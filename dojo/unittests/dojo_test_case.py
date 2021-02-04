@@ -164,7 +164,7 @@ class DojoTestUtilsMixin(object):
             self.assertEqual(response.status_code, 200)
         elif expect_redirect_to:
             self.assertEqual(response.status_code, 302)
-            print('url: ' + response.url)
+            # print('url: ' + response.url)
             try:
                 product = Product.objects.get(id=response.url.split('/')[-1])
             except:
@@ -222,14 +222,14 @@ class DojoTestUtilsMixin(object):
 
     def edit_jira_project_for_product_with_data(self, product, data, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=None):
         jira_project_count_before = self.db_jira_project_count()
-        print('before: ' + str(jira_project_count_before))
+        # print('before: ' + str(jira_project_count_before))
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = self.get_expected_redirect_product(product)
 
         response = self.edit_product_jira(product, data, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
-        print('after: ' + str(self.db_jira_project_count()))
+        # print('after: ' + str(self.db_jira_project_count()))
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
@@ -242,14 +242,14 @@ class DojoTestUtilsMixin(object):
 
     def empty_jira_project_for_product(self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
         jira_project_count_before = self.db_jira_project_count()
-        print('before: ' + str(jira_project_count_before))
+        # print('before: ' + str(jira_project_count_before))
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = self.get_expected_redirect_product(product)
 
         response = self.edit_product_jira(product, self.get_product_with_empty_jira_project_data(product), expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
-        print('after: ' + str(self.db_jira_project_count()))
+        # print('after: ' + str(self.db_jira_project_count()))
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
@@ -275,30 +275,33 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def import_scan(self, payload):
         # logger.debug('import_scan payload %s', payload)
         response = self.client.post(reverse('importscan-list'), payload)
-        self.assertEqual(201, response.status_code)
+        # print(response.content)
+        self.assertEqual(201, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
     def reimport_scan(self, payload):
         response = self.client.post(reverse('reimportscan-list'), payload)
-        self.assertEqual(201, response.status_code)
+        # print(response.content)
+        self.assertEqual(201, response.status_code, response.content[:1000])
         return json.loads(response.content)
 
     def get_test_api(self, test_id):
         response = self.client.get(reverse('test-list') + '%s/' % test_id, format='json')
-        self.assertEqual(200, response.status_code)
-        print('test.content: ', response.content)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None):
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
-                "scan_type": 'ZAP Scan',
+                "scan_type": scan_type,
                 "file": open(filename),
                 "engagement": engagement,
                 "version": "1.0.1",
+                "close_old_findings": close_old_findings,
         }
 
         if push_to_jira is not None:
@@ -309,17 +312,18 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         return self.import_scan(payload)
 
-    def reimport_scan_with_params(self, test_id, filename, engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None):
+    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
         payload = {
                 "test": test_id,
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
                 "active": active,
                 "verified": verified,
-                "scan_type": 'ZAP Scan',
+                "scan_type": scan_type,
                 "file": open(filename),
                 "engagement": engagement,
                 "version": "1.0.1",
+                "close_old_findings": close_old_findings,
         }
 
         if push_to_jira is not None:
@@ -332,7 +336,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def get_finding_api(self, finding_id):
         response = self.client.get(reverse('finding-list') + '%s/' % finding_id, format='json')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
     def post_new_finding_api(self, finding_details, push_to_jira=None):
@@ -343,7 +347,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # logger.debug('posting new finding push_to_jira: %s', payload.get('push_to_jira', None))
 
         response = self.client.post(reverse('finding-list'), payload, format='json')
-        self.assertEqual(201, response.status_code)
+        self.assertEqual(201, response.status_code, response.content[:1000])
         return response.data
 
     def put_finding_api(self, finding_id, finding_details, push_to_jira=None):
@@ -352,7 +356,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             payload['push_to_jira'] = push_to_jira
 
         response = self.client.put(reverse('finding-list') + '%s/' % finding_id, payload, format='json')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
     def patch_finding_api(self, finding_id, finding_details, push_to_jira=None):
@@ -361,7 +365,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             payload['push_to_jira'] = push_to_jira
 
         response = self.client.patch(reverse('finding-list') + '%s/' % finding_id, payload, format='json')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
     def get_jira_issue_severity(self, finding_id):
@@ -383,7 +387,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             payload['verified'] = verified
 
         response = self.client.get(reverse('finding-list'), payload, format='json')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         # print('findings.content: ', response.content)
         return json.loads(response.content)
 
@@ -397,7 +401,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         response = http_method(reverse('finding-tags', args=(finding_id,)), data, format='json')
         # print(vars(response))
         # print(response.content)
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         return response
 
     def get_finding_tags_api(self, finding_id):
@@ -407,7 +411,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def get_finding_api_filter_tags(self, tags):
         response = self.client.get(reverse('finding-list') + '?tags=%s' % tags, format='json')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         print(response.data)
         return response.data
 
@@ -423,7 +427,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         response = http_method(reverse('finding-remove-tags', args=(finding_id,)), data, format='json')
         print(response)
         print(response.content)
-        self.assertEqual(expected_response_status_code, response.status_code)
+        self.assertEqual(expected_response_status_code, response.status_code, response.content[:1000])
         return response.data
 
     def put_finding_remove_tags_api(self, finding_id, tags, *args, **kwargs):
@@ -444,7 +448,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         response = http_method(reverse('finding-notes', args=(finding_id,)), data, format='json')
         print(vars(response))
         print(response.content)
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         return response
 
     def post_finding_notes_api(self, finding_id, note):

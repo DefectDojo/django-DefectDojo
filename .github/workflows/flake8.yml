@@ -2,6 +2,7 @@ name: Flake8
 # pull requests:
 #      run on pull_request_target instead of just pull_request as we need write access to update the status check
 on:
+  workflow_dispatch:
   pull_request_target:
   push:
 

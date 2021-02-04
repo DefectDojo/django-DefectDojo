@@ -44,7 +44,7 @@ RUN \
     libmariadb3 \
     xmlsec1 \
     git \
-    uuid-runtime \    
+    uuid-runtime \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
     curl \
@@ -59,7 +59,7 @@ RUN pip3 install \
 	--no-index \
   --find-links=/tmp/wheels \
   -r ./requirements.txt
-  
+
 COPY \
   docker/entrypoint-celery-beat.sh \
   docker/entrypoint-celery-worker.sh \
@@ -72,23 +72,24 @@ COPY \
   docker/wait-for-it.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py tests/unit-tests.sh ./
+COPY wsgi.py manage.py docker/unit-tests.sh ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer
 COPY docker/extra_fixtures/* /app/dojo/fixtures/
 
+# Fallback for safety parser, if installation does't allow internet connectivity
+RUN curl -sS -o dojo/tools/safety/insecure_full.json https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json
+
 COPY tests/ ./tests/
 RUN \
   # Remove placeholder copied from docker/certs
-  rm -f /readme.txt && \ 
+  rm -f /readme.txt && \
   # Remove placeholder copied from docker/extra_fixtures
   rm -f dojo/fixtures/readme.txt && \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   true
-# Fallback for safety parser, if installation does't allow internet connectivity
-RUN curl -sS -o dojo/tools/safety/insecure_full.json https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json
 USER root
 RUN \
     adduser --system --no-create-home --disabled-password --gecos '' \

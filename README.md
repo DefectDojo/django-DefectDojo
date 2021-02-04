@@ -2,7 +2,7 @@
 
 [![OWASP Flagship](https://img.shields.io/badge/owasp-flagship%20project-orange.svg)](https://www.owasp.org/index.php/OWASP_DefectDojo_Project) [![GitHub release](https://img.shields.io/github/release/DefectDojo/django-DefectDojo.svg)](https://github.com/DefectDojo/django-DefectDojo) [![YouTube Subscribe](https://img.shields.io/badge/youtube-subscribe-%23c4302b.svg)](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ) ![Twitter Follow](https://img.shields.io/twitter/follow/defectdojo.svg?style=social&label=Follow)
 
-[![Build Status](https://travis-ci.org/DefectDojo/django-DefectDojo.svg?branch=master)](https://travis-ci.org/DefectDojo/django-DefectDojo) [![Documentation Status](https://readthedocs.org/projects/defectdojo/badge/?version=latest)](https://defectdojo.readthedocs.io/en/latest/?badge=latest) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2098/badge)](https://bestpractices.coreinfrastructure.org/projects/2098)
+[![Build Status](https://github.com/DefectDojo/django-DefectDojo/actions)](https://github.com/DefectDojo/django-DefectDojo/actions) [![Documentation Status](https://readthedocs.org/projects/defectdojo/badge/?version=latest)](https://defectdojo.readthedocs.io/en/latest/?badge=latest) [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2098/badge)](https://bestpractices.coreinfrastructure.org/projects/2098)
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/Documentation/master/doc/img/screenshot1.png)
 
@@ -22,11 +22,16 @@ cd django-DefectDojo
 docker-compose build
 # running
 docker-compose up
-# obtain admin credentials
+# obtain admin credentials. the initializer can take up to 3 minutes to run
+# use docker-compose logs -f initializer to track progress
 docker-compose logs initializer | grep "Admin password:"
 ```
 
 Navigate to <http://localhost:8080>.
+
+Alternatively, try out the demo sever at [demo.defectdojo.org](https://demo.defectdojo.org)
+
+Log in with `admin / defectdojo@demo#appsec` and please note that the demo server is refreshed regularly.
 
 ## Documentation
 

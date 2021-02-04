@@ -3,7 +3,7 @@ import unittest
 import sys
 import os
 from base_test_class import BaseTestCase
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -14,7 +14,7 @@ class IBMAppScanTest(BaseTestCase):
     def test_import_ibm_app_scan_result(self):
         # Login to the site.
         # Username and password will be gotten from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the Endpoint page
         self.goto_product_overview(driver)
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
@@ -43,6 +43,7 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(IBMAppScanTest('test_import_ibm_app_scan_result'))
     suite.addTest(ProductTest('test_delete_product'))

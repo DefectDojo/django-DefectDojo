@@ -1,307 +1,255 @@
-from dojo.tools.burp.parser import BurpXmlParser
-from dojo.tools.dsop.parser import DsopParser
-from dojo.tools.nessus.parser import NessusCSVParser, NessusXMLParser
-from dojo.tools.nmap.parser import NmapXMLParser
-from dojo.tools.nexpose.parser import NexposeFullXmlParser
-from dojo.tools.veracode.parser import VeracodeXMLParser
-from dojo.tools.zap.parser import ZapXmlParser
-from dojo.tools.checkmarx.parser import CheckmarxXMLParser
-from dojo.tools.crashtest_security_xml.parser import CrashtestSecurityXmlParser
-from dojo.tools.crashtest_security_json.parser import CrashtestSecurityJsonParser
-from dojo.tools.contrast.parser import ContrastCSVParser
-from dojo.tools.bandit.parser import BanditParser
-from dojo.tools.eslint.parser import ESLintParser
-from dojo.tools.appspider.parser import AppSpiderXMLParser
-from dojo.tools.arachni.parser import ArachniJSONParser
-from dojo.tools.vcg.parser import VCGParser
-from dojo.tools.dependency_check.parser import DependencyCheckParser
-from dojo.tools.dependency_track.parser import DependencyTrackParser
-from dojo.tools.retirejs.parser import RetireJsParser
-from dojo.tools.nsp.parser import NspParser
-from dojo.tools.npm_audit.parser import NpmAuditParser
-from dojo.tools.php_symfony_security_check.parser import PhpSymfonySecurityCheckParser
-from dojo.tools.generic.parser import GenericFindingUploadCsvParser
-from dojo.tools.qualys.parser import QualysParser
-from dojo.tools.qualys_infrascan_webgui.parser import QualysInfraScanParser
-from dojo.tools.qualys_webapp.parser import QualysWebAppParser
-from dojo.tools.snyk.parser import SnykParser
-from dojo.tools.gosec.parser import GosecScannerParser
-from dojo.tools.openvas_csv.parser import OpenVASUploadCsvParser
-from dojo.tools.trustwave.parser import TrustwaveUploadCsvParser
-from dojo.tools.skf.parser import SKFCsvParser
-from dojo.tools.ssl_labs.parser import SSLlabsParser
-from dojo.tools.nikto.parser import NiktoXMLParser
-from dojo.tools.trufflehog.parser import TruffleHogJSONParser
-from dojo.tools.netsparker.parser import NetsparkerParser
-from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2
-from dojo.tools.acunetix.parser import AcunetixScannerParser
-from dojo.tools.fortify.parser import FortifyXMLParser
-from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
-from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
-from dojo.tools.clair.parser import ClairParser
-from dojo.tools.mobsf.parser import MobSFParser
-from dojo.tools.aws_scout2.parser import AWSScout2Parser
-from dojo.tools.aws_prowler.parser import AWSProwlerParser
-from dojo.tools.brakeman.parser import BrakemanScanParser
-from dojo.tools.spotbugs.parser import SpotbugsXMLParser
-from dojo.tools.ibm_app.parser import IbmAppScanDASTXMLParser
-from dojo.tools.safety.parser import SafetyParser
-from dojo.tools.clair_klar.parser import ClairKlarParser
-from dojo.tools.dawnscanner.parser import DawnScannerParser
-from dojo.tools.anchore_engine.parser import AnchoreEngineScanParser
-from dojo.tools.bundler_audit.parser import BundlerAuditParser
-from dojo.tools.twistlock.parser import TwistlockParser
-from dojo.tools.kiuwan.parser import KiuwanCSVParser
-from dojo.tools.blackduck.parser import BlackduckHubCSVParser
-from dojo.tools.sonatype.parser import SonatypeJSONParser
-from dojo.tools.openscap.parser import OpenscapXMLParser
-from dojo.tools.immuniweb.parser import ImmuniwebXMLParser
-from dojo.tools.wapiti.parser import WapitiXMLParser
-from dojo.tools.cobalt.parser import CobaltCSVParser
-from dojo.tools.mozilla_observatory.parser import MozillaObservatoryJSONParser
-from dojo.tools.whitesource.parser import WhitesourceJSONParser
-from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectXMLParser
-from dojo.tools.wpscan.parser import WpscanJSONParser
-from dojo.tools.sslscan.parser import SslscanXMLParser
-from dojo.tools.jfrogxray.parser import XrayJSONParser
-from dojo.tools.sslyze.parser_json import SSLyzeJSONParser
-from dojo.tools.sslyze.parser_xml import SSLyzeXMLParser
-from dojo.tools.testssl.parser import TestsslCSVParser
-from dojo.tools.hadolint.parser import HadolintParser
-from dojo.tools import SCAN_SONARQUBE_API
-from dojo.tools.aqua.parser import AquaJSONParser
-from dojo.tools.blackduck_component_risk.parser import BlackduckHubParser
-from dojo.tools.h1.parser import HackerOneJSONParser
-from dojo.tools.xanitizer.parser import XanitizerXMLParser
-from dojo.tools.trivy.parser import TrivyParser
-from dojo.tools.outpost24.parser import Outpost24Parser
-from dojo.tools.burp_enterprise.parser import BurpEnterpriseHtmlParser
-from dojo.tools.anchore_enterprise.parser import AnchoreEnterprisePolicyCheckParser
-from dojo.tools.gitleaks.parser import GitleaksJSONParser
-from dojo.tools.harbor_vulnerability.parser import HarborVulnerabilityParser
-from dojo.tools.github_vulnerability.parser import GithubVulnerabilityParser
-from dojo.tools.choctaw_hog.parser import ChoctawhogParser
-from dojo.tools.gitlab_sast.parser import GitlabSastReportParser
-from dojo.tools.yarn_audit.parser import YarnAuditParser
-from dojo.tools.bugcrowd.parser import BugCrowdCSVParser
-from dojo.tools.huskyci.parser import HuskyCIReportParser
-from dojo.tools.ccvs.parser import CCVSReportParser
-from dojo.tools.awssecurityhub.parser import AwsSecurityFindingFormatParser
-from dojo.tools.semgrep.parser import SemgrepJSONParser
-from dojo.tools.risk_recon.parser import RiskReconParser
-from dojo.tools.drheader.parser import DrHeaderJSONParser
-from dojo.tools.checkov.parser import CheckovParser
-from dojo.tools.kubebench.parser import KubeBenchParser
-from dojo.tools.ort.parser import OrtParser
-from dojo.tools.sarif.parser import SarifParser
+import logging
+from dojo.models import Test_Type
+
+PARSERS = {}
+# TODO remove that
+SCAN_SONARQUBE_API = 'SonarQube API Import'
 
 
-__author__ = 'Jay Paz'
+def register_parser(scan_type, parser):
+    logging.info(f"register scan_type:{scan_type}")
+    # check double registration or registration with an existing key
+    if scan_type in PARSERS:
+        raise ValueError(f'Try to register an existing parser {scan_type}')
+    PARSERS[scan_type] = parser
 
 
-# TODO change conditional search of the parser to the mapping
 def import_parser_factory(file, test, active, verified, scan_type=None):
-    if scan_type is None:
-        scan_type = test.test_type.name
-    if scan_type == "Burp Scan":
-        parser = BurpXmlParser(file, test)
-    elif scan_type == "Burp Enterprise Scan":
-        parser = BurpEnterpriseHtmlParser(file, test)
-    elif scan_type == "Nessus Scan":
-        filename = file.name.lower()
-        if filename.endswith("csv"):
-            parser = NessusCSVParser(file, test)
-        elif filename.endswith("xml") or filename.endswith("nessus"):
-            parser = NessusXMLParser(file, test)
-    elif scan_type == "Clair Scan":
-        parser = ClairParser(file, test)
-    elif scan_type == "Nmap Scan":
-        parser = NmapXMLParser(file, test)
-    elif scan_type == "Nikto Scan":
-        parser = NiktoXMLParser(file, test)
-    elif scan_type == "Nexpose Scan":
-        parser = NexposeFullXmlParser(file, test)
-    elif scan_type == "Veracode Scan":
-        parser = VeracodeXMLParser(file, test)
-    elif scan_type == "Checkmarx Scan":
-        parser = CheckmarxXMLParser(file, test)
-    elif scan_type == "Checkmarx Scan detailed":
-        parser = CheckmarxXMLParser(file, test, 'detailed')
-    elif scan_type == "Contrast Scan":
-        parser = ContrastCSVParser(file, test)
-    elif scan_type == "Crashtest Security JSON File":
-        parser = CrashtestSecurityJsonParser(file, test)
-    elif scan_type == "Crashtest Security XML File":
-        parser = CrashtestSecurityXmlParser(file, test)
-    elif scan_type == "Bandit Scan":
-        parser = BanditParser(file, test)
-    elif scan_type == "ESLint Scan":
-        parser = ESLintParser(file, test)
-    elif scan_type == "ZAP Scan":
-        parser = ZapXmlParser(file, test)
-    elif scan_type == "AppSpider Scan":
-        parser = AppSpiderXMLParser(file, test)
-    elif scan_type == "Arachni Scan":
-        parser = ArachniJSONParser(file, test)
-    elif scan_type == 'VCG Scan':
-        parser = VCGParser(file, test)
-    elif scan_type == 'Dependency Check Scan':
-        parser = DependencyCheckParser(file, test)
-    elif scan_type == 'Dependency Track Finding Packaging Format (FPF) Export':
-        parser = DependencyTrackParser(file, test)
-    elif scan_type == 'Retire.js Scan':
-        parser = RetireJsParser(file, test)
-    elif scan_type == 'Node Security Platform Scan':
-        parser = NspParser(file, test)
-    elif scan_type == 'NPM Audit Scan':
-        parser = NpmAuditParser(file, test)
-    elif scan_type == 'PHP Symfony Security Check':
-        parser = PhpSymfonySecurityCheckParser(file, test)
-    elif scan_type == 'Generic Findings Import':
-        parser = GenericFindingUploadCsvParser(file, test, active, verified)
-    elif scan_type == 'Qualys Scan':
-        parser = QualysParser(file, test)
-    elif scan_type == 'Qualys Infrastructure Scan (WebGUI XML)':
-        parser = QualysInfraScanParser(file, test)
-    elif scan_type == 'Qualys Webapp Scan':
-        parser = QualysWebAppParser(file, test)
-    elif scan_type == "OpenVAS CSV":
-        parser = OpenVASUploadCsvParser(file, test)
-    elif scan_type == 'Snyk Scan':
-        parser = SnykParser(file, test)
-    elif scan_type == 'SKF Scan':
-        parser = SKFCsvParser(file, test)
-    elif scan_type == 'SSL Labs Scan':
-        parser = SSLlabsParser(file, test)
-    elif scan_type == 'Trufflehog Scan':
-        parser = TruffleHogJSONParser(file, test)
-    elif scan_type == 'Clair Klar Scan':
-        parser = ClairKlarParser(file, test)
-    elif scan_type == 'Gosec Scanner':
-        parser = GosecScannerParser(file, test)
-    elif scan_type == 'Trustwave Scan (CSV)':
-        parser = TrustwaveUploadCsvParser(file, test)
-    elif scan_type == 'Netsparker Scan':
-        parser = NetsparkerParser(file, test)
-    elif scan_type == 'PHP Security Audit v2':
-        parser = PhpSecurityAuditV2(file, test)
-    elif scan_type == 'Acunetix Scan':
-        parser = AcunetixScannerParser(file, test)
-    elif scan_type == 'Fortify Scan':
-        parser = FortifyXMLParser(file, test)
-    elif scan_type == 'SonarQube Scan':
-        parser = SonarQubeHtmlParser(file, test)
-    elif scan_type == 'SonarQube Scan detailed':
-        parser = SonarQubeHtmlParser(file, test, 'detailed')
-    elif scan_type == SCAN_SONARQUBE_API:
-        parser = SonarQubeApiImporter(test)
-    elif scan_type == 'MobSF Scan':
-        parser = MobSFParser(file, test)
-    elif scan_type == 'AWS Scout2 Scan':
-        parser = AWSScout2Parser(file, test)
-    elif scan_type == 'AWS Prowler Scan':
-        parser = AWSProwlerParser(file, test)
-    elif scan_type == 'Brakeman Scan':
-        parser = BrakemanScanParser(file, test)
-    elif scan_type == 'SpotBugs Scan':
-        parser = SpotbugsXMLParser(file, test)
-    elif scan_type == 'Safety Scan':
-        parser = SafetyParser(file, test)
-    elif scan_type == 'DawnScanner Scan':
-        parser = DawnScannerParser(file, test)
-    elif scan_type == 'Anchore Engine Scan':
-        parser = AnchoreEngineScanParser(file, test)
-    elif scan_type == 'Bundler-Audit Scan':
-        parser = BundlerAuditParser(file, test)
-    elif scan_type == 'Twistlock Image Scan':
-        parser = TwistlockParser(file, test)
-    elif scan_type == 'IBM AppScan DAST':
-        parser = IbmAppScanDASTXMLParser(file, test)
-    elif scan_type == 'Kiuwan Scan':
-        parser = KiuwanCSVParser(file, test)
-    elif scan_type == 'Blackduck Hub Scan':
-        parser = BlackduckHubCSVParser(file, test)
-    elif scan_type == 'Blackduck Component Risk':
-        parser = BlackduckHubParser(file, test)
-    elif scan_type == 'Sonatype Application Scan':
-        parser = SonatypeJSONParser(file, test)
-    elif scan_type == 'Openscap Vulnerability Scan':
-        parser = OpenscapXMLParser(file, test)
-    elif scan_type == 'Immuniweb Scan':
-        parser = ImmuniwebXMLParser(file, test)
-    elif scan_type == 'Wapiti Scan':
-        parser = WapitiXMLParser(file, test)
-    elif scan_type == 'Cobalt.io Scan':
-        parser = CobaltCSVParser(file, test)
-    elif scan_type == 'Mozilla Observatory Scan':
-        parser = MozillaObservatoryJSONParser(file, test)
-    elif scan_type == 'Whitesource Scan':
-        parser = WhitesourceJSONParser(file, test)
-    elif scan_type == 'Microfocus Webinspect Scan':
-        parser = MicrofocusWebinspectXMLParser(file, test)
-    elif scan_type == 'Wpscan':
-        parser = WpscanJSONParser(file, test)
-    elif scan_type == 'Sslscan':
-        parser = SslscanXMLParser(file, test)
-    elif scan_type == 'JFrog Xray Scan':
-        parser = XrayJSONParser(file, test)
-    elif scan_type == 'Sslyze Scan':
-        parser = SSLyzeXMLParser(file, test)
-    elif scan_type == 'SSLyze 3 Scan (JSON)':
-        parser = SSLyzeJSONParser(file, test)
-    elif scan_type == 'Testssl Scan':
-        parser = TestsslCSVParser(file, test)
-    elif scan_type == 'Hadolint Dockerfile check':
-        parser = HadolintParser(file, test)
-    elif scan_type == 'Aqua Scan':
-        parser = AquaJSONParser(file, test)
-    elif scan_type == 'HackerOne Cases':
-        parser = HackerOneJSONParser(file, test)
-    elif scan_type == 'Xanitizer Scan':
-        parser = XanitizerXMLParser(file, test)
-    elif scan_type == 'Trivy Scan':
-        parser = TrivyParser(file, test)
-    elif scan_type == 'Outpost24 Scan':
-        parser = Outpost24Parser(file, test)
-    elif scan_type == 'DSOP Scan':
-        parser = DsopParser(file, test)
-    elif scan_type == 'Anchore Enterprise Policy Check':
-        parser = AnchoreEnterprisePolicyCheckParser(file, test)
-    elif scan_type == 'Gitleaks Scan':
-        parser = GitleaksJSONParser(file, test)
-    elif scan_type == 'Harbor Vulnerability Scan':
-        parser = HarborVulnerabilityParser(file, test)
-    elif scan_type == 'Github Vulnerability Scan':
-        parser = GithubVulnerabilityParser(file, test)
-    elif scan_type == 'Choctaw Hog Scan':
-        parser = ChoctawhogParser(file, test)
-    elif scan_type == 'GitLab SAST Report':
-        parser = GitlabSastReportParser(file, test)
-    elif scan_type == 'Yarn Audit Scan':
-        parser = YarnAuditParser(file, test)
-    elif scan_type == 'BugCrowd Scan':
-        parser = BugCrowdCSVParser(file, test)
-    elif scan_type == 'HuskyCI Report':
-        parser = HuskyCIReportParser(file, test)
-    elif scan_type == 'CCVS Report':
-        parser = CCVSReportParser(file, test)
-    elif scan_type == 'AWS Security Hub Scan':
-        parser = AwsSecurityFindingFormatParser(file, test)
-    elif scan_type == 'Semgrep JSON Report':
-        parser = SemgrepJSONParser(file, test)
-    elif scan_type == 'Risk Recon API Importer':
-        parser = RiskReconParser(file, test)
-    elif scan_type == 'DrHeader JSON Importer':
-        parser = DrHeaderJSONParser(file, test)
-    elif scan_type == 'Checkov Scan':
-        parser = CheckovParser(file, test)
-    elif scan_type == 'kube-bench Scan':
-        parser = KubeBenchParser(file, test)
-    elif scan_type == 'ORT evaluated model Importer':
-        parser = OrtParser(file, test)
-    elif scan_type == 'SARIF':
-        parser = SarifParser(file, test)
+    """Return a parser by the scan type
+    This fucntion exists only for backward compatibility
+    """
+    if scan_type in PARSERS:
+        # create dynamicaly in DB
+        test_type, created = Test_Type.objects.get_or_create(name=scan_type)
+        if created:
+            test_type.save()
+        return PARSERS[scan_type]
     else:
-        raise ValueError('Unknown Test Type')
+        raise ValueError(f'Unknown Test Type {scan_type}')
 
-    return parser
+
+def get_choices():
+    res = list()
+    for key in PARSERS:
+        res.append((key, key))
+    return tuple(res)
+
+
+def requires_file(scan_type):
+    if scan_type is None or scan_type not in PARSERS:
+        return False
+    # FIXME switch to method of the parser
+    # parser = PARSERS[scan_type]
+    return scan_type != SCAN_SONARQUBE_API
+
+
+def handles_active_verified_statuses(scan_type):
+    # FIXME switch to method of the parser
+    # parser = PARSERS[scan_type]
+    return scan_type in [
+        'Generic Findings Import', SCAN_SONARQUBE_API, 'Qualys Scan'
+    ]
+
+
+from .acunetix.parser import AcunetixScannerParser
+register_parser('Acunetix Scan', AcunetixScannerParser())
+from .anchore_engine.parser import AnchoreEngineScanParser
+register_parser('Anchore Engine Scan', AnchoreEngineScanParser())
+from .anchore_enterprise.parser import AnchoreEnterprisePolicyCheckParser
+register_parser('Anchore Enterprise Policy Check', AnchoreEnterprisePolicyCheckParser())
+from .appspider.parser import AppSpiderXMLParser
+register_parser('AppSpider Scan', AppSpiderXMLParser())
+from .aqua.parser import AquaJSONParser
+register_parser('Aqua Scan', AquaJSONParser())
+from .arachni.parser import ArachniJSONParser
+register_parser('Arachni Scan', ArachniJSONParser())
+from .aws_prowler.parser import AWSProwlerParser
+register_parser('AWS Prowler Scan', AWSProwlerParser())
+from .aws_scout2.parser import AWSScout2Parser
+register_parser('AWS Scout2 Scan', AWSScout2Parser())
+from .awssecurityhub.parser import AwsSecurityFindingFormatParser
+register_parser('AWS Security Hub Scan', AwsSecurityFindingFormatParser())
+from .bandit.parser import BanditParser
+register_parser('Bandit Scan', BanditParser())
+from .blackduck_component_risk.parser import BlackduckCRImporter
+register_parser('Blackduck Component Risk', BlackduckCRImporter())
+from .blackduck.parser import BlackduckHubCSVParser
+register_parser('Blackduck Hub Scan', BlackduckHubCSVParser())
+from .brakeman.parser import BrakemanScanParser
+register_parser('Brakeman Scan', BrakemanScanParser())
+from .bugcrowd.parser import BugCrowdCSVParser
+register_parser('BugCrowd Scan', BugCrowdCSVParser())
+from .bundler_audit.parser import BundlerAuditParser
+register_parser('Bundler-Audit Scan', BundlerAuditParser())
+from .burp_enterprise.parser import BurpEnterpriseHtmlParser
+register_parser('Burp Enterprise Scan', BurpEnterpriseHtmlParser())
+from .burp_api.parser import BurpApiParser
+register_parser('Burp REST API', BurpApiParser())
+from .burp.parser import BurpXmlParser
+register_parser('Burp Scan', BurpXmlParser())
+from .ccvs.parser import CCVSReportParser
+register_parser('CCVS Report', CCVSReportParser())
+from .checkmarx.parser import CheckmarxXMLParser
+register_parser('Checkmarx Scan', CheckmarxXMLParser())
+register_parser('Checkmarx Scan detailed', CheckmarxXMLParser())
+from .checkov.parser import CheckovParser
+register_parser('Checkov Scan', CheckovParser())
+from .choctaw_hog.parser import ChoctawhogParser
+register_parser('Choctaw Hog Scan', ChoctawhogParser())
+from .clair_klar.parser import ClairKlarParser
+register_parser('Clair Klar Scan', ClairKlarParser())
+from .clair.parser import ClairParser
+register_parser('Clair Scan', ClairParser())
+from .cobalt.parser import CobaltCSVParser
+register_parser('Cobalt.io Scan', CobaltCSVParser())
+from .contrast.parser import ContrastCSVParser
+register_parser('Contrast Scan', ContrastCSVParser())
+from .crashtest_security_json.parser import CrashtestSecurityJsonParser
+register_parser('Crashtest Security JSON File', CrashtestSecurityJsonParser())
+from .crashtest_security_xml.parser import CrashtestSecurityXmlParser
+register_parser('Crashtest Security XML File', CrashtestSecurityXmlParser())
+from .dawnscanner.parser import DawnScannerParser
+register_parser('DawnScanner Scan', DawnScannerParser())
+from .dependency_check.parser import DependencyCheckParser
+register_parser('Dependency Check Scan', DependencyCheckParser())
+from .dependency_track.parser import DependencyTrackParser
+register_parser('Dependency Track Finding Packaging Format (FPF) Export', DependencyTrackParser())
+from .drheader.parser import DrHeaderJSONParser
+register_parser('DrHeader JSON Importer', DrHeaderJSONParser())
+from .dsop.parser import DsopParser
+register_parser('DSOP Scan', DsopParser())
+from .eslint.parser import ESLintParser
+register_parser('ESLint Scan', ESLintParser())
+from .fortify.parser import FortifyXMLParser
+register_parser('Fortify Scan', FortifyXMLParser())
+from .generic.parser import GenericFindingUploadCsvParser
+register_parser('Generic Findings Import', GenericFindingUploadCsvParser())
+from .github_vulnerability.parser import GithubVulnerabilityParser
+register_parser('Github Vulnerability Scan', GithubVulnerabilityParser())
+from .gitlab_dep_scan.parser import GitlabDepScanReportParser
+register_parser('GitLab Dependency Scanning Report', GitlabDepScanReportParser())
+from .gitlab_sast.parser import GitlabSastReportParser
+register_parser('GitLab SAST Report', GitlabSastReportParser())
+from .gitleaks.parser import GitleaksJSONParser
+register_parser('Gitleaks Scan', GitleaksJSONParser())
+from .gosec.parser import GosecScannerParser
+register_parser('Gosec Scanner', GosecScannerParser())
+from .h1.parser import HackerOneJSONParser
+register_parser('HackerOne Cases', HackerOneJSONParser())
+from .hadolint.parser import HadolintParser
+register_parser('Hadolint Dockerfile check', HadolintParser())
+from .harbor_vulnerability.parser import HarborVulnerabilityParser
+register_parser('Harbor Vulnerability Scan', HarborVulnerabilityParser())
+from .huskyci.parser import HuskyCIReportParser
+register_parser('HuskyCI Report', HuskyCIReportParser())
+from .ibm_app.parser import IbmAppScanDASTXMLParser
+register_parser('IBM AppScan DAST', IbmAppScanDASTXMLParser())
+from .immuniweb.parser import ImmuniwebXMLParser
+register_parser('Immuniweb Scan', ImmuniwebXMLParser())
+from .jfrogxray.parser import XrayJSONParser
+register_parser('JFrog Xray Scan', XrayJSONParser())
+from .kiuwan.parser import KiuwanCSVParser
+register_parser('Kiuwan Scan', KiuwanCSVParser())
+from .kubebench.parser import KubeBenchParser
+register_parser('kube-bench Scan', KubeBenchParser())
+from .microfocus_webinspect.parser import MicrofocusWebinspectXMLParser
+register_parser('Microfocus Webinspect Scan', MicrofocusWebinspectXMLParser())
+from .mobsf.parser import MobSFParser
+register_parser('MobSF Scan', MobSFParser())
+from .mozilla_observatory.parser import MozillaObservatoryJSONParser
+register_parser('Mozilla Observatory Scan', MozillaObservatoryJSONParser())
+from .nessus.parser import NessusParser
+register_parser('Nessus Scan', NessusParser())
+from .netsparker.parser import NetsparkerParser
+register_parser('Netsparker Scan', NetsparkerParser())
+from .nexpose.parser import NexposeFullXmlParser
+register_parser('Nexpose Scan', NexposeFullXmlParser())
+from .nikto.parser import NiktoXMLParser
+register_parser('Nikto Scan', NiktoXMLParser())
+from .nmap.parser import NmapXMLParser
+register_parser('Nmap Scan', NmapXMLParser())
+from .nsp.parser import NspParser
+register_parser('Node Security Platform Scan', NspParser())
+from .npm_audit.parser import NpmAuditParser
+register_parser('NPM Audit Scan', NpmAuditParser())
+from .openscap.parser import OpenscapXMLParser
+register_parser('Openscap Vulnerability Scan', OpenscapXMLParser())
+from .openvas_csv.parser import OpenVASUploadCsvParser
+register_parser('OpenVAS CSV', OpenVASUploadCsvParser())
+from .ort.parser import OrtParser
+register_parser('ORT evaluated model Importer', OrtParser())
+from .ossindex_devaudit.parser import OssIndexDevauditParser
+register_parser('OssIndex Devaudit SCA Scan Importer', OssIndexDevauditParser())
+from .outpost24.parser import Outpost24Parser
+register_parser('Outpost24 Scan', Outpost24Parser())
+from .php_security_audit_v2.parser import PhpSecurityAuditV2
+register_parser('PHP Security Audit v2', PhpSecurityAuditV2())
+from .php_symfony_security_check.parser import PhpSymfonySecurityCheckParser
+register_parser('PHP Symfony Security Check', PhpSymfonySecurityCheckParser())
+from .qualys_infrascan_webgui.parser import QualysInfraScanParser
+register_parser('Qualys Infrastructure Scan (WebGUI XML)', QualysInfraScanParser())
+from .qualys.parser import QualysParser
+register_parser('Qualys Scan', QualysParser())
+from .qualys_webapp.parser import QualysWebAppParser
+register_parser('Qualys Webapp Scan', QualysWebAppParser())
+from .retirejs.parser import RetireJsParser
+register_parser('Retire.js Scan', RetireJsParser())
+from .risk_recon.parser import RiskReconParser
+register_parser('Risk Recon API Importer', RiskReconParser())
+from .safety.parser import SafetyParser
+register_parser('Safety Scan', SafetyParser())
+from .sarif.parser import SarifParser
+register_parser('SARIF', SarifParser())
+from .scantist.parser import ScantistJSONParser
+register_parser('Scantist Scan', ScantistJSONParser())
+from .scout_suite.parser import ScoutSuiteParser
+register_parser('Scout Suite Scan', ScoutSuiteParser())
+from .semgrep.parser import SemgrepJSONParser
+register_parser('Semgrep JSON Report', SemgrepJSONParser())
+from .skf.parser import SKFCsvParser
+register_parser('SKF Scan', SKFCsvParser())
+from .snyk.parser import SnykParser
+register_parser('Snyk Scan', SnykParser())
+from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
+register_parser('SonarQube API Import', SonarQubeApiImporter())
+from .sonarqube.parser import SonarQubeHtmlParser
+register_parser('SonarQube Scan', SonarQubeHtmlParser())
+register_parser('SonarQube Scan detailed', SonarQubeHtmlParser())
+from .sonatype.parser import SonatypeJSONParser
+register_parser('Sonatype Application Scan', SonatypeJSONParser())
+from .spotbugs.parser import SpotbugsXMLParser
+register_parser('SpotBugs Scan', SpotbugsXMLParser())
+from .ssl_labs.parser import SSLlabsParser
+register_parser('SSL Labs Scan', SSLlabsParser())
+from .sslscan.parser import SslscanXMLParser
+register_parser('Sslscan', SslscanXMLParser())
+from .sslyze.parser_json import SSLyzeJSONParser
+register_parser('SSLyze 3 Scan (JSON)', SSLyzeJSONParser())
+from .sslyze.parser_xml import SSLyzeXMLParser
+register_parser('Sslyze Scan', SSLyzeXMLParser())
+from .testssl.parser import TestsslCSVParser
+register_parser('Testssl Scan', TestsslCSVParser())
+from .trivy.parser import TrivyParser
+register_parser('Trivy Scan', TrivyParser())
+from .trufflehog.parser import TruffleHogJSONParser
+register_parser('Trufflehog Scan', TruffleHogJSONParser())
+from .trustwave.parser import TrustwaveUploadCsvParser
+register_parser('Trustwave Scan (CSV)', TrustwaveUploadCsvParser())
+from .twistlock.parser import TwistlockParser
+register_parser('Twistlock Image Scan', TwistlockParser())
+from .vcg.parser import VCGParser
+register_parser('VCG Scan', VCGParser())
+from .veracode.parser import VeracodeXMLParser
+register_parser('Veracode Scan', VeracodeXMLParser())
+from .wapiti.parser import WapitiXMLParser
+register_parser('Wapiti Scan', WapitiXMLParser())
+from .whitesource.parser import WhitesourceJSONParser
+register_parser('Whitesource Scan', WhitesourceJSONParser())
+from .wpscan.parser import WpscanJSONParser
+register_parser('Wpscan', WpscanJSONParser())
+from .xanitizer.parser import XanitizerXMLParser
+register_parser('Xanitizer Scan', XanitizerXMLParser())
+from .yarn_audit.parser import YarnAuditParser
+register_parser('Yarn Audit Scan', YarnAuditParser())
+from .zap.parser import ZapXmlParser
+register_parser('ZAP Scan', ZapXmlParser())

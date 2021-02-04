@@ -30,7 +30,7 @@ Defect Dojo</br>
     New test added for engagement {{ engagement.product }}.
 Title: {{test.title}}
 Type: {{ test.test_type }}
-You can find details here: {{ url }}
+You can find details here: {{ url|full_url }}
 {% elif type == 'msteams' %}
 {% url 'view_test' test.id as test_url %}
     {

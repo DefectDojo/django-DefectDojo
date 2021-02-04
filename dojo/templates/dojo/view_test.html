@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% load get_endpoint_status %}
-{% load static from staticfiles %}
+{% load static %}
 {% load humanize %}
 {% block add_styles %}
     ul#select_by_severity a:hover, ul#bulk_edit a:hover {
@@ -200,7 +200,7 @@
         </div>
 
         <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-            {% if user|is_authorized_for_change:test %}            
+            {% if user|is_authorized_for_change:test %}
                 <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     Bulk Edit
@@ -221,7 +221,7 @@
                             <i class="fa fa-trash"></i>
                         </a>
                     </button>
-                {% endif %}                
+                {% endif %}
             </div>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                 <li class="dropdown-header">Choose wisely...</li>
@@ -271,8 +271,8 @@
                         {% endif %}
                         <label style="display: block">Tags</label>
                         {% comment %}
-                            Quick hack to make bulk edit work without refactoring the whole bulk edit form                                
-                        {% endcomment %}                                
+                            Quick hack to make bulk edit work without refactoring the whole bulk edit form
+                        {% endcomment %}
                         {{ bulk_edit_form.media.css }}
                         {{ bulk_edit_form.media.js }}
                         {{ bulk_edit_form.tags }}
@@ -378,14 +378,14 @@
                                             </li>
                                         {% endif %}
                                     {% endif %}
-                                    {% if user|is_authorized_for_change:finding %}                                       
+                                    {% if user|is_authorized_for_change:finding %}
                                         <li role="presentation">
                                             <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                 <i class="fa fa-clock-o"></i> Touch Finding
                                             </a>
                                         </li>
-                                    {% endif %}             
-                                    {% if user.is_staff %}                                                                 
+                                    {% endif %}
+                                    {% if user.is_staff %}
                                         <li role="presentation">
                                             <a href="{% url 'mktemplate' finding.id %}">
                                                 <i class="fa fa-copy"></i> Make Finding a Template
@@ -413,23 +413,27 @@
                                         {% endif %}
                                     {% endif %}
                                     {% if user|is_authorized_for_staff:finding %}
-                                        {% if finding.risk_acceptance_set.all %}
+                                        {% if finding.risk_accepted %}
                                             <li role="presentation">
-                                            <a href="{% url 'simple_risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                            <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                 <i class="fa fa-exclamation-circle"></i> Unaccept Risk
                                             </a>
                                             </li>
                                         {% else %}
-                                            <li role="presentation">
-                                                <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                    <i class="fa fa-exclamation-circle"></i> Accept Risk (simple), or
-                                                </a>
-                                            </li>
-                                            <li role="presentation">
-                                                <a href ="{% url 'upload_risk_acceptance$' finding.test.engagement.id%}">
-                                                    <i class="fa fa-exclamation-circle"></i> Add Full Risk Acceptance...
-                                                </a>
-                                            </li>
+                                            {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
+                                                <li role="presentation">
+                                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                        <i class="fa fa-exclamation-circle"></i> Accept Risk
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                            {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                                <li role="presentation">
+                                                    <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                        <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
+                                                    </a>
+                                                </li>
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
                                     <li class="divider"></li>
@@ -454,7 +458,7 @@
                                 </ul>
                             </div>
                             </div>
-                        </td>                        
+                        </td>
                         <td class="centered">
                             <span class="label severity severity-{{ finding.severity }}">
                             {{ finding.severity_display }}
@@ -522,8 +526,8 @@
                             {% if jira_project and product_tab or not product_tab %}
                                 <td>
                                     {% if finding.has_jira_issue %}
-                                        <a href="{{ finding | jira_issue_url }}" target="_blank" 
-                                            alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}"><i class="fa fa-bug fa-fw"></i></a>
+                                        <a href="{{ finding | jira_issue_url }}" target="_blank"
+                                            alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}">{{finding | jira_key}}</a>
                                     {% endif %}
                                     </td>
 
@@ -550,7 +554,7 @@
             {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
         </div>
 
-        <div class="panel panel-default to_highlight table-responsive potential-finding">
+        <div class="panel panel-default table-responsive potential-finding">
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Potential Findings</h4>
@@ -724,6 +728,43 @@
 </div>
 <!--Cred end -->
 
+<!--Files beign -->
+<div class="row">
+    <div class="col-md-12" id="cred">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Files<span class="pull-right">
+                <a data-toggle="collapse" href="#add_feat_files">
+                    <i class="glyphicon glyphicon-chevron-down"></i></a></span>
+                <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"
+                    href="{% url 'manage_files' oid=test.id obj_type='Test' %}">
+                    <span class="fa fa-edit"></span></a>
+                </h4>
+            </div>
+
+            <div id="add_feat_files" class="panel-body collapse {% if files %}in{% endif %}">
+                {% for file in files %}
+                <div class="col-md-2" style="text-align: center">
+                    <div class="row">
+                        <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
+                            {% if file.file.url|get_thumbnail %}
+                                <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
+                            {% else %}
+                                <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="row">
+                        <caption style="text-align:center">{{ file.title }}</caption>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<!--Files end -->
+
 {% include "dojo/snippets/comments.html" with notes=notes object=test destination="test" %}
 
 <div class="protip">
@@ -791,7 +832,7 @@
                 colReorder: true,
                 "columns": columns,
                 columnDefs: [
-                    { 
+                    {
                         "orderable": false,
                         "targets": [0]
                     },
@@ -905,14 +946,14 @@
                       checkbox_count++;
                     }
                   }
-  
+
                   if ($(this).prop("checked")) {
                     $('div#bulk_edit_menu').removeClass('hidden');
                   } else {
                     checkbox_count--;
                     var checkbox_values = $("input[type=checkbox][name^='select_']");
                     var checked = false;
-  
+
                     for (var i = 0; i < checkbox_values.length; i++) {
                       if ($(checkbox_values[i]).prop("checked")) {
                         checked = true;
@@ -922,7 +963,7 @@
                       $('div#bulk_edit_menu').addClass('hidden');
                     }
                   }
-  
+
                 }
               });
             $('a.merge').on('click', function (e) {
@@ -1085,5 +1126,5 @@
         });
 
     </script>
-    {% include "dojo/filter_js_snippet.html" %}    
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

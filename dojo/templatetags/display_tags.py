@@ -1,5 +1,4 @@
 from itertools import chain
-import random
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
@@ -62,6 +61,12 @@ finding_related_action_title_dict = {
     'set_finding_as_original': 'Set as original',
     'mark_finding_duplicate': 'Mark as duplicate'
 }
+
+supported_file_formats = [
+        'apng', 'avif', 'gif', 'jpg',
+        'jpeg', 'jfif', 'pjpeg', 'pjp',
+        'png', 'svg', 'webp', 'pdf'
+]
 
 
 @register.filter
@@ -144,7 +149,7 @@ def dojo_current_hash():
 
 @register.simple_tag
 def display_date():
-    return timezone.now().strftime("%b %d, %Y")
+    return timezone.localtime(timezone.now()).strftime("%b %d, %Y")
 
 
 @register.simple_tag
@@ -238,42 +243,6 @@ def version_num(value):
     return version
 
 
-@register.filter(name='count_findings_test_all')
-def count_findings_test_all(test):
-    open_findings = Finding.objects.filter(test=test).count()
-    return open_findings
-
-
-@register.filter(name='count_findings_test_duplicate')
-def count_findings_test_duplicate(test):
-    duplicate_findings = Finding.objects.filter(test=test, duplicate=True).count()
-    return duplicate_findings
-
-
-@register.filter(name='paginator')
-def paginator(page):
-    page_value = paginator_value(page)
-    if page_value:
-        page_value = "&page=" + page_value
-    return page_value
-
-
-@register.filter(name='paginator_form')
-def paginator_form(page):
-    return paginator_value(page)
-
-
-def paginator_value(page):
-    page_value = ""
-    # isinstance(page, int):
-    try:
-        if int(page):
-            page_value = str(page)
-    except:
-        pass
-    return page_value
-
-
 @register.filter(name='finding_sla')
 def finding_sla(finding):
     if not get_system_setting('enable_finding_sla'):
@@ -285,20 +254,20 @@ def finding_sla(finding):
     sla_age = get_system_setting('sla_' + severity.lower())
     if finding.mitigated:
         status = "blue"
-        status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
+        status_text = 'Remediated within SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
         if find_sla and find_sla < 0:
             status = "orange"
             find_sla = abs(find_sla)
             status_text = 'Out of SLA: Remediatied ' + str(
-                find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days)'
+                find_sla) + ' days past SLA for ' + severity.lower() + ' findings (' + str(sla_age) + ' days since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
     else:
         status = "green"
-        status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less'
+        status_text = 'Remediation for ' + severity.lower() + ' findings in ' + str(sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
         if find_sla and find_sla < 0:
             status = "red"
             find_sla = abs(find_sla)
             status_text = 'Overdue: Remediation for ' + severity.lower() + ' findings in ' + str(
-                sla_age) + ' days or less'
+                sla_age) + ' days or less since ' + finding.get_sla_start_date().strftime("%b %d, %Y") + ')'
 
     if find_sla is not None:
         title = '<a class="has-popover" data-toggle="tooltip" data-placement="bottom" title="" href="#" data-content="' + status_text + '">' \
@@ -337,21 +306,6 @@ def display_index(data, index):
     return data[index]
 
 
-@register.filter
-def finding_status(finding, duplicate):
-    findingFilter = None
-    if finding:
-        findingFilter = finding.filter(duplicate=duplicate)
-    return findingFilter
-
-
-@register.simple_tag
-def random_html():
-    def r(): return random.randint(0, 255)
-
-    return ('#%02X%02X%02X' % (r(), r(), r()))
-
-
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
 def action_log_entry(value, autoescape=None):
@@ -369,13 +323,6 @@ def action_log_entry(value, autoescape=None):
 def dojo_body_class(context):
     request = context['request']
     return request.COOKIES.get('dojo-sidebar', 'min')
-
-
-@register.simple_tag
-def random_value():
-    import string
-    import random
-    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
 
 
 @register.filter(name='datediff_time')
@@ -763,12 +710,13 @@ def finding_display_status(finding):
     # add urls for some statuses
     # outputs html, so make sure to escape user provided fields
     display_status = finding.status()
-    if finding.risk_acceptance_set.all():
-        url = reverse('view_risk', args=(finding.test.engagement.id, finding.risk_acceptance_set.all()[0].id, ))
-        name = finding.risk_acceptance_set.all()[0].name
-        link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(name) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
-        # print(link)
-        display_status = display_status.replace('Risk Accepted', link)
+    if 'Risk Accepted' in display_status:
+        ra = finding.risk_acceptance
+        if ra:
+            url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
+            info = ra.name_and_expiration_info
+            link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
+            display_status = display_status.replace('Risk Accepted', link)
 
     if finding.under_review:
         url = reverse('defect_finding_review', args=(finding.id, ))
@@ -792,20 +740,18 @@ def finding_display_status(finding):
 
 @register.filter
 def is_authorized_for_change(user, obj):
-    # print('filter: is_authorized_for_change')
     return user_is_authorized(user, 'change', obj)
 
 
 @register.filter
 def is_authorized_for_delete(user, obj):
-    # print('filter: is_authorized_for_delete')
     return user_is_authorized(user, 'delete', obj)
 
 
 @register.filter
 def is_authorized_for_staff(user, obj):
-    # print('filter: is_authorized_for_staff')
-    return user_is_authorized(user, 'staff', obj)
+    result = user_is_authorized(user, 'staff', obj)
+    return result
 
 
 @register.filter
@@ -837,7 +783,7 @@ def jira_project(obj, use_inheritance=True):
 
 @register.filter
 def jira_issue_url(obj):
-    return jira_helper.get_jira_issue_url(obj)
+    return jira_helper.get_jira_url(obj)
 
 
 @register.filter
@@ -858,6 +804,13 @@ def jira_creation(obj):
 @register.filter
 def jira_change(obj):
     return jira_helper.get_jira_change(obj)
+
+
+@register.filter
+def get_thumbnail(filename):
+    from pathlib import Path
+    file_format = Path(filename).suffix[1:]
+    return file_format in supported_file_formats
 
 
 @register.filter

@@ -270,7 +270,7 @@
     "fields": {
         "name": "Veracode Scan"
     }
-  },  
+  },
   {
     "pk": 999,
     "model": "dojo.test_type",
@@ -493,7 +493,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "risk_path": "none",
       "eng_type": null,
       "active": true,
       "done_testing": false,
@@ -525,7 +524,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "risk_path": "none",
       "eng_type": null,
       "active": true,
       "done_testing": false,
@@ -557,7 +555,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "risk_path": "none",
       "eng_type": null,
       "active": true,
       "done_testing": false,
@@ -592,7 +589,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "risk_path": "none",
       "eng_type": null,
       "active": true,
       "done_testing": false,
@@ -624,7 +620,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "risk_path": "none",
       "eng_type": null,
       "active": true,
       "done_testing": false,
@@ -656,7 +651,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "risk_path": "none",
       "eng_type": null,
       "active": true,
       "done_testing": false,
@@ -1642,10 +1636,10 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "<YOUR_USER_HERE>",
-        "password": "<YOUR_API_KEY_HERE>",
+        "username": "<your username>",
+        "password": "<your password>",
         "default_issue_type": "Task",
-        "epic_name_id": 10942,
+        "epic_name_id": 10011,
         "open_status_key": 11,
         "close_status_key": 41,
         "low_mapping_severity": "Low",
@@ -1660,7 +1654,7 @@
     "pk": 3,
     "model": "dojo.jira_instance",
     "fields": {
-      "username": "user2",
+      "username": "defect.dojo",
       "default_issue_type": "Task",
       "finding_text": "",
       "low_mapping_severity": "test severity",
@@ -1678,7 +1672,7 @@
     "pk": 4,
     "model": "dojo.jira_instance",
     "fields": {
-      "username": "user3",
+      "username": "defect.dojo",
       "default_issue_type": "Spike",
       "finding_text": "",
       "low_mapping_severity": "test severity",
@@ -1750,15 +1744,15 @@
   },
   {
     "pk": 1,
-    "model": "dojo.note_type", 
+    "model": "dojo.note_type",
     "fields": {
-      "name": "Test Note Type", 
-      "description": "not that much", 
-      "is_single": false, 
-      "is_active": true, 
+      "name": "Test Note Type",
+      "description": "not that much",
+      "is_single": false,
+      "is_active": true,
       "is_mandatory": false
     }
-  }, 
+  },
   {
     "pk": 1,
     "model": "dojo.tool_type",

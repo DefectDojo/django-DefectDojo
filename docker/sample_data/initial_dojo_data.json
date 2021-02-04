@@ -321,22 +321,6 @@
   },
   {
     "fields": {
-      "model": "customfield",
-      "app_label": "custom_field"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 41
-  },
-  {
-    "fields": {
-      "model": "customfieldvalue",
-      "app_label": "custom_field"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 42
-  },
-  {
-    "fields": {
       "expire_date": "2016-09-10T12:40:25.483Z",
       "session_data": "NjIzODFjMWIxMjVhNzQ1NzNhMTRjMzM1MzQ1MjVkY2VmZGI4YjIzNDp7ImRvam9fYnJlYWRjcnVtYnMiOlt7InVybCI6Ii8iLCJ0aXRsZSI6IkhvbWUifSx7InVybCI6Ii9wcm9maWxlIiwidGl0bGUiOiJFbmdpbmVlciBQcm9maWxlIC0gKGFkbWluKSJ9XSwiX2F1dGhfdXNlcl9oYXNoIjoiYzU0NTg4NGExYTNiOWM3NTA0YjAzM2VhOWMxYTJlMzRiMjQ4Nzk1OSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6IjEifQ=="
     },
@@ -1384,28 +1368,6 @@
         "protected": false
     }
 },
-  {
-    "fields": {
-      "default_value": "",
-      "field_type": "a",
-      "field_choices": "",
-      "name": "Slack Channels",
-      "content_type": 16,
-      "is_required": false
-    },
-    "model": "custom_field.customfield",
-    "pk": 1
-  },
-  {
-    "fields": {
-      "field": 1,
-      "content_type": 16,
-      "object_id": 1,
-      "value": "#dev-app-1"
-    },
-    "model": "custom_field.customfieldvalue",
-    "pk": 1
-  },
   {
     "fields": {
       "codename": "add_permission",
@@ -2485,60 +2447,6 @@
     },
     "model": "auth.permission",
     "pk": 120
-  },
-  {
-    "fields": {
-      "codename": "add_customfield",
-      "name": "Can add custom field",
-      "content_type": 41
-    },
-    "model": "auth.permission",
-    "pk": 121
-  },
-  {
-    "fields": {
-      "codename": "change_customfield",
-      "name": "Can change custom field",
-      "content_type": 41
-    },
-    "model": "auth.permission",
-    "pk": 122
-  },
-  {
-    "fields": {
-      "codename": "delete_customfield",
-      "name": "Can delete custom field",
-      "content_type": 41
-    },
-    "model": "auth.permission",
-    "pk": 123
-  },
-  {
-    "fields": {
-      "codename": "add_customfieldvalue",
-      "name": "Can add custom field value",
-      "content_type": 42
-    },
-    "model": "auth.permission",
-    "pk": 124
-  },
-  {
-    "fields": {
-      "codename": "change_customfieldvalue",
-      "name": "Can change custom field value",
-      "content_type": 42
-    },
-    "model": "auth.permission",
-    "pk": 125
-  },
-  {
-    "fields": {
-      "codename": "delete_customfieldvalue",
-      "name": "Can delete custom field value",
-      "content_type": 42
-    },
-    "model": "auth.permission",
-    "pk": 126
   },
   {
     "model": "auth.permission",

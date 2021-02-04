@@ -2,7 +2,7 @@
 {% load display_tags %}
 {% load humanize %}
 {% load survey_tags %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_styles %}
     .tooltip-inner {
       max-width: 350px;
@@ -240,7 +240,7 @@
                             <th>Date</th>
                             <th>Lead</th>
                             <th>Total Findings</th>
-                            <th>Active and Verified</th>
+                            <th>Active (Verified)</th>
                             <th>Mitigated</th>
                             <th>Duplicates</th>
                             <th>Notes</th>
@@ -250,7 +250,13 @@
                         {% for test in tests %}
                             <tr>
                                 <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
-                                  {% if test.tags %}
+                                    {% if test.version %}
+                                        <sup>
+                                            <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ test.version }}">
+                                            {{ test.version }}</a>
+                                        </sup>
+                                    {% endif %}
+                                    {% if test.tags %}
                                       <sup>
                                           {% for tag in test.tags.all %}
                                           <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=test-tag:{{ tag }}">{{ tag }}</a>
@@ -263,7 +269,7 @@
                                    <li class="dropdown" style="list-style:none;position:absolute">
                                          <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                          <ul class="dropdown-menu">
-                                           <li>
+                                            <li>
                                              <a class="" href="{% url 'view_test' test.id %}">
                                                <i class="fa fa-list-alt"></i> View</a>
                                           </li>
@@ -305,7 +311,10 @@
                                   {% endif %}
                                 </td>
                                 <td><a href="{% url 'view_test' test.id %}">{{ test.count_findings_test_all }}</a></td>
-                                <td><a href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a></td>
+                                <td>
+                                  <a href="{% url 'view_test' test.id %}?active=true">{{ test.count_findings_test_active }}</a>&nbsp;
+                                  (<a href="{% url 'view_test' test.id %}?active=true&verified=true">{{ test.count_findings_test_active_verified }}</a>)
+                                </td>
                                 <td><a href="{% url 'view_test' test.id %}?is_Mitigated=true">{{ test.count_findings_test_mitigated }}</a></td>
                                 <td><a href="{% url 'view_test' test.id %}?duplicate=true">{{ test.count_findings_test_dups }}</a></td>
                                 <td class="nowrap">
@@ -336,9 +345,9 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4> Risk Acceptance
-                    {% if can_add_risk %}
+                    {% if user|is_authorized_for_staff:eng and eng.product.enable_full_risk_acceptance %}
                         <a title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
-                           href="{% url 'upload_risk_acceptance$' eng.id %}"><span class="fa fa-plus"></span></a>
+                           href="{% url 'add_risk_acceptance' eng.id %}?return_url={{ request.get_full_path|urlencode }}"><span class="fa fa-plus"></span></a>
                         </a>
                     {% endif %}
                 </h4>
@@ -349,29 +358,61 @@
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Owner</th>
                             <th>Date</th>
+                            <th>Accepted By</th>
                             <th>Name</th>
-                            <th>Date Expires</th>
-                            <th>Accepted by</th>
-                            <th>Findings Accepted</th>
-                            <th>View File</th>
-                            <th>Actions</th>
+                            <th>Decision</th>
+                            <!-- <th>Decision Details</th> -->
+                            <th>Expiration</th>
+                            <th>Findings</th>
+                            <th>Proof</th>
+                            <th>Owner</th>
+                            <th class="centered">Actions</th>
                         </thead>
                         <tbody>
-                        {% for risk in risks_accepted %}
+                        {% for risk_acceptance in risks_accepted %}
                             <tr>
-                                <td>{{ risk.owner }}</td>
-                                <td>{{ risk.created }}</td>
-                                <td>{{ risk.name }}</td>
-                                <td>{{ risk.expiration_date|default_if_none:"" }}</td>
-                                <td>{{ risk.accepted_by|default_if_none:"" }}</td>
-                                <td>{{ risk.accepted_findings.count }}</td>
-                                <td><a href="{% url 'download_risk' eng.id risk.id %}">{{ risk.filename }}</a></td>
+                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.created|date }}</a></td>
+                                <td>{{ risk_acceptance.accepted_by.get_full_name }}</td>
+                                <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.name }}</a></td>
                                 <td>
-                                    <a class="btn btn-sm btn-primary" href="{% url 'view_risk' eng.id risk.id %}">
-                                        View
-                                        Acceptance</a>
+                                    {{ risk_acceptance.get_decision_display|default_if_none:"" }}
+
+                                    {% if risk_acceptance.decision_details %}
+                                    &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Decision Details" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                    data-content="{{ risk_acceptance.decision_details }}"></i>
+                                    {% endif %}
+
+                                </td>
+                                <!-- <td>{{ risk_acceptance.decision_details|default_if_none:""| truncatechars_html:100 }}</td> -->
+                                <td class="{% if risk_acceptance.is_expired %}red{% endif%}">
+                                    {% if risk_acceptance.expiration_date %}
+                                        {{ risk_acceptance.expiration_date|date }}
+                                    {% else %}
+                                        Never
+                                    {% endif %}
+                                </td>
+                                <td>{{ risk_acceptance.accepted_findings.count }}</td>
+                                {% if risk_acceptance.filename %}
+                                <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">Yes</a>
+                                    &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Uploaded proof" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                    data-content="{{ risk_acceptance.filename }}"></i>
+                                </td>
+                                {% else %}
+                                    <td>No</a></td>
+                                {% endif %}
+                                <td>{{ risk_acceptance.owner.get_full_name }}</td>
+                                <td class="centered">
+                                    <ul>
+                                        <li class="dropdown" style="list-style:none;position:absolute">
+                                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                              <ul class="dropdown-menu">
+                                                {% with engagement=eng %}
+                                                    {% include 'dojo/snippets/risk_acceptance_actions_snippet.html' with include_view=True %}
+                                                {% endwith %}
+                                            </ul>
+                                        </li>
+                                    </ul>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -617,6 +658,39 @@
 
     </div>
 
+    <div class="panel panel-default">
+
+      <div class="panel-heading">
+        <h4>Files<span class="pull-right">
+          <a data-toggle="collapse" href="#add_feat_files">
+            <i class="glyphicon glyphicon-chevron-down"></i></a></span>
+          <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"
+            href="{% url 'manage_files' oid=eng.id obj_type='Engagement' %}">
+              <span class="fa fa-edit"></span></a>
+        </h4>
+      </div>
+
+      <div id="add_feat_files" class="panel-body collapse {% if files %}in{% endif %}">
+                {% for file in files %}
+                <div class="col-md-2" style="text-align: center">
+                    <div class="row">
+                        <a href="{{ request.scheme }}://{{ request.get_host }}{{ file.file.url }}" target="_blank">
+                            {% if file.file.url|get_thumbnail %}
+                                <img src="{{ file.file.url }}" alt="thumbnail" style="width:150px">
+                            {% else %}
+                                <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="row">
+                        <caption style="text-align:center">{{ file.title }}</caption>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+      </div>
+
   </div>
 </div>
 
@@ -728,7 +802,7 @@
             {% if jira_project.engagement is not eng %}
             <small>(inherited)</small>
             {% else %}
-            <small>(project)</small>              
+            <small>(project)</small>
             {% endif %}
             </a></td>
         </tr>
@@ -959,5 +1033,8 @@
             modal.find('p#questionnaireURL').text('Questionnaire URL: ' + host + path)
             })
         });
+
+        {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+
     </script>
 {% endblock %}

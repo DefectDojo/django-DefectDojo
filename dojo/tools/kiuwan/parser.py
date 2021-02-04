@@ -1,6 +1,7 @@
-import io
 import csv
 import hashlib
+import io
+
 from dojo.models import Finding
 
 __author__ = 'dr3dd589'
@@ -24,14 +25,7 @@ class Severityfilter():
 
 
 class KiuwanCSVParser(object):
-    def __init__(self, filename, test):
-        self.dupes = dict()
-        self.items = ()
-
-        if filename is None:
-            self.items = ()
-            return
-
+    def get_findings(self, filename, test):
         content = filename.read()
         if type(content) is bytes:
             content = content.decode('utf-8')
@@ -41,6 +35,7 @@ class KiuwanCSVParser(object):
         for row in reader:
             csvarray.append(row)
 
+        dupes = dict()
         for row in csvarray:
             finding = Finding(test=test)
             findingdict = {}
@@ -82,7 +77,7 @@ class KiuwanCSVParser(object):
 
                 key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+                if key not in dupes:
+                    dupes[key] = finding
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

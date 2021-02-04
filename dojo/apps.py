@@ -70,7 +70,6 @@ def get_model_fields_with_extra(model, extra_fields=()):
 
 def get_model_fields(default_fields, extra_fields=()):
     combined = default_fields + extra_fields
-    # print(combined)
     return combined
 
 

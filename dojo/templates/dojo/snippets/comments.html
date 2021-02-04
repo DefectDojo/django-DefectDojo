@@ -1,5 +1,5 @@
 {% load humanize %}
-<div class="panel panel-default to_highlight table-responsive">
+<div class="panel panel-default table-responsive">
     <div class="panel-comments">
         <h4>Notes <span class="pull-right"><a data-toggle="collapse" href="#vuln_notes"><i
                 class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
@@ -52,7 +52,7 @@
             </form>
           </div>
           {% endif %}
-          
+
           <div class="row-sm-2">
             <strong>{{ note.author.username }}</strong>
             <span class="text-muted">commented {{ note.date }}</span>

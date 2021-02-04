@@ -32,28 +32,37 @@
                 <tbody>
                     {% for result in result  %}
                     <tr>
-                        <td>{{ result.component_name  }}</td>
+                        <td>
+                            {% if result.component_name == none%}
+                               <a href="{% url 'findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.component_name }}</b></a>
+                            {% else %}
+                               <a href="{% url 'findings' %}?component_name={{ result.component_name }}&test__engagement__product={{prod.id}}"><b>{{ result.component_name }}</b></a>
+                            {% endif %}
+                        </td>
                         <td>{{result.component_version}} </td>
                         <td>
-                            {% if result.active %}
-                            <a
-                                href="{% url 'open_findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{prod.id}}"><b>{{ result.active }}</b></a>
+                            {% if result.active and result.component_name == none %}
+                            <a href="{% url 'open_findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.active }}</b></a>
+                            {% elif result.active %}
+                            <a href="{% url 'open_findings' %}?component_name={{ result.component_name }}&test__engagement__product={{prod.id}}"><b>{{ result.active }}</b></a>
                             {% else %}
                             0
                             {% endif %}
                         </td>
                         <td>
-                            {% if result.duplicate %}
-                            <a
-                                href="{% url 'findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{prod.id}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            {% if result.duplicate and result.component_name == none %}
+                            <a href="{% url 'findings' %}?has_component=false&test__engagement__product={{prod.id}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            {% elif result.duplicate %}
+                            <a href="{% url 'findings' %}?component_name={{ result.component_name }}&test__engagement__product={{prod.id}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% else %}
                             0
                             {% endif %}
                         </td>
                         <td>
-                            {% if result.total %}
-                            <a
-                                href="{% url 'findings' %}?component_name={{ result.component_name }}&component_version={{result.component_version}}&test__engagement__product={{prod.id}}"><b>{{ result.total }}</b></a>
+                            {% if result.total and result.component_name == none %}
+                            <a href="{% url 'findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.total }}</b></a>
+                            {% elif result.total %}
+                            <a href="{% url 'findings' %}?component_name={{ result.component_name }}&test__engagement__product={{prod.id}}"><b>{{ result.total }}</b></a>
                             {% else %}
                             0
                             {% endif %}
@@ -70,6 +79,26 @@
 </div>
 {% endblock %}
 {% block postscript %}
+<script>
+        $(function () {
+            //Ensures dropdown has proper zindex
+            $('.table-responsive').on('show.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "inherit" );
+            });
+
+            $('.table-responsive').on('hide.bs.dropdown', function () {
+              $('.table-responsive').css( "overflow", "auto" );
+            })
+            var availableTags = [
+                {% for word in component_words %}
+                    "{{word}}",
+                {% endfor %}
+            ];
+            $("#id_component_name").autocomplete({
+                source: availableTags
+            });
+        });
+</script>
 <script>
     // DataTables setup
     $(document).ready(function() {

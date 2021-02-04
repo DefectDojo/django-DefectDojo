@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import NamedTuple, List
 
 from django.db.models import QuerySet
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
@@ -39,7 +38,7 @@ class AcceptedRisksMixin(ABC):
     )
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
-        model = get_object_or_404(self.risk_application_model_class, pk=pk)
+        model = self.get_object()
         serializer = AcceptedRiskSerializer(data=request.data, many=True)
         if serializer.is_valid():
             accepted_risks = serializer.save()
@@ -86,9 +85,11 @@ def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, o
             # so for now we add some timestamp based suffix
             name = risk.cve + ' via api at ' + timezone.now().strftime('%b %d, %Y, %H:%M:%S')
             acceptance = Risk_Acceptance.objects.create(owner=owner, name=name[:100],
-                                                        compensating_control=risk.justification,
+                                                        decision=Risk_Acceptance.TREATMENT_ACCEPT,
+                                                        decision_details=risk.justification,
                                                         accepted_by=risk.accepted_by[:200])
             acceptance.accepted_findings.set(findings)
+            findings.update(risk_accepted=True)
             acceptance.save()
             accepted.append(acceptance)
     return accepted

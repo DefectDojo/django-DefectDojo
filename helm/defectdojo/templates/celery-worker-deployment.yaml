@@ -41,6 +41,7 @@ spec:
           runAsNonRoot: true
         command: ["/cloud_sql_proxy"]
         args:
+        - "-verbose={{ .Values.cloudsql.verbose }}"
         {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
         {{- else if eq .Values.database "mysql" }}
@@ -50,8 +51,10 @@ spec:
       - name: celery
         image: "{{ template "celery.repository" . }}:{{ .Values.tag }}"
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
         securityContext:
-          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}       
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+        {{- end }}        
         command: ['/entrypoint-celery-worker.sh']
         envFrom:
         - configMapRef:

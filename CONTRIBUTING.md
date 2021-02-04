@@ -12,6 +12,10 @@ Bugs that do not have this information will be closed.
 
 Here are a few things to keep in mind when making changes to DefectDojo.
 
+## Writing a new parser
+
+Please see [this file](doc/guide_to_parser_writing.md) for guidance on how to write a parser.
+
 ## Modifying DefectDojo and Testing
 
 Please use [these test scripts](./tests) to test your changes. These are the scripts we run in our [integration tests](DOCKER.md#run-the-tests-with-docker).

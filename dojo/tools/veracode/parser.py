@@ -1,6 +1,8 @@
-from xml.dom import NamespaceErr
-from lxml import etree
 from datetime import datetime
+from xml.dom import NamespaceErr
+
+from lxml import etree
+
 from dojo.models import Finding
 
 
@@ -22,12 +24,11 @@ class VeracodeXMLParser(object):
         5: 'Critical'
     }
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         if filename is None:
-            self.items = list()
-            return
+            return list()
         try:
-            xml = etree.parse(filename)
+            xml = etree.parse(filename, etree.XMLParser(resolve_entities=False))
         except:
             raise NamespaceErr('Cannot parse this report. Make sure to upload a proper Veracode Detailed XML report.')
 
@@ -71,7 +72,7 @@ class VeracodeXMLParser(object):
             if dupe_key not in dupes:
                 dupes[dupe_key] = self.__xml_sca_flaw_to_finding(vulnerable_lib_node, test)
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     @classmethod
     def __xml_flaw_to_unique_id(cls, xml_node):

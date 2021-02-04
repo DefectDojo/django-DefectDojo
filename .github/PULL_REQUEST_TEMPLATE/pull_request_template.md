@@ -1,6 +1,7 @@
-**Descriptions**
+**Description**
 
-Describe the feature / bug fix implemented by this PR
+Describe the feature / bug fix implemented by this PR.
+If this is a new parser, [the parser guide](../../doc/guide_to_parser_writing.md) may be worth (re)reading.
 
 **Test results**
 
@@ -55,12 +56,12 @@ In case of conflict:
  git rebase --continue
  ```
 
-When everything's fine on your local branch, force push to your `myOrigin` remote: 
+When everything's fine on your local branch, force push to your `myOrigin` remote:
 ```
 git push myOrigin --force-with-lease
 ```
 
-To cancel everything: 
+To cancel everything:
 ```
 git rebase --abort
 ```
@@ -74,7 +75,7 @@ git rebase -i origin/dev
 - Replace `pick` by `reword` on the first commit if you want to change the commit message
 - Save the file and quit your editor
 
-Force push to your `myOrigin` remote: 
+Force push to your `myOrigin` remote:
 ```
 git push myOrigin --force-with-lease
 ```
