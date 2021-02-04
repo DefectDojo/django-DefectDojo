@@ -17,6 +17,7 @@ from django.utils import timezone
 from time import strftime
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
+from django.core.exceptions import MultipleObjectsReturned
 
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter
@@ -660,33 +661,46 @@ def import_scan_results(request, eid=None, pid=None):
                         burp_rr.save()
 
                     for endpoint in item.unsaved_endpoints:
-                        ep, created = Endpoint.objects.get_or_create(
-                            protocol=endpoint.protocol,
-                            host=endpoint.host,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=t.engagement.product)
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=item,
-                            endpoint=ep)
-                        ep.endpoint_status.add(eps)
+                        try:
+                            ep, created = Endpoint.objects.get_or_create(
+                                protocol=endpoint.protocol,
+                                host=endpoint.host,
+                                path=endpoint.path,
+                                query=endpoint.query,
+                                fragment=endpoint.fragment,
+                                product=t.engagement.product)
+                        except (MultipleObjectsReturned):
+                            pass
+                        try:
+                            eps, created = Endpoint_Status.objects.get_or_create(
+                                finding=item,
+                                endpoint=ep)
+                        except (MultipleObjectsReturned):
+                            pass
 
+                        ep.endpoint_status.add(eps)
                         item.endpoints.add(ep)
                         item.endpoint_status.add(eps)
-                    for endpoint in form.cleaned_data['endpoints']:
-                        ep, created = Endpoint.objects.get_or_create(
-                            protocol=endpoint.protocol,
-                            host=endpoint.host,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=t.engagement.product)
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=item,
-                            endpoint=ep)
-                        ep.endpoint_status.add(eps)
 
+                    for endpoint in form.cleaned_data['endpoints']:
+                        try:
+                            ep, created = Endpoint.objects.get_or_create(
+                                protocol=endpoint.protocol,
+                                host=endpoint.host,
+                                path=endpoint.path,
+                                query=endpoint.query,
+                                fragment=endpoint.fragment,
+                                product=t.engagement.product)
+                        except (MultipleObjectsReturned):
+                            pass
+                        try:
+                            eps, created = Endpoint_Status.objects.get_or_create(
+                                finding=item,
+                                endpoint=ep)
+                        except (MultipleObjectsReturned):
+                            pass
+
+                        ep.endpoint_status.add(eps)
                         item.endpoints.add(ep)
                         item.endpoint_status.add(eps)
 
