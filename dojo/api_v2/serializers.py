@@ -28,7 +28,6 @@ import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
 import dojo.finding.helper as finding_helper
-from django.conf import settings
 
 
 logger = logging.getLogger(__name__)

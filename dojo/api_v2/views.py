@@ -38,7 +38,6 @@ from django.db.models import Count, Q
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
-from django.conf import settings
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.authorization.roles_permissions import Permissions, Roles
 
