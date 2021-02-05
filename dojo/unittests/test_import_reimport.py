@@ -594,8 +594,8 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 "verified": verified,
                 "scan_type": scan_type,
                 "file": open(filename),
-                "environment": 1
-                # "version": "1.0.1",
+                "environment": 1,
+                "version": "1.0.1",
                 # "close_old_findings": close_old_findings,
         }
 

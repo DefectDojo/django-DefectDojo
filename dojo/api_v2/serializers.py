@@ -1065,6 +1065,7 @@ class ImportScanSerializer(serializers.Serializer):
     close_old_findings = serializers.BooleanField(required=False, default=False)
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
+    version = serializers.CharField(required=False)
 
     # class Meta:
     #     model = Test
@@ -1085,12 +1086,9 @@ class ImportScanSerializer(serializers.Serializer):
         if settings.USE_TZ:
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
-        version = None
-        if 'version' in data:
-            version = data['version']
-
         # Will save in the provided environment or in the `Development` one if absent
         environment_name = data.get('environment', 'Development')
+        version = data.get('version', None)
 
         environment = Development_Environment.objects.get(name=environment_name)
         tags = None
@@ -1333,6 +1331,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     # mentain the old API behavior after reintroducing the close_old_findings parameter
     # also for ReImport.
     close_old_findings = serializers.BooleanField(required=False, default=True)
+    version = serializers.CharField(required=False)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1347,9 +1346,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
         verified = data['verified']
         active = data['active']
-        version = None
-        if 'version' in data:
-            version = data['version']
+        version = data.get('version', None)
 
         try:
             parser = import_parser_factory(data.get('file', None),
