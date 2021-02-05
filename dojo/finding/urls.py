@@ -16,6 +16,8 @@ urlpatterns = [
     #     name='finding_bulk_update_all_test'),
     url(r'^finding/open$', views.open_findings,
         name='open_findings'),
+    url(r'^finding/open$', views.verified_findings,
+        name='verified_findings'),
     url(r'^product/(?P<pid>\d+)/finding/open$', views.open_findings,
         name='product_open_findings'),
     # legacy url kept for old bookmarks etc
