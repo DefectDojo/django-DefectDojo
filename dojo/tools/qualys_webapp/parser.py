@@ -171,14 +171,14 @@ def get_vulnerabilities(vulnerabilities, is_info=False, is_app_report=False):
 
 # Retrieve information from a single glossary entry such as description,
 # severity, title, impact, mitigation, and CWE
-def get_glossary_item(glossary, finding, is_info=False):
+def get_glossary_item(glossary, finding, is_info=False, enable_weakness=False):
     title = glossary.findtext('TITLE')
     if title is not None:
         finding.title = str(title)
     severity = glossary.findtext('SEVERITY')
     if severity is not None:
         group = glossary.findtext('GROUP')
-        if is_info and (not QUALYS_WAS_WEAKNESS_IS_VULN or group in ("DIAG", "IG")):
+        if is_info and (not enable_weakness or group in ("DIAG", "IG")):
             # Scan Diagnostics are always Info.
             finding.severity = "Info"
         else:
@@ -207,7 +207,7 @@ def get_info_item(info_gathered, finding):
 
 
 # Create finding items for all vulnerabilities in the report
-def get_items(vulnerabilities, info_gathered, glossary, is_app_report):
+def get_items(vulnerabilities, info_gathered, glossary, is_app_report, enable_weakness=False):
     ig_qid_list = [int(ig.findtext('QID')) for ig in info_gathered]
     g_qid_list = [int(g.findtext('QID')) for g in glossary]
 
@@ -217,11 +217,11 @@ def get_items(vulnerabilities, info_gathered, glossary, is_app_report):
     for qid, finding in get_vulnerabilities(vulnerabilities, False, is_app_report).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            findings[qid] = get_glossary_item(glossary[index], finding)
+            findings[qid] = get_glossary_item(glossary[index], finding, enable_weakness)
     for qid, finding in get_vulnerabilities(info_gathered, True, is_app_report).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(glossary[index], finding, True)
+            finding = get_glossary_item(glossary[index], finding, True, enable_weakness)
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
             findings[qid] = get_info_item(info_gathered[index], finding)
@@ -229,7 +229,7 @@ def get_items(vulnerabilities, info_gathered, glossary, is_app_report):
     return findings
 
 
-def qualys_webapp_parser(qualys_xml_file, test):
+def qualys_webapp_parser(qualys_xml_file, test, enable_weakness=False):
     if qualys_xml_file is None:
         return []
 
@@ -245,11 +245,11 @@ def qualys_webapp_parser(qualys_xml_file, test):
         info_gathered = tree.findall('./RESULTS/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED')
     glossary = tree.findall('./GLOSSARY/QID_LIST/QID')
 
-    items = list(get_items(vulnerabilities, info_gathered, glossary, is_app_report).values())
+    items = list(get_items(vulnerabilities, info_gathered, glossary, is_app_report, enable_weakness).values())
 
     return items
 
 
 class QualysWebAppParser(object):
-    def get_findings(self, file, test):
-        return qualys_webapp_parser(file, test)
+    def get_findings(self, file, test, enable_weakness=QUALYS_WAS_WEAKNESS_IS_VULN):
+        return qualys_webapp_parser(file, test, enable_weakness)
