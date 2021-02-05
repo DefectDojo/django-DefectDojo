@@ -103,9 +103,8 @@
                                 <td><a href="{% url 'view_product_type' pt.id %}">{{ pt.name }}</a></td>
                                 <td><a href="{% url 'product' %}?prod_type={{ pt.id }}"> {{ pt.prod_count }} </a></td>
                                 <td>
-                                    <a href="{% url 'open_findings' %}?test__engagement__product__prod_type={{ pt.id }}">
-                                        {{ pt.active_findings_count }}&nbsp;({{pt.active_verified_findings_count}})
-                                    </a>
+                                    <a href="{% url 'open_findings' %}?test__engagement__product__prod_type={{ pt.id }}"><b>{{ pt.active_findings_count }}</b></a>
+                                    &nbsp;(<a href="{% url 'verified_findings' %}?test__engagement__product__prod_type={{ pt.id }}">{{ pt.active_verified_findings_count }}</a>)
                                 </td>
                                 <td>{{ pt.critical_product }}</td>
                                 <td>{{ pt.key_product }}</td>

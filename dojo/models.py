@@ -1052,6 +1052,9 @@ class Engagement(models.Model):
 
     class Meta:
         ordering = ['-target_start']
+        indexes = [
+            models.Index(fields=['product', 'active']),
+        ]
 
     def is_overdue(self):
         if self.engagement_type == 'CI/CD':
@@ -1141,6 +1144,12 @@ class Endpoint_Status(models.Model):
             field_values.append(str(getattr(self, field.name, '')))
         return ' '.join(field_values)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['finding', 'mitigated']),
+            models.Index(fields=['endpoint', 'mitigated']),
+        ]
+
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
@@ -1170,6 +1179,9 @@ class Endpoint(models.Model):
 
     class Meta:
         ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
+        indexes = [
+            models.Index(fields=['product', 'mitigated']),
+        ]
 
     def __unicode__(self):
         from urllib.parse import uses_netloc
@@ -1352,6 +1364,11 @@ class Test(models.Model):
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.")
 
     version = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['engagement', 'test_type']),
+        ]
 
     def test_type_name(self):
         return self.test_type.name
@@ -1747,6 +1764,18 @@ class Finding(models.Model):
     class Meta:
         ordering = ('numerical_severity', '-date', 'title')
         indexes = [
+            models.Index(fields=['test', 'active', 'verified']),
+
+            models.Index(fields=['test', 'is_Mitigated']),
+            models.Index(fields=['test', 'duplicate']),
+            models.Index(fields=['test', 'out_of_scope']),
+            models.Index(fields=['test', 'false_p']),
+
+            models.Index(fields=['test', 'unique_id_from_tool', 'duplicate']),
+            models.Index(fields=['test', 'hash_code', 'duplicate']),
+
+            models.Index(fields=['test', 'component_name']),
+
             models.Index(fields=['cve']),
             models.Index(fields=['cwe']),
             models.Index(fields=['out_of_scope']),
@@ -2794,6 +2823,9 @@ class Notifications(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['user', 'product'], name="notifications_user_product")
+        ]
+        indexes = [
+            models.Index(fields=['user', 'product']),
         ]
 
     @classmethod
