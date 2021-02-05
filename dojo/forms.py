@@ -888,6 +888,7 @@ class PromoteFindingForm(forms.ModelForm):
 
 class SplitDateTimeWidget(forms.MultiWidget):
     supports_microseconds = False
+    template_name = 'dojo/field-datetime.html'
 
     def __init__(self):
         widgets = (
