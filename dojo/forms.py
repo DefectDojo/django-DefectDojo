@@ -9,10 +9,12 @@ from django.db.models import Count
 
 from dateutil.relativedelta import relativedelta
 from django import forms
+from django.conf import settings
 from django.core import validators
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
+from django.forms import utils as form_utils
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
@@ -884,6 +886,46 @@ class PromoteFindingForm(forms.ModelForm):
                    'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
+class SplitDateTimeWidget(forms.MultiWidget):
+    supports_microseconds = False
+
+    def __init__(self):
+        widgets = (
+            forms.TextInput(attrs={'type': 'date', 'autocomplete': 'off'}),
+            forms.TextInput(attrs={'type': 'time', 'autocomplete': 'off'}),
+        )
+        super().__init__(widgets)
+
+    def decompress(self, value):
+        if value:
+            value = form_utils.to_current_timezone(value)
+            return [value.date(), value.time()]
+        return [None, None]
+
+
+class SplitDateTimeField(forms.MultiValueField):
+    widget = SplitDateTimeWidget
+    hidden_widget = forms.SplitHiddenDateTimeWidget
+
+    def __init__(self, **kwargs):
+        fields = (
+            forms.DateField(),
+            forms.TimeField(),
+        )
+        super().__init__(fields, **kwargs)
+
+    def compress(self, data_list):
+        if data_list:
+            # Raise a validation error if time or date is empty
+            # (possible if SplitDateTimeField has required=False).
+            if data_list[0] in self.empty_values:
+                raise forms.ValidationError(self.error_messages['invalid_date'], code='invalid_date')
+            if data_list[1] in self.empty_values:
+                raise forms.ValidationError(self.error_messages['invalid_time'], code='invalid_time')
+            return form_utils.from_current_timezone(datetime.combine(*data_list))
+        return None
+
+
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
@@ -908,10 +950,13 @@ class FindingForm(forms.ModelForm):
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
+    mitigated = SplitDateTimeField()
+
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'risk_accepted', 'under_defect_review')
+    field_order = ['title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce', 
+                    'severity_justification', 'endpoints', 'references', 'is_template', 'active'] \
+                    + (['mitigated', 'mitigated_by'] if settings.DD_EDITABLE_MITIGATED_DATA else []) \
+                    + ['verified', 'false_p', 'duplicate', 'out_of_scope', 'risk_accept', 'under_defect_review']
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
