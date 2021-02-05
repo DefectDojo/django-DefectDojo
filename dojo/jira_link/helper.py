@@ -995,8 +995,10 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
                 # could be a new jira_project, so set product_id
                 if engagement:
                     jira_project.engagement_id = engagement.id
+                    obj = engagement
                 elif product:
                     jira_project.product_id = product.id
+                    obj = product
 
                 if not jira_project.product_id and not jira_project.engagement_id:
                     raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
@@ -1012,7 +1014,8 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
                         jira_project.save()
                         # update the in memory instance to make jira_project attribute work and it can be retrieved when pushing
                         # an epic in the next step
-                        engagement.jira_project = jira_project
+
+                        obj.jira_project = jira_project
 
                         messages.add_message(request,
                                                 messages.SUCCESS,
