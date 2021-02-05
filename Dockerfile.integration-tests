@@ -19,8 +19,10 @@ RUN \
 # Installing Google Chrome browser
 RUN \
   curl -sS -o - https://dl.google.com/linux/linux_signing_key.pub | apt-key add && \
+  # only update chrome repo, not all other repo's again
   echo "deb [arch=amd64]  http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
-  apt-get -y update && \
+  apt-get update -y -o Dir::Etc::sourcelist="sources.list.d/google-chrome.list" \
+  -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0" && \
   apt-get -y install \
     google-chrome-stable \
   && \
