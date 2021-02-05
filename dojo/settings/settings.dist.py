@@ -165,6 +165,8 @@ env = environ.Env(
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
     # APIv1 is depreacted and will be removed at 2021-06-30
     DD_LEGACY_API_V1_ENABLE=(bool, False),
+    # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
+    DD_EDITABLE_MITIGATED_DATA=False
 )
 
 
