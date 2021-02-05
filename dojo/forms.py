@@ -917,13 +917,17 @@ class SplitDateTimeField(forms.MultiValueField):
 
     def compress(self, data_list):
         if data_list:
-            # Raise a validation error if time or date is empty
-            # (possible if SplitDateTimeField has required=False).
+            # preserve default dojo behavior and set current time if any part is empty
             if data_list[0] in self.empty_values:
-                raise forms.ValidationError(self.error_messages['invalid_date'], code='invalid_date')
+                selected_date = date.today()
+            else:
+                selected_date = data_list[0]
             if data_list[1] in self.empty_values:
-                raise forms.ValidationError(self.error_messages['invalid_time'], code='invalid_time')
-            return form_utils.from_current_timezone(datetime.combine(*data_list))
+                selected_time = datetime.now().time()
+            else:
+                selected_time = data_list[1]
+            # keep potential tzinfo
+            return form_utils.from_current_timezone(datetime.combine(selected_date, selected_time, *data_list[2:]))
         return None
 
 
