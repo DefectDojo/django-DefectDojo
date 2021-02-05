@@ -631,6 +631,15 @@ def update_jira_issue(find):
         find.jira_issue.save()
         find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
+        if jira_project.enable_engagement_epic_mapping:
+            eng = find.test.engagement
+            logger.debug('Adding to EPIC Map: %s', eng.name)
+            epic = get_jira_issue(eng)
+            if epic:
+                jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+            else:
+                logger.info('The following EPIC does not exist: %s', eng.name)
+
         logger.debug('Updated the following linked jira issue for %d:%s', find.id, find.title)
         return True
 
@@ -814,14 +823,6 @@ def update_epic(engagement):
 @task
 @dojo_model_from_id(model=Engagement)
 def add_epic(engagement):
-    add_epic_sync(engagement)
-
-
-# This code was not being tested, but calling it
-# as a task was not working. Using block execution
-# would not either here because this method is called
-# explicitly instead of through a save function
-def add_epic_sync(engagement):
     logger.debug('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
@@ -1048,6 +1049,7 @@ def process_jira_epic_form(request, engagement=None):
             if jira_epic_form.cleaned_data.get('push_to_jira'):
                 logger.debug('pushing engagement to JIRA')
                 if push_to_jira(engagement):
+                    logger.debug('Push to JIRA for Epic queued succesfully')
                     messages.add_message(
                         request,
                         messages.SUCCESS,
@@ -1055,7 +1057,7 @@ def process_jira_epic_form(request, engagement=None):
                         extra_tags='alert-success')
                 else:
                     error = True
-
+                    logger.debug('Push to JIRA for Epic failey')
                     messages.add_message(
                         request,
                         messages.ERROR,
@@ -1065,7 +1067,6 @@ def process_jira_epic_form(request, engagement=None):
             logger.debug('invalid jira epic form')
     else:
         logger.debug('no jira_project for this engagement, skipping epic push')
-
     return not error, jira_epic_form
 
 

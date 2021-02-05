@@ -287,9 +287,6 @@ class DojoTestUtilsMixin(object):
         url = instance.url.strip('/') + '/rest/api/latest/issue/' + issue_id
         response = jira._session.get(url).json().get('fields', {})
         epic_link = response.get(epic_link_field, None)
-        print(epic_id, epic_link_field, epic_link)
-        import pprint
-        pprint.pprint(response)
         if epic_id is None and epic_link is None or issue_in_epic:
             self.assertTrue(epic_id == epic_link)
         else:

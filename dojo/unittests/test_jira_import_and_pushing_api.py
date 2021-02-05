@@ -3,6 +3,7 @@ from dojo.jira_link import helper as jira_helper
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
 from .dojo_test_case import DojoVCRAPITestCase
+from crum import impersonate
 # from unittest import skip
 import logging
 from vcr import VCR
@@ -74,10 +75,10 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
     def setUp(self):
         super().setUp()
         self.system_settings(enable_jira=True)
-        testuser = User.objects.get(username='admin')
-        testuser.usercontactinfo.block_execution = True
-        testuser.usercontactinfo.save()
-        token = Token.objects.get(user=testuser)
+        self.testuser = User.objects.get(username='admin')
+        self.testuser.usercontactinfo.block_execution = True
+        self.testuser.usercontactinfo.save()
+        token = Token.objects.get(user=self.testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
         self.scans_path = 'dojo/unittests/scans/zap/'
@@ -370,7 +371,8 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
         self.assert_cassette_played()
 
     def create_engagement_epic(self, engagement):
-        return jira_helper.add_epic_sync(engagement)
+        with impersonate(self.testuser):
+            return jira_helper.add_epic(engagement)
 
     def assert_epic_issue_count(self, engagement, count):
         jira_issues = self.get_epic_issues(engagement)
