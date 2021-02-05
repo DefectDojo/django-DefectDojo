@@ -153,7 +153,7 @@ class SonarQubeHtmlParser(object):
     def get_references(self, rule_name, vuln_details):
         rule_references = rule_name
         for a in vuln_details.iter("a"):
-            rule_references += "\n" + a.text
+            rule_references += "\n" + str(a.text)
         return rule_references
 
     def get_cwe(self, vuln_references):

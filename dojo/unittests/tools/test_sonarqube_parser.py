@@ -396,3 +396,13 @@ class TestSonarQubeParser(TestCase):
         findings = parser.get_findings(my_file_handle, test, "detailed")
         # specific verifications
         self.assertEqual(4, len(findings))
+
+    def test_detailed_parse_file_with_vuln_issue_3725(self):
+        """SonarQube Scan detailed - report that crash
+        see: https://github.com/DefectDojo/django-DefectDojo/issues/3725
+        """
+        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/sonarqube/sonar.html")
+        parser = SonarQubeHtmlParser()
+        findings = parser.get_findings(my_file_handle, test, 'detailed')
+        # specific verifications
+        self.assertEqual(322, len(findings))
