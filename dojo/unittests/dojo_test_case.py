@@ -510,7 +510,29 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             logger.debug(str(eps.id) + ': ' + str(eps.endpoint) + ': ' + str(eps.endpoint.id) + ': ' + str(eps.mitigated))
 
 
-class DojoVCRAPITestCase(DojoAPITestCase, VCRTestCase):
+class DojoVCRTestCase(DojoTestCase, VCRTestCase):
+    def __init__(self, *args, **kwargs):
+        DojoTestCase.__init__(self, *args, **kwargs)
+        VCRTestCase.__init__(self, *args, **kwargs)
+
+    # filters headers doesn't seem to work for cookies, so use callbacks to filter cookies from being recorded
+    # https://github.com/kevin1024/vcrpy/issues/569
+    def before_record_request(self, request):
+        if 'Cookie' in request.headers:
+            del request.headers['Cookie']
+        if 'cookie' in request.headers:
+            del request.headers['cookie']
+        return request
+
+    def before_record_response(self, response):
+        if 'Set-Cookie' in response['headers']:
+            del response['headers']['Set-Cookie']
+        if 'set-cookie' in response['headers']:
+            del response['headers']['set-cookie']
+        return response
+
+
+class DojoVCRAPITestCase(DojoAPITestCase, DojoVCRTestCase):
     def __init__(self, *args, **kwargs):
         DojoAPITestCase.__init__(self, *args, **kwargs)
-        VCRTestCase.__init__(self, *args, **kwargs)
+        DojoVCRTestCase.__init__(self, *args, **kwargs)
