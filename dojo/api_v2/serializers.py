@@ -17,6 +17,7 @@ from dojo.notifications.helper import create_notification
 from django.urls import reverse
 
 from django.core.validators import URLValidator, validate_ipv46_address
+from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
@@ -1181,24 +1182,36 @@ class ImportScanSerializer(serializers.Serializer):
                     burp_rr.save()
 
                 for endpoint in item.unsaved_endpoints:
-                    ep, created = Endpoint.objects.get_or_create(
-                        protocol=endpoint.protocol,
-                        host=endpoint.host,
-                        path=endpoint.path,
-                        query=endpoint.query,
-                        fragment=endpoint.fragment,
-                        product=test.engagement.product)
-                    eps, created = Endpoint_Status.objects.get_or_create(
+                    try:
+                        ep, created = Endpoint.objects.get_or_create(
+                            protocol=endpoint.protocol,
+                            host=endpoint.host,
+                            path=endpoint.path,
+                            query=endpoint.query,
+                            fragment=endpoint.fragment,
+                            product=test.engagement.product)
+                    except (MultipleObjectsReturned):
+                        pass
+
+                    try:
+                        eps, created = Endpoint_Status.objects.get_or_create(
                             finding=item,
                             endpoint=ep)
+                    except (MultipleObjectsReturned):
+                        pass
+
                     ep.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
                     item.endpoints.add(ep)
                 if endpoint_to_add:
                     item.endpoints.add(endpoint_to_add)
-                    eps, created = Endpoint_Status.objects.get_or_create(
+                    try:
+                        eps, created = Endpoint_Status.objects.get_or_create(
                             finding=item,
                             endpoint=endpoint_to_add)
+                    except (MultipleObjectsReturned):
+                        pass
+
                     endpoint_to_add.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
                 if item.unsaved_tags is not None:
@@ -1500,23 +1513,34 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if finding:
                     finding_count += 1
                     for endpoint in item.unsaved_endpoints:
-                        ep, created = Endpoint.objects.get_or_create(
-                            protocol=endpoint.protocol,
-                            host=endpoint.host,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=test.engagement.product)
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=finding,
-                            endpoint=ep)
+                        try:
+                            ep, created = Endpoint.objects.get_or_create(
+                                protocol=endpoint.protocol,
+                                host=endpoint.host,
+                                path=endpoint.path,
+                                query=endpoint.query,
+                                fragment=endpoint.fragment,
+                                product=test.engagement.product)
+                        except (MultipleObjectsReturned):
+                            pass
+
+                        try:
+                            eps, created = Endpoint_Status.objects.get_or_create(
+                                finding=finding,
+                                endpoint=ep)
+                        except (MultipleObjectsReturned):
+                            pass
+
                         ep.endpoint_status.add(eps)
                         finding.endpoints.add(ep)
                         finding.endpoint_status.add(eps)
                     if endpoint_to_add:
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=finding,
-                            endpoint=endpoint_to_add)
+                        try:
+                            eps, created = Endpoint_Status.objects.get_or_create(
+                                finding=finding,
+                                endpoint=endpoint_to_add)
+                        except (MultipleObjectsReturned):
+                            pass
                         finding.endpoints.add(endpoint_to_add)
                         endpoint_to_add.endpoint_status.add(eps)
                         finding.endpoint_status.add(eps)
