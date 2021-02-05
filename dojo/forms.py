@@ -990,6 +990,10 @@ class FindingForm(forms.ModelForm):
 
         self.fields['sla_start_date'].disabled = True
 
+        if settings.DD_EDITABLE_MITIGATED_DATA:
+            self.fields['mitigated'] = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
+            self.initial['mitigated_by'] = get_current_user()
+
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
 
