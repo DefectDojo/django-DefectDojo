@@ -120,13 +120,27 @@
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>
     <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
-
     <script type="application/javascript">
         $ = django.jQuery;
         $.hotkeys.options.filterInputAcceptingElements = false;
         $.hotkeys.options.filterTextInputs = false;
 
         $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
+
+        function displayMitigated() {
+            var elMitigated = $('#id_mitigated_0').closest('.form-group'),
+                elMitigatedBy = $('#id_mitigated_by').closest('.form-group'),
+                elActive = $('#id_active')[0];
+
+            if (!elActive.checked) {
+                elMitigated.show('fast');
+                elMitigatedBy.show('fast');
+            } else {
+                elMitigated.hide('fast');
+                elMitigatedBy.hide('fast');
+            }
+        }
+
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
 
@@ -161,6 +175,9 @@
                 });
                 mde.render();
             });
+
+            displayMitigated();
+            $('#id_active').change(displayMitigated);
         });
 
         {% comment %} crazy legacy stuff to force the original finding to be displayede at the right place {% endcomment %}
