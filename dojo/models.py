@@ -2840,6 +2840,7 @@ class Notifications(models.Model):
                 result.upcoming_engagement = merge_sets_safe(result.upcoming_engagement, notifications.upcoming_engagement)
                 result.stale_engagement = merge_sets_safe(result.stale_engagement, notifications.stale_engagement)
                 result.auto_close_engagement = merge_sets_safe(result.auto_close_engagement, notifications.auto_close_engagement)
+                result.close_engagement = merge_sets_safe(result.close_engagement, notifications.close_engagement)
                 result.user_mentioned = merge_sets_safe(result.user_mentioned, notifications.user_mentioned)
                 result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
                 result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
