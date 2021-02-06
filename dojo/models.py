@@ -1495,14 +1495,14 @@ class Finding(models.Model):
     thread_id = models.IntegerField(default=0,
                                     editable=False,
                                     verbose_name="Thread ID")
-    mitigated = models.DateTimeField(editable=settings.DD_EDITABLE_MITIGATED_DATA,
+    mitigated = models.DateTimeField(editable=False,
                                      null=True,
                                      blank=True,
-                                     verbose_name="Mitigated time",
+                                     verbose_name="Mitigated",
                                      help_text="Denotes if this flaw has been fixed by storing the date it was fixed.")
     mitigated_by = models.ForeignKey(User,
                                      null=True,
-                                     editable=settings.DD_EDITABLE_MITIGATED_DATA,
+                                     editable=False,
                                      related_name="mitigated_by",
                                      on_delete=models.CASCADE,
                                      verbose_name="Mitigated By",
