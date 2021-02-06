@@ -2,6 +2,10 @@
 {% if page.has_other_pages %}
     {% with page_param=prefix|add:'page' %}
     {% with page_size_param=prefix|add:'page_size' %}
+    <div class="pull-left pagination  pagination-sm">
+        Showing entries {{ page.start_index }} to {{ page.end_index }} of {{ page.paginator.count }}
+    </div>
+
     <nav class="pull-right">
         <ul class="pagination pagination-sm">
             {% for num in page|paginate:5 %}

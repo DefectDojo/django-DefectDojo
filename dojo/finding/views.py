@@ -81,7 +81,7 @@ def closed_findings_filter(request, queryset, user, pid):
 
 
 def open_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=OPEN_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=OPEN_FINDINGS_QUERY, prefetch_type='open')
 
 
 def verified_findings(request, pid=None, eid=None, view=None):
@@ -113,7 +113,7 @@ def closed_findings(request, pid=None, eid=None, view=None):
 
 
 def findings(request, pid=None, eid=None, view=None, filter_name=None, query_filter=None, order_by='numerical_severity',
-django_filter=open_findings_filter):
+django_filter=open_findings_filter, prefetch_type='all'):
     show_product_column = True
     custom_breadcrumb = None
     product_tab = None
@@ -161,7 +161,7 @@ django_filter=open_findings_filter):
     title_words = get_words_for_field(findings_filter.qs, 'title')
     component_words = get_words_for_field(findings_filter.qs, 'component_name')
 
-    paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs), 25)
+    paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs, prefetch_type), 25)
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
@@ -194,7 +194,7 @@ django_filter=open_findings_filter):
         })
 
 
-def prefetch_for_findings(findings):
+def prefetch_for_findings(findings, prefetch_type='all'):
     prefetched_findings = findings
     if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         prefetched_findings = prefetched_findings.select_related('reporter')
@@ -203,12 +203,15 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_project_set__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('found_by')
-        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
-        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
-        prefetched_findings = prefetched_findings.prefetch_related('original_finding')
-        prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
-        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
 
+        # for open/active findings the following 4 prefetches are not needed
+        if prefetch_type != 'open':
+            prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
+            prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
+            prefetched_findings = prefetched_findings.prefetch_related('original_finding')
+            prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
+
+        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')

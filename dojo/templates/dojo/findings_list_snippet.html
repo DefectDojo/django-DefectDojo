@@ -419,7 +419,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="clearfix pull-right">
+                <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
@@ -509,6 +509,7 @@
                 ],
                 dom: 'Bfrtip',
                 paging: false,
+                info: false,
                 buttons: [
                     {
                         extend: 'colvis',
