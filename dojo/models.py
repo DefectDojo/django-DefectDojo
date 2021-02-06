@@ -2710,10 +2710,6 @@ class JIRA_Project(models.Model):
     product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=False, verbose_name="Send Risk Acceptance expiration notifications as comment?")
 
-    @property
-    def conf(self):
-        return jira_instance
-
     def clean(self):
         if not self.jira_instance:
             raise ValidationError('Cannot save JIRA_Project without JIRA_Instance')
