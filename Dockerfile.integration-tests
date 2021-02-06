@@ -19,7 +19,6 @@ RUN \
 # Installing Google Chrome browser
 RUN \
   curl -sS -o - https://dl.google.com/linux/linux_signing_key.pub | apt-key add && \
-  # only update chrome repo, not all other repo's again
   apt-get -y update && \
   apt-get -y install \
     google-chrome-stable \
