@@ -158,7 +158,7 @@ env = environ.Env(
     # to disable deleting alerts per user set value to -1
     DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
-
+    DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -975,6 +975,9 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = 100
+
+# Apply a severity level to "Security Weaknesses" in Qualys WAS
+QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',
