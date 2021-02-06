@@ -49,10 +49,10 @@ class ArachniJSONParser(object):
                 unique_objs = []
                 new_list = []
                 for o in items[dupe_key].unsaved_endpoints:
-                    if o.__unicode__() in unique_objs:
+                    if str(o) in unique_objs:
                         continue
                     new_list.append(o)
-                    unique_objs.append(o.__unicode__())
+                    unique_objs.append(str(o))
 
                 items[dupe_key].unsaved_endpoints = new_list
             else:
