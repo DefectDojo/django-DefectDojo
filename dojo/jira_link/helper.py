@@ -272,7 +272,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         else:
             log_jira_generic_alert('Unknown JIRA Connection Error', e)
 
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.message)
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e))
         raise e
 
     except requests.exceptions.RequestException as re:
@@ -995,8 +995,10 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
                 # could be a new jira_project, so set product_id
                 if engagement:
                     jira_project.engagement_id = engagement.id
+                    obj = engagement
                 elif product:
                     jira_project.product_id = product.id
+                    obj = product
 
                 if not jira_project.product_id and not jira_project.engagement_id:
                     raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
@@ -1008,7 +1010,12 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
                         logger.debug('unable to retrieve jira project from jira instance, invalid?!')
                         error = True
                     else:
+                        logger.debug(vars(jira_project))
                         jira_project.save()
+                        # update the in memory instance to make jira_project attribute work and it can be retrieved when pushing
+                        # an epic in the next step
+
+                        obj.jira_project = jira_project
 
                         messages.add_message(request,
                                                 messages.SUCCESS,
