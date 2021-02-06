@@ -125,7 +125,7 @@ def view_test(request, tid):
         try:
             drive_service = googleapiclient.discovery.build('drive', 'v3', credentials=credentials, cache_discovery=False)
             folder_id = system_settings.drive_folder_ID
-            files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
+            gs_files = drive_service.files().list(q="mimeType='application/vnd.google-apps.spreadsheet' and parents in '%s' and name='%s'" % (folder_id, spreadsheet_name),
                                                   spaces='drive',
                                                   pageSize=10,
                                                   fields='files(id, name)').execute()
@@ -145,7 +145,7 @@ def view_test(request, tid):
                 extra_tags="alert-danger",
             )
         else:
-            spreadsheets = files.get('files')
+            spreadsheets = gs_files.get('files')
             if len(spreadsheets) == 1:
                 spreadsheetId = spreadsheets[0].get('id')
                 sheet_url = 'https://docs.google.com/spreadsheets/d/' + spreadsheetId

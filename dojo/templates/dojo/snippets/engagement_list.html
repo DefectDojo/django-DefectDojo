@@ -15,7 +15,9 @@
               {% endif %}
               </h4>
         </div>
-        <div class="clearfix">
+    </div>
+
+    <div class="clearfix">
             {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
         </div>
         {% if engs %}
@@ -232,7 +234,7 @@
                 <p class="text-muted">No {% if status == "open" %}active{% elif status == "paused" %}paused{% else %}closed{% endif %} engagements found.</p>
             </div>
         {% endif %}
-    </div>
+
     <div class="clearfix">
         {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
     </div>

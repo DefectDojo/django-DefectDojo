@@ -194,7 +194,7 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">
-                        Tests ({{tests.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
+                        Tests ({{tests.paginator.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
                     </h4>
                     {% if user|is_authorized_for_delete:eng%}
                     <div class="dropdown pull-right">
@@ -230,7 +230,11 @@
                     {% endif %}
                 </div>
             </div>
-            {% if tests %}
+        </div>
+        {% if tests %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=tests page_size=True %}
+                </div>
                 <div class="table-responsive">
                     <table class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
@@ -337,13 +341,14 @@
                         </tbody>
                     </table>
                 </div>
-            {% else %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=tests page_size=True %}
+                </div>
+        {% else %}
                 <div class="panel-body">
                     <small class="text-muted"><em>No tests found.</em></small>
                 </div>
-            {% endif %}
-        </div>
-
+        {% endif %}
     </div>
 
 </div>
@@ -400,7 +405,7 @@
                                         Never
                                     {% endif %}
                                 </td>
-                                <td>{{ risk_acceptance.accepted_findings.count }}</td>
+                                <td>{{ risk_acceptance.accepted_findings_count }}</td>
                                 {% if risk_acceptance.filename %}
                                 <td><a href="{% url 'download_risk_acceptance' eng.id risk_acceptance.id %}">Yes</a>
                                     &nbsp;<i style="position:absolute;" class="fa has-popover fa-info-circle" title="Uploaded proof" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
