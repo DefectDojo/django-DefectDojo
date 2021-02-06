@@ -957,6 +957,9 @@ class FindingForm(forms.ModelForm):
 
     mitigated = SplitDateTimeField()
 
+    mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
+    mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
+
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ['title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce', 
                     'severity_justification', 'endpoints', 'references', 'is_template', 'active'] \
@@ -995,8 +998,12 @@ class FindingForm(forms.ModelForm):
         self.fields['sla_start_date'].disabled = True
 
         if settings.DD_EDITABLE_MITIGATED_DATA:
-            self.fields['mitigated'] = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
-            self.initial['mitigated_by'] = get_current_user()
+            if hasattr(self, 'instance'):
+                self.fields['mitigated'].initial = self.instance.mitigated
+                self.fields['mitigated_by'].initial = self.instance.mitigated_by
+        else:
+            del self.fields['mitigated']
+            del self.fields['mitigated_by']
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
@@ -1013,6 +1020,17 @@ class FindingForm(forms.ModelForm):
                                         'be risk accepted.')
 
         return cleaned_data
+
+    def _post_clean(self):
+        super(FindingForm, self)._post_clean()
+
+        if settings.DD_EDITABLE_MITIGATED_DATA:
+            opts = self.instance._meta
+            try:
+                opts.get_field('mitigated').save_form_data(self.instance, self.cleaned_data.get('mitigated'))
+                opts.get_field('mitigated_by').save_form_data(self.instance, self.cleaned_data.get('mitigated_by'))
+            except forms.ValidationError as e:
+                self._update_errors(e)
 
     class Meta:
         model = Finding
