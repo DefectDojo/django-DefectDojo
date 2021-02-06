@@ -11,7 +11,7 @@ def update_finding_status(new_state_finding, request_user, old_state_finding=Non
 
     if old_state_finding is not None:
         if old_state_finding.active is True and new_state_finding.active is False:
-            if settings.DD_EDITABLE_MITIGATED_DATA:
+            if can_edit_mitigated_data(request_user):
                 # only set if it was not already set by user
                 new_state_finding.mitigated = new_state_finding.mitigated or timezone.now()
                 new_state_finding.mitigated_by = new_state_finding.mitigated_by or request_user
@@ -52,3 +52,7 @@ def update_finding_status(new_state_finding, request_user, old_state_finding=Non
         new_state_finding.mitigated_by = None
 
     return finding_status_changed
+
+
+def can_edit_mitigated_data(request_user):
+    return settings.DD_EDITABLE_MITIGATED_DATA and request_user.is_superuser

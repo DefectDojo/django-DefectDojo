@@ -973,6 +973,9 @@ class FindingForm(forms.ModelForm):
         if 'req_resp' in kwargs:
             req_resp = kwargs.pop('req_resp')
 
+        self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
+            else False
+
         super(FindingForm, self).__init__(*args, **kwargs)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
@@ -997,7 +1000,7 @@ class FindingForm(forms.ModelForm):
 
         self.fields['sla_start_date'].disabled = True
 
-        if settings.DD_EDITABLE_MITIGATED_DATA:
+        if self.can_edit_mitigated_data:
             if hasattr(self, 'instance'):
                 self.fields['mitigated'].initial = self.instance.mitigated
                 self.fields['mitigated_by'].initial = self.instance.mitigated_by
@@ -1024,7 +1027,7 @@ class FindingForm(forms.ModelForm):
     def _post_clean(self):
         super(FindingForm, self)._post_clean()
 
-        if settings.DD_EDITABLE_MITIGATED_DATA:
+        if self.can_edit_mitigated_data:
             opts = self.instance._meta
             try:
                 opts.get_field('mitigated').save_form_data(self.instance, self.cleaned_data.get('mitigated'))
