@@ -3,8 +3,9 @@ name: github-pages
 on:
   push:
     branches:
-      - main
-      - docs
+      - master
+    tags:
+      - gh-pages-update
 
 jobs:
   deploy:
