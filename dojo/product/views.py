@@ -106,8 +106,8 @@ def prefetch_for_product(prods):
         if get_system_setting('enable_github'):
             prefetched_prods = prefetched_prods.prefetch_related(
                 Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'),
-                        to_attr='github_confs'))        
-        
+                        to_attr='github_confs'))
+
     else:
         logger.debug('unable to prefetch because query was already executed')
 
