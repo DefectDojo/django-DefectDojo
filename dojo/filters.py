@@ -388,6 +388,47 @@ class EngagementFilter(DojoFilter):
         fields = ['name', 'prod_type']
 
 
+class ProductEngagementFilter(DojoFilter):
+    lead = ModelChoiceFilter(
+        queryset=User.objects.filter(
+            engagement__lead__isnull=False).distinct(),
+        label="Lead")
+    version = CharFilter(lookup_expr='icontains', label='Engagement version')
+    test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
+
+    name = CharFilter(lookup_expr='icontains')
+    status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
+                                              label="Status")
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+            ('version', 'version'),
+            ('target_start', 'target_start'),
+            ('target_end', 'target_end'),
+            ('status', 'status'),
+        ),
+        field_labels={
+            'name': 'Engagement Name',
+        }
+
+    )
+
+    class Meta:
+        model = Product
+        fields = ['name', 'prod_type']
+
+
 class ApiEngagementFilter(DojoFilter):
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
 
