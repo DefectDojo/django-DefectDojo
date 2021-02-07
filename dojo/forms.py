@@ -194,7 +194,7 @@ class Delete_Dev_EnvironmentForm(forms.ModelForm):
 
 
 class ProductForm(forms.ModelForm):
-    name = forms.CharField(max_length=50, required=True)
+    name = forms.CharField(max_length=255, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=True)
 

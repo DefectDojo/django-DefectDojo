@@ -868,6 +868,17 @@ def add_risk_acceptance(request, eid, fid=None):
     if request.method == 'POST':
         form = RiskAcceptanceForm(request.POST, request.FILES)
         if form.is_valid():
+            # first capture notes param as it cannot be saved directly as m2m
+            notes = None
+            if form.cleaned_data['notes']:
+                notes = Notes(
+                    entry=form.cleaned_data['notes'],
+                    author=request.user,
+                    date=timezone.now())
+                notes.save()
+
+            del form.cleaned_data['notes']
+
             try:
                 # we sometimes see a weird exception here, but are unable to reproduce.
                 # we add some logging in case it happens
@@ -876,16 +887,13 @@ def add_risk_acceptance(request, eid, fid=None):
                 logger.debug(vars(request.POST))
                 logger.error(vars(form))
                 logger.exception(e)
+                raise
+
+            # attach note to risk acceptance object now in database
+            if notes:
+                risk_acceptance.notes.add(notes)
 
             eng.risk_acceptance.add(risk_acceptance)
-
-            if form.cleaned_data['notes']:
-                notes = Notes(
-                    entry=form.cleaned_data['notes'],
-                    author=request.user,
-                    date=timezone.now())
-                notes.save()
-                risk_acceptance.notes.add(notes)
 
             findings = form.cleaned_data['accepted_findings']
 
