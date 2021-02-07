@@ -4,7 +4,7 @@ import logging
 from datetime import timedelta, datetime
 from django.apps import apps
 from auditlog.models import LogEntry
-from django.contrib.auth.models import User
+from django.conf import settings
 import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
@@ -351,7 +351,7 @@ class ComponentFilter(ProductComponentFilter):
 
 class EngagementFilter(DojoFilter):
     engagement__lead = ModelChoiceFilter(
-        queryset=User.objects.filter(
+        queryset=Dojo_User.objects.filter(
             engagement__lead__isnull=False).distinct(),
         label="Lead")
     engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
@@ -393,7 +393,7 @@ class EngagementFilter(DojoFilter):
 
 class ProductEngagementFilter(DojoFilter):
     lead = ModelChoiceFilter(
-        queryset=User.objects.filter(
+        queryset=Dojo_User.objects.filter(
             engagement__lead__isnull=False).distinct(),
         label="Lead")
     version = CharFilter(lookup_expr='icontains', label='Engagement version')
@@ -1784,6 +1784,9 @@ class EngagementTestFilter(DojoFilter):
             engagement__lead__isnull=False).distinct(),
         label="Lead")
     version = CharFilter(lookup_expr='icontains', label='Version')
+
+    if settings.TRACK_IMPORT_HISTORY:
+        test_import__version = CharFilter(field_name='test_import__version', lookup_expr='icontains', label='Reimported Version')
 
     target_start = DateRangeFilter()
     target_end = DateRangeFilter()

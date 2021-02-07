@@ -321,6 +321,7 @@ User = get_user_model()
 class Dojo_User(User):
     class Meta:
         proxy = True
+        ordering = ['first_name']
 
     def get_full_name(self):
         return Dojo_User.generate_full_name(self)
