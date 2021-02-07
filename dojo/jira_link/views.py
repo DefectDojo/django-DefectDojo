@@ -98,7 +98,7 @@ def webhook(request, secret=None):
                                 finding.mitigated = None
                                 finding.is_Mitigated = False
                                 finding.false_p = True
-                                finding.remove_from_any_risk_acceptance()
+                                ra_helper.remove_from_any_risk_acceptance(finding)
                             else:
                                 # Mitigated by default as before
                                 now = timezone.now()
@@ -107,21 +107,21 @@ def webhook(request, secret=None):
                                 finding.is_Mitigated = True
                                 finding.endpoints.clear()
                                 finding.false_p = False
-                                finding.remove_from_any_risk_acceptance()
+                                ra_helper.remove_from_any_risk_acceptance(finding)
                         else:
                             # Reopen / Open Jira issue
                             finding.active = True
                             finding.mitigated = None
                             finding.is_Mitigated = False
                             finding.false_p = False
-                            ra_helper.remove_finding.from_any_risk_acceptance(finding)
+                            ra_helper.remove_from_any_risk_acceptance(finding)
                     else:
                         # Reopen / Open Jira issue
                         finding.active = True
                         finding.mitigated = None
                         finding.is_Mitigated = False
                         finding.false_p = False
-                        ra_helper.remove_finding.from_any_risk_acceptance(finding)
+                        ra_helper.remove_from_any_risk_acceptance(finding)
 
                         finding.jira_issue.jira_change = timezone.now()
                         finding.jira_issue.save()
