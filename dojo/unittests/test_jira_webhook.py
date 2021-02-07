@@ -4,6 +4,7 @@ from dojo.models import JIRA_Issue
 import json
 # from unittest import skip
 import logging
+import dojo.jira_link.helper as jira_helper
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,44 @@ class JIRAWebhookTest(DojoTestCase):
                     "updateAuthor": {
                         "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
                         "name": "valentijn",
+                        "avatarUrls": {
+                            "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+                            "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+                            "16x16": "http://www.testjira.com/secure/useravatar?size=xsmall&ownerId=valentijn&avatarId=11101",
+                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                        },
+                        "displayName": "Valentijn Scholten",
+                        "active": "true",
+                        "timeZone": "Europe/Amsterdam"
+                    },
+                    "created": "2020-11-11T18:55:21.425+0100",
+                    "updated": "2020-11-11T18:55:21.425+0100"
+        }
+    }
+
+    jira_issue_comment_template_json_with_email = {
+        "timestamp": 1605117321425,
+        "webhookEvent": "comment_created",
+        "comment": {
+                    "self": "http://www.testjira.com/rest/api/2/issue/2/comment/456843",
+                    "id": "456843",
+                    "author": {
+                        "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
+                        "emailAddress": "darthvaalor@testme.nl",
+                        "avatarUrls": {
+                            "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
+                            "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
+                            "16x16": "http://www.testjira.com/secure/useravatar?size=x small&ownerId=valentijn&avatarId=11101",
+                            "32x32": "http://www.testjira.com/secure/useravatar?size=medium&ownerId=valentijn&avatarId=11101"
+                        },
+                        "displayName": "Valentijn Scholten",
+                        "active": "true",
+                        "timeZone": "Europe/Amsterdam"
+                    },
+                    "body": "test2",
+                    "updateAuthor": {
+                        "self": "http://www.testjira.com/rest/api/2/user?username=valentijn",
+                        "emailAddress": "darthvaalor@testme.nl",
                         "avatarUrls": {
                             "48x48": "http://www.testjira.com/secure/useravatar?ownerId=valentijn&avatarId=11101",
                             "24x24": "http://www.testjira.com/secure/useravatar?size=small&ownerId=valentijn&avatarId=11101",
@@ -447,12 +486,48 @@ class JIRAWebhookTest(DojoTestCase):
         body['comment']['updateAuthor']['displayName'] = "Defect Dojo"
 
         response = self.client.post(reverse('jira_web_hook_secret', args=(self.correct_secret, )),
-                                    body,
-                                    content_type="application/json")
+                                  body,
+                                  content_type="application/json")
 
         jira_issue = JIRA_Issue.objects.get(jira_id=2)
         finding = jira_issue.finding
         notes_count_after = finding.notes.count()
+
+        self.assertEqual(200, response.status_code)
+        # incoming comment must be ignored
+        self.assertEqual(notes_count_after, notes_count_before)
+
+    # when a note is placed in defect dojo and sent to jira, it will trigger an incoming webhook request
+    # we want to ignore that one because the incoming comment from jira is the comment that was placed in dojo
+    # this time when name is not there, but with email (jira with sso?)
+    def test_webhook_comment_on_finding_from_dojo_note_with_email(self):
+        self.system_settings(enable_jira=True, enable_jira_web_hook=True, disable_jira_webhook_secret=False, jira_webhook_secret=self.correct_secret)
+
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        notes_count_before = finding.notes.count()
+
+        # modify jira_instance to use email instead of name to perform testj
+        jira_instance = jira_helper.get_jira_instance(finding)
+        jira_instance.username = "defect.dojo@testme.com"
+        jira_instance.save()
+
+        body = json.loads(json.dumps(self.jira_issue_comment_template_json_with_email))
+        body['comment']['updateAuthor']['emailAddress'] = "defect.dojo@testme.com"
+        body['comment']['updateAuthor']['displayName'] = "Defect Dojo"
+
+        response = self.client.post(reverse('jira_web_hook_secret', args=(self.correct_secret, )),
+                                  body,
+                                  content_type="application/json")
+
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        notes_count_after = finding.notes.count()
+
+        # reset jira_instance to use name to avoid confusion for potential later tests
+        jira_instance = jira_helper.get_jira_instance(finding)
+        jira_instance.username = "defect.dojo"
+        jira_instance.save()
 
         self.assertEqual(200, response.status_code)
         # incoming comment must be ignored

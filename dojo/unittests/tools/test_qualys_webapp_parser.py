@@ -30,6 +30,17 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         parser = QualysWebAppParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        # 9 non-info findings, 21 total
+        # 3 non-info findings, 21 total
         self.assertEqual(3, len([x for x in findings if x.severity != "Info"]))
+        self.assertEqual(21, len(findings))
+
+    def test_qualys_webapp_parser_info_is_vuln(self):
+        testfile = open(
+            "dojo/unittests/scans/qualys_webapp/qualys_webapp_many_vuln.xml"
+        )
+        parser = QualysWebAppParser()
+        findings = parser.get_findings(testfile, Test(), True)
+        testfile.close()
+        # 18 non-info findings, 21 total
+        self.assertEqual(18, len([x for x in findings if x.severity != "Info"]))
         self.assertEqual(21, len(findings))

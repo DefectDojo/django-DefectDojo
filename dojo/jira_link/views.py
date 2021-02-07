@@ -98,7 +98,7 @@ def webhook(request, secret=None):
                                 finding.mitigated = None
                                 finding.is_Mitigated = False
                                 finding.false_p = True
-                                finding.remove_from_any_risk_acceptance()
+                                ra_helper.remove_from_any_risk_acceptance(finding)
                             else:
                                 # Mitigated by default as before
                                 now = timezone.now()
@@ -107,21 +107,21 @@ def webhook(request, secret=None):
                                 finding.is_Mitigated = True
                                 finding.endpoints.clear()
                                 finding.false_p = False
-                                finding.remove_from_any_risk_acceptance()
+                                ra_helper.remove_from_any_risk_acceptance(finding)
                         else:
                             # Reopen / Open Jira issue
                             finding.active = True
                             finding.mitigated = None
                             finding.is_Mitigated = False
                             finding.false_p = False
-                            ra_helper.remove_finding.from_any_risk_acceptance(finding)
+                            ra_helper.remove_from_any_risk_acceptance(finding)
                     else:
                         # Reopen / Open Jira issue
                         finding.active = True
                         finding.mitigated = None
                         finding.is_Mitigated = False
                         finding.false_p = False
-                        ra_helper.remove_finding.from_any_risk_acceptance(finding)
+                        ra_helper.remove_from_any_risk_acceptance(finding)
 
                         finding.jira_issue.jira_change = timezone.now()
                         finding.jira_issue.save()
@@ -181,7 +181,13 @@ def webhook(request, secret=None):
                 """
 
                 comment_text = parsed['comment']['body']
-                commentor = parsed['comment']['updateAuthor']['name']
+                commentor = ''
+                if 'name' in parsed['comment']['updateAuthor']:
+                    commentor = parsed['comment']['updateAuthor']['name']
+                elif 'emailAddress' in parsed['comment']['updateAuthor']:
+                    commentor = parsed['comment']['updateAuthor']['emailAddress']
+                else:
+                    logger.debug('Could not find the author of this jira comment!')
                 commentor_display_name = parsed['comment']['updateAuthor']['displayName']
                 # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
                 jid = parsed['comment']['self'].split('/')[-3]
@@ -193,7 +199,7 @@ def webhook(request, secret=None):
                     for jira_userid in jira_usernames:
                         # logger.debug('incoming username: %s jira config username: %s', commentor.lower(), jira_userid.lower())
                         if jira_userid.lower() == commentor.lower():
-                            logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in Defect Dojo (%s)', commentor.lower(), jira_userid.lower())
+                            logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in DefectDojo (%s)', commentor.lower(), jira_userid.lower())
                             return HttpResponse('')
                             break
                     finding = jissue.finding
