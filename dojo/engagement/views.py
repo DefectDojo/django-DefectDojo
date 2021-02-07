@@ -20,7 +20,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.core.exceptions import MultipleObjectsReturned
 
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.filters import EngagementFilter
+from dojo.filters import EngagementFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
@@ -267,8 +267,8 @@ def view_engagement(request, eid):
 
     default_page_num = 5
 
+    tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
     paged_tests = get_page_items(request, tests, default_page_num)
-
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
 
@@ -343,6 +343,7 @@ def view_engagement(request, eid):
             'product_tab': product_tab,
             'system_settings': system_settings,
             'tests': paged_tests,
+            'filter': tests_filter,
             'check': check,
             'threat': eng.tmodel_path,
             'form': form,

@@ -193,42 +193,46 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">
+                    <h4>
                         Tests ({{tests.paginator.count}}) <small>{{ eng.id|get_severity_count:"engagement" }}</small>
-                    </h4>
-                    {% if user|is_authorized_for_delete:eng%}
-                    <div class="dropdown pull-right">
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
-                            <span class="fa fa-bars"></span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            <li role="presentation">
-                                <a class="" href="{% url 'add_tests' eng.id %}">
-                                    <i class="fa fa-plus"></i> Add Tests
-                                </a>
-                            </li>
-                            <li role="presentation">
-                                <a class="" href="{% url 'import_scan_results' eng.id %}">
-                                    <i class="fa fa-upload"></i> Import Scan Results
-                                </a>
-                            </li>
-                            <li class="divider"></li>
-                            <li role="presentation">
-                              <a href="{% url 'engagment_open_findings' eng.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
-                                  <i class="fa fa-file-text-o"></i> View Open Findings
-                              </a>
-                            </li>
-                            <li role="presentation">
-                              <a href="{% url 'engagment_all_findings' eng.id %}?test__engagement={{ eng.id }}">
-                                  <i class="fa fa-file-text-o"></i> View All Findings
-                              </a>
-                            </li>
-                        </ul>
-                    </div>
-                    {% endif %}
+                                <span class="fa fa-bars"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                {% if user|is_authorized_for_change:eng%}
+                                <li role="presentation">
+                                    <a class="" href="{% url 'add_tests' eng.id %}">
+                                        <i class="fa fa-plus"></i> Add Tests
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a class="" href="{% url 'import_scan_results' eng.id %}">
+                                        <i class="fa fa-upload"></i> Import Scan Results
+                                    </a>
+                                </li>
+                                <li class="divider"></li>
+                                {% endif %}
+                                <li role="presentation">
+                                    <a href="{% url 'engagment_open_findings' eng.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
+                                        <i class="fa fa-file-text-o"></i> View Open Findings
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href="{% url 'engagment_all_findings' eng.id %}?test__engagement={{ eng.id }}">
+                                        <i class="fa fa-file-text-o"></i> View All Findings
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </h4>
                 </div>
+            </div>
+            <div id="the-filters" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
+                {% include "dojo/filter_snippet.html" with form=filter.form %}
             </div>
         </div>
         {% if tests %}

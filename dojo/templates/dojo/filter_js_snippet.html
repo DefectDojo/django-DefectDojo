@@ -13,7 +13,7 @@
             $(this).toggleClass("dropup");
         })
 
-        <!-- what works on every other page with the 'e' keydown, conflicts here with the textare for notes, stoppropagation 'fixes' this -->
+        <!-- what works on every other page with the 'e' keydown, conflicts here with the input fields in the filter div, stoppropagation 'fixes' this -->
         $('.is-filters').keydown( function(e) {
             e.stopPropagation();
         })

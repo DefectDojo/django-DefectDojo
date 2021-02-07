@@ -77,6 +77,7 @@ class DojoFilter(FilterSet):
                 self.form.fields[field] = model._meta.get_field("tags").formfield()
                 # we defer applyting the select2 autocomplete because there can be multiple forms on the same page
                 # and form.js would then apply select2 multiple times, resulting in duplicated fields
+                # the initialization now happens in filter_js_snippet.html
                 self.form.fields[field].widget.tag_options = \
                     self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px', 'defer': True})
                 tagged_model = get_tags_model_from_field_name(field)
@@ -422,6 +423,7 @@ class ProductEngagementFilter(DojoFilter):
             ('target_start', 'target_start'),
             ('target_end', 'target_end'),
             ('status', 'status'),
+            ('lead', 'lead'),
         ),
         field_labels={
             'name': 'Engagement Name',
@@ -431,7 +433,7 @@ class ProductEngagementFilter(DojoFilter):
 
     class Meta:
         model = Product
-        fields = ['name']
+        fields = ['id', 'name']
 
 
 class ApiEngagementFilter(DojoFilter):
@@ -1774,6 +1776,51 @@ class ApiEndpointFilter(DojoFilter):
     class Meta:
         model = Endpoint
         fields = ['id', 'host', 'product']
+
+
+class EngagementTestFilter(DojoFilter):
+    lead = ModelChoiceFilter(
+        queryset=Dojo_User.objects.filter(
+            engagement__lead__isnull=False).distinct(),
+        label="Lead")
+    version = CharFilter(lookup_expr='icontains', label='Version')
+
+    target_start = DateRangeFilter()
+    target_end = DateRangeFilter()
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('title', 'title'),
+            ('version', 'version'),
+            ('target_start', 'target_start'),
+            ('target_end', 'target_end'),
+            ('lead', 'lead'),
+        ),
+        field_labels={
+            'name': 'Test Name',
+        }
+
+    )
+
+    class Meta:
+        model = Test
+        fields = ['id', 'title', 'test_type', 'target_start',
+                     'target_end', 'percent_complete',
+                     'version']
+
+    def __init__(self, *args, **kwargs):
+        self.engagement = kwargs.pop('engagement')
+        super(DojoFilter, self).__init__(*args, **kwargs)
+        self.form.fields['test_type'].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by('name')
 
 
 class ApiTestFilter(DojoFilter):
