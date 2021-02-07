@@ -1,5 +1,5 @@
 import logging
-import datetime
+from datetime import datetime
 from django.utils import timezone
 from django.conf import settings
 
@@ -38,7 +38,7 @@ def update_finding_status(new_state_finding, request_user, old_state_finding=Non
     # ensure mitigate data is set or cleared based on is_Mitigated boolean
     if new_state_finding.is_Mitigated and new_state_finding.mitigated is None:
         finding_status_changed = True
-        new_state_finding.mitigated = datetime.datetime.now()
+        new_state_finding.mitigated = datetime.now()
         if settings.USE_TZ:
             new_state_finding.mitigated = timezone.make_aware(new_state_finding.mitigated, timezone.get_default_timezone())
     if new_state_finding.is_Mitigated and new_state_finding.mitigated_by is None:
