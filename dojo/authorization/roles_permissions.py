@@ -73,6 +73,30 @@ class Permissions(IntEnum):
         except ValueError:
             return False
 
+    @classmethod
+    def get_engagement_permissions(cls):
+        return {Permissions.Engagement_View, Permissions.Engagement_Add, Permissions.Engagement_Edit, Permissions.Engagement_Delete}
+
+    @classmethod
+    def get_test_permissions(cls):
+        return {Permissions.Test_View, Permissions.Test_Add, Permissions.Test_Edit, Permissions.Test_Delete}
+
+    @classmethod
+    def get_finding_permissions(cls):
+        return {Permissions.Finding_View, Permissions.Finding_Add, Permissions.Finding_Edit, Permissions.Import_Scan_Result, Permissions.Finding_Delete}
+
+    @classmethod
+    def get_endpoint_permissions(cls):
+        return {Permissions.Endpoint_View, Permissions.Endpoint_Add, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
+
+    @classmethod
+    def get_product_member_permissions(cls):
+        return {Permissions.Product_Manage_Members, Permissions.Product_Remove_Member}
+
+    @classmethod
+    def get_product_type_member_permissions(cls):
+        return {Permissions.Product_Type_Manage_Members, Permissions.Product_Type_Remove_Member}
+
 
 def get_roles_with_permissions():
     return {
