@@ -621,6 +621,8 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     engs = Engagement.objects.filter(product=prod, active=True, status="In Progress",
                                      engagement_type=engagement_type).order_by('-updated')
     active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
+    print('active filter')
+    print(vars(active_engs_filter))
     result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list)
@@ -629,15 +631,19 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True,
                                      engagement_type=engagement_type).order_by('-updated')
     queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
+    print('queued filter')
+    print(vars(queued_engs_filter))
     result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
     result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list)
 
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by(
         '-target_end')
-    inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='inactive')
-    result_inactive_engs_page = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="i_engs")
-    result_inactive_engs_page.object_list = prefetch_for_view_engagements(result_inactive_engs_page.object_list)
+    inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
+    print('inactive filter')
+    print(vars(inactive_engs_filter))
+    result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="i_engs")
+    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list)
 
     title = "All Engagements"
     if engagement_type == "CI/CD":
@@ -655,8 +661,8 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'queued_engs': result_queued_engs,
                    'queued_engs_count': result_queued_engs.paginator.count,
                    'queued_engs_filter': queued_engs_filter,
-                   'i_engs': result_inactive_engs_page,
-                   'i_engs_count': result_inactive_engs_page.paginator.count,
+                   'i_engs': result_inactive_engs,
+                   'i_engs_count': result_inactive_engs.paginator.count,
                    'i_engs_filter': inactive_engs_filter,
                    'user': request.user,
                    'authorized': auth})

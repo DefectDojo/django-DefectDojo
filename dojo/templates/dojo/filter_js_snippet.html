@@ -2,6 +2,13 @@
 <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
 <script type="application/javascript">
     $(function () {
+        $(function () {
+            $('input[data-tagulous]').each(function () {
+                console.log($(this))
+                Tagulous.select2($(this))
+            })
+        })
+
         $('.toggle-filters').on('click', function () {
             $(this).toggleClass("dropup");
         })

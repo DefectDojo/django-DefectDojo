@@ -570,16 +570,16 @@
             <div class="panel-heading">
                 <h4 class="has-filters">Similar Findings ({{ similar_findings.count }})
                     <span class="pull-right">
-                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         <a data-toggle="collapse" href=".similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a>
                     </span>
                 </h4>
             </div>
-            <div id="the-filters" class="panel-body collapse">
+            <div id="the-filters" class="is-filters panel-body collapse {% if similar_findings_filter.form.has_changed %}in{% endif %}">
                 {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form %}
             </div>
             {% if similar_findings_filter %}
-                <div id="similar_findings" class="panel-body similar_findings collapse">
+                <div id="similar_findings" class="panel-body similar_findings collapse {% if similar_findings_filter.form.has_changed %}in{% endif %}">
                     {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
                 </div>
             {% endif %}

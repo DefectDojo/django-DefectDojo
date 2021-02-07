@@ -75,8 +75,10 @@ class DojoFilter(FilterSet):
                 model = tags_filter.model
 
                 self.form.fields[field] = model._meta.get_field("tags").formfield()
+                # we defer applyting the select2 autocomplete because there can be multiple forms on the same page
+                # and form.js would then apply select2 multiple times, resulting in duplicated fields
                 self.form.fields[field].widget.tag_options = \
-                    self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
+                    self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px', 'defer': True})
                 tagged_model = get_tags_model_from_field_name(field)
                 if tagged_model:  # only if not the normal tags field
                     self.form.fields[field].label = get_tags_label_from_model(tagged_model)
@@ -400,6 +402,9 @@ class ProductEngagementFilter(DojoFilter):
     status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
                                               label="Status")
 
+    target_start = DateRangeFilter()
+    target_end = DateRangeFilter()
+
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
         to_field_name='name',
@@ -426,7 +431,7 @@ class ProductEngagementFilter(DojoFilter):
 
     class Meta:
         model = Product
-        fields = ['name', 'prod_type']
+        fields = ['name']
 
 
 class ApiEngagementFilter(DojoFilter):
