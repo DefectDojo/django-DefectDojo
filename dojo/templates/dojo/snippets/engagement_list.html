@@ -18,7 +18,7 @@
               </h4>
         </div>
     </div>
-    <div id="the-filters-{{status}}" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+    <div id="the-filters-{{status}}" class="is-filters panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
         {% include "dojo/filter_snippet.html" with form=filter.form %}
     </div>
 
@@ -323,4 +323,3 @@
         });
     </script>
     {% endblock %}
-    {% include "dojo/filter_js_snippet.html" %}

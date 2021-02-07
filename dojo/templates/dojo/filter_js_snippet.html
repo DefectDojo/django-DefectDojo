@@ -2,14 +2,15 @@
 <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
 <script type="application/javascript">
     $(function () {
-        var toggle=$('#show-filters')
-        toggle.on('click', function () {
-            $(this).toggleClass("dropup");
-        })
-
         $('.toggle-filters').on('click', function () {
             $(this).toggleClass("dropup");
         })
+
+        <!-- what works on every other page with the 'e' keydown, conflicts here with the textare for notes, stoppropagation 'fixes' this -->
+        $('.is-filters').keydown( function(e) {
+            e.stopPropagation();
+        })
+
     })
 
     {% if title_words %}
