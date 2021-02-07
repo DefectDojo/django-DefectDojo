@@ -62,7 +62,6 @@ def prefetch_for_product_type(prod_types):
         prefetch_prod_types = prefetch_prod_types.annotate(
             active_verified_findings_count=Count('prod_type__engagement__test__finding__id', filter=active_verified_findings_query))
         prefetch_prod_types = prefetch_prod_types.annotate(prod_count=Count('prod_type', distinct=True))
-        prefetch_prod_types = prefetch_prod_types.annotate(user_count=Count('authorized_users', distinct=True))
     else:
         logger.debug('unable to prefetch because query was already executed')
 
