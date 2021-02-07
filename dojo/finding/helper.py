@@ -40,7 +40,8 @@ def update_finding_status(new_state_finding, request_user, old_state_finding=Non
         finding_status_changed = True
         new_state_finding.mitigated = datetime.now()
         if settings.USE_TZ:
-            new_state_finding.mitigated = timezone.make_aware(new_state_finding.mitigated, timezone.get_default_timezone())
+            new_state_finding.mitigated = timezone.make_aware(new_state_finding.mitigated,
+                                                              timezone.get_default_timezone())
     if new_state_finding.is_Mitigated and new_state_finding.mitigated_by is None:
         finding_status_changed = True
         new_state_finding.mitigated_by = request_user
@@ -55,4 +56,4 @@ def update_finding_status(new_state_finding, request_user, old_state_finding=Non
 
 
 def can_edit_mitigated_data(request_user):
-    return settings.DD_EDITABLE_MITIGATED_DATA and request_user.is_superuser
+    return settings.EDITABLE_MITIGATED_DATA and request_user.is_superuser

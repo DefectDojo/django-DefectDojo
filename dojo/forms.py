@@ -9,7 +9,6 @@ from django.db.models import Count
 
 from dateutil.relativedelta import relativedelta
 from django import forms
-from django.conf import settings
 from django.core import validators
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
@@ -955,16 +954,14 @@ class FindingForm(forms.ModelForm):
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
-    mitigated = SplitDateTimeField()
-
     mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
     mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ['title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce', 
-                    'severity_justification', 'endpoints', 'references', 'is_template', 'active'] \
-                    + (['mitigated', 'mitigated_by'] if settings.DD_EDITABLE_MITIGATED_DATA else []) \
-                    + ['verified', 'false_p', 'duplicate', 'out_of_scope', 'risk_accept', 'under_defect_review']
+    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact',
+                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
+                   'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+                   'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
