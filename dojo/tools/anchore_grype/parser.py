@@ -14,14 +14,7 @@ class AnchoreGrypeScanParser(object):
                 continue
 
             cve = vulnerability.get("id")
-            title = (
-                vulnerability.get("id")
-                + " - "
-                + artifact.get("name")
-                + " ("
-                + artifact.get("version")
-                + ")"
-            )
+            title = vulnerability.get("id") + " - " + artifact.get("name") + " (" + artifact.get("version") + ")"
 
             # Finding details information
             findingdetail = "\n\n".join(
