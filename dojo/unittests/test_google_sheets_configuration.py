@@ -31,8 +31,7 @@ class GoogleSheetsConfigTestApi(DojoVCRTestCase):
 
     def test_config_google_sheets(self):
         # To regenerate the cassette, use an actual credentials json file
-        # with open('tests/defectdojo-sheets-localdev.json', 'rb') as f:
-        with open('tests/test-dojo-sheets-ab2fe11c32b5.json', 'rb') as f:
+        with open('tests/test-dojo-sheets-NONEXISTING.json', 'rb') as f:
             data = {}
             # fail on purpose to get all the fields dynamically
             response = self.client.post(reverse('configure_google_sheets'), data, follow=True)
@@ -47,10 +46,11 @@ class GoogleSheetsConfigTestApi(DojoVCRTestCase):
                 data.update({field.html_name: 0})
 
             data.update({
-                # To regenerate the cassette, use actual credentials
-                # If regenerating, make sure all credentials used are deleted prior to pushing,
+                # To regenerate the cassette, use non-revoked credentials
+                # The json file is a real json file, but the account is disabled and the key deleted
+                # The VCR does not recognize the stream otherwise, and will not match causing tests to fail :sob: :shrug:
                 # due to the bearer token having to remain in the vcr yaml
-                'email_address': 'defectdojo-fake-user@fake-project-name.iam.gserviceaccount.com',
+                'email_address': 'test-dojo-sheets@test-dojo-sheets.iam.gserviceaccount.com',
                 # needs to match ID in the cassette
                 'drive_folder_ID': 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
                 'enable_service': 'on',
