@@ -15,6 +15,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.decorators import user_passes_test
+from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
 
 from dojo.models import Finding, System_Settings, Test, Dojo_User, Note_Type, NoteHistory, Notes, Sonarqube_Issue
 from dojo.forms import GoogleSheetFieldsForm
@@ -23,6 +24,7 @@ from dojo.utils import add_breadcrumb, Product_Tab
 logger = logging.getLogger(__name__)
 
 
+@sensitive_post_parameters()
 @user_passes_test(lambda u: u.is_superuser)
 def configure_google_sheets(request):
     fields = Finding._meta.fields
@@ -124,6 +126,7 @@ def configure_google_sheets(request):
     })
 
 
+@sensitive_variables('cred_str', 'drive_folder_ID', 'service_account_info')
 def validate_drive_authentication(request, cred_str, drive_folder_ID):
     SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']
     service_account_info = json.loads(cred_str)
