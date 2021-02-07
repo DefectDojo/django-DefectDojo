@@ -9,6 +9,7 @@
                         {{ name }}
                         {% if request.user.is_staff %}
                         <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -46,9 +47,9 @@
 								<i class="fa fa-trash"></i>
 								</a>
 						</button>
-					</form>	
+					</form>
 				</div>
-				
+
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=endpoints page_size=True %}
                 </div>
@@ -155,7 +156,7 @@
                 var checked = this.checked;
                 // $('#bulk_remedy #id_active').prop('disabled', !checked);
             })
-            
+
             $('.table-responsive').on('hide.bs.dropdown', function () {
               $('.table-responsive').css( "overflow", "auto" );
             })

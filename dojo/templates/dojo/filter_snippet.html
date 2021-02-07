@@ -1,4 +1,5 @@
 {% load navigation_tags %}
+{% load event_tags %}
 {% load static %}
 {% block add_css %}
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
@@ -14,7 +15,10 @@
         {% for field in form %}
             <div class="form-group">
                 {{ field.errors }}
-                {{ field.label_tag }} {{ field }}
+                <label for="{{ field.auto_id }}" style="display: block;">{{ field.label }}</label>
+                {% with placeholder="placeholder:"|add:field.label %}
+                    {{ field|addcss:"class:form-control input-sm"|addcss:placeholder }}
+                {% endwith %}
             </div>
         {% endfor %}
         {% if submit == 'report' %}

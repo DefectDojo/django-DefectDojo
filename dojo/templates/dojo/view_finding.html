@@ -569,9 +569,10 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="has-filters">Similar Findings ({{ similar_findings.count }})
-                    <span class="pull-right"><a data-toggle="collapse" href=".similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span>
-                    {% comment %} <span class="pull-right similar_findings collapse" aria-expanded="false"><button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary dropdown" aria-expanded="false"> <i class="fa fa-filter"></i> <i class="caret"></i> </button></span> {% endcomment %}
-                    <div class="similar_findings dropdown pull-right collapse"></div>
+                    <span class="pull-right">
+                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        <a data-toggle="collapse" href=".similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                    </span>
                 </h4>
             </div>
             <div id="the-filters" class="panel-body collapse">
