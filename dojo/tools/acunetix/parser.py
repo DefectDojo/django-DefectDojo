@@ -17,6 +17,15 @@ logger = logging.getLogger(__name__)
 class AcunetixScannerParser(object):
     """Parser for Acunetix XML files."""
 
+    def get_scan_types(self):
+        return ["Acunetix Scanner"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Acunetix Scanner"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "XML format"
+
     def get_findings(self, xml_output, test):
         if xml_output is None:
             return list()
