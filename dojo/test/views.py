@@ -38,12 +38,14 @@ import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 from django.views.decorators.vary import vary_on_cookie
 from django.core.exceptions import MultipleObjectsReturned
+from django.views.decorators.debug import sensitive_variables
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
+@sensitive_variables('service_account_info', 'credentials')
 @user_must_be_authorized(Test, 'view', 'tid')
 def view_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
@@ -116,11 +118,12 @@ def view_test(request, tid):
                                                   spaces='drive',
                                                   pageSize=10,
                                                   fields='files(id, name)').execute()
+
         except googleapiclient.errors.HttpError:
             messages.add_message(
                 request,
                 messages.ERROR,
-                "There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue. Until fixed Google Shet Sync feature can not be used.",
+                "There is a problem with the Google Sheets Sync Configuration. Contact your system admin to solve the issue. Until fixed, the Google Sheets Sync feature cannot be used.",
                 extra_tags="alert-danger",
             )
             google_sheets_enabled = False

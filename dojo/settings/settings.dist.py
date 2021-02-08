@@ -966,6 +966,9 @@ LOGGING = {
     }
 }
 
+# override filter to ensure sensitive variables are also hidden when DEBUG = True
+DEFAULT_EXCEPTION_REPORTER_FILTER = 'dojo.settings.exception_filter.CustomExceptionReporterFilter'
+
 # As we require `innodb_large_prefix = ON` for MySQL, we can silence the
 # warning about large varchar with unique indices.
 SILENCED_SYSTEM_CHECKS = ['mysql.E001']
