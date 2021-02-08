@@ -6,7 +6,14 @@ from dojo.tools.anchore_grype.parser import AnchoreGrypeScanParser
 
 class TestAnchoreEngineParser(TestCase):
 
-    def test_anchore_engine_parser_has_many_findings(self):
+    def test_parser_has_no_findings(self):
+        testfile = open("dojo/unittests/scans/anchore_grype/no_vuln.json")
+        parser = AnchoreGrypeScanParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(0, len(findings))
+
+    def test_parser_has_many_findings(self):
         testfile = open("dojo/unittests/scans/anchore_grype/many_vulns.json")
         parser = AnchoreGrypeScanParser()
         findings = parser.get_findings(testfile, Test())
