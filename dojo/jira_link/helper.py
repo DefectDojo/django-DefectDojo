@@ -272,7 +272,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         else:
             log_jira_generic_alert('Unknown JIRA Connection Error', e)
 
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.message)
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e))
         raise e
 
     except requests.exceptions.RequestException as re:
@@ -529,11 +529,16 @@ def add_jira_issue(find):
                     find, jira, issue,
                     settings.MEDIA_ROOT + pic.image_large.name)
 
-                # if jira_project.enable_engagement_epic_mapping:
-                #      epic = get_jira_issue(eng)
-                #      issue_list = [j_issue.jira_id,]
-                #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+            if jira_project.enable_engagement_epic_mapping:
+                eng = find.test.engagement
+                logger.debug('Adding to EPIC Map: %s', eng.name)
+                epic = get_jira_issue(eng)
+                if epic:
+                    jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+                else:
+                    logger.info('The following EPIC does not exist: %s', eng.name)
 
+            logger.info('Created the following jira issue for %d:%s', find.id, find.title)
             return True
         except JIRAError as e:
             logger.exception(e)
@@ -551,7 +556,7 @@ def add_jira_issue(find):
 @task
 @dojo_model_from_id
 def update_jira_issue(find):
-    logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
+    logger.debug('trying to update a linked jira issue for %d:%s', find.id, find.title)
 
     if not is_jira_enabled():
         return False
@@ -625,6 +630,17 @@ def update_jira_issue(find):
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
         find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
+        if jira_project.enable_engagement_epic_mapping:
+            eng = find.test.engagement
+            logger.debug('Adding to EPIC Map: %s', eng.name)
+            epic = get_jira_issue(eng)
+            if epic:
+                jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+            else:
+                logger.info('The following EPIC does not exist: %s', eng.name)
+
+        logger.debug('Updated the following linked jira issue for %d:%s', find.id, find.title)
         return True
 
     except JIRAError as e:
@@ -776,7 +792,7 @@ def close_epic(eng, push_to_jira):
 @task
 @dojo_model_from_id(model=Engagement)
 def update_epic(engagement):
-    logger.info('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
+    logger.debug('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
@@ -807,7 +823,7 @@ def update_epic(engagement):
 @task
 @dojo_model_from_id(model=Engagement)
 def add_epic(engagement):
-    logger.info('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
+    logger.debug('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
@@ -979,8 +995,10 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
                 # could be a new jira_project, so set product_id
                 if engagement:
                     jira_project.engagement_id = engagement.id
+                    obj = engagement
                 elif product:
                     jira_project.product_id = product.id
+                    obj = product
 
                 if not jira_project.product_id and not jira_project.engagement_id:
                     raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
@@ -992,7 +1010,12 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
                         logger.debug('unable to retrieve jira project from jira instance, invalid?!')
                         error = True
                     else:
+                        logger.debug(vars(jira_project))
                         jira_project.save()
+                        # update the in memory instance to make jira_project attribute work and it can be retrieved when pushing
+                        # an epic in the next step
+
+                        obj.jira_project = jira_project
 
                         messages.add_message(request,
                                                 messages.SUCCESS,
@@ -1033,6 +1056,7 @@ def process_jira_epic_form(request, engagement=None):
             if jira_epic_form.cleaned_data.get('push_to_jira'):
                 logger.debug('pushing engagement to JIRA')
                 if push_to_jira(engagement):
+                    logger.debug('Push to JIRA for Epic queued succesfully')
                     messages.add_message(
                         request,
                         messages.SUCCESS,
@@ -1040,7 +1064,7 @@ def process_jira_epic_form(request, engagement=None):
                         extra_tags='alert-success')
                 else:
                     error = True
-
+                    logger.debug('Push to JIRA for Epic failey')
                     messages.add_message(
                         request,
                         messages.ERROR,
@@ -1050,7 +1074,6 @@ def process_jira_epic_form(request, engagement=None):
             logger.debug('invalid jira epic form')
     else:
         logger.debug('no jira_project for this engagement, skipping epic push')
-
     return not error, jira_epic_form
 
 

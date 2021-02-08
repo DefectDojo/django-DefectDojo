@@ -13,8 +13,6 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
-import requests
-
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes, Risk_Acceptance
@@ -237,74 +235,94 @@ def webhook(request, secret=None):
     return HttpResponse('')
 
 
+def get_custom_field(jira, label):
+    url = jira._options["server"].strip('/') + '/rest/api/2/field'
+    response = jira._session.get(url).json()
+    for node in response:
+        if label in node['clauseNames']:
+            field = int(node['schema']['customId'])
+            break
+
+    return field
+
+
 @user_passes_test(lambda u: u.is_staff)
 def express_new_jira(request):
     if request.method == 'POST':
         jform = ExpressJIRAForm(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
+            jira_server = jform.cleaned_data.get('url').rstrip('/')
+            jira_username = jform.cleaned_data.get('username')
+            jira_password = jform.cleaned_data.get('password')
+
             try:
-                jira_server = jform.cleaned_data.get('url').rstrip('/')
-                jira_username = jform.cleaned_data.get('username')
-                jira_password = jform.cleaned_data.get('password')
-
-                try:
-                    jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
-                except Exception as e:
-                    logger.exception(e)  # already logged in jira_helper
-                    return render(request, 'dojo/express_new_jira.html',
-                                            {'jform': jform})
-                # authentication successful
-                # Get the open and close keys
+                jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+            except Exception as e:
+                logger.exception(e)  # already logged in jira_helper
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Unable to authenticate. Please check credentials.',
+                                    extra_tags='alert-danger')
+                return render(request, 'dojo/express_new_jira.html',
+                                        {'jform': jform})
+            # authentication successful
+            # Get the open and close keys
+            try:
                 issue_id = jform.cleaned_data.get('issue_key')
-                key_url = jira_server + '/rest/api/latest/issue/' + issue_id + '/transitions?expand=transitions.fields'
-                data = json.loads(requests.get(key_url, auth=(jira_username, jira_password)).text)
-                for node in data['transitions']:
-                    if node['to']['name'] == 'To Do':
-                        open_key = int(node['to']['id'])
-                    if node['to']['name'] == 'Done':
-                        close_key = int(node['to']['id'])
-                # Get the epic id name
-                key_url = jira_server + '/rest/api/2/field'
-                data = json.loads(requests.get(key_url, auth=(jira_username, jira_password)).text)
-                for node in data:
-                    if 'Epic Name' in node['clauseNames']:
-                        epic_name = int(node['clauseNames'][0][3:-1])
-                        break
+                key_url = jira_server.strip('/') + '/rest/api/latest/issue/' + issue_id + '/transitions?expand=transitions.fields'
+                response = jira._session.get(key_url).json()
+                open_key = close_key = None
+                for node in response['transitions']:
+                    if node['to']['statusCategory']['name'] == 'To Do':
+                        open_key = int(node['id']) if not open_key else open_key
+                    if node['to']['statusCategory']['name'] == 'Done':
+                        close_key = int(node['id']) if not close_key else close_key
+            except Exception as e:
+                logger.exception(e)  # already logged in jira_helper
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Unable to find Open/Close ID\'s. They will need to be found manually',
+                                    extra_tags='alert-danger')
+                return render(request, 'dojo/new_jira.html',
+                                        {'jform': jform})
+            # Get the epic id name
+            try:
+                epic_name = get_custom_field(jira, 'Epic Name')
+            except Exception as e:
+                logger.exception(e)  # already logged in jira_helper
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Unable to find Epic Name. It will need to be found manually',
+                                    extra_tags='alert-danger')
+                return render(request, 'dojo/new_jira.html',
+                                        {'jform': jform})
 
-                jira_instance = JIRA_Instance(username=jira_username,
-                                        password=jira_password,
-                                        url=jira_server,
-                                        configuration_name=jform.cleaned_data.get('configuration_name'),
-                                        info_mapping_severity='Lowest',
-                                        low_mapping_severity='Low',
-                                        medium_mapping_severity='Medium',
-                                        high_mapping_severity='High',
-                                        critical_mapping_severity='Highest',
-                                        epic_name_id=epic_name,
-                                        open_status_key=open_key,
-                                        close_status_key=close_key,
-                                        finding_text='',
-                                        default_issue_type=jform.cleaned_data.get('default_issue_type'))
-                jira_instance.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'JIRA Configuration Successfully Created.',
-                                     extra_tags='alert-success')
-                create_notification(event='other',
-                                    title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
-                                    description='JIRA "%s" was added by %s' %
-                                                (jform.cleaned_data.get('configuration_name'), request.user),
-                                    url=request.build_absolute_uri(reverse('jira')),
-                                    )
-                return HttpResponseRedirect(reverse('jira', ))
-            except:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     'Unable to query other required fields. They must be entered manually.',
-                                     extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('add_jira', ))
-            return render(request, 'dojo/express_new_jira.html',
-                {'jform': jform})
+            jira_instance = JIRA_Instance(username=jira_username,
+                                    password=jira_password,
+                                    url=jira_server,
+                                    configuration_name=jform.cleaned_data.get('configuration_name'),
+                                    info_mapping_severity='Lowest',
+                                    low_mapping_severity='Low',
+                                    medium_mapping_severity='Medium',
+                                    high_mapping_severity='High',
+                                    critical_mapping_severity='Highest',
+                                    epic_name_id=epic_name,
+                                    open_status_key=open_key,
+                                    close_status_key=close_key,
+                                    finding_text='',
+                                    default_issue_type=jform.cleaned_data.get('default_issue_type'))
+            jira_instance.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'JIRA Configuration Successfully Created.',
+                                    extra_tags='alert-success')
+            create_notification(event='other',
+                                title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                description='JIRA "%s" was added by %s' %
+                                            (jform.cleaned_data.get('configuration_name'), request.user),
+                                url=request.build_absolute_uri(reverse('jira')),
+                                )
+            return HttpResponseRedirect(reverse('jira', ))
     else:
         jform = ExpressJIRAForm()
         add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)
