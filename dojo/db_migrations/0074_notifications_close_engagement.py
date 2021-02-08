@@ -7,7 +7,7 @@ import multiselectfield.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0072_composite_index'),
+        ('dojo', '0073_sheets_textfields'),
     ]
 
     operations = [
