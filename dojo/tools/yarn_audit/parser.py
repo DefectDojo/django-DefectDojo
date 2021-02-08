@@ -17,7 +17,7 @@ class YarnAuditParser(object):
     def get_findings(self, json_output, test):
         if json_output is None:
             return list()
-        tree = json.load(json_output)
+        tree = (json.loads(line) for line in json_output)
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):

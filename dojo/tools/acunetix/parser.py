@@ -14,7 +14,7 @@ __status__ = "Development"
 logger = logging.getLogger(__name__)
 
 
-class AcunetixScannerParser(object):
+class AcunetixParser(object):
     """Parser for Acunetix XML files."""
 
     def get_scan_types(self):
