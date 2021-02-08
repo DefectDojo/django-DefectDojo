@@ -1155,6 +1155,7 @@ def ad_hoc_finding(request, pid):
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
+            new_finding.tags = form.cleaned_data['tags']
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
             for endpoint in form.cleaned_data['endpoints']:
