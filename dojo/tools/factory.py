@@ -73,7 +73,7 @@ for (path, module_name, _) in iter_modules([package_dir]):
             module = import_module(f"dojo.tools.{module_name}.parser")
             for attribute_name in dir(module):
                 attribute = getattr(module, attribute_name)
-                if isclass(attribute) and attribute_name.endswith('Parser'):
+                if isclass(attribute) and attribute_name.lower().replace("_", "") == module_name + 'parser':
                     register(attribute)
         except:
             logging.exception(f"failed to load {module_name}")

@@ -102,6 +102,7 @@ class WapitiXMLParser(object):
 
         return list(dupes.values())
 
+    # FIXME remove custom endpoint management
     def process_endpoints(self, finding, host):
         protocol = "http"
         query = ""

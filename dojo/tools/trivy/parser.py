@@ -29,6 +29,15 @@ Fixed version: {fixed_version}
 
 class TrivyParser:
 
+    def get_scan_types(self):
+        return ["Trivy Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Trivy Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import trivy JSON scan report."
+
     def get_findings(self, scan_file, test):
 
         scan_data = scan_file.read()

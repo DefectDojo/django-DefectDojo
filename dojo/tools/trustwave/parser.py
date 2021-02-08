@@ -92,6 +92,15 @@ class Severityfilter():
 
 class TrustwaveUploadCsvParser(object):
 
+    def get_scan_types(self):
+        return ["Trustwave Scan (CSV)"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Trustwave Scan (CSV)"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "CSV output of Trustwave vulnerability scan."
+
     def get_findings(self, filename, test):
         self.dupes = dict()
         self.items = ()
