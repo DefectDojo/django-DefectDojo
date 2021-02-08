@@ -575,11 +575,11 @@
                     </span>
                 </h4>
             </div>
-            <div id="the-filters" class="is-filters panel-body collapse {% if similar_findings_filter.form.has_changed %}in{% endif %}">
+            <div id="the-filters" class="is-filters panel-body collapse {% if similar_findings_filter.has_changed %}in{% endif %}">
                 {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form %}
             </div>
             {% if similar_findings_filter %}
-                <div id="similar_findings" class="panel-body similar_findings collapse {% if similar_findings_filter.form.has_changed %}in{% endif %}">
+                <div id="similar_findings" class="panel-body similar_findings collapse {% if similar_findings_filter.has_changed %}in{% endif %}">
                     {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
                 </div>
             {% endif %}

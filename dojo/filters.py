@@ -1292,6 +1292,8 @@ class SimilarFindingFilter(DojoFilter):
             self.finding = kwargs.pop('finding')
 
         # if filterset is bound, use initial values as defaults
+        # because of this, we can't rely on the self.form.has_changed
+        self.has_changed = True
         if not data:
             # get a mutable copy of the QueryDict
             data = data.copy()
@@ -1304,6 +1306,8 @@ class SimilarFindingFilter(DojoFilter):
             data['test__test_type'] = self.finding.test.test_type
             data['test__engagement__product'] = self.finding.test.engagement.product
             data['test__engagement__product__prod_type'] = self.finding.test.engagement.product.prod_type
+
+            self.has_changed = False
 
         super().__init__(data, *args, **kwargs)
 
