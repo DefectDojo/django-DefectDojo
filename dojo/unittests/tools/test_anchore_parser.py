@@ -23,3 +23,10 @@ class TestAnchoreEngineParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(23, len(findings))
+
+    def test_anchore_engine_parser_has_many_findings_2_4_1(self):
+        testfile = open("dojo/unittests/scans/anchore/many_vulns_2.4.1.json")
+        parser = AnchoreEngineScanParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(51, len(findings))
