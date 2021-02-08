@@ -481,3 +481,9 @@ class DojoVCRAPITestCase(DojoAPITestCase, VCRTestCase):
     def __init__(self, *args, **kwargs):
         DojoAPITestCase.__init__(self, *args, **kwargs)
         VCRTestCase.__init__(self, *args, **kwargs)
+
+
+class DojoVCRTestCase(DojoTestCase, VCRTestCase):
+    def __init__(self, *args, **kwargs):
+        DojoTestCase.__init__(self, *args, **kwargs)
+        VCRTestCase.__init__(self, *args, **kwargs)
