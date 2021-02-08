@@ -15,6 +15,7 @@ from dojo.notifications.helper import create_notification
 from django.urls import reverse
 
 from django.core.validators import URLValidator, validate_ipv46_address
+from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError
@@ -312,8 +313,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
 
 
+class UserStubSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'first_name', 'last_name')
+
+
 class NoteHistorySerializer(serializers.ModelSerializer):
-    current_editor = UserSerializer(read_only=True)
+    current_editor = UserStubSerializer(read_only=True)
 
     class Meta:
         model = NoteHistory
@@ -321,9 +328,9 @@ class NoteHistorySerializer(serializers.ModelSerializer):
 
 
 class NoteSerializer(serializers.ModelSerializer):
-    author = UserSerializer(
+    author = UserStubSerializer(
         many=False, read_only=True)
-    editor = UserSerializer(
+    editor = UserStubSerializer(
         read_only=True, many=False, allow_null=True)
 
     history = NoteHistorySerializer(read_only=True, many=True)
@@ -1154,24 +1161,36 @@ class ImportScanSerializer(serializers.Serializer):
                     burp_rr.save()
 
                 for endpoint in item.unsaved_endpoints:
-                    ep, created = Endpoint.objects.get_or_create(
-                        protocol=endpoint.protocol,
-                        host=endpoint.host,
-                        path=endpoint.path,
-                        query=endpoint.query,
-                        fragment=endpoint.fragment,
-                        product=test.engagement.product)
-                    eps, created = Endpoint_Status.objects.get_or_create(
+                    try:
+                        ep, created = Endpoint.objects.get_or_create(
+                            protocol=endpoint.protocol,
+                            host=endpoint.host,
+                            path=endpoint.path,
+                            query=endpoint.query,
+                            fragment=endpoint.fragment,
+                            product=test.engagement.product)
+                    except (MultipleObjectsReturned):
+                        pass
+
+                    try:
+                        eps, created = Endpoint_Status.objects.get_or_create(
                             finding=item,
                             endpoint=ep)
+                    except (MultipleObjectsReturned):
+                        pass
+
                     ep.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
                     item.endpoints.add(ep)
                 if endpoint_to_add:
                     item.endpoints.add(endpoint_to_add)
-                    eps, created = Endpoint_Status.objects.get_or_create(
+                    try:
+                        eps, created = Endpoint_Status.objects.get_or_create(
                             finding=item,
                             endpoint=endpoint_to_add)
+                    except (MultipleObjectsReturned):
+                        pass
+
                     endpoint_to_add.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
                 if item.unsaved_tags is not None:
@@ -1449,23 +1468,34 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if finding:
                     finding_count += 1
                     for endpoint in item.unsaved_endpoints:
-                        ep, created = Endpoint.objects.get_or_create(
-                            protocol=endpoint.protocol,
-                            host=endpoint.host,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=test.engagement.product)
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=finding,
-                            endpoint=ep)
+                        try:
+                            ep, created = Endpoint.objects.get_or_create(
+                                protocol=endpoint.protocol,
+                                host=endpoint.host,
+                                path=endpoint.path,
+                                query=endpoint.query,
+                                fragment=endpoint.fragment,
+                                product=test.engagement.product)
+                        except (MultipleObjectsReturned):
+                            pass
+
+                        try:
+                            eps, created = Endpoint_Status.objects.get_or_create(
+                                finding=finding,
+                                endpoint=ep)
+                        except (MultipleObjectsReturned):
+                            pass
+
                         ep.endpoint_status.add(eps)
                         finding.endpoints.add(ep)
                         finding.endpoint_status.add(eps)
                     if endpoint_to_add:
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=finding,
-                            endpoint=endpoint_to_add)
+                        try:
+                            eps, created = Endpoint_Status.objects.get_or_create(
+                                finding=finding,
+                                endpoint=endpoint_to_add)
+                        except (MultipleObjectsReturned):
+                            pass
                         finding.endpoints.add(endpoint_to_add)
                         endpoint_to_add.endpoint_status.add(eps)
                         finding.endpoint_status.add(eps)
@@ -1609,7 +1639,7 @@ class ReportGenerateSerializer(serializers.Serializer):
     endpoint = EndpointSerializer(many=False, read_only=True)
     endpoints = EndpointSerializer(many=True, read_only=True)
     findings = FindingSerializer(many=True, read_only=True)
-    user = UserSerializer(many=False, read_only=True)
+    user = UserStubSerializer(many=False, read_only=True)
     team_name = serializers.CharField(max_length=200)
     title = serializers.CharField(max_length=200)
     user_id = serializers.IntegerField()
