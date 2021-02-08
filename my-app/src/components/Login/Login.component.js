@@ -43,6 +43,7 @@ export default class Login extends Component {
                   <label
                     className="custom-control-label"
                     htmlFor="customCheck1"
+                    for="customCheck1"
                   >
                     Remember me
                   </label>
