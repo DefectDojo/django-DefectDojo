@@ -27,7 +27,7 @@
                         </div>
                     </div>
                 </div>
-                {% if request.user.is_superuser %}
+                {% if request.user.is_superuser or request.user.is_staff %}
                     <a href="{% url 'engagement' %}">
                 {% else %}
                     <a href="{% url 'engagement' %}?engagement__lead={{ request.user.id }}">
