@@ -19,7 +19,7 @@ class ArachniJSONParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Arachni JSON report format."
 
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, scan_type):
         self.target = None
         self.port = "80"
         self.host = None

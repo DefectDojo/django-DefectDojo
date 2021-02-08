@@ -2,7 +2,7 @@ import logging
 import re
 from urllib.parse import urlparse
 
-from lxml import etree
+from defusedxml import ElementTree as etree
 
 from dojo.models import Endpoint, Finding
 
@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class BurpEnterpriseHtmlParser(object):
 
-    def get_findings(self, filename, test, mode=None):
+    def get_findings(self, filename, test, scan_type):
         parser = etree.HTMLParser()
         tree = etree.parse(filename, parser)
         if tree:

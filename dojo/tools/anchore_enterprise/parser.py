@@ -20,7 +20,7 @@ class AnchoreEnterprisePolicyCheckParser:
     def get_description_for_scan_types(self, scan_type):
         return "Anchore-CLI JSON policy check report format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, scan_type):
         content = filename.read()
         try:
             data = json.loads(str(content, 'utf-8'))

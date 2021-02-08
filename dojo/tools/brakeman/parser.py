@@ -18,7 +18,7 @@ class BrakemanScanParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import Brakeman Scanner findings in JSON format."
 
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, scan_type):
         if filename is None:
             return ()
 

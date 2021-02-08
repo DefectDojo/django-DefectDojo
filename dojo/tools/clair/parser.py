@@ -4,7 +4,7 @@ from dojo.models import Finding
 
 
 class ClairParser(object):
-    def get_findings(self, json_output, test):
+    def get_findings(self, json_output, test, scan_type):
 
         tree = self.parse_json(json_output)
 

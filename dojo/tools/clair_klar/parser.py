@@ -7,7 +7,17 @@ logger = logging.getLogger(__name__)
 
 
 class ClairKlarParser(object):
-    def get_findings(self, json_output, test):
+
+    def get_scan_types(self):
+        return ["Clair Klar Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON reports of Docker image vulnerabilities from clair klar client."
+
+    def get_findings(self, json_output, test, scan_type):
 
         tree = self.parse_json(json_output)
 

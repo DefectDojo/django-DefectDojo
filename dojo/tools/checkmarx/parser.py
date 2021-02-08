@@ -11,21 +11,34 @@ from dojo.utils import add_language
 
 logger = logging.getLogger(__name__)
 
-# ----------------------------------------
-# Structure of the checkmarx xml report:
-# ----------------------------------------
-# - Query:
-#    the kind of vulnerabilities. Contains for example cweId
-# - Result: One vulnerability in checkmarx = 1 pathId
-#    Includes filename and linenumber from source of vulnerability (start of the attack vector)
-# - Path: There should be only one.Parent tag of Pathnodes
-# - Pathnode: all the calls from the source (start) to the sink (end) of the attack vector
-
 
 class CheckmarxXMLParser(object):
+    """
+    ----------------------------------------
+    Structure of the checkmarx xml report:
+    ----------------------------------------
+    - Query:
+    the kind of vulnerabilities. Contains for example cweId
+    - Result: One vulnerability in checkmarx = 1 pathId
+    Includes filename and linenumber from source of vulnerability (start of the attack vector)
+    - Path: There should be only one.Parent tag of Pathnodes
+    - Pathnode: all the calls from the source (start) to the sink (end) of the attack vector
+    """
+
+    def get_scan_types(self):
+        return ["Checkmarx Scan", "Checkmarx Scan detailed"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        if scan_type == "Checkmarx Scan":
+            return "Detailed XML Report. Aggregates vulnerabilities per categories, cwe, name, sinkFilename
+        else:
+            return "Detailed XML Report. Import all vulnerabilities from checkmarx without aggregation"
+
+    # FIXME get rid of local variables
     language_list = []
-    mode = None
-    test = None
     mitigation = 'N/A'
     impact = 'N/A'
     references = ''
@@ -33,14 +46,13 @@ class CheckmarxXMLParser(object):
     # mode:
     # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
     # 'detailed' : No aggregation
-    def get_findings(self, filename, test, mode=None):
+    def get_findings(self, filename, test, scan_type):
         cxscan = ElementTree.parse(filename)
         self.test = test
         root = cxscan.getroot()
-        if(mode in [None, 'detailed']):
-            self.mode = mode
-        else:
-            raise Exception("Internal error: Invalid mode " + mode + ". Expected: one of None, 'detailed'")
+        mode = 'normal'
+        if scan_type.endswith('detailed'):
+            mode = 'detailed'
 
         # Dictonary to hold the aggregated findings with:
         #  - key: the concatenated aggregate keys
@@ -77,9 +89,9 @@ class CheckmarxXMLParser(object):
                 deeplink = "[{}]({})".format(result.get('DeepLink'), result.get('DeepLink'))
                 findingdetail = "{}**Finding Link:** {}\n\n".format(findingdetail, deeplink)
 
-                if(self.mode is None):
+                if mode != 'detailed':
                     self.process_result_file_name_aggregated(dupes, findingdetail, query, result, find_date)
-                elif (self.mode == 'detailed'):
+                else:
                     self.process_result_detailed(dupes, findingdetail, query, result, find_date)
                 findingdetail = ''
 
