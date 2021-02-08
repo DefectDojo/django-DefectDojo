@@ -1,5 +1,4 @@
 from datetime import datetime
-from xml.dom import NamespaceErr
 
 from lxml import etree
 
@@ -24,19 +23,25 @@ class VeracodeXMLParser(object):
         5: 'Critical'
     }
 
+    def get_scan_types(self):
+        return ["Veracode Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Veracode Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Detailed XML Report"
+
     def get_findings(self, filename, test):
         if filename is None:
             return list()
-        try:
-            xml = etree.parse(filename, etree.XMLParser(resolve_entities=False))
-        except:
-            raise NamespaceErr('Cannot parse this report. Make sure to upload a proper Veracode Detailed XML report.')
+        xml = etree.parse(filename, etree.XMLParser(resolve_entities=False))
 
         ns = self.ns
         report_node = xml.xpath('/x:detailedreport', namespaces=self.ns)[0]
 
         if not report_node:
-            raise NamespaceErr(
+            raise ValueError(
                 'This version of Veracode report is not supported.  '
                 'Please make sure the export is formatted using the '
                 'https://www.veracode.com/schema/reports/export/1.0 schema.')
