@@ -359,6 +359,7 @@ def add_findings(request, tid):
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
+            new_finding.tags = form.cleaned_data['tags']
             new_finding.save(dedupe_option=False, push_to_jira=False)
             for ep in form.cleaned_data['endpoints']:
                 eps, created = Endpoint_Status.objects.get_or_create(
