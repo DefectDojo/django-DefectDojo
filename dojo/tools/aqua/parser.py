@@ -4,6 +4,16 @@ from dojo.models import Finding
 
 
 class AquaJSONParser(object):
+
+    def get_scan_types(self):
+        return ["Aqua Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Aqua Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return ""
+
     def get_findings(self, json_output, test):
         tree = json.load(json_output)
         return self.get_items(tree, test)

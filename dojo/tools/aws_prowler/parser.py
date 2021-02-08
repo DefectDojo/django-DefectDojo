@@ -11,6 +11,15 @@ from dojo.models import Finding
 
 class AWSProwlerParser(object):
 
+    def get_scan_types(self):
+        return ["AWS Prowler Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "AWS Prowler Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "AWS Security Hub exports in JSON format."
+
     def get_findings(self, filename, test):
         content = filename.read()
         if type(content) is bytes:

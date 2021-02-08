@@ -7,6 +7,16 @@ __author__ = 'dr3dd589'
 
 
 class WhitesourceJSONParser(object):
+
+    def get_scan_types(self):
+        return ["Whitesource Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Whitesource Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON report"
+
     def get_findings(self, file, test):
         if file is None:
             return list()

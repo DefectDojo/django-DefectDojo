@@ -4,6 +4,15 @@ from dojo.models import Finding
 
 
 class AnchoreEngineScanParser(object):
+    def get_scan_types(self):
+        return ["Anchore Engine Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Anchore Engine Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Anchore-CLI JSON vulnerability report format."
+
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = dict()

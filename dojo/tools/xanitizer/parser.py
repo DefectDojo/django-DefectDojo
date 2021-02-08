@@ -8,6 +8,16 @@ from dojo.models import Finding
 
 
 class XanitizerXMLParser(object):
+
+    def get_scan_types(self):
+        return ["Xanitizer Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Xanitizer Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import XML findings list report, preferably with parameter 'generateDetailsInFindingsListReport=true'."
+
     def get_findings(self, filename, test):
         if filename is None:
             return list()

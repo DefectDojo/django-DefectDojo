@@ -9,6 +9,16 @@ from dojo.models import Endpoint, Finding
 
 
 class ArachniJSONParser(object):
+
+    def get_scan_types(self):
+        return ["Arachni Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Arachni Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Arachni JSON report format."
+
     def get_findings(self, json_output, test):
         self.target = None
         self.port = "80"

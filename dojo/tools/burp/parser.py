@@ -18,6 +18,15 @@ class BurpXmlParser(object):
     TODO Test burp output version. Handle what happens if the parser doesn't support it.
     """
 
+    def get_scan_types(self):
+        return ["Burp Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Burp Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "When the Burp report is generated, the recommended option is Base64 encoding both the request and response fields. These fields will be processed and made available in the 'Finding View' page."
+
     def get_findings(self, xml_output, test):
         tree = etree.parse(xml_output, etree.XMLParser())
         return self.get_items(tree, test)

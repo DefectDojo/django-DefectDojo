@@ -14,6 +14,15 @@ class AWSScout2Parser(object):
     item_data = ""
     pdepth = 0
 
+    def get_scan_types(self):
+        return ["AWS Scout2 Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "AWS Scout2 Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JS file in scout2-report/inc-awsconfig/aws_config.js."
+
     def get_findings(self, filename, test):
         # filename is instance of class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
         with open(filename.temporary_file_path(), "r") as fileobj:

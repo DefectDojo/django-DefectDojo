@@ -10,6 +10,16 @@ logger = logging.getLogger(__name__)
 
 
 class AnchoreEnterprisePolicyCheckParser:
+
+    def get_scan_types(self):
+        return ["Anchore Enterprise Policy Check"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Anchore Enterprise Policy Check"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Anchore-CLI JSON policy check report format."
+
     def get_findings(self, filename, test):
         content = filename.read()
         try:

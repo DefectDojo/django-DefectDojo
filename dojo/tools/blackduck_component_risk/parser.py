@@ -8,6 +8,16 @@ class BlackduckHubParser(object):
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv
     """
+
+    def get_scan_types(self):
+        return ["Blackduck Component Risk"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Blackduck Component Risk"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Upload the zip file containing the security.csv and files.csv."
+
     def get_findings(self, filename, test):
         """
         Function initializes the parser with a file and sets the

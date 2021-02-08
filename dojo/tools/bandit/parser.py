@@ -8,6 +8,16 @@ from dojo.models import Finding
 
 
 class BanditParser(object):
+
+    def get_scan_types(self):
+        return ["Bandit Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Bandit Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JSON report format"
+
     def get_findings(self, filename, test):
 
         if filename is None:
