@@ -12,7 +12,7 @@ from dojo.utils import add_language
 logger = logging.getLogger(__name__)
 
 
-class CheckmarxXMLParser(object):
+class CheckmarxParser(object):
     """
     ----------------------------------------
     Structure of the checkmarx xml report:
