@@ -4,7 +4,7 @@ from dojo.models import Finding
 
 
 class ChoctawhogParser(object):
-    def get_findings(self, json_output, test, scan_type):
+    def get_findings(self, json_output, test):
         if json_output is None:
             return list()
 

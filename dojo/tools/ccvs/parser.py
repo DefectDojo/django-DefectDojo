@@ -18,7 +18,7 @@ class CCVSParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import CCVS Report vulnerabilities in JSON format."
 
-    def get_findings(self, json_output, test, scan_type):
+    def get_findings(self, json_output, test):
 
         if json_output is None:
             return list()

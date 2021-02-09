@@ -20,7 +20,7 @@ class AWSProwlerParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "AWS Security Hub exports in JSON format."
 
-    def get_findings(self, filename, test, scan_type):
+    def get_findings(self, filename, test):
         content = filename.read()
         if type(content) is bytes:
             content = content.decode('utf-8')

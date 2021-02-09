@@ -26,7 +26,7 @@ class AcunetixParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "XML format"
 
-    def get_findings(self, xml_output, test, scan_type):
+    def get_findings(self, xml_output, test):
         if xml_output is None:
             return list()
         acunetix_defectdojo_findings = get_defectdojo_findings(xml_output)

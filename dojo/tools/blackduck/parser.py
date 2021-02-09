@@ -20,7 +20,7 @@ class BlackduckHubCSVParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Upload the zip file containing the security.csv and components.csv for Security and License risks."
 
-    def get_findings(self, filename, test, scan_type):
+    def get_findings(self, filename, test):
         normalized_findings = self.normalize_findings(filename)
         return self.ingest_findings(normalized_findings, test)
 

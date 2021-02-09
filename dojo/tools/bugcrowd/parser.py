@@ -17,7 +17,7 @@ class BugCrowdCSVParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "BugCrowd CSV report format"
 
-    def get_findings(self, filename, test, scan_type):
+    def get_findings(self, filename, test):
 
         if filename is None:
             return ()

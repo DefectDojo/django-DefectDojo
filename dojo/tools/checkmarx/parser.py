@@ -46,7 +46,7 @@ class CheckmarxXMLParser(object):
     # mode:
     # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
     # 'detailed' : No aggregation
-    def get_findings(self, filename, test, scan_type):
+    def get_findings(self, filename, test):
         cxscan = ElementTree.parse(filename)
         self.test = test
         root = cxscan.getroot()

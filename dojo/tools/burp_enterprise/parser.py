@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class BurpEnterpriseHtmlParser(object):
 
-    def get_findings(self, filename, test, scan_type):
+    def get_findings(self, filename, test):
         parser = etree.HTMLParser()
         tree = etree.parse(filename, parser)
         if tree:

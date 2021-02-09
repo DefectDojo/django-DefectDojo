@@ -14,7 +14,7 @@ class ClairParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import JSON reports of Docker image vulnerabilities."
 
-    def get_findings(self, json_output, test, scan_type):
+    def get_findings(self, json_output, test):
         tree = json.load(json_output)
         return self.get_items(tree, test)
 

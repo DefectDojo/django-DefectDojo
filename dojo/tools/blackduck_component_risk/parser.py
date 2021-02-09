@@ -18,7 +18,7 @@ class BlackduckHubParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Upload the zip file containing the security.csv and files.csv."
 
-    def get_findings(self, filename, test, scan_type):
+    def get_findings(self, filename, test):
         """
         Function initializes the parser with a file and sets the
         self.items (eventually).
