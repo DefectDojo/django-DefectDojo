@@ -7,7 +7,7 @@ from defusedxml import ElementTree as ET
 from dojo.models import Finding
 
 
-class XanitizerXMLParser(object):
+class XanitizerParser(object):
 
     def get_scan_types(self):
         return ["Xanitizer Scan"]

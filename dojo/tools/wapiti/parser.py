@@ -26,7 +26,7 @@ class Severityfilter():
             self.severity = 'Info'
 
 
-class WapitiXMLParser(object):
+class WapitiParser(object):
 
     def get_scan_types(self):
         return ["Wapiti Scan"]

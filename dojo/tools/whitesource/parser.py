@@ -9,7 +9,7 @@ __author__ = 'dr3dd589'
 logger = logging.getLogger(__name__)
 
 
-class WhitesourceJSONParser(object):
+class WhitesourceParser(object):
 
     def get_scan_types(self):
         return ["Whitesource Scan"]

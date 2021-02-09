@@ -8,7 +8,7 @@ from dojo.models import Endpoint, Finding
 __author__ = 'dr3dd589'
 
 
-class WpscanJSONParser(object):
+class WpscanParser(object):
     """WPScan – WordPress Security Scanner"""
 
     def get_scan_types(self):
