@@ -46,13 +46,14 @@ class CheckmarxParser(object):
     # mode:
     # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
     # 'detailed' : No aggregation
-    def get_findings(self, filename, test):
+    def get_findings(self, filename, test, mode='normal'):
         cxscan = ElementTree.parse(filename)
         self.test = test
         root = cxscan.getroot()
-        mode = 'normal'
-        if scan_type.endswith('detailed'):
-            mode = 'detailed'
+
+        # FIXME manage mode
+        # if scan_type.endswith('detailed'):
+        #    mode = 'detailed'
 
         # Dictonary to hold the aggregated findings with:
         #  - key: the concatenated aggregate keys
