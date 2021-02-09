@@ -147,9 +147,7 @@ class TestUnitTest(BaseTestCase):
         driver.find_element_by_partial_link_text("Beta Test").click()
         # "Click" the dropdown button to see options
         test_menu = driver.find_element_by_id("test-menu")
-        print(test_menu.get_attribute('outerHTML'))
         test_menu.click()
-        print(test_menu.get_attribute('outerHTML'))
 
         driver.find_element_by_link_text("Add Finding to Test").click()
         # Keep a good practice of clearing field before entering value
