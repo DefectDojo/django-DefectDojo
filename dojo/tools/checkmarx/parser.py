@@ -33,7 +33,7 @@ class CheckmarxXMLParser(object):
 
     def get_description_for_scan_types(self, scan_type):
         if scan_type == "Checkmarx Scan":
-            return "Detailed XML Report. Aggregates vulnerabilities per categories, cwe, name, sinkFilename
+            return "Detailed XML Report. Aggregates vulnerabilities per categories, cwe, name, sinkFilename"
         else:
             return "Detailed XML Report. Import all vulnerabilities from checkmarx without aggregation"
 
