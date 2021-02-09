@@ -47,9 +47,9 @@ class ClairKlarParser(object):
         if tree_severity:
             for data in self.get_items(tree_severity, test):
                 items.append(data)
-            logger.info("Appended findings for severity " + severity)
+            logger.debug("Appended findings for severity " + severity)
         else:
-            logger.info("No findings for severity " + severity)
+            logger.debug("No findings for severity " + severity)
         return items
 
     def get_items(self, tree_severity, test):

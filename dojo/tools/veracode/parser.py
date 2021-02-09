@@ -13,7 +13,7 @@ def truncate_str(value: str, maxlen: int):
 
 # This parser is written for Veracode Detailed XML reports, version 1.5.
 # Version is annotated in the report, `detailedreport/@report_format_version`.
-class VeracodeXMLParser(object):
+class VeracodeParser(object):
     ns = {'x': 'https://www.veracode.com/schema/reports/export/1.0'}
     vc_severity_mapping = {
         1: 'Info',
@@ -40,7 +40,7 @@ class VeracodeXMLParser(object):
         ns = self.ns
         report_node = xml.xpath('/x:detailedreport', namespaces=self.ns)[0]
 
-        if not report_node:
+        if report_node is None:
             raise ValueError(
                 'This version of Veracode report is not supported.  '
                 'Please make sure the export is formatted using the '
