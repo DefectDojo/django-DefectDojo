@@ -57,6 +57,8 @@ from .anchore_engine.parser import AnchoreEngineScanParser
 register_parser('Anchore Engine Scan', AnchoreEngineScanParser())
 from .anchore_enterprise.parser import AnchoreEnterprisePolicyCheckParser
 register_parser('Anchore Enterprise Policy Check', AnchoreEnterprisePolicyCheckParser())
+from .anchore_grype.parser import AnchoreGrypeScanParser
+register_parser('Anchore Grype Scan', AnchoreGrypeScanParser())
 from .appspider.parser import AppSpiderXMLParser
 register_parser('AppSpider Scan', AppSpiderXMLParser())
 from .aqua.parser import AquaJSONParser

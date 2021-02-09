@@ -263,8 +263,8 @@ class System_Settings(models.Model):
         verbose_name="Allow Anonymous Survey Responses",
         help_text="Enable anyone with a link to the survey to answer a survey"
     )
-    credentials = models.CharField(max_length=3000, blank=True)
-    column_widths = models.CharField(max_length=1500, blank=True)
+    credentials = models.TextField(max_length=3000, blank=True)
+    column_widths = models.TextField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
@@ -307,9 +307,6 @@ class Dojo_User(User):
 
     def get_full_name(self):
         return Dojo_User.generate_full_name(self)
-
-    def __unicode__(self):
-        return self.get_full_name()
 
     def __str__(self):
         return self.get_full_name()
@@ -367,9 +364,6 @@ class Note_Type(models.Model):
     is_active = models.BooleanField(default=True, null=False)
     is_mandatory = models.BooleanField(default=True, null=False)
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
@@ -398,9 +392,6 @@ class Notes(models.Model):
 
     class Meta:
         ordering = ['-date']
-
-    def __unicode__(self):
-        return self.entry
 
     def __str__(self):
         return self.entry
@@ -470,14 +461,11 @@ class Product_Type(models.Model):
     class Meta:
         ordering = ('name',)
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
     def get_breadcrumbs(self):
-        bc = [{'title': self.__unicode__(),
+        bc = [{'title': str(self),
                'url': reverse('edit_product_type', args=(self.id,))}]
         return bc
 
@@ -489,9 +477,6 @@ class Product_Type(models.Model):
 class Product_Line(models.Model):
     name = models.CharField(max_length=300)
     description = models.CharField(max_length=2000)
-
-    def __unicode__(self):
-        return self.name
 
     def __str__(self):
         return self.name
@@ -506,9 +491,6 @@ class Test_Type(models.Model):
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
@@ -516,7 +498,7 @@ class Test_Type(models.Model):
         ordering = ('name',)
 
     def get_breadcrumbs(self):
-        bc = [{'title': self.__unicode__(),
+        bc = [{'title': str(self),
                'url': None}]
         return bc
 
@@ -558,9 +540,6 @@ class DojoMeta(models.Model):
             raise ValidationError('Metadata entries need either a product, an endpoint or a finding')
         if ids_count > 1:
             raise ValidationError('Metadata entries may not have more than one relation, either a product, an endpoint either or a finding')
-
-    def __unicode__(self):
-        return "%s: %s" % (self.name, self.value)
 
     def __str__(self):
         return "%s: %s" % (self.name, self.value)
@@ -674,9 +653,6 @@ class Product(models.Model):
     enable_simple_risk_acceptance = models.BooleanField(default=False, help_text=_('Allows simple risk acceptance by checking/unchecking a checkbox.'))
     enable_full_risk_acceptance = models.BooleanField(default=True, help_text=_('Allows full risk acceptanc using a risk acceptance form, expiration date, uploaded proof, etc.'))
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
@@ -774,7 +750,7 @@ class Product(models.Model):
                     'Total': (critical + high + medium + low)}
 
     def get_breadcrumbs(self):
-        bc = [{'title': self.__unicode__(),
+        bc = [{'title': str(self),
                'url': reverse('view_product', args=(self.id,))}]
         return bc
 
@@ -849,15 +825,12 @@ class Scan(models.Model):
     status = models.CharField(max_length=10, default='Pending', editable=False)
     baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
 
-    def __unicode__(self):
-        return self.scan_settings.protocol + " Scan " + str(self.date)
-
     def __str__(self):
         return self.scan_settings.protocol + " Scan " + str(self.date)
 
     def get_breadcrumbs(self):
         bc = self.scan_settings.get_breadcrumbs()
-        bc += [{'title': self.__unicode__(),
+        bc += [{'title': str(self),
                 'url': reverse('view_scan', args=(self.id,))}]
         return bc
 
@@ -874,9 +847,6 @@ class Tool_Type(models.Model):
 
     class Meta:
         ordering = ['name']
-
-    def __unicode__(self):
-        return self.name
 
     def __str__(self):
         return self.name
@@ -904,9 +874,6 @@ class Tool_Configuration(models.Model):
 
     class Meta:
         ordering = ['name']
-
-    def __unicode__(self):
-        return self.name
 
     def __str__(self):
         return self.name
@@ -949,9 +916,6 @@ class Tool_Configuration_Admin(admin.ModelAdmin):
 class Network_Locations(models.Model):
     location = models.CharField(max_length=500, help_text="Location of network testing: Examples: VPN, Internet or Internal.")
 
-    def __unicode__(self):
-        return self.location
-
     def __str__(self):
         return self.location
 
@@ -965,9 +929,6 @@ class Engagement_Presets(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=False)
 
-    def __unicode__(self):
-        return self.title
-
     def __str__(self):
         return self.title
 
@@ -977,9 +938,6 @@ class Engagement_Presets(models.Model):
 
 class Engagement_Type(models.Model):
     name = models.CharField(max_length=200)
-
-    def __unicode__(self):
-        return self.name
 
     def __str__(self):
         return self.name
@@ -1069,11 +1027,6 @@ class Engagement(models.Model):
 
         return False
 
-    def __unicode__(self):
-        return "Engagement: %s (%s)" % (self.name if self.name else '',
-                                        self.target_start.strftime(
-                                            "%b %d, %Y"))
-
     def __str__(self):
         return "Engagement: %s (%s)" % (self.name if self.name else '',
                                         self.target_start.strftime(
@@ -1081,7 +1034,7 @@ class Engagement(models.Model):
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
-        bc += [{'title': self.__unicode__(),
+        bc += [{'title': str(self),
                 'url': reverse('view_engagement', args=(self.id,))}]
         return bc
 
@@ -1183,36 +1136,6 @@ class Endpoint(models.Model):
             models.Index(fields=['product', 'mitigated']),
         ]
 
-    def __unicode__(self):
-        from urllib.parse import uses_netloc
-
-        netloc = self.host
-        port = self.port
-        scheme = self.protocol
-        url = self.path if self.path else ''
-        query = self.query
-        fragment = self.fragment
-
-        if port:
-            # If http or https on standard ports then don't tack on the port number
-            if (port != 443 and scheme == "https") or (port != 80 and scheme == "http"):
-                netloc += ':%s' % port
-
-        if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
-            if url and url[:1] != '/':
-                url = '/' + url
-            if scheme and scheme in uses_netloc and url[:2] != '//':
-                url = '//' + (netloc or '') + url
-            else:
-                url = (netloc or '') + url
-        if scheme:
-            url = scheme + ':' + url
-        if query:
-            url = url + '?' + query
-        if fragment:
-            url = url + '#' + fragment
-        return url
-
     def __str__(self):
         from urllib.parse import uses_netloc
 
@@ -1248,7 +1171,7 @@ class Endpoint(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, Endpoint):
-            return self.__unicode__() == other.__unicode__()
+            return str(self) == str(other)
         else:
             return NotImplemented
 
@@ -1328,14 +1251,11 @@ class Endpoint(models.Model):
 class Development_Environment(models.Model):
     name = models.CharField(max_length=200)
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
     def get_breadcrumbs(self):
-        return [{"title": self.__unicode__(),
+        return [{"title": str(self),
                  "url": reverse("edit_dev_env", args=(self.id,))}]
 
 
@@ -1373,11 +1293,6 @@ class Test(models.Model):
     def test_type_name(self):
         return self.test_type.name
 
-    def __unicode__(self):
-        if self.title:
-            return "%s (%s)" % (self.title, self.test_type)
-        return str(self.test_type)
-
     def __str__(self):
         if self.title:
             return "%s (%s)" % (self.title, self.test_type)
@@ -1385,7 +1300,7 @@ class Test(models.Model):
 
     def get_breadcrumbs(self):
         bc = self.engagement.get_breadcrumbs()
-        bc += [{'title': self.__unicode__(),
+        bc += [{'title': str(self),
                 'url': reverse('view_test', args=(self.id,))}]
         return bc
 
@@ -1451,9 +1366,6 @@ class Sonarqube_Product(models.Model):
         Tool_Configuration, verbose_name="SonarQube Configuration",
         null=True, blank=True, on_delete=models.CASCADE
     )
-
-    def __unicode__(self):
-        return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
 
     def __str__(self):
         return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
@@ -1955,9 +1867,6 @@ class Finding(models.Model):
         else:
             return 5
 
-    def __unicode__(self):
-        return self.title
-
     def __str__(self):
         return self.title
 
@@ -2201,7 +2110,7 @@ class Finding(models.Model):
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
-        bc += [{'title': self.__unicode__(),
+        bc += [{'title': str(self),
                 'url': reverse('view_finding', args=(self.id,))}]
         return bc
 
@@ -2260,7 +2169,16 @@ class Finding(models.Model):
         return self.references
 
 
-Finding.endpoints.through.__unicode__ = lambda \
+class FindingAdmin(admin.ModelAdmin):
+    # For efficiency with large databases, display many-to-many fields with raw
+    # IDs rather than multi-select
+    raw_id_fields = (
+        'endpoints',
+        'endpoint_status',
+    )
+
+
+Finding.endpoints.through.__str__ = lambda \
     x: "Endpoint: " + x.endpoint.host
 
 
@@ -2275,15 +2193,12 @@ class Stub_Finding(models.Model):
     class Meta:
         ordering = ('-date', 'title')
 
-    def __unicode__(self):
-        return self.title
-
     def __str__(self):
         return self.title
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
-        bc += [{'title': "Potential Finding: " + self.__unicode__(),
+        bc += [{'title': "Potential Finding: " + str(self),
                 'url': reverse('view_potential_finding', args=(self.id,))}]
         return bc
 
@@ -2315,14 +2230,11 @@ class Finding_Template(models.Model):
     class Meta:
         ordering = ['-cwe']
 
-    def __unicode__(self):
-        return self.title
-
     def __str__(self):
         return self.title
 
     def get_breadcrumbs(self):
-        bc = [{'title': self.__unicode__(),
+        bc = [{'title': str(self),
                'url': reverse('view_template', args=(self.id,))}]
         return bc
 
@@ -2443,9 +2355,6 @@ class Risk_Acceptance(models.Model):
     created = models.DateTimeField(null=False, editable=False, auto_now_add=True)
     updated = models.DateTimeField(editable=False, auto_now=True)
 
-    def __unicode__(self):
-        return str(self.name)
-
     def __str__(self):
         return str(self.name)
 
@@ -2461,7 +2370,7 @@ class Risk_Acceptance(models.Model):
 
     def get_breadcrumbs(self):
         bc = self.engagement_set.first().get_breadcrumbs()
-        bc += [{'title': self.__unicode__(),
+        bc += [{'title': str(self),
                 'url': reverse('view_risk_acceptance', args=(
                     self.engagement_set.first().product.id, self.id,))}]
         return bc
@@ -2493,9 +2402,6 @@ class Report(models.Model):
     datetime = models.DateTimeField(auto_now_add=True)
     done_datetime = models.DateTimeField(null=True)
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
@@ -2525,9 +2431,6 @@ class FindingImage(models.Model):
                                  processors=[ResizeToCover(1024, 768)],
                                  format='JPEG',
                                  options={'quality': 100})
-
-    def __unicode__(self):
-        return self.image.name or 'No Image'
 
     def __str__(self):
         return self.image.name or 'No Image'
@@ -2564,9 +2467,6 @@ class GITHUB_Conf(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
     api_key = models.CharField(max_length=2000, help_text="Enter your Github API Key", default='')
 
-    def __unicode__(self):
-        return self.configuration_name
-
     def __str__(self):
         return self.configuration_name
 
@@ -2575,9 +2475,6 @@ class GITHUB_Issue(models.Model):
     issue_id = models.CharField(max_length=200)
     issue_url = models.URLField(max_length=2000, verbose_name="GitHub issue URL")
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
-
-    def __unicode__(self):
-        return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
 
     def __str__(self):
         return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
@@ -2602,9 +2499,6 @@ class GITHUB_PKey(models.Model):
     git_conf = models.ForeignKey(GITHUB_Conf, verbose_name="Github Configuration",
                                  null=True, blank=True, on_delete=models.CASCADE)
     git_push_notes = models.BooleanField(default=False, blank=True, help_text="Notes added to findings will be automatically added to the corresponding github issue")
-
-    def __unicode__(self):
-        return self.product.name + " | " + self.git_project
 
     def __str__(self):
         return self.product.name + " | " + self.git_project
@@ -2651,9 +2545,6 @@ class JIRA_Instance(models.Model):
     @property
     def false_positive_resolutions(self):
         return [m.strip() for m in (self.false_positive_mapping_resolution or '').split(',')]
-
-    def __unicode__(self):
-        return self.configuration_name + " | " + self.url + " | " + self.username
 
     def __str__(self):
         return self.configuration_name + " | " + self.url + " | " + self.username
@@ -2715,16 +2606,9 @@ class JIRA_Project(models.Model):
     product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
     risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=False, verbose_name="Send Risk Acceptance expiration notifications as comment?")
 
-    @property
-    def conf(self):
-        return jira_instance
-
     def clean(self):
         if not self.jira_instance:
             raise ValidationError('Cannot save JIRA_Project without JIRA_Instance')
-
-    def __unicode__(self):
-        return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
 
     def __str__(self):
         return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
@@ -2773,14 +2657,6 @@ class JIRA_Issue(models.Model):
                                        verbose_name="Jira last update",
                                        help_text="The date the linked Jira issue was last modified.")
 
-    def __unicode__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
-
     def __str__(self):
         text = ""
         if self.finding:
@@ -2807,6 +2683,7 @@ class Notifications(models.Model):
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -2853,6 +2730,7 @@ class Notifications(models.Model):
                 result.upcoming_engagement = merge_sets_safe(result.upcoming_engagement, notifications.upcoming_engagement)
                 result.stale_engagement = merge_sets_safe(result.stale_engagement, notifications.stale_engagement)
                 result.auto_close_engagement = merge_sets_safe(result.auto_close_engagement, notifications.auto_close_engagement)
+                result.close_engagement = merge_sets_safe(result.close_engagement, notifications.close_engagement)
                 result.user_mentioned = merge_sets_safe(result.user_mentioned, notifications.user_mentioned)
                 result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
                 result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
@@ -2928,9 +2806,6 @@ class Cred_User(models.Model):
     class Meta:
         ordering = ['name']
 
-    def __unicode__(self):
-        return self.name + " (" + self.role + ")"
-
     def __str__(self):
         return self.name + " (" + self.role + ")"
 
@@ -2950,9 +2825,6 @@ class Cred_Mapping(models.Model):
                                             verbose_name="Authentication Provider")
     url = models.URLField(max_length=2000, null=True, blank=True)
 
-    def __unicode__(self):
-        return self.cred_id.name + " (" + self.cred_id.role + ")"
-
     def __str__(self):
         return self.cred_id.name + " (" + self.cred_id.role + ")"
 
@@ -2960,9 +2832,6 @@ class Cred_Mapping(models.Model):
 class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False)
     color = models.CharField(max_length=7, null=True, verbose_name='HTML color')
-
-    def __unicode__(self):
-        return self.language
 
     def __str__(self):
         return self.language
@@ -2977,9 +2846,6 @@ class Languages(models.Model):
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
     code = models.IntegerField(blank=True, null=True, verbose_name='Number of code lines')
     created = models.DateTimeField(null=False, editable=False, default=now)
-
-    def __unicode__(self):
-        return self.language.language
 
     def __str__(self):
         return self.language.language
@@ -3002,9 +2868,6 @@ class App_Analysis(models.Model):
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True)
 
-    def __unicode__(self):
-        return self.name + " | " + self.product.name
-
     def __str__(self):
         return self.name + " | " + self.product.name
 
@@ -3012,9 +2875,6 @@ class App_Analysis(models.Model):
 class Objects_Review(models.Model):
     name = models.CharField(max_length=100, null=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
-
-    def __unicode__(self):
-        return self.name
 
     def __str__(self):
         return self.name
@@ -3034,17 +2894,6 @@ class Objects_Product(models.Model):
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add.")
-
-    def __unicode__(self):
-        name = None
-        if self.path is not None:
-            name = self.path
-        elif self.folder is not None:
-            name = self.folder
-        elif self.artifact is not None:
-            name = self.artifact
-
-        return name
 
     def __str__(self):
         name = None
@@ -3067,17 +2916,6 @@ class Objects_Engagement(models.Model):
     type = models.CharField(max_length=30, null=True)
     percentUnchanged = models.CharField(max_length=10, null=True)
 
-    def __unicode__(self):
-        data = ""
-        if self.object_id.path:
-            data = self.object_id.path
-        elif self.object_id.folder:
-            data = self.object_id.folder
-        elif self.object_id.artifact:
-            data = self.object_id.artifact
-
-        return data + " | " + self.engagement.name + " | " + str(self.engagement.id)
-
     def __str__(self):
         data = ""
         if self.object_id.path:
@@ -3098,9 +2936,6 @@ class Testing_Guide_Category(models.Model):
     class Meta:
         ordering = ('name',)
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
@@ -3115,9 +2950,6 @@ class Testing_Guide(models.Model):
     results_expected = models.CharField(max_length=800, help_text="What the results look like for a test")
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
-
-    def __unicode__(self):
-        return self.testing_guide_category.name + ': ' + self.name
 
     def __str__(self):
         return self.testing_guide_category.name + ': ' + self.name
@@ -3136,9 +2968,6 @@ class Benchmark_Type(models.Model):
     updated = models.DateTimeField(editable=False, default=now)
     enabled = models.BooleanField(default=True)
 
-    def __unicode__(self):
-        return self.name + " " + self.version
-
     def __str__(self):
         return self.name + " " + self.version
 
@@ -3154,9 +2983,6 @@ class Benchmark_Category(models.Model):
 
     class Meta:
         ordering = ('name',)
-
-    def __unicode__(self):
-        return self.name + ': ' + self.type.name
 
     def __str__(self):
         return self.name + ': ' + self.type.name
@@ -3176,9 +3002,6 @@ class Benchmark_Requirement(models.Model):
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
 
-    def __unicode__(self):
-        return str(self.objective_number) + ': ' + self.category.name
-
     def __str__(self):
         return str(self.objective_number) + ': ' + self.category.name
 
@@ -3193,9 +3016,6 @@ class Benchmark_Product(models.Model):
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
-
-    def __unicode__(self):
-        return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
 
     def __str__(self):
         return self.product.name + ': ' + self.control.objective_number + ': ' + self.control.category.name
@@ -3225,9 +3045,6 @@ class Benchmark_Product_Summary(models.Model):
     publish = models.BooleanField(default=False, help_text='Publish score to Product.')
     created = models.DateTimeField(null=False, editable=False, default=now)
     updated = models.DateTimeField(editable=False, default=now)
-
-    def __unicode__(self):
-        return self.product.name + ': ' + self.benchmark_type.name
 
     def __str__(self):
         return self.product.name + ': ' + self.benchmark_type.name
@@ -3307,7 +3124,7 @@ class FieldRule(models.Model):
     text = models.CharField(max_length=200)
 
 
-# ==============================
+# ==========================
 # Defect Dojo Engaegment Surveys
 # ==============================
 
@@ -3327,9 +3144,6 @@ class Question(PolymorphicModel, TimeStampedModel):
         help_text="If selected, user doesn't have to answer this question")
 
     text = models.TextField(blank=False, help_text='The question text', default='')
-
-    def __unicode__(self):
-        return self.text
 
     def __str__(self):
         return self.text
@@ -3359,9 +3173,6 @@ class Choice(TimeStampedModel):
 
     class Meta:
         ordering = ['order']
-
-    def __unicode__(self):
-        return self.label
 
     def __str__(self):
         return self.label
@@ -3400,9 +3211,6 @@ class Engagement_Survey(models.Model):
         verbose_name_plural = "Engagement Surveys"
         ordering = ('-active', 'name',)
 
-    def __unicode__(self):
-        return self.name
-
     def __str__(self):
         return self.name
 
@@ -3430,9 +3238,6 @@ class Answered_Survey(models.Model):
         verbose_name = "Answered Engagement Survey"
         verbose_name_plural = "Answered Engagement Surveys"
 
-    def __unicode__(self):
-        return self.survey.name
-
     def __str__(self):
         return self.survey.name
 
@@ -3446,9 +3251,6 @@ class General_Survey(models.Model):
     class Meta:
         verbose_name = "General Engagement Survey"
         verbose_name_plural = "General Engagement Surveys"
-
-    def __unicode__(self):
-        return self.survey.name
 
     def __str__(self):
         return self.survey.name
@@ -3471,7 +3273,7 @@ class TextAnswer(Answer):
         help_text='The answer text',
         default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.answer
 
 
@@ -3480,7 +3282,7 @@ class ChoiceAnswer(Answer):
         Choice,
         help_text='The selected choices as the answer')
 
-    def __unicode__(self):
+    def __str__(self):
         if len(self.answer.all()):
             return str(self.answer.all()[0])
         else:
@@ -3545,7 +3347,7 @@ admin.site.register(Languages)
 admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
 admin.site.register(Test)
-admin.site.register(Finding)
+admin.site.register(Finding, FindingAdmin)
 admin.site.register(FindingImage)
 admin.site.register(FindingImageAccessToken)
 admin.site.register(Stub_Finding)

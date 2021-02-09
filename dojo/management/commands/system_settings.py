@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from dojo.models import System_Settings
 
+
 class Command(BaseCommand):
     help = 'Updates product grade calculation'
 

@@ -1936,6 +1936,7 @@ class ProductNotificationsForm(forms.ModelForm):
         super(ProductNotificationsForm, self).__init__(*args, **kwargs)
         if not self.instance.id:
             self.initial['engagement_added'] = ''
+            self.initial['close_engagement'] = ''
             self.initial['test_added'] = ''
             self.initial['scan_added'] = ''
             self.initial['sla_breach'] = ''
@@ -1943,7 +1944,7 @@ class ProductNotificationsForm(forms.ModelForm):
 
     class Meta:
         model = Notifications
-        fields = ['engagement_added', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiration']
+        fields = ['engagement_added', 'close_engagement', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiration']
 
 
 class AjaxChoiceField(forms.ChoiceField):

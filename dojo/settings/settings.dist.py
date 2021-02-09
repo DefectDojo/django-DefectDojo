@@ -158,7 +158,7 @@ env = environ.Env(
     # to disable deleting alerts per user set value to -1
     DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
-
+    DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -769,7 +769,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component', 'vuln_id_from_tool'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'vuln_id_from_tool'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe', 'endpoints'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
@@ -969,6 +969,9 @@ LOGGING = {
     }
 }
 
+# override filter to ensure sensitive variables are also hidden when DEBUG = True
+DEFAULT_EXCEPTION_REPORTER_FILTER = 'dojo.settings.exception_filter.CustomExceptionReporterFilter'
+
 # As we require `innodb_large_prefix = ON` for MySQL, we can silence the
 # warning about large varchar with unique indices.
 SILENCED_SYSTEM_CHECKS = ['mysql.E001']
@@ -978,6 +981,9 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = 100
+
+# Apply a severity level to "Security Weaknesses" in Qualys WAS
+QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',

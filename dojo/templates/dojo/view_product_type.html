@@ -207,11 +207,23 @@
                       <tbody>
                         <tr>
                           <td style="width: 150px;"><strong>Critical product</strong></td>
-                          <td>{{ pt.critical_product }}</td>
-                        </tr>
+                          <td>
+                            {% if pt.critical_product %}
+                            <i class="text-success fa fa-check"></i>
+                            {% else %}
+                            <i class="text-danger fa fa-times"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
                         <tr>
                             <td style="width: 150px;"><strong>Key product</strong></td>
-                            <td>{{ pt.key_product }}</td>
+                            <td>
+                                {% if pt.key_product %}
+                                <i class="text-success fa fa-check"></i>
+                                {% else %}
+                                <i class="text-danger fa fa-times"></i>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% feature_new_authorization as feature_new_authorization_flag %}
                         {% if feature_new_authorization_flag is False %}

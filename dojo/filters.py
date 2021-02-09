@@ -1060,10 +1060,10 @@ class AcceptedFindingFilter(DojoFilter):
 
 
 class AcceptedFindingSuperFilter(AcceptedFindingFilter):
-    test__engagement__risk_acceptance__reporter = \
+    test__engagement__risk_acceptance__owner = \
         ModelMultipleChoiceFilter(
             queryset=Dojo_User.objects.all(),
-            label="Risk Acceptance Reporter")
+            label="Risk Acceptance Owner")
 
 
 class ProductFindingFilter(DojoFilter):
@@ -1411,6 +1411,10 @@ class MetricsFindingFilter(FilterSet):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
+    test__test_type = ModelMultipleChoiceFilter(
+        queryset=Test_Type.objects.all().order_by('name'),
+        label="Test Type"
+    )
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
