@@ -30,7 +30,7 @@ def dashboard(request):
     now = timezone.now()
     seven_days_ago = now - timedelta(days=6)  # 6 days plus today
 
-    if request.user.is_superuser:
+    if request.user.is_superuser or request.user.is_staff:
         engagement_count = Engagement.objects.filter(active=True).count()
         finding_count = Finding.objects.filter(verified=True,
                                                mitigated=None,

@@ -8,7 +8,6 @@ export DD_BASE_URL='http://localhost:8080/'
 # If any script is unsuccessful a failure message is printed and the test script
 # Exits with status code of 1
 
-
 echo "Running Product type integration tests"
 if python3 tests/regulations_test.py ; then
     echo "Success: Regulation integration tests passed"
@@ -16,7 +15,6 @@ else
     docker-compose logs uwsgi --tail=120
     echo "Error: Regulation integration test failed."; exit 1
 fi
-
 
 echo "Running Product type integration tests"
 if python3 tests/product_type_test.py ; then
@@ -27,7 +25,7 @@ else
 fi
 
 echo "Running Product integration tests"
-if python3 tests/product_test.py ; then 
+if python3 tests/product_test.py ; then
     echo "Success: Product integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -59,7 +57,7 @@ else
 fi
 
 echo "Running Environment integration tests"
-if python3 tests/environment_test.py ; then 
+if python3 tests/environment_test.py ; then
     echo "Success: Environment integration tests passed"
 else
     docker-compose logs uwsgi --tail=120
@@ -122,13 +120,12 @@ else
     fail $test
 fi
 
-
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
 # echo "Running Import Scanner integration test"
 # if python3 tests/import_scanner_test.py ; then
-#     echo "Success: Import Scanner integration tests passed" 
+#     echo "Success: Import Scanner integration tests passed"
 # else
 #     echo "Error: Import Scanner integration test failed"; exit 1
 # fi
