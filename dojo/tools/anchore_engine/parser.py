@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class AnchoreEngineScanParser(object):
+class AnchoreEngineParser(object):
     def get_scan_types(self):
         return ["Anchore Engine Scan"]
 

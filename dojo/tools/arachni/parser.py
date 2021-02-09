@@ -8,7 +8,7 @@ from django.utils.encoding import force_str
 from dojo.models import Endpoint, Finding
 
 
-class ArachniJSONParser(object):
+class ArachniParser(object):
 
     def get_scan_types(self):
         return ["Arachni Scan"]

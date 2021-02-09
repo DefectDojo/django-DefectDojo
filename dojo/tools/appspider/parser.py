@@ -7,7 +7,7 @@ from defusedxml import ElementTree
 from dojo.models import Endpoint, Finding
 
 
-class AppSpiderXMLParser(object):
+class AppSpiderParser(object):
     """Parser for Rapid7 AppSpider reports"""
 
     def get_scan_types(self):

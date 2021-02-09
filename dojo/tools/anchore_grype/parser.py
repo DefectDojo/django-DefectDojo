@@ -3,7 +3,7 @@ import json
 from dojo.models import Finding
 
 
-class AnchoreGrypeScanParser(object):
+class AnchoreGrypeParser(object):
     def get_findings(self, file, test):
         tree = json.load(file)
         dupes = dict()

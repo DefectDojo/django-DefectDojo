@@ -9,7 +9,7 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class AnchoreEnterprisePolicyCheckParser:
+class AnchoreEnterpriseParser:
 
     def get_scan_types(self):
         return ["Anchore Enterprise Policy Check"]
