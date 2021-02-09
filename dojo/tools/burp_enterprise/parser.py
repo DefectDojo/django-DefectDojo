@@ -25,7 +25,6 @@ class BurpEnterpriseHtmlParser(object):
             s += ''.join(container.itertext()).strip().replace('Snip', '\n<-------------- Snip -------------->').replace('\t', '')
         else:
             for elem in container.iterchildren():
-                # print(elem.tag, ' : ', elem.text, '\n')
                 if elem.text is not None and elem.text.strip() != '':
                     if elem.tag == 'a':
                         s += '(' + elem.text + ')[' + elem.attrib['href'] + ']' + '\n'

@@ -24,7 +24,6 @@ class PhpSymfonySecurityCheckParser(object):
         return tree
 
     def get_items(self, tree, test):
-        # print(('tree: ', tree))
         items = {}
 
         for dependency_name, dependency_data in list(tree.items()):
@@ -37,7 +36,6 @@ class PhpSymfonySecurityCheckParser(object):
                 item = get_item(dependency_name, dependency_version, advisory, test)
                 unique_key = str(dependency_name) + str(dependency_data['version'] + str(advisory['cve']))
                 items[unique_key] = item
-                # print(('item: ', item))
 
         return list(items.values())
 

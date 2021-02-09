@@ -23,8 +23,6 @@ class DependencyCheckParser(object):
 
             if key not in dupes:
                 dupes[key] = finding
-            # else:
-                # print('skipping: ' + finding.title)
 
     def get_field_value(self, parent_node, field_name, namespace):
         field_node = parent_node.find(namespace + field_name)

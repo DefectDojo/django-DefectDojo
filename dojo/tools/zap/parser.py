@@ -194,8 +194,6 @@ class Item(object):
         description_detail = "\n"
         for instance in item_node.findall('instances/instance'):
             for node in instance.iter():
-                # print('tag: ' + node.tag)
-                # print('text:' + escape(node.text))
                 if node.tag == "uri":
                     if node.text != "":
                         description_detail += "URL: " + node.text

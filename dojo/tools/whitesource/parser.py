@@ -1,9 +1,12 @@
 import hashlib
 import json
+import logging
 
 from dojo.models import Finding
 
 __author__ = 'dr3dd589'
+
+logger = logging.getLogger(__name__)
 
 
 class WhitesourceJSONParser(object):
@@ -74,7 +77,7 @@ class WhitesourceJSONParser(object):
                             topfix_node.get('fixResolution')
                         )
                 except Exception as e:
-                    print("Error handling topFix node. {}").format(e)
+                    logger.exception("Error handling topFix node.")
 
             filepaths = []
             if 'sourceFiles' in node:
@@ -83,7 +86,7 @@ class WhitesourceJSONParser(object):
                     for sfile in sourceFiles_node:
                         filepaths.append(sfile.get('localPath'))
                 except Exception as e:
-                    print("Error handling local paths for vulnerability. {}").format(e)
+                    logger.exception("Error handling local paths for vulnerability.")
 
             return {'title': title,
                      'description': description,
