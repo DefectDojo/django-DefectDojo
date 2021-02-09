@@ -8,6 +8,16 @@ __author__ = 'dr3dd589'
 
 
 class MozillaObservatoryJSONParser(object):
+
+    def get_scan_types(self):
+        return ["Mozilla Observatory Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Mozilla Observatory Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON report."
+
     def get_findings(self, file, test):
         dupes = dict()
         data = file.read()
