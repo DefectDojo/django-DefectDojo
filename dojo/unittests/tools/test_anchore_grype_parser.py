@@ -4,7 +4,7 @@ from dojo.models import Finding, Test
 from dojo.tools.anchore_grype.parser import AnchoreGrypeParser
 
 
-class TestAnchoreEngineParser(TestCase):
+class TestAnchoreGrypeParser(TestCase):
 
     def test_parser_has_no_findings(self):
         testfile = open("dojo/unittests/scans/anchore_grype/no_vuln.json")
