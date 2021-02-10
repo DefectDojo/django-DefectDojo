@@ -7,7 +7,7 @@ from dateutil import parser
 from dojo.models import Finding
 
 
-class BrakemanScanParser(object):
+class BrakemanParser(object):
 
     def get_scan_types(self):
         return ["Brakeman Scan"]
