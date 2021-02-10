@@ -65,7 +65,7 @@ def webhook(request, secret=None):
                     jira_instance = jira_helper.get_jira_instance(finding)
                     resolved = True
                     resolution = parsed['issue']['fields']['resolution']
-                    logger.debug("JIRA resolution for {} is {}".format(jissue.jira_key, resolution))
+                    logger.debug("JIRA resolution for {} is {}".format(jissue.jira_key, resolution['name']))
 
                     #         "resolution":{
                     #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
