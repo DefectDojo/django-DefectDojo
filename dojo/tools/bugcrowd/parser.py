@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from dojo.models import Endpoint, Finding
 
 
-class BugCrowdCSVParser(object):
+class BugCrowdParser(object):
 
     def get_scan_types(self):
         return ["BugCrowd Scan"]
