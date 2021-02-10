@@ -1,15 +1,15 @@
 from django.test import TestCase
-from dojo.tools.gitlab_dep_scan.parser import GitlabDepScanReportParser
+from dojo.tools.gitlab_dep_scan.parser import GitlabDepScanParser
 from dojo.models import Test
 
 
-class TestGitlabDepScanReportParser(TestCase):
+class TestGitlabDepScanParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
             "dojo/unittests/scans/gitlab_dep_scan/gl-dependency-scanning-report-0-vuln.json"
         )
-        parser = GitlabDepScanReportParser()
+        parser = GitlabDepScanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
@@ -17,7 +17,7 @@ class TestGitlabDepScanReportParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/gitlab_dep_scan/gl-dependency-scanning-report-1-vuln.json"
         )
-        parser = GitlabDepScanReportParser()
+        parser = GitlabDepScanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
@@ -25,7 +25,7 @@ class TestGitlabDepScanReportParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/gitlab_dep_scan/gl-dependency-scanning-report-2-vuln-missing-component.json"
         )
-        parser = GitlabDepScanReportParser()
+        parser = GitlabDepScanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(2, len(findings))
         finding = findings[0]
@@ -39,6 +39,6 @@ class TestGitlabDepScanReportParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/gitlab_dep_scan/gl-dependency-scanning-report-many-vuln.json"
         )
-        parser = GitlabDepScanReportParser()
+        parser = GitlabDepScanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertTrue(len(findings) > 2)
