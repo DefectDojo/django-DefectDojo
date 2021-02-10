@@ -81,6 +81,7 @@ def webhook(request, secret=None):
                     if finding.active == resolved:
                         if finding.active:
                             if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
+                                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jissue.jira_key))
                                 finding.active = False
                                 finding.mitigated = None
                                 finding.is_Mitigated = False
@@ -92,6 +93,7 @@ def webhook(request, secret=None):
                                     owner=finding.reporter,
                                 ).accepted_findings.set([finding])
                             elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
+                                logger.debug("Marking related finding of {} as false-positive".format(jissue.jira_key))
                                 finding.active = False
                                 finding.verified = False
                                 finding.mitigated = None
@@ -100,6 +102,7 @@ def webhook(request, secret=None):
                                 ra_helper.remove_from_any_risk_acceptance(finding)
                             else:
                                 # Mitigated by default as before
+                                logger.debug("Marking related finding of {} as mitigated (default)".format(jissue.jira_key))
                                 now = timezone.now()
                                 finding.active = False
                                 finding.mitigated = now
@@ -109,6 +112,7 @@ def webhook(request, secret=None):
                                 ra_helper.remove_from_any_risk_acceptance(finding)
                         else:
                             # Reopen / Open Jira issue
+                            logger.debug("Re-opening related finding of {}".format(jissue.jira_key))
                             finding.active = True
                             finding.mitigated = None
                             finding.is_Mitigated = False
