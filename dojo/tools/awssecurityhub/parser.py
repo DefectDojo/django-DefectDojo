@@ -4,7 +4,7 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class AwsSecurityFindingFormatParser(object):
+class AwsSecurityHubParser(object):
 
     def get_scan_types(self):
         return ["AWS Security Hub Scan"]
