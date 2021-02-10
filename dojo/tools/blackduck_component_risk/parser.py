@@ -3,7 +3,7 @@ from .importer import BlackduckCRImporter
 from dojo.models import Finding
 
 
-class BlackduckHubParser(object):
+class BlackduckComponentRiskParser(object):
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv
