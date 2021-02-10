@@ -4,7 +4,7 @@ from dojo.models import Finding
 from .importer import BlackduckImporter
 
 
-class BlackduckHubCSVParser(object):
+class BlackduckParser(object):
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv and files.csv
