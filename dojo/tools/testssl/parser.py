@@ -11,7 +11,7 @@ __author__ = 'dr3dd589'
 SEV = ['INFO', 'LOW', 'HIGH', 'WARN']
 
 
-class TestsslCSVParser(object):
+class TestsslParser(object):
 
     def get_scan_types(self):
         return ["Testssl Scan"]

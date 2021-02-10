@@ -9,7 +9,19 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class SonarQubeHtmlParser(object):
+class SonarQubeParser(object):
+
+    def get_scan_types(self):
+        return ["SonarQube Scan", "SonarQube Scan detailed"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        if scan_type == "SonarQube Scan":
+            return "Aggregates findings per cwe, title, description, file_path. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
+        else:
+            return "Import all findings from sonarqube html report. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
 
     def get_findings(self, filename, test, mode=None):
         parser = etree.HTMLParser()

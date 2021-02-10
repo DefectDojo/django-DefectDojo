@@ -9,7 +9,7 @@ from dojo.models import Endpoint, Finding
 __author__ = 'dr3dd589'
 
 
-class SslscanXMLParser(object):
+class SslscanParser(object):
 
     def get_scan_types(self):
         return ["Sslscan"]
