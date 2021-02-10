@@ -18,7 +18,7 @@ class AcunetixParser(object):
     """Parser for Acunetix XML files."""
 
     def get_scan_types(self):
-        return ["Acunetix Scanner"]
+        return ["Acunetix Scan"]
 
     def get_label_for_scan_types(self, scan_type):
         return "Acunetix Scanner"
