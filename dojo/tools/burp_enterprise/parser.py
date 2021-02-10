@@ -9,7 +9,16 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class BurpEnterpriseHtmlParser(object):
+class BurpEnterpriseParser(object):
+
+    def get_scan_types(self):
+        return ["Burp Enterprise Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Burp Enterprise Edition findings in HTML format"
 
     def get_findings(self, filename, test):
         parser = etree.HTMLParser()
