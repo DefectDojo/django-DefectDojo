@@ -75,7 +75,5 @@ for (path, module_name, _) in iter_modules([package_dir]):
                 attribute = getattr(module, attribute_name)
                 if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + 'parser':
                     register(attribute)
-                #if not attribute_name.startswith("_"):
-                #    print(f"{attribute_name.lower().replace('_', '')}=={module_name + 'parser'}")
         except:
             logging.exception(f"failed to load {module_name}")
