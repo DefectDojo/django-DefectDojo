@@ -102,6 +102,7 @@ def webhook(request, secret=None):
                                 finding.is_Mitigated = False
                                 finding.false_p = True
                                 ra_helper.remove_from_any_risk_acceptance(finding)
+                                finding.save(dedupe_option=False)
                             else:
                                 # Mitigated by default as before
                                 logger.debug("Marking related finding of {} as mitigated (default)".format(jissue.jira_key))
@@ -112,6 +113,7 @@ def webhook(request, secret=None):
                                 finding.endpoints.clear()
                                 finding.false_p = False
                                 ra_helper.remove_from_any_risk_acceptance(finding)
+                                finding.save(dedupe_option=False)
                         else:
                             # Reopen / Open Jira issue
                             logger.debug("Re-opening related finding of {}".format(jissue.jira_key))
@@ -120,6 +122,7 @@ def webhook(request, secret=None):
                             finding.is_Mitigated = False
                             finding.false_p = False
                             ra_helper.remove_from_any_risk_acceptance(finding)
+                            finding.save()
                     else:
                         # Reopen / Open Jira issue
                         finding.active = True
