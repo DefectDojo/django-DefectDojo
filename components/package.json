@@ -30,7 +30,7 @@
     "jquery.cookie": "1.4.1",
     "jquery.flot.tooltip": "^0.9.0",
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
-    "jszip": "^3.5.0",
+    "jszip": "^3.6.0",
     "justgage": "^1.4.0",
     "metismenu": "~3.0.6",
     "moment": "^2.29.1",
