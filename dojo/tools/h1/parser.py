@@ -13,7 +13,7 @@ class H1Parser(object):
     """
 
     def get_scan_types(self):
-        return ["ackerOne Cases"]
+        return ["HackerOne Cases"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type
