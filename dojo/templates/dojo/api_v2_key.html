@@ -17,7 +17,7 @@
         Alternatively, you can use /api/v2/api-token-auth/ to get your token. Example:
     </p>
     <pre>
-curl -X POST -H 'content-type: application/json' {% if request.is_secure %}https{% else %}http{% endif %}://{{ request.META.HTTP_HOST }}/api/v2/api-token-auth/ -d '{"username": "&lt;YOURUSERNAME&gt;", "password": "&lt;YOURPASSWROD&gt;"}'</pre>
+curl -X POST -H 'content-type: application/json' {% if request.is_secure %}https{% else %}http{% endif %}://{{ request.META.HTTP_HOST }}/api/v2/api-token-auth/ -d '{"username": "&lt;YOURUSERNAME&gt;", "password": "&lt;YOURPASSWORD&gt;"}'</pre>
     <p>
         To use your API Key you need to specify an Authorization header. Example:
     </p>
