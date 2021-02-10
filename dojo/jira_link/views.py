@@ -78,7 +78,7 @@ def webhook(request, secret=None):
 
                     if resolution is None:
                         resolved = False
-                    if finding.active == resolved:
+                    if finding.active is resolved:
                         if finding.active:
                             if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
                                 logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jissue.jira_key))
