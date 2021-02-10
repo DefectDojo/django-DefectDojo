@@ -1,17 +1,17 @@
 from django.test import TestCase
 
 from dojo.models import Test, Engagement, Product
-from dojo.tools.contrast.parser import ContrastCSVParser
+from dojo.tools.contrast.parser import ContrastParser
 
 
-class TestContrastCSVParser(TestCase):
+class TestContrastParser(TestCase):
 
     def test_example_report(self):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open("dojo/unittests/scans/contrast/contrast-node-goat.csv")
-        parser = ContrastCSVParser()
+        parser = ContrastParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(52, len(findings))
         with self.subTest(i=0):
@@ -32,7 +32,7 @@ class TestContrastCSVParser(TestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open("dojo/unittests/scans/contrast/vulnerabilities2020-09-21.csv")
-        parser = ContrastCSVParser()
+        parser = ContrastParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):

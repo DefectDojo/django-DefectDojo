@@ -208,7 +208,16 @@ if __name__ == "__main__":
         exit()
 
 
-# still need to import this in Dojo
-class QualysInfraScanParser(object):
+class QualysInfraWebguiParser(object):
+
+    def get_scan_types(self):
+        return ["Qualys Infrastructure Scan (WebGUI XML)"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Qualys WebGUI output files can be imported in XML format."
+
     def get_findings(self, file, test):
         return qualys_infrascan_parser(file)
