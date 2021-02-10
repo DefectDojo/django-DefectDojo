@@ -239,6 +239,15 @@ class DependencyCheckParser(object):
             component_name=component_name,
             component_version=component_version)
 
+    def get_scan_types(self):
+        return ["Dependency Check Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "OWASP Dependency Check output can be imported in Xml format."
+
     def get_findings(self, filename, test):
 
         if filename is None:

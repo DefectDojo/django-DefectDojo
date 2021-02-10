@@ -4,6 +4,16 @@ from dojo.models import Finding
 
 
 class AnchoreGrypeParser(object):
+
+    def get_scan_types(self):
+        return ["anchore_grype"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Anchore Grype"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "A vulnerability scanner for container images and filesystems. JSON report generated with '-f json' format"
+
     def get_findings(self, file, test):
         tree = json.load(file)
         dupes = dict()

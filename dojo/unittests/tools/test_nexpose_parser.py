@@ -1,12 +1,12 @@
 from django.test import TestCase
-from dojo.tools.nexpose.parser import NexposeFullXmlParser
+from dojo.tools.nexpose.parser import NexposeParser
 from dojo.models import Test, Engagement, Product
 
 
 class TestNexposeParser(TestCase):
     def test_nexpose_parser_has_no_finding(self):
         testfile = open("dojo/unittests/scans/nexpose/no_vuln.xml")
-        parser = NexposeFullXmlParser()
+        parser = NexposeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
@@ -15,7 +15,7 @@ class TestNexposeParser(TestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open("dojo/unittests/scans/nexpose/many_vulns.xml")
-        parser = NexposeFullXmlParser()
+        parser = NexposeParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
         self.assertEqual(10, len(findings))
