@@ -218,7 +218,7 @@ class CrashtestSecurityXmlParser(object):
         return items
 
 
-class CrashTestSecurityParser(object):
+class CrashtestSecurityParser(object):
     """SSLYze support JSON and XML"""
 
     def get_scan_types(self):
@@ -237,11 +237,9 @@ class CrashTestSecurityParser(object):
         if filename is None:
             return list()
 
-        content = filename.read()
-
         if filename.name.lower().endswith('.xml'):
-            return SSLyzeXMLParser().get_findings(filename, test)
+            return CrashtestSecurityXmlParser().get_findings(filename, test)
         elif filename.name.lower().endswith('.json'):
-            return SSLyzeJSONParser().get_findings(filename, test)
+            return CrashtestSecurityJsonParser().get_findings(filename, test)
         else:
             raise Exception('Unknown File Format')
