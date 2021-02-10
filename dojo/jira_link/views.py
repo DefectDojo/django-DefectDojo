@@ -58,6 +58,7 @@ def webhook(request, secret=None):
             if parsed.get('webhookEvent') == 'jira:issue_updated':
                 # xml examples at the end of file
                 jid = parsed['issue']['id']
+                logging.info("Received issue update for {}".format(jid))
                 jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
                 if jissue.finding:
                     finding = jissue.finding
@@ -132,7 +133,7 @@ def webhook(request, secret=None):
                     #     eng.save()
                     return HttpResponse('Update for engagement ignored')
                 else:
-                    raise Http404('No finding or engagement found for this JIRA issue')
+                    raise Http404('No finding or engagement found for JIRA issue {}'.format(jid))
 
             if parsed.get('webhookEvent') == 'comment_created':
                 """
@@ -189,6 +190,7 @@ def webhook(request, secret=None):
                 commentor_display_name = parsed['comment']['updateAuthor']['displayName']
                 # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
                 jid = parsed['comment']['self'].split('/')[-3]
+                logging.info("Received issue comment for {}".format(jid))
                 jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
                 logger.debug('jissue: %s', vars(jissue))
                 if jissue.finding:
@@ -213,7 +215,7 @@ def webhook(request, secret=None):
                 elif jissue.engagement:
                     return HttpResponse('Comment for engagement ignored')
                 else:
-                    raise Http404('No finding or engagement found for this JIRA issue')
+                    raise Http404('No finding or engagement found for JIRA issue {}'.format(jid))
 
             if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
                 logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
