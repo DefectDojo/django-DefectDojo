@@ -208,7 +208,7 @@ if __name__ == "__main__":
         exit()
 
 
-class QualysInfraWebguiParser(object):
+class QualysInfrascanWebguiParser(object):
 
     def get_scan_types(self):
         return ["Qualys Infrastructure Scan (WebGUI XML)"]

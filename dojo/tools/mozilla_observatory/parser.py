@@ -7,7 +7,7 @@ from dojo.models import Endpoint, Finding
 __author__ = 'dr3dd589'
 
 
-class MozillaObservatoryJSONParser(object):
+class MozillaObservatoryParser(object):
 
     def get_scan_types(self):
         return ["Mozilla Observatory Scan"]
