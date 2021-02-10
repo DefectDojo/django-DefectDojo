@@ -10,7 +10,17 @@ from dojo.models import Endpoint, Finding
 __author__ = 'dr3dd589'
 
 
-class OpenscapXMLParser(object):
+class OpenscapParser(object):
+
+    def get_scan_types(self):
+        return ["Openscap Vulnerability Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Openscap Vulnerability Scan in XML formats."
+
     def get_findings(self, file, test):
         tree = ET.parse(file)
         # get root of tree.
