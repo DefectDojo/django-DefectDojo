@@ -258,8 +258,7 @@
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
-                    <td>
-                        <div class="align-top">
+                    <td class="nowrap, align-top">
                             {% comment %}
                             {% if finding.duplicate %}
                                 {% include "dojo/finding_related_actions.html" with similar_finding=finding finding_context=finding intro=finding|finding_display_status|safe %}
@@ -268,7 +267,7 @@
                             {% endif %}
                             {% endcomment %}
                             {{ finding|finding_display_status|safe }}
-                        </div>
+                        &nbsp;{{ finding|import_history }}
                     </td>
                     {% if finding.risk_acceptance_set.all %}
                         <td>

@@ -17,20 +17,19 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
 # from tagulous.forms import TagWidget
 # import tagulous
 from crum import get_current_user
+from django.forms import HiddenInput
 
 logger = logging.getLogger(__name__)
 
 local_tz = pytz.timezone(get_system_setting('time_zone'))
 
-SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
-                    ('High', 'High'), ('Critical', 'Critical'))
 BOOLEAN_CHOICES = (('false', 'No'), ('true', 'Yes'),)
 EARLIEST_FINDING = None
 
@@ -352,6 +351,9 @@ class EngagementFilter(DojoFilter):
         queryset=User.objects.filter(
             engagement__lead__isnull=False).distinct(),
         label="Lead")
+    engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
+    engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
+
     name = CharFilter(lookup_expr='icontains')
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
@@ -716,6 +718,8 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
+    test_import_finding_action__test_import = NumberFilter()
+
     has_jira_issue = BooleanFilter(field_name='jira_issue',
                                 lookup_expr='isnull',
                                 exclude=True,
@@ -743,23 +747,24 @@ class OpenFindingFilter(DojoFilter):
     test__tags = ModelMultipleChoiceFilter(
         field_name='test__tags__name',
         to_field_name='name',
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
     test__engagement__tags = ModelMultipleChoiceFilter(
         field_name='test__engagement__tags__name',
         to_field_name='name',
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
     test__engagement__product__tags = ModelMultipleChoiceFilter(
         field_name='test__engagement__product__tags__name',
         to_field_name='name',
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
+
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
@@ -820,6 +825,8 @@ class OpenFindingFilter(DojoFilter):
                 product_id=self.pid
             ).all()
 
+        self.form.fields['test_import_finding_action__test_import'].widget = HiddenInput()
+
 
 class OpenFindingSuperFilter(OpenFindingFilter):
     reporter = ModelMultipleChoiceFilter(
@@ -868,6 +875,27 @@ class ClosedFindingFilter(DojoFilter):
         field_name='tags__name',
         to_field_name='name',
         queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
@@ -962,6 +990,27 @@ class AcceptedFindingFilter(DojoFilter):
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     o = OrderingFilter(
@@ -1015,10 +1064,10 @@ class AcceptedFindingFilter(DojoFilter):
 
 
 class AcceptedFindingSuperFilter(AcceptedFindingFilter):
-    test__engagement__risk_acceptance__reporter = \
+    test__engagement__risk_acceptance__owner = \
         ModelMultipleChoiceFilter(
             queryset=Dojo_User.objects.all(),
-            label="Risk Acceptance Reporter")
+            label="Risk Acceptance Owner")
 
 
 class ProductFindingFilter(DojoFilter):
@@ -1039,6 +1088,27 @@ class ProductFindingFilter(DojoFilter):
         field_name='tags__name',
         to_field_name='name',
         queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
@@ -1128,21 +1198,21 @@ class SimilarFindingFilter(DojoFilter):
     test__tags = ModelMultipleChoiceFilter(
         field_name='test__tags__name',
         to_field_name='name',
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
     test__engagement__tags = ModelMultipleChoiceFilter(
         field_name='test__engagement__tags__name',
         to_field_name='name',
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
     test__engagement__product__tags = ModelMultipleChoiceFilter(
         field_name='test__engagement__product__tags__name',
         to_field_name='name',
-        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
@@ -1219,6 +1289,27 @@ class TemplateFindingFilter(DojoFilter):
         field_name='tags__name',
         to_field_name='name',
         queryset=Finding_Template.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
@@ -1324,6 +1415,10 @@ class MetricsFindingFilter(FilterSet):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
+    test__test_type = ModelMultipleChoiceFilter(
+        queryset=Test_Type.objects.all().order_by('name'),
+        label="Test Type"
+    )
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
@@ -1335,6 +1430,27 @@ class MetricsFindingFilter(FilterSet):
         field_name='tags__name',
         to_field_name='name',
         queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
@@ -1444,6 +1560,27 @@ class ProductMetricsFindingFilter(FilterSet):
         field_name='tags__name',
         to_field_name='name',
         queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
@@ -1600,7 +1737,7 @@ class ApiTestFilter(DojoFilter):
         model = Test
         fields = ['id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
-                     'actual_time', 'engagement']
+                     'actual_time', 'engagement', 'version']
 
 
 class ApiAppAnalysisFilter(DojoFilter):
@@ -1654,6 +1791,27 @@ class ReportFindingFilter(DojoFilter):
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
     class Meta:
@@ -1669,12 +1827,15 @@ class ReportFindingFilter(DojoFilter):
         self.prod_type = None
         self.product = None
         self.engagement = None
+        self.test = None
         if 'prod_type' in kwargs:
             self.prod_type = kwargs.pop('prod_type')
         if 'product' in kwargs:
             self.product = kwargs.pop('product')
         if 'engagement' in kwargs:
             self.engagement = kwargs.pop('engagement')
+        if 'test' in kwargs:
+            self.test = kwargs.pop('test')
 
         super().__init__(*args, **kwargs)
         # duplicate_finding queryset needs to restricted in line with permissions
@@ -1685,10 +1846,18 @@ class ReportFindingFilter(DojoFilter):
                 Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
                 Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
 
+        if self.test:
+            duplicate_finding_query_set = duplicate_finding_query_set.filter(test=self.test)
+            del self.form.fields['test__tags']
+            del self.form.fields['test__engagement__tags']
+            del self.form.fields['test__engagement__product__tags']
         if self.engagement:
             duplicate_finding_query_set = duplicate_finding_query_set.filter(test__engagement=self.engagement)
+            del self.form.fields['test__engagement__tags']
+            del self.form.fields['test__engagement__product__tags']
         elif self.product:
             duplicate_finding_query_set = duplicate_finding_query_set.filter(test__engagement__product=self.product)
+            del self.form.fields['test__engagement__product__tags']
         elif self.prod_type:
             duplicate_finding_query_set = duplicate_finding_query_set.filter(test__engagement__product__prod_type=self.prod_type)
 
@@ -1717,6 +1886,27 @@ class ReportAuthedFindingFilter(DojoFilter):
         field_name='tags__name',
         to_field_name='name',
         queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
         # label='tags', # doesn't work with tagulous, need to set in __init__ below
     )
 

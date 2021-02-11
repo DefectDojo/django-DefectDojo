@@ -390,7 +390,7 @@
                                 <td>
                                   <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
                                 </td>
-                                <td>{{ finding|finding_display_status|safe }}
+                                <td class="nowrap">{{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
                                 </td>
                                 {% if system_settings.enable_jira %}
                                   {% if jira_project and product_tab or not product_tab %}

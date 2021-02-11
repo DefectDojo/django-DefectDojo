@@ -47,7 +47,7 @@ class BaseTestCase(unittest.TestCase):
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
             dd_driver_options.add_argument("--no-sandbox")
-            # dd_driver_options.add_argument("--disable-dev-shm-usage")
+            dd_driver_options.add_argument("--disable-dev-shm-usage")
             dd_driver_options.add_argument("--disable-gpu")  # on windows sometimes chrome can't start with certain gpu driver versions, even in headless mode
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow
@@ -120,6 +120,12 @@ class BaseTestCase(unittest.TestCase):
 
     def goto_component_overview(self, driver):
         driver.get(self.base_url + "components")
+        return driver
+
+    def goto_google_sheets_configuration_form(self, driver):
+        # if something is terribly wrong, it may still fail, even if system_settings is disabled.
+        # See https://github.com/DefectDojo/django-DefectDojo/issues/3742 for reference.
+        driver.get(self.base_url + "configure_google_sheets")
         return driver
 
     def goto_active_engagements_overview(self, driver):

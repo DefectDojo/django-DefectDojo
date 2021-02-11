@@ -4,19 +4,18 @@ from dojo.models import Finding
 
 
 class YarnAuditParser(object):
-    def __init__(self, json_output, test):
+    def get_findings(self, json_output, test):
 
         tree = self.parse_json(json_output)
 
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return [data for data in self.get_items(tree, test)]
         else:
-            self.items = []
+            return []
 
     def parse_json(self, json_output):
         if json_output is None:
-            self.items = []
-            return
+            return None
         try:
             data = []
             reader = jsonlines.Reader(json_output)

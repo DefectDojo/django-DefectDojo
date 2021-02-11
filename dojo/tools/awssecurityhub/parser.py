@@ -1,29 +1,13 @@
-from dojo.models import Finding
-from datetime import datetime
 import json
+from datetime import datetime
+
+from dojo.models import Finding
 
 
 class AwsSecurityFindingFormatParser:
-    def __init__(self, filehandle, test):
-        tree = self.parse_json(filehandle)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
-
-    def parse_json(self, filehandle):
-        try:
-            data = filehandle.read()
-        except:
-            return None
-
-        try:
-            tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
+    def get_findings(self, filehandle, test):
+        tree = json.load(filehandle)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = {}
