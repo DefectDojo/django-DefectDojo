@@ -61,6 +61,7 @@ def webhook(request, secret=None):
                 # xml examples at the end of file
                 jid = parsed['issue']['id']
                 jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+                logging.info("Received issue update for {}".format(jissue.jira_key))
                 if jissue.finding:
                     finding = jissue.finding
                     jira_instance = jira_helper.get_jira_instance(finding)
@@ -79,9 +80,11 @@ def webhook(request, secret=None):
 
                     if resolution is None:
                         resolved = False
-                    if finding.active == resolved:
+                        logger.debug("JIRA resolution is None, therefore resolved is now False")
+                    if finding.active is resolved:
                         if finding.active:
                             if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
+                                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jissue.jira_key))
                                 finding.active = False
                                 finding.mitigated = None
                                 finding.is_Mitigated = False
@@ -93,6 +96,7 @@ def webhook(request, secret=None):
                                     owner=finding.reporter,
                                 ).accepted_findings.set([finding])
                             elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
+                                logger.debug("Marking related finding of {} as false-positive".format(jissue.jira_key))
                                 finding.active = False
                                 finding.verified = False
                                 finding.mitigated = None
@@ -123,9 +127,9 @@ def webhook(request, secret=None):
                         finding.false_p = False
                         ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
-                        finding.jira_issue.jira_change = timezone.now()
-                        finding.jira_issue.save()
-                        finding.save()
+                    finding.jira_issue.jira_change = timezone.now()
+                    finding.jira_issue.save()
+                    finding.save()
 
                 elif jissue.engagement:
                     # if parsed['issue']['fields']['resolution'] != None:
@@ -134,7 +138,7 @@ def webhook(request, secret=None):
                     #     eng.save()
                     return HttpResponse('Update for engagement ignored')
                 else:
-                    raise Http404('No finding or engagement found for this JIRA issue')
+                    raise Http404('No finding or engagement found for JIRA issue {}'.format(jissue.jira_key))
 
             if parsed.get('webhookEvent') == 'comment_created':
                 """
@@ -192,6 +196,7 @@ def webhook(request, secret=None):
                 # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
                 jid = parsed['comment']['self'].split('/')[-3]
                 jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+                logging.info("Received issue comment for {}".format(jissue.jira_key))
                 logger.debug('jissue: %s', vars(jissue))
                 if jissue.finding:
                     # logger.debug('finding: %s', vars(jissue.finding))
@@ -215,7 +220,7 @@ def webhook(request, secret=None):
                 elif jissue.engagement:
                     return HttpResponse('Comment for engagement ignored')
                 else:
-                    raise Http404('No finding or engagement found for this JIRA issue')
+                    raise Http404('No finding or engagement found for JIRA issue {}'.format(jissue.jira_key))
 
             if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
                 logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
