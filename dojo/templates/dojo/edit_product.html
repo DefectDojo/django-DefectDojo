@@ -30,9 +30,22 @@
             {% include "dojo/form_fields.html" with form=gform %}
         {% endif %}
         {% if sonarqube_form %}
-            <h4> SonarQube API </h4>
-            <hr>
-            {% include "dojo/form_fields.html" with form=sonarqube_form %}
+         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+              <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  SonarQube API
+                </a>
+              </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+              <div class="panel-body">
+                {% include "dojo/form_fields.html" with form=sonarqube_form %}
+              </div>
+            </div>
+          </div>
+        </div>
         {% endif %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">

@@ -2,7 +2,7 @@
 {% load static %}
 {% block add_css %}
 
-    <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
+    <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}" />
 {% endblock %}
 {% block add_styles %}
     .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
@@ -26,20 +26,38 @@
             <hr>
             {% include "dojo/form_fields.html" with form=gform %}
         {% endif %}
+
         {% if sonarqube_form %}
-            <h4> SonarQube API </h4>
-            <hr>
-            {% include "dojo/form_fields.html" with form=sonarqube_form %}
-        {% endif %}
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" type="submit" value="Submit"/>
+
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne">
+              <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  SonarQube API
+                </a>
+              </h4>
             </div>
+            <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+              <div class="panel-body">
+                {% include "dojo/form_fields.html" with form=sonarqube_form %}
+              </div>
+            </div>
+          </div>
         </div>
+
+        {% endif %}
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn btn-primary" type="submit" value="Submit"/>
+                </div>
+            </div>
+
     </form>
 {% endblock %}
 {% block postscript %}
-    <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
+    <script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}" />
     <script type="application/javascript">
         $(function () {
             $("textarea").each(function (index, elem) {
