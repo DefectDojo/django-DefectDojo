@@ -8,9 +8,7 @@ import django_jsonfield_backport.models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('dojo', '0072_composite_index'),
-    ]
+    dependencies = [('dojo', '0074_notifications_close_engagement')]
 
     operations = [
         migrations.CreateModel(

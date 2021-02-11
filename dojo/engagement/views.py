@@ -168,6 +168,10 @@ def edit_engagement(request, eid):
             engagement = form.save(commit=False)
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
+                create_notification(event='close_engagement',
+                        title='Closure of %s' % engagement.name,
+                        description='The engagement "%s" was closed' % (engagement.name),
+                        engagement=engagaement, url=reverse('engagment_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
             engagement.save()
@@ -774,10 +778,10 @@ def close_eng(request, eid):
         messages.SUCCESS,
         'Engagement closed successfully.',
         extra_tags='alert-success')
-    create_notification(event='other',
+    create_notification(event='close_engagement',
                         title='Closure of %s' % eng.name,
                         description='The engagement "%s" was closed' % (eng.name),
-                        url=request.build_absolute_uri(reverse('view_engagements', args=(eng.product.id, ))),)
+                        engagement=eng, url=reverse('engagment_all_findings', args=(eng.id, ))),
     if eng.engagement_type == 'CI/CD':
         return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
     else:
@@ -796,7 +800,7 @@ def reopen_eng(request, eid):
     create_notification(event='other',
                         title='Reopening of %s' % eng.name,
                         description='The engagement "%s" was reopened' % (eng.name),
-                        url=request.build_absolute_uri(reverse('view_engagements', args=(eng.product.id, ))),)
+                        url=reverse('view_engagement', args=(eng.id, ))),
     if eng.engagement_type == 'CI/CD':
         return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
     else:

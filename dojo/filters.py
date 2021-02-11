@@ -1112,10 +1112,10 @@ class AcceptedFindingFilter(DojoFilter):
 
 
 class AcceptedFindingSuperFilter(AcceptedFindingFilter):
-    test__engagement__risk_acceptance__reporter = \
+    test__engagement__risk_acceptance__owner = \
         ModelMultipleChoiceFilter(
             queryset=Dojo_User.objects.all(),
-            label="Risk Acceptance Reporter")
+            label="Risk Acceptance Owner")
 
 
 class ProductFindingFilter(DojoFilter):
