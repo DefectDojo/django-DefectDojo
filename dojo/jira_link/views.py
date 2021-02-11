@@ -93,7 +93,6 @@ def webhook(request, secret=None):
                                     accepted_by=assignee_name,
                                     owner=finding.reporter,
                                 ).accepted_findings.set([finding])
-                                finding.save(dedupe_option=False)
                             elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
                                 logger.debug("Marking related finding of {} as false-positive".format(jissue.jira_key))
                                 finding.active = False
