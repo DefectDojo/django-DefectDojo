@@ -244,6 +244,9 @@
                             <th>Mitigated</th>
                             <th>Duplicates</th>
                             <th>Notes</th>
+                            {% if 'TRACK_IMPORT_HISTORY'|setting_enabled %}
+                                <th>Reimports</th>
+                            {% endif %}
                         </tr>
                         </thead>
                         <tbody>
@@ -324,6 +327,11 @@
                                     </a>
                                   {% endif %}
                                 </td>
+                                {% if 'TRACK_IMPORT_HISTORY'|setting_enabled %}
+                                    <td>
+                                        {{ test.total_reimport_count }}
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>

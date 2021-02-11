@@ -1345,12 +1345,12 @@ class TestDuplicationLogic(TestCase):
         if not_pk:
             self.assertNotEqual(finding.pk, not_pk)
 
-        logger.debug('asserting that finding %i is a duplicate of %i', finding.id, duplicate_finding_id)
         self.assertEqual(finding.duplicate, duplicate)
         if not duplicate:
             self.assertFalse(finding.duplicate_finding)  # False -> None
 
         if duplicate_finding_id:
+            logger.debug('asserting that finding %i is a duplicate of %i', finding.id, duplicate_finding_id)
             self.assertTrue(finding.duplicate_finding)  # True -> not None
             self.assertEqual(finding.duplicate_finding.id, duplicate_finding_id)
 
