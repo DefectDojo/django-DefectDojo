@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dojo', '0074_notifications_close_engagement'),
+        ('dojo', '0075_import_history'),
     ]
 
     operations = [

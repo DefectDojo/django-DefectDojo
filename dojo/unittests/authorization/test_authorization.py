@@ -87,7 +87,7 @@ class TestAuthorization(TestCase):
 
     def test_user_has_permission_exception(self):
         with self.assertRaisesMessage(NoAuthorizationImplementedError,
-                'No authorization implemented for class Product_Type_Member and permission 1006'):
+                'No authorization implemented for class Product_Type_Member and permission 1007'):
             user_has_permission(self.user, self.product_type_member, Permissions.Product_Type_Delete)
 
     def test_user_has_permission_product_type_no_member(self):
