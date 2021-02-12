@@ -34,15 +34,17 @@ class Permissions(IntEnum):
     Product_Type_View = 1002
     Product_Type_Remove_Member = 1003
     Product_Type_Manage_Members = 1004
-    Product_Type_Edit = 1005
-    Product_Type_Delete = 1006
+    Product_Type_Member_Add_Owner = 1005
+    Product_Type_Edit = 1006
+    Product_Type_Delete = 1007
 
     Product_View = 1102
     Product_Remove_Member = 1103
     Product_Manage_Members = 1104
-    Product_Configure_Notifications = 1105
-    Product_Edit = 1106
-    Product_Delete = 1107
+    Product_Member_Add_Owner = 1005
+    Product_Configure_Notifications = 1106
+    Product_Edit = 1107
+    Product_Delete = 1108
 
     Engagement_View = 1202
     Engagement_Add = 1203
@@ -181,12 +183,14 @@ def get_roles_with_permissions():
             Permissions.Product_Type_View,
             Permissions.Product_Type_Remove_Member,
             Permissions.Product_Type_Manage_Members,
+            Permissions.Product_Type_Member_Add_Owner,
             Permissions.Product_Type_Edit,
             Permissions.Product_Type_Delete,
 
             Permissions.Product_View,
             Permissions.Product_Remove_Member,
             Permissions.Product_Manage_Members,
+            Permissions.Product_Member_Add_Owner,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
             Permissions.Product_Delete,

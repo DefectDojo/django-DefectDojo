@@ -16,6 +16,7 @@ from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.conf import settings
+from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_members
@@ -176,17 +177,15 @@ def add_product_type_member(request, ptid):
         memberform = Add_Product_Type_MemberForm(request.POST, initial={'product_type': pt.id})
         if memberform.is_valid():
             members = Product_Type_Member.objects.filter(product_type=pt, user=memberform.instance.user)
-            if not request.user.is_superuser:
-                own_member = Product_Type_Member.objects.get(user=request.user, product_type=ptid)
             if members.count() > 0:
                 messages.add_message(request,
                                     messages.WARNING,
                                     'Product type member already exists.',
                                     extra_tags='alert-warning')
-            elif not request.user.is_superuser and memberform.instance.role > own_member.role:
+            elif memberform.instance.role == Roles.Owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
-                                    'Role of new member is higher than your own role.',
+                                    'You are not permitted to add users as owners.',
                                     extra_tags='alert-warning')
             else:
                 memberform.save()
@@ -217,13 +216,10 @@ def edit_product_type_member(request, memberid):
                                         'There must be at least one owner.',
                                         extra_tags='alert-warning')
                     return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
-
-            if not request.user.is_superuser:
-                own_member = Product_Type_Member.objects.get(user=request.user, product_type=member.product_type.id)
-            if not request.user.is_superuser and memberform.instance.role > own_member.role:
+            if member.role == Roles.Owner and not user_has_permission(request.user, member.product_type, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
-                                    'Role of member is higher than your own role.',
+                                    'You are not permitted to make users to owners.',
                                     extra_tags='alert-warning')
             else:
                 memberform.save()

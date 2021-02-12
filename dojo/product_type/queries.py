@@ -30,6 +30,6 @@ def get_authorized_members(product_type, permission):
     user = get_current_user()
 
     if user.is_superuser or user_has_permission(user, product_type, permission):
-        return Product_Type_Member.objects.filter(product_type=product_type).order_by('-role', 'user__first_name', 'user__last_name')
+        return Product_Type_Member.objects.filter(product_type=product_type).order_by('user__first_name', 'user__last_name')
     else:
         return None
