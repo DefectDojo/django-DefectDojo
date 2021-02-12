@@ -15,6 +15,7 @@ function Login() {
             <div className="form-group">
               <label for="email">Email</label>
               <input
+                label="email"
                 type="email"
                 className="form-control"
                 placeholder="Enter email"
@@ -25,6 +26,7 @@ function Login() {
             <div className="form-group">
               <label for="password">Password</label>
               <input
+                label="password"
                 type="password"
                 className="form-control"
                 placeholder="Enter password"
@@ -35,6 +37,7 @@ function Login() {
             <div className="form-group">
               <div className="custom-control custom-checkbox">
                 <input
+                  label="checkbox"
                   type="checkbox"
                   className="custom-control-input"
                   id="customCheck1"

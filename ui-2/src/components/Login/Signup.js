@@ -16,6 +16,7 @@ function SignUp() {
                 type="text"
                 className="form-control"
                 placeholder="First name"
+                label="firstname"
                 name="firstname"
               />
             </div>
@@ -27,6 +28,7 @@ function SignUp() {
                 className="form-control"
                 placeholder="Last name"
                 name="lastname"
+                label="lastname"
               />
             </div>
 
@@ -37,6 +39,7 @@ function SignUp() {
                 className="form-control"
                 placeholder="Enter email"
                 name="email"
+                label="email"
               />
             </div>
 
@@ -47,6 +50,7 @@ function SignUp() {
                 className="form-control"
                 placeholder="Enter password"
                 name="password"
+                label="password"
               />
             </div>
 
