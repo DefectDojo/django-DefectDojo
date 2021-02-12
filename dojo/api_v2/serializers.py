@@ -6,9 +6,11 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
-    System_Settings, FileUpload, Product_Type_Member
+    System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
+    Test_Import_Finding_Action, IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING, \
+    IMPORT_REACTIVATED_FINDING, Product_Type_Member
 
-from dojo.forms import ImportScanForm, SEVERITY_CHOICES
+from dojo.forms import ImportScanForm
 from dojo.tools.factory import import_parser_factory, requires_file
 from dojo.utils import max_safe, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
@@ -698,6 +700,21 @@ class TestToFilesSerializer(serializers.Serializer):
     files = FileSerializer(many=True)
 
 
+class TestImportFindingActionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test_Import_Finding_Action
+        fields = '__all__'
+
+
+class TestImportSerializer(serializers.ModelSerializer):
+    # findings = TestImportFindingActionSerializer(source='test_import_finding_action', many=True, read_only=True)
+    test_import_finding_action_set = TestImportFindingActionSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Test_Import
+        fields = '__all__'
+
+
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Risk_Acceptance
@@ -884,7 +901,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         return super().build_relational_field(field_name, relation_info)
 
     def get_request_response(self, obj):
-        burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
+        # burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
+        burp_req_resp = obj.burprawrequestresponse_set.all()
         burp_list = []
         for burp in burp_req_resp:
             request = burp.get_request()
@@ -1063,6 +1081,7 @@ class ImportScanSerializer(serializers.Serializer):
     close_old_findings = serializers.BooleanField(required=False, default=False)
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
+    version = serializers.CharField(required=False)
 
     # class Meta:
     #     model = Test
@@ -1074,6 +1093,7 @@ class ImportScanSerializer(serializers.Serializer):
         close_old_findings = data['close_old_findings']
         active = data['active']
         verified = data['verified']
+        min_sev = data['minimum_severity']
         test_type, created = Test_Type.objects.get_or_create(
             name=data.get('test_type', data['scan_type']))
         endpoint_to_add = data['endpoint_to_add']
@@ -1082,13 +1102,17 @@ class ImportScanSerializer(serializers.Serializer):
         if settings.USE_TZ:
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
-        version = ''
-        if 'version' in data:
-            version = data['version']
         # Will save in the provided environment or in the `Development` one if absent
         environment_name = data.get('environment', 'Development')
-        environment = Development_Environment.objects.get(name=environment_name)
+        version = data.get('version', None)
 
+        environment = Development_Environment.objects.get(name=environment_name)
+        tags = None
+        if 'tags' in data:
+            logger.debug('import scan tags: %s', data['tags'])
+            tags = data['tags']
+
+        print(tags)
         test = Test(
             engagement=data['engagement'],
             lead=data['lead'],
@@ -1097,15 +1121,12 @@ class ImportScanSerializer(serializers.Serializer):
             target_end=data['scan_date'],
             environment=environment,
             percent_complete=100,
-            version=version)
+            version=version,
+            tags=tags)
         try:
             test.full_clean()
         except ValidationError:
             pass
-
-        if 'tags' in data:
-            logger.debug('import scan tags: %s', data['tags'])
-            test.tags = data['tags']
 
         test.save()
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
@@ -1261,6 +1282,31 @@ class ImportScanSerializer(serializers.Serializer):
                 old_finding.tags.add('stale')
                 old_finding.save(dedupe_option=False)
 
+        if settings.TRACK_IMPORT_HISTORY:
+            import_settings = {}  # json field
+            import_settings['active'] = active
+            import_settings['verified'] = verified
+            import_settings['minimum_severity'] = min_sev
+            import_settings['close_old_findings'] = close_old_findings
+            import_settings['push_to_jira'] = push_to_jira
+            import_settings['version'] = version
+            import_settings['tags'] = tags
+            if endpoint_to_add:
+                import_settings['endpoint'] = endpoint_to_add
+
+            test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.IMPORT_TYPE)
+            test_import.save()
+
+            test_import_finding_action_list = []
+            for finding in old_findings:
+                logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
+            for finding in new_findings:
+                logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
+
+            Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
+
         logger.debug('done importing findings')
 
         title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
@@ -1313,6 +1359,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     # mentain the old API behavior after reintroducing the close_old_findings parameter
     # also for ReImport.
     close_old_findings = serializers.BooleanField(required=False, default=True)
+    version = serializers.CharField(required=False)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1327,9 +1374,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
         verified = data['verified']
         active = data['active']
-        version = None
-        if 'version' in data:
-            version = data['version']
+        version = data.get('version', None)
 
         try:
             parser = import_parser_factory(data.get('file', None),
@@ -1564,6 +1609,34 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 test.version = version
             test.save()
             test.engagement.save()
+
+            if settings.TRACK_IMPORT_HISTORY:
+                import_settings = {}  # json field
+                import_settings['active'] = active
+                import_settings['verified'] = verified
+                import_settings['minimum_severity'] = min_sev
+                import_settings['close_old_findings'] = close_old_findings
+                import_settings['push_to_jira'] = push_to_jira
+                import_settings['version'] = version
+                # tags=tags TODO no tags field in api for reimport it seems
+                if endpoint_to_add:
+                    import_settings['endpoint'] = endpoint_to_add
+
+                test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.REIMPORT_TYPE)
+                test_import.save()
+
+                test_import_finding_action_list = []
+                for finding in mitigated_findings:
+                    logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                    test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
+                for finding in new_items:
+                    logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                    test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
+                for finding in reactivated_items:
+                    logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
+                    test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING))
+
+                Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
 
             updated_count = mitigated_count + reactivated_count + len(new_items)
             if updated_count > 0:

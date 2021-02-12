@@ -244,6 +244,9 @@
                             <th>Mitigated</th>
                             <th>Duplicates</th>
                             <th>Notes</th>
+                            {% if 'TRACK_IMPORT_HISTORY'|setting_enabled %}
+                                <th>Reimports</th>
+                            {% endif %}
                         </tr>
                         </thead>
                         <tbody>
@@ -267,7 +270,7 @@
                                 <td>
                                   <ul>
                                    <li class="dropdown" style="list-style:none;position:absolute">
-                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                         <a href="#" id='test-menu' class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                          <ul class="dropdown-menu">
                                             <li>
                                              <a class="" href="{% url 'view_test' test.id %}">
@@ -324,6 +327,11 @@
                                     </a>
                                   {% endif %}
                                 </td>
+                                {% if 'TRACK_IMPORT_HISTORY'|setting_enabled %}
+                                    <td>
+                                        {{ test.total_reimport_count }}
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>
