@@ -1553,7 +1553,7 @@ class Finding(models.Model):
                                                    on_delete=models.CASCADE,
                                                    verbose_name="Defect Review Requested By",
                                                    help_text="Documents who requested a defect review for this flaw.")
-    is_Mitigated = models.BooleanField(default=False,
+    is_mitigated = models.BooleanField(default=False,
                                        verbose_name="Is Mitigated",
                                        help_text="Denotes if this flaw has been fixed.")
     thread_id = models.IntegerField(default=0,
@@ -1728,7 +1728,7 @@ class Finding(models.Model):
         indexes = [
             models.Index(fields=['test', 'active', 'verified']),
 
-            models.Index(fields=['test', 'is_Mitigated']),
+            models.Index(fields=['test', 'is_mitigated']),
             models.Index(fields=['test', 'duplicate']),
             models.Index(fields=['test', 'out_of_scope']),
             models.Index(fields=['test', 'false_p']),
@@ -1754,7 +1754,7 @@ class Finding(models.Model):
             models.Index(fields=['line']),
             models.Index(fields=['component_name']),
             models.Index(fields=['duplicate']),
-            models.Index(fields=['is_Mitigated']),
+            models.Index(fields=['is_mitigated']),
         ]
 
     def get_absolute_url(self):
@@ -1930,7 +1930,7 @@ class Finding(models.Model):
             status += ['Inactive']
         if self.verified:
             status += ['Verified']
-        if self.mitigated or self.is_Mitigated:
+        if self.mitigated or self.is_mitigated:
             status += ['Mitigated']
         if self.false_p:
             status += ['False Positive']

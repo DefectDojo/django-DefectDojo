@@ -776,11 +776,11 @@ def re_import_scan_results(request, tid):
 
                     if findings:
                         finding = findings[0]
-                        if finding.mitigated or finding.is_Mitigated:
+                        if finding.mitigated or finding.is_mitigated:
                             logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                             # it was once fixed, but now back
                             finding.mitigated = None
-                            finding.is_Mitigated = False
+                            finding.is_mitigated = False
                             finding.mitigated_by = None
                             finding.active = True
                             finding.verified = verified
@@ -915,10 +915,10 @@ def re_import_scan_results(request, tid):
                 if close_old_findings:
                     for finding in to_mitigate:
                         # finding = Finding.objects.get(id=finding_id)
-                        if not finding.mitigated or not finding.is_Mitigated:
+                        if not finding.mitigated or not finding.is_mitigated:
                             logger.debug('mitigating finding: %i:%s', finding.id, finding)
                             finding.mitigated = scan_date_time
-                            finding.is_Mitigated = True
+                            finding.is_mitigated = True
                             finding.mitigated_by = request.user
                             finding.active = False
 

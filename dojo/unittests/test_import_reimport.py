@@ -478,7 +478,7 @@ class ImportReimportMixin(object):
         not_mitigated = 0
         for finding in findings['results']:
             logger.debug(finding)
-            if finding['is_Mitigated']:
+            if finding['is_mitigated']:
                 mitigated += 1
             else:
                 not_mitigated += 1

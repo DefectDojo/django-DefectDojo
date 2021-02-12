@@ -316,19 +316,19 @@ def finding_querys(request, prod):
                                          duplicate=False,
                                          out_of_scope=False,
                                          active=True,
-                                         is_Mitigated=False)
+                                         is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
-                                             is_Mitigated=False)
+                                             is_mitigated=False)
     filters['closed'] = findings_qs.filter(date__range=[start_date, end_date],
                                            false_p=False,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=False,
-                                           is_Mitigated=True)
+                                           is_mitigated=True)
     filters['false_positive'] = findings_qs.filter(date__range=[start_date, end_date],
                                                    false_p=True,
                                                    duplicate=False,
@@ -669,7 +669,7 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
+        prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_mitigated=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
         ACCEPTED_FINDINGS_QUERY = Q(test__finding__risk_accepted=True)
         prefetched_engs = prefetched_engs.annotate(count_findings_accepted=Count('test__finding__id', filter=ACCEPTED_FINDINGS_QUERY))

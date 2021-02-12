@@ -936,8 +936,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
         push_to_jira = push_to_jira or jira_helper.is_push_all_issues(new_finding)
 
-        # Allow setting the mitigation date based upon the state of is_Mitigated.
-        if new_finding.is_Mitigated:
+        # Allow setting the mitigation date based upon the state of is_mitigated.
+        if new_finding.is_mitigated:
             new_finding.mitigated = datetime.datetime.now()
             new_finding.mitigated_by = self.context['request'].user
             if settings.USE_TZ:
@@ -945,7 +945,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         # If we need to push to JIRA, an extra save call is needed.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
-        if push_to_jira or new_finding.is_Mitigated:
+        if push_to_jira or new_finding.is_mitigated:
             new_finding.save(push_to_jira=push_to_jira)
 
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
@@ -1438,10 +1438,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if findings:
                     # existing finding found
                     finding = findings[0]
-                    if finding.mitigated or finding.is_Mitigated:
+                    if finding.mitigated or finding.is_mitigated:
                         logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                         finding.mitigated = None
-                        finding.is_Mitigated = False
+                        finding.is_mitigated = False
                         finding.mitigated_by = None
                         finding.active = True
                         finding.verified = verified
@@ -1557,10 +1557,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             mitigated_findings = []
             if close_old_findings:
                 for finding in to_mitigate:
-                    if not finding.mitigated or not finding.is_Mitigated:
+                    if not finding.mitigated or not finding.is_mitigated:
                         logger.debug('mitigating finding: %i:%s', finding.id, finding)
                         finding.mitigated = scan_date_time
-                        finding.is_Mitigated = True
+                        finding.is_mitigated = True
                         finding.mitigated_by = self.context['request'].user
                         finding.active = False
 

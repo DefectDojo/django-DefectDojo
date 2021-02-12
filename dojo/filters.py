@@ -603,7 +603,7 @@ class ApiFindingFilter(DojoFilter):
     duplicate = BooleanFilter(field_name='duplicate')
     dynamic_finding = BooleanFilter(field_name='dynamic_finding')
     false_p = BooleanFilter(field_name='false_p')
-    is_Mitigated = BooleanFilter(field_name='is_Mitigated')
+    is_mitigated = BooleanFilter(field_name='is_mitigated')
     out_of_scope = BooleanFilter(field_name='out_of_scope')
     static_finding = BooleanFilter(field_name='static_finding')
     under_defect_review = BooleanFilter(field_name='under_defect_review')
@@ -676,7 +676,7 @@ class ApiFindingFilter(DojoFilter):
             ('false_p', 'false_p'),
             ('found_by', 'found_by'),
             ('id', 'id'),
-            ('is_Mitigated', 'is_Mitigated'),
+            ('is_mitigated', 'is_mitigated'),
             ('numerical_severity', 'numerical_severity'),
             ('out_of_scope', 'out_of_scope'),
             ('severity', 'severity'),

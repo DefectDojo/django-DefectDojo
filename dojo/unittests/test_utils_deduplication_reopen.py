@@ -13,7 +13,7 @@ class TestDuplicationReopen(TestCase):
         self.finding_a.pk = None
         self.finding_a.duplicate = False
         self.finding_a.mitigated = datetime.date(1970, 1, 1)
-        self.finding_a.is_Mitigated = True
+        self.finding_a.is_mitigated = True
         self.finding_a.false_p = True
         self.finding_a.duplicate_finding = None
         self.finding_a.save()
@@ -66,12 +66,12 @@ class TestDuplicationReopen(TestCase):
         self.finding_b = Finding.objects.get(id=self.finding_b.id)
 
         self.assertTrue(self.finding_a.false_p)
-        self.assertTrue(self.finding_a.is_Mitigated)
+        self.assertTrue(self.finding_a.is_mitigated)
         self.assertFalse(self.finding_a.active)
         self.assertFalse(self.finding_a.verified)
 
         self.assertFalse(self.finding_b.false_p)
-        self.assertFalse(self.finding_b.is_Mitigated)
+        self.assertFalse(self.finding_b.is_mitigated)
         self.assertFalse(self.finding_b.active)
         self.assertFalse(self.finding_b.verified)
 
@@ -95,11 +95,11 @@ class TestDuplicationReopen(TestCase):
         self.finding_d = Finding.objects.get(id=self.finding_d.id)
 
         self.assertTrue(self.finding_c.out_of_scope)
-        self.assertFalse(self.finding_c.is_Mitigated)
+        self.assertFalse(self.finding_c.is_mitigated)
         self.assertFalse(self.finding_c.active)
         self.assertFalse(self.finding_c.verified)
 
         self.assertFalse(self.finding_d.out_of_scope)
-        self.assertFalse(self.finding_d.is_Mitigated)
+        self.assertFalse(self.finding_d.is_mitigated)
         self.assertFalse(self.finding_d.active)
         self.assertFalse(self.finding_d.verified)

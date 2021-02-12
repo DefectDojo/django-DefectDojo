@@ -139,7 +139,7 @@ class VeracodeXMLParser(object):
                 _mitigated_date = datetime.strptime(raw_mitigated_date, '%Y-%m-%d %H:%M:%S %Z')
             else:
                 _mitigated_date = None
-        finding.is_Mitigated = _is_mitigated
+        finding.is_mitigated = _is_mitigated
         finding.mitigated = _mitigated_date
         finding.active = not _is_mitigated
 

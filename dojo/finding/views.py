@@ -56,11 +56,11 @@ OPEN_FINDINGS_QUERY = Q(active=True)
 VERIFIED_FINDINGS_QUERY = Q(verified=True)
 OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
 FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
-INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False)
+INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_mitigated=False, false_p=False, out_of_scope=False)
 ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
 NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
-CLOSED_FINDINGS_QUERY = Q(is_Mitigated=True)
+CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 
 
 def open_findings_filter(request, queryset, user, pid):
@@ -417,7 +417,7 @@ def close_finding(request, fid):
                 now = timezone.now()
                 finding.mitigated = now
                 finding.mitigated_by = request.user
-                finding.is_Mitigated = True
+                finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 endpoint_status = finding.endpoint_status.all()
@@ -488,7 +488,7 @@ def defect_finding_review(request, fid):
                 finding.active = False
                 finding.mitigated = now
                 finding.mitigated_by = request.user
-                finding.is_Mitigated = True
+                finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
@@ -549,7 +549,7 @@ def reopen_finding(request, fid):
     finding.active = True
     finding.mitigated = None
     finding.mitigated_by = request.user
-    finding.is_Mitigated = False
+    finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     endpoint_status = finding.endpoint_status.all()
@@ -904,7 +904,7 @@ def request_finding_review(request, fid):
             finding.notes.add(new_note)
             finding.active = False
             finding.verified = False
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             finding.under_review = True
             finding.review_requested_by = user
             finding.last_reviewed = now
@@ -1841,7 +1841,7 @@ def finding_bulk_update_all(request, pid=None):
                                  verified=form.cleaned_data['verified'],
                                  false_p=form.cleaned_data['false_p'],
                                  out_of_scope=form.cleaned_data['out_of_scope'],
-                                 is_Mitigated=form.cleaned_data['is_Mitigated'],
+                                 is_mitigated=form.cleaned_data['is_mitigated'],
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
 
@@ -1894,7 +1894,7 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
-                    if finding.is_Mitigated:
+                    if finding.is_mitigated:
                         finding.mitigated = timezone.now()
                         finding.save()
 

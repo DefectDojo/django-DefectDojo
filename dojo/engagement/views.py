@@ -273,7 +273,7 @@ def view_engagement(request, eid):
         .annotate(count_findings_test_all=Count('finding__id', distinct=True))
         .annotate(count_findings_test_active=Count('finding__id', filter=Q(finding__active=True), distinct=True))
         .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
-        .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True), distinct=True))
+        .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_mitigated=True), distinct=True))
         .annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True))
         .annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
         .order_by('test_type__name', '-updated')

@@ -223,7 +223,7 @@ def issue_r(raw_row, vuln):
                               vuln_id_from_tool=_gid,
                               )
         finding.mitigated = _temp['mitigation_date']
-        finding.is_Mitigated = _temp['mitigated']
+        finding.is_mitigated = _temp['mitigated']
         finding.active = _temp['active']
         finding.verified = True
         finding.unsaved_endpoints = list()

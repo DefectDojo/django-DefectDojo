@@ -85,7 +85,7 @@ def webhook(request, secret=None):
                                 logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jissue.jira_key))
                                 finding.active = False
                                 finding.mitigated = None
-                                finding.is_Mitigated = False
+                                finding.is_mitigated = False
                                 finding.false_p = False
                                 assignee = parsed['issue']['fields'].get('assignee')
                                 assignee_name = assignee['name'] if assignee else None
@@ -98,7 +98,7 @@ def webhook(request, secret=None):
                                 finding.active = False
                                 finding.verified = False
                                 finding.mitigated = None
-                                finding.is_Mitigated = False
+                                finding.is_mitigated = False
                                 finding.false_p = True
                                 ra_helper.remove_from_any_risk_acceptance(finding)
                             else:
@@ -107,7 +107,7 @@ def webhook(request, secret=None):
                                 now = timezone.now()
                                 finding.active = False
                                 finding.mitigated = now
-                                finding.is_Mitigated = True
+                                finding.is_mitigated = True
                                 finding.endpoints.clear()
                                 finding.false_p = False
                                 ra_helper.remove_from_any_risk_acceptance(finding)
@@ -116,14 +116,14 @@ def webhook(request, secret=None):
                             logger.debug("Re-opening related finding of {}".format(jissue.jira_key))
                             finding.active = True
                             finding.mitigated = None
-                            finding.is_Mitigated = False
+                            finding.is_mitigated = False
                             finding.false_p = False
                             ra_helper.remove_from_any_risk_acceptance(finding)
                     else:
                         # Reopen / Open Jira issue
                         finding.active = True
                         finding.mitigated = None
-                        finding.is_Mitigated = False
+                        finding.is_mitigated = False
                         finding.false_p = False
                         ra_helper.remove_from_any_risk_acceptance(finding)
 
