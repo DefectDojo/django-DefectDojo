@@ -167,6 +167,8 @@ env = environ.Env(
     DD_LEGACY_API_V1_ENABLE=(bool, False),
     # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
+    # new experimental feature that tracks history across multiple reimports for the same test
+    DD_TRACK_IMPORT_HISTORY=(bool, False)
 )
 
 
@@ -638,6 +640,7 @@ INSTALLED_APPS = (
     'social_django',
     'drf_yasg2',
     'tagulous',
+    'django_jsonfield_backport',
 )
 
 # ------------------------------------------------------------------------------
@@ -768,7 +771,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component', 'vuln_id_from_tool'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'vuln_id_from_tool'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe', 'endpoints'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
@@ -860,6 +863,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
+
+TRACK_IMPORT_HISTORY = env('DD_TRACK_IMPORT_HISTORY')
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -968,6 +973,9 @@ LOGGING = {
     }
 }
 
+# override filter to ensure sensitive variables are also hidden when DEBUG = True
+DEFAULT_EXCEPTION_REPORTER_FILTER = 'dojo.settings.exception_filter.CustomExceptionReporterFilter'
+
 # As we require `innodb_large_prefix = ON` for MySQL, we can silence the
 # warning about large varchar with unique indices.
 SILENCED_SYSTEM_CHECKS = ['mysql.E001']
@@ -1001,3 +1009,5 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
+
+USE_L10N = True

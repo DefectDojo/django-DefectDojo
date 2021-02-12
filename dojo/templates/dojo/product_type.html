@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load display_tags %}
+
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -46,8 +48,8 @@
                             <th>{% dojo_sort request 'Product Type' 'name' 'asc' %}</th>
                             <th>Product count</th>
                             <th>Active (Verified) findings</th>
-                            <th>Critical product</th>
-                            <th>Key product</th>
+                            <th class="text-center">Critical product</th>
+                            <th class="text-center">Key product</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -98,8 +100,20 @@
                                     <a href="{% url 'open_findings' %}?test__engagement__product__prod_type={{ pt.id }}"><b>{{ pt.active_findings_count }}</b></a>
                                     &nbsp;(<a href="{% url 'verified_findings' %}?test__engagement__product__prod_type={{ pt.id }}">{{ pt.active_verified_findings_count }}</a>)
                                 </td>
-                                <td>{{ pt.critical_product }}</td>
-                                <td>{{ pt.key_product }}</td>
+                                <td class="text-center">
+                                    {% if pt.critical_product %}
+                                        <i class="text-success fa fa-check"></i>
+                                    {% else %}
+                                        <i class="text-danger fa fa-times"></i>
+                                    {% endif %}
+								</td>
+                                    <td class="text-center">
+                                    {% if pt.key_product %}
+                                        <i class="text-success fa fa-check"></i>
+                                    {% else %}
+                                        <i class="text-danger fa fa-times"></i>
+                                    {% endif %}
+								</td>
                             </tr>
                         {% endfor %}
                         </tbody>

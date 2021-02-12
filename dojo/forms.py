@@ -27,7 +27,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation, FileUpload
+    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -45,9 +45,6 @@ FINDING_STATUS = (('verified', 'Verified'),
                   ('false_p', 'False Positive'),
                   ('duplicate', 'Duplicate'),
                   ('out_of_scope', 'Out of Scope'))
-
-SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
-                    ('High', 'High'), ('Critical', 'Critical'))
 
 
 class SelectWithPop(forms.Select):
@@ -1967,6 +1964,7 @@ class ProductNotificationsForm(forms.ModelForm):
         super(ProductNotificationsForm, self).__init__(*args, **kwargs)
         if not self.instance.id:
             self.initial['engagement_added'] = ''
+            self.initial['close_engagement'] = ''
             self.initial['test_added'] = ''
             self.initial['scan_added'] = ''
             self.initial['sla_breach'] = ''
@@ -1974,7 +1972,7 @@ class ProductNotificationsForm(forms.ModelForm):
 
     class Meta:
         model = Notifications
-        fields = ['engagement_added', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiration']
+        fields = ['engagement_added', 'close_engagement', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiration']
 
 
 class AjaxChoiceField(forms.ChoiceField):

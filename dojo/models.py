@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q, Count
 from django_extensions.db.models import TimeStampedModel
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
@@ -28,9 +29,25 @@ from django.utils.translation import gettext as _
 from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
+from django_jsonfield_backport.models import JSONField
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
+                    ('High', 'High'), ('Critical', 'Critical'))
+
+IMPORT_CREATED_FINDING = 'N'
+IMPORT_CLOSED_FINDING = 'C'
+IMPORT_REACTIVATED_FINDING = 'R'
+IMPORT_UPDATED_FINDING = 'U'
+
+IMPORT_ACTIONS = [
+    (IMPORT_CREATED_FINDING, 'created'),
+    (IMPORT_CLOSED_FINDING, 'closed'),
+    (IMPORT_REACTIVATED_FINDING, 'reactivated'),
+    (IMPORT_UPDATED_FINDING, 'updated'),
+]
 
 
 @deconstructible
@@ -263,8 +280,8 @@ class System_Settings(models.Model):
         verbose_name="Allow Anonymous Survey Responses",
         help_text="Enable anyone with a link to the survey to answer a survey"
     )
-    credentials = models.CharField(max_length=3000, blank=True)
-    column_widths = models.CharField(max_length=1500, blank=True)
+    credentials = models.TextField(max_length=3000, blank=True)
+    column_widths = models.TextField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)
     email_address = models.EmailField(max_length=100, blank=True)
@@ -1041,6 +1058,10 @@ class Engagement(models.Model):
         from django.urls import reverse
         return reverse('view_engagement', args=[str(self.id)])
 
+    @property
+    def is_ci_cd(self):
+        return self.engagement_type == "CI/CD"
+
 
 class CWE(models.Model):
     url = models.CharField(max_length=1000)
@@ -1313,6 +1334,49 @@ class Test(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_test', args=[str(self.id)])
+
+
+class Test_Import(TimeStampedModel):
+
+    IMPORT_TYPE = 'import'
+    REIMPORT_TYPE = 'reimport'
+
+    test = models.ForeignKey(Test, editable=False, null=False, blank=False, on_delete=models.CASCADE)
+    findings_affected = models.ManyToManyField('Finding', through='Test_Import_Finding_Action')
+    import_settings = JSONField(null=True)
+    version = models.CharField(max_length=100, null=True, blank=True)
+    type = models.CharField(max_length=64, null=False, blank=False, default='unknown')
+
+    def get_queryset(self):
+        logger.debug('prefetch test_import counts')
+        super_query = super().get_queryset()
+        super_query = super_query.annotate(created_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CREATED_FINDING)))
+        super_query = super_query.annotate(closed_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_CLOSED_FINDING)))
+        super_query = super_query.annotate(reactivated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_REACTIVATED_FINDING)))
+        super_query = super_query.annotate(updated_findings_count=Count('findings', filter=Q(test_import_finding_action__action=IMPORT_UPDATED_FINDING)))
+        return super_query
+
+    class Meta:
+        ordering = ('-id',)
+        indexes = [
+            models.Index(fields=['created', 'test', 'type']),
+        ]
+
+    def __str__(self):
+        return self.created.strftime("%Y-%m-%d %H:%M:%S")
+
+
+class Test_Import_Finding_Action(TimeStampedModel):
+    test_import = models.ForeignKey(Test_Import, editable=False, null=False, blank=False, on_delete=models.CASCADE)
+    finding = models.ForeignKey('Finding', editable=False, null=False, blank=False, on_delete=models.CASCADE)
+    action = models.CharField(max_length=100, null=True, blank=True, choices=IMPORT_ACTIONS)
+
+    class Meta:
+        unique_together = (('test_import', 'finding'))
+        ordering = ('test_import', 'action', 'finding')
+
+    def __str__(self):
+        return '%i: %s' % (self.finding.id, self.action)
 
 
 class VA(models.Model):
@@ -2669,6 +2733,7 @@ class Notifications(models.Model):
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
+    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -2715,6 +2780,7 @@ class Notifications(models.Model):
                 result.upcoming_engagement = merge_sets_safe(result.upcoming_engagement, notifications.upcoming_engagement)
                 result.stale_engagement = merge_sets_safe(result.stale_engagement, notifications.stale_engagement)
                 result.auto_close_engagement = merge_sets_safe(result.auto_close_engagement, notifications.auto_close_engagement)
+                result.close_engagement = merge_sets_safe(result.close_engagement, notifications.close_engagement)
                 result.user_mentioned = merge_sets_safe(result.user_mentioned, notifications.user_mentioned)
                 result.code_review = merge_sets_safe(result.code_review, notifications.code_review)
                 result.review_requested = merge_sets_safe(result.review_requested, notifications.review_requested)
