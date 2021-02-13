@@ -34,10 +34,15 @@
                     <i class="fa fa-filter"></i> Apply Filters
                 </button>
                 &nbsp;
-                {% if clear_link %}
+                {% if clear_js %}
+                    <a href="#" id="clear2" class="clear centered"> [Clear Filters] </a>
+                {% elif clear_link %}
                     <a href="{{ clear_link }}" id="clear" class="clear centered"> [Clear Filters] </a>
                 {% else %}
                     <a href="{{ request.path }}" id="clear" class="clear centered"> [Clear Filters] </a>
+                {% endif %}
+                {% if restart_link %}
+                    <a href="{{ restart_link }}" id="clear" class="clear centered"> [Restart] </a>
                 {% endif %}
             </div>
         {% endif %}

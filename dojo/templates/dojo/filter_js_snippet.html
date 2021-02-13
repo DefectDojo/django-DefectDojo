@@ -3,11 +3,19 @@
 <script type="application/javascript">
     $(function () {
         $(function () {
+
+        })
+
+        $(function () {
+            $('.similar-filters select[multiple]').not('[data-tagulous]').each(function () {
+                $(this).select2(
+                )
+            })
             $('input[data-tagulous]').each(function () {
-                console.log($(this))
                 Tagulous.select2($(this))
             })
         })
+
 
         $('.toggle-filters').on('click', function () {
             $(this).toggleClass("dropup");
@@ -18,6 +26,9 @@
             e.stopPropagation();
         })
 
+        $('#clear2').on('click', function() {
+            clear_form($(this).closest('form'))
+        })
     })
 
     {% if title_words %}

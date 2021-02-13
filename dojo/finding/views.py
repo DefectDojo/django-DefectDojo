@@ -53,7 +53,7 @@ import dojo.finding.helper as finding_helper
 logger = logging.getLogger(__name__)
 
 OPEN_FINDINGS_QUERY = Q(active=True)
-VERIFIED_FINDINGS_QUERY = Q(verified=True)
+VERIFIED_FINDINGS_QUERY = Q(active=True, verified=True)
 OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
 FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
 INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False)
@@ -157,6 +157,9 @@ django_filter=open_findings_filter, prefetch_type='all'):
         )
 
     findings_filter = django_filter(request, findings, request.user, pid)
+
+    print(findings_filter.form.has_changed())
+    print(findings_filter.form.changed_data)
 
     title_words = get_words_for_field(findings_filter.qs, 'title')
     component_words = get_words_for_field(findings_filter.qs, 'component_name')

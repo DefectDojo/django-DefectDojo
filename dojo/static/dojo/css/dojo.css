@@ -1620,3 +1620,7 @@ small {
 .red {
     color:red;
 }
+
+.select2-container {
+    min-width:200px;
+}

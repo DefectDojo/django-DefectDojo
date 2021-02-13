@@ -2,6 +2,7 @@ __author__ = 'Jay Paz'
 import collections
 import logging
 from datetime import timedelta, datetime
+from django import forms
 from django.apps import apps
 from auditlog.models import LogEntry
 from django.conf import settings
@@ -1204,6 +1205,7 @@ class ProductFindingFilter(DojoFilter):
 
 
 class SimilarFindingFilter(DojoFilter):
+    hash_code = MultipleChoiceFilter()
     cve = CharFilter(lookup_expr='icontains')
     cwe = NumberFilter()
     title = CharFilter(lookup_expr='icontains')
@@ -1280,7 +1282,7 @@ class SimilarFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        fields = ['cwe', 'hash_code', 'unique_id_from_tool', 'line', 'id', 'tags']
+        fields = ['id', 'cve', 'cwe', 'unique_id_from_tool', 'file_path', 'line', 'hash_code', 'tags']
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1294,7 +1296,7 @@ class SimilarFindingFilter(DojoFilter):
         # if filterset is bound, use initial values as defaults
         # because of this, we can't rely on the self.form.has_changed
         self.has_changed = True
-        if not data:
+        if not data and self.finding:
             # get a mutable copy of the QueryDict
             data = data.copy()
 
@@ -1310,6 +1312,9 @@ class SimilarFindingFilter(DojoFilter):
             self.has_changed = False
 
         super().__init__(data, *args, **kwargs)
+
+        if self.finding and self.finding.hash_code:
+            self.form.fields['hash_code'] = forms.MultipleChoiceField(choices=[(self.finding.hash_code, self.finding.hash_code[:24] + '...')], required=False, initial=[])
 
         if get_system_setting('enable_jira'):
             self.form.fields.pop('jira_issue__jira_key')
