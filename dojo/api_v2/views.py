@@ -8,13 +8,12 @@ from django.db import IntegrityError
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated, IsAdminUser
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
-from rest_framework.exceptions import ParseError
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg2 import openapi
 from drf_yasg2.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.models import Product, Product_Type, Engagement, Test, Test_Type, Finding, \
+from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
@@ -1227,6 +1226,60 @@ class TestTypesViewSet(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
+class TestImportViewSet(prefetch.PrefetchListMixin,
+                      prefetch.PrefetchRetrieveMixin,
+                      mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
+    serializer_class = serializers.TestImportSerializer
+    queryset = Test_Import.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('test', 'findings_affected', 'version', 'test_import_finding_action__action',
+                    'test_import_finding_action__finding', 'test_import_finding_action__created')
+    swagger_schema = prefetch.get_prefetch_schema(["test_imports_list", "test_imports_read"], serializers.TestImportSerializer). \
+        to_schema()
+
+    def get_queryset(self):
+        if not self.request.user.is_staff and not self.request.user.is_superuser:
+            test_imports = Test_Import.objects.filter(
+                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
+            )
+        else:
+            test_imports = Test_Import.objects.all()
+        return test_imports.prefetch_related(
+                                        'test_import_finding_action_set',
+                                        'findings',
+                                        'findings__endpoints',
+                                        'findings__endpoint_status',
+                                        'findings__finding_meta',
+                                        'findings__jira_issue',
+                                        'findings__burprawrequestresponse_set',
+                                        'findings__jira_issue',
+                                        'findings__jira_issue',
+                                        'findings__jira_issue',
+                                        'findings__reviewers',
+                                        'findings__notes',
+                                        'findings__notes__author',
+                                        'findings__notes__history',
+                                        'findings__files',
+                                        'findings__images',
+                                        'findings__found_by',
+                                        'findings__tags',
+                                        'findings__risk_acceptance_set',
+                                        'test',
+                                        'test__tags',
+                                        'test__notes',
+                                        'test__notes__author',
+                                        'test__files',
+                                        'test__test_type',
+                                        'test__engagement',
+                                        'test__environment',
+                                        'test__engagement__product',
+                                        'test__engagement__product__prod_type')
+
+
 # Authorization: superuser
 class ToolConfigurationsViewSet(mixins.ListModelMixin,
                                 mixins.RetrieveModelMixin,
@@ -1314,10 +1367,7 @@ class ImportScanView(mixins.CreateModelMixin,
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
-        try:
-            serializer.save(push_to_jira=push_to_jira)
-        except Exception as e:
-            raise ParseError(detail=e)
+        serializer.save(push_to_jira=push_to_jira)
 
 
 # Authorization: authenticated users, DjangoModelPermissions
@@ -1337,10 +1387,7 @@ class ReImportScanView(mixins.CreateModelMixin,
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
-        try:
-            serializer.save(push_to_jira=push_to_jira)
-        except Exception as e:
-            raise ParseError(detail=e)
+        serializer.save(push_to_jira=push_to_jira)
 
 
 # Authorization: staff

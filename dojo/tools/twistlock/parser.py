@@ -1,8 +1,8 @@
-import io
 import csv
+import hashlib
+import io
 import json
 import logging
-import hashlib
 import textwrap
 
 from dojo.models import Finding
@@ -162,16 +162,14 @@ def convert_severity(severity):
 
 class TwistlockParser(object):
 
-    def __init__(self, filename, test):
-        self.dupes = dict()
+    def get_findings(self, filename, test):
 
         if filename is None:
-            self.items = []
-            return
+            return list()
 
         if filename.name.lower().endswith('.json'):
-            self.items = TwistlockJsonParser().parse(filename, test)
+            return TwistlockJsonParser().parse(filename, test)
         elif filename.name.lower().endswith('.csv'):
-            self.items = TwistlockCSVParser().parse(filename, test)
+            return TwistlockCSVParser().parse(filename, test)
         else:
             raise Exception('Unknown File Format')

@@ -26,9 +26,9 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation, FileUpload
+    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES
 
-from dojo.tools import requires_file, SCAN_SONARQUBE_API
+from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 from tagulous.forms import TagField
@@ -44,9 +44,6 @@ FINDING_STATUS = (('verified', 'Verified'),
                   ('false_p', 'False Positive'),
                   ('duplicate', 'Duplicate'),
                   ('out_of_scope', 'Out of Scope'))
-
-SEVERITY_CHOICES = (('Info', 'Info'), ('Low', 'Low'), ('Medium', 'Medium'),
-                    ('High', 'High'), ('Critical', 'Critical'))
 
 
 class SelectWithPop(forms.Select):
@@ -152,6 +149,8 @@ class MonthYearWidget(Widget):
 
 
 class Product_TypeForm(forms.ModelForm):
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=False)
     authorized_users = forms.ModelMultipleChoiceField(
         queryset=None,
         required=False, label="Authorized Users")
@@ -164,13 +163,16 @@ class Product_TypeForm(forms.ModelForm):
 
     class Meta:
         model = Product_Type
-        fields = ['name', 'authorized_users', 'critical_product', 'key_product']
+        fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
     class Meta:
         model = Product_Type
-        exclude = ['name', 'critical_product', 'key_product']
+        exclude = ['name', 'description', 'critical_product', 'key_product', 'authorized_users']
 
 
 class Test_TypeForm(forms.ModelForm):
@@ -192,7 +194,7 @@ class Delete_Dev_EnvironmentForm(forms.ModelForm):
 
 
 class ProductForm(forms.ModelForm):
-    name = forms.CharField(max_length=50, required=True)
+    name = forms.CharField(max_length=255, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=True)
 
@@ -288,112 +290,7 @@ class DojoMetaDataForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
-    SCAN_TYPE_CHOICES = (("", "Please Select a Scan Type"),
-                         ("Netsparker Scan", "Netsparker Scan"),
-                         ("Burp Scan", "Burp Scan"),
-                         ("Burp REST API", "Burp REST API"),
-                         ("Nessus Scan", "Nessus Scan"),
-                         ("Nmap Scan", "Nmap Scan"),
-                         ("Nexpose Scan", "Nexpose Scan"),
-                         ("AppSpider Scan", "AppSpider Scan"),
-                         ("Veracode Scan", "Veracode Scan"),
-                         ("Checkmarx Scan", "Checkmarx Scan"),
-                         ("Checkmarx Scan detailed", "Checkmarx Scan detailed"),
-                         ("Crashtest Security JSON File", "Crashtest Security JSON File"),
-                         ("Crashtest Security XML File", "Crashtest Security XML File"),
-                         ("ZAP Scan", "ZAP Scan"),
-                         ("Arachni Scan", "Arachni Scan"),
-                         ("VCG Scan", "VCG Scan"),
-                         ("Dependency Check Scan", "Dependency Check Scan"),
-                         ("Dependency Track Finding Packaging Format (FPF) Export", "Dependency Track Finding Packaging Format (FPF) Export"),
-                         ("Retire.js Scan", "Retire.js Scan"),
-                         ("Node Security Platform Scan", "Node Security Platform Scan"),
-                         ("NPM Audit Scan", "NPM Audit Scan"),
-                         ("Qualys Scan", "Qualys Scan"),
-                         ("Qualys Infrastructure Scan (WebGUI XML)", "Qualys Infrastructure Scan (WebGUI XML)"),
-                         ("Qualys Webapp Scan", "Qualys Webapp Scan"),
-                         ("OpenVAS CSV", "OpenVAS CSV"),
-                         ("Snyk Scan", "Snyk Scan"),
-                         ("Generic Findings Import", "Generic Findings Import"),
-                         ("Trustwave Scan (CSV)", "Trustwave Scan (CSV)"),
-                         ("SKF Scan", "SKF Scan"),
-                         ("Clair Klar Scan", "Clair Klar Scan"),
-                         ("Bandit Scan", "Bandit Scan"),
-                         ("ESLint Scan", "ESLint Scan"),
-                         ("SSL Labs Scan", "SSL Labs Scan"),
-                         ("Acunetix Scan", "Acunetix Scan"),
-                         ("Fortify Scan", "Fortify Scan"),
-                         ("Gosec Scanner", "Gosec Scanner"),
-                         ("SonarQube Scan", "SonarQube Scan"),
-                         ("SonarQube Scan detailed", "SonarQube Scan detailed"),
-                         (SCAN_SONARQUBE_API, SCAN_SONARQUBE_API),
-                         ("MobSF Scan", "MobSF Scan"),
-                         ("Trufflehog Scan", "Trufflehog Scan"),
-                         ("Nikto Scan", "Nikto Scan"),
-                         ("Clair Scan", "Clair Scan"),
-                         ("Brakeman Scan", "Brakeman Scan"),
-                         ("SpotBugs Scan", "SpotBugs Scan"),
-                         ("AWS Scout2 Scan", "AWS Scout2 Scan"),
-                         ("AWS Prowler Scan", "AWS Prowler Scan"),
-                         ("Scout Suite Scan", "Scout Suite Scan"),
-                         ("IBM AppScan DAST", "IBM AppScan DAST"),
-                         ("PHP Security Audit v2", "PHP Security Audit v2"),
-                         ("PHP Symfony Security Check", "PHP Symfony Security Check"),
-                         ("Safety Scan", "Safety Scan"),
-                         ("DawnScanner Scan", "DawnScanner Scan"),
-                         ("Anchore Engine Scan", "Anchore Engine Scan"),
-                         ("Bundler-Audit Scan", "Bundler-Audit Scan"),
-                         ("Twistlock Image Scan", "Twistlock Image Scan"),
-                         ("Kiuwan Scan", "Kiuwan Scan"),
-                         ("Blackduck Hub Scan", "Blackduck Hub Scan"),
-                         ("Blackduck Component Risk", "Blackduck Component Risk"),
-                         ("Openscap Vulnerability Scan", "Openscap Vulnerability Scan"),
-                         ("Wapiti Scan", "Wapiti Scan"),
-                         ("Immuniweb Scan", "Immuniweb Scan"),
-                         ("Sonatype Application Scan", "Sonatype Application Scan"),
-                         ("Cobalt.io Scan", "Cobalt.io Scan"),
-                         ("Mozilla Observatory Scan", "Mozilla Observatory Scan"),
-                         ("Whitesource Scan", "Whitesource Scan"),
-                         ("Contrast Scan", "Contrast Scan"),
-                         ("Microfocus Webinspect Scan", "Microfocus Webinspect Scan"),
-                         ("Wpscan", "Wpscan"),
-                         ("Sslscan", "Sslscan"),
-                         ("JFrog Xray Scan", "JFrog Xray Scan"),
-                         ("Sslyze Scan", "Sslyze Scan"),
-                         ("SSLyze 3 Scan (JSON)", "SSLyze 3 Scan (JSON)"),
-                         ("Testssl Scan", "Testssl Scan"),
-                         ("Hadolint Dockerfile check", "Hadolint Dockerfile check"),
-                         ("Aqua Scan", "Aqua Scan"),
-                         ("HackerOne Cases", "HackerOne Cases"),
-                         ("Xanitizer Scan", "Xanitizer Scan"),
-                         ("Outpost24 Scan", "Outpost24 Scan"),
-                         ("Burp Enterprise Scan", "Burp Enterprise Scan"),
-                         ("DSOP Scan", "DSOP Scan"),
-                         ("Trivy Scan", "Trivy Scan"),
-                         ("Anchore Enterprise Policy Check", "Anchore Enterprise Policy Check"),
-                         ("Gitleaks Scan", "Gitleaks Scan"),
-                         ("Choctaw Hog Scan", "Choctaw Hog Scan"),
-                         ("Harbor Vulnerability Scan", "Harbor Vulnerability Scan"),
-                         ("Github Vulnerability Scan", "Github Vulnerability Scan"),
-                         ("Yarn Audit Scan", "Yarn Audit Scan"),
-                         ("BugCrowd Scan", "BugCrowd Scan"),
-                         ("GitLab SAST Report", "GitLab SAST Report"),
-                         ("AWS Security Hub Scan", "AWS Security Hub Scan"),
-                         ("GitLab Dependency Scanning Report", "GitLab Dependency Scanning Report"),
-                         ("HuskyCI Report", "HuskyCI Report"),
-                         ("Semgrep JSON Report", "Semgrep JSON Report"),
-                         ("Risk Recon API Importer", "Risk Recon API Importer"),
-                         ("DrHeader JSON Importer", "DrHeader JSON Importer"),
-                         ("Checkov Scan", "Checkov Scan"),
-                         ("kube-bench Scan", "Kube-Bench Scan"),
-                         ("CCVS Report", "CCVS Report"),
-                         ("ORT evaluated model Importer", "ORT evaluated model Importer"),
-                         ("SARIF", "SARIF"),
-                         ("OssIndex Devaudit SCA Scan Importer", "OssIndex Devaudit SCA Scan Importer"),
-                         ("Scantist Scan", "Scantist Scan"),
-                         )
-
-    SORTED_SCAN_TYPE_CHOICES = sorted(SCAN_TYPE_CHOICES, key=lambda x: x[1])
+    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -410,6 +307,8 @@ class ImportScanForm(forms.Form):
         queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
+    version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on the Test object that will be created.")
+
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
@@ -462,6 +361,7 @@ class ReImportScanForm(forms.Form):
         required=False)
     close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
                                             required=False, initial=True)
+    version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
 
     def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
@@ -1992,6 +1892,7 @@ class ProductNotificationsForm(forms.ModelForm):
         super(ProductNotificationsForm, self).__init__(*args, **kwargs)
         if not self.instance.id:
             self.initial['engagement_added'] = ''
+            self.initial['close_engagement'] = ''
             self.initial['test_added'] = ''
             self.initial['scan_added'] = ''
             self.initial['sla_breach'] = ''
@@ -1999,7 +1900,7 @@ class ProductNotificationsForm(forms.ModelForm):
 
     class Meta:
         model = Notifications
-        fields = ['engagement_added', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiration']
+        fields = ['engagement_added', 'close_engagement', 'test_added', 'scan_added', 'sla_breach', 'risk_acceptance_expiration']
 
 
 class AjaxChoiceField(forms.ChoiceField):

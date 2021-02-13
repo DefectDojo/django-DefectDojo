@@ -19,7 +19,7 @@ python tests/engagement_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Environment integration tests"
-python tests/environment_test.py 
+python tests/environment_test.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
 echo "Running Finding integration tests"
@@ -54,13 +54,12 @@ echo "Running Check Various Pages integration test"
 python tests/check_various_pages.py
 if %ERRORLEVEL% NEQ 0 GOTO END
 
-
 REM REM  The below tests are commented out because they are still an unstable work in progress
 REM REM Once Ready they can be uncommented.
 
 REM REM echo "Running Import Scanner integration test"
 rem rem python tests/import_scanner_test.py
-REM REM     echo "Success: Import Scanner integration tests passed" 
+REM REM     echo "Success: Import Scanner integration tests passed"
 REM REM else
 REM REM     echo "Error: Import Scanner integration test failed"; exit 1
 REM REM fi

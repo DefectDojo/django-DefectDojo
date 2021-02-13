@@ -1,19 +1,13 @@
 import json
+
 from dojo.models import Finding
 
 
 class KubeBenchParser(object):
 
-    def __init__(self, json_output, test):
-        self.items = []
-
-        if json_output is None:
-            return
-
+    def get_findings(self, json_output, test):
         tree = self.parse_json(json_output)
-
-        if tree:
-            self.items = [data for data in self.get_chapters(tree, test)]
+        return self.get_chapters(tree, test)
 
     def parse_json(self, json_output):
         try:

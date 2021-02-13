@@ -244,6 +244,9 @@
                             <th>Mitigated</th>
                             <th>Duplicates</th>
                             <th>Notes</th>
+                            {% if 'TRACK_IMPORT_HISTORY'|setting_enabled %}
+                                <th>Reimports</th>
+                            {% endif %}
                         </tr>
                         </thead>
                         <tbody>
@@ -287,8 +290,14 @@
                                          </li>
                                      </ul>
                                   </td>
-                                  <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
-                                  {% if test.tags %}
+                                <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
+                                    {% if test.version %}
+                                        <sup>
+                                            <a target="_blank" class="tag-label tag-version" data-toggle="tooltip" data-placement="bottom" title="Product Version: {{ test.version }}">
+                                            {{ test.version }}</a>
+                                        </sup>
+                                    {% endif %}
+                                    {% if test.tags %}
                                       <sup>
                                           {% for tag in test.tags.all %}
                                           <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=test-tag:{{ tag }}">{{ tag }}</a>
@@ -318,6 +327,11 @@
                                     </a>
                                   {% endif %}
                                 </td>
+                                {% if 'TRACK_IMPORT_HISTORY'|setting_enabled %}
+                                    <td>
+                                        {{ test.total_reimport_count }}
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>

@@ -214,33 +214,30 @@ class DependencyTrackParser(object):
             static_finding=True,
             dynamic_finding=False)
 
-    def __init__(self, file, test):
-        # Start with an empty list of findings
-        self.items = []
+    def get_findings(self, file, test):
 
         # Exit if file is not provided
         if file is None:
-            return
+            return list()
 
         # Load the contents of the JSON file into a dictionary
+        data = file.read()
         try:
-            data = file.read()
-            try:
-                findings_export_dict = json.loads(str(data, 'utf-8'))
-            except:
-                findings_export_dict = json.loads(data)
+            findings_export_dict = json.loads(str(data, 'utf-8'))
         except:
-            logger.exception("Invalid file format!")
-            raise
+            findings_export_dict = json.loads(data)
 
         # Exit if file is an empty JSON dictionary
         if len(findings_export_dict.keys()) == 0:
-            return
+            return list()
 
         # Make sure the findings key exists in the dictionary and that it is not null or an empty list
         # If it is null or an empty list then exit
         if 'findings' not in findings_export_dict or not findings_export_dict['findings']:
-            return
+            return list()
+
+        # Start with an empty list of findings
+        items = list()
 
         # If we have gotten this far then there should be one or more findings
         # Loop through each finding from Dependency Track
@@ -249,4 +246,5 @@ class DependencyTrackParser(object):
             dojo_finding = self._convert_dependency_track_finding_to_dojo_finding(dependency_track_finding, test)
 
             # Append DefectDojo finding to list
-            self.items.append(dojo_finding)
+            items.append(dojo_finding)
+        return items
