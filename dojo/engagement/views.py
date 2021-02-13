@@ -272,7 +272,6 @@ def view_engagement(request, eid):
     default_page_num = 10
 
     tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
-    print(vars(tests_filter))
     paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)

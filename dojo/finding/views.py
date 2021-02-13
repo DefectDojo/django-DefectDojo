@@ -158,9 +158,6 @@ django_filter=open_findings_filter, prefetch_type='all'):
 
     findings_filter = django_filter(request, findings, request.user, pid)
 
-    print(findings_filter.form.has_changed())
-    print(findings_filter.form.changed_data)
-
     title_words = get_words_for_field(findings_filter.qs, 'title')
     component_words = get_words_for_field(findings_filter.qs, 'component_name')
 

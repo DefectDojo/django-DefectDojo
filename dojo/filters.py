@@ -873,13 +873,6 @@ class OpenFindingFilter(DojoFilter):
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
-        # print(self.filters)
-        # del self.filters['test_import_finding_action__test_import']
-        # self.form.fields['test_import_finding_action__test_import'].widget = HiddenInput()
-        for field in self.form.hidden_fields():
-            print('hidden field: ' + str(field))
-        for field in self.form.visible_fields():
-            print('visible field: ' + str(field.name))
 
 
 class OpenFindingSuperFilter(OpenFindingFilter):
