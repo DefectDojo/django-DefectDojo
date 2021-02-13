@@ -12,7 +12,10 @@
 {% endblock %}
 <div class="filter-set">
     <form method="get" {% if form_id %}id="{{form_id}}"{% endif %} class="{{ request.path|slugify }}-filters form-inline dojo-filter-set">
-        {% for field in form %}
+        {% for field in form.hidden_fields %}
+            {{ field }}
+        {% endfor %}
+        {% for field in form.visible_fields %}
             <div class="form-group">
                 {{ field.errors }}
                 <label for="{{ field.auto_id }}" style="display: block;">{{ field.label }}</label>
@@ -35,7 +38,7 @@
                 </button>
                 &nbsp;
                 {% if clear_js %}
-                    <a href="#" id="clear2" class="clear centered"> [Clear Filters] </a>
+                    <a href="#{{form_id}}" id="clear_js" class="clear centered"> [Clear Filters] </a>
                 {% elif clear_link %}
                     <a href="{{ clear_link }}" id="clear" class="clear centered"> [Clear Filters] </a>
                 {% else %}

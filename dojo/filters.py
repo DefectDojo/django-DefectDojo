@@ -767,7 +767,7 @@ class OpenFindingFilter(DojoFilter):
     test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
-    test_import_finding_action__test_import = NumberFilter()
+    test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
 
     has_jira_issue = BooleanFilter(field_name='jira_issue',
                                 lookup_expr='isnull',
@@ -873,8 +873,13 @@ class OpenFindingFilter(DojoFilter):
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
-
-        self.form.fields['test_import_finding_action__test_import'].widget = HiddenInput()
+        # print(self.filters)
+        # del self.filters['test_import_finding_action__test_import']
+        # self.form.fields['test_import_finding_action__test_import'].widget = HiddenInput()
+        for field in self.form.hidden_fields():
+            print('hidden field: ' + str(field))
+        for field in self.form.visible_fields():
+            print('visible field: ' + str(field.name))
 
 
 class OpenFindingSuperFilter(OpenFindingFilter):
@@ -1282,7 +1287,8 @@ class SimilarFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        fields = ['id', 'cve', 'cwe', 'unique_id_from_tool', 'file_path', 'line', 'hash_code', 'tags']
+        fields = ['id', 'title', 'cve', 'cwe', 'unique_id_from_tool', 'file_path', 'line', 'hash_code', 'active',
+                    'duplicate', 'risk_accepted', 'false_p', 'out_of_scope', 'is_Mitigated', 'tags']
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1316,7 +1322,7 @@ class SimilarFindingFilter(DojoFilter):
         if self.finding and self.finding.hash_code:
             self.form.fields['hash_code'] = forms.MultipleChoiceField(choices=[(self.finding.hash_code, self.finding.hash_code[:24] + '...')], required=False, initial=[])
 
-        if get_system_setting('enable_jira'):
+        if not get_system_setting('enable_jira'):
             self.form.fields.pop('jira_issue__jira_key')
             self.form.fields.pop('has_jira_issue')
 

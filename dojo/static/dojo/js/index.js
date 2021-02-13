@@ -333,6 +333,7 @@ function clear_form(form){
     $(form).find(':input').each(function() {
         console.log(this.type)
         switch(this.type) {
+            case 'number':
             case 'password':
             case 'select-one':
             case 'text':

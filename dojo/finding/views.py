@@ -243,7 +243,8 @@ def prefetch_for_similar_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
         prefetched_findings = prefetched_findings.prefetch_related('original_finding')
-
+        prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
+        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
@@ -352,10 +353,13 @@ def view_finding(request, fid):
     if finding.duplicate_finding:
         finding.duplicate_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, finding.duplicate_finding)
 
-    # similar_findings = get_similar_findings(request, finding)
     similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
     logger.debug('similar query: %s', similar_findings_filter.qs.query)
-    similar_findings = prefetch_for_similar_findings(similar_findings_filter.qs[:settings.SIMILAR_FINDINGS_MAX_RESULTS])
+
+    similar_findings = get_page_items(request, similar_findings_filter.qs, settings.SIMILAR_FINDINGS_MAX_RESULTS)
+
+    similar_findings.object_list = prefetch_for_similar_findings(similar_findings.object_list)
+
     for similar_finding in similar_findings:
         similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
 
@@ -2161,50 +2165,6 @@ def push_to_jira(request, fid):
             extra_tags='alert-danger')
         return HttpResponse(status=500)
     # return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
-
-
-def get_similar_findings(request, finding):
-    similar = Finding.objects.all()
-
-    if not request.user.is_staff:
-        similar = similar.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-        )
-
-    if finding.test.engagement.deduplication_on_engagement:
-        similar = similar.filter(test__engagement=finding.test.engagement)
-    else:
-        similar = similar.filter(test__engagement__product=finding.test.engagement.product)
-
-    if finding.cve:
-        similar = similar.filter(cve=finding.cve)
-    if finding.cwe:
-        similar = similar.filter(cwe=finding.cwe)
-    if finding.file_path:
-        similar = similar.filter(file_path=finding.file_path)
-    if finding.line:
-        similar = similar.filter(line=finding.line)
-    if finding.unique_id_from_tool:
-        similar = similar.filter(unique_id_from_tool=finding.unique_id_from_tool)
-
-    similar = similar.exclude(id__in=finding.duplicate_finding_set())
-    if finding.duplicate_finding:
-        similar = similar.exclude(id=finding.duplicate_finding.id)
-
-    identical = Finding.objects.all().filter(test__engagement__product=finding.test.engagement.product).filter(hash_code=finding.hash_code).exclude(pk=finding.pk)
-    identical = identical.exclude(id__in=finding.duplicate_finding_set())
-    if finding.duplicate_finding:
-        identical = identical.exclude(id=finding.duplicate_finding.id)
-
-    # TODO: remove this temp testing code Valentijn
-    temp = Finding.objects.all().filter(id__in=[49046, 51314, 59225, 59227, 59229, 59223])
-
-    result = (temp | similar.exclude(pk=finding.pk) | identical)[:10]
-    for similar_finding in result:
-        similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
-
-    return result
 
 
 # precalculate because we need related_actions to be set
