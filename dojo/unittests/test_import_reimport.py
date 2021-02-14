@@ -582,6 +582,7 @@ class ImportReimportMixin(object):
                 self.assertTrue(finding['is_Mitigated'])
 
 
+
 @override_settings(TRACK_IMPORT_HISTORY=True)
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ['dojo_testdata.json']
