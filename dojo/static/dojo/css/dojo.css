@@ -1620,3 +1620,7 @@ small {
 .red {
     color:red;
 }
+
+.no-italics {
+    font-style: normal;
+}
