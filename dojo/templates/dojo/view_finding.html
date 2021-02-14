@@ -209,10 +209,6 @@
                     </tr>
                 {% endif %}
                 <tr>
-                    <th>Severity</th>
-                    {% if system_settings.enable_finding_sla %}
-                    <th>SLA</th>
-                    {% endif %}
                     {% if finding.scanner_confidence %}
                     <th>Scanner Confidence</th>
                     {% endif %}
@@ -236,25 +232,9 @@
                         <th>Date Mitigated</th>
                         <th>Mitigated By</th>
                     {% endif %}
-                        <th>CWE</th>
-                        <th>CVE</th>
                     <th>Found by</th>
                 </tr>
                 <tr>
-                    <td>
-                        <span class="label severity severity-{{ finding.severity }}">
-                            {% if finding.severity %}
-                                {{ finding.severity_display }}
-                            {% else %}
-                                Unknown
-                            {% endif %}
-                        </span>
-                    </td>
-                    {% if system_settings.enable_finding_sla %}
-                    <td>
-                      {{ finding|finding_sla }}
-                    </td>
-                    {% endif %}
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
@@ -345,24 +325,6 @@
                         <td>{{ finding.mitigated }}</td>
                         <td>{{ finding.mitigated_by }}</td>
                     {% endif %}
-                        <td>
-                        {% if finding.cwe > 0 %}
-                            <a target="_blank" href="{{ finding.cwe|cwe_url }}">
-                                <i class="fa fa-external-link"></i> {{ finding.cwe }}
-                            </a>
-                        {% endif %}
-                        </td>
-                    {% if finding.cve|slice:":3" == 'CVE' %}
-                        <td>
-                            <a target="_blank" href="{{ finding.cve |cve_url }}">
-                                <i class="fa fa-external-link"></i> {{ finding.cve }}
-                            </a>
-                        </td>
-                    {% else %}
-                         <td>
-                             {{ finding.cve }}
-                         </td>
-                    {% endif %}
                     <td> {% for scanner in found_by %}
                         {{ scanner }}
                     {% endfor %}</td>
@@ -371,6 +333,50 @@
             </table>
         </div>
     </div>
+
+    <div class="panel panel-default">
+        <table id="error_notes" class="table-striped table table-condensed table-hover centered">
+            <tr>
+                <th>Severity</th>
+                {% if finding.cvssv3 %}
+                    <th>CVSSv3</th>
+                {% endif %}
+                {% if system_settings.enable_finding_sla %}
+                    <th>SLA</th>
+                {% endif %}
+                <th>CVE</th>
+                {% if finding.cwe > 0 %}
+                    <th>CWE</th>
+                {% endif %}
+            </tr>
+            <tr>
+                <td>
+                    <span class="label severity severity-{{ finding.severity }}">
+                        {% if finding.severity %}
+                            {{ finding.severity_display }}
+                        {% else %}
+                            Unknown
+                        {% endif %}
+                    </span>
+                </td>
+                {% if finding.cvssv3 %}
+                    <td>{{ finding.cvssv3 }}</td>
+                {% endif %}
+                {% if system_settings.enable_finding_sla %}
+                    <td>{{ finding|finding_sla}}</td>
+                {% endif %}
+                {% if finding.cve|slice:":3" == 'CVE' %}
+                    <td><a target="_blank" href="{{ finding.cve |cve_url }}"><i class="fa fa-external-link"></i>{{ finding.cve }}</a></td>
+                {% else %}
+                    <td>{{ finding.cve }}</td>
+                {% endif %}
+                {% if finding.cwe > 0 %}
+                    <a target="_blank" href="{{ finding.cwe|cwe_url }}"><i class="fa fa-external-link"></i> {{ finding.cwe }}</a>
+                {% endif %}
+            </tr>
+        </table>
+    </div>
+
     {% if finding.static_finding or finding.line > 0 %}
         {% if finding.sast_source_object or finding.sast_sink_object or finding.sast_source_file_path or finding.sast_source_line > 0 %}
         {# For tools that give information on both source (start) and sink (end) of the attack vector #}
@@ -743,17 +749,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>CVSS 3.0<span class="pull-right"><a data-toggle="collapse" href="#vuln_cvss"><i
-                        class="glyphicon glyphicon-chevron-{% if finding.cvssv3 %}up{%else%}down{%endif%}"></i></a></span></h4>
-            </div>
-            <div id="vuln_cvss" class="panel-body collapse {% if finding.cvssv3 %}in{%endif%}">
-                <pre>{{ finding.cvssv3|markdown_render|default_if_none:"" }}</pre>
-            </div>
-        </div>
-
 
         <div class="panel panel-default">
             <div class="panel-heading">
