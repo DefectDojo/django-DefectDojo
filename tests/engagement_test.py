@@ -19,7 +19,7 @@ class EngagementTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element_by_class_name("pull-left").click()
-        driver.find_element_by_link_text("Add New Engagement").click()
+        driver.find_element_by_partial_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("test engagement")
         driver.find_element_by_id("id_name").send_keys("\tthis is engagement test.")
         driver.find_element_by_id("id_test_strategy").clear()
