@@ -245,7 +245,7 @@
                         <span class="label severity severity-{{ finding.severity }}">
                             {% if finding.severity %}
                                 {% if finding.cvssv3 %}
-                                    <i class="no-italics" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                    <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
                                         data-content="{{ finding.cvssv3 }}">{{ finding.severity_display }}</i>
                                 {% else %}
                                     {{ finding.severity_display }}
