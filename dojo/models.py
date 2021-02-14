@@ -1451,7 +1451,7 @@ class Finding(models.Model):
     cvssv3 = models.TextField(validators=[cvssv3_regex],
                               max_length=117,
                               null=True,
-                              verbose_name="CVSSv3",
+                              verbose_name="CVSS v3",
                               help_text="Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw.")
     url = models.TextField(null=True,
                            blank=True,
