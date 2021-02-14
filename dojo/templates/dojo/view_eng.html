@@ -235,8 +235,8 @@
                     <table class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Title / Type</th>
                             <th></th>
+                            <th>Title / Type</th>
                             <th>Date</th>
                             <th>Lead</th>
                             <th>Total Findings</th>
@@ -252,6 +252,44 @@
                         <tbody>
                         {% for test in tests %}
                             <tr>
+                                <td>
+                                    <ul>
+                                     <li class="dropdown" style="list-style:none;position:absolute">
+                                           <a href="#" id='test-menu' class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                           <ul class="dropdown-menu">
+                                              <li>
+                                               <a class="" href="{% url 'view_test' test.id %}">
+                                                 <i class="fa fa-list-alt"></i> View</a>
+                                            </li>
+                                            <li>
+                                               <a class="" href="{% url 'edit_test' test.id %}">
+                                                <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                            </li>
+                                            <li class="divider"></li>
+                                            <li>
+                                              <a class="" href="{% url 'add_findings' test.id %}">
+                                                <i class="fa fa-plus"></i> Add Finding to Test
+                                              </a>
+                                            </li>
+                                             <li class="divider"></li>
+                                             <li><a class="" href="{% url 're_import_scan_results' test.id %}">
+                                                 <i class="fa fa-upload"></i> Re-Upload Scan Results
+                                             </a></li>
+                                             <li class="divider"></li>
+                                             <li role="presentation">
+                                                 <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                                     <i class="fa fa-file-text-o"></i> Test Report
+                                                 </a>
+                                             </li>
+                                             <li class="divider"></li>
+                                             <li>
+                                               <a class="text-danger" href="{% url 'delete_test' test.id %}">
+                                                <i class="fa fa-trash-o"></i> Delete</a>
+                                            </li>
+                                           </ul>
+                                         </li>
+                                     </ul>
+                                  </td>
                                 <td><a title="{{ test.description }}" href="{% url 'view_test' test.id %}">{{ test }}</a>
                                     {% if test.version %}
                                         <sup>
@@ -266,44 +304,6 @@
                                           {% endfor %}
                                       </sup>
                                   {% endif %}
-                                </td>
-                                <td>
-                                  <ul>
-                                   <li class="dropdown" style="list-style:none;position:absolute">
-                                         <a href="#" id='test-menu' class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
-                                         <ul class="dropdown-menu">
-                                            <li>
-                                             <a class="" href="{% url 'view_test' test.id %}">
-                                               <i class="fa fa-list-alt"></i> View</a>
-                                          </li>
-                                          <li>
-                                             <a class="" href="{% url 'edit_test' test.id %}">
-                                              <i class="fa fa-pencil-square-o"></i> Edit</a>
-                                          </li>
-                                          <li class="divider"></li>
-                                          <li>
-                                            <a class="" href="{% url 'add_findings' test.id %}">
-                                              <i class="fa fa-plus"></i> Add Finding to Test
-                                            </a>
-                                          </li>
-                                           <li class="divider"></li>
-                                           <li><a class="" href="{% url 're_import_scan_results' test.id %}">
-                                               <i class="fa fa-upload"></i> Re-Upload Scan Results
-                                           </a></li>
-                                           <li class="divider"></li>
-                                           <li role="presentation">
-                                               <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
-                                                   <i class="fa fa-file-text-o"></i> Test Report
-                                               </a>
-                                           </li>
-                                           <li class="divider"></li>
-                                           <li>
-                                             <a class="text-danger" href="{% url 'delete_test' test.id %}">
-                                              <i class="fa fa-trash-o"></i> Delete</a>
-                                          </li>
-                                         </ul>
-                                       </li>
-                                   </ul>
                                 </td>
                                 <td>{{ test.target_start|date }} - {{ test.target_end|date }}</td>
                                 <td>
@@ -366,6 +366,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
+                            <th></th>
                             <th>Date</th>
                             <th>Accepted By</th>
                             <th>Name</th>
@@ -375,11 +376,22 @@
                             <th>Findings</th>
                             <th>Proof</th>
                             <th>Owner</th>
-                            <th class="centered">Actions</th>
                         </thead>
                         <tbody>
                         {% for risk_acceptance in risks_accepted %}
                             <tr>
+                                <td class="centered">
+                                    <ul>
+                                        <li class="dropdown" style="list-style:none;position:absolute">
+                                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                              <ul class="dropdown-menu">
+                                                {% with engagement=eng %}
+                                                    {% include 'dojo/snippets/risk_acceptance_actions_snippet.html' with include_view=True %}
+                                                {% endwith %}
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </td>
                                 <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.created|date }}</a></td>
                                 <td>{{ risk_acceptance.accepted_by.get_full_name }}</td>
                                 <td><a href="{% url 'view_risk_acceptance' eng.id risk_acceptance.id %}">{{ risk_acceptance.name }}</a></td>
@@ -410,18 +422,6 @@
                                     <td>No</a></td>
                                 {% endif %}
                                 <td>{{ risk_acceptance.owner.get_full_name }}</td>
-                                <td class="centered">
-                                    <ul>
-                                        <li class="dropdown" style="list-style:none;position:absolute">
-                                              <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
-                                              <ul class="dropdown-menu">
-                                                {% with engagement=eng %}
-                                                    {% include 'dojo/snippets/risk_acceptance_actions_snippet.html' with include_view=True %}
-                                                {% endwith %}
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -450,7 +450,7 @@
     {% if eng.engagement_type == "Interactive" %}
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h4> Check List<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
+          <h4> Checklist<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
             <i class="glyphicon glyphicon-chevron-down"></i></a></span>
             {% if user|is_authorized_for_delete:eng %}
               {% if check %}
@@ -458,7 +458,7 @@
                     href="{% url 'complete_checklist' eng.id %}">
                       <span class="fa fa-edit"></span></a>
               {% else %}
-                  <a title="Complete Check List" class="btn btn-sm btn-primary pull-right"
+                  <a title="Complete Checklist" class="btn btn-sm btn-primary pull-right"
                     href="{% url 'complete_checklist' eng.id %}">
                       <span class="fa fa-edit"></span></a></a>
               {% endif %}

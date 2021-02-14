@@ -165,7 +165,8 @@ env = environ.Env(
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
     # APIv1 is depreacted and will be removed at 2021-06-30
     DD_LEGACY_API_V1_ENABLE=(bool, False),
-
+    # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
+    DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new experimental feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, False)
 )
@@ -1006,4 +1007,7 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
+
+EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
+
 USE_L10N = True
