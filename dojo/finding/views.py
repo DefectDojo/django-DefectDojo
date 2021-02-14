@@ -657,7 +657,8 @@ def edit_finding(request, fid):
         )
     else:
         req_resp = None
-    form = FindingForm(instance=finding, template=False, req_resp=req_resp)
+    form = FindingForm(instance=finding, template=False, req_resp=req_resp,
+                       can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
     form_error = False
     jform = None
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
@@ -667,7 +668,8 @@ def edit_finding(request, fid):
     github_enabled = finding.has_github_issue()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, instance=finding, template=False, req_resp=None)
+        form = FindingForm(request.POST, instance=finding, template=False, req_resp=None,
+                           can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
 
         if finding.active:
             if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
