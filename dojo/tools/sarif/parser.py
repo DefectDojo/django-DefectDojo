@@ -15,6 +15,16 @@ class SarifParser(object):
 
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
     """
+
+    def get_scan_types(self):
+        return ["SARIF"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "SARIF report file can be imported in SARIF format."
+
     def get_findings(self, filehandle, test):
         tree = json.load(filehandle)
 

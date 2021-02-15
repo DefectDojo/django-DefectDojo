@@ -7,6 +7,16 @@ from dojo.models import Endpoint, Finding
 
 
 class SSLlabsParser(object):
+
+    def get_scan_types(self):
+        return ["SSL Labs Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JSON Output of ssllabs-scan cli."
+
     def get_findings(self, filename, test):
         tree = filename.read()
         try:

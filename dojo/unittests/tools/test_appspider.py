@@ -1,16 +1,16 @@
 from django.test import TestCase
-from dojo.tools.appspider.parser import AppSpiderXMLParser
+from dojo.tools.appspider.parser import AppSpiderParser
 from dojo.models import Product, Engagement, Test, Finding
 
 
-class TestAppSpiderXMLParser(TestCase):
+class TestAppSpiderParser(TestCase):
 
     def test_appspider_parser_has_one_finding(self):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open("dojo/unittests/scans/appspider/one_vuln.xml")
-        parser = AppSpiderXMLParser()
+        parser = AppSpiderParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
         self.assertEqual(1, len(findings))
@@ -27,5 +27,5 @@ class TestAppSpiderXMLParser(TestCase):
     def convert_severity(self):
         with self.subTest(val="0-Safe"):
             self.assertIn(
-                Finding.SEVERITIES, AppSpiderXMLParser.convert_severity("0-Safe")
+                Finding.SEVERITIES, AppSpiderParser.convert_severity("0-Safe")
             )

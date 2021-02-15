@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class TwistlockCSVParser(object):
+
     def parse_issue(self, row, test):
         if not row:
             return None
@@ -161,6 +162,15 @@ def convert_severity(severity):
 
 
 class TwistlockParser(object):
+
+    def get_scan_types(self):
+        return ["Twistlock Image Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Twistlock Image Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JSON output of twistcli image scan or CSV."
 
     def get_findings(self, filename, test):
 

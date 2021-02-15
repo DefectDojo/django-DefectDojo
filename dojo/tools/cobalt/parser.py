@@ -7,7 +7,17 @@ from dojo.models import Finding
 __author__ = 'dr3dd589'
 
 
-class CobaltCSVParser(object):
+class CobaltParser(object):
+
+    def get_scan_types(self):
+        return ["Cobalt.io Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "CSV Report"
+
     def get_findings(self, filename, test):
         if filename is None:
             return list()
