@@ -27,20 +27,20 @@ class NmapParser(object):
 
             ip = host.find("address[@addrtype='ipv4']").attrib['addr']
             if ip is not None:
-                host_info += "IP Address: %s\n" % ip
+                host_info += "**IP Address:** %s\n" % ip
 
             fqdn = host.find("hostnames/hostname[@type='PTR']").attrib['name'] if host.find("hostnames/hostname[@type='PTR']") is not None else None
             if fqdn is not None:
-                host_info += "FQDN: %s\n" % fqdn
+                host_info += "**FQDN:** %s\n" % fqdn
 
             host_info += "\n\n"
 
             for os in host.iter("os"):
                 for os_match in os.iter("osmatch"):
                     if 'name' in os_match.attrib:
-                        host_info += "Host OS: %s\n" % os_match.attrib['name']
+                        host_info += "**Host OS:** %s\n" % os_match.attrib['name']
                     if 'accuracy' in os_match.attrib:
-                        host_info += "Accuracy: {0}%\n".format(os_match.attrib['accuracy'])
+                        host_info += "**Accuracy:** {0}%\n".format(os_match.attrib['accuracy'])
 
                 host_info += "\n\n"
 
@@ -88,6 +88,8 @@ class NmapParser(object):
                                 verified=False,
                                 description=description,
                                 severity=severity,
+                                mitigation="N/A",
+                                impact="No impact provided",
                                 numerical_severity=Finding.get_numerical_severity(severity))
                     find.unsaved_endpoints = list()
                     dupes[dupe_key] = find
@@ -118,8 +120,8 @@ class NmapParser(object):
         for component_element in script_element.findall('table'):
             component_cpe = CPE(component_element.attrib['key'])
             for vuln in component_element.findall('table'):
-                description = "**Vulnerability**\n"
-                description += "**CPE**" + str(component_cpe) + "\n"
+                description = "## Vulnerability\n\n"
+                description += "**CPE**: " + str(component_cpe) + "\n"
                 vuln_attributes = dict()
                 for elem in vuln.findall('elem'):
                     vuln_attributes[elem.attrib['key'].lower()] = elem.text
@@ -140,6 +142,8 @@ class NmapParser(object):
                                     verified=False,
                                     description=description,
                                     severity=severity,
+                                    mitigation="N/A",
+                                    impact="No impact provided",
                                     numerical_severity=Finding.get_numerical_severity(severity),
                                     component_name=component_cpe.get_product()[0] if len(component_cpe.get_product()) > 0 else '',
                                     component_version=component_cpe.get_version()[0] if len(component_cpe.get_version()) > 0 else '',
