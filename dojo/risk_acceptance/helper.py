@@ -121,7 +121,7 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
     post_jira_comments(risk_acceptance, findings, accepted_message_creator)
 
 
-@task(name='risk_acceptance_expiration_handler')
+@task(name='dojo.risk_acceptance.helper.expiration_handler')
 def expiration_handler(*args, **kwargs):
     """
     Creates a notification upon risk expiration and X days beforehand if configured.
