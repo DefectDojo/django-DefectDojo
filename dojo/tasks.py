@@ -290,12 +290,12 @@ def async_dupe_delete(*args, **kwargs):
         logger.info('total number of excess duplicates deleted: %s', total_deleted_count)
 
 
-@task(name='celery_status', ignore_result=False)
+@task(ignore_result=False)
 def celery_status():
     return True
 
 
-@app.task(name='dojo.tasks.async_sla_compute_and_notify')
+@app.task
 def async_sla_compute_and_notify_task(*args, **kwargs):
     logger.debug("Computing SLAs and notifying as needed")
     try:
