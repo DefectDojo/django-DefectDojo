@@ -23,7 +23,7 @@ class NmapParser(object):
             raise ValueError("This doesn't seem to be a valid Nmap xml file.")
 
         for host in root.findall("host"):
-            host_info = "--- HOST ---\n\n"
+            host_info = "### Host\n\n"
 
             ip = host.find("address[@addrtype='ipv4']").attrib['addr']
             if ip is not None:
@@ -120,7 +120,7 @@ class NmapParser(object):
         for component_element in script_element.findall('table'):
             component_cpe = CPE(component_element.attrib['key'])
             for vuln in component_element.findall('table'):
-                description = "## Vulnerability\n\n"
+                description = "### Vulnerability\n\n"
                 description += "**CPE**: " + str(component_cpe) + "\n"
                 vuln_attributes = dict()
                 for elem in vuln.findall('elem'):
