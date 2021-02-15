@@ -13,6 +13,7 @@ from django.core import validators
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
+from django.forms import utils as form_utils
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
@@ -922,6 +923,51 @@ class PromoteFindingForm(forms.ModelForm):
                    'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
+class SplitDateTimeWidget(forms.MultiWidget):
+    supports_microseconds = False
+    template_name = 'dojo/field-datetime.html'
+
+    def __init__(self):
+        widgets = (
+            forms.TextInput(attrs={'type': 'date', 'autocomplete': 'off'}),
+            forms.TextInput(attrs={'type': 'time', 'autocomplete': 'off'}),
+        )
+        super().__init__(widgets)
+
+    def decompress(self, value):
+        if value:
+            value = form_utils.to_current_timezone(value)
+            return [value.date(), value.time()]
+        return [None, None]
+
+
+class SplitDateTimeField(forms.MultiValueField):
+    widget = SplitDateTimeWidget
+    hidden_widget = forms.SplitHiddenDateTimeWidget
+
+    def __init__(self, **kwargs):
+        fields = (
+            forms.DateField(),
+            forms.TimeField(),
+        )
+        super().__init__(fields, **kwargs)
+
+    def compress(self, data_list):
+        if data_list:
+            # preserve default dojo behavior and set current time if any part is empty
+            if data_list[0] in self.empty_values:
+                selected_date = date.today()
+            else:
+                selected_date = data_list[0]
+            if data_list[1] in self.empty_values:
+                selected_time = datetime.now().time()
+            else:
+                selected_time = data_list[1]
+            # keep potential tzinfo
+            return form_utils.from_current_timezone(datetime.combine(selected_date, selected_time, *data_list[2:]))
+        return None
+
+
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
@@ -946,10 +992,14 @@ class FindingForm(forms.ModelForm):
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
+    mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
+    mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
+
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'risk_accepted', 'under_defect_review')
+    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact',
+                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
+                   'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+                   'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
@@ -957,6 +1007,9 @@ class FindingForm(forms.ModelForm):
         req_resp = None
         if 'req_resp' in kwargs:
             req_resp = kwargs.pop('req_resp')
+
+        self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
+            else False
 
         super(FindingForm, self).__init__(*args, **kwargs)
 
@@ -982,6 +1035,14 @@ class FindingForm(forms.ModelForm):
 
         self.fields['sla_start_date'].disabled = True
 
+        if self.can_edit_mitigated_data:
+            if hasattr(self, 'instance'):
+                self.fields['mitigated'].initial = self.instance.mitigated
+                self.fields['mitigated_by'].initial = self.instance.mitigated_by
+        else:
+            del self.fields['mitigated']
+            del self.fields['mitigated_by']
+
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
 
@@ -997,6 +1058,17 @@ class FindingForm(forms.ModelForm):
                                         'be risk accepted.')
 
         return cleaned_data
+
+    def _post_clean(self):
+        super(FindingForm, self)._post_clean()
+
+        if self.can_edit_mitigated_data:
+            opts = self.instance._meta
+            try:
+                opts.get_field('mitigated').save_form_data(self.instance, self.cleaned_data.get('mitigated'))
+                opts.get_field('mitigated_by').save_form_data(self.instance, self.cleaned_data.get('mitigated_by'))
+            except forms.ValidationError as e:
+                self._update_errors(e)
 
     class Meta:
         model = Finding

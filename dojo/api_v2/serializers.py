@@ -1082,6 +1082,7 @@ class ImportScanSerializer(serializers.Serializer):
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
     version = serializers.CharField(required=False)
+    test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
     # class Meta:
     #     model = Test
