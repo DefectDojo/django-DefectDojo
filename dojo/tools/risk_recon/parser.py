@@ -5,6 +5,16 @@ from dojo.tools.risk_recon.api import RiskReconAPI
 
 
 class RiskReconParser(object):
+
+    def get_scan_types(self):
+        return ["Risk Recon API Importer"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Risk Recon API Importer"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Risk Recon ApI will be accessed to gather finding information. Report format here."
+
     def get_findings(self, filename, test):
         if filename:
             tree = filename.read()

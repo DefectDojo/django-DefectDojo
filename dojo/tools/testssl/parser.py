@@ -11,7 +11,17 @@ __author__ = 'dr3dd589'
 SEV = ['INFO', 'LOW', 'HIGH', 'WARN']
 
 
-class TestsslCSVParser(object):
+class TestsslParser(object):
+
+    def get_scan_types(self):
+        return ["Testssl Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Testssl Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import CSV output of testssl scan report."
+
     def get_findings(self, filename, test):
         content = filename.read()
         if type(content) is bytes:
@@ -71,6 +81,7 @@ class TestsslCSVParser(object):
                         self.process_endpoints(finding, url)
         return dupes.values()
 
+    # FIXME remove special endpoint management
     def process_endpoints(self, finding, host):
         protocol = "http"
         query = ""

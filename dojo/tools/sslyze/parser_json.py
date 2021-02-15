@@ -287,5 +287,4 @@ def get_endpoint(node):
             host=hostname,
             port=port)
     else:
-        print("No endpoint found")
         return None

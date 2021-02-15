@@ -1,0 +1,262 @@
+{
+	"Issues": [
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/app.go",
+			"code": "s.ListenAndServe()",
+			"line": "79"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/setting/setting.go",
+			"code": "db,_ := database.Connect()",
+			"line": "64"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/setting/setting.go",
+			"code": "_ = db.QueryRow(sql).Scan(\u0026version)",
+			"line": "66"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"rule_id": "G501",
+			"details": "Blacklisted import crypto/md5: weak cryptographic primitive",
+			"file": "/vagrant/go/src/govwa/user/user.go",
+			"code": "\"crypto/md5\"",
+			"line": "8"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"rule_id": "G401",
+			"details": "Use of weak cryptographic primitive",
+			"file": "/vagrant/go/src/govwa/user/user.go",
+			"code": "md5.New()",
+			"line": "160"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/user/user.go",
+			"code": "hasher.Write([]byte(text))",
+			"line": "161"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/util/cookie.go",
+			"code": "cookie, _ := r.Cookie(name)",
+			"line": "42"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/util/template.go",
+			"code": "w.Write(b)",
+			"line": "35"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/util/template.go",
+			"code": "template.ExecuteTemplate(w, name, data)",
+			"line": "41"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "LOW",
+			"rule_id": "G203",
+			"details": "this method will not auto-escape HTML. Verify data is well formed.",
+			"file": "/vagrant/go/src/govwa/util/template.go",
+			"code": "template.HTML(text)",
+			"line": "45"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/util/middleware/middleware.go",
+			"code": "sqlmapDetected, _ := regexp.MatchString(\"sqlmap*\", userAgent)",
+			"line": "70"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/util/middleware/middleware.go",
+			"code": "w.Write([]byte(\"Forbidden\"))",
+			"line": "73"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"rule_id": "G501",
+			"details": "Blacklisted import crypto/md5: weak cryptographic primitive",
+			"file": "/vagrant/go/src/govwa/vulnerability/csa/csa.go",
+			"code": "\"crypto/md5\"",
+			"line": "7"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"rule_id": "G401",
+			"details": "Use of weak cryptographic primitive",
+			"file": "/vagrant/go/src/govwa/vulnerability/csa/csa.go",
+			"code": "md5.New()",
+			"line": "62"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/vulnerability/csa/csa.go",
+			"code": "hasher.Write([]byte(text))",
+			"line": "63"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"rule_id": "G501",
+			"details": "Blacklisted import crypto/md5: weak cryptographic primitive",
+			"file": "/vagrant/go/src/govwa/vulnerability/idor/idor.go",
+			"code": "\"crypto/md5\"",
+			"line": "8"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/vulnerability/idor/idor.go",
+			"code": "p.GetData(sid)",
+			"line": "42"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/vulnerability/idor/idor.go",
+			"code": "p.GetData(sid)",
+			"line": "61"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/vulnerability/idor/idor.go",
+			"code": "p.GetData(sid)",
+			"line": "82"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/vulnerability/idor/idor.go",
+			"code": "p.GetData(sid)",
+			"line": "124"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"rule_id": "G401",
+			"details": "Use of weak cryptographic primitive",
+			"file": "/vagrant/go/src/govwa/vulnerability/idor/idor.go",
+			"code": "md5.New()",
+			"line": "164"
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"rule_id": "G104",
+			"details": "Errors unhandled.",
+			"file": "/vagrant/go/src/govwa/vulnerability/idor/idor.go",
+			"code": "hasher.Write([]byte(text))",
+			"line": "165"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"rule_id": "G201",
+			"details": "SQL string formatting",
+			"file": "/vagrant/go/src/govwa/vulnerability/sqli/function.go",
+			"code": "fmt.Sprintf(`SELECT p.user_id, p.full_name, p.city, p.phone_number \n\t\t\t\t\t\t\t\tFROM Profile as p,Users as u \n\t\t\t\t\t\t\t\twhere p.user_id = u.id \n\t\t\t\t\t\t\t\tand u.id=%s`,uid)",
+			"line": "36-39"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "LOW",
+			"rule_id": "G203",
+			"details": "this method will not auto-escape HTML. Verify data is well formed.",
+			"file": "/vagrant/go/src/govwa/vulnerability/xss/xss.go",
+			"code": "template.HTML(value)",
+			"line": "58"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "LOW",
+			"rule_id": "G203",
+			"details": "this method will not auto-escape HTML. Verify data is well formed.",
+			"file": "/vagrant/go/src/govwa/vulnerability/xss/xss.go",
+			"code": "template.HTML(notFound)",
+			"line": "59"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "LOW",
+			"rule_id": "G203",
+			"details": "this method will not auto-escape HTML. Verify data is well formed.",
+			"file": "/vagrant/go/src/govwa/vulnerability/xss/xss.go",
+			"code": "template.HTML(value)",
+			"line": "62"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "LOW",
+			"rule_id": "G203",
+			"details": "this method will not auto-escape HTML. Verify data is well formed.",
+			"file": "/vagrant/go/src/govwa/vulnerability/xss/xss.go",
+			"code": "template.HTML(vuln)",
+			"line": "63"
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "LOW",
+			"rule_id": "G203",
+			"details": "this method will not auto-escape HTML. Verify data is well formed.",
+			"file": "/vagrant/go/src/govwa/vulnerability/xss/xss.go",
+			"code": "template.HTML(inlineJS)",
+			"line": "100"
+		}
+	],
+	"Stats": {
+		"files": 20,
+		"lines": 1562,
+		"nosec": 0,
+		"found": 28
+	}
+}

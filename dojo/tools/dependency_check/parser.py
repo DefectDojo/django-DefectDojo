@@ -23,8 +23,6 @@ class DependencyCheckParser(object):
 
             if key not in dupes:
                 dupes[key] = finding
-            # else:
-                # print('skipping: ' + finding.title)
 
     def get_field_value(self, parent_node, field_name, namespace):
         field_node = parent_node.find(namespace + field_name)
@@ -240,6 +238,15 @@ class DependencyCheckParser(object):
             references=reference_detail,
             component_name=component_name,
             component_version=component_version)
+
+    def get_scan_types(self):
+        return ["Dependency Check Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "OWASP Dependency Check output can be imported in Xml format."
 
     def get_findings(self, filename, test):
 

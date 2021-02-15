@@ -18,6 +18,15 @@ DESCRIPTION_TEMPLATE = """**{title}**
 class BurpApiParser(object):
     """Parser that can load data from Burp API"""
 
+    def get_scan_types(self):
+        return ["Burp REST API"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Burp REST API"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Burp REST API scan data in JSON format (/scan/[task_id] endpoint)."
+
     def get_findings(self, file, test):
 
         if file is None:

@@ -82,7 +82,16 @@ class NotesColumnMappingStrategy(ColumnMappingStrategy):
             finding.notes.add(note)
 
 
-class SKFCsvParser(object):
+class SKFParser(object):
+
+    def get_scan_types(self):
+        return ["SKF Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Output of SKF Sprint summary export."
 
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()

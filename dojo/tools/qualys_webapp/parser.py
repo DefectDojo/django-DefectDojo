@@ -251,5 +251,15 @@ def qualys_webapp_parser(qualys_xml_file, test, enable_weakness=False):
 
 
 class QualysWebAppParser(object):
+
+    def get_scan_types(self):
+        return ["Qualys Webapp Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Qualys WebScan output files can be imported in XML format."
+
     def get_findings(self, file, test, enable_weakness=QUALYS_WAS_WEAKNESS_IS_VULN):
         return qualys_webapp_parser(file, test, enable_weakness)
