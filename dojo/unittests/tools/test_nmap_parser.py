@@ -31,8 +31,12 @@ class TestNmapParser(TestCase):
 
         self.assertEqual("Medium", findings[0].severity)
         self.assertEqual("CVE-2018-15919", findings[0].cve)
+        self.assertEqual("openssh", findings[0].component_name)
+        self.assertEqual("7.4", findings[0].component_version)
 
         self.assertEqual("Medium", findings[1].severity)
         self.assertEqual("CVE-2017-15906", findings[1].cve)
+        self.assertEqual("openssh", findings[1].component_name)
+        self.assertEqual("7.4", findings[1].component_version)
 
         self.assertEqual("Info", findings[2].severity)

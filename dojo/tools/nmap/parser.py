@@ -123,7 +123,7 @@ class NmapParser(object):
                 vuln_attributes = dict()
                 for elem in vuln.findall('elem'):
                     vuln_attributes[elem.attrib['key'].lower()] = elem.text
-                    description += "**" + elem.attrib['key'] + "**" + elem.text + "\n"
+                    description += "**" + elem.attrib['key'] + "**: " + elem.text + "\n"
                 cve = vuln_attributes['id']
                 severity = self.convert_cvss_score(vuln_attributes['cvss'])
 
