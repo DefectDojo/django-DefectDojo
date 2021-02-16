@@ -235,9 +235,9 @@ class NexposeParser(object):
                         refs = ''
                         for ref in vuln['refs']:
                             if ref.startswith('CA'):
-                                ref = f" * [{vuln['refs'][ref]}](https://www.cert.org/advisories/{vuln['refs'][ref]}.html)"
+                                ref += f" * [{vuln['refs'][ref]}](https://www.cert.org/advisories/{vuln['refs'][ref]}.html)"
                             elif ref.startswith('CVE'):
-                                ref = f" * [{vuln['refs'][ref]}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln['refs'][ref]})"
+                                ref += f" * [{vuln['refs'][ref]}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln['refs'][ref]})"
                             else:
                                 refs += f" * {ref}: {vuln['refs'][ref]}"
                             refs += "\n"
@@ -284,9 +284,9 @@ class NexposeParser(object):
                 refs = ''
                 for ref in vuln['refs']:
                     if ref.startswith('CA'):
-                        ref = f" * [{vuln['refs'][ref]}](https://www.cert.org/advisories/{vuln['refs'][ref]}.html)"
+                        ref += f" * [{vuln['refs'][ref]}](https://www.cert.org/advisories/{vuln['refs'][ref]}.html)"
                     elif ref.startswith('CVE'):
-                        ref = f" * [{vuln['refs'][ref]}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln['refs'][ref]})"
+                        ref += f" * [{vuln['refs'][ref]}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln['refs'][ref]})"
                     else:
                         refs += f" * {ref}: {vuln['refs'][ref]}"
                     refs += "\n"
