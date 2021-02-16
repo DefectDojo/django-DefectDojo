@@ -53,6 +53,9 @@ class ImportReimportMixin(object):
         self.anchore_file_name = self.scans_path + 'anchore/one_vuln_many_files.json'
         self.scan_type_anchore = 'Anchore Engine Scan'
 
+        self.gitlab_dep_scan_components_filename = self.scans_path + 'gitlab_dep_scan/gl-dependency-scanning-report-many-vuln.json'
+        self.scan_type_gtlab_dep_scan = 'GitLab Dependency Scanning Report'
+
     # import zap scan, testing:
     # - import
     # - active/verifed = True
@@ -516,6 +519,57 @@ class ImportReimportMixin(object):
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
+
+    # TODO
+    def test_import_0_reimport_0_gitlab_dep_scan_component_name_and_version(self):
+
+        import0 = self.import_scan_with_params(self.gitlab_dep_scan_components_filename,
+                                               scan_type=self.scan_type_gtlab_dep_scan,
+                                               minimum_severity='Info')
+
+        test_id = import0['test']
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(6, active_findings_before)
+
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0):
+              reimport0 = self.reimport_scan_with_params(test_id,
+                                                         self.gitlab_dep_scan_components_filename,
+                                                         scan_type=self.scan_type_gtlab_dep_scan,
+                                                         minimum_severity='Info')
+
+        active_findings_after = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(6, active_findings_after)
+
+        count = 0
+        for finding in active_findings_after['results']:
+            if 'v0.0.0-20190219172222-a4c6cb3142f2' == finding['component_version']:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
+                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+                count = count + 1
+            elif 'v0.0.0-20190308221718-c2843e01d9a2' == finding['component_version']:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
+                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+                count = count + 1
+            elif 'v0.0.0-20200302210943-78000ba7a073' == finding['component_version']:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
+                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+                count = count + 1
+            elif 'v0.3.0' == finding['component_version']:
+                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
+                self.assertEqual("CVE-2020-14040", finding['cve'])
+                self.assertEqual("golang.org/x/text", finding['component_name'])
+                count = count + 1
+            elif 'v0.3.2' == finding['component_version']:
+                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
+                self.assertEqual("CVE-2020-14040", finding['cve'])
+                self.assertEqual("golang.org/x/text", finding['component_name'])
+                count = count + 1
+
+        self.assertEqual(5, count)
 
 
 @override_settings(TRACK_IMPORT_HISTORY=True)

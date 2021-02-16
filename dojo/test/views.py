@@ -749,7 +749,14 @@ def re_import_scan_results(request, tid):
                                                         severity=sev,
                                                         numerical_severity=Finding.get_numerical_severity(sev),
                                                         description=item.description)
-
+                    elif scan_type == 'GitLab Dependency Scanning Report':
+                        findings = Finding.objects.filter(
+                            title=item.title,
+                            test=test,
+                            severity=sev,
+                            component_name=component_name,
+                            component_version=component_version,
+                            numerical_severity=Finding.get_numerical_severity(sev)).all()
                     else:
                         findings = Finding.objects.filter(title=item.title,
                                                       test__id=test.id,
