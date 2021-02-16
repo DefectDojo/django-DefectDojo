@@ -710,11 +710,11 @@ def import_scan_results(request, eid=None, pid=None):
                         item.endpoints.add(ep)
                         item.endpoint_status.add(eps)
 
+                    if item.unsaved_tags:
+                        item.tags = item.unsaved_tags
+
                     item.save(false_history=True, push_to_jira=push_to_jira)
                     new_findings.append(item)
-
-                    if item.unsaved_tags is not None:
-                        item.tags = item.unsaved_tags
 
                     finding_count += 1
                     i += 1

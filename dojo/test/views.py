@@ -903,7 +903,7 @@ def re_import_scan_results(request, tid):
                             finding.endpoints.add(ep)
                             finding.endpoint_status.add(eps)
 
-                        if item.unsaved_tags is not None:
+                        if item.unsaved_tags:
                             finding.tags = item.unsaved_tags
 
                     # Save it. This may be the second time we save it in this function.
