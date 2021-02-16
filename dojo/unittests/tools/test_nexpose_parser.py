@@ -4,6 +4,7 @@ from dojo.models import Test, Engagement, Product
 
 
 class TestNexposeParser(TestCase):
+
     def test_nexpose_parser_has_no_finding(self):
         testfile = open("dojo/unittests/scans/nexpose/no_vuln.xml")
         parser = NexposeParser()
@@ -18,7 +19,7 @@ class TestNexposeParser(TestCase):
         parser = NexposeParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(10, len(findings))
+        self.assertEqual(11, len(findings))
         # vuln 1
         finding = findings[0]
         self.assertEqual("Critical", finding.severity)
@@ -30,5 +31,20 @@ class TestNexposeParser(TestCase):
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("Missing HttpOnly Flag From Cookie", finding.title)
         self.assertIsNone(finding.cve)
-        print(finding.unsaved_endpoints)
         self.assertEqual(1, len(finding.unsaved_endpoints))
+
+    def test_nexpose_parser_tests_outside_endpoint(self):
+        testfile = open("dojo/unittests/scans/nexpose/report_auth.xml")
+        parser = NexposeParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(3, len(findings))
+        # vuln 1
+        finding = findings[0]
+        self.assertEqual("High", finding.severity)
+        self.assertEqual("ICMP redirection enabled", finding.title)
+        self.assertIsNone(finding.cve)
+        # vuln 2
+        finding = findings[1]
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual("No password for Grub", finding.title)
+        self.assertIsNone(finding.cve)
