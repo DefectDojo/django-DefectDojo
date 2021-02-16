@@ -19,7 +19,7 @@ class TestNexposeParser(TestCase):
         parser = NexposeParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(11, len(findings))
+        self.assertEqual(13, len(findings))
         # vuln 1
         finding = findings[0]
         self.assertEqual("Critical", finding.severity)
@@ -27,7 +27,7 @@ class TestNexposeParser(TestCase):
         self.assertIsNone(finding.cve)
         self.assertEqual(1, len(finding.unsaved_endpoints))
         # vuln 2
-        finding = findings[1]
+        finding = findings[2]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("Missing HttpOnly Flag From Cookie", finding.title)
         self.assertIsNone(finding.cve)
@@ -37,14 +37,19 @@ class TestNexposeParser(TestCase):
         testfile = open("dojo/unittests/scans/nexpose/report_auth.xml")
         parser = NexposeParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
-        # vuln 1
+        self.assertEqual(4, len(findings))
+        # vuln 0
         finding = findings[0]
         self.assertEqual("High", finding.severity)
         self.assertEqual("ICMP redirection enabled", finding.title)
         self.assertIsNone(finding.cve)
-        # vuln 2
+        # vuln 1
         finding = findings[1]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("No password for Grub", finding.title)
+        self.assertIsNone(finding.cve)
+        # vuln 2
+        finding = findings[2]
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual("User home directory mode unsafe", finding.title)
         self.assertIsNone(finding.cve)

@@ -103,7 +103,8 @@ class NexposeParser(object):
         for tests in node.iter('tests'):
             for test in tests.iter('test'):
                 vuln = dict()
-                if test.get('id') in vulnsDefinitions and test.get('status') == 'vulnerable-exploited':
+                if test.get('id') in vulnsDefinitions and (test.get('status') == 'vulnerable-exploited' or
+                                           test.get('status') == 'vulnerable-version'):
                     vuln = vulnsDefinitions[test.get('id').lower()]
                     for desc in list(test):
                         if 'pluginOutput' in vuln:
