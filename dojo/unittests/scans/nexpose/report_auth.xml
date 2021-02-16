@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <NexposeReport version="2.0">
 <scans>
-<scan id="27992" name="Site1-serv1" startTime="20210211T162340221" endTime="20210211T164705486" status="finished"/>
+<scan id="27992" name="Rand1-om1" startTime="20210211T162340221" endTime="20210211T164705486" status="finished"/>
 </scans><nodes>
-<node address="192.168.0.12" status="alive" device-id="26083" site-name="Site1" site-importance="Normal" scan-template="Discovery Scan,Full audit Pan Net" risk-score="2649.9238">
+<node address="192.168.0.12" status="alive" device-id="26083" site-name="Site1" site-importance="Normal" scan-template="Discovery Scan,Full audit Nigel" risk-score="2649.9238">
 <names>
-<name>slavedns02</name>
+<name>slippery</name>
 </names>
 <fingerprints>
 <os certainty="1.00" vendor="Ubuntu" family="Linux" product="Linux" version="20.04"/>
@@ -56,9 +56,9 @@
 </tests>
 </node>
 
-<node address="192.168.0.10" status="alive" device-id="26084" site-name="Site1" site-importance="Normal" scan-template="Discovery Scan,Full audit Pan Net" risk-score="2649.9238">
+<node address="192.168.0.10" status="alive" device-id="26084" site-name="Site1" site-importance="Normal" scan-template="Discovery Scan,Full audit Nigel" risk-score="2649.9238">
 <names>
-<name>slavedns03</name>
+<name>slippery03</name>
 </names>
 <fingerprints>
 <os certainty="1.00" vendor="Ubuntu" family="Linux" product="Linux" version="20.04"/>
@@ -109,9 +109,9 @@
 </tests>
 </node>
 
-<node address="192.168.0.11" status="alive" device-id="26086" site-name="Site1" site-importance="Normal" scan-template="Discovery Scan,Full audit Pan Net" risk-score="2649.9238">
+<node address="192.168.0.11" status="alive" device-id="26086" site-name="Site1" site-importance="Normal" scan-template="Discovery Scan,Full audit Nigel" risk-score="2649.9238">
 <names>
-<name>slavedns00</name>
+<name>slippery00</name>
 </names>
 <fingerprints>
 <os certainty="1.00" vendor="Ubuntu" family="Linux" product="Linux" version="20.04"/>
@@ -168,9 +168,9 @@
 </tests>
 </node>
 
-<node address="192.168.0.42" status="alive" device-id="26088" site-name="Site1" site-importance="Normal" scan-template="Discovery Scan,Full audit Pan Net" risk-score="2649.9238">
+<node address="192.168.0.42" status="alive" device-id="26088" site-name="Site1" site-importance="Normal" scan-template="Discovery Scan,Full audit Nigel" risk-score="2649.9238">
 <names>
-<name>slavedns01</name>
+<name>slippery01</name>
 </names>
 <fingerprints>
 <os certainty="1.00" vendor="Ubuntu" family="Linux" product="Linux" version="20.04"/>
