@@ -520,6 +520,102 @@ class ImportReimportMixin(object):
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
 
+    # import Zap0 with 4 findings
+    # set 1 finding to active=False and false_positve=True
+    # set 1 finding to active=False and out_of_scope=True
+    # set 1 finding to active=False and risk_accepted=True
+    # delete 1 finding
+    # reimport Zap0 and only 1 finding must be active
+    # the other 3 findings manually set to active=False must remain False
+    def test_import_reimport_keep_false_positive_and_out_of_scope(self):
+        logger.debug('importing zap0 with 4 findings, manually setting 3 findings to active=False, reimporting zap0 must return only 1 finding active=True')
+
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0['test']
+
+        test_api_response = self.get_test_api(test_id)
+        product_api_response = self.get_engagement_api(test_api_response['engagement'])
+        product_id = product_api_response['product']
+
+        self.patch_product_api(product_id, {"enable_simple_risk_acceptance": True})
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(4, active_findings_before)
+
+        for finding in active_findings_before['results']:
+            if 'Zap1' in finding['title']:
+                self.patch_finding_api(finding['id'], {"active": False,
+                                                       "verified": False,
+                                                       "false_p": True,
+                                                       "out_of_scope": False,
+                                                       "risk_accepted": False,
+                                                       "is_Mitigated": True})
+            elif 'Zap2' in finding['title']:
+                self.patch_finding_api(finding['id'], {"active": False,
+                                                       "verified": False,
+                                                       "false_p": False,
+                                                       "out_of_scope": True,
+                                                       "risk_accepted": False,
+                                                       "is_Mitigated": True})
+            elif 'Zap3' in finding['title']:
+                self.patch_finding_api(finding['id'], {"active": False,
+                                                       "verified": False,
+                                                       "false_p": False,
+                                                       "out_of_scope": False,
+                                                       "risk_accepted": True,
+                                                       "is_Mitigated": True})
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(1, active_findings_before)
+
+        for finding in active_findings_before['results']:
+            if 'Zap5' in finding['title']:
+                self.delete_finding_api(finding['id'])
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(0, active_findings_before)
+
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+
+        self.assertEqual(reimport0['test'], test_id)
+
+        active_findings_after = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(1, active_findings_after)
+
+        active_findings_after = self.get_test_findings_api(test_id, active=False)
+        self.assert_finding_count_json(3, active_findings_after)
+
+        for finding in active_findings_after['results']:
+            if 'Zap1' in finding['title']:
+                self.assertFalse(finding['active'])
+                self.assertFalse(finding['verified'])
+                self.assertTrue(finding['false_p'])
+                self.assertFalse(finding['out_of_scope'])
+                self.assertFalse(finding['risk_accepted'])
+                self.assertTrue(finding['is_Mitigated'])
+            elif 'Zap2' in finding['title']:
+                self.assertFalse(finding['active'])
+                self.assertFalse(finding['verified'])
+                self.assertFalse(finding['false_p'])
+                self.assertTrue(finding['out_of_scope'])
+                self.assertFalse(finding['risk_accepted'])
+                self.assertTrue(finding['is_Mitigated'])
+            elif 'Zap3' in finding['title']:
+                self.assertFalse(finding['active'])
+                self.assertFalse(finding['verified'])
+                self.assertFalse(finding['false_p'])
+                self.assertFalse(finding['out_of_scope'])
+                self.assertTrue(finding['risk_accepted'])
+                self.assertTrue(finding['is_Mitigated'])
+            elif 'Zap5' in finding['title']:
+                self.assertTrue(finding['active'])
+                self.assertTrue(finding['verified'])
+                self.assertFalse(finding['false_p'])
+                self.assertFalse(finding['out_of_scope'])
+                self.assertFalse(finding['risk_accepted'])
+                self.assertFalse(finding['is_Mitigated'])
+
     # TODO
     def test_import_0_reimport_0_gitlab_dep_scan_component_name_and_version(self):
 
