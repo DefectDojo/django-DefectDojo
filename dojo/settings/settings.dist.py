@@ -170,7 +170,8 @@ env = environ.Env(
     # new experimental feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, False),
 
-    # feature flag for the new permissions
+    # Feature toggle for new authorization, which is incomplete at the moment.
+    # Don't set it to True for productive environments!
     DD_FEATURE_NEW_AUTHORIZATION=(bool, False)
 )
 
@@ -1011,7 +1012,8 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
 
-# Feature toggles
+# Feature toggle for new authorization, which is incomplete at the moment.
+# Don't set it to True for productive environments!
 FEATURE_NEW_AUTHORIZATION = env('DD_FEATURE_NEW_AUTHORIZATION')
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
