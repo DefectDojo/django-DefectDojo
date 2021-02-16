@@ -172,6 +172,7 @@
             </ul>
             <!-- /.navbar-top-links -->
 
+            {% if request.user.is_authenticated %}
             <div class="navbar-default sidebar navbar-fixed-top" role="navigation">
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
@@ -271,7 +272,6 @@
                                     </ul>
                                 </li>
                             {% endif %}
-                            {% if request.user.is_authenticated %}
                             <li>
                                 <a href="{% url 'reports' %}" aria-expanded="false" aria-label="Reports">
 				                    <i class="fa fa-file-text-o fa-fw"></i>
@@ -303,7 +303,6 @@
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% endif %}
                             {% if request.user.is_staff %}
                                 <li>
                                     <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
@@ -311,8 +310,6 @@
                                         <span>Users</span>
                                     </a>
                                 </li>
-                            {% endif %}
-                            {% if request.user.is_staff %}
                                 <li>
 				                    <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                         <i class="fa fa-calendar fa-fw"></i>
@@ -355,6 +352,7 @@
                                         {% endif %}
                                         <li><a href="{% url 'notifications' %}">Notifications</a></li>
                                     </ul>
+                                </li>
                         {% endblock %}
 
                         <li id="min-menu">
@@ -368,6 +366,7 @@
                 <!-- /.sidebar-collapse -->
             </div>
             <!-- /.navbar-static-side -->
+            {% endif %}
         </nav>
     {% endblock %}
     <!-- Page Content -->
