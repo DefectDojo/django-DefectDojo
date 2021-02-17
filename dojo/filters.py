@@ -353,6 +353,7 @@ class ComponentFilter(ProductComponentFilter):
 
 
 class EngagementFilter(DojoFilter):
+    engagement__name = CharFilter(lookup_expr='icontains', label='Engagement name contains')
     engagement__lead = ModelChoiceFilter(
         queryset=Dojo_User.objects.filter(
             engagement__lead__isnull=False).distinct(),
@@ -360,7 +361,7 @@ class EngagementFilter(DojoFilter):
     engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
     engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
 
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='icontains', label='Product name contains')
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
