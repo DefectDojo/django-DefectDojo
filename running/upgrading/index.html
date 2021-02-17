@@ -1,0 +1,211 @@
+<!doctype html><html lang=en class="js csstransforms3d"><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=generator content="Hugo 0.79.1"><meta name=description content="Documentation for DefectDojo"><link rel="shortcut icon" href=/django-DefectDojo/images/favicon.ico type=image/x-icon><title>Upgrading :: DefectDojo Documentation</title><link href=/django-DefectDojo/css/nucleus.css?1613586496 rel=stylesheet><link href=/django-DefectDojo/css/fontawesome-all.min.css?1613586496 rel=stylesheet><link href=/django-DefectDojo/css/hybrid.css?1613586496 rel=stylesheet><link href=/django-DefectDojo/css/featherlight.min.css?1613586496 rel=stylesheet><link href=/django-DefectDojo/css/perfect-scrollbar.min.css?1613586496 rel=stylesheet><link href=/django-DefectDojo/css/auto-complete.css?1613586496 rel=stylesheet><link href=/django-DefectDojo/css/atom-one-dark-reasonable.css?1613586496 rel=stylesheet><link href=/django-DefectDojo/css/theme.css?1613586496 rel=stylesheet><link href=/django-DefectDojo/css/hugo-theme.css?1613586496 rel=stylesheet><link href=/django-DefectDojo/css/theme-blue.css?1613586496 rel=stylesheet><script src=/django-DefectDojo/js/jquery-3.3.1.min.js?1613586496></script><style>:root #header+#content>#left>#rlblock_left{display:none!important}</style><style type=text/css>body{max-width:1500px}a#logo{background:#fff}</style></head><body data-url=/django-DefectDojo/running/upgrading/><nav id=sidebar><div id=header-wrapper><div id=header><a id=logo href=/django-DefectDojo/><img src=/django-DefectDojo/images/logo.png alt="DefectDojo Logo"></a></div><div class=searchbox><label for=search-by><i class="fas fa-search"></i></label><input data-search-input id=search-by type=search placeholder=Search...>
+<span data-search-clear><i class="fas fa-times"></i></span></div><script type=text/javascript src=/django-DefectDojo/js/lunr.min.js?1613586496></script><script type=text/javascript src=/django-DefectDojo/js/auto-complete.js?1613586496></script><script type=text/javascript>var baseurl="https:\/\/DefectDojo.github.io\/django-DefectDojo\/";</script><script type=text/javascript src=/django-DefectDojo/js/search.js?1613586496></script></div><div class=highlightable><ul class=topics><li data-nav-id=/django-DefectDojo/basics/ title=Basics class=dd-item><a href=/django-DefectDojo/basics/>Basics</a><ul><li data-nav-id=/django-DefectDojo/basics/about/ title="About DefectDojo" class=dd-item><a href=/django-DefectDojo/basics/about/>About DefectDojo</a></li><li data-nav-id=/django-DefectDojo/basics/models/ title=Models class=dd-item><a href=/django-DefectDojo/basics/models/>Models</a></li><li data-nav-id=/django-DefectDojo/basics/features/ title=Features class=dd-item><a href=/django-DefectDojo/basics/features/>Features</a></li><li data-nav-id=/django-DefectDojo/basics/workflows/ title=Workflows class=dd-item><a href=/django-DefectDojo/basics/workflows/>Workflows</a></li><li data-nav-id=/django-DefectDojo/basics/start-using/ title="Usage Examples" class=dd-item><a href=/django-DefectDojo/basics/start-using/>Usage Examples</a></li></ul></li><li data-nav-id=/django-DefectDojo/integrations/ title=Integrations class=dd-item><a href=/django-DefectDojo/integrations/>Integrations</a><ul><li data-nav-id=/django-DefectDojo/integrations/burp-plugin/ title="Defect Dojo Burp-Plugin" class=dd-item><a href=/django-DefectDojo/integrations/burp-plugin/>Defect Dojo Burp-Plugin</a></li><li data-nav-id=/django-DefectDojo/integrations/api-docs/ title="DefectDojo API Documentation" class=dd-item><a href=/django-DefectDojo/integrations/api-docs/>DefectDojo API Documentation</a></li><li data-nav-id=/django-DefectDojo/integrations/api-v2-docs/ title="DefectDojo API v2 Documentation" class=dd-item><a href=/django-DefectDojo/integrations/api-v2-docs/>DefectDojo API v2 Documentation</a></li><li data-nav-id=/django-DefectDojo/integrations/google-sheets-sync/ title="Google Sheets Sync" class=dd-item><a href=/django-DefectDojo/integrations/google-sheets-sync/>Google Sheets Sync</a></li><li data-nav-id=/django-DefectDojo/integrations/import/ title="Import Reports" class=dd-item><a href=/django-DefectDojo/integrations/import/>Import Reports</a></li><li data-nav-id=/django-DefectDojo/integrations/jira/ title="JIRA Integration" class=dd-item><a href=/django-DefectDojo/integrations/jira/>JIRA Integration</a></li><li data-nav-id=/django-DefectDojo/integrations/social-authentication/ title="Setting up Social Authentication via OAuth2 Providers" class=dd-item><a href=/django-DefectDojo/integrations/social-authentication/>Setting up Social Authentication via OAuth2 Providers</a></li><li data-nav-id=/django-DefectDojo/integrations/slack-notifications/ title="Slack Notifications" class=dd-item><a href=/django-DefectDojo/integrations/slack-notifications/>Slack Notifications</a></li></ul></li><li data-nav-id=/django-DefectDojo/running/ title="Running DefectDojo" class="dd-item
+parent"><a href=/django-DefectDojo/running/>Running DefectDojo</a><ul><li data-nav-id=/django-DefectDojo/running/getting-started/ title="Getting Started" class=dd-item><a href=/django-DefectDojo/running/getting-started/>Getting Started</a></li><li data-nav-id=/django-DefectDojo/running/configuration/ title=Configuration class=dd-item><a href=/django-DefectDojo/running/configuration/>Configuration</a></li><li data-nav-id=/django-DefectDojo/running/running-in-production/ title="Running in Production" class=dd-item><a href=/django-DefectDojo/running/running-in-production/>Running in Production</a></li><li data-nav-id=/django-DefectDojo/running/upgrading/ title=Upgrading class="dd-item active"><a href=/django-DefectDojo/running/upgrading/>Upgrading</a></li></ul></li><li data-nav-id=/django-DefectDojo/contributing/ title=Contributing class=dd-item><a href=/django-DefectDojo/contributing/>Contributing</a><ul><li data-nav-id=/django-DefectDojo/contributing/documentation/ title=Documentation class=dd-item><a href=/django-DefectDojo/contributing/documentation/>Documentation</a></li><li data-nav-id=/django-DefectDojo/contributing/how-to-write-a-parser/ title="How to write a DefectDojo parser" class=dd-item><a href=/django-DefectDojo/contributing/how-to-write-a-parser/>How to write a DefectDojo parser</a></li></ul></li></ul><section id=shortcuts><h3>More</h3><ul><li><a class=padding href=https://github.com/DefectDojo/django-DefectDojo><i class="fab fa-github"></i>Github repo</a></li><li><a class=padding href=https://demo.defectdojo.org/><i class="fas fa-fw fa-camera"></i>Demo site</a></li></ul></section><section id=footer><p>Built with <a href=https://github.com/matcornic/hugo-theme-learn><i class="fas fa-heart"></i></a>from <a href=https://getgrav.org>Grav</a> and <a href=https://gohugo.io/>Hugo</a></p></section></div></nav><section id=body><div id=overlay></div><div class="padding highlightable"><div><div id=top-bar><div id=top-github-link><a class=github-link title="Edit this page" href=https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/running/upgrading.md target=blank><i class="fas fa-code-branch"></i><span id=top-github-link-text>Edit this page</span></a></div><div id=breadcrumbs itemscope itemtype=http://data-vocabulary.org/Breadcrumb><span id=sidebar-toggle-span><a href=# id=sidebar-toggle data-sidebar-toggle><i class="fas fa-bars"></i></a></span><span id=toc-menu><i class="fas fa-list-alt"></i></span><span class=links><a href=/django-DefectDojo/>DefectDojo's Documentation</a> > <a href=/django-DefectDojo/running/>Running DefectDojo</a> > Upgrading</span></div><div class=progress><div class=wrapper><nav id=TableOfContents><ul><li><a href=#docker-compose>Docker-compose</a><ul><li><a href=#using-docker-images-provided-in-dockerhub>Using docker images provided in DockerHub</a></li><li><a href=#building-your-local-images>Building your local images</a></li></ul></li><li><a href=#setupbash>Setup.bash</a></li><li><a href=#faq>FAQ</a></li><li><a href=#upgrading-to-defectdojo-version-110x>Upgrading to DefectDojo Version 1.10.x</a></li><li><a href=#upgrading-to-defectdojo-version-193>Upgrading to DefectDojo Version 1.9.3</a></li><li><a href=#upgrading-to-defectdojo-version-180>Upgrading to DefectDojo Version 1.8.0</a></li><li><a href=#upgrading-to-defectdojo-version-170>Upgrading to DefectDojo Version 1.7.0</a></li><li><a href=#upgrading-to-defectdojo-version-150>Upgrading to DefectDojo Version 1.5.0</a></li><li><a href=#upgrading-to-defectdojo-version-131>Upgrading to DefectDojo Version 1.3.1</a></li><li><a href=#upgrading-to-defectdojo-version-129>Upgrading to DefectDojo Version 1.2.9</a></li><li><a href=#upgrading-to-defectdojo-version-128>Upgrading to DefectDojo Version 1.2.8</a></li><li><a href=#upgrading-to-defectdojo-version-124>Upgrading to DefectDojo Version 1.2.4</a></li><li><a href=#upgrading-to-defectdojo-version-123>Upgrading to DefectDojo Version 1.2.3</a></li><li><a href=#july-6th-2017---new-location-for-system-settings>July 6th 2017 - New location for system settings</a></li><li><a href=#upgrading-to-defectdojo-version-122>Upgrading to DefectDojo Version 1.2.2</a></li><li><a href=#upgrading-to-django-115>Upgrading to Django 1.1.5</a></li><li><a href=#upgrading-to-django-111>Upgrading to Django 1.11</a></li></ul></nav></div></div></div></div><div id=head-tags></div><div id=body-inner><h1>Upgrading</h1><h2 id=docker-compose>Docker-compose</h2><p>When you deploy a vanilla docker-compose, it will create a persistent
+volume for your MySQL database. As long as your volume is there, you
+should not lose any data.</p><h3 id=using-docker-images-provided-in-dockerhub>Using docker images provided in DockerHub</h3><div class="notices note"><p>If you're using <code>latest</code>, then you need to pre pull the <code>latest</code> from
+DockerHub to update.</p></div><p>The generic upgrade method for docker-compose follows these steps:</p><ul><li><p>Pull the latest version</p><pre><code class=language-{.sourceCode data-lang={.sourceCode>docker pull defectdojo/defectdojo-django:latest
+docker pull defectdojo/defectdojo-nginx:latest
+</code></pre></li><li><p>If you would like to use something older (so not the latest
+version), specify the version (tag) you want to upgrade to:</p><pre><code class=language-{.sourceCode data-lang={.sourceCode>docker pull defectdojo/defectdojo-django:1.10.2
+docker pull defectdojo/defectdojo-nginx:1.10.2
+</code></pre></li><li><p>Go to the directory where your docker-compose.yml file lives</p></li><li><p>Stop DefectDojo: <code>docker-compose stop</code></p></li><li><p>Re-start DefectDojo, allowing for container recreation:
+<code>docker-compose up -d</code></p></li><li><p>Run the database migrations to bring your database schema up to
+speed with the latest code</p></li><li><p>If you have the initializer disabled (or if you want to be on the
+safe side), run the migration command:
+<code>docker-compose exec uwsgi /bin/bash -c 'python manage.py migrate</code></p></li></ul><h3 id=building-your-local-images>Building your local images</h3><p>If you build your images locally and do not use the ones from DockerHub,
+the instructions are much the same, except that you'd build your images
+first. (Of course, if you're doing this, then you know you have to
+update the source code first)</p><p>Replace the first step above with this one: - <code>docker-compose build</code></p><h2 id=setupbash>Setup.bash</h2><p>::: {.warning}
+::: {.admonition-title}
+Warning
+:::</p><p>This installation method will is EOL and will be removed on 2020-12-31
+:::</p><p>The easiest way to upgrade to a new version of DefectDojo is to pull
+from Github. Assuming the source code lives in a directory named
+[defect-dojo]{.title-ref} you can complete the following steps to
+upgrade to the latest DefectDojo release.:</p><pre><code>cd defect-dojo
+git checkout master
+git pull
+pip freeze &gt; pip_frozen.txt
+pip install -r pip_frozen.txt --upgrade
+./manage.py makemigrations dojo
+./manage.py makemigrations
+./manage.py migrate
+</code></pre><p>Because yarn assets change from time to time, it is always a good idea
+to re-install them and collect the static resources. :</p><pre><code>cd defect-dojo
+cd components
+yarn
+cd ..
+</code></pre><p>At this point yarn may ask you to select from different versions of
+packages, choose the latest on each.</p><p>Next you can run: :</p><pre><code>./manage.py collectstatic --noinput
+</code></pre><p>If you are in your production system, you will need to restart gunicorn
+and celery to make sure the latest code is being used by both.</p><h2 id=faq>FAQ</h2><p><strong>Celery Error:</strong></p><p>If you have an issue starting Django with the error: TypeError:
+config_from_object() got an unexpected keyword argument 'namespace'</p><p>Upgrade Celery to the latest version:</p><blockquote><p><code>pip install --upgrade celery</code></p></blockquote><h2 id=upgrading-to-defectdojo-version-110x>Upgrading to DefectDojo Version 1.10.x</h2><p><strong>1.10.4 is a security release</strong></p><ul><li>See the security advisory:
+<a href=https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-96vq-gqr9-vf2c>https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-96vq-gqr9-vf2c</a></li><li>See release notes:
+<a href=https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.10.4>https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.10.4</a></li><li>Version 1.10.4 replaces 1.10.3 as the latter contained an incomplete
+fix</li></ul><p><strong>What's New:</strong></p><ul><li>See release notes:
+<a href=https://github.com/DefectDojo/django-DefectDojo/releases>https://github.com/DefectDojo/django-DefectDojo/releases</a></li><li>Defect Dojo now provides a [settings.py]{.title-ref} file
+out-of-the-box. Custom settings need to go into
+[local_settings.py]{.title-ref}. See
+<a href=https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.py>https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.py</a>
+and
+<a href=https://github.com/DefectDojo/django-DefectDojo/blob/master/docker/extra_settings/README.md>https://github.com/DefectDojo/django-DefectDojo/blob/master/docker/extra_settings/README.md</a></li><li>A quickfix is to rename your own / customized
+[settings.py]{.title-ref} or [settings.dist.py]{.title-ref} to
+[local_settings.py]{.title-ref}. Details of that PR:
+<a href=https://github.com/DefectDojo/django-DefectDojo/pull/3136>https://github.com/DefectDojo/django-DefectDojo/pull/3136</a></li><li>Major JIRA integration refactoring, for which you should at least
+use 1.10.1 and not 1.10.0 for many bug fixes.</li></ul><p><strong>Breaking changes</strong></p><p>Kubernetes/Helm users: we have moved away from the "stable" repository
+to "bitnami" in this release. The bitnami postgresql chart required us
+to add a new key to the postgresql secret, which will give you the error
+<code>postgresql-postgres-password is missing</code> if you have
+<code>createPostgresqlSecret: false</code>. In 1.10.1, a fix was also included to
+allow your existing <code>postgresqlPassword</code> to be reused properly.</p><p>Including in 1.10.1 were a couple fixes related to a rabbitMQ upgrade.
+The path to access <code>password</code>, <code>erlangCookie</code> and
+<code>existingPasswordSecret</code> changed from <code>rabbitmq</code> to <code>auth</code>. Furthermore,
+as rabbitMQ is deployed as a StatefulSet, an in-place upgrade is not
+possible and an error will likely be thrown such as
+<code>Forbidden: updates to statefulset spec for fields other than 'replicas', 'template', and 'updateStrategy' are forbidden</code>.
+After ensuring your rabbitMQ celery queue is empty, you will then want
+to delete your rabbitMQ StatefulSet and PVC to allow them to get
+re-created, or fully delete and recreate defectdojo.</p><h2 id=upgrading-to-defectdojo-version-193>Upgrading to DefectDojo Version 1.9.3</h2><p><strong>This is a security release</strong></p><ul><li>See the <a href=https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-8q8j-7wc4-vjg5>security
+advisory</a></li><li>See <a href=https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.9.3>release
+notes</a></li></ul><p><strong>What's New:</strong></p><ul><li>See release notes:
+<a href=https://github.com/DefectDojo/django-DefectDojo/releases>https://github.com/DefectDojo/django-DefectDojo/releases</a></li></ul><p><strong>NOTE:</strong></p><p>When upgrading from before 1.9.2, a corrective script may need to be ran</p><p>[./manage.py create_endpoint_status]{.title-ref}</p><p>If you're using docker:</p><p>[docker-compose exec uwsgi ./manage.py
+create_endpoint_status]{.title-ref}</p><p>This can take a while depending on your hardware and the number of
+findings in your instance.</p><ul><li>Search index tweaking index rebuild after upgrade:</li></ul><p>This requires a (one-time) rebuild of the Django-Watson search index.
+Execute the django command from the defect dojo installation directory:</p><p>[./manage.py buildwatson]{.title-ref}</p><p>If you're using docker:</p><p>[docker-compose exec uwsgi ./manage.py buildwatson]{.title-ref}</p><p>This can take a while depending on your hardware and the number of
+findings in your instance.</p><h2 id=upgrading-to-defectdojo-version-180>Upgrading to DefectDojo Version 1.8.0</h2><p><strong>What's New:</strong></p><ul><li>See release notes:
+<a href=https://github.com/DefectDojo/django-DefectDojo/releases>https://github.com/DefectDojo/django-DefectDojo/releases</a></li><li>Improved search, which requires an index rebuild
+(<a href=https://github.com/DefectDojo/django-DefectDojo/pull/2861>https://github.com/DefectDojo/django-DefectDojo/pull/2861</a>)</li></ul><p>This requires a (one-time) rebuild of the Django-Watson search index.
+Execute the django command from the defect dojo installation directory:</p><p>[./manage.py buildwatson]{.title-ref}</p><p>If you're using docker:</p><p>[docker-compose exec uwsgi ./manage.py buildwatson]{.title-ref}</p><p>This can take a while depending on your hardware and the number of
+findings in your instance.</p><ul><li><strong>NOTE:</strong></li></ul><p>As a result of a breaking bug revolving around Endpoint_status objects,
+a corrective script will need to be ran after every dynamic scan
+imported through either API version.</p><p>The script can be found
+<a href=https://github.com/DefectDojo/django-DefectDojo/blob/dev/dojo/management/commands/create_endpoint_status.py>here</a></p><p>[./manage.py create_endpoint_status]{.title-ref}</p><p>If you're using docker:</p><p>[docker-compose exec uwsgi ./manage.py
+create_endpoint_status]{.title-ref}</p><p>This can take a while depending on your hardware and the number of
+findings in your instance.</p><h2 id=upgrading-to-defectdojo-version-170>Upgrading to DefectDojo Version 1.7.0</h2><p><strong>What's New:</strong></p><ul><li>Updated search, you can now search for CVE-XXXX-YYYY</li><li>Updated search index, fields added to index: 'id', 'title',
+'cve', 'url', 'severity', 'description', 'mitigation',
+'impact', 'steps_to_reproduce', 'severity_justification',
+'references', 'sourcefilepath', 'sourcefile', 'hash_code',
+'file_path', 'component_name', 'component_version',
+'unique_id_from_tool'</li></ul><p>This requires a (one-time) rebuild of the Django-Watson search index.
+Execute the django command from the defect dojo installation directory:</p><p>[./manage.py buildwatson dojo.Finding]{.title-ref}</p><p>If you're using docker:</p><p>[docker-compose exec uwsgi ./manage.py buildwatson
+dojo.Finding]{.title-ref}</p><h2 id=upgrading-to-defectdojo-version-150>Upgrading to DefectDojo Version 1.5.0</h2><p><strong>What's New:</strong></p><ul><li>Updated UI with a new DefectDojo logo, default colors and CSS.</li><li>Updated Product views with tabs for Product Overview, Metrics,
+Engagements, Endpoints, Benchmarks (ASVS), and Settings to make it
+easier to navigate and manage your products.</li><li>New Product Information fields: Regulations, Criticality, Platform,
+Lifecycle, Origin, User Records, Revenue, External Audience,
+Internet Accessible</li><li>Languages pie chart on product overview, only supported through the
+API and Django admin, integrates with cloc analyzer</li><li>New Engagement type of CI/CD to support continual testing</li><li>Engagement shortcuts and ability to import findings and auto-create
+an engagement</li><li>Engagement labels for overdue, no tests and findings</li><li>New Contextual menus throughout DefectDojo and shortcuts to new
+findings and critical findings</li><li>Ability to merge a finding into a parent finding and either
+inactivate or delete the merged findings.</li><li>Report improvements and styling adjustment with the default option
+of HTML reports</li><li>SLA for remediation of severities based on finding criticality, for
+example critical findings remediated within 7 days. Configurable in
+System Settings.</li><li>Engagement Auto-Close Days in System Settings. Automatically close
+an engagement if open past the end date.</li><li>Ability to apply remediation advice based on CWE. For example XSS
+can be configured as a template so that it's consistent across all
+findings. Enabled in system settings.</li><li>Finding confidence field supported from scanners. First
+implementation in the Burp importer.</li><li>Goast importer for static analysis of Golang products</li><li>Celery status check on System Settings</li><li>Beta rules framework release for modifying findings on the fly</li><li>DefectDojo 2.0 API with Swagger support</li><li>Created and Modified fields on all major tables</li><li>Various bug fixes reported on Github</li></ul><p><strong>Upgrading to 1.5.0 requirements:</strong></p><ol><li><p>Back up your database first, ideally take the backup from production
+and test the upgrade on a staging server.</p></li><li><p>Edit the settings.py file which can be found in
+<code>django-DefectDojo/dojo/settings/settings.py</code>. Copy in the rest
+framework configuration after the CSRF_COOKIE_SECURE = True:</p><pre><code>REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.DjangoModelPermissions',
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 25
+}
+</code></pre></li></ol><p>Navigate to: LOGIN_EXEMPT_URLS and add the following after
+r'^%sfinding/image/(?P&lt;token>[^/]+)$' % URL_PREFIX:</p><pre><code>r'^%sfinding/image/(?P&lt;token&gt;[^/]+)$' % URL_PREFIX,
+r'^%sapi/v2/' % URL_PREFIX,
+</code></pre><p>Navigate to: INSTALLED_APPS and add the following after:
+'multiselectfield',:</p><pre><code>'multiselectfield',
+'rest_framework',
+'rest_framework.authtoken',
+'rest_framework_swagger',
+'dbbackup',
+</code></pre><p>Navigate to: CELERY_TASK_IGNORE_RESULT = True and add the following
+after CELERY_TASK_IGNORE_RESULT line:</p><pre><code>CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
+</code></pre><p>Save your modified settings file. For reference the modified file should
+look like the new 1.5.0
+[settings](<a href=https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py>https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.dist.py</a>)
+file, minus the environmental configurations. As an alternative this
+file can be used and the enviromental configurations from you
+environment can be copied into this file.</p><ol start=3><li>Activate your virtual environment and then upgrade the requirements:</li></ol><p><code>pip install -r requirements.txt --upgrade</code></p><ol start=4><li><p>Upgrade the database:</p><pre><code>./manage.py makemigrations
+./manage.py migrate
+</code></pre></li><li><p>Collect the static files (Javascript, Images, CSS):</p><pre><code>./manage.py collectstatic --noinput
+</code></pre></li><li><p>Complete</p></li></ol><h2 id=upgrading-to-defectdojo-version-131>Upgrading to DefectDojo Version 1.3.1</h2><p><strong>What's New:</strong></p><ul><li>New importers for Contrast, Nikto and TruffleHog (finding secrets in
+git repos).</li><li>Improved merging of findings for dynamic and static importers</li><li>Markdown support for findings</li><li>HTML report improvements including support of Markdown.</li><li>System settings Celery status page to assist in debugging if Celery
+is functional.</li></ul><p><strong>Upgrading to 1.3.1 requires:</strong></p><ol><li>pip install markdown pip install pandas</li><li>./manage.py makemigrations ./manage.py migrate</li><li>./manage.py collectstatic --noinput</li><li>Complete</li></ol><h2 id=upgrading-to-defectdojo-version-129>Upgrading to DefectDojo Version 1.2.9</h2><p><strong>What's New:</strong> New feature: Benchmarks (OWASP ASVS)</p><p><strong>Upgrading to 1.2.9 requires:</strong></p><ol><li>./manage.py makemigrations ./manage.py migrate ./manage.py loaddata
+dojo/fixtures/benchmark_type.json ./manage.py loaddata
+dojo/fixtures/benchmark_category.json ./manage.py loaddata
+dojo/fixtures/benchmark_requirement.json</li><li>./manage.py collectstatic --noinput</li><li>Complete</li></ol><h2 id=upgrading-to-defectdojo-version-128>Upgrading to DefectDojo Version 1.2.8</h2><p>New feature: Product Grading (Overall Product Health) Upgrading to 1.2.8
+requires:</p><ol><li>./manage.py makemigrations ./manage.py migrate ./manage.py
+system_settings</li><li>./manage.py collectstatic --noinput</li><li>pip install asteval</li><li>pip install --upgrade celery</li><li>Complete</li></ol><h2 id=upgrading-to-defectdojo-version-124>Upgrading to DefectDojo Version 1.2.4</h2><p>Upgrading to 1.2.4 requires:</p><ol><li>./manage.py makemigrations ./manage.py migrate ./manage.py loaddata
+dojo/fixtures/objects_review.json</li></ol><h2 id=upgrading-to-defectdojo-version-123>Upgrading to DefectDojo Version 1.2.3</h2><p>Upgrading to 1.2.3 requires:</p><ol><li>./manage.py makemigrations ./manage.py migrate ./manage.py loaddata
+dojo/fixtures/language_type.json</li><li>Currently languages and technologies can be updated via the API or
+in the admin section of Django.</li></ol><h2 id=july-6th-2017---new-location-for-system-settings>July 6th 2017 - New location for system settings</h2><p>Pull request #313 moves a number of system settings previously located
+in the application's settings.py to a model that can be used and
+changed within the web application under "Configuration -> System
+Settings".</p><p>If you're using a custom <code>URL_PREFIX</code> you will need to set this in the
+model after upgrading by editing <code>dojo/fixtures/system_settings.json</code>
+and setting your URL prefix in the <code>url_prefix</code> value there. Then issue
+the command <code>./manage.py loaddata system_settings.json</code> to load your
+settings into the database.</p><p>If you're not using a custom <code>URL_PREFIX</code>, after upgrading simply go to
+the System Settings page and review which values you want to set for
+each setting, as they're not automatically migrated from settings.py.</p><p>If you like you can then remove the following settings from settings.py
+to avoid confusion:</p><ul><li><code>ENABLE_DEDUPLICATION</code></li><li><code>ENABLE_JIRA</code></li><li><code>S_FINDING_SEVERITY_NAMING</code></li><li><code>URL_PREFIX</code></li><li><code>TIME_ZONE</code></li><li><code>TEAM_NAME</code></li></ul><h2 id=upgrading-to-defectdojo-version-122>Upgrading to DefectDojo Version 1.2.2</h2><p>Upgrading to 1.2.2 requires:</p><ol><li>Copying settings.py to the settings/ folder.</li><li>If you have supervisor scripts change
+DJANGO_SETTINGS_MODULE=dojo.settings.settings</li></ol><h2 id=upgrading-to-django-115>Upgrading to Django 1.1.5</h2><p>If you are upgrading an existing version of DefectDojo, you will need to
+run the following commands manually:</p><ol><li><p>First install Yarn. Follow the instructions based on your OS:
+<a href=https://yarnpkg.com/lang/en/docs/install/>https://yarnpkg.com/lang/en/docs/install/</a></p></li><li><p>The following must be removed/commented out from <code>settings.py</code>: :</p><pre><code>'djangobower.finders.BowerFinder',
+
+From the line that contains:
+# where should bower install components
+...
+
+To the end of the bower declarations
+  'justgage'
+)
+</code></pre></li><li><p>The following needs to be updated in <code>settings.py</code>: :</p><pre><code>STATICFILES_DIRS = (
+    # Put strings here, like &quot;/home/html/static&quot; or &quot;C:/www/django/static&quot;.
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.dirname(DOJO_ROOT) + &quot;/components/yarn_components&quot;,
+)
+</code></pre></li></ol><h2 id=upgrading-to-django-111>Upgrading to Django 1.11</h2><p>Pull request #300 makes DefectDojo Django 1.11 ready. A fresh install
+of DefectDojo can be done with the setup.bash script included - no
+special steps are required.</p><p>If you are upgrading an existing installation of DefectDojo, you will
+need to run the following commands manually: :</p><pre><code>pip install django-tastypie --upgrade
+pip install django-tastypie-swagger --upgrade
+pip install django-filter --upgrade
+pip install django-watson --upgrade
+pip install django-polymorphic --upgrade
+pip install django --upgrade
+pip install pillow --upgrade
+./manage.py makemigrations
+./manage.py migrate
+</code></pre><p>The following must be removed/commented out from settings.py: :</p><pre><code>TEMPLATE_DIRS
+TEMPLATE_DEBUG
+TEMPLATE_LOADERS
+TEMPLATE_CONTEXT_PROCESSORS
+</code></pre><p>The following needs to be added to settings.py: :</p><pre><code>TEMPLATES  = [
+{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'APP_DIRS': True,
+    'OPTIONS': {
+        'context_processors': [
+            'django.template.context_processors.debug',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
+        ],
+    },
+},
+]
+</code></pre><p>Once all these steps are completed your installation of DefectDojo will
+be running under Django 1.11</p><footer class=footline></footer></div></div><div id=navigation></div></section><div style=left:-1000px;overflow:scroll;position:absolute;top:-1000px;border:none;box-sizing:content-box;height:200px;margin:0;padding:0;width:200px><div style=border:none;box-sizing:content-box;height:200px;margin:0;padding:0;width:200px></div></div><script src=/django-DefectDojo/js/clipboard.min.js?1613586496></script><script src=/django-DefectDojo/js/perfect-scrollbar.min.js?1613586496></script><script src=/django-DefectDojo/js/perfect-scrollbar.jquery.min.js?1613586496></script><script src=/django-DefectDojo/js/jquery.sticky.js?1613586496></script><script src=/django-DefectDojo/js/featherlight.min.js?1613586496></script><script src=/django-DefectDojo/js/highlight.pack.js?1613586496></script><script>hljs.initHighlightingOnLoad();</script><script src=/django-DefectDojo/js/modernizr.custom-3.6.0.js?1613586496></script><script src=/django-DefectDojo/js/learn.js?1613586496></script><script src=/django-DefectDojo/js/hugo-learn.js?1613586496></script><script src=/django-DefectDojo/mermaid/mermaid.js?1613586496></script><script>mermaid.initialize({startOnLoad:true});</script></body></html>
