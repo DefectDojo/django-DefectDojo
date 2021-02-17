@@ -20,7 +20,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.core.exceptions import MultipleObjectsReturned
 
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.filters import EngagementFilter
+from dojo.filters import EngagementFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
@@ -267,20 +267,17 @@ def delete_engagement(request, eid):
 @user_must_be_authorized(Engagement, 'view', 'eid')
 def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
-    tests = (
-        Test.objects.filter(engagement=eng)
-        .prefetch_related('tags', 'test_type')
-        .annotate(count_findings_test_all=Count('finding__id', distinct=True))
-        .annotate(count_findings_test_active=Count('finding__id', filter=Q(finding__active=True), distinct=True))
-        .annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
-        .annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True), distinct=True))
-        .annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True))
-        .annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
-        .order_by('test_type__name', '-updated')
-    )
+    tests = eng.test_set.all().order_by('test_type__name', '-updated')
+
+    default_page_num = 10
+
+    tests_filter = EngagementTestFilter(request.GET, queryset=tests, engagement=eng)
+    paged_tests = get_page_items(request, tests_filter.qs, default_page_num)
+    # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
+    paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
 
     prod = eng.product
-    risks_accepted = eng.risk_acceptance.all().select_related('owner')
+    risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
     preset_test_type = None
     network = None
     if eng.preset:
@@ -290,14 +287,6 @@ def view_engagement(request, eid):
 
     jissue = jira_helper.get_jira_issue(eng)
     jira_project = jira_helper.get_jira_project(eng)
-
-    exclude_findings = [
-        finding.id for ra in eng.risk_acceptance.all()
-        for finding in ra.accepted_findings.all()
-    ]
-
-    eng_findings = Finding.objects.filter(test__in=eng.test_set.all()) \
-        .exclude(id__in=exclude_findings).order_by('title')
 
     try:
         check = Check_List.objects.get(engagement=eng)
@@ -346,40 +335,6 @@ def view_engagement(request, eid):
         engagement=eng.id).select_related('cred_id').order_by('cred_id')
 
     add_breadcrumb(parent=eng, top_level=False, request=request)
-    if hasattr(settings, 'ENABLE_DEDUPLICATION'):
-        if settings.ENABLE_DEDUPLICATION:
-            enabled = True
-            findings = Finding.objects.filter(
-                test__engagement=eng, duplicate=False)
-        else:
-            enabled = False
-            findings = None
-    else:
-        enabled = False
-        findings = None
-
-    if findings is not None:
-        fpage = get_page_items(request, findings, 15)
-    else:
-        fpage = None
-
-    # ----------
-
-    try:
-        start_date = Finding.objects.filter(
-            test__engagement__product=eng.product).order_by('date')[:1][0].date
-    except:
-        start_date = timezone.now()
-
-    end_date = timezone.now()
-
-    risk_acceptances = Risk_Acceptance.objects.filter(
-        engagement__in=Engagement.objects.filter(product=eng.product))
-
-    accepted_findings = [
-        finding for ra in risk_acceptances
-        for finding in ra.accepted_findings.all()
-    ]
 
     title = ""
     if eng.engagement_type == "CI/CD":
@@ -391,9 +346,8 @@ def view_engagement(request, eid):
             'eng': eng,
             'product_tab': product_tab,
             'system_settings': system_settings,
-            'tests': tests,
-            'findings': fpage,
-            'enabled': enabled,
+            'tests': paged_tests,
+            'filter': tests_filter,
             'check': check,
             'threat': eng.tmodel_path,
             'form': form,
@@ -402,13 +356,31 @@ def view_engagement(request, eid):
             'risks_accepted': risks_accepted,
             'jissue': jissue,
             'jira_project': jira_project,
-            'accepted_findings': accepted_findings,
-            'start_date': start_date,
             'creds': creds,
             'cred_eng': cred_eng,
             'network': network,
             'preset_test_type': preset_test_type
         })
+
+
+def prefetch_for_view_tests(tests):
+    prefetched = tests
+    if isinstance(tests,
+                  QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+
+        prefetched = prefetched.select_related('lead')
+        prefetched = prefetched.prefetch_related('tags', 'test_type', 'notes')
+        prefetched = prefetched.annotate(count_findings_test_all=Count('finding__id', distinct=True))
+        prefetched = prefetched.annotate(count_findings_test_active=Count('finding__id', filter=Q(finding__active=True), distinct=True))
+        prefetched = prefetched.annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
+        prefetched = prefetched.annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True), distinct=True))
+        prefetched = prefetched.annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True))
+        prefetched = prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
+
+    else:
+        logger.warn('unable to prefetch because query was already executed')
+
+    return prefetched
 
 
 @user_must_be_authorized(Engagement, 'staff', 'eid')

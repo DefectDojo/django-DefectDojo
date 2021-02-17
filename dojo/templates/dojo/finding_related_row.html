@@ -31,7 +31,7 @@
         {% endwith %}
     </td>
     <td class="nowrap">{{ finding.date|date }}</td>
-    <td>{{ similar_finding|finding_display_status|safe }}</td>
+    <td>{{ similar_finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}</td>
     <td><a href="{% url 'view_test' similar_finding.test_id %}">{{ similar_finding.test }}</a></td>
     <td><a href="{% url 'view_engagement' similar_finding.test.engagement_id %}">{{ similar_finding.test.engagement.name }}</a>
     {% if similar_finding.test.engagement.version %}
@@ -59,7 +59,7 @@
         <td></td>
     {% endif%}
 
-    {% if system_settings.enable_jira %} 
+    {% if system_settings.enable_jira %}
         <td>
             {% if similar_finding.jira_issue %}
                 <a href="{{ similar_finding | jira_issue_url }}"

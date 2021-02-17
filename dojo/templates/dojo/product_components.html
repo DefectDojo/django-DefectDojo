@@ -7,12 +7,14 @@
         <div class="panel panel-default">
             <div class="panel-heading tight">
                     <h3 class="has-filters">
-                    Components
-                    <div class="dropdown pull-right">
+                        Components
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        </div>
                     </h3>
             </div>
         </div>
-        <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+        <div id="the-filters" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
             {% include "dojo/filter_snippet.html" with form=filter.form %}
         </div>
         <div class="clearfix">
@@ -129,12 +131,13 @@
             ],
             order: [],
             columnDefs: [
-                { 
+                {
                     "orderable": false,
                 },
             ],
             dom: 'Bfrtip',
             paging: false,
+            info: false,
             buttons: [
                 {
                     extend: 'colvis',

@@ -53,7 +53,7 @@ import dojo.finding.helper as finding_helper
 logger = logging.getLogger(__name__)
 
 OPEN_FINDINGS_QUERY = Q(active=True)
-VERIFIED_FINDINGS_QUERY = Q(verified=True)
+VERIFIED_FINDINGS_QUERY = Q(active=True, verified=True)
 OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
 FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
 INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False)
@@ -81,7 +81,7 @@ def closed_findings_filter(request, queryset, user, pid):
 
 
 def open_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=OPEN_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=OPEN_FINDINGS_QUERY, prefetch_type='open')
 
 
 def verified_findings(request, pid=None, eid=None, view=None):
@@ -113,7 +113,7 @@ def closed_findings(request, pid=None, eid=None, view=None):
 
 
 def findings(request, pid=None, eid=None, view=None, filter_name=None, query_filter=None, order_by='numerical_severity',
-django_filter=open_findings_filter):
+django_filter=open_findings_filter, prefetch_type='all'):
     show_product_column = True
     custom_breadcrumb = None
     product_tab = None
@@ -161,7 +161,7 @@ django_filter=open_findings_filter):
     title_words = get_words_for_field(findings_filter.qs, 'title')
     component_words = get_words_for_field(findings_filter.qs, 'component_name')
 
-    paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs), 25)
+    paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs, prefetch_type), 25)
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
@@ -194,7 +194,7 @@ django_filter=open_findings_filter):
         })
 
 
-def prefetch_for_findings(findings):
+def prefetch_for_findings(findings, prefetch_type='all'):
     prefetched_findings = findings
     if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         prefetched_findings = prefetched_findings.select_related('reporter')
@@ -203,12 +203,15 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_project_set__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('found_by')
-        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
-        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
-        prefetched_findings = prefetched_findings.prefetch_related('original_finding')
-        prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
-        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
 
+        # for open/active findings the following 4 prefetches are not needed
+        if prefetch_type != 'open':
+            prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
+            prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
+            prefetched_findings = prefetched_findings.prefetch_related('original_finding')
+            prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
+
+        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
@@ -237,7 +240,8 @@ def prefetch_for_similar_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
         prefetched_findings = prefetched_findings.prefetch_related('original_finding')
-
+        prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
+        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
         prefetched_findings = prefetched_findings.prefetch_related('tags')
@@ -346,10 +350,13 @@ def view_finding(request, fid):
     if finding.duplicate_finding:
         finding.duplicate_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, finding.duplicate_finding)
 
-    # similar_findings = get_similar_findings(request, finding)
     similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
     logger.debug('similar query: %s', similar_findings_filter.qs.query)
-    similar_findings = prefetch_for_similar_findings(similar_findings_filter.qs[:settings.SIMILAR_FINDINGS_MAX_RESULTS])
+
+    similar_findings = get_page_items(request, similar_findings_filter.qs, settings.SIMILAR_FINDINGS_MAX_RESULTS)
+
+    similar_findings.object_list = prefetch_for_similar_findings(similar_findings.object_list)
+
     for similar_finding in similar_findings:
         similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
 
@@ -2157,50 +2164,6 @@ def push_to_jira(request, fid):
             extra_tags='alert-danger')
         return HttpResponse(status=500)
     # return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
-
-
-def get_similar_findings(request, finding):
-    similar = Finding.objects.all()
-
-    if not request.user.is_staff:
-        similar = similar.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-        )
-
-    if finding.test.engagement.deduplication_on_engagement:
-        similar = similar.filter(test__engagement=finding.test.engagement)
-    else:
-        similar = similar.filter(test__engagement__product=finding.test.engagement.product)
-
-    if finding.cve:
-        similar = similar.filter(cve=finding.cve)
-    if finding.cwe:
-        similar = similar.filter(cwe=finding.cwe)
-    if finding.file_path:
-        similar = similar.filter(file_path=finding.file_path)
-    if finding.line:
-        similar = similar.filter(line=finding.line)
-    if finding.unique_id_from_tool:
-        similar = similar.filter(unique_id_from_tool=finding.unique_id_from_tool)
-
-    similar = similar.exclude(id__in=finding.duplicate_finding_set())
-    if finding.duplicate_finding:
-        similar = similar.exclude(id=finding.duplicate_finding.id)
-
-    identical = Finding.objects.all().filter(test__engagement__product=finding.test.engagement.product).filter(hash_code=finding.hash_code).exclude(pk=finding.pk)
-    identical = identical.exclude(id__in=finding.duplicate_finding_set())
-    if finding.duplicate_finding:
-        identical = identical.exclude(id=finding.duplicate_finding.id)
-
-    # TODO: remove this temp testing code Valentijn
-    temp = Finding.objects.all().filter(id__in=[49046, 51314, 59225, 59227, 59229, 59223])
-
-    result = (temp | similar.exclude(pk=finding.pk) | identical)[:10]
-    for similar_finding in result:
-        similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
-
-    return result
 
 
 # precalculate because we need related_actions to be set
