@@ -156,7 +156,7 @@ class NexposeParser(object):
                     if item.tag == 'references':
                         for ref in list(item):
                             if 'URL' in ref.get('source'):
-                                vuln['refs'][ref.get('source')+str(url_index)] = str(ref.text).strip()
+                                vuln['refs'][ref.get('source') + str(url_index)] = str(ref.text).strip()
                                 url_index += 1
                             else:
                                 vuln['refs'][ref.get('source')] = str(ref.text).strip()
