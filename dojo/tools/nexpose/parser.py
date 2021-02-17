@@ -264,7 +264,6 @@ class NexposeParser(object):
                            dynamic_finding=True)
             # build references
             refs = ''
-            print(vuln['refs'])
             for ref in vuln['refs']:
                 if ref.startswith('CA'):
                     refs += f" * [{vuln['refs'][ref]}](https://www.cert.org/advisories/{vuln['refs'][ref]}.html)"
