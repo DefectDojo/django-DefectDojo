@@ -1887,3 +1887,17 @@ def get_object_or_none(klass, *args, **kwargs):
         return queryset.get(*args, **kwargs)
     except queryset.model.DoesNotExist:
         return None
+
+
+def add_error_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            message,
+                            extra_tags='alert-danger')
+
+
+def add_field_errors_to_response(form):
+    if form and get_current_request():
+        for field, error in form.errors.items():
+            add_error_message_to_response(error)

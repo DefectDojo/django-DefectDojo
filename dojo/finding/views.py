@@ -25,7 +25,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from itertools import chain
 from dojo.user.helper import user_must_be_authorized
-from dojo.utils import close_external_issue, reopen_external_issue
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, close_external_issue, reopen_external_issue
 import copy
 
 from dojo.filters import OpenFindingFilter, \
@@ -361,6 +361,9 @@ def view_finding(request, fid):
         similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
+
+    can_be_pushed_to_jira, can_be_pushed_to_jira_error, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
+
     lastPos = (len(findings)) - 1
     return render(
         request, 'dojo/view_finding.html', {
@@ -384,7 +387,9 @@ def view_finding(request, fid):
             'next_finding_id': next_finding_id,
             'duplicate_cluster': duplicate_cluster(request, finding),
             'similar_findings': similar_findings,
-            'similar_findings_filter': similar_findings_filter
+            'similar_findings_filter': similar_findings_filter,
+            'can_be_pushed_to_jira': can_be_pushed_to_jira,
+            'can_be_pushed_to_jira_error': can_be_pushed_to_jira_error,
         })
 
 
@@ -699,7 +704,7 @@ def edit_finding(request, fid):
                                          extra_tags='alert-danger')
 
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding, jira_project=jira_helper.get_jira_project(finding))
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -830,15 +835,13 @@ def edit_finding(request, fid):
 
             return redirect_to_return_url_or_else(request, reverse('view_finding', args=(new_finding.id,)))
         else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'There appears to be errors on the form, please correct below.',
-                extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
             form_error = True
     else:
         if use_jira:
-            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding, jira_project=jira_helper.get_jira_project(finding))
+            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
@@ -1229,7 +1232,7 @@ def promote_to_finding(request, fid):
     if request.method == 'POST':
         form = PromoteFindingForm(request.POST)
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding))
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -1313,14 +1316,12 @@ def promote_to_finding(request, fid):
             else:
                 form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'The form has errors, please correct them below.',
-                extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
     else:
         if use_jira:
-            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test))
+            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 

@@ -503,11 +503,18 @@
                         <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
                         <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
                     {% else %}
-                        None
-                        <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
-                        {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
-                            <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
-                        </a> {% endcomment %}
+                        {% if can_be_pushed_to_jira %}
+                            None
+                            <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
+                            {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
+                                <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                            </a> {% endcomment %}
+                        {% else %}
+                            <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                            data-content="{{ can_be_pushed_to_jira_error }}"
+                             data-placement="bottom" data-container="body">
+                             </i>
+                        {% endif %}
                     {% endif %}
                     </td>
                 {% endif %}

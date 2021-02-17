@@ -31,7 +31,7 @@ from dojo.models import Finding, IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, 
 # IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UPDATED_FINDING, \
 # IMPORT_ACTIONS
 from dojo.tools.factory import import_parser_factory, get_choices
-from dojo.utils import get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
     Product_Tab, max_safe, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
@@ -340,22 +340,6 @@ def add_findings(request, tid):
 
     if request.method == 'POST':
         form = AddFindingForm(request.POST, req_resp=None)
-        if (form['active'].value() is False or form['verified'].value() is False) \
-                and 'jiraform-push_to_jira' in request.POST:
-            error = ValidationError('Findings must be active and verified to be pushed to JIRA',
-                                    code='not_active_or_verified')
-            if form['active'].value() is False:
-                form.add_error('active', error)
-            if form['verified'].value() is False:
-                form.add_error('verified', error)
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'Findings must be active and verified to be pushed to JIRA',
-                                 extra_tags='alert-danger')
-        if form['severity'].value() == 'Info' and 'jiraform-push_to_jira' in request.POST:
-            error = ValidationError('Findings with Informational severity cannot be pushed to JIRA.',
-                                    code='info-severity-to-jira')
-
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -372,7 +356,7 @@ def add_findings(request, tid):
                                      'Can not set a finding as inactive or false positive without adding all mandatory notes',
                                      extra_tags='alert-danger')
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test))
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -480,13 +464,13 @@ def add_findings(request, tid):
             else:
                 form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'The form has errors, please correct them below.',
-                                 extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
+
     else:
         if use_jira:
-            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test))
+            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
     product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -510,7 +494,7 @@ def add_temp_finding(request, tid, fid):
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
 
     if jira_helper.get_jira_project(test):
-        jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test))
+        jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
     else:
         jform = None
 
@@ -557,7 +541,7 @@ def add_temp_finding(request, tid, fid):
                 new_finding.endpoint_status.add(eps)
             new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test))
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
                 if jform.is_valid():
                     if jform.cleaned_data.get('push_to_jira'):
                         jira_helper.push_to_jira(new_finding)
@@ -596,6 +580,7 @@ def add_temp_finding(request, tid, fid):
                                  messages.ERROR,
                                  'The form has errors, please correct them below.',
                                  extra_tags='alert-danger')
+
     else:
         form = FindingForm(template=True, req_resp=None, initial={'active': False,
                                     'date': timezone.now().date(),
