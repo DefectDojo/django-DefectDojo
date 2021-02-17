@@ -1,18 +1,23 @@
 {% load navigation_tags %}
-{% if page.has_other_pages %}
-    {% with page_param=prefix|add:'page' %}
-    {% with page_size_param=prefix|add:'page_size' %}
-    <nav class="pull-right">
-        <ul class="pagination pagination-sm">
-            {% for num in page|paginate:5 %}
-                <li {% if num.is_current %}class="active"{% endif %}>
-                    {% if num.page_number %}
-                        <a href="?{% url_replace request page_param num.page_number %}"> {{ num.display }}</a>
-                    {% else %}
-                        <a>{{ num.display }}</a>
-                    {% endif %}
-                </li>
-            {% endfor %}
+{% with page_param=prefix|add:'page' %}
+{% with page_size_param=prefix|add:'page_size' %}
+<div class="pull-left pagination  pagination-sm">
+    Showing entries {{ page.start_index }} to {{ page.end_index }} of {{ page.paginator.count }}
+</div>
+
+<nav class="pull-right">
+    <ul class="pagination pagination-sm">
+            {% if page.has_other_pages %}
+                {% for num in page|paginate:5 %}
+                    <li {% if num.is_current %}class="active"{% endif %}>
+                        {% if num.page_number %}
+                            <a href="?{% url_replace request page_param num.page_number %}"> {{ num.display }}</a>
+                        {% else %}
+                            <a>{{ num.display }}</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            {% endif %}
             {% if page_size %}
                 <li>
                     <!-- Split button -->
@@ -42,5 +47,3 @@
     </nav>
     {% endwith %}
     {% endwith %}
-
-{% endif %}
