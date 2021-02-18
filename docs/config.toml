@@ -10,7 +10,7 @@ home = [ "HTML", "RSS", "JSON"]
 [params]
   # Change default color scheme with a variant one. Can be "red", "blue", "green".
   themeVariant = "blue"
-  editURL = "https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/"
+  editURL = "https://github.com/DefectDojo/django-DefectDojo/blob/dev/docs/content/"
   description = "Documentation for DefectDojo"
   disableNextPrev = true
   disableLandingPageButton = true

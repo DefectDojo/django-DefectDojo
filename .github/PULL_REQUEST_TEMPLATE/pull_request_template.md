@@ -1,7 +1,7 @@
 **Description**
 
 Describe the feature / bug fix implemented by this PR.
-If this is a new parser, [the parser guide](../../doc/guide_to_parser_writing.md) may be worth (re)reading.
+If this is a new parser, [the parser guide](https://defectdojo.github.io/django-DefectDojo/contributing/how-to-write-a-parser/) may be worth (re)reading.
 
 **Test results**
 
