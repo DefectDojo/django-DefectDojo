@@ -14,7 +14,7 @@ from dojo.models import Finding, Test, Engagement, Product, JIRA_Issue, JIRA_Pro
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 from django.contrib import messages
-from celery.decorators import task
+from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 from dojo.utils import get_current_request, truncate_with_dots
 from django.urls import reverse
@@ -423,7 +423,7 @@ def push_to_jira(obj):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def add_jira_issue(find):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
@@ -553,7 +553,7 @@ def add_jira_issue(find):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def update_jira_issue(find):
     logger.debug('trying to update a linked jira issue for %d:%s', find.id, find.title)
@@ -747,7 +747,7 @@ def jira_check_attachment(issue, source_file_name):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id(model=Engagement)
 def close_epic(eng, push_to_jira):
     engagement = eng
@@ -789,7 +789,7 @@ def close_epic(eng, push_to_jira):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id(model=Engagement)
 def update_epic(engagement):
     logger.debug('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
@@ -820,7 +820,7 @@ def update_epic(engagement):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id(model=Engagement)
 def add_epic(engagement):
     logger.debug('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
@@ -893,7 +893,7 @@ def jira_get_issue(jira_project, issue_key):
 @dojo_model_to_id(parameter=1)
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
 def add_comment(find, note, force_push=False):

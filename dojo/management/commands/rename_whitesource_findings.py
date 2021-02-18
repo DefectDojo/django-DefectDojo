@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from pytz import timezone
-from celery.decorators import task
+from dojo.celery import app
 
 locale = timezone(get_system_setting('time_zone'))
 
@@ -17,7 +17,7 @@ class Command(BaseCommand):
         rename_whitesource_finding()
 
 
-@task(name='rename_whitesource_finding_task')
+@app.task(name='rename_whitesource_finding_task')
 def rename_whitesource_finding():
     whitesource_id = Test_Type.objects.get(name="Whitesource Scan").id
     findings = Finding.objects.filter(found_by=whitesource_id)

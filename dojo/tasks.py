@@ -10,7 +10,6 @@ from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from dojo.celery import app
 from celery.utils.log import get_task_logger
-from celery.decorators import task
 from dojo.models import Alerts, Product, Finding, Engagement, System_Settings, User
 from django.utils import timezone
 from dojo.utils import calculate_grade
@@ -290,7 +289,7 @@ def async_dupe_delete(*args, **kwargs):
         logger.info('total number of excess duplicates deleted: %s', total_deleted_count)
 
 
-@task(ignore_result=False)
+@app.task(ignore_result=False)
 def celery_status():
     return True
 
