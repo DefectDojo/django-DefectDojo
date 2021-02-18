@@ -86,7 +86,7 @@ def is_push_all_issues(instance):
 def finding_can_be_pushed_to_jira(finding, form=None):
     # logger.debug('can be pushed to JIRA: %s', finding_or_form)
     if not get_jira_project(finding):
-        return False, 'Finding cannot be pushed to jira as there is no jira project configuration for this product.', error_no_jira_project
+        return False, 'Finding cannot be pushed to jira as there is no jira project configuration for this product.', 'error_no_jira_project'
 
     if finding.has_jira_issue:
         return True, None, None
