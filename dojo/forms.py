@@ -2126,7 +2126,7 @@ class JIRAFindingForm(forms.Form):
         logger.debug('self.cleaned_data.push_to_jira: %s', self.cleaned_data.get('push_to_jira', None))
 
         if self.cleaned_data.get('push_to_jira', None):
-            can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(self.finding_form)
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(self.instance, self.finding_form)
             if not can_be_pushed_to_jira:
                 self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
                 # for field in error_fields:

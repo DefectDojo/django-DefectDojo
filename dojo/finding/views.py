@@ -6,7 +6,7 @@ import mimetypes
 import os
 import shutil
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from django.db import models
 from django.db.models.functions import Length
 from django.conf import settings
@@ -1918,16 +1918,22 @@ def finding_bulk_update_all(request, pid=None):
 
                     # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
+                    error_counts = defaultdict(lambda: 0)
                     if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
-                        if not jira_helper.get_jira_project(finding):
-                            jira_helper.log_jira_alert('Finding cannot be pushed to jira as there is no jira project configuration for this product.', finding)
+                        can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
+                        if not can_be_pushed_to_jira:
+                            error_counts[error_message] += 1
+                            jira_helper.log_jira_alert(error_message, finding)
                         else:
                             logger.debug('pushing to jira from finding.finding_bulk_update_all()')
                             jira_helper.push_to_jira(finding)
 
+                        for error_message, error_count in error_counts.items():
+                            add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
+
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Bulk edit of findings was successful.  Check to make sure it is what you intended.',
+                                     'Bulk edit of findings was successful. Check alerts top right and result to make sure it is what you intended.',
                                      extra_tags='alert-success')
             else:
                 messages.add_message(request,

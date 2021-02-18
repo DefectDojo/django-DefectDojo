@@ -1,7 +1,5 @@
 import logging
 
-from django.forms import Form
-from django.forms.forms import BaseForm
 from dojo.utils import add_error_message_to_response, get_system_setting
 import os
 import io
@@ -81,16 +79,26 @@ def is_push_all_issues(instance):
         return jira_project.push_all_issues
 
 
-def finding_can_be_pushed_to_jira(finding_or_form):
+# checks if a finding can be pushed to JIRA
+# optionally provides a form with the new data for the finding
+# any finding that already has a JIRA issue can be pushed again to JIRA
+# returns True/False, error_message, error_code
+def finding_can_be_pushed_to_jira(finding, form=None):
     # logger.debug('can be pushed to JIRA: %s', finding_or_form)
-    if isinstance(finding_or_form, BaseForm) or isinstance(finding_or_form, Form):
-        active = finding_or_form['active'].value()
-        verified = finding_or_form['verified'].value()
-        severity = finding_or_form['severity'].value()
+    if not get_jira_project(finding):
+        return False, 'Finding cannot be pushed to jira as there is no jira project configuration for this product.', error_no_jira_project
+
+    if finding.has_jira_issue:
+        return True, None, None
+
+    if form:
+        active = form['active'].value()
+        verified = form['verified'].value()
+        severity = form['severity'].value()
     else:
-        active = finding_or_form.active
-        verified = finding_or_form.verified
-        severity = finding_or_form.severity
+        active = finding.active
+        verified = finding.verified
+        severity = finding.severity
 
     logger.debug('finding_can_be_pushed_to_jira: %s, %s, %s', active, verified, severity)
 
@@ -102,7 +110,7 @@ def finding_can_be_pushed_to_jira(finding_or_form):
         jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
 
         if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
-            return False, 'Finding below the minimum JIRA severity threshold ()%s.' % jira_minimum_threshold, 'below_minimum_threshold'
+            return False, 'Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity, 'below_minimum_threshold'
 
     return True, None, None
 
