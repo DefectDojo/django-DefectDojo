@@ -3,22 +3,20 @@ import json
 from dojo.models import Finding
 
 
-class AquaJSONParser(object):
+class AquaParser(object):
+
+    def get_scan_types(self):
+        return ["Aqua Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Aqua Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return ""
+
     def get_findings(self, json_output, test):
         tree = json.load(json_output)
         return self.get_items(tree, test)
-
-    def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
 
     def get_items(self, tree, test):
         items = {}

@@ -12,7 +12,16 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class NiktoXMLParser(object):
+class NiktoParser(object):
+
+    def get_scan_types(self):
+        return ["Nikto Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "XML output"
 
     def get_findings(self, filename, test):
         dupes = dict()

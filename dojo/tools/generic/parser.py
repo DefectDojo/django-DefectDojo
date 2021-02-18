@@ -259,7 +259,7 @@ class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
         finding.duplicate = self.evaluate_bool_value(column_value)
 
 
-class GenericFindingUploadCsvParser(object):
+class GenericParser(object):
 
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()
@@ -296,6 +296,15 @@ class GenericFindingUploadCsvParser(object):
         for column in row:
             self.column_names[index] = column
             index += 1
+
+    def get_scan_types(self):
+        return ["Generic Findings Import"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Generic findings in CSV format."
 
     def get_findings(self, filename, test, active=False, verified=False):
         self.chain = None

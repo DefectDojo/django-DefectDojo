@@ -1,5 +1,3 @@
-__author__ = 'jaguasch'
-
 import hashlib
 import json
 import re
@@ -10,12 +8,18 @@ from dojo.models import Finding
 
 
 class DawnScannerParser(object):
+
+    def get_scan_types(self):
+        return ["DawnScanner Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Dawnscanner (-j) output file can be imported in JSON format."
+
     def get_findings(self, filename, test):
-        tree = filename.read()
-        try:
-            data = json.loads(str(tree, 'utf-8'))
-        except:
-            data = json.loads(tree)
+        data = json.load(filename)
 
         dupes = dict()
         find_date = parser.parse(data['scan_started'])
@@ -43,7 +47,7 @@ class DawnScannerParser(object):
             mitigation = item['remediation']
             references = item['cve_link']
 
-            dupe_key = hashlib.md5(str(sev + '|' + title).encode("utf-8")).hexdigest()
+            dupe_key = hashlib.sha256(str(sev + '|' + title).encode("utf-8")).hexdigest()
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]

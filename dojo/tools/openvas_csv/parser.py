@@ -262,7 +262,7 @@ class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
         finding.duplicate = self.evaluate_bool_value(column_value)
 
 
-class OpenVASUploadCsvParser(object):
+class OpenVASCsvParser(object):
 
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()
@@ -301,6 +301,15 @@ class OpenVASUploadCsvParser(object):
             column_names[index] = column
             index += 1
         return column_names
+
+    def get_scan_types(self):
+        return ["OpenVAS CSV"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import OpenVAS Scan in CSV format. Export as CSV Results on OpenVAS."
 
     def get_findings(self, filename, test):
 

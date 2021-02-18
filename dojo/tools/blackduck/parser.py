@@ -4,12 +4,22 @@ from dojo.models import Finding
 from .importer import BlackduckImporter
 
 
-class BlackduckHubCSVParser(object):
+class BlackduckParser(object):
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv and files.csv
     - a single security.csv file
     """
+
+    def get_scan_types(self):
+        return ["Blackduck Hub Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Blackduck Hub Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Upload the zip file containing the security.csv and components.csv for Security and License risks."
+
     def get_findings(self, filename, test):
         normalized_findings = self.normalize_findings(filename)
         return self.ingest_findings(normalized_findings, test)

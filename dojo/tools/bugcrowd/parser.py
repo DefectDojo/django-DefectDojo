@@ -6,7 +6,17 @@ from urllib.parse import urlparse
 from dojo.models import Endpoint, Finding
 
 
-class BugCrowdCSVParser(object):
+class BugCrowdParser(object):
+
+    def get_scan_types(self):
+        return ["BugCrowd Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "BugCrowd Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "BugCrowd CSV report format"
+
     def get_findings(self, filename, test):
 
         if filename is None:

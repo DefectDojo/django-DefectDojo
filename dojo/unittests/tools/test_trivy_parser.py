@@ -10,26 +10,21 @@ def sample_path(file_name):
 
 
 class TestTrivyParser(TestCase):
-    def setUp(self):
-        self.dojo_test = Test()
 
-    def test_mixed_scan(self):
-        test_file = open(sample_path("trivy_mix.json"))
+    def test_no_vuln(self):
+        test_file = open(sample_path("no_vuln.json"))
         parser = TrivyParser()
-        trivy_findings = parser.get_findings(test_file, self.dojo_test)
-        self.assertEqual(len(trivy_findings), 6)
-        self.check_title(trivy_findings)
-        self.check_cve(trivy_findings)
-        self.check_cwe(trivy_findings)
+        trivy_findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(trivy_findings), 0)
 
-    def check_title(self, trivy_findings):
-        self.assertEqual(trivy_findings[0].title, "CVE-2018-16487 lodash 4.17.4")
-        self.assertEqual(trivy_findings[1].title, "CVE-2018-16840 curl 7.61.0-r0")
-
-    def check_cve(self, trivy_findings):
-        self.assertEqual(trivy_findings[0].cve, "CVE-2018-16487")
-        self.assertEqual(trivy_findings[1].cve, "CVE-2018-16840")
-
-    def check_cwe(self, trivy_findings):
-        self.assertEqual(trivy_findings[0].cwe, 190)
-        self.assertEqual(trivy_findings[1].cwe, 0)
+    def test_many_vulns(self):
+        test_file = open(sample_path("many_vulns.json"))
+        parser = TrivyParser()
+        findings = parser.get_findings(test_file, Test())
+        self.assertEqual(len(findings), 93)
+        finding = findings[0]
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual("CVE-2011-3374", finding.cve)
+        self.assertEqual(347, finding.cwe)
+        self.assertEqual("apt", finding.component_name)
+        self.assertEqual("1.8.2.2", finding.component_version)

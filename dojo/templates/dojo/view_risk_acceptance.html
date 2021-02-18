@@ -331,7 +331,6 @@
     <script type="text/javascript">
         // keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            console.log(e.key);
             if (e.key == 'e') {
                 window.location.assign('{% url 'edit_risk_acceptance' eng.id risk_acceptance.id %}')
             }
