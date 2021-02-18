@@ -5,12 +5,9 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-heading tight">
-                    <h3 class="has-filters">
+                    <h3>
                         {{ obj }} History
                     </h3>
-                </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
             {% if history %}

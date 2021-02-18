@@ -17,7 +17,7 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
+from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
@@ -459,7 +459,7 @@ def view_product_metrics(request, pid):
         request.GET,
         queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
 
-    i_engs_page = get_page_items(request, result.qs, 10)
+    inactive_engs_page = get_page_items(request, result.qs, 10)
 
     scan_sets = ScanSettings.objects.filter(product=prod)
 
@@ -581,7 +581,7 @@ def view_product_metrics(request, pid):
                   {'prod': prod,
                    'product_tab': product_tab,
                    'engs': engs,
-                   'i_engs': i_engs_page,
+                   'inactive_engs': inactive_engs_page,
                    'scan_sets': scan_sets,
                    'view': view,
                    'verified_objs': filters.get('verified', None),
@@ -620,24 +620,24 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     # In Progress Engagements
     engs = Engagement.objects.filter(product=prod, active=True, status="In Progress",
                                      engagement_type=engagement_type).order_by('-updated')
-    active_engs = EngagementFilter(request.GET, queryset=engs)
-    result_active_engs = get_page_items(request, active_engs.qs, default_page_num, prefix="engs")
+    active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
+    result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list)
 
     # Engagements that are queued because they haven't started or paused
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True,
                                      engagement_type=engagement_type).order_by('-updated')
-    queued_engs = EngagementFilter(request.GET, queryset=engs)
-    result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, prefix="queued_engs")
+    queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
+    result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
     result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list)
 
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by(
         '-target_end')
-    result_inactive = EngagementFilter(request.GET, queryset=engs)
-    result_inactive_engs_page = get_page_items(request, result_inactive.qs, default_page_num, prefix="i_engs")
-    result_inactive_engs_page.object_list = prefetch_for_view_engagements(result_inactive_engs_page.object_list)
+    inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
+    result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
+    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list)
 
     title = "All Engagements"
     if engagement_type == "CI/CD":
@@ -651,10 +651,13 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'engagement_type': engagement_type,
                    'engs': result_active_engs,
                    'engs_count': result_active_engs.paginator.count,
+                   'engs_filter': active_engs_filter,
                    'queued_engs': result_queued_engs,
                    'queued_engs_count': result_queued_engs.paginator.count,
-                   'i_engs': result_inactive_engs_page,
-                   'i_engs_count': result_inactive_engs_page.paginator.count,
+                   'queued_engs_filter': queued_engs_filter,
+                   'inactive_engs': result_inactive_engs,
+                   'inactive_engs_count': result_inactive_engs.paginator.count,
+                   'inactive_engs_filter': inactive_engs_filter,
                    'user': request.user,
                    'authorized': auth})
 
@@ -666,6 +669,8 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.select_related('lead')
         prefetched_engs = prefetched_engs.prefetch_related('test_set')
         prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
+        prefetched_engs = prefetched_engs.prefetch_related('jira_project__jira_instance')
+        prefetched_engs = prefetched_engs.prefetch_related('product__jira_project_set__jira_instance')
         prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)))

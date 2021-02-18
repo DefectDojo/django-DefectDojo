@@ -1,21 +1,21 @@
 from django.test import TestCase
 
 from dojo.models import Finding, Test
-from dojo.tools.anchore_grype.parser import AnchoreGrypeScanParser
+from dojo.tools.anchore_grype.parser import AnchoreGrypeParser
 
 
-class TestAnchoreEngineParser(TestCase):
+class TestAnchoreGrypeParser(TestCase):
 
     def test_parser_has_no_findings(self):
         testfile = open("dojo/unittests/scans/anchore_grype/no_vuln.json")
-        parser = AnchoreGrypeScanParser()
+        parser = AnchoreGrypeParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parser_has_many_findings(self):
         testfile = open("dojo/unittests/scans/anchore_grype/many_vulns.json")
-        parser = AnchoreGrypeScanParser()
+        parser = AnchoreGrypeParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(388, len(findings))

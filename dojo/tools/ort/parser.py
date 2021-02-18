@@ -5,8 +5,18 @@ from collections import namedtuple
 from dojo.models import Finding
 
 
-# Oss Review Toolkit Parser
 class OrtParser(object):
+    """Oss Review Toolkit Parser"""
+
+    def get_scan_types(self):
+        return ["ORT evaluated model Importer"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "ORT evaluated model Importer"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Outpost24 endpoint vulnerability scan in XML format."
+
     def get_findings(self, json_output, test):
 
         if json_output is None:

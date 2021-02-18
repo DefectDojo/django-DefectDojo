@@ -1,9 +1,9 @@
 from django.test import TestCase
-from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectXMLParser
+from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectParser
 from dojo.models import Test, Engagement, Product
 
 
-class TestMicrofocusWebinspectXMLParser(TestCase):
+class TestMicrofocusWebinspectParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         test = Test()
@@ -12,7 +12,7 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/microfocus_webinspect/Webinspect_no_vuln.xml"
         )
-        parser = MicrofocusWebinspectXMLParser()
+        parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(0, len(findings))
 
@@ -23,7 +23,7 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/microfocus_webinspect/Webinspect_one_vuln.xml"
         )
-        parser = MicrofocusWebinspectXMLParser()
+        parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(1, len(findings))
         item = findings[0]
@@ -37,7 +37,7 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/microfocus_webinspect/Webinspect_many_vuln.xml"
         )
-        parser = MicrofocusWebinspectXMLParser()
+        parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(8, len(findings))
         item = findings[1]
@@ -51,9 +51,9 @@ class TestMicrofocusWebinspectXMLParser(TestCase):
     def test_convert_severity(self):
         with self.subTest("convert info", val="0"):
             self.assertEqual(
-                "Info", MicrofocusWebinspectXMLParser.convert_severity("0")
+                "Info", MicrofocusWebinspectParser.convert_severity("0")
             )
         with self.subTest("convert medium", val="2"):
             self.assertEqual(
-                "Medium", MicrofocusWebinspectXMLParser.convert_severity("2")
+                "Medium", MicrofocusWebinspectParser.convert_severity("2")
             )

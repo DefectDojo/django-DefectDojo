@@ -1,5 +1,5 @@
 from django.test import TestCase
-from dojo.tools.nikto.parser import NiktoXMLParser
+from dojo.tools.nikto.parser import NiktoParser
 from dojo.models import Test, Engagement, Product
 
 
@@ -11,13 +11,13 @@ class TestNiktoParser(TestCase):
         engagement.product = Product()
         test.engagement = engagement
         testfile = open("dojo/unittests/scans/nikto/nikto-report-old-format.xml")
-        parser = NiktoXMLParser()
+        parser = NiktoParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("dojo/unittests/scans/nikto/nikto-report-zero-vuln.xml")
-        parser = NiktoXMLParser()
+        parser = NiktoParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
@@ -27,7 +27,7 @@ class TestNiktoParser(TestCase):
         engagement.product = Product()
         test.engagement = engagement
         testfile = open("dojo/unittests/scans/nikto/nikto-report-one-vuln.xml")
-        parser = NiktoXMLParser()
+        parser = NiktoParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(1, len(findings))
 
@@ -37,6 +37,6 @@ class TestNiktoParser(TestCase):
         engagement.product = Product()
         test.engagement = engagement
         testfile = open("dojo/unittests/scans/nikto/nikto-report-many-vuln.xml")
-        parser = NiktoXMLParser()
+        parser = NiktoParser()
         findings = parser.get_findings(testfile, test)
         self.assertTrue(len(findings) == 10)

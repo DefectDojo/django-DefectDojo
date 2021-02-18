@@ -7,7 +7,17 @@ from dojo.models import Endpoint, Finding
 __author__ = 'patriknordlen'
 
 
-class NmapXMLParser(object):
+class NmapParser(object):
+
+    def get_scan_types(self):
+        return ["Nmap Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "XML output (use -oX)"
+
     def get_findings(self, file, test):
         parser = le.XMLParser(resolve_entities=False)
         nmap_scan = le.parse(file, parser)

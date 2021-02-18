@@ -4,7 +4,16 @@ from dojo.models import Finding
 from dojo.tools.semgrep.models import SemgrepJSONResult
 
 
-class SemgrepJSONParser(object):
+class SemgrepParser(object):
+
+    def get_scan_types(self):
+        return ["Semgrep JSON Report"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Semgrep output (--json)"
 
     def get_findings(self, filehandle, test):
         tree = json.load(filehandle)

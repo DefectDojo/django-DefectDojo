@@ -24,7 +24,17 @@ class Severityfilter():
             self.severity = 'Info'
 
 
-class KiuwanCSVParser(object):
+class KiuwanParser(object):
+
+    def get_scan_types(self):
+        return ["Kiuwan Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan."
+
     def get_findings(self, filename, test):
         content = filename.read()
         if type(content) is bytes:

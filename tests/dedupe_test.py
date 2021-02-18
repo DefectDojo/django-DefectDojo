@@ -112,7 +112,7 @@ class DedupeTest(BaseTestCase):
         # Create engagement
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("Dedupe Path Test")
         driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
@@ -184,7 +184,7 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("Dedupe Endpoint Test")
         driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
@@ -254,7 +254,7 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("Dedupe Same Eng Test")
         driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
@@ -328,7 +328,7 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("Dedupe on hash_code only")
         driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
@@ -397,7 +397,7 @@ class DedupeTest(BaseTestCase):
 
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("Dedupe Generic Test")
         # driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
@@ -414,7 +414,7 @@ class DedupeTest(BaseTestCase):
 
         # Create immuniweb engagement
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("Dedupe Immuniweb Test")
         # driver.find_element_by_xpath('//*[@id="id_deduplication_on_engagement"]').click()
