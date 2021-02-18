@@ -72,18 +72,18 @@ def my_decorator_inside(func):
     return wrapper
 
 
-@app.task
 @my_decorator_outside
+@app.task
 @my_decorator_inside
 def my_test_task(new_finding, *args, **kwargs):
     print('oh la la what a nice task')
 
 
 # example working with multiple parameters...
-@app.task
 @dojo_model_to_id(parameter=1)
 @dojo_model_to_id
 @dojo_async_task
+@app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
 def test_valentijn_task(new_finding, note):
