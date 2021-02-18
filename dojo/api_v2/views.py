@@ -19,7 +19,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Te
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
-    BurpRawRequestResponse, FileUpload
+    BurpRawRequestResponse, FileUpload, Product_Type_Member
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -38,6 +38,8 @@ from django.db.models import Count, Q
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
+from dojo.product_type.queries import get_authorized_product_types
+from dojo.authorization.roles_permissions import Permissions, Roles
 
 logger = logging.getLogger(__name__)
 
@@ -946,12 +948,23 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     queryset = Product_Type.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
+    if settings.FEATURE_NEW_AUTHORIZATION:
+        permission_classes = (IsAuthenticated, permissions.UserHasProductTypePermission)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(authorized_users__in=[self.request.user])
-        else:
-            return self.queryset
+        return get_authorized_product_types(Permissions.Product_Type_View)
+
+    # Overwrite perfom_create of CreateModelMixin to add current user as owner
+    def perform_create(self, serializer):
+        serializer.save()
+        if settings.FEATURE_NEW_AUTHORIZATION:
+            product_type_data = serializer.data
+            product_type_data.pop('members')
+            member = Product_Type_Member()
+            member.user = self.request.user
+            member.product_type = Product_Type(**product_type_data)
+            member.role = Roles.Owner
+            member.save()
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,

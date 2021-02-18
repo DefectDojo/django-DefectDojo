@@ -7,7 +7,6 @@ from datetime import datetime, date, timedelta
 from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -36,6 +35,9 @@ from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)
 
@@ -48,13 +50,7 @@ def product(request):
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
 
-    prods = Product.objects.all()
-
-    if not request.user.is_staff:
-        prods = prods.filter(
-            Q(authorized_users__in=[request.user]) |
-            Q(prod_type__authorized_users__in=[request.user])
-        )
+    prods = get_authorized_products(Permissions.Product_View)
 
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
@@ -694,7 +690,7 @@ def import_scan_results_prod(request, pid=None):
     return import_scan_results(request, pid=pid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
 def new_product(request, ptid=None):
     jira_project_form = None
     error = False
@@ -714,6 +710,8 @@ def new_product(request, ptid=None):
             gform = None
 
         if form.is_valid():
+            product_type = form.instance.prod_type
+            user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
