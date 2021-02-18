@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% load display_tags %}
 
 {% block content %}
@@ -45,7 +46,9 @@
                            class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
+                            {% if request.user|feature_new_authorization_or_user_is_staff %}
                             <th></th>
+                            {% endif %}
                             <th>{% dojo_sort request 'Product Type' 'name' 'asc' %}</th>
                             <th>Product count</th>
                             <th>Active (Verified) findings</th>
@@ -56,35 +59,38 @@
                         <tbody>
                         {% for pt in pts %}
                             <tr>
+                                {% if request.user|feature_new_authorization_or_user_is_staff %}
                                 <td>
                                     <ul>
                                         <li class="dropdown" style="list-style:none;position:absolute">
-                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true"  id="dropdownMenuProductType">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuProductType">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuProductType">
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'view_product_type' pt.id %}">
                                                     <i class="fa fa-list-alt"></i> View</a>
                                                 </li>
-                                                {% if user.is_staff %}
+                                                {% if pt|has_object_permission:Permissions.Product_Type_Edit %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'edit_product_type' pt.id %}">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                 </li>
+                                                {% endif %}
+                                                {% if pt|has_object_permission:Permissions.Product_Type_Add_Product %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
                                                     <i class="fa fa-plus"></i> Add Product</a>
                                                 </li>
                                                 {% endif %}
                                                 <li role="separator" class="divider"></li>
-                                                <li>
+                                                <li role="presentation">
                                                     <a class="" href="{% url 'product_type_metrics' pt.id %}">
                                                     <i class="fa fa-line-chart"></i> Metrics</a>
                                                 </li>
-                                                {% if user.is_staff %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'product_type_report' pt.id %}">
                                                     <i class="fa fa-file-text-o"></i> Product Type Report</a>
                                                 </li>
+                                                {% if pt|has_object_permission:Permissions.Product_Type_Delete %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'delete_product_type' pt.id %}">
@@ -95,6 +101,7 @@
                                         </li>
                                     </ul>
                                 </td>
+                                {% endif %}
                                 <td><a href="{% url 'view_product_type' pt.id %}">{{ pt.name }}</a></td>
                                 <td><a href="{% url 'product' %}?prod_type={{ pt.id }}"> {{ pt.prod_count }} </a></td>
                                 <td>
@@ -107,14 +114,14 @@
                                     {% else %}
                                         <i class="text-danger fa fa-times"></i>
                                     {% endif %}
-								</td>
+                                </td>
                                     <td class="text-center">
                                     {% if pt.key_product %}
                                         <i class="text-success fa fa-check"></i>
                                     {% else %}
                                         <i class="text-danger fa fa-times"></i>
                                     {% endif %}
-								</td>
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>

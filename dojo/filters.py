@@ -25,6 +25,8 @@ import tagulous
 # from tagulous.forms import TagWidget
 # import tagulous
 from crum import get_current_user
+from dojo.authorization.roles_permissions import Permissions
+from dojo.product_type.queries import get_authorized_product_types
 from django.forms import HiddenInput
 
 logger = logging.getLogger(__name__)
@@ -451,7 +453,7 @@ class ApiEngagementFilter(DojoFilter):
 class ProductFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains', label="Product Name")
     prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.all().order_by('name'),
+        queryset=None,
         label="Product Type")
     business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES)
     platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES)
@@ -568,10 +570,7 @@ class ProductFilter(DojoFilter):
 
         super(ProductFilter, self).__init__(*args, **kwargs)
 
-        if self.user is not None and not self.user.is_staff:
-            self.form.fields[
-                'prod_type'].queryset = Product_Type.objects.filter(
-                authorized_users__in=[self.user])
+        self.form.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
     class Meta:
         model = Product
