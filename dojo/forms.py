@@ -1184,6 +1184,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
         self.fields['severity'].required = False
+        # we need to defer initialization to prevent multiple initializations if other forms are shown
         self.fields['tags'].widget.tag_options = tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px', 'defer': True})
 
     def clean(self):
