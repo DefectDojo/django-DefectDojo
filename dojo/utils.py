@@ -102,9 +102,9 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
+@app.task
 @dojo_model_to_id
 @dojo_async_task
-@app.task
 @dojo_model_from_id
 def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
@@ -360,9 +360,9 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
+@app.task
 @dojo_model_to_id
 @dojo_async_task
-@app.task
 @dojo_model_from_id
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
@@ -1222,9 +1222,9 @@ def handle_uploaded_selenium(f, cred):
     cred.save()
 
 
+@app.task
 @dojo_model_to_id
 @dojo_async_task
-@app.task
 @dojo_model_from_id
 def add_external_issue(find, external_issue_provider):
     eng = Engagement.objects.get(test=find.test)
@@ -1235,9 +1235,9 @@ def add_external_issue(find, external_issue_provider):
         add_external_issue_github(find, prod, eng)
 
 
+@app.task
 @dojo_model_to_id
 @dojo_async_task
-@app.task
 @dojo_model_from_id
 def update_external_issue(find, old_status, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1247,9 +1247,9 @@ def update_external_issue(find, old_status, external_issue_provider):
         update_external_issue_github(find, prod, eng)
 
 
+@app.task
 @dojo_model_to_id
 @dojo_async_task
-@app.task
 @dojo_model_from_id
 def close_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1259,9 +1259,9 @@ def close_external_issue(find, note, external_issue_provider):
         close_external_issue_github(find, note, prod, eng)
 
 
+@app.task
 @dojo_model_to_id
 @dojo_async_task
-@app.task
 @dojo_model_from_id
 def reopen_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
