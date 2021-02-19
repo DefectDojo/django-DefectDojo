@@ -145,7 +145,7 @@ def process_notifications(event, notifications=None, **kwargs):
 # notifications are made synchronous again due to serialization bug in django-tagulous
 # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
 # @dojo_async_task
-@app.task(name='send_slack_notification')
+@app.task
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -205,7 +205,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 # notifications are made synchronous again due to serialization bug in django-tagulous
 # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
 # @dojo_async_task
-@app.task(name='send_msteams_notification')
+@app.task
 def send_msteams_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -233,7 +233,7 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
 # notifications are made synchronous again due to serialization bug in django-tagulous
 # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
 # @dojo_async_task
-@app.task(name='send_mail_notification')
+@app.task
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
