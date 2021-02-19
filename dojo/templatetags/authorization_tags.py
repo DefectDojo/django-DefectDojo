@@ -28,3 +28,8 @@ def has_object_permission(obj, permission):
         return user_has_permission(get_current_user(), obj, permission)
     else:
         return get_current_user().is_staff
+
+
+@register.filter
+def product_type_name(product_type):
+    return product_type.name

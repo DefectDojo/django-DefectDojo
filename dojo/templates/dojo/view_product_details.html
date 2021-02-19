@@ -2,6 +2,7 @@
 {% load static %}
 {% load humanize %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% block add_styles %}
   .chart {height: 160px}
 {% endblock %}
@@ -183,6 +184,93 @@
     </div>
   </div>
 </div>
+{% feature_new_authorization as feature_new_authorization_flag %}
+{% if feature_new_authorization_flag %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h4 class="pull-left">Members</h4>
+                {% if prod|has_object_permission:Permissions.Product_Manage_Members %}
+                <div class="dropdown pull-right">
+                    <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" aria-expanded="true">
+                        <span class="fa fa-bars"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation">
+                            <a class="" href="{% url 'add_product_member' prod.id %}">
+                                <i class="fa fa-plus"></i> Add Member
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% if product_members or product_type_members %}
+            <div class="table-responsive">
+                <table class="tablesorter-bootstrap table table-condensed table-striped">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>User</th>
+                        <th>Source</th>
+                        <th>Role</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for member in product_members %}
+                        <tr>
+                            <td>
+                                <ul>
+                                <li class="dropdown" style="list-style:none;position:absolute">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                    <ul class="dropdown-menu">
+                                        {% if prod|has_object_permission:Permissions.Product_Manage_Members %}
+                                        <li>
+                                            <a class="" href="{% url 'edit_product_member' member.id %}">
+                                            <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                        </li>
+                                        {% endif %}
+                                        {% if member|has_object_permission:Permissions.Product_Remove_Member %}
+                                        <li>
+                                            <a class="" href="{% url 'delete_product_member' member.id %}">
+                                            <i class="fa fa-trash"></i> Delete</a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </li>
+                                </ul>
+                            </td>
+                            <td>{{ member.user|full_name }}</td>
+                            <td>Product member</td>
+                            <td>{% role_as_string member.role %}</td>
+                        </tr>
+                    {% endfor %}
+                    {% for member in product_type_members %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td>{{ member.user|full_name }}</td>
+                            <td>
+                                <a class="" href="{% url 'view_product_type' member.product_type.id %}">
+                                    {{ member.product_type|product_type_name }}
+                                </a>
+                            </td>
+                            <td>{% role_as_string member.role %}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="panel-body">
+                <small class="text-muted"><em>No members found.</em></small>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
 </div>
 <!-- Meta Data -->
 <div class="col-md-4">

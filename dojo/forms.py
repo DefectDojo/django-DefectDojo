@@ -27,7 +27,8 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member
+    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
+    Product_Member
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -280,6 +281,37 @@ class DeleteProductForm(forms.ModelForm):
                    'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                    'internet_accessible', 'regulations', 'product_meta']
+
+
+class Edit_Product_MemberForm(forms.ModelForm):
+    user = forms.ModelChoiceField(queryset=None, required=True)
+    role = forms.ChoiceField(choices=Roles.choices())
+
+    def __init__(self, *args, **kwargs):
+        super(Edit_Product_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
+        self.fields['user'].queryset = Dojo_User.objects.order_by('first_name', 'last_name')
+        self.fields['user'].disabled = True
+
+    class Meta:
+        model = Product_Member
+        fields = ['product', 'user', 'role']
+
+
+class Add_Product_MemberForm(Edit_Product_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_MemberForm, self).__init__(*args, **kwargs)
+        current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list('user', flat=True)
+        self.fields['user'].queryset = Dojo_User.objects.exclude(
+            Q(is_superuser=True) |
+            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+        self.fields['user'].disabled = False
+
+
+class Delete_Product_MemberForm(Edit_Product_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Product_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
 
 
 class NoteTypeForm(forms.ModelForm):
