@@ -15,6 +15,7 @@ env = environ.Env(
     DD_LOG_LEVEL=(str, ''),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
+    DD_LOGIN_URL=(str, '/login'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
@@ -352,7 +353,7 @@ URL_PREFIX = env('DD_URL_PREFIX')
 # ------------------------------------------------------------------------------
 
 LOGIN_REDIRECT_URL = env('DD_LOGIN_REDIRECT_URL')
-LOGIN_URL = '/login'
+LOGIN_URL = env('DD_LOGIN_URL')
 
 # These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
