@@ -44,4 +44,10 @@ urlpatterns = [
         name='add_engagement_presets'),
     url(r'^product/(?P<pid>\d+)/engagement_presets/(?P<eid>\d+)/delete', views.delete_engagement_presets,
         name='delete_engagement_presets'),
+    url(r'^product/(?P<pid>\d+)/add_member$', views.add_product_member,
+        name='add_product_member'),
+    url(r'^product/member/(?P<memberid>\d+)/edit$', views.edit_product_member,
+        name='edit_product_member'),
+    url(r'^product/member/(?P<memberid>\d+)/delete$', views.delete_product_member,
+        name='delete_product_member'),
 ]

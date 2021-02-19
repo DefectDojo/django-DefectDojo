@@ -19,10 +19,11 @@ from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
-                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
+                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
+                       Edit_Product_MemberForm, Delete_Product_MemberForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member
 
 from dojo.utils import add_external_issue, get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 
@@ -30,15 +31,16 @@ from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F
 from django.db.models.query import QuerySet
 from github import Github
-from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
-from dojo.authorization.roles_permissions import Permissions
-from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.product.queries import get_authorized_products
+from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from django.conf import settings
+from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.product.queries import get_authorized_products, get_authorized_product_members
+from dojo.product_type.queries import get_authorized_members
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +73,7 @@ def product(request):
                   {'prod_list': prod_list,
                    'prod_filter': prod_filter,
                    'name_words': sorted(set(name_words)),
+                   'Permissions': Permissions,
                    'user': request.user})
 
 
@@ -117,11 +120,13 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
 
 
-@user_must_be_authorized(Product, 'view', 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact',
                                                       'team_manager').prefetch_related('authorized_users')
     prod = get_object_or_404(prod_query, id=pid)
+    product_members = get_authorized_product_members(prod, Permissions.Product_View)
+    product_type_members = get_authorized_members(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
@@ -183,9 +188,13 @@ def view_product(request, pid):
         'system_settings': system_settings,
         'benchmarks_percents': benchAndPercent,
         'benchmarks': benchmarks,
+        'Permissions': Permissions,
+        'product_members': product_members,
+        'product_type_members': product_type_members,
         'personal_notifications_form': personal_notifications_form})
 
 
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
@@ -446,7 +455,7 @@ def endpoint_querys(request, prod):
     return filters
 
 
-@user_must_be_authorized(Product, 'view', 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
@@ -606,11 +615,9 @@ def view_product_metrics(request, pid):
                    'user': request.user})
 
 
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def view_engagements(request, pid, engagement_type="Interactive"):
     prod = get_object_or_404(Product, id=pid)
-    auth = request.user.is_staff or check_auth_users_list(request.user, prod)
-    if not auth:
-        raise PermissionDenied
 
     default_page_num = 10
 
@@ -655,8 +662,7 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'inactive_engs': result_inactive_engs,
                    'inactive_engs_count': result_inactive_engs.paginator.count,
                    'inactive_engs_filter': inactive_engs_filter,
-                   'user': request.user,
-                   'authorized': auth})
+                   'user': request.user})
 
 
 def prefetch_for_view_engagements(engs):
@@ -682,6 +688,7 @@ def prefetch_for_view_engagements(engs):
     return prefetched_engs
 
 
+# TODO: Check if this is authorized
 def view_engagements_cicd(request, pid):
     return view_engagements(request, pid, engagement_type="CI/CD")
 
@@ -691,7 +698,6 @@ def import_scan_results_prod(request, pid=None):
     return import_scan_results(request, pid=pid)
 
 
-# @user_passes_test(lambda u: u.is_staff)
 def new_product(request, ptid=None):
     jira_project_form = None
     error = False
@@ -788,8 +794,7 @@ def new_product(request, ptid=None):
                    'sonarqube_form': Sonarqube_ProductForm()})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def edit_product(request, pid):
     product = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
@@ -883,8 +888,7 @@ def edit_product(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Delete, 'pid')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
@@ -918,8 +922,7 @@ def delete_product(request, pid):
                    })
 
 
-@user_must_be_authorized(Product, 'staff',
-                         'pid')  # use arg 0 as using pid causes issues, I think due to cicd being there
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
 def new_eng_for_app(request, pid, cicd=False):
     jira_project_form = None
     jira_project = None
@@ -1013,8 +1016,7 @@ def new_eng_for_app(request, pid, cicd=False):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def new_tech_for_prod(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1034,15 +1036,13 @@ def new_tech_for_prod(request, pid):
                   {'form': form, 'pid': pid})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
 def new_eng_for_app_cicd(request, pid):
     # we have to use pid=pid here as new_eng_for_app expects kwargs, because that is how django calls the function based on urls.py named groups
     return new_eng_for_app(request, pid=pid, cicd=True)
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def add_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1070,8 +1070,7 @@ def add_meta_data(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1102,8 +1101,7 @@ def edit_meta_data(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Finding_Add, 'pid')
 def ad_hoc_finding(request, pid):
     prod = Product.objects.get(id=pid)
     test = None
@@ -1321,8 +1319,7 @@ def ad_hoc_finding(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     presets = Engagement_Presets.objects.filter(product=prod).all()
@@ -1335,8 +1332,7 @@ def engagement_presets(request, pid):
                    'prod': prod})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def edit_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1362,8 +1358,7 @@ def edit_engagement_presets(request, pid, eid):
                    'prod': prod})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def add_engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1386,8 +1381,7 @@ def add_engagement_presets(request, pid):
     return render(request, 'dojo/new_params.html', {'tform': tform, 'pid': pid, 'product_tab': product_tab})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def delete_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1417,6 +1411,7 @@ def delete_engagement_presets(request, pid, eid):
                    })
 
 
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def edit_notifications(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1438,3 +1433,88 @@ def edit_notifications(request, pid):
                                  extra_tags='alert-success')
 
     return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+
+
+@user_is_authorized(Product, Permissions.Product_Manage_Members, 'pid')
+def add_product_member(request, pid):
+    product = get_object_or_404(Product, pk=pid)
+    memberform = Add_Product_MemberForm(initial={'product': product.id})
+    if request.method == 'POST':
+        memberform = Add_Product_MemberForm(request.POST, initial={'product': product.id})
+        if memberform.is_valid():
+            members = Product_Member.objects.filter(product=product, user=memberform.instance.user)
+            if members.count() > 0:
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'Product member already exists.',
+                                    extra_tags='alert-warning')
+            elif memberform.instance.role == Roles.Owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'You are not permitted to add users as owners.',
+                                    extra_tags='alert-warning')
+            else:
+                memberform.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Product member added successfully.',
+                                    extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_product', args=(pid, )))
+    product_tab = Product_Tab(pid, title="Add Product Member", tab="settings")
+    return render(request, 'dojo/new_product_member.html', {
+        'product': product,
+        'form': memberform,
+        'product_tab': product_tab,
+    })
+
+
+@user_is_authorized(Product_Member, Permissions.Product_Manage_Members, 'memberid')
+def edit_product_member(request, memberid):
+    member = get_object_or_404(Product_Member, pk=memberid)
+    memberform = Edit_Product_MemberForm(instance=member)
+    if request.method == 'POST':
+        memberform = Edit_Product_MemberForm(request.POST, instance=member)
+        if memberform.is_valid():
+            if member.role == Roles.Owner and not user_has_permission(request.user, member.product, Permissions.Product_Member_Add_Owner):
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'You are not permitted to make users to owners.',
+                                    extra_tags='alert-warning')
+            else:
+                memberform.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Product member updated successfully.',
+                                    extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+    product_tab = Product_Tab(member.product.id, title="Edit Product Member", tab="settings")
+    return render(request, 'dojo/edit_product_member.html', {
+        'memberid': memberid,
+        'form': memberform,
+        'product_tab': product_tab,
+    })
+
+
+@user_is_authorized(Product_Member, Permissions.Product_Remove_Member, 'memberid')
+def delete_product_member(request, memberid):
+    member = get_object_or_404(Product_Member, pk=memberid)
+    memberform = Delete_Product_MemberForm(instance=member)
+    if request.method == 'POST':
+        memberform = Delete_Product_MemberForm(request.POST, instance=member)
+        member = memberform.instance
+        user = member.user
+        member.delete()
+        messages.add_message(request,
+                            messages.SUCCESS,
+                            'Product member deleted successfully.',
+                            extra_tags='alert-success')
+        if user == request.user:
+            return HttpResponseRedirect(reverse('product'))
+        else:
+            return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+    product_tab = Product_Tab(member.product.id, title="Delete Product Member", tab="settings")
+    return render(request, 'dojo/delete_product_member.html', {
+        'memberid': memberid,
+        'form': memberform,
+        'product_tab': product_tab,
+    })

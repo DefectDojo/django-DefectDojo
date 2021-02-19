@@ -41,7 +41,7 @@ class Permissions(IntEnum):
     Product_View = 1102
     Product_Remove_Member = 1103
     Product_Manage_Members = 1104
-    Product_Member_Add_Owner = 1005
+    Product_Member_Add_Owner = 1105
     Product_Configure_Notifications = 1106
     Product_Edit = 1107
     Product_Delete = 1108
