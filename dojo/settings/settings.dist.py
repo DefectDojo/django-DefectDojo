@@ -731,7 +731,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(hours=3),
     },
     'compute-sla-age-and-notify': {
-        'task': 'dojo.tasks.async_sla_compute_and_notify',
+        'task': 'dojo.tasks.async_sla_compute_and_notify_task',
         'schedule': crontab(hour=7, minute=30),
     },
     'risk_acceptance_expiration_handler': {
