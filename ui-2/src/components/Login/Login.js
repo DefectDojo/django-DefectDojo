@@ -1,46 +1,47 @@
 import React from "react";
-import "./Login.css";
+import styles from "./Login.module.css";
 import Navbars from "./Navbar";
+
 function Login() {
   return (
-    <div className="login">
+    <div className={styles.login}>
       <section>
         <Navbars />
       </section>
-      <div className="outer">
-        <div className="inner">
+      <div className={styles.outer}>
+        <div className={styles.inner}>
           <form>
             <h3>Log in</h3>
 
             <div className="form-group">
               <label for="email">Email</label>
               <input
+                id="email"
                 label="email"
                 type="email"
                 className="form-control"
                 placeholder="Enter email"
-                name="email"
               />
             </div>
 
             <div className="form-group">
               <label for="password">Password</label>
               <input
+                id="password"
                 label="password"
                 type="password"
                 className="form-control"
                 placeholder="Enter password"
-                name="password"
               />
             </div>
 
             <div className="form-group">
               <div className="custom-control custom-checkbox">
                 <input
+                  id="customCheck1"
                   label="checkbox"
                   type="checkbox"
                   className="custom-control-input"
-                  id="customCheck1"
                 />
                 <label
                   className="custom-control-label"

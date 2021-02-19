@@ -1,33 +1,33 @@
 import React from "react";
 import Navbars from "./Navbar";
-import "./Login.css";
+import styles from "./Login.module.css";
 function SignUp() {
   return (
-    <div className="login">
+    <div className={styles.login}>
       <Navbars />
-      <div className="outer">
-        <div className="inner">
+      <div className={styles.outer}>
+        <div className={styles.inner}>
           <form>
             <h3>Register</h3>
 
             <div className="form-group">
               <label for="firstname">First name</label>
               <input
+                id="firstname"
                 type="text"
                 className="form-control"
                 placeholder="First name"
                 label="firstname"
-                name="firstname"
               />
             </div>
 
             <div className="form-group">
               <label for="lastname">Last name</label>
               <input
+                id="lastname"
                 type="text"
                 className="form-control"
                 placeholder="Last name"
-                name="lastname"
                 label="lastname"
               />
             </div>
@@ -35,10 +35,10 @@ function SignUp() {
             <div className="form-group">
               <label for="email">Email</label>
               <input
+                id="email"
                 type="email"
                 className="form-control"
                 placeholder="Enter email"
-                name="email"
                 label="email"
               />
             </div>
@@ -46,10 +46,10 @@ function SignUp() {
             <div className="form-group">
               <label for="Password">Password</label>
               <input
+                id="password"
                 type="password"
                 className="form-control"
                 placeholder="Enter password"
-                name="password"
                 label="password"
               />
             </div>
