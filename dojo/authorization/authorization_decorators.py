@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from dojo.authorization.authorization import user_has_permission
+from dojo.user.helper import user_is_authorized as legacy_check
 
 
 def user_is_authorized(model, permission, arg, lookup="pk", func=None):
@@ -30,7 +31,10 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
             if not user_has_permission(request.user, obj, permission) and not request.user.is_superuser:
                 raise PermissionDenied()
         else:
-            if not request.user.is_staff:
+            if permission.name.endswith("View"):
+                if not legacy_check(request.user, 'view', obj):
+                    raise PermissionDenied()
+            elif not request.user.is_staff:
                 raise PermissionDenied()
 
         return func(request, *args, **kwargs)
