@@ -50,6 +50,7 @@ vobject==0.9.6.1
 whitenoise==5.2.0
 titlecase==2.0.0
 social-auth-app-django==4.0.0
+social-auth-core==4.0.3
 Python-jose==3.2.0
 gitpython>=2.1.13
 ptvsd==4.3.2
