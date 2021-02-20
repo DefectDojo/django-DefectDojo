@@ -693,7 +693,7 @@
     "pk": 1,
     "fields": {
         "enable_deduplication": false,
-        "delete_dupulicates": false,
+        "delete_duplicates": false,
         "max_dupes": null,
         "enable_jira": false,
         "enable_jira_web_hook": false,
