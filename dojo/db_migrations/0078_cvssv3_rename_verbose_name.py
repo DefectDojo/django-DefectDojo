@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0075_import_history'),
+        ('dojo', '0077_delete_dupulicates'),
     ]
 
     operations = [
