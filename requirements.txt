@@ -6,7 +6,7 @@ coverage==5.4
 defusedxml==0.6.0
 django_celery_results==2.0.1
 django-auditlog==1.0a1
-django-dbbackup>=3.2.0
+django-dbbackup==3.2.0
 django-environ==0.4.5
 django-filter==2.4.0
 django-imagekit==4.0.2
@@ -50,6 +50,7 @@ vobject==0.9.6.1
 whitenoise==5.2.0
 titlecase==2.0.0
 social-auth-app-django==4.0.0
+social-auth-core==4.0.3
 Python-jose==3.2.0
 gitpython>=2.1.13
 ptvsd==4.3.2
