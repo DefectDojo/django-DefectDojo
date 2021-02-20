@@ -1,5 +1,6 @@
 from django.conf import settings
 from dojo.models import Finding
+from django.utils import timezone
 
 import logging
 
@@ -56,3 +57,26 @@ def match_new_finding_to_existing_finding(item, test, deduplication_algorithm, s
     else:
         logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
         return None
+
+
+def update_endpoint_status(existing_finding, new_finding, user):
+    # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
+    # So we only need to mitigate endpoints that are no longer present
+    existing_finding_endpoint_status_list = existing_finding.endpoint_status.all()
+    new_finding_endpoints_list = new_finding.unsaved_endpoints
+    endpoint_status_to_mitigate = list(
+        filter(
+            lambda existing_finding_endpoint_status: existing_finding_endpoint_status.endpoint not in new_finding_endpoints_list,
+            existing_finding_endpoint_status_list)
+    )
+    for endpoint_status in endpoint_status_to_mitigate:
+        mitigate_endpoint_status(endpoint_status, user)
+
+
+def mitigate_endpoint_status(endpoint_status, user):
+    logger.debug("Re-import: mitigating endpoint %s that is no longer present", str(endpoint_status.endpoint))
+    endpoint_status.mitigated_by = user
+    endpoint_status.mitigated_time = timezone.now()
+    endpoint_status.mitigated = True
+    endpoint_status.last_modified = timezone.now()
+    endpoint_status.save()

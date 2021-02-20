@@ -1344,7 +1344,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             unchanged_items = []
 
             logger.debug('starting reimport of %i items.', len(items))
-            from dojo.reimport_utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding
+            from dojo.reimport_utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
             deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
 
             i = 0
@@ -1417,6 +1417,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                         unchanged_items.append(finding)
                         unchanged_count += 1
+                    if finding.dynamic_finding:
+                        logger.debug("Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints")
+                        update_endpoint_status(finding, item, self.context['request'].user)
                 else:
                     # no existing finding found
                     item.test = test

@@ -718,7 +718,7 @@ def re_import_scan_results(request, tid):
                 push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
 
                 logger.debug('starting reimport of %i items.', len(items))
-                from dojo.reimport_utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding
+                from dojo.reimport_utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
                 deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
 
                 i = 0
@@ -792,7 +792,9 @@ def re_import_scan_results(request, tid):
                                 finding.save(dedupe_option=False)
                             unchanged_items.append(finding)
                             unchanged_count += 1
-
+                        if finding.dynamic_finding:
+                            logger.debug("Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints")
+                            update_endpoint_status(finding, item, request.user)
                     else:
                         item.test = test
                         item.reporter = request.user
