@@ -38,6 +38,7 @@ import dojo.finding.helper as finding_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.product.queries import get_authorized_products
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -710,8 +711,12 @@ def new_product(request, ptid=None):
             gform = None
 
         if form.is_valid():
-            product_type = form.instance.prod_type
-            user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
+            if settings.FEATURE_NEW_AUTHORIZATION:
+                product_type = form.instance.prod_type
+                user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
+            else:
+                if not request.user.is_staff:
+                    raise PermissionDenied
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
