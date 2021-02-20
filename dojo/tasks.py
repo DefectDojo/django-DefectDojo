@@ -238,7 +238,7 @@ def async_custom_pdf_report(self,
 def async_dupe_delete(*args, **kwargs):
     try:
         system_settings = System_Settings.objects.get()
-        enabled = system_settings.delete_dupulicates
+        enabled = system_settings.delete_duplicates
         dupe_max = system_settings.max_dupes
         total_duplicate_delete_count_max_per_run = settings.DUPE_DELETE_MAX_PER_RUN
     except System_Settings.DoesNotExist:
