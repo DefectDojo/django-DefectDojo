@@ -190,7 +190,7 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h4 class="pull-left">Members</h4>
-                {% if prod|has_object_permission:Permissions.Product_Manage_Members %}
+                {% if prod|has_object_permission:"Product_Manage_Members" %}
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true">
@@ -227,13 +227,13 @@
                                 <li class="dropdown" style="list-style:none;position:absolute">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
-                                        {% if prod|has_object_permission:Permissions.Product_Manage_Members %}
+                                        {% if prod|has_object_permission:"Product_Manage_Members" %}
                                         <li>
                                             <a class="" href="{% url 'edit_product_member' member.id %}">
                                             <i class="fa fa-pencil-square-o"></i> Edit</a>
                                         </li>
                                         {% endif %}
-                                        {% if member|has_object_permission:Permissions.Product_Remove_Member %}
+                                        {% if member|has_object_permission:"Product_Remove_Member" %}
                                         <li>
                                             <a class="" href="{% url 'delete_product_member' member.id %}">
                                             <i class="fa fa-trash"></i> Delete</a>
@@ -396,6 +396,8 @@
             <td><strong>Technical Contact</strong></td>
             <td>{% if prod.technical_contact != "0" %}{{ prod.technical_contact | default:"Unknown" }}{% endif %}</td>
           </tr>
+          {% feature_new_authorization as feature_new_authorization_flag %}
+          {% if feature_new_authorization_flag is False %}
           <tr>
             <td><strong>Authorized Users</strong></td>
             <td>
@@ -421,6 +423,7 @@
               {% endif %}
             </td>
           </tr>
+          {% endif %}
         </tbody>
       </table>
     </div>

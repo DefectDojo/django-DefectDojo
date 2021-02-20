@@ -69,13 +69,13 @@
                                                     <a class="" href="{% url 'view_product_type' pt.id %}">
                                                     <i class="fa fa-list-alt"></i> View</a>
                                                 </li>
-                                                {% if pt|has_object_permission:Permissions.Product_Type_Edit %}
+                                                {% if pt|has_object_permission:"Product_Type_Edit" %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'edit_product_type' pt.id %}">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                 </li>
                                                 {% endif %}
-                                                {% if pt|has_object_permission:Permissions.Product_Type_Add_Product %}
+                                                {% if pt|has_object_permission:"Product_Type_Add_Product" %}
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
                                                     <i class="fa fa-plus"></i> Add Product</a>
@@ -90,7 +90,7 @@
                                                     <a class="" href="{% url 'product_type_report' pt.id %}">
                                                     <i class="fa fa-file-text-o"></i> Product Type Report</a>
                                                 </li>
-                                                {% if pt|has_object_permission:Permissions.Product_Type_Delete %}
+                                                {% if pt|has_object_permission:"Product_Type_Delete" %}
                                                 <li role="separator" class="divider"></li>
                                                 <li role="presentation">
                                                     <a class="" href="{% url 'delete_product_type' pt.id %}">

@@ -77,19 +77,19 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_engagement_permissions(cls):
-        return {Permissions.Engagement_View, Permissions.Engagement_Add, Permissions.Engagement_Edit, Permissions.Engagement_Delete}
+        return {Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Delete}
 
     @classmethod
     def get_test_permissions(cls):
-        return {Permissions.Test_View, Permissions.Test_Add, Permissions.Test_Edit, Permissions.Test_Delete}
+        return {Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete}
 
     @classmethod
     def get_finding_permissions(cls):
-        return {Permissions.Finding_View, Permissions.Finding_Add, Permissions.Finding_Edit, Permissions.Import_Scan_Result, Permissions.Finding_Delete}
+        return {Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Import_Scan_Result, Permissions.Finding_Delete}
 
     @classmethod
     def get_endpoint_permissions(cls):
-        return {Permissions.Endpoint_View, Permissions.Endpoint_Add, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
+        return {Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
 
     @classmethod
     def get_product_member_permissions(cls):

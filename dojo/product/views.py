@@ -35,7 +35,7 @@ from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
-from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_product_members
@@ -119,7 +119,7 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related('product_manager', 'technical_contact',
                                                       'team_manager').prefetch_related('authorized_users')
@@ -193,7 +193,7 @@ def view_product(request, pid):
         'personal_notifications_form': personal_notifications_form})
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
@@ -454,7 +454,7 @@ def endpoint_querys(request, prod):
     return filters
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
@@ -614,7 +614,7 @@ def view_product_metrics(request, pid):
                    'user': request.user})
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_engagements(request, pid, engagement_type="Interactive"):
     prod = get_object_or_404(Product, id=pid)
 
@@ -692,6 +692,7 @@ def view_engagements_cicd(request, pid):
     return view_engagements(request, pid, engagement_type="CI/CD")
 
 
+# TODO: Check if this is authorized
 def import_scan_results_prod(request, pid=None):
     from dojo.engagement.views import import_scan_results
     return import_scan_results(request, pid=pid)
@@ -789,7 +790,7 @@ def new_product(request, ptid=None):
                    'sonarqube_form': Sonarqube_ProductForm()})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_product(request, pid):
     product = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
@@ -883,7 +884,7 @@ def edit_product(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Delete, 'pid')
+@user_is_authorized(Product, Permissions.Product_Delete, 'pid', 'staff')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
@@ -917,7 +918,7 @@ def delete_product(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
 def new_eng_for_app(request, pid, cicd=False):
     jira_project_form = None
     jira_project = None
@@ -1011,7 +1012,7 @@ def new_eng_for_app(request, pid, cicd=False):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def new_tech_for_prod(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1031,13 +1032,13 @@ def new_tech_for_prod(request, pid):
                   {'form': form, 'pid': pid})
 
 
-@user_is_authorized(Product, Permissions.Engagement_Add, 'pid')
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
 def new_eng_for_app_cicd(request, pid):
     # we have to use pid=pid here as new_eng_for_app expects kwargs, because that is how django calls the function based on urls.py named groups
     return new_eng_for_app(request, pid=pid, cicd=True)
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def add_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1065,7 +1066,7 @@ def add_meta_data(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1096,7 +1097,7 @@ def edit_meta_data(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Finding_Add, 'pid')
+@user_is_authorized(Product, Permissions.Finding_Add, 'pid', 'staff')
 def ad_hoc_finding(request, pid):
     prod = Product.objects.get(id=pid)
     test = None
@@ -1314,7 +1315,7 @@ def ad_hoc_finding(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'staff')
 def engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     presets = Engagement_Presets.objects.filter(product=prod).all()
@@ -1327,7 +1328,7 @@ def engagement_presets(request, pid):
                    'prod': prod})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1353,7 +1354,7 @@ def edit_engagement_presets(request, pid, eid):
                    'prod': prod})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def add_engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1376,7 +1377,7 @@ def add_engagement_presets(request, pid):
     return render(request, 'dojo/new_params.html', {'tform': tform, 'pid': pid, 'product_tab': product_tab})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def delete_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
