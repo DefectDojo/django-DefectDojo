@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0075_import_history'),
+        ('dojo', '0076_authorization'),
     ]
 
     operations = [
