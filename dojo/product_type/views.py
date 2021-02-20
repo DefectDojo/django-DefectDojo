@@ -44,7 +44,6 @@ def product_type(request):
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
-        'Permissions': Permissions,
         'pts': pts,
         'ptl': ptl,
         'name_words': name_words})
@@ -104,7 +103,6 @@ def view_product_type(request, ptid):
     add_breadcrumb(title="View Product Type", top_level=False, request=request)
     return render(request, 'dojo/view_product_type.html', {
         'name': 'View Product Type',
-        'Permissions': Permissions,
         'pt': pt,
         'products': products,
         'members': members})

@@ -73,7 +73,6 @@ def product(request):
                   {'prod_list': prod_list,
                    'prod_filter': prod_filter,
                    'name_words': sorted(set(name_words)),
-                   'Permissions': Permissions,
                    'user': request.user})
 
 
@@ -188,7 +187,6 @@ def view_product(request, pid):
         'system_settings': system_settings,
         'benchmarks_percents': benchAndPercent,
         'benchmarks': benchmarks,
-        'Permissions': Permissions,
         'product_members': product_members,
         'product_type_members': product_type_members,
         'personal_notifications_form': personal_notifications_form})
@@ -1412,7 +1410,7 @@ def delete_engagement_presets(request, pid, eid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def edit_notifications(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
