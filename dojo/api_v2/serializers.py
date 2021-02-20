@@ -8,7 +8,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING, \
-    IMPORT_REACTIVATED_FINDING
+    IMPORT_REACTIVATED_FINDING, Product_Type_Member
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import import_parser_factory, requires_file
@@ -393,13 +393,28 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.open_findings_list()
 
 
+class ProductTypeMemberSerializer(serializers.ModelSerializer):
+    user = UserStubSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Product_Type_Member
+        exclude = ['product_type']
+
+
 class ProductTypeSerializer(serializers.ModelSerializer):
+    if settings.FEATURE_NEW_AUTHORIZATION:
+        members = ProductTypeMemberSerializer(source='product_type_member_set', read_only=True, many=True)
+
     class Meta:
         model = Product_Type
-        fields = '__all__'
-        extra_kwargs = {
-            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-        }
+
+        if not settings.FEATURE_NEW_AUTHORIZATION:
+            exclude = ['members']
+            extra_kwargs = {
+                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+            }
+        else:
+            exclude = ['authorized_users']
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
