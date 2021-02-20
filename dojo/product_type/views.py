@@ -96,7 +96,7 @@ def add_product_type(request):
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid', 'view')
 def view_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     members = get_authorized_members(pt, Permissions.Product_Type_View)

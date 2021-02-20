@@ -244,9 +244,10 @@ class ProductForm(forms.ModelForm):
                                        queryset=None,
                                        required=True)
 
-    authorized_users = forms.ModelMultipleChoiceField(
-        queryset=None,
-        required=False, label="Authorized Users")
+    if not settings.FEATURE_NEW_AUTHORIZATION:
+        authorized_users = forms.ModelMultipleChoiceField(
+            queryset=None,
+            required=False, label="Authorized Users")
 
     app_analysis = forms.ModelMultipleChoiceField(label='Technologies',
                                            queryset=App_Analysis.objects.all().order_by('name'),
@@ -260,14 +261,20 @@ class ProductForm(forms.ModelForm):
         non_staff = Dojo_User.objects.exclude(is_staff=True) \
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(ProductForm, self).__init__(*args, **kwargs)
-        self.fields['authorized_users'].queryset = non_staff
+        if not settings.FEATURE_NEW_AUTHORIZATION:
+            self.fields['authorized_users'].queryset = non_staff
         self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
-                  'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                  'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
+        if settings.FEATURE_NEW_AUTHORIZATION:
+            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
+                    'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
+                    'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
+        else:
+            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
+                    'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
+                    'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
 
 class DeleteProductForm(forms.ModelForm):
