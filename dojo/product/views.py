@@ -24,7 +24,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, S
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
 
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+from dojo.utils import add_external_issue, get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 
 from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F
