@@ -1,6 +1,7 @@
 {% load navigation_tags %}
 {% with page_param=prefix|add:'page' %}
 {% with page_size_param=prefix|add:'page_size' %}
+{% if page.paginator %}
 <div class="pull-left pagination  pagination-sm">
     Showing entries {{ page.start_index }} to {{ page.end_index }} of {{ page.paginator.count }}
 </div>
@@ -43,7 +44,7 @@
                 </li>
             {% endif %}
         </ul>
-
     </nav>
-    {% endwith %}
-    {% endwith %}
+{% endif %}
+{% endwith %}
+{% endwith %}
