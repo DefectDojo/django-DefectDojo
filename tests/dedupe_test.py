@@ -135,6 +135,8 @@ class DedupeTest(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
+    # Re-upload dedupe_path_1.json bandit report into "Path Test 1" empty test (nothing uploaded before)
+    # Then do the same with dedupe_path_2.json / "Path Test 2"
     @on_exception_html_source_logger
     def test_import_path_tests(self):
         logger.debug("importing reports...")

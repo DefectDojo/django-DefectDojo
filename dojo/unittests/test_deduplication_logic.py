@@ -526,8 +526,8 @@ class TestDuplicationLogic(TestCase):
         finding_new2.endpoints.add(ep2)
         finding_new2.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new2, not_pk=finding_new.pk, duplicate=True, duplicate_finding_id=finding_new.id, hash_code=finding_new.hash_code, not_hash_code=finding_4.hash_code)
+        # expect: marked as duplicate of original finding 2 (because finding 4 is a duplicate of finding 2 in sample data), hash_code not affected by endpoints (endpoints are not anymore in ZAP configuration for hash_code)
+        self.assert_finding(finding_new2, not_pk=finding_new.pk, duplicate=True, duplicate_finding_id=2, hash_code=finding_new.hash_code, not_hash_code=None)
 
     def test_identical_hash_code_with_different_endpoints(self):
         finding_new, finding_4 = self.copy_and_reset_finding_add_endpoints(id=4)
@@ -548,8 +548,8 @@ class TestDuplicationLogic(TestCase):
         finding_new3.endpoints.add(ep3)
         finding_new3.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, not_hash_code=finding_4.hash_code)
+        # expect: marked as duplicate, hash_code not affected by endpoints (ZAP hash_code not dependent on endpoints anymore)
+        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=True, hash_code=finding_4.hash_code)
 
     # # unique_id algo uses id from tool. hash_code is still calculated, according to legacy field config Checkmarx detailed scan
 

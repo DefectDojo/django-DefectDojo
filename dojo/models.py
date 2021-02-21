@@ -1811,20 +1811,26 @@ class Finding(models.Model):
     # (This sometimes reports "None")
     def get_endpoints(self):
         endpoint_str = ''
-        if len(self.unsaved_endpoints) > 0 and self.id is None:
-            deduplicationLogger.debug("get_endpoints before the finding was saved")
-            # convert list of unsaved endpoints to the list of their canonical representation
-            endpoint_str_list = list(
-                map(
-                    lambda endpoint: str(endpoint),
-                    self.unsaved_endpoints
-                ))
-            # deduplicate (usually done upon saving finding) and sort endpoints
-            endpoint_str = ''.join(
-                sorted(
-                    list(
-                        dict.fromkeys(endpoint_str_list)
-                    )))
+        if(self.id is None):
+            if len(self.unsaved_endpoints) > 0:
+                deduplicationLogger.debug("get_endpoints before the finding was saved")
+                # convert list of unsaved endpoints to the list of their canonical representation
+                endpoint_str_list = list(
+                    map(
+                        lambda endpoint: str(endpoint),
+                        self.unsaved_endpoints
+                    ))
+                # deduplicate (usually done upon saving finding) and sort endpoints
+                endpoint_str = ''.join(
+                    sorted(
+                        list(
+                            dict.fromkeys(endpoint_str_list)
+                        )))
+            else:
+                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+                # In this case, before saving the finding, both static_finding and dynamic_finding are True
+                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+                deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
         else:
             deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
             # convert list of endpoints to the list of their canonical representation

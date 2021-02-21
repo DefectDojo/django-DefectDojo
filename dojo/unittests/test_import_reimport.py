@@ -378,10 +378,10 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(4, findings)
 
-        # existing BUG: endpoint that is no longer in last scan should be removed or marked as mitigated
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
-        self.assertEqual(endpoint_status_count_before_active, self.db_endpoint_status_count(mitigated=False))
-        self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
+        # 1 endpoint was marked as mitigated
+        self.assertEqual(endpoint_status_count_before_active - 1, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated + 1, self.db_endpoint_status_count(mitigated=True))
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())

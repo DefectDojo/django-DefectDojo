@@ -738,9 +738,6 @@ def re_import_scan_results(request, tid):
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
 
-                    # Try to find the existing finding
-                    # If it's Veracode or Arachni, then we consider the description for some
-                    # reason...
                     from titlecase import titlecase
                     item.title = titlecase(item.title)
                     item.hash_code = item.compute_hash_code()
