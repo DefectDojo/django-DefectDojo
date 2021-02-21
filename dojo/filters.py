@@ -78,7 +78,7 @@ class DojoFilter(FilterSet):
                 model = tags_filter.model
 
                 self.form.fields[field] = model._meta.get_field("tags").formfield()
-                # we defer applyting the select2 autocomplete because there can be multiple forms on the same page
+                # we defer applying the select2 autocomplete because there can be multiple forms on the same page
                 # and form.js would then apply select2 multiple times, resulting in duplicated fields
                 # the initialization now happens in filter_js_snippet.html
                 self.form.fields[field].widget.tag_options = \
