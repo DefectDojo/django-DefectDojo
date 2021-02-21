@@ -2128,6 +2128,9 @@ class JIRAFindingForm(forms.Form):
         self.push_all = kwargs.pop('push_all', False)
         self.instance = kwargs.pop('instance', None)
         self.jira_project = kwargs.pop('jira_project', None)
+        # we provide the finding_form from the same page so we can add validation errors
+        # if the finding doesn't satisfy the rules to be pushed to JIRA
+        self.finding_form = kwargs.pop('finding_form', None)
 
         if self.instance is None and self.jira_project is None:
             raise ValueError('either and finding instance or jira_project is needed')
@@ -2154,12 +2157,22 @@ class JIRAFindingForm(forms.Form):
         self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
 
     def clean(self):
+        logger.debug('jform clean')
         import dojo.jira_link.helper as jira_helper
-        logger.debug('validating jirafindingform')
         cleaned_data = super(JIRAFindingForm, self).clean()
         jira_issue_key_new = self.cleaned_data.get('jira_issue')
         finding = self.instance
         jira_project = self.jira_project
+
+        logger.debug('self.cleaned_data.push_to_jira: %s', self.cleaned_data.get('push_to_jira', None))
+
+        if self.cleaned_data.get('push_to_jira', None):
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(self.instance, self.finding_form)
+            if not can_be_pushed_to_jira:
+                self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
+                # for field in error_fields:
+                #     self.finding_form.add_error(field, error)
+
         if jira_issue_key_new:
             if finding:
                 # in theory there can multiple jira instances that have similar projects
