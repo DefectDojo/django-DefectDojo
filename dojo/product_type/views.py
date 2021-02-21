@@ -76,11 +76,12 @@ def add_product_type(request):
         form = Product_TypeForm(request.POST)
         if form.is_valid():
             product_type = form.save()
-            member = Product_Type_Member()
-            member.user = request.user
-            member.product_type = product_type
-            member.role = Roles.Owner
-            member.save()
+            if settings.FEATURE_NEW_AUTHORIZATION:
+                member = Product_Type_Member()
+                member.user = request.user
+                member.product_type = product_type
+                member.role = Roles.Owner
+                member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Product type added successfully.',

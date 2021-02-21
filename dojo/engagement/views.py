@@ -171,7 +171,7 @@ def edit_engagement(request, eid):
                 create_notification(event='close_engagement',
                         title='Closure of %s' % engagement.name,
                         description='The engagement "%s" was closed' % (engagement.name),
-                        engagement=engagaement, url=reverse('engagment_all_findings', args=(engagement.id, ))),
+                        engagement=engagement, url=reverse('engagment_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
             engagement.save()
@@ -682,11 +682,11 @@ def import_scan_results(request, eid=None, pid=None):
                         item.endpoints.add(ep)
                         item.endpoint_status.add(eps)
 
+                    if item.unsaved_tags:
+                        item.tags = item.unsaved_tags
+
                     item.save(false_history=True, push_to_jira=push_to_jira)
                     new_findings.append(item)
-
-                    if item.unsaved_tags is not None:
-                        item.tags = item.unsaved_tags
 
                     finding_count += 1
                     i += 1
@@ -816,6 +816,12 @@ method to complete checklists from the engagement view
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
+    try:
+        checklist = Check_List.objects.get(engagement=eng)
+    except:
+        checklist = None
+        pass
+
     add_breadcrumb(
         parent=eng,
         title="Complete checklist",
@@ -824,7 +830,7 @@ def complete_checklist(request, eid):
     if request.method == 'POST':
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
-        form = CheckForm(request.POST, findings=findings)
+        form = CheckForm(request.POST, instance=checklist, findings=findings)
         if form.is_valid():
             cl = form.save(commit=False)
             try:
@@ -833,7 +839,6 @@ def complete_checklist(request, eid):
                 cl.save()
                 form.save_m2m()
             except:
-
                 cl.engagement = eng
                 cl.save()
                 form.save_m2m()
@@ -848,7 +853,7 @@ def complete_checklist(request, eid):
     else:
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
-        form = CheckForm(findings=findings)
+        form = CheckForm(instance=checklist, findings=findings)
 
     product_tab = Product_Tab(eng.product.id, title="Checklist", tab="engagements")
     product_tab.setEngagement(eng)

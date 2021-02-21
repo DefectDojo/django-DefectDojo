@@ -1645,10 +1645,11 @@ class ImportScanResource(MultipartResource, Resource):
                     ep.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
                     item.endpoints.add(ep)
-                item.save()
 
-                if item.unsaved_tags is not None:
+                if item.unsaved_tags:
                     item.tags = item.unsaved_tags
+
+                item.save()
 
         except SyntaxError:
             raise NotFound("Parser SyntaxError")
@@ -1873,9 +1874,11 @@ class ReImportScanResource(MultipartResource, Resource):
                         find.endpoint_status.add(eps)
                         find.endpoints.add(ep)
 
-                    if item.unsaved_tags is not None:
+                    if item.unsaved_tags:
                         find.tags = item.unsaved_tags
+
                 find.save()
+
             # calculate the difference
             to_mitigate = set(original_items) - set(new_items)
             for finding_id in to_mitigate:

@@ -1230,7 +1230,8 @@ class ImportScanSerializer(serializers.Serializer):
 
                     endpoint_to_add.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
-                if item.unsaved_tags is not None:
+
+                if item.unsaved_tags:
                     item.tags = item.unsaved_tags
 
                 item.save(push_to_jira=push_to_jira)
