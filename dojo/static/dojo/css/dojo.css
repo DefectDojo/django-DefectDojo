@@ -1621,6 +1621,10 @@ small {
     color:red;
 }
 
+.no-italics {
+    font-style: normal;
+}
+
 .select2-container {
     min-width:200px;
 }

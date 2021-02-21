@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.60 scan initiated Mon Feb 17 10:07:25 2020 as: nmap -sV -p22 -&#45;script=vulners/vulners.nse -oX 192_168_0_1.xml 192.168.0.1 -->
+<nmaprun scanner="nmap" args="nmap -sV -p22 -&#45;script=vulners/vulners.nse -oX 192_168_0_1.xml 192.168.0.1" start="1581930445" startstr="Mon Feb 17 10:07:25 2020" version="7.60" xmloutputversion="1.04">
+<scaninfo type="connect" protocol="tcp" numservices="1" services="5022"/>
+<verbose level="0"/>
+<debugging level="0"/>
+<host starttime="1581930450" endtime="1581930455"><status state="up" reason="syn-ack" reason_ttl="0"/>
+<address addr="192.168.0.1" addrtype="ipv4"/>
+<hostnames>
+</hostnames>
+<ports><port protocol="tcp" portid="5022"><state state="open" reason="syn-ack" reason_ttl="0"/><service name="ssh" product="OpenSSH" version="7.4" extrainfo="protocol 2.0" method="probed" conf="10"><cpe>cpe:/a:openbsd:openssh:7.4</cpe></service><script id="vulners" output="&#xa;  cpe:/a:openbsd:openssh:7.4: &#xa;    &#x9;CVE-2018-15919&#x9;5.0&#x9;https://vulners.com/cve/CVE-2018-15919&#xa;    &#x9;CVE-2017-15906&#x9;5.0&#x9;https://vulners.com/cve/CVE-2017-15906"><table key="cpe:/a:openbsd:openssh:7.4">
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">CVE-2018-15919</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+<table>
+<elem key="cvss">5.0</elem>
+<elem key="id">CVE-2017-15906</elem>
+<elem key="is_exploit">false</elem>
+<elem key="type">cve</elem>
+</table>
+</table>
+</script></port>
+</ports>
+<times srtt="45869" rttvar="48374" to="239365"/>
+</host>
+<runstats><finished time="1581930455" timestr="Mon Feb 17 10:07:35 2020" elapsed="12.18" summary="Nmap done at Mon Feb 17 10:07:35 2020; 1 IP address (1 host up) scanned in 12.18 seconds" exit="success"/><hosts up="1" down="0" total="1"/>
+</runstats>
+</nmaprun> 

@@ -1,4 +1,3 @@
-
 import html2text
 from defusedxml import ElementTree
 
@@ -103,7 +102,8 @@ class NexposeParser(object):
         for tests in node.iter('tests'):
             for test in tests.iter('test'):
                 vuln = dict()
-                if test.get('id') in vulnsDefinitions and test.get('status') == 'vulnerable-exploited':
+                if test.get('id') in vulnsDefinitions and (
+                        test.get('status') in ['vulnerable-exploited', 'vulnerable-version', 'vulnerable-potential']):
                     vuln = vulnsDefinitions[test.get('id').lower()]
                     for desc in list(test):
                         if 'pluginOutput' in vuln:
@@ -120,7 +120,7 @@ class NexposeParser(object):
         @returns vulns A dict of Vulnerability Definitions
         """
         vulns = dict()
-
+        url_index = 0
         for vulnsDef in tree.iter('VulnerabilityDefinitions'):
             for vulnDef in vulnsDef.iter('vulnerability'):
                 vid = vulnDef.get('id').lower()
@@ -151,19 +151,24 @@ class NexposeParser(object):
 
                     if item.tag == 'exploits':
                         for exploit in list(item):
-                            vuln['refs'][exploit.get('title')] = str(exploit.get('title')).strip() + ' ' + str(exploit.get('link')).strip()
+                            vuln['refs'][exploit.get('title')] = str(exploit.get('title')).strip() + ' ' + \
+                                                                 str(exploit.get('link')).strip()
                     if item.tag == 'references':
                         for ref in list(item):
-                            vuln['refs'][ref.get('source')] = str(ref.text).strip()
+                            if 'URL' in ref.get('source'):
+                                vuln['refs'][ref.get('source') + str(url_index)] = str(ref.text).strip()
+                                url_index += 1
+                            else:
+                                vuln['refs'][ref.get('source')] = str(ref.text).strip()
                     if item.tag == 'solution':
                         for htmlType in list(item):
                             vuln['resolution'] += self.parse_html_type(htmlType)
-                    """
+
                     # there is currently no method to register tags in vulns
                     if item.tag == 'tags':
                         for tag in list(item):
                             vuln['tags'].append(tag.text.lower())
-                    """
+
                 vulns[vid] = vuln
         return vulns
 
@@ -176,7 +181,7 @@ class NexposeParser(object):
                 host['hostnames'] = set()
                 host['os'] = ""
                 host['services'] = list()
-                # host['vulns'] = self.parse_tests_type(node, vulns)
+                host['vulns'] = self.parse_tests_type(node, vulns)
 
                 for names in node.iter('names'):
                     for name in list(names):
@@ -210,47 +215,69 @@ class NexposeParser(object):
                 for vuln in service['vulns']:
                     dupe_key = vuln['severity'] + vuln['name']
 
-                    if dupe_key in dupes:
-                        find = dupes[dupe_key]
-                        dupe_text = html2text.html2text(vuln['pluginOutput'])
-                        if dupe_text not in find.description:
-                            find.description += "\n\n" + dupe_text
-                    else:
-                        find = Finding(title=vuln['name'],
-                                       description=html2text.html2text(
-                            vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].strip()),
-                            severity=vuln['severity'],
-                            numerical_severity=Finding.get_numerical_severity(vuln['severity']),
-                            mitigation=html2text.html2text(vuln['resolution']),
-                            impact=vuln['vector'],
-                            test=test,
-                            active=False,
-                            verified=False,
-                            false_p=False,
-                            duplicate=False,
-                            out_of_scope=False,
-                            mitigated=None,
-                            dynamic_finding=True)
-                        # build references
-                        refs = ''
-                        for ref in vuln['refs']:
-                            if ref.startswith('CA'):
-                                ref = f" * [{vuln['refs'][ref]}](https://www.cert.org/advisories/{vuln['refs'][ref]}.html)"
-                            elif ref.startswith('CVE'):
-                                ref = f" * [{vuln['refs'][ref]}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln['refs'][ref]})"
-                            else:
-                                refs += f" * {ref}: {vuln['refs'][ref]}"
-                            refs += "\n"
-                        find.references = refs
-                        # update CVE
-                        if "CVE" in vuln['refs']:
-                            find.cve = vuln['refs']['CVE']
-                        find.unsaved_endpoints = list()
-                        dupes[dupe_key] = find
+                    find = self.findings(dupe_key, dupes, test, vuln)
 
                     endpoint = Endpoint(host=item['name'])
                     if 'port' in service:
                         endpoint.port = int(service['port'])
                     find.unsaved_endpoints.append(endpoint)
+                    find.unsaved_tags = list()
+                    find.unsaved_tags = vuln['tags']
+
+        # manage findings by node only
+        for vuln in host['vulns']:
+            dupe_key = vuln['severity'] + vuln['name']
+
+            find = self.findings(dupe_key, dupes, test, vuln)
+
+            find.unsaved_tags = list()
+            find.unsaved_tags = vuln['tags']
 
         return list(dupes.values())
+
+    @staticmethod
+    def findings(dupe_key, dupes, test, vuln):
+        """
+
+
+        """
+        if dupe_key in dupes:
+            find = dupes[dupe_key]
+            dupe_text = html2text.html2text(vuln['pluginOutput'])
+            if dupe_text not in find.description:
+                find.description += "\n\n" + dupe_text
+        else:
+            find = Finding(title=vuln['name'],
+                           description=html2text.html2text(
+                               vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].strip()),
+                           severity=vuln['severity'],
+                           numerical_severity=Finding.get_numerical_severity(vuln['severity']),
+                           mitigation=html2text.html2text(vuln['resolution']),
+                           impact=vuln['vector'],
+                           test=test,
+                           active=False,
+                           verified=False,
+                           false_p=False,
+                           duplicate=False,
+                           out_of_scope=False,
+                           mitigated=None,
+                           dynamic_finding=True)
+            # build references
+            refs = ''
+            for ref in vuln['refs']:
+                if ref.startswith('CA'):
+                    refs += f" * [{vuln['refs'][ref]}](https://www.cert.org/advisories/{vuln['refs'][ref]}.html)"
+                elif ref.startswith('CVE'):
+                    refs += f" * [{vuln['refs'][ref]}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln['refs'][ref]})"
+                elif ref.startswith('URL'):
+                    refs += f" * URL: {vuln['refs'][ref]}"
+                else:
+                    refs += f" * {ref}: {vuln['refs'][ref]}"
+                refs += "\n"
+            find.references = refs
+            # update CVE
+            if "CVE" in vuln['refs']:
+                find.cve = vuln['refs']['CVE']
+            find.unsaved_endpoints = list()
+            dupes[dupe_key] = find
+        return find

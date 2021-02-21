@@ -126,7 +126,7 @@ class System_Settings(models.Model):
                   "title, Dojo marks the less recent finding as a duplicate. "
                   "When deduplication is enabled, a list of "
                   "deduplicated findings is added to the engagement view.")
-    delete_dupulicates = models.BooleanField(default=False, blank=False, help_text="Requires next setting: maximum number of duplicates to retain.")
+    delete_duplicates = models.BooleanField(default=False, blank=False, help_text="Requires next setting: maximum number of duplicates to retain.")
     max_dupes = models.IntegerField(blank=True, null=True, default=10,
                                     verbose_name='Max Duplicates',
                                     help_text="When enabled, if a single "
@@ -1466,7 +1466,7 @@ class Finding(models.Model):
     cvssv3 = models.TextField(validators=[cvssv3_regex],
                               max_length=117,
                               null=True,
-                              verbose_name="CVSSv3",
+                              verbose_name="CVSS v3",
                               help_text="Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw.")
     url = models.TextField(null=True,
                            blank=True,
@@ -2042,7 +2042,7 @@ class Finding(models.Model):
         long_desc += '*' + self.title + '*\n\n'
         long_desc += '*Severity:* ' + str(self.severity) + '\n\n'
         long_desc += '*Cve:* ' + str(self.cve) + '\n\n'
-        long_desc += '*CVSSv3.0:* ' + str(self.cvssv3) + '\n\n'
+        long_desc += '*CVSS v3:* ' + str(self.cvssv3) + '\n\n'
         long_desc += '*Product/Engagement:* ' + self.test.engagement.product.name + ' / ' + self.test.engagement.name + '\n\n'
         if self.test.engagement.branch_tag:
             long_desc += '*Branch/Tag:* ' + self.test.engagement.branch_tag + '\n\n'

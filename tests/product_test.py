@@ -165,8 +165,10 @@ class ProductTest(BaseTestCase):
         # finding Date as a default value and can be safely skipped
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("High")
+        # cvssv3 field
+        driver.find_element_by_id("id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Description
-        driver.find_element_by_id("id_severity").send_keys(Keys.TAB, "This is just a Test Case Finding")
+        driver.find_element_by_id("id_cvssv3").send_keys(Keys.TAB, "This is just a Test Case Finding")
         # Finding Mitigation
         # Use Javascript to bypass the editor by making Setting textArea style from none to inline
         # Any Text written to textarea automatically reflects in Editor field.
