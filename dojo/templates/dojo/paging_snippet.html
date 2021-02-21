@@ -1,3 +1,4 @@
+{% if page.paginator.count > 0 %}
 {% load navigation_tags %}
 {% with page_param=prefix|add:'page' %}
 {% with page_size_param=prefix|add:'page_size' %}
@@ -47,3 +48,4 @@
     </nav>
     {% endwith %}
     {% endwith %}
+{% endif %}
