@@ -238,6 +238,8 @@ Follow along below.
 SAML 2.0
 --------
 
+WARNING: The SAML integration below is based on [https://github.com/fangli/django-saml2-auth](django-saml2-auth) which is no longer maintained, see #3890
+
 In a similar direction OAuth, this SAML addition provides a more secure
 perogative to SSO. For definitions of terms used and more information,
 see the plugin [plugin
