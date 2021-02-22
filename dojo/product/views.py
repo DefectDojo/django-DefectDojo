@@ -686,13 +686,11 @@ def prefetch_for_view_engagements(engs):
     return prefetched_engs
 
 
-# TODO: Check if this is authorized
 @user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_engagements_cicd(request, pid):
     return view_engagements(request, pid=pid, engagement_type="CI/CD")
 
 
-# TODO: Check if this is authorized
 def import_scan_results_prod(request, pid=None):
     from dojo.engagement.views import import_scan_results
     return import_scan_results(request, pid=pid)
