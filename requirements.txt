@@ -6,7 +6,7 @@ coverage==5.4
 defusedxml==0.6.0
 django_celery_results==2.0.1
 django-auditlog==1.0a1
-django-dbbackup==3.2.0
+django-dbbackup==3.3.0
 django-environ==0.4.5
 django-filter==2.4.0
 django-imagekit==4.0.2
