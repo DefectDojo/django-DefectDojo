@@ -493,13 +493,12 @@ def add_temp_finding(request, tid, fid):
     findings = Finding_Template.objects.all()
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
 
-    if jira_helper.get_jira_project(test):
-        jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
-    else:
-        jform = None
-
     if request.method == 'POST':
+
         form = FindingForm(request.POST, template=True, req_resp=None)
+        if jira_helper.get_jira_project(test):
+            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
+
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -596,6 +595,9 @@ def add_temp_finding(request, tid, fid):
                                     'impact': finding.impact,
                                     'references': finding.references,
                                     'numerical_severity': finding.numerical_severity})
+
+        if jira_helper.get_jira_project(test):
+            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
     product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
