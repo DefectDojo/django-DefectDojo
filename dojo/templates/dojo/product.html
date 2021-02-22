@@ -80,7 +80,7 @@
                                           </a>
                                         </li>
                                         {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
-                                        <li role="presentation">
+                                          <li role="presentation">
                                             <a class="" href="{% url 'edit_product' prod.id %}">
                                                 <i class="fa fa-pencil-square-o"></i> Edit
                                             </a>
@@ -135,7 +135,7 @@
                                             <i class="fa fa-file-text-o"></i> Product Report
                                           </a>
                                         </li>
-                                        {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:prod %}
+                                        {% if prod|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:prod %}
                                           {% if system_settings.enable_benchmark and benchmark_type %}
                                             <li role="separator" class="divider"></li>
                                             {% for bt in benchmark_type %}
