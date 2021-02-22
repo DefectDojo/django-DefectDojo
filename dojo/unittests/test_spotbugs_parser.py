@@ -13,4 +13,4 @@ class TestSpotbugsXMLParser(TestCase):
         testfile = open("dojo/unittests/scans/spotbugs/many_findings.xml")
         parser = SpotbugsXMLParser(testfile, Test())
         testfile.close()
-        self.assertEqual(3, len(parser.items))
+        self.assertEqual(81, len(parser.items))
