@@ -155,8 +155,8 @@ django:
     # to create configMap `kubectl create  cm defect-dojo-certs --from-file=file_path`
       enabled: false
       configName: defect-dojo-certs
-      certMountPath: /certs/cacert.crt
-      
+      certMountPath: /certs/
+
 initializer:
   run: true
   keepSeconds: 60
