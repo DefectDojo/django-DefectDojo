@@ -106,7 +106,7 @@ def view_test(request, tid):
     # test_imports = test.test_import_set.all()
     paged_test_imports = get_page_items_and_count(request, test.test_import_set.all(), 5, prefix='test_imports')
 
-    paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
+    paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix='findings')
     paged_stub_findings = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
 
@@ -493,13 +493,13 @@ def add_temp_finding(request, tid, fid):
     findings = Finding_Template.objects.all()
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
 
-    if jira_helper.get_jira_project(test):
-        jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
-    else:
-        jform = None
-
     if request.method == 'POST':
+
         form = FindingForm(request.POST, template=True, req_resp=None)
+        if jira_helper.get_jira_project(test):
+            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
+            logger.debug('jform valid: %s', jform.is_valid())
+
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -541,10 +541,12 @@ def add_temp_finding(request, tid, fid):
                 new_finding.endpoint_status.add(eps)
             new_finding.save(false_history=True)
             if 'jiraform-push_to_jira' in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
+                jform = JIRAFindingForm(request.POST, prefix='jiraform', instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
                 if jform.is_valid():
                     if jform.cleaned_data.get('push_to_jira'):
                         jira_helper.push_to_jira(new_finding)
+                else:
+                    add_error_message_to_response('jira form validation failed: %s' % jform.errors)
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -596,6 +598,15 @@ def add_temp_finding(request, tid, fid):
                                     'impact': finding.impact,
                                     'references': finding.references,
                                     'numerical_severity': finding.numerical_severity})
+
+        if jira_helper.get_jira_project(test):
+            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform', jira_project=jira_helper.get_jira_project(test), finding_form=form)
+
+    # logger.debug('form valid: %s', form.is_valid())
+    # logger.debug('jform valid: %s', jform.is_valid())
+    # logger.debug('form errors: %s', form.errors)
+    # logger.debug('jform errors: %s', jform.errors)
+    # logger.debug('jform errors: %s', vars(jform))
 
     product_tab = Product_Tab(test.engagement.product.id, title="Add Finding", tab="engagements")
     product_tab.setEngagement(test.engagement)
