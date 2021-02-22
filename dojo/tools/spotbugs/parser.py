@@ -42,9 +42,15 @@ class SpotbugsXMLParser(object):
             mitigation = bug_patterns[bug.get('type')]
             impact = 'N/A'
             references = 'N/A'
+
             # find the source line and file on the buginstance
-            source_line = "42"
-            source_file = "lepath"
+            source_line = "N/A"
+            source_file = "N/A"
+
+            source_extract = bug.find('SourceLine')
+            if source_extract is not None:
+                source_file = source_extract.get("sourcepath")
+                source_line = source_extract.get("start")
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -63,7 +69,7 @@ class SpotbugsXMLParser(object):
                     numerical_severity=Finding.get_numerical_severity(severity),
                     static_finding=True,
                     line=source_line,
-                    file_patch=source_file
+                    file_path=source_file
                 )
                 dupes[dupe_key] = finding
 
