@@ -350,7 +350,7 @@ def view_finding(request, fid):
     similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
     logger.debug('similar query: %s', similar_findings_filter.qs.query)
 
-    similar_findings = get_page_items(request, similar_findings_filter.qs, settings.SIMILAR_FINDINGS_MAX_RESULTS)
+    similar_findings = get_page_items(request, similar_findings_filter.qs, settings.SIMILAR_FINDINGS_MAX_RESULTS, prefix='similar')
 
     similar_findings.object_list = prefetch_for_similar_findings(similar_findings.object_list)
 
