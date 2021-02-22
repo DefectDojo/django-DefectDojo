@@ -805,6 +805,18 @@
               {% endif %}
             </td>
           </tr>
+          <tr>
+            <td><strong>Test Strategy</strong></td>
+            <td>
+              {% if eng.test_strategy %}
+                <a target="_blank" data-toggle="tooltip" data-placement="top" title="{{ eng.test_strategy }}" href="{{ eng.test_strategy }}">
+                  <i class="fa fa-external-link"></i> {{ eng.test_strategy|last_value }}
+                </a>
+              {% else %}
+                {{ eng.test_strategy|notspecified}}
+              {% endif %}
+            </td>
+          </tr>
         {% if jissue and jira_project %}
         <tr>
             <td><strong>Jira</strong></td>
