@@ -54,13 +54,13 @@ class SpotbugsParser(object):
             references = 'N/A'
 
             # find the source line and file on the buginstance
-            source_line = "N/A"
+            source_line = 0
             source_file = "N/A"
 
             source_extract = bug.find('SourceLine')
             if source_extract is not None:
                 source_file = source_extract.get("sourcepath")
-                source_line = source_extract.get("start")
+                source_line = int(source_extract.get("start"))
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
