@@ -29,12 +29,7 @@ def has_object_permission(obj, permission):
     if settings.FEATURE_NEW_AUTHORIZATION:
         return user_has_permission(get_current_user(), obj, Permissions[permission])
     else:
-        if permission.endswith('Edit'):
-            return user_is_authorized(get_current_user(), 'change', obj)
-        elif permission.endswith('Delete'):
-            return user_is_authorized(get_current_user(), 'delete', obj)
-        else:
-            return get_current_user().is_staff
+        return False
 
 
 @register.filter

@@ -22,14 +22,14 @@
                             <span class="caret"></span>
                         </button>
               <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                {% if user|is_authorized_for_change:prod %}
+                {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
                   <li role="presentation">
                     <a class="" href="{% url 'edit_product' prod.id %}">
                                           <i class="fa fa-pencil-square-o"></i> Edit
                                       </a>
                   </li>
                 {% endif %}
-                {% if user|is_authorized_for_staff:prod %}
+                {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:prod %}
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="" href="{% url 'add_meta_data' prod.id %}">
@@ -60,7 +60,7 @@
                       <i class="fa fa-file-text-o"></i> Product Report
                   </a>
                 </li>
-                {% if user|is_authorized_for_staff:prod %}
+                {% if prod|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:prod %}
                   {% if system_settings.enable_benchmark and benchmark_type %}
                     <li role="separator" class="divider"></li>
                     {% for bt in benchmark_type %}
@@ -71,6 +71,8 @@
                     </li>
                     {% endfor %} 
                   {% endif %}
+                {% endif %}
+                {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:prod %}
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a href="{% url 'action_history' prod|content_type prod.id %}">
@@ -78,7 +80,7 @@
                     </a>
                   </li>
                 {% endif %}
-                {% if user|is_authorized_for_delete:prod %}
+                {% if prod|has_object_permission:"Product_Delete" or user|is_authorized_for_delete:prod %}
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="text-danger" href="{% url 'delete_product' prod.id %}">

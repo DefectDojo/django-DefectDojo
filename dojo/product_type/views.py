@@ -108,7 +108,7 @@ def view_product_type(request, ptid):
         'members': members})
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Delete, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Delete, 'ptid', 'delete')
 def delete_product_type(request, ptid):
     product_type = get_object_or_404(Product_Type, pk=ptid)
     form = Delete_Product_TypeForm(instance=product_type)
@@ -141,7 +141,7 @@ def delete_product_type(request, ptid):
                    })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid', 'staff')
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     authed_users = pt.authorized_users.all()

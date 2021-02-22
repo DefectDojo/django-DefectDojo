@@ -46,6 +46,8 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
 from django.views.decorators.vary import vary_on_cookie
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
 
 
 logger = logging.getLogger(__name__)
@@ -483,8 +485,11 @@ def import_scan_results(request, eid=None, pid=None):
     elif not user.is_staff:
         raise PermissionDenied
 
-    if not user_is_authorized(user, 'staff', engagement_or_product):
-        raise PermissionDenied
+    if settings.FEATURE_NEW_AUTHORIZATION:
+        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+    else:
+        if not user_is_authorized(user, 'staff', engagement_or_product):
+            raise PermissionDenied
 
     push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
 

@@ -687,8 +687,9 @@ def prefetch_for_view_engagements(engs):
 
 
 # TODO: Check if this is authorized
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_engagements_cicd(request, pid):
-    return view_engagements(request, pid, engagement_type="CI/CD")
+    return view_engagements(request, pid=pid, engagement_type="CI/CD")
 
 
 # TODO: Check if this is authorized
@@ -887,7 +888,7 @@ def edit_product(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Delete, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Product_Delete, 'pid', 'delete')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)

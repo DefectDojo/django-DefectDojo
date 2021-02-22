@@ -740,7 +740,10 @@ def finding_display_status(finding):
 
 @register.filter
 def is_authorized_for_change(user, obj):
-    return user_is_authorized(user, 'change', obj)
+    if not settings.FEATURE_NEW_AUTHORIZATION:
+        return user_is_authorized(user, 'change', obj)
+    else:
+        return False
 
 
 @register.filter

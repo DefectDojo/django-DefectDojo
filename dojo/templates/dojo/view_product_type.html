@@ -17,7 +17,7 @@
                                       <span class="caret"></span>
                                   </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if pt|has_object_permission:"Product_Type_Edit" %}
+                            {% if pt|has_object_permission:"Product_Type_Edit" or user|is_authorized_for_change:pt %}
                             <li>
                                 <a class="" href="{% url 'edit_product_type' pt.id %}">
                                 <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -32,7 +32,7 @@
                                 <a class="" href="{% url 'product_type_report' pt.id %}">
                                 <i class="fa fa-file-text-o"></i> Product Type Report</a>
                             </li>
-                            {% if pt|has_object_permission:"Product_Type_Delete" %}
+                            {% if pt|has_object_permission:"Product_Type_Delete" or user|is_authorized_for_delete:pt %}
                             <li role="separator" class="divider"></li>
                             <li>
                                 <a class="" href="{% url 'delete_product_type' pt.id %}">
@@ -52,7 +52,7 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">Products</h4>
-                        {% if pt|has_object_permission:"Product_Type_Add_Product" %}
+                        {% if pt|has_object_permission:"Product_Type_Add_Product" or user|is_authorized_for_staff:pt %}
                         <div class="dropdown pull-right">
                             <div class="btn-group">
                                 <button class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
