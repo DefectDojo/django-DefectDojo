@@ -6,7 +6,7 @@ import mimetypes
 import os
 import shutil
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from django.db import models
 from django.db.models.functions import Length
 from django.conf import settings
@@ -25,12 +25,11 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from itertools import chain
 from dojo.user.helper import user_must_be_authorized
-from dojo.utils import close_external_issue, reopen_external_issue
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, close_external_issue, reopen_external_issue
 import copy
 
-from dojo.filters import OpenFindingFilter, \
-    OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
-    ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
+from dojo.filters import OpenFindingFilter, OpenFindingSuperFilter, AcceptedFindingFilter, AcceptedFindingSuperFilter, \
+    ClosedFindingFilter, ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
@@ -71,13 +70,13 @@ def open_findings_filter(request, queryset, user, pid):
 
 
 def accepted_findings_filter(request, queryset, user, pid):
-    assert user.is_staff
-    return AcceptedFindingSuperFilter(request.GET, queryset=queryset, pid=pid)
+    filter_class = AcceptedFindingSuperFilter if user.is_staff else AcceptedFindingFilter
+    return filter_class(request.GET, queryset=queryset, pid=pid)
 
 
 def closed_findings_filter(request, queryset, user, pid):
-    assert user.is_staff
-    return ClosedFindingSuperFilter(request.GET, queryset=queryset, pid=pid)
+    filter_class = ClosedFindingSuperFilter if user.is_staff else ClosedFindingFilter
+    return filter_class(request.GET, queryset=queryset, pid=pid)
 
 
 def open_findings(request, pid=None, eid=None, view=None):
@@ -100,13 +99,11 @@ def inactive_findings(request, pid=None, eid=None, view=None):
     return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=INACTIVE_FINDINGS_QUERY)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def accepted_findings(request, pid=None, eid=None, view=None):
     return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=ACCEPTED_FINDINGS_QUERY,
                     django_filter=accepted_findings_filter)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def closed_findings(request, pid=None, eid=None, view=None):
     return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
                     django_filter=closed_findings_filter)
@@ -361,6 +358,9 @@ def view_finding(request, fid):
         similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
+
+    can_be_pushed_to_jira, can_be_pushed_to_jira_error, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
+
     lastPos = (len(findings)) - 1
     return render(
         request, 'dojo/view_finding.html', {
@@ -384,7 +384,9 @@ def view_finding(request, fid):
             'next_finding_id': next_finding_id,
             'duplicate_cluster': duplicate_cluster(request, finding),
             'similar_findings': similar_findings,
-            'similar_findings_filter': similar_findings_filter
+            'similar_findings_filter': similar_findings_filter,
+            'can_be_pushed_to_jira': can_be_pushed_to_jira,
+            'can_be_pushed_to_jira_error': can_be_pushed_to_jira_error,
         })
 
 
@@ -699,7 +701,7 @@ def edit_finding(request, fid):
                                          extra_tags='alert-danger')
 
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding, jira_project=jira_helper.get_jira_project(finding))
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -830,15 +832,13 @@ def edit_finding(request, fid):
 
             return redirect_to_return_url_or_else(request, reverse('view_finding', args=(new_finding.id,)))
         else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'There appears to be errors on the form, please correct below.',
-                extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
             form_error = True
     else:
         if use_jira:
-            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding, jira_project=jira_helper.get_jira_project(finding))
+            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
@@ -1229,7 +1229,7 @@ def promote_to_finding(request, fid):
     if request.method == 'POST':
         form = PromoteFindingForm(request.POST)
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding))
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -1313,14 +1313,12 @@ def promote_to_finding(request, fid):
             else:
                 form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'The form has errors, please correct them below.',
-                extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
     else:
         if use_jira:
-            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test))
+            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
@@ -1917,16 +1915,22 @@ def finding_bulk_update_all(request, pid=None):
 
                     # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
+                    error_counts = defaultdict(lambda: 0)
                     if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
-                        if not jira_helper.get_jira_project(finding):
-                            jira_helper.log_jira_alert('Finding cannot be pushed to jira as there is no jira project configuration for this product.', finding)
+                        can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
+                        if not can_be_pushed_to_jira:
+                            error_counts[error_message] += 1
+                            jira_helper.log_jira_alert(error_message, finding)
                         else:
                             logger.debug('pushing to jira from finding.finding_bulk_update_all()')
                             jira_helper.push_to_jira(finding)
 
+                        for error_message, error_count in error_counts.items():
+                            add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
+
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Bulk edit of findings was successful.  Check to make sure it is what you intended.',
+                                     'Bulk edit of findings was successful. Check alerts top right and result to make sure it is what you intended.',
                                      extra_tags='alert-success')
             else:
                 messages.add_message(request,
