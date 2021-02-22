@@ -88,7 +88,7 @@ spec:
         {{- if  .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
-        {{- end }}   
+        {{- end }}
         ports:
         - name: http
           protocol: TCP
