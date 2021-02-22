@@ -30,6 +30,7 @@ from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
 from django_jsonfield_backport.models import JSONField
+import hyperlink
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1143,6 +1144,12 @@ class Endpoint(models.Model):
             url = url + '#' + fragment
         return url
 
+    # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
+    # Example: https://google.com and https://google.com:443
+    def get_normalized_url(self):
+        url = hyperlink.parse(str(self))
+        return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_text()
+
     def __hash__(self):
         return self.__str__().__hash__()
 
@@ -1817,7 +1824,7 @@ class Finding(models.Model):
                 # convert list of unsaved endpoints to the list of their canonical representation
                 endpoint_str_list = list(
                     map(
-                        lambda endpoint: str(endpoint),
+                        lambda endpoint: endpoint.get_normalized_url(),
                         self.unsaved_endpoints
                     ))
                 # deduplicate (usually done upon saving finding) and sort endpoints
@@ -1836,7 +1843,7 @@ class Finding(models.Model):
             # convert list of endpoints to the list of their canonical representation
             endpoint_str_list = list(
                 map(
-                    lambda endpoint: str(endpoint),
+                    lambda endpoint: endpoint.get_normalized_url(),
                     self.endpoints.all()
                 ))
             # sort endpoints strings

@@ -328,6 +328,13 @@ docker/setEnv.sh integration_tests
 docker-compose up
 ```
 
+NB: the first time you run it, initializing the database may be too long for the tests to succeed. In that case, you'll need to wait for the initializer container to end, then re-run `docker-compose up`
+
+Check the logs with:
+```
+docker logs -f django-defectdojo_integration-tests_1
+```
+
 # Checking Docker versions
 
 Run the following to determine the versions for docker and docker-compose:

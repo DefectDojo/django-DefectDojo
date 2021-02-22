@@ -1,5 +1,5 @@
 from django.conf import settings
-from dojo.models import Finding
+from dojo.models import Finding, Q
 from django.utils import timezone
 
 import logging
@@ -21,20 +21,24 @@ def get_deduplication_algorithm_from_conf(scan_type):
     return deduplication_algorithm
 
 
-def match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type):
+def match_new_finding_to_existing_finding(new_finding, test, deduplication_algorithm, scan_type):
+    # This code should match the logic used for deduplication out of the re-import feature.
+    # See utils.py deduplicate_* functions
     if deduplication_algorithm == 'hash_code':
         return Finding.objects.filter(
             test=test,
-            hash_code=item.hash_code).exclude(
-                        hash_code=None).all()
-    elif deduplication_algorithm == 'unique_id_from_tool' or deduplication_algorithm == 'unique_id_from_tool_or_hash_code':
-        # processing 'unique_id_from_tool_or_hash_code' as 'unique_id_from_tool' because when using 'unique_id_from_tool_or_hash_code'
-        # we usually want to use 'hash_code' for cross-parser matching,
-        # while it makes more sense to use the 'unique_id_from_tool' for same-parser matching
+            hash_code=new_finding.hash_code).exclude(
+                        hash_code=None)
+    elif deduplication_algorithm == 'unique_id_from_tool':
         return Finding.objects.filter(
             test=test,
-            unique_id_from_tool=item.unique_id_from_tool).exclude(
-                        unique_id_from_tool=None).all()
+            unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
+                        unique_id_from_tool=None)
+    elif deduplication_algorithm == 'unique_id_from_tool_or_hash_code':
+        return Finding.objects.filter(
+            Q(test=test),
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool)))
     elif deduplication_algorithm == 'legacy':
         # This is the legacy reimport behavior. Although it's pretty flawed and doesn't match the legacy algorithm for deduplication,
         # this is left as is for simplicity.
@@ -43,17 +47,17 @@ def match_new_finding_to_existing_finding(item, test, deduplication_algorithm, s
         logger.debug("Legacy reimport. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
         if scan_type == 'Arachni Scan':
             return Finding.objects.filter(
-                title=item.title,
+                title=new_finding.title,
                 test=test,
-                severity=item.severity,
-                numerical_severity=Finding.get_numerical_severity(item.severity),
-                description=item.description).all()
+                severity=new_finding.severity,
+                numerical_severity=Finding.get_numerical_severity(new_finding.severity),
+                description=new_finding.description)
         else:
             return Finding.objects.filter(
-                title=item.title,
+                title=new_finding.title,
                 test=test,
-                severity=item.severity,
-                numerical_severity=Finding.get_numerical_severity(item.severity)).all()
+                severity=new_finding.severity,
+                numerical_severity=Finding.get_numerical_severity(new_finding.severity))
     else:
         logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
         return None
