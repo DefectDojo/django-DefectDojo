@@ -14,4 +14,3 @@ class TestSpotbugsXMLParser(TestCase):
         parser = SpotbugsXMLParser(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(parser.items))
-
