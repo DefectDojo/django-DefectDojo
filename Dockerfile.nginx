@@ -65,7 +65,7 @@ COPY dojo/ ./dojo/
 
 RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
-FROM nginx:1.19.6-alpine@sha256:c2ce58e024275728b00a554ac25628af25c54782865b3487b11c21cafb7fabda
+FROM nginx:1.19.7-alpine@sha256:14536d83ca3128923ee7c2f7f4f285e023abd40f3ccdc8911f56cd4119558506
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
