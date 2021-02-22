@@ -106,7 +106,7 @@ def view_test(request, tid):
     # test_imports = test.test_import_set.all()
     paged_test_imports = get_page_items_and_count(request, test.test_import_set.all(), 5, prefix='test_imports')
 
-    paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25)
+    paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix='findings')
     paged_stub_findings = get_page_items(request, stub_findings, 25)
     show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
 
