@@ -246,7 +246,12 @@
                     <td>
                         <span class="label severity severity-{{ finding.severity }}">
                             {% if finding.severity %}
-                                {{ finding.severity_display }}
+                                {% if finding.cvssv3 %}
+                                    <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                        data-content="{{ finding.cvssv3 }}">{{ finding.severity_display }}</i>
+                                {% else %}
+                                    {{ finding.severity_display }}
+                                {% endif %}
                             {% else %}
                                 Unknown
                             {% endif %}
@@ -503,11 +508,18 @@
                         <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
                         <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
                     {% else %}
-                        None
-                        <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
-                        {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
-                            <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
-                        </a> {% endcomment %}
+                        {% if can_be_pushed_to_jira %}
+                            None
+                            <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
+                            {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
+                                <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                            </a> {% endcomment %}
+                        {% else %}
+                            <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                            data-content="{{ can_be_pushed_to_jira_error }}"
+                             data-placement="bottom" data-container="body">
+                             </i>
+                        {% endif %}
                     {% endif %}
                     </td>
                 {% endif %}
@@ -758,17 +770,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>CVSS 3.0<span class="pull-right"><a data-toggle="collapse" href="#vuln_cvss"><i
-                        class="glyphicon glyphicon-chevron-{% if finding.cvssv3 %}up{%else%}down{%endif%}"></i></a></span></h4>
-            </div>
-            <div id="vuln_cvss" class="panel-body collapse {% if finding.cvssv3 %}in{%endif%}">
-                <pre>{{ finding.cvssv3|markdown_render|default_if_none:"" }}</pre>
-            </div>
-        </div>
-
 
         <div class="panel panel-default">
             <div class="panel-heading">

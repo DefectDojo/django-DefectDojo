@@ -24,8 +24,8 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member
-
-from dojo.utils import add_external_issue, get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
+                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 
 from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F
@@ -1147,7 +1147,7 @@ def ad_hoc_finding(request, pid):
                                      extra_tags='alert-danger')
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues,
-                                    jira_project=jira_helper.get_jira_project(test))
+                                    jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
@@ -1288,14 +1288,14 @@ def ad_hoc_finding(request, pid):
             else:
                 form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'The form has errors, please correct them below.',
-                                 extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
+
     else:
         if use_jira:
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform',
-                                    jira_project=jira_helper.get_jira_project(test))
+                                    jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
