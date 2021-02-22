@@ -572,9 +572,9 @@
             </div>
             <div id="duplicate_tree" class="panel-body collapse">
                 {% if finding.duplicate_finding %}
-                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster prefix='duplicate' %}
                 {% else %}
-                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding finding_list=duplicate_cluster %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding finding_list=duplicate_cluster prefix='duplicate' %}
                 {% endif %}
             </div>
         </div>
@@ -601,11 +601,11 @@
             <span id="the-filters-wrapper" class="collapse {% if similar_findings_filter.has_changed %}in{% endif %}">
                 <div id="the-filters" class="is-filters panel-body similar-filters">
                     {% url 'view_finding' finding.id as finding_url %}
-                    {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form form_id="similar" clear_js=True restart_link=finding_url%}
+                    {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form form_id="similar" clear_js=True restart_link=finding_url %}
                 </div>
                 {% if similar_findings_filter %}
                     <div id="similar_findings" class="panel-body">
-                        {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
+                        {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings prefix='similar' %}
                     </div>
                 {% endif %}
             </span>
@@ -1291,6 +1291,102 @@
 
         $(".dojo-filter-set :input").not("button").addClass("form-control input-sm"); {% endcomment %}
 
+    </script>
+
+    <script type="application/javascript">
+        // DataTables Setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Findings_List_' + date;
+            var columns = [
+                { "data": "relationship" },
+                { "data": "severity" },
+                { "data": "finding" , render: function (data, type, row) {
+                        return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                }},
+                { "data": "found_date" },
+                { "data": "status" },
+                { "data": "test" },
+                { "data": "engagement" },
+                { "data": "product" },
+                { "data": "cwe" },
+                { "data": "cve" },
+                { "data": "file_path" },
+                {% if system_settings.enable_jira %}
+                    { "data": "jira_id" },
+                {% endif %}
+                { "data": "action" },
+              ];
+
+            // Filter the list of items to display based on what is shown.
+            var disallowed_entries = new Set(["checkbox", "action"]);
+            var data_column_list = [];
+            for (var i = 0; i < columns.length; i++) {
+                if (!disallowed_entries.has(columns[i]["data"])) {
+                    data_column_list.push(i);
+                }
+            }
+
+            var buttonCommon = {
+                exportOptions: {
+                    columns: data_column_list,
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Similar Findings List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#similar_findings_table').DataTable({
+                drawCallback: function(){
+                      $('.has-popover').popover({'trigger':'hover'});
+                },
+                colReorder: true,
+                "columns": columns,
+                order: [],
+                columnDefs: [
+                    {
+                        "orderable": false,
+                        "targets": [0, 1]
+                    },
+                    {
+                        targets: [0, 1],
+                        className: 'noVis'
+                    }
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                info: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
     </script>
 
     {% include "dojo/filter_js_snippet.html" %}

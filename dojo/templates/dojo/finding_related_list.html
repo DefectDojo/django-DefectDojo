@@ -1,9 +1,9 @@
 {% load navigation_tags %}
 {% load static %}
 <div class="clearfix">
-    {% include "dojo/paging_snippet.html" with page=finding_list prefix=similar page_size=True %}
+    {% include "dojo/paging_snippet.html" with page=finding_list prefix=prefix page_size=True %}
 </div>
-<table id="similar_findings_table" class="table table-striped table-hover centered no-bottom-margin">
+<table id="{{prefix}}_findings_table" class="table table-striped table-hover centered no-bottom-margin">
     <tr>
         <th>Relationship</th>
         <th>Severity</th>
@@ -30,98 +30,3 @@
         {% include "dojo/finding_related_row.html" with similar_finding=similar_finding finding_context=finding %}
     {% endfor %}
 </table>
-<script type="application/javascript">
-    // DataTables Setup
-    $(document).ready(function() {
-        date =  new Date().toISOString().slice(0, 10);
-        var fileDated = 'Findings_List_' + date;
-        var columns = [
-            { "data": "relationship" },
-            { "data": "severity" },
-            { "data": "finding" , render: function (data, type, row) {
-                    return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
-            }},
-            { "data": "found_date" },
-            { "data": "status" },
-            { "data": "test" },
-            { "data": "engagement" },
-            { "data": "product" },
-            { "data": "cwe" },
-            { "data": "cve" },
-            { "data": "file_path" },
-            {% if system_settings.enable_jira %}
-                { "data": "jira_id" },
-            {% endif %}
-            { "data": "action" },
-          ];
-
-        // Filter the list of items to display based on what is shown.
-        var disallowed_entries = new Set(["checkbox", "action"]);
-        var data_column_list = [];
-        for (var i = 0; i < columns.length; i++) {
-            if (!disallowed_entries.has(columns[i]["data"])) {
-                data_column_list.push(i);
-            }
-        }
-
-        var buttonCommon = {
-            exportOptions: {
-                columns: data_column_list,
-                stripHtml: true,
-                stripNewlines: true,
-                trim: true,
-                orthogonal: 'export'
-            },
-            filename: fileDated,
-            title: 'Similar Findings List'
-        };
-
-        // Mapping of table columns to objects for proper cleanup and data formatting
-        var dojoTable = $('#similar_findings_table').DataTable({
-            drawCallback: function(){
-                  $('.has-popover').popover({'trigger':'hover'});
-            },
-            colReorder: true,
-            "columns": columns,
-            order: [],
-            columnDefs: [
-                {
-                    "orderable": false,
-                    "targets": [0, 1]
-                },
-                {
-                    targets: [0, 1],
-                    className: 'noVis'
-                }
-            ],
-            dom: 'Bfrtip',
-            paging: false,
-            info: false,
-            buttons: [
-                {
-                    extend: 'colvis',
-                    columns: ':not(.noVis)'
-                },
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'copy'
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'excel',
-                    autoFilter: true,
-                    sheetName: 'Exported data',
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'csv'
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'pdf',
-                    orientation: 'landscape',
-                    pageSize: 'LETTER'
-                }),
-                $.extend( true, {}, buttonCommon, {
-                    extend: 'print'
-                }),
-            ],
-        });
-    });
-</script>
