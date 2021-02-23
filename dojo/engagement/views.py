@@ -48,6 +48,7 @@ from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
 from django.views.decorators.vary import vary_on_cookie
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
+from dojo.product.queries import get_authorized_products
 
 
 logger = logging.getLogger(__name__)
@@ -85,7 +86,8 @@ def engagement_calendar(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def engagement(request):
-    products_with_engagements = Product.objects.filter(~Q(engagement=None), engagement__active=True).distinct()
+    products_with_engagements = get_authorized_products(Permissions.Engagement_View)
+    products_with_engagements = products_with_engagements.filter(~Q(engagement=None), engagement__active=True).distinct()
     filtered = EngagementFilter(
         request.GET,
         queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
@@ -113,7 +115,8 @@ def engagement(request):
 @user_passes_test(lambda u: u.is_staff)
 def engagements_all(request):
 
-    products_with_engagements = Product.objects.filter(~Q(engagement=None)).distinct()
+    products_with_engagements = get_authorized_products(Permissions.Engagement_View)
+    products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
     filtered = EngagementFilter(
         request.GET,
         queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',

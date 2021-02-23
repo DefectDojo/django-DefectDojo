@@ -41,6 +41,7 @@ from dojo.utils import get_system_setting
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
+from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)
 
@@ -242,7 +243,7 @@ class ProductForm(forms.ModelForm):
                                   required=True)
 
     prod_type = forms.ModelChoiceField(label='Product Type',
-                                       queryset=None,
+                                       queryset=Product_Type.objects.none(),
                                        required=True)
 
     if not settings.FEATURE_NEW_AUTHORIZATION:
@@ -691,7 +692,7 @@ class EngForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     product = forms.ModelChoiceField(label='Product',
-                                       queryset=Product.objects.all().order_by('name'),
+                                       queryset=Product.objects.none(),
                                        required=True)
     target_start = forms.DateField(widget=forms.TextInput(
         attrs={'class': 'datepicker', 'autocomplete': 'off'}))
@@ -724,8 +725,7 @@ class EngForm(forms.ModelForm):
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
-        if self.user is not None and not self.user.is_staff and not self.user.is_superuser:
-            self.fields['product'].queryset = Product.objects.all().filter(authorized_users__in=[self.user])
+        self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)
 
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
@@ -1337,7 +1337,7 @@ class AddEndpointForm(forms.Form):
             product = kwargs.pop('product')
         super(AddEndpointForm, self).__init__(*args, **kwargs)
         if product is None:
-            self.fields['product'] = forms.ModelChoiceField(queryset=Product.objects.all())
+            self.fields['product'] = forms.ModelChoiceField(queryset=get_authorized_products(Permissions.Product_View))
         else:
             self.fields['product'].initial = product.id
 
@@ -1657,15 +1657,13 @@ class ProductTypeCountsForm(forms.Form):
     year = forms.ChoiceField(choices=get_years, required=True, error_messages={
         'required': '*'})
     product_type = forms.ModelChoiceField(required=True,
-                                          queryset=Product_Type.objects.all(),
+                                          queryset=Product_Type.objects.none(),
                                           error_messages={
                                               'required': '*'})
 
     def __init__(self, *args, **kwargs):
         super(ProductTypeCountsForm, self).__init__(*args, **kwargs)
-        if get_current_user() is not None and not get_current_user().is_staff:
-            self.fields['product_type'].queryset = Product_Type.objects.filter(
-                authorized_users__in=[get_current_user()])
+        self.fields['product_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
 
 class APIKeyForm(forms.ModelForm):
@@ -2729,7 +2727,11 @@ class AssignUserForm(forms.ModelForm):
 
 class AddEngagementForm(forms.Form):
     product = forms.ModelChoiceField(
-        queryset=Product.objects.all(),
+        queryset=Product.objects.none(),
         required=True,
         widget=forms.widgets.Select(),
         help_text='Select which product to attach Engagement')
+
+    def __init__(self, *args, **kwargs):
+        super(AddEngagementForm, self).__init__(*args, **kwargs)
+        self.fields['product'].queryset = get_authorized_products(Permissions.Engagement_Add)

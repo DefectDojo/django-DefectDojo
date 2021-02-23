@@ -8,6 +8,9 @@ from dojo.authorization.authorization import get_roles_for_permission, user_has_
 def get_authorized_product_types(permission):
     user = get_current_user()
 
+    if user is None:
+        return Product_Type.objects.none()
+
     if user.is_superuser:
         return Product_Type.objects.all().order_by('name')
 
