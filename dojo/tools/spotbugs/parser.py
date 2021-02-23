@@ -79,7 +79,9 @@ class SpotbugsParser(object):
                     numerical_severity=Finding.get_numerical_severity(severity),
                     static_finding=True,
                     line=source_line,
-                    file_path=source_file
+                    file_path=source_file,
+                    sast_source_line=source_line,
+                    sast_source_file_path = source_file
                 )
                 dupes[dupe_key] = finding
 
