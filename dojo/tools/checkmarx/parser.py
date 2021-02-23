@@ -37,23 +37,24 @@ class CheckmarxParser(object):
         else:
             return "Detailed XML Report. Import all vulnerabilities from checkmarx without aggregation"
 
+    # mode:
+    # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
+    # 'detailed' : No aggregation
+    mode = None
+
+    def set_mode(self, mode):
+        self.mode = mode
+
     # FIXME get rid of local variables
     language_list = []
     mitigation = 'N/A'
     impact = 'N/A'
     references = ''
 
-    # mode:
-    # None (default): aggregates vulnerabilites per sink filename (legacy behavior)
-    # 'detailed' : No aggregation
-    def get_findings(self, filename, test, mode='normal'):
+    def get_findings(self, filename, test):
         cxscan = ElementTree.parse(filename)
         self.test = test
         root = cxscan.getroot()
-
-        # FIXME manage mode
-        # if scan_type.endswith('detailed'):
-        #    mode = 'detailed'
 
         # Dictonary to hold the aggregated findings with:
         #  - key: the concatenated aggregate keys
@@ -90,10 +91,10 @@ class CheckmarxParser(object):
                 deeplink = "[{}]({})".format(result.get('DeepLink'), result.get('DeepLink'))
                 findingdetail = "{}**Finding Link:** {}\n\n".format(findingdetail, deeplink)
 
-                if mode != 'detailed':
-                    self.process_result_file_name_aggregated(dupes, findingdetail, query, result, find_date)
-                else:
+                if self.mode == 'detailed':
                     self.process_result_detailed(dupes, findingdetail, query, result, find_date)
+                else:
+                    self.process_result_file_name_aggregated(dupes, findingdetail, query, result, find_date)
                 findingdetail = ''
 
         for lang in self.language_list:
