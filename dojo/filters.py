@@ -361,6 +361,7 @@ class ComponentFilter(ProductComponentFilter):
 
 
 class EngagementFilter(DojoFilter):
+    engagement__name = CharFilter(lookup_expr='icontains', label='Engagement name contains')
     engagement__lead = ModelChoiceFilter(
         queryset=Dojo_User.objects.filter(
             engagement__lead__isnull=False).distinct(),
@@ -368,7 +369,7 @@ class EngagementFilter(DojoFilter):
     engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
     engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
 
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='icontains', label='Product name contains')
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
@@ -715,7 +716,7 @@ class ApiFindingFilter(DojoFilter):
     test__engagement = NumberInFilter(field_name='test__engagement', lookup_expr='in')
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
     # ReportRiskAcceptanceFilter
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter()
+    risk_acceptance = ReportRiskAcceptanceFilter()
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
@@ -775,7 +776,7 @@ class OpenFindingFilter(DojoFilter):
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.all(),
         label="Engagement")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
     test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
@@ -900,6 +901,7 @@ class OpenFindingSuperFilter(OpenFindingFilter):
 
 class ClosedFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
+    duplicate = ReportBooleanFilter()
     sourcefile = CharFilter(lookup_expr='icontains')
     sourcefilepath = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
@@ -918,7 +920,7 @@ class ClosedFindingFilter(DojoFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
     has_jira_issue = BooleanFilter(field_name='jira_issue',
@@ -1029,11 +1031,12 @@ class ClosedFindingSuperFilter(ClosedFindingFilter):
 
 class AcceptedFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
+    duplicate = ReportBooleanFilter()
     sourcefile = CharFilter(lookup_expr='icontains')
     sourcefilepath = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
     payload = CharFilter(lookup_expr='icontains')
-    test__engagement__risk_acceptance__created = \
+    risk_acceptance__created__date = \
         DateRangeFilter(label="Acceptance Date")
     date = DateRangeFilter(label="Finding Date")
     cwe = MultipleChoiceFilter(choices=[])
@@ -1085,8 +1088,8 @@ class AcceptedFindingFilter(DojoFilter):
         fields=(
             ('numerical_severity', 'numerical_severity'),
             ('date', 'date'),
-            ('test__engagement__risk_acceptance__created',
-             'test__engagement__risk_acceptance__created'),
+            ('risk_acceptance__created__date',
+             'risk_acceptance__created__date'),
             ('title', 'title'),
             ('test__engagement__product__name',
              'test__engagement__product__name'),
@@ -1094,7 +1097,7 @@ class AcceptedFindingFilter(DojoFilter):
         field_labels={
             'numerical_severity': 'Severity',
             'date': 'Finding Date',
-            'test__engagement__risk_acceptance__created': 'Acceptance Date',
+            'risk_acceptance__created__date': 'Acceptance Date',
             'title': 'Finding Name',
             'test__engagement__product__name': 'Product Name',
         }
@@ -1103,7 +1106,7 @@ class AcceptedFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        fields = ['title', 'test__engagement__risk_acceptance__created']
+        fields = ['title', 'risk_acceptance__created__date']
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
@@ -1137,7 +1140,7 @@ class AcceptedFindingFilter(DojoFilter):
 
 
 class AcceptedFindingSuperFilter(AcceptedFindingFilter):
-    test__engagement__risk_acceptance__owner = \
+    risk_acceptance__owner = \
         ModelMultipleChoiceFilter(
             queryset=Dojo_User.objects.all(),
             label="Risk Acceptance Owner")
@@ -1154,7 +1157,7 @@ class ProductFindingFilter(DojoFilter):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
     tags = ModelMultipleChoiceFilter(
@@ -1192,8 +1195,8 @@ class ProductFindingFilter(DojoFilter):
         fields=(
             ('numerical_severity', 'numerical_severity'),
             ('date', 'date'),
-            ('test__engagement__risk_acceptance__created',
-             'test__engagement__risk_acceptance__created'),
+            ('risk_acceptance__created__date',
+             'risk_acceptance__created__date'),
             ('title', 'title'),
             ('test__engagement__product__name',
              'test__engagement__product__name'),
@@ -1201,7 +1204,7 @@ class ProductFindingFilter(DojoFilter):
         field_labels={
             'numerical_severity': 'Severity',
             'date': 'Finding Date',
-            'test__engagement__risk_acceptance__created': 'Acceptance Date',
+            'risk_acceptance__created__date': 'Acceptance Date',
             'title': 'Finding Name',
             'test__engagement__product__name': 'Product Name',
         }
@@ -1900,7 +1903,7 @@ class ReportFindingFilter(DojoFilter):
     mitigated = MitigatedDateRangeFilter()
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
     # queryset will be restricted in __init__, here we don't have access to the logged in user
     duplicate = ReportBooleanFilter()
@@ -1999,7 +2002,7 @@ class ReportAuthedFindingFilter(DojoFilter):
     mitigated = MitigatedDateRangeFilter()
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
     duplicate = ReportBooleanFilter()
     duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())

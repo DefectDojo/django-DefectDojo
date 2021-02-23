@@ -1019,7 +1019,7 @@ def view_engineer(request, eid):
 
     neg_length = len(stuff)
     findz = findings.filter(mitigated__isnull=True, active=True,
-                            test__engagement__risk_acceptance=None)
+                            risk_acceptance=None)
     findz = findz.filter(Q(severity="Critical") | Q(severity="High"))
     less_thirty = 0
     less_sixty = 0

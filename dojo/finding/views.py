@@ -28,9 +28,8 @@ from dojo.user.helper import user_must_be_authorized
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, close_external_issue, reopen_external_issue
 import copy
 
-from dojo.filters import OpenFindingFilter, \
-    OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
-    ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
+from dojo.filters import OpenFindingFilter, OpenFindingSuperFilter, AcceptedFindingFilter, AcceptedFindingSuperFilter, \
+    ClosedFindingFilter, ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
@@ -71,13 +70,13 @@ def open_findings_filter(request, queryset, user, pid):
 
 
 def accepted_findings_filter(request, queryset, user, pid):
-    assert user.is_staff
-    return AcceptedFindingSuperFilter(request.GET, queryset=queryset, pid=pid)
+    filter_class = AcceptedFindingSuperFilter if user.is_staff else AcceptedFindingFilter
+    return filter_class(request.GET, queryset=queryset, pid=pid)
 
 
 def closed_findings_filter(request, queryset, user, pid):
-    assert user.is_staff
-    return ClosedFindingSuperFilter(request.GET, queryset=queryset, pid=pid)
+    filter_class = ClosedFindingSuperFilter if user.is_staff else ClosedFindingFilter
+    return filter_class(request.GET, queryset=queryset, pid=pid)
 
 
 def open_findings(request, pid=None, eid=None, view=None):
@@ -100,13 +99,11 @@ def inactive_findings(request, pid=None, eid=None, view=None):
     return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=INACTIVE_FINDINGS_QUERY)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def accepted_findings(request, pid=None, eid=None, view=None):
     return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=ACCEPTED_FINDINGS_QUERY,
                     django_filter=accepted_findings_filter)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def closed_findings(request, pid=None, eid=None, view=None):
     return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
                     django_filter=closed_findings_filter)
@@ -353,7 +350,7 @@ def view_finding(request, fid):
     similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
     logger.debug('similar query: %s', similar_findings_filter.qs.query)
 
-    similar_findings = get_page_items(request, similar_findings_filter.qs, settings.SIMILAR_FINDINGS_MAX_RESULTS)
+    similar_findings = get_page_items(request, similar_findings_filter.qs, settings.SIMILAR_FINDINGS_MAX_RESULTS, prefix='similar')
 
     similar_findings.object_list = prefetch_for_similar_findings(similar_findings.object_list)
 

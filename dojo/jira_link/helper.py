@@ -103,6 +103,7 @@ def finding_can_be_pushed_to_jira(finding, form=None):
     logger.debug('finding_can_be_pushed_to_jira: %s, %s, %s', active, verified, severity)
 
     if not active or not verified:
+        logger.debug('Findings must be active and verified to be pushed to JIRA')
         return False, 'Findings must be active and verified to be pushed to JIRA', 'not_active_or_verified'
 
     jira_minimum_threshold = None
@@ -110,6 +111,7 @@ def finding_can_be_pushed_to_jira(finding, form=None):
         jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
 
         if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
+            logger.debug('Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity)
             return False, 'Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity, 'below_minimum_threshold'
 
     return True, None, None
@@ -471,7 +473,7 @@ def add_jira_issue(find):
     can_be_pushed_to_jira, error_message, error_code = finding_can_be_pushed_to_jira(find)
     if not can_be_pushed_to_jira:
         log_jira_alert(error_message, find)
-        logger.warn("Finding {} cannot be pushed to JIRA: %s.", find.id, error_message)
+        logger.warn("Finding %s cannot be pushed to JIRA: %s.", find.id, error_message)
         logger.warn("The JIRA issue will NOT be created.")
         return False
     logger.debug('Trying to create a new JIRA issue for finding {}...'.format(find.id))

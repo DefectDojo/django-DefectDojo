@@ -84,17 +84,23 @@ def engagement_calendar(request):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
 def engagement(request):
-    products_with_engagements = get_authorized_products(Permissions.Engagement_View)
-    products_with_engagements = products_with_engagements.filter(~Q(engagement=None), engagement__active=True).distinct()
+    products = get_authorized_products(Permissions.Engagement_View).distinct()
+    if request.user.is_staff:
+        engagements = Engagement.objects.all()
+    else:
+        engagements = Engagement.objects\
+            .filter(Q(product__authorized_users=request.user) | Q(product__prod_type__authorized_users=request.user))\
+            .distinct()
+
+    products_with_engagements = products.filter(~Q(engagement=None), engagement__active=True).distinct()
     filtered = EngagementFilter(
         request.GET,
         queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
                                                             'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
     prods = get_page_items(request, filtered.qs, 25)
     name_words = products_with_engagements.values_list('name', flat=True)
-    eng_words = Engagement.objects.filter(active=True).values_list('name', flat=True).distinct()
+    eng_words = engagements.filter(active=True).values_list('name', flat=True).distinct()
 
     add_breadcrumb(
         title="Active Engagements",
