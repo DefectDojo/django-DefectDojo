@@ -13,8 +13,6 @@ from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
-import requests
-
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes, Risk_Acceptance
@@ -61,6 +59,7 @@ def webhook(request, secret=None):
                 # xml examples at the end of file
                 jid = parsed['issue']['id']
                 jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+                logging.info("Received issue update for {}".format(jissue.jira_key))
                 if jissue.finding:
                     finding = jissue.finding
                     jira_instance = jira_helper.get_jira_instance(finding)
@@ -79,9 +78,11 @@ def webhook(request, secret=None):
 
                     if resolution is None:
                         resolved = False
-                    if finding.active == resolved:
+                        logger.debug("JIRA resolution is None, therefore resolved is now False")
+                    if finding.active is resolved:
                         if finding.active:
                             if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
+                                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jissue.jira_key))
                                 finding.active = False
                                 finding.mitigated = None
                                 finding.is_Mitigated = False
@@ -93,39 +94,42 @@ def webhook(request, secret=None):
                                     owner=finding.reporter,
                                 ).accepted_findings.set([finding])
                             elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
+                                logger.debug("Marking related finding of {} as false-positive".format(jissue.jira_key))
                                 finding.active = False
                                 finding.verified = False
                                 finding.mitigated = None
                                 finding.is_Mitigated = False
                                 finding.false_p = True
-                                finding.remove_from_any_risk_acceptance()
+                                ra_helper.remove_from_any_risk_acceptance(finding)
                             else:
                                 # Mitigated by default as before
+                                logger.debug("Marking related finding of {} as mitigated (default)".format(jissue.jira_key))
                                 now = timezone.now()
                                 finding.active = False
                                 finding.mitigated = now
                                 finding.is_Mitigated = True
                                 finding.endpoints.clear()
                                 finding.false_p = False
-                                finding.remove_from_any_risk_acceptance()
+                                ra_helper.remove_from_any_risk_acceptance(finding)
                         else:
                             # Reopen / Open Jira issue
+                            logger.debug("Re-opening related finding of {}".format(jissue.jira_key))
                             finding.active = True
                             finding.mitigated = None
                             finding.is_Mitigated = False
                             finding.false_p = False
-                            ra_helper.remove_finding.from_any_risk_acceptance(finding)
+                            ra_helper.remove_from_any_risk_acceptance(finding)
                     else:
                         # Reopen / Open Jira issue
                         finding.active = True
                         finding.mitigated = None
                         finding.is_Mitigated = False
                         finding.false_p = False
-                        ra_helper.remove_finding.from_any_risk_acceptance(finding)
+                        ra_helper.remove_from_any_risk_acceptance(finding)
 
-                        finding.jira_issue.jira_change = timezone.now()
-                        finding.jira_issue.save()
-                        finding.save()
+                    finding.jira_issue.jira_change = timezone.now()
+                    finding.jira_issue.save()
+                    finding.save()
 
                 elif jissue.engagement:
                     # if parsed['issue']['fields']['resolution'] != None:
@@ -134,7 +138,7 @@ def webhook(request, secret=None):
                     #     eng.save()
                     return HttpResponse('Update for engagement ignored')
                 else:
-                    raise Http404('No finding or engagement found for this JIRA issue')
+                    raise Http404('No finding or engagement found for JIRA issue {}'.format(jissue.jira_key))
 
             if parsed.get('webhookEvent') == 'comment_created':
                 """
@@ -181,11 +185,18 @@ def webhook(request, secret=None):
                 """
 
                 comment_text = parsed['comment']['body']
-                commentor = parsed['comment']['updateAuthor']['name']
+                commentor = ''
+                if 'name' in parsed['comment']['updateAuthor']:
+                    commentor = parsed['comment']['updateAuthor']['name']
+                elif 'emailAddress' in parsed['comment']['updateAuthor']:
+                    commentor = parsed['comment']['updateAuthor']['emailAddress']
+                else:
+                    logger.debug('Could not find the author of this jira comment!')
                 commentor_display_name = parsed['comment']['updateAuthor']['displayName']
                 # example: body['comment']['self'] = "http://www.testjira.com/jira_under_a_path/rest/api/2/issue/666/comment/456843"
                 jid = parsed['comment']['self'].split('/')[-3]
                 jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
+                logging.info("Received issue comment for {}".format(jissue.jira_key))
                 logger.debug('jissue: %s', vars(jissue))
                 if jissue.finding:
                     # logger.debug('finding: %s', vars(jissue.finding))
@@ -193,7 +204,7 @@ def webhook(request, secret=None):
                     for jira_userid in jira_usernames:
                         # logger.debug('incoming username: %s jira config username: %s', commentor.lower(), jira_userid.lower())
                         if jira_userid.lower() == commentor.lower():
-                            logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in Defect Dojo (%s)', commentor.lower(), jira_userid.lower())
+                            logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in DefectDojo (%s)', commentor.lower(), jira_userid.lower())
                             return HttpResponse('')
                             break
                     finding = jissue.finding
@@ -209,7 +220,7 @@ def webhook(request, secret=None):
                 elif jissue.engagement:
                     return HttpResponse('Comment for engagement ignored')
                 else:
-                    raise Http404('No finding or engagement found for this JIRA issue')
+                    raise Http404('No finding or engagement found for JIRA issue {}'.format(jissue.jira_key))
 
             if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
                 logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
@@ -231,74 +242,94 @@ def webhook(request, secret=None):
     return HttpResponse('')
 
 
+def get_custom_field(jira, label):
+    url = jira._options["server"].strip('/') + '/rest/api/2/field'
+    response = jira._session.get(url).json()
+    for node in response:
+        if label in node['clauseNames']:
+            field = int(node['schema']['customId'])
+            break
+
+    return field
+
+
 @user_passes_test(lambda u: u.is_staff)
 def express_new_jira(request):
     if request.method == 'POST':
         jform = ExpressJIRAForm(request.POST, instance=JIRA_Instance())
         if jform.is_valid():
+            jira_server = jform.cleaned_data.get('url').rstrip('/')
+            jira_username = jform.cleaned_data.get('username')
+            jira_password = jform.cleaned_data.get('password')
+
             try:
-                jira_server = jform.cleaned_data.get('url').rstrip('/')
-                jira_username = jform.cleaned_data.get('username')
-                jira_password = jform.cleaned_data.get('password')
-
-                try:
-                    jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
-                except Exception as e:
-                    logger.exception(e)  # already logged in jira_helper
-                    return render(request, 'dojo/express_new_jira.html',
-                                            {'jform': jform})
-                # authentication successful
-                # Get the open and close keys
+                jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+            except Exception as e:
+                logger.exception(e)  # already logged in jira_helper
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Unable to authenticate. Please check credentials.',
+                                    extra_tags='alert-danger')
+                return render(request, 'dojo/express_new_jira.html',
+                                        {'jform': jform})
+            # authentication successful
+            # Get the open and close keys
+            try:
                 issue_id = jform.cleaned_data.get('issue_key')
-                key_url = jira_server + '/rest/api/latest/issue/' + issue_id + '/transitions?expand=transitions.fields'
-                data = json.loads(requests.get(key_url, auth=(jira_username, jira_password)).text)
-                for node in data['transitions']:
-                    if node['to']['name'] == 'To Do':
-                        open_key = int(node['to']['id'])
-                    if node['to']['name'] == 'Done':
-                        close_key = int(node['to']['id'])
-                # Get the epic id name
-                key_url = jira_server + '/rest/api/2/field'
-                data = json.loads(requests.get(key_url, auth=(jira_username, jira_password)).text)
-                for node in data:
-                    if 'Epic Name' in node['clauseNames']:
-                        epic_name = int(node['clauseNames'][0][3:-1])
-                        break
+                key_url = jira_server.strip('/') + '/rest/api/latest/issue/' + issue_id + '/transitions?expand=transitions.fields'
+                response = jira._session.get(key_url).json()
+                open_key = close_key = None
+                for node in response['transitions']:
+                    if node['to']['statusCategory']['name'] == 'To Do':
+                        open_key = int(node['id']) if not open_key else open_key
+                    if node['to']['statusCategory']['name'] == 'Done':
+                        close_key = int(node['id']) if not close_key else close_key
+            except Exception as e:
+                logger.exception(e)  # already logged in jira_helper
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Unable to find Open/Close ID\'s. They will need to be found manually',
+                                    extra_tags='alert-danger')
+                return render(request, 'dojo/new_jira.html',
+                                        {'jform': jform})
+            # Get the epic id name
+            try:
+                epic_name = get_custom_field(jira, 'Epic Name')
+            except Exception as e:
+                logger.exception(e)  # already logged in jira_helper
+                messages.add_message(request,
+                                    messages.ERROR,
+                                    'Unable to find Epic Name. It will need to be found manually',
+                                    extra_tags='alert-danger')
+                return render(request, 'dojo/new_jira.html',
+                                        {'jform': jform})
 
-                jira_instance = JIRA_Instance(username=jira_username,
-                                        password=jira_password,
-                                        url=jira_server,
-                                        configuration_name=jform.cleaned_data.get('configuration_name'),
-                                        info_mapping_severity='Lowest',
-                                        low_mapping_severity='Low',
-                                        medium_mapping_severity='Medium',
-                                        high_mapping_severity='High',
-                                        critical_mapping_severity='Highest',
-                                        epic_name_id=epic_name,
-                                        open_status_key=open_key,
-                                        close_status_key=close_key,
-                                        finding_text='',
-                                        default_issue_type=jform.cleaned_data.get('default_issue_type'))
-                jira_instance.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'JIRA Configuration Successfully Created.',
-                                     extra_tags='alert-success')
-                create_notification(event='other',
-                                    title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
-                                    description='JIRA "%s" was added by %s' %
-                                                (jform.cleaned_data.get('configuration_name'), request.user),
-                                    url=request.build_absolute_uri(reverse('jira')),
-                                    )
-                return HttpResponseRedirect(reverse('jira', ))
-            except:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     'Unable to query other required fields. They must be entered manually.',
-                                     extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('add_jira', ))
-            return render(request, 'dojo/express_new_jira.html',
-                {'jform': jform})
+            jira_instance = JIRA_Instance(username=jira_username,
+                                    password=jira_password,
+                                    url=jira_server,
+                                    configuration_name=jform.cleaned_data.get('configuration_name'),
+                                    info_mapping_severity='Lowest',
+                                    low_mapping_severity='Low',
+                                    medium_mapping_severity='Medium',
+                                    high_mapping_severity='High',
+                                    critical_mapping_severity='Highest',
+                                    epic_name_id=epic_name,
+                                    open_status_key=open_key,
+                                    close_status_key=close_key,
+                                    finding_text='',
+                                    default_issue_type=jform.cleaned_data.get('default_issue_type'))
+            jira_instance.save()
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'JIRA Configuration Successfully Created.',
+                                    extra_tags='alert-success')
+            create_notification(event='other',
+                                title='New addition of JIRA: %s' % jform.cleaned_data.get('configuration_name'),
+                                description='JIRA "%s" was added by %s' %
+                                            (jform.cleaned_data.get('configuration_name'), request.user),
+                                url=request.build_absolute_uri(reverse('jira')),
+                                )
+            return HttpResponseRedirect(reverse('jira', ))
     else:
         jform = ExpressJIRAForm()
         add_breadcrumb(title="New Jira Configuration (Express)", top_level=False, request=request)

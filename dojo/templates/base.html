@@ -172,70 +172,52 @@
             </ul>
             <!-- /.navbar-top-links -->
 
+            {% if request.user.is_authenticated %}
             <div class="navbar-default sidebar navbar-fixed-top" role="navigation">
                 <div class="sidebar-nav navbar-collapse">
                     <ul class="nav" id="side-menu">
                         {% block sidebar-items %}
-
-                            {% if request.user.is_staff %}
-                                <li>
-                                    <a href="{% url 'dashboard' %}" aria-disabled="true" aria-expanded="false" aria-label="Dashboard">
-                                        <i class="fa fa-dashboard fa-fw"></i>
-                                        <span>Dashboard</span>
-                                    </a>
-                                </li>
-                            {% endif %}
                             <li>
-                                {% if request.user.is_staff %}
-                                    <a href="{% url 'product' %}" aria-expanded="false" aria-label="Products">
-                                        <i class="fa fa-list fa-fw"></i>
-                                        <span>Products</span>
-                                        <span class="glyphicon arrow"></span>
-                                    </a>
-                                {% elif request.user.is_authenticated %}
-                                <a href="{% url 'product' %}" title="Products" aria-label="Products"><i class="fa fa-list fa-fw"></i><span>Products</span></a>
-                                {% endif %}
-                                {% if request.user.is_staff %}
-                                    <ul class="nav nav-second-level">
-                                      {% if request.user.is_staff %}
-                                        <li>
-                                            <a href="{% url 'new_product' %}"> Add Product</a>
-                                        </li>
-                                      {% endif %}
-                                        <li>
-                                            <a href="{% url 'product' %}"> All Products</a>
-                                        </li>
-                                        <li>
-                                            <a href="{% url 'product_type' %}">View Product Types</a>
-                                        </li>
-
-                                    </ul>
-                                {% endif %}
+                                <a href="{% url 'dashboard' %}" aria-disabled="true" aria-expanded="false" aria-label="Dashboard">
+                                    <i class="fa fa-dashboard fa-fw"></i>
+                                    <span>Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'product' %}" aria-expanded="false" aria-label="Products">
+                                    <i class="fa fa-list fa-fw"></i>
+                                    <span>Products</span>
+                                    <span class="glyphicon arrow"></span>
+                                </a>
+                                <ul class="nav nav-second-level">
+                                    <li><a href="{% url 'product' %}"> All Products</a></li>
+                                    {% if request.user.is_staff %}
+                                        <li><a href="{% url 'new_product' %}"> Add Product</a></li>
+                                    {% endif %}
+                                    <li><a href="{% url 'product_type' %}">All Product Types</a></li>
+                                    {% if request.user.is_staff %}
+                                        <li><a href="{% url 'add_product_type' %}"> Add Product Type</a></li>
+                                    {% endif %}
+                                </ul>
+                                <!-- /.nav-second-level -->
+                            </li>
+                            <li>
+                                <a href="{% url 'engagement' %}" aria-expanded="false" aria-label="Engagements">
+                                    <i class="fa fa-inbox fa-fw"></i>
+                                    <span>Engagements</span>
+                                    <span class="glyphicon arrow"></span>
+                                </a>
+                                <ul class="nav nav-second-level">
+                                    <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
+                                    {% if request.user.is_staff %}
+                                        <li><a href="{% url 'engagements_all' %}">All Engagements</a></li>
+                                        <li><a href="{% url 'test_type' %}">Test Types</a></li>
+                                        <li><a href="{% url 'dev_env' %}">Environments</a></li>
+                                    {% endif %}
+                                </ul>
                                 <!-- /.nav-second-level -->
                             </li>
                             {% if request.user.is_staff %}
-                                <li>
-                                    <a href="{% url 'engagements_all' %}" aria-expanded="false" aria-label="Engagements">
-                                        <i class="fa fa-inbox fa-fw"></i>
-                                        <span>Engagements</span>
-                                        <span class="glyphicon arrow"></span>
-                                    </a>
-                                    <ul class="nav nav-second-level">
-                                        <li>
-                                            <a href="{% url 'engagements_all' %}">All Engagements</a>
-                                        </li>
-                                        <li>
-                                            <a href="{% url 'engagement' %}">Active Engagements</a>
-                                        </li>
-                                        <li>
-                                            <a href="{% url 'test_type' %}">Test Types</a>
-                                        </li>
-                                        <li>
-                                            <a href="{% url 'dev_env' %}">Environments</a>
-                                        </li>
-                                    </ul>
-                                    <!-- /.nav-second-level -->
-                                </li>
                                 <li>
                                     <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                         <i class="fa fa-bug fa-fw"></i>
@@ -290,7 +272,6 @@
                                     </ul>
                                 </li>
                             {% endif %}
-                            {% if request.user.is_authenticated %}
                             <li>
                                 <a href="{% url 'reports' %}" aria-expanded="false" aria-label="Reports">
 				                    <i class="fa fa-file-text-o fa-fw"></i>
@@ -310,6 +291,7 @@
                                     <span class="glyphicon arrow"></span>
                                 </a>
                                 <ul class="nav nav-second-level">
+                                    <li><a href="{% url 'metrics' %}?date=5&view=dashboard"> Metrics Dashboard </a></li>
                                     <li><a href="{% url 'critical_product_metrics' %}"> Critical Product Metrics </a></li>
                                     <li><a href="{% url 'metrics_product_type' %}"> Product Type Metrics </a></li>
                                     <li><a href="{% url 'product_type_counts' %}"> Product Type Counts </a></li>
@@ -318,11 +300,9 @@
                                         <li><a href="{% url 'engineer_metrics' %}"> Engineer Metrics </a></li>
                                         <li><a href="{% url 'research_metrics' %}"> Security Research Metrics </a></li>
                                     {% endif %}
-                                    <li><a href="{% url 'metrics' %}?date=5&view=dashboard"> Metrics Dashboard </a></li>
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% endif %}
                             {% if request.user.is_staff %}
                                 <li>
                                     <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
@@ -330,8 +310,6 @@
                                         <span>Users</span>
                                     </a>
                                 </li>
-                            {% endif %}
-                            {% if request.user.is_staff %}
                                 <li>
 				                    <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                         <i class="fa fa-calendar fa-fw"></i>
@@ -374,6 +352,7 @@
                                         {% endif %}
                                         <li><a href="{% url 'notifications' %}">Notifications</a></li>
                                     </ul>
+                                </li>
                         {% endblock %}
 
                         <li id="min-menu">
@@ -387,6 +366,7 @@
                 <!-- /.sidebar-collapse -->
             </div>
             <!-- /.navbar-static-side -->
+            {% endif %}
         </nav>
     {% endblock %}
     <!-- Page Content -->

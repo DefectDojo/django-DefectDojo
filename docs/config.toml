@@ -1,0 +1,28 @@
+baseURL = "https://DefectDojo.github.io/django-DefectDojo/"
+languageCode = "en-us"
+title = "DefectDojo Documentation"
+theme = "learn"
+
+# For search functionality
+[outputs]
+home = [ "HTML", "RSS", "JSON"]
+
+[params]
+  # Change default color scheme with a variant one. Can be "red", "blue", "green".
+  themeVariant = "blue"
+  editURL = "https://github.com/DefectDojo/django-DefectDojo/blob/dev/docs/content/"
+  description = "Documentation for DefectDojo"
+  disableNextPrev = true
+  disableLandingPageButton = true
+
+[[menu.shortcuts]] 
+name = "<i class='fab fa-github'></i> Github repo"
+identifier = "gh"
+url = "https://github.com/DefectDojo/django-DefectDojo"
+weight = 10
+
+[[menu.shortcuts]] 
+name = "<i class='fas fa-fw fa-camera'></i> Demo site"
+identifier = "ds"
+url = "https://demo.defectdojo.org/"
+weight = 11

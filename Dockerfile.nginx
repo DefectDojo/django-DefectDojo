@@ -34,16 +34,18 @@ RUN \
   apt-get -y update && \
   apt-get -y install apt-transport-https ca-certificates curl wget && \
   curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key add --no-tty - && \
-  curl -sL https://deb.nodesource.com/setup_12.x | bash - && \
+  echo 'deb https://deb.nodesource.com/node_14.x buster main' > /etc/apt/sources.list.d/nodesource.list && \
+  echo 'deb-src https://deb.nodesource.com/node_14.x buster main' >> /etc/apt/sources.list.d/nodesource.list && \
+  apt-get update -y -o Dir::Etc::sourcelist="sources.list.d/nodesource.list" \
+  -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0" && \
   curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-  wget https://github.com/yarnpkg/yarn/releases/download/v1.21.0/yarn_1.21.0_all.deb && \
-  dpkg -i yarn_1.21.0_all.deb && \
-  apt-get -y update && \
+  wget https://github.com/yarnpkg/yarn/releases/download/v1.22.10/yarn_1.22.10_all.deb && \
+  dpkg -i yarn_1.22.10_all.deb && \
   echo "$(yarn --version)" && \
   apt-get -y install nodejs && \
   echo "$(node --version)" && \
   apt-get clean && \
-  rm yarn_1.21.0_all.deb && \
+  rm yarn_1.22.10_all.deb && \
   rm -rf /var/lib/apt/lists && \
   true
 
@@ -54,17 +56,16 @@ RUN pip3 install \
 	-r ./requirements.txt
 
 COPY components/ ./components/
+RUN \
+  cd components && \
+  yarn
+
 COPY manage.py ./
 COPY dojo/ ./dojo/
 
-RUN \
-  cd components && \
-  yarn && \
-  cd .. && \
-  env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && \
-  true
+RUN env DD_SECRET_KEY='.' python3 manage.py collectstatic --noinput && true
 
-FROM nginx:1.19.6-alpine@sha256:01747306a7247dbe928db991eab42e4002118bf636dd85b4ffea05dd907e5b66
+FROM nginx:1.19.7-alpine@sha256:14536d83ca3128923ee7c2f7f4f285e023abd40f3ccdc8911f56cd4119558506
 ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/

@@ -4,19 +4,27 @@
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
             <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
-              {% if user|is_authorized_for_staff:prod %}
-                {% if type == "CI/CD" %}
-                <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
-                      class="fa fa-plus"></span> </a>
-                {% else %}
-                <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"><span
-                      class="fa fa-plus"></span> </a>
-                {% endif %}
-              {% endif %}
+                <div class="dropdown pull-right">
+                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters-{{status}}" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                    {% if user|is_authorized_for_staff:prod %}
+                        {% if type == "CI/CD" %}
+                        <a title="Add New Engagement" class="btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
+                            class="fa fa-plus"></span> </a>
+                        {% else %}
+                        <a title="Add New Engagement" class="btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"><span
+                            class="fa fa-plus"></span> </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
               </h4>
         </div>
-        <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
+        <div id="the-filters-{{status}}" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
+            {% include "dojo/filter_snippet.html" with form=filter.form %}
+        </div>
+    </div>
+
+    <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
         </div>
         {% if engs %}
             <table id={{ status }} class="tablesorter-bootstrap table table-condensed table-striped table-hover">
@@ -99,7 +107,7 @@
                               </a>
                             </li>
                             <li role="presentation">
-                                <a href="{% url 'engagment_open_findings' eng.id %}?test__engagement__risk_acceptance=1&test__engagement={{ eng.id }}">
+                                <a href="{% url 'engagment_open_findings' eng.id %}?risk_acceptance=1&test__engagement={{ eng.id }}">
                                     <i class="fa fa-file-text-o"></i> View Accepted Findings
                                 </a>
                               </li>
@@ -232,9 +240,9 @@
                 <p class="text-muted">No {% if status == "open" %}active{% elif status == "paused" %}paused{% else %}closed{% endif %} engagements found.</p>
             </div>
         {% endif %}
-    </div>
+
     <div class="clearfix">
-        {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
+        {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
     </div>
 </div>
 {% block postscript %}
@@ -286,6 +294,7 @@
                 ],
                 dom: 'Bfrtip',
                 paging: false,
+                info: false,
                 buttons: [
                     {
                         extend: 'colvis',
@@ -315,4 +324,3 @@
         });
     </script>
     {% endblock %}
-    {% include "dojo/filter_js_snippet.html" %}

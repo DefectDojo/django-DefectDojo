@@ -8,10 +8,12 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         Engagements
-                        <div class="dropdown pull-right"></div>
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
@@ -28,9 +30,9 @@
                             <th>Product</th>
                             <th>Product Type</th>
                             <th>Engagement Name</th>
-                            {% if system_settings.enable_jira %}                            
+                            {% if system_settings.enable_jira %}
                                 <th>JIRA</th>
-                            {% endif %}                                
+                            {% endif %}
                             <th>Status</th>
                             <th>Period</th>
                             <th>Lead</th>
@@ -74,7 +76,7 @@
                                     <td class="text-center">
                                       {{ e|jira_project_tag }}
                                     </td>
-                                    {% endif %}     
+                                    {% endif %}
                                     <td> {{ e.status }} </td>
                                     <td> {{ e.target_start|date:"SHORT_DATE_FORMAT" }} - {{ e.target_end|date:"SHORT_DATE_FORMAT" }}
                                         {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
@@ -154,7 +156,7 @@
 
             // Mapping of table columns to objects for proper cleanup and data formatting
             var dojoTable = $('#engagements').DataTable({
-                colReorder: true,                
+                colReorder: true,
                 columnDefs: [
                     {
                         "orderable": false,
@@ -163,6 +165,7 @@
                 ],
                 dom: 'Bfrtip',
                 paging: false,
+                info: false,
                 buttons: [
                     {
                         extend: 'colvis',

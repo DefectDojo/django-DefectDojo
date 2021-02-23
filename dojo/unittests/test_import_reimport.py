@@ -4,6 +4,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from django.test.client import Client
 from .dojo_test_case import DojoAPITestCase
+from .test_utils import assertTestImportModelsCreated
+from django.test import override_settings
 # from unittest import skip
 import logging
 
@@ -56,13 +58,13 @@ class ImportReimportMixin(object):
     # - active/verifed = True
     def test_zap_scan_base_active_verified(self):
         logger.debug('importing original zap xml report')
-
         endpoint_count_before = self.db_endpoint_count()
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
         notes_count_before = self.db_notes_count()
 
-        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
+            import0 = self.import_scan_with_params(self.zap_sample0_filename)
 
         # 0_zap_sample.xml: basic file with 4 out of 5 findings reported, zap4 absent
         # 1 active
@@ -106,7 +108,8 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+        with assertTestImportModelsCreated(self, reimports=1):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         test_id = reimport0['test']
         self.assertEqual(test_id, test_id)
@@ -143,7 +146,8 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename, verified=False)
+        with assertTestImportModelsCreated(self, reimports=1):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename, verified=False)
 
         test_id = reimport0['test']
         self.assertEqual(test_id, test_id)
@@ -190,7 +194,8 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport updated report
-        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename, verified=False)
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1):
+            reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename, verified=False)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
@@ -222,7 +227,7 @@ class ImportReimportMixin(object):
         # - 1 new note for zap1 being closed now
         self.assertEqual(notes_count_before + 1, self.db_notes_count())
 
-    # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed and then reimport 1 again
+    # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed and then reimport 0 again
     # - active findings count should be 4
     # - total  findings count should be 5
     # - zap1 active, zap4 inactive
@@ -250,7 +255,8 @@ class ImportReimportMixin(object):
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
 
-        reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, closed=1, reactivated=1):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
@@ -311,7 +317,8 @@ class ImportReimportMixin(object):
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
         notes_count_before = self.db_notes_count()
 
-        reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0):
+            reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
 
         test_id = reimport2['test']
         self.assertEqual(test_id, test_id)
@@ -344,7 +351,8 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
 
-        reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0):
+            reimport2 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename)
 
         test_id = reimport2['test']
         self.assertEqual(test_id, test_id)
@@ -400,7 +408,8 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport updated report
-        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample3_filename)
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=4, created=2, closed=2):
+            reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample3_filename)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
@@ -453,7 +462,8 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(4, findings)
 
-        reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename, close_old_findings=False)
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1):
+            reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample2_filename, close_old_findings=False)
 
         test_id = reimport1['test']
         self.assertEqual(test_id, test_id)
@@ -497,7 +507,8 @@ class ImportReimportMixin(object):
         notes_count_before = self.db_notes_count()
 
         # reimport exact same report
-        reimport0 = self.reimport_scan_with_params(test_id, self.anchore_file_name, scan_type=self.scan_type_anchore)
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0):
+            reimport0 = self.reimport_scan_with_params(test_id, self.anchore_file_name, scan_type=self.scan_type_anchore)
 
         active_findings_after = self.get_test_findings_api(test_id, active=True)
         self.log_finding_summary_json_api(active_findings_after)
@@ -506,7 +517,104 @@ class ImportReimportMixin(object):
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
 
+    # import Zap0 with 4 findings
+    # set 1 finding to active=False and false_positve=True
+    # set 1 finding to active=False and out_of_scope=True
+    # set 1 finding to active=False and risk_accepted=True
+    # delete 1 finding
+    # reimport Zap0 and only 1 finding must be active
+    # the other 3 findings manually set to active=False must remain False
+    def test_import_reimport_keep_false_positive_and_out_of_scope(self):
+        logger.debug('importing zap0 with 4 findings, manually setting 3 findings to active=False, reimporting zap0 must return only 1 finding active=True')
 
+        import0 = self.import_scan_with_params(self.zap_sample0_filename)
+        test_id = import0['test']
+
+        test_api_response = self.get_test_api(test_id)
+        product_api_response = self.get_engagement_api(test_api_response['engagement'])
+        product_id = product_api_response['product']
+
+        self.patch_product_api(product_id, {"enable_simple_risk_acceptance": True})
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(4, active_findings_before)
+
+        for finding in active_findings_before['results']:
+            if 'Zap1' in finding['title']:
+                self.patch_finding_api(finding['id'], {"active": False,
+                                                       "verified": False,
+                                                       "false_p": True,
+                                                       "out_of_scope": False,
+                                                       "risk_accepted": False,
+                                                       "is_Mitigated": True})
+            elif 'Zap2' in finding['title']:
+                self.patch_finding_api(finding['id'], {"active": False,
+                                                       "verified": False,
+                                                       "false_p": False,
+                                                       "out_of_scope": True,
+                                                       "risk_accepted": False,
+                                                       "is_Mitigated": True})
+            elif 'Zap3' in finding['title']:
+                self.patch_finding_api(finding['id'], {"active": False,
+                                                       "verified": False,
+                                                       "false_p": False,
+                                                       "out_of_scope": False,
+                                                       "risk_accepted": True,
+                                                       "is_Mitigated": True})
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(1, active_findings_before)
+
+        for finding in active_findings_before['results']:
+            if 'Zap5' in finding['title']:
+                self.delete_finding_api(finding['id'])
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(0, active_findings_before)
+
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=1, created=1):
+            reimport0 = self.reimport_scan_with_params(test_id, self.zap_sample0_filename)
+
+        self.assertEqual(reimport0['test'], test_id)
+
+        active_findings_after = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(1, active_findings_after)
+
+        active_findings_after = self.get_test_findings_api(test_id, active=False)
+        self.assert_finding_count_json(3, active_findings_after)
+
+        for finding in active_findings_after['results']:
+            if 'Zap1' in finding['title']:
+                self.assertFalse(finding['active'])
+                self.assertFalse(finding['verified'])
+                self.assertTrue(finding['false_p'])
+                self.assertFalse(finding['out_of_scope'])
+                self.assertFalse(finding['risk_accepted'])
+                self.assertTrue(finding['is_Mitigated'])
+            elif 'Zap2' in finding['title']:
+                self.assertFalse(finding['active'])
+                self.assertFalse(finding['verified'])
+                self.assertFalse(finding['false_p'])
+                self.assertTrue(finding['out_of_scope'])
+                self.assertFalse(finding['risk_accepted'])
+                self.assertTrue(finding['is_Mitigated'])
+            elif 'Zap3' in finding['title']:
+                self.assertFalse(finding['active'])
+                self.assertFalse(finding['verified'])
+                self.assertFalse(finding['false_p'])
+                self.assertFalse(finding['out_of_scope'])
+                self.assertTrue(finding['risk_accepted'])
+                self.assertTrue(finding['is_Mitigated'])
+            elif 'Zap5' in finding['title']:
+                self.assertTrue(finding['active'])
+                self.assertTrue(finding['verified'])
+                self.assertFalse(finding['false_p'])
+                self.assertFalse(finding['out_of_scope'])
+                self.assertFalse(finding['risk_accepted'])
+                self.assertFalse(finding['is_Mitigated'])
+
+
+@override_settings(TRACK_IMPORT_HISTORY=True)
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ['dojo_testdata.json']
 
@@ -525,6 +633,7 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # self.url = reverse(self.viewname + '-list')
 
 
+@override_settings(TRACK_IMPORT_HISTORY=True)
 class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
     fixtures = ['dojo_testdata.json']
     client_ui = Client()
@@ -581,8 +690,8 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 "verified": verified,
                 "scan_type": scan_type,
                 "file": open(filename),
-                "environment": 1
-                # "version": "1.0.1",
+                "environment": 1,
+                "version": "1.0.1",
                 # "close_old_findings": close_old_findings,
         }
 

@@ -154,6 +154,7 @@ class ScannerTest(BaseTestCase):
             print()
         assert len(missing_forms) == 0
 
+    @unittest.skip("Deprecated since Dynamic Parser infrastructure")
     def test_check_for_options(self):
         template_path = dir_path[:-5] + 'dojo/templates/dojo/import_scan_results.html'
         file = open(template_path, 'r+')
@@ -197,7 +198,7 @@ class ScannerTest(BaseTestCase):
     def test_engagement_import_scan_result(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys('Scan type mapping')
         driver.find_element_by_name('_Import Scan Results').click()
@@ -246,7 +247,7 @@ class ScannerTest(BaseTestCase):
                 failed_tests += [test.upper() + ': No test cases']
             for case in cases:
                 self.goto_product_overview(driver)
-                driver.find_element_by_class_name("pull-left").click()
+                driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
                 driver.find_element_by_link_text("Add New Engagement").click()
                 driver.find_element_by_id("id_name").send_keys(test + ' - ' + case)
                 driver.find_element_by_name('_Import Scan Results').click()

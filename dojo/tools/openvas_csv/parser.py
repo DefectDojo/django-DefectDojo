@@ -1,14 +1,17 @@
 # Sorry for the lazyness but I just update the column name fields
 # Didn't change the class names, only the main one..
 
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
-from dateutil.parser import parse
+import io
 import re
-from urllib.parse import urlparse
 import socket
+from urllib.parse import urlparse
+
+from dateutil.parser import parse
+
+from dojo.models import Endpoint, Finding
+
 
 class ColumnMappingStrategy(object):
 
@@ -95,9 +98,9 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
         ParseResult(scheme='http', netloc='www.cwi.nl:80', path='/%7Eguido/Python.html',
                     params='', query='', fragment='')
         """
-        if self.is_valid_ipv4_address(url) == False:
-            rhost = re.search(
-                "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
+        if not self.is_valid_ipv4_address(url):
+            rhost = re.match(
+                r"(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
                 url)
 
             if rhost:
@@ -111,8 +114,8 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
                 if protocol == 'https':
                     port = 443
 
-                if rhost.group(11) is not None:
-                    port = rhost.group(11)
+                if rhost[11] is not None:
+                    port = rhost[11]
 
                 try:
                     dupe_endpoint = Endpoint.objects.get(protocol=protocol,
@@ -141,8 +144,8 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
 
                 finding.unsaved_endpoints = endpoints
 
-        #URL is an IP so save as an IP endpoint
-        elif self.is_valid_ipv4_address(url) == True:
+        # URL is an IP so save as an IP endpoint
+        elif self.is_valid_ipv4_address(url):
             try:
                 dupe_endpoint = Endpoint.objects.get(protocol=None,
                                                      host=url,
@@ -159,8 +162,6 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
                 endpoints = [dupe_endpoint]
 
             finding.unsaved_endpoints = endpoints
-
-
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -261,7 +262,7 @@ class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
         finding.duplicate = self.evaluate_bool_value(column_value)
 
 
-class OpenVASUploadCsvParser(object):
+class OpenVASCsvParser(object):
 
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()
@@ -291,24 +292,33 @@ class OpenVASUploadCsvParser(object):
         title_column_strategy.successor = cwe_column_strategy
         date_column_strategy.successor = title_column_strategy
 
-        self.chain = date_column_strategy
+        return date_column_strategy
 
     def read_column_names(self, row):
+        column_names = dict()
         index = 0
         for column in row:
-            self.column_names[index] = column
+            column_names[index] = column
             index += 1
+        return column_names
 
-    def __init__(self, filename, test):
-        self.chain = None
-        self.column_names = dict()
-        self.dupes = dict()
-        self.items = ()
-        self.create_chain()
+    def get_scan_types(self):
+        return ["OpenVAS CSV"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import OpenVAS Scan in CSV format. Export as CSV Results on OpenVAS."
+
+    def get_findings(self, filename, test):
+
+        column_names = dict()
+        dupes = dict()
+        chain = self.create_chain()
 
         if filename is None:
-            self.items = ()
-            return
+            return ()
 
         content = open(filename.temporary_file_path(), 'rb')
         reportCSV = io.TextIOWrapper(content, encoding='utf-8 ', errors='replace')
@@ -319,7 +329,7 @@ class OpenVASUploadCsvParser(object):
             finding = Finding(test=test)
 
             if row_number == 0:
-                self.read_column_names(row)
+                column_names = self.read_column_names(row)
                 row_number += 1
                 continue
 
@@ -338,9 +348,9 @@ class OpenVASUploadCsvParser(object):
 
                 key = hashlib.md5((finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+                if key not in dupes:
+                    dupes[key] = finding
 
             row_number += 1
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

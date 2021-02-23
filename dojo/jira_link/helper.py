@@ -1,5 +1,6 @@
 import logging
-from dojo.utils import get_system_setting
+
+from dojo.utils import add_error_message_to_response, get_system_setting
 import os
 import io
 import json
@@ -14,9 +15,9 @@ from dojo.models import Finding, Test, Engagement, Product, JIRA_Issue, JIRA_Pro
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 from django.contrib import messages
-from celery.decorators import task
+from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-from dojo.utils import get_current_request, truncate_with_dots
+from dojo.utils import truncate_with_dots
 from django.urls import reverse
 from dojo.forms import JIRAProjectForm, JIRAEngagementForm
 
@@ -76,6 +77,44 @@ def is_push_all_issues(instance):
     jira_project = get_jira_project(instance)
     if jira_project:
         return jira_project.push_all_issues
+
+
+# checks if a finding can be pushed to JIRA
+# optionally provides a form with the new data for the finding
+# any finding that already has a JIRA issue can be pushed again to JIRA
+# returns True/False, error_message, error_code
+def finding_can_be_pushed_to_jira(finding, form=None):
+    # logger.debug('can be pushed to JIRA: %s', finding_or_form)
+    if not get_jira_project(finding):
+        return False, 'Finding cannot be pushed to jira as there is no jira project configuration for this product.', 'error_no_jira_project'
+
+    if finding.has_jira_issue:
+        return True, None, None
+
+    if form:
+        active = form['active'].value()
+        verified = form['verified'].value()
+        severity = form['severity'].value()
+    else:
+        active = finding.active
+        verified = finding.verified
+        severity = finding.severity
+
+    logger.debug('finding_can_be_pushed_to_jira: %s, %s, %s', active, verified, severity)
+
+    if not active or not verified:
+        logger.debug('Findings must be active and verified to be pushed to JIRA')
+        return False, 'Findings must be active and verified to be pushed to JIRA', 'not_active_or_verified'
+
+    jira_minimum_threshold = None
+    if System_Settings.objects.get().jira_minimum_severity:
+        jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
+
+        if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
+            logger.debug('Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity)
+            return False, 'Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity, 'below_minimum_threshold'
+
+    return True, None, None
 
 
 # use_inheritance=True means get jira_project config from product if engagement itself has none
@@ -272,7 +311,7 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
         else:
             log_jira_generic_alert('Unknown JIRA Connection Error', e)
 
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + e.message)
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e))
         raise e
 
     except requests.exceptions.RequestException as re:
@@ -285,14 +324,6 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
 
     # except RequestException as re:
     #     logger.exception(re)
-
-
-def add_error_message_to_response(message):
-    if get_current_request():
-        messages.add_message(get_current_request(),
-                            messages.ERROR,
-                            message,
-                            extra_tags='alert-danger')
 
 
 # Gets a connection to a Jira server based on the finding
@@ -423,135 +454,131 @@ def push_to_jira(obj):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def add_jira_issue(find):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
     if not is_jira_enabled():
-        return
+        return False
 
     if not is_jira_configured_and_enabled(find):
         logger.error("Finding {} cannot be pushed to JIRA as there is no JIRA configuration for this product.".format(find.id))
         log_jira_alert('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
-        return
-
-    jira_minimum_threshold = None
-    if System_Settings.objects.get().jira_minimum_severity:
-        jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
+        return False
 
     jira_project = get_jira_project(find)
     jira_instance = get_jira_instance(find)
 
-    if 'Active' in find.status() and 'Verified' in find.status():
-        if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(find.severity):
-            log_jira_alert('Finding below the minimum JIRA severity threshold.', find)
-            logger.warn("Finding {} is below the minimum JIRA severity threshold.".format(find.id))
-            logger.warn("The JIRA issue will NOT be created.")
-            return
+    can_be_pushed_to_jira, error_message, error_code = finding_can_be_pushed_to_jira(find)
+    if not can_be_pushed_to_jira:
+        log_jira_alert(error_message, find)
+        logger.warn("Finding %s cannot be pushed to JIRA: %s.", find.id, error_message)
+        logger.warn("The JIRA issue will NOT be created.")
+        return False
+    logger.debug('Trying to create a new JIRA issue for finding {}...'.format(find.id))
+    meta = None
+    try:
+        JIRAError.log_to_tempfile = False
+        jira = get_jira_connection(jira_instance)
 
-        logger.debug('Trying to create a new JIRA issue for finding {}...'.format(find.id))
-        meta = None
-        try:
-            JIRAError.log_to_tempfile = False
-            jira = get_jira_connection(jira_instance)
+        fields = {
+                'project': {
+                    'key': jira_project.project_key
+                },
+                'summary': find.title,
+                'description': jira_description(find),
+                'issuetype': {
+                    'name': jira_instance.default_issue_type
+                },
+        }
 
-            fields = {
-                    'project': {
-                        'key': jira_project.project_key
+        if jira_project.component:
+            fields['components'] = [
+                    {
+                        'name': jira_project.component
                     },
-                    'summary': find.title,
-                    'description': jira_description(find),
-                    'issuetype': {
-                        'name': jira_instance.default_issue_type
-                    },
-            }
+            ]
 
-            if jira_project.component:
-                fields['components'] = [
-                        {
-                            'name': jira_project.component
-                        },
-                ]
+        # populate duedate field, but only if it's available for this project + issuetype
+        if not meta:
+            meta = get_jira_meta(jira, jira_project)
 
-            # populate duedate field, but only if it's available for this project + issuetype
+        epic_name_field = get_epic_name_field_name(jira_instance)
+        if epic_name_field in meta['projects'][0]['issuetypes'][0]['fields']:
+            # epic name is present in this issuetype
+            # epic name is always mandatory in jira, so we populate it
+            fields[epic_name_field] = fields['summary']
+
+        if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
+            fields['priority'] = {
+                                    'name': jira_instance.get_priority(find.severity)
+                                }
+
+        labels = get_labels(find)
+        if labels:
+            if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
+                fields['labels'] = labels
+
+        if System_Settings.objects.get().enable_finding_sla:
+
+            if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
+                # jira wants YYYY-MM-DD
+                duedate = find.sla_deadline()
+                if duedate:
+                    fields['duedate'] = duedate.strftime('%Y-%m-%d')
+
+        if len(find.endpoints.all()) > 0:
             if not meta:
                 meta = get_jira_meta(jira, jira_project)
 
-            epic_name_field = get_epic_name_field_name(jira_instance)
-            if epic_name_field in meta['projects'][0]['issuetypes'][0]['fields']:
-                # epic name is present in this issuetype
-                # epic name is always mandatory in jira, so we populate it
-                fields[epic_name_field] = fields['summary']
+            if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+                environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
+                fields['environment'] = environment
 
-            if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
-                fields['priority'] = {
-                                        'name': jira_instance.get_priority(find.severity)
-                                    }
+        logger.debug('sending fields to JIRA: %s', fields)
 
-            labels = get_labels(find)
-            if labels:
-                if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
-                    fields['labels'] = labels
+        new_issue = jira.create_issue(fields)
 
-            if System_Settings.objects.get().enable_finding_sla:
+        j_issue = JIRA_Issue(
+            jira_id=new_issue.id, jira_key=new_issue.key, finding=find, jira_project=jira_project)
+        j_issue.jira_creation = timezone.now()
+        j_issue.jira_change = timezone.now()
+        j_issue.save()
+        issue = jira.issue(new_issue.id)
 
-                if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
-                    # jira wants YYYY-MM-DD
-                    duedate = find.sla_deadline()
-                    if duedate:
-                        fields['duedate'] = duedate.strftime('%Y-%m-%d')
+        find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
-            if len(find.endpoints.all()) > 0:
-                if not meta:
-                    meta = get_jira_meta(jira, jira_project)
+        # Upload dojo finding screenshots to Jira
+        for pic in find.images.all():
+            jira_attachment(
+                find, jira, issue,
+                settings.MEDIA_ROOT + pic.image_large.name)
 
-                if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
-                    environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
-                    fields['environment'] = environment
+        if jira_project.enable_engagement_epic_mapping:
+            eng = find.test.engagement
+            logger.debug('Adding to EPIC Map: %s', eng.name)
+            epic = get_jira_issue(eng)
+            if epic:
+                jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+            else:
+                logger.info('The following EPIC does not exist: %s', eng.name)
 
-            logger.debug('sending fields to JIRA: %s', fields)
-
-            new_issue = jira.create_issue(fields)
-
-            j_issue = JIRA_Issue(
-                jira_id=new_issue.id, jira_key=new_issue.key, finding=find, jira_project=jira_project)
-            j_issue.jira_creation = timezone.now()
-            j_issue.jira_change = timezone.now()
-            j_issue.save()
-            issue = jira.issue(new_issue.id)
-
-            find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
-            # Upload dojo finding screenshots to Jira
-            for pic in find.images.all():
-                jira_attachment(
-                    find, jira, issue,
-                    settings.MEDIA_ROOT + pic.image_large.name)
-
-                # if jira_project.enable_engagement_epic_mapping:
-                #      epic = get_jira_issue(eng)
-                #      issue_list = [j_issue.jira_id,]
-                #      jira.add_jira_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
-
-            return True
-        except JIRAError as e:
-            logger.exception(e)
-            logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
-            log_jira_alert(e.text, find)
-            return False
-    else:
-        log_jira_alert("A Finding needs to be both Active and Verified to be pushed to JIRA.", find)
-        logger.warning("A Finding needs to be both Active and Verified to be pushed to JIRA: %s", find)
+        logger.info('Created the following jira issue for %d:%s', find.id, find.title)
+        return True
+    except JIRAError as e:
+        logger.exception(e)
+        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+        log_jira_alert(e.text, find)
         return False
 
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def update_jira_issue(find):
-    logger.info('trying to update a linked jira issue for %d:%s', find.id, find.title)
+    logger.debug('trying to update a linked jira issue for %d:%s', find.id, find.title)
 
     if not is_jira_enabled():
         return False
@@ -625,6 +652,17 @@ def update_jira_issue(find):
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
         find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+
+        if jira_project.enable_engagement_epic_mapping:
+            eng = find.test.engagement
+            logger.debug('Adding to EPIC Map: %s', eng.name)
+            epic = get_jira_issue(eng)
+            if epic:
+                jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+            else:
+                logger.info('The following EPIC does not exist: %s', eng.name)
+
+        logger.debug('Updated the following linked jira issue for %d:%s', find.id, find.title)
         return True
 
     except JIRAError as e:
@@ -731,7 +769,7 @@ def jira_check_attachment(issue, source_file_name):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id(model=Engagement)
 def close_epic(eng, push_to_jira):
     engagement = eng
@@ -773,10 +811,10 @@ def close_epic(eng, push_to_jira):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id(model=Engagement)
 def update_epic(engagement):
-    logger.info('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
+    logger.debug('trying to update jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
@@ -804,10 +842,10 @@ def update_epic(engagement):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id(model=Engagement)
 def add_epic(engagement):
-    logger.info('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
+    logger.debug('trying to create a new jira EPIC for %d:%s', engagement.id, engagement.name)
 
     if not is_jira_configured_and_enabled(engagement):
         return False
@@ -877,7 +915,7 @@ def jira_get_issue(jira_project, issue_key):
 @dojo_model_to_id(parameter=1)
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
 def add_comment(find, note, force_push=False):
@@ -979,8 +1017,10 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
                 # could be a new jira_project, so set product_id
                 if engagement:
                     jira_project.engagement_id = engagement.id
+                    obj = engagement
                 elif product:
                     jira_project.product_id = product.id
+                    obj = product
 
                 if not jira_project.product_id and not jira_project.engagement_id:
                     raise ValueError('encountered JIRA_Project without product_id and without engagement_id')
@@ -992,7 +1032,12 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
                         logger.debug('unable to retrieve jira project from jira instance, invalid?!')
                         error = True
                     else:
+                        logger.debug(vars(jira_project))
                         jira_project.save()
+                        # update the in memory instance to make jira_project attribute work and it can be retrieved when pushing
+                        # an epic in the next step
+
+                        obj.jira_project = jira_project
 
                         messages.add_message(request,
                                                 messages.SUCCESS,
@@ -1033,6 +1078,7 @@ def process_jira_epic_form(request, engagement=None):
             if jira_epic_form.cleaned_data.get('push_to_jira'):
                 logger.debug('pushing engagement to JIRA')
                 if push_to_jira(engagement):
+                    logger.debug('Push to JIRA for Epic queued succesfully')
                     messages.add_message(
                         request,
                         messages.SUCCESS,
@@ -1040,7 +1086,7 @@ def process_jira_epic_form(request, engagement=None):
                         extra_tags='alert-success')
                 else:
                     error = True
-
+                    logger.debug('Push to JIRA for Epic failey')
                     messages.add_message(
                         request,
                         messages.ERROR,
@@ -1050,7 +1096,6 @@ def process_jira_epic_form(request, engagement=None):
             logger.debug('invalid jira epic form')
     else:
         logger.debug('no jira_project for this engagement, skipping epic push')
-
     return not error, jira_epic_form
 
 

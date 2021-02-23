@@ -1,12 +1,23 @@
 __author__ = 'Aaron Weaver'
 
-from dojo.models import Endpoint, Finding
-from datetime import datetime
 import json
+from datetime import datetime
+
+from dojo.models import Endpoint, Finding
 
 
 class SSLlabsParser(object):
-    def __init__(self, filename, test):
+
+    def get_scan_types(self):
+        return ["SSL Labs Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JSON Output of ssllabs-scan cli."
+
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))

@@ -1,19 +1,27 @@
-from xml.dom import NamespaceErr
 import hashlib
-import html2text
-from urllib.parse import urlparse
 import re
+from urllib.parse import urlparse
+from xml.dom import NamespaceErr
+
+import html2text
 from defusedxml import ElementTree as ET
+
 from dojo.models import Endpoint, Finding
 
 
-class MicrofocusWebinspectXMLParser(object):
+class MicrofocusWebinspectParser(object):
     """Micro Focus Webinspect XML report parser"""
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
-        if file is None:
-            return
+
+    def get_scan_types(self):
+        return ["Microfocus Webinspect Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import XML report"
+
+    def get_findings(self, file, test):
 
         tree = ET.parse(file)
         # get root of tree.
@@ -21,6 +29,7 @@ class MicrofocusWebinspectXMLParser(object):
         if 'Sessions' not in root.tag:
             raise NamespaceErr("This doesn't seem to be a valid Webinspect xml file.")
 
+        dupes = dict()
         for session in root:
             url = session.find('URL').text
             parts = urlparse(url)
@@ -37,7 +46,7 @@ class MicrofocusWebinspectXMLParser(object):
                 description = ""
                 mitigation = ""
                 reference = ""
-                severity = MicrofocusWebinspectXMLParser.convert_severity(issue.find('Severity').text)
+                severity = MicrofocusWebinspectParser.convert_severity(issue.find('Severity').text)
                 for content in issue.findall('ReportSection'):
                     name = content.find('Name').text
                     if 'Summary' in name:
@@ -56,19 +65,19 @@ class MicrofocusWebinspectXMLParser(object):
                     # detect CWE number
                     # TODO support more than one CWE number
                     if "kind" in content.attrib and "CWE" == content.attrib["kind"]:
-                        cwe = MicrofocusWebinspectXMLParser.get_cwe(content.attrib['identifier'])
+                        cwe = MicrofocusWebinspectParser.get_cwe(content.attrib['identifier'])
                         description += "\n\n" + content.text + "\n"
 
                 # make dupe hash key
                 dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
                 # check if dupes are present.
-                if dupe_key in self.dupes:
-                    finding = self.dupes[dupe_key]
+                if dupe_key in dupes:
+                    finding = dupes[dupe_key]
                     if finding.description:
                         finding.description = finding.description
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
                 else:
-                    self.dupes[dupe_key] = True
+                    dupes[dupe_key] = True
 
                     finding = Finding(title=title,
                                     test=test,
@@ -87,9 +96,9 @@ class MicrofocusWebinspectXMLParser(object):
                         finding.unique_id_from_tool = issue.attrib.get("id")
                     # manage endpoint
                     finding.unsaved_endpoints.append(endpoint)
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
 
-            self.items = list(self.dupes.values())
+        return list(dupes.values())
 
     @staticmethod
     def convert_severity(val):

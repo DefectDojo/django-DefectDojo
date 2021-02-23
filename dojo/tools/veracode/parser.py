@@ -1,6 +1,7 @@
-from xml.dom import NamespaceErr
-from lxml import etree
 from datetime import datetime
+
+from lxml import etree
+
 from dojo.models import Finding
 
 
@@ -12,7 +13,7 @@ def truncate_str(value: str, maxlen: int):
 
 # This parser is written for Veracode Detailed XML reports, version 1.5.
 # Version is annotated in the report, `detailedreport/@report_format_version`.
-class VeracodeXMLParser(object):
+class VeracodeParser(object):
     ns = {'x': 'https://www.veracode.com/schema/reports/export/1.0'}
     vc_severity_mapping = {
         1: 'Info',
@@ -22,20 +23,25 @@ class VeracodeXMLParser(object):
         5: 'Critical'
     }
 
-    def __init__(self, filename, test):
+    def get_scan_types(self):
+        return ["Veracode Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Veracode Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Detailed XML Report"
+
+    def get_findings(self, filename, test):
         if filename is None:
-            self.items = list()
-            return
-        try:
-            xml = etree.parse(filename, etree.XMLParser(resolve_entities=False))
-        except:
-            raise NamespaceErr('Cannot parse this report. Make sure to upload a proper Veracode Detailed XML report.')
+            return list()
+        xml = etree.parse(filename, etree.XMLParser(resolve_entities=False))
 
         ns = self.ns
         report_node = xml.xpath('/x:detailedreport', namespaces=self.ns)[0]
 
-        if not report_node:
-            raise NamespaceErr(
+        if report_node is None:
+            raise ValueError(
                 'This version of Veracode report is not supported.  '
                 'Please make sure the export is formatted using the '
                 'https://www.veracode.com/schema/reports/export/1.0 schema.')
@@ -71,7 +77,7 @@ class VeracodeXMLParser(object):
             if dupe_key not in dupes:
                 dupes[dupe_key] = self.__xml_sca_flaw_to_finding(vulnerable_lib_node, test)
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     @classmethod
     def __xml_flaw_to_unique_id(cls, xml_node):

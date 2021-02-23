@@ -9,6 +9,7 @@
                     <h3 class="has-filters">
                         Product List
                         <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -33,7 +34,7 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
             </div>
@@ -194,7 +195,7 @@
                                 </td>
                                 <td class="text-center">
                                   {% if prod.last_engagement_date %}
-                                    <i style="position:absolute;" class="fa fa-calendar happy-green-color has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                    <i class="fa fa-calendar happy-green-color has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
                                     data-content="{{ prod.active_engagement_count }} Active,
                                     {{ prod.closed_engagement_count }} Closed<br>
                                     <b>Last Assessed:</b> {{ prod.last_engagement_date }}"></i>
@@ -357,6 +358,7 @@
                 ],
                 dom: 'Bfrtip',
                 paging: false,
+                info: false,
                 buttons: [
                     {
                         extend: 'colvis',

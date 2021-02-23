@@ -1,23 +1,31 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
-class HuskyCIReportParser(object):
-
+class HuskyCIParser(object):
     """
     Read JSON data from huskyCI compatible format and import it to DefectDojo
     """
 
-    def __init__(self, json_output, test):
-        self.items = []
+    def get_scan_types(self):
+        return ["HuskyCI Report"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import HuskyCI Report vulnerabilities in JSON format."
+
+    def get_findings(self, json_output, test):
 
         if json_output is None:
             return
 
         tree = self.parse_json(json_output)
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return self.get_items(tree, test)
 
     def parse_json(self, json_output):
         try:

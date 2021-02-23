@@ -1,22 +1,26 @@
 __author__ = 'aaronweaver'
 
-from datetime import datetime
 import json
+import logging
+from datetime import datetime
+
 from dojo.models import Finding
 
 
 class BanditParser(object):
-    def __init__(self, filename, test):
-        self.items = []
 
-        if filename is None:
-            return
+    def get_scan_types(self):
+        return ["Bandit Scan"]
 
-        tree = filename.read()
-        try:
-            data = json.loads(str(tree, 'utf-8'))
-        except:
-            data = json.loads(tree)
+    def get_label_for_scan_types(self, scan_type):
+        return "Bandit Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JSON report format"
+
+    def get_findings(self, filename, test):
+        data = json.load(filename)
+
         dupes = dict()
         if "generated_at" in data:
             find_date = datetime.strptime(data["generated_at"], '%Y-%m-%dT%H:%M:%SZ')
@@ -67,8 +71,8 @@ class BanditParser(object):
                                url='N/A',
                                date=find_date,
                                static_finding=True)
-
+                logging.debug(f"Bandit parser {find}")
                 dupes[dupe_key] = find
                 findingdetail = ''
 
-        self.items = list(dupes.values())
+        return list(dupes.values())

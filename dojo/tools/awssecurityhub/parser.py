@@ -1,29 +1,23 @@
-from dojo.models import Finding
-from datetime import datetime
 import json
+from datetime import datetime
+
+from dojo.models import Finding
 
 
-class AwsSecurityFindingFormatParser:
-    def __init__(self, filehandle, test):
-        tree = self.parse_json(filehandle)
+class AwsSecurityHubParser(object):
 
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+    def get_scan_types(self):
+        return ["AWS Security Hub Scan"]
 
-    def parse_json(self, filehandle):
-        try:
-            data = filehandle.read()
-        except:
-            return None
+    def get_label_for_scan_types(self, scan_type):
+        return "AWS Security Hub Scan"
 
-        try:
-            tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
+    def get_description_for_scan_types(self, scan_type):
+        return "AWS Security Hub exports in JSON format."
 
-        return tree
+    def get_findings(self, filehandle, test):
+        tree = json.load(filehandle)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = {}
@@ -49,7 +43,7 @@ def get_item(finding, test):
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
     cve = None
     cwe = None
-    active = True
+    active = False
     verified = False
     false_p = False
     duplicate = False

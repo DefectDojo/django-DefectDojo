@@ -1,14 +1,26 @@
 __author__ = 'Aaron Weaver'
 
-from dojo.models import Finding
-from datetime import datetime
 import json
-from django.utils.text import Truncator
+from datetime import datetime
+
 from django.utils.html import strip_tags
+from django.utils.text import Truncator
+
+from dojo.models import Finding
 
 
 class MobSFParser(object):
-    def __init__(self, filename, test):
+
+    def get_scan_types(self):
+        return ["MobSF Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "MobSF Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Export a JSON file using the API, api/v1/report_json."
+
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))

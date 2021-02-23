@@ -4,27 +4,19 @@ from dojo.models import Finding
 
 
 class ClairParser(object):
-    def __init__(self, json_output, test):
 
-        tree = self.parse_json(json_output)
+    def get_scan_types(self):
+        return ["Clair Scan"]
 
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
 
-    def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-            subtree = tree.get('vulnerabilities')
-        except:
-            raise Exception("Invalid format")
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON reports of Docker image vulnerabilities."
 
-        return subtree
+    def get_findings(self, json_output, test):
+        tree = json.load(json_output)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = {}

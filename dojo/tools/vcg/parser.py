@@ -1,7 +1,9 @@
-import io
 import csv
 import hashlib
+import io
+
 from defusedxml import ElementTree
+
 from dojo.models import Finding
 
 
@@ -181,19 +183,27 @@ class VCGCsvParser(object):
 
 
 class VCGParser(object):
+    """VCG (VisualCodeGrepper) support CSV and XML"""
 
-    def __init__(self, filename, test):
-        self.dupes = dict()
+    def get_scan_types(self):
+        return ["VCG Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "VCG Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "VCG output can be imported in CSV or Xml formats."
+
+    def get_findings(self, filename, test):
 
         if filename is None:
-            self.items = ()
-            return
+            return list()
 
         content = filename.read()
 
         if filename.name.lower().endswith('.xml'):
-            self.items = list(VCGXmlParser().parse(content, test).values())
+            return list(VCGXmlParser().parse(content, test).values())
         elif filename.name.lower().endswith('.csv'):
-            self.items = list(VCGCsvParser().parse(content, test).values())
+            return list(VCGCsvParser().parse(content, test).values())
         else:
             raise Exception('Unknown File Format')

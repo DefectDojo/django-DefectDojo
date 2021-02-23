@@ -165,8 +165,10 @@ class ProductTest(BaseTestCase):
         # finding Date as a default value and can be safely skipped
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("High")
+        # cvssv3 field
+        driver.find_element_by_id("id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Description
-        driver.find_element_by_id("id_severity").send_keys(Keys.TAB, "This is just a Test Case Finding")
+        driver.find_element_by_id("id_cvssv3").send_keys(Keys.TAB, "This is just a Test Case Finding")
         # Finding Mitigation
         # Use Javascript to bypass the editor by making Setting textArea style from none to inline
         # Any Text written to textarea automatically reflects in Editor field.
@@ -177,6 +179,20 @@ class ProductTest(BaseTestCase):
         # Any Text written to textarea automatically reflects in Editor field.
         driver.execute_script("document.getElementsByName('impact')[0].style.display = 'inline'")
         driver.find_element_by_name("impact").send_keys(Keys.TAB, "This has a very critical effect on production")
+        # Add an endpoint
+        main_window_handle = driver.current_window_handle
+        driver.find_element_by_id("add_id_endpoints").click()
+        popup_window = None
+        while not popup_window:
+            for handle in driver.window_handles:
+                if handle != main_window_handle:
+                    popup_window = handle
+                    break
+        driver.switch_to.window(popup_window)
+        driver.find_element_by_id("id_endpoint").clear()
+        driver.find_element_by_id("id_endpoint").send_keys("product.finding.com")
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.switch_to.window(main_window_handle)
         # "Click" the Done button to Add the finding with other defaults
         with WaitForPageLoad(driver, timeout=30):
             driver.find_element_by_xpath("//input[@name='_Finished']").click()

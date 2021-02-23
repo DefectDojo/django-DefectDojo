@@ -10,9 +10,9 @@
 {% block content %}
     <div class="row">
       {% if user.is_staff or authorized %}
-          {% include "dojo/snippets/engagement_list.html" with engs=engs count=engs_count parm_name="engs" status="open" type=engagement_type %}
-          {% include "dojo/snippets/engagement_list.html" with engs=queued_engs count=queued_engs_count parm_name="queued_engs_count" status="paused" type=engagement_type %}
-          {% include "dojo/snippets/engagement_list.html" with engs=i_engs count=i_engs_count parm_name="i_engs" status="closed" type=engagement_type %}
+          {% include "dojo/snippets/engagement_list.html" with engs=engs filter=engs_filter count=engs_count prefix="engs" status="open" type=engagement_type %}
+          {% include "dojo/snippets/engagement_list.html" with engs=queued_engs filter=queued_engs_filter count=queued_engs_count prefix="queued_engs_count" status="paused" type=engagement_type %}
+          {% include "dojo/snippets/engagement_list.html" with engs=inactive_engs filter=inactive_engs_filter count=inactive_engs_count prefix="inactive_engs" status="closed" type=engagement_type %}
       {% endif %}
     </div>
     <div class="protip">
@@ -23,17 +23,18 @@
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         $(function () {
-            $(document).on('keypress', function(e) {
+
+            document.addEventListener('keydown', function(e) {
                 // return immediately if any of the search box is in focus while doing the keypress
                 if (e.target.getAttribute('type') === 'search' || e.target.id === 'simple_search') {
                   return;
                 }
-                var key = String.fromCharCode(e.which);
-                if (key =='a') {
+
+                if (e.key =='a') {
                   {% if engagement_type == "CI/CD" %}
-                  window.location.assign('{% url 'new_eng_for_prod_cicd' prod.id %}');
+                      window.location.assign('{% url 'new_eng_for_prod_cicd' prod.id %}');
                   {% else %}
-                  window.location.assign('{% url 'new_eng_for_prod' prod.id %}');
+                      window.location.assign('{% url 'new_eng_for_prod' prod.id %}');
                   {% endif %}
                 }
             });
@@ -55,4 +56,5 @@
             }
           });
     </script>
+    {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

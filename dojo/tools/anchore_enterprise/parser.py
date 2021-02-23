@@ -1,18 +1,26 @@
 import json
 import logging
 import re
-from json.decoder import JSONDecodeError
 from datetime import datetime
+from json.decoder import JSONDecodeError
+
 from dojo.models import Finding
-
-# pylint: disable=R0914,R1702
-
 
 logger = logging.getLogger(__name__)
 
 
-class AnchoreEnterprisePolicyCheckParser:
-    def __init__(self, filename, test):
+class AnchoreEnterpriseParser:
+
+    def get_scan_types(self):
+        return ["Anchore Enterprise Policy Check"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Anchore Enterprise Policy Check"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Anchore-CLI JSON policy check report format."
+
+    def get_findings(self, filename, test):
         content = filename.read()
         try:
             data = json.loads(str(content, 'utf-8'))
@@ -20,13 +28,12 @@ class AnchoreEnterprisePolicyCheckParser:
             data = json.loads(content)
 
         find_date = datetime.now()
-
+        items = list()
         try:
             for checks in data:
                 for policies in checks.values():
                     for images in policies.values():
                         for evaluation in images:
-                            self.items = list()
                             try:
                                 results = evaluation['detail']['result']
                                 imageid = results['image_id']
@@ -57,12 +64,13 @@ class AnchoreEnterprisePolicyCheckParser:
                                         date=find_date,
                                         static_finding=True,
                                         dynamic_finding=False)
-                                    self.items.append(find)
+                                    items.append(find)
                             except (KeyError, IndexError) as err:
                                 raise Exception("Invalid format: {} key not found".format(err))
         except AttributeError as err:
             # import empty policies without error (e.g. policies or images objects are not a dictionary)
             logger.warning('Exception at %s', 'parsing anchore policy', exc_info=err)
+        return items
 
 
 def map_gate_action_to_severity(gate):
