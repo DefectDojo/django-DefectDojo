@@ -44,7 +44,7 @@ class SpotbugsXMLParser(object):
             references = 'N/A'
 
             # find the source line and file on the buginstance
-            source_line = 0
+            source_line = None
             source_file = "N/A"
 
             source_extract = bug.find('SourceLine')
