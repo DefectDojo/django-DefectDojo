@@ -403,6 +403,10 @@ def product_endpoint_report(request, pid):
     include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
+    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
+    disclaimer = get_system_setting('disclaimer')
+    if include_disclaimer and len(disclaimer) == 0:
+        disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
     add_breadcrumb(parent=product, title="Vulnerable Product Endpoints Report", top_level=False, request=request)
     report_form = ReportOptionsForm()
@@ -468,6 +472,8 @@ def product_endpoint_report(request, pid):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': request.user,
                            'title': 'Generate Report',
                            })
@@ -506,6 +512,8 @@ def product_endpoint_report(request, pid):
                                             'include_finding_images': include_finding_images,
                                             'include_executive_summary': include_executive_summary,
                                             'include_table_of_contents': include_table_of_contents,
+                                            'include_disclaimer': include_disclaimer,
+                                            'disclaimer': disclaimer,
                                             'user': user,
                                             'team_name': get_system_setting('team_name'),
                                             'title': 'Generate Report',
@@ -530,6 +538,8 @@ def product_endpoint_report(request, pid):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': request.user,
                            'title': 'Generate Report',
                            })
@@ -589,6 +599,10 @@ def generate_report(request, obj):
     include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
+    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
+    disclaimer = get_system_setting('disclaimer')
+    if include_disclaimer and len(disclaimer) == 0:
+        disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
     report_name = str(obj)
     report_type = type(obj).__name__
@@ -638,6 +652,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -667,6 +683,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -698,6 +716,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -722,6 +742,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -750,6 +772,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': get_system_setting('team_name'),
                    'title': report_title,
@@ -771,6 +795,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -796,6 +822,8 @@ def generate_report(request, obj):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': user,
                            'team_name': settings.TEAM_NAME,
                            'title': report_title,
@@ -850,6 +878,8 @@ def generate_report(request, obj):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': user,
                            'team_name': settings.TEAM_NAME,
                            'title': report_title,
