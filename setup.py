@@ -64,7 +64,7 @@ setup(
         'whitenoise==4.1.4',
         'django-environ==0.4.5',
         'titlecase',
-        'json-lines==1.2.0'  # requred by yarn audit parser
+        'jsonlines==2.0.0'  # requred by yarn audit parser
     ],
 
     extras_require={'mysql': ['mysqlclient==2.0.3']},
