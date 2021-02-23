@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 def vulnerable_endpoints(request):
     endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                        finding__duplicate=False, finding__out_of_scope=False, mitigated=False).distinct()
+                                        finding__duplicate=False, finding__out_of_scope=False, mitigated=False).prefetch_related('product', 'product__tags', 'tags').distinct()
 
     # are they authorized
     if request.user.is_staff:
@@ -67,7 +67,7 @@ def vulnerable_endpoints(request):
 
 
 def all_endpoints(request):
-    endpoints = Endpoint.objects.all()
+    endpoints = Endpoint.objects.all().prefetch_related('product', 'tags', 'product__tags')
     show_uri = get_system_setting('display_endpoint_uri')
     # are they authorized
     if request.user.is_staff:
@@ -251,8 +251,6 @@ def delete_endpoint(request, eid):
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = 'dojo/add_endpoint.html'
-    if '_popup' in request.GET:
-        template = 'dojo/add_related.html'
 
     form = AddEndpointForm(product=product)
     if request.method == 'POST':

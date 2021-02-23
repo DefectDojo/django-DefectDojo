@@ -2,24 +2,35 @@ __guide__ = 'aaronweaver'
 __author__ = 'Rajarshi333'
 
 
-from defusedxml import ElementTree
-from dateutil import parser
-import re
-from dojo.models import Finding
 import logging
+import re
+
+from dateutil import parser
+from defusedxml import ElementTree
+
+from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 
-class FortifyXMLParser(object):
-    language_list = []
+class FortifyParser(object):
 
-    def __init__(self, filename, test):
+    def get_scan_types(self):
+        return ["Fortify Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Findings from XML file format."
+
+    def get_findings(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
 
+        language_list = []
         # Get Date
-        date_string = root.getchildren()[5].getchildren()[1].getchildren()[2].text
+        date_string = root[5][1][2].text
         date_list = date_string.split()[1:4]
         date_list = [item.replace(',', '') for item in date_list]
         date_act = ".".join(date_list)
@@ -30,8 +41,8 @@ class FortifyXMLParser(object):
                                       lang_string, re.MULTILINE)
         lang_my_string = lang_need_string[0]
         language = lang_my_string.split('=')[1]
-        if language not in self.language_list:
-            self.language_list.append(language)
+        if language not in language_list:
+            language_list.append(language)
 
         # Get Category Information:
         # Abstract, Explanation, Recommendation, Tips
@@ -97,12 +108,12 @@ class FortifyXMLParser(object):
             raise
         # map created
 
-        self.items = []
+        items = []
         dupes = set()
         for issue_key, issue in issue_map.items():
             title = self.format_title(issue["Category"], issue["FileName"], issue["LineStart"])
             if title not in dupes:
-                self.items.append(Finding(
+                items.append(Finding(
                     title=title,
                     severity=issue["Friority"],
                     numerical_severity=Finding.get_numerical_severity(issue["Friority"]),
@@ -119,6 +130,7 @@ class FortifyXMLParser(object):
                     unique_id_from_tool=issue_key
                 ))
                 dupes.add(title)
+        return items
 
     def format_title(self, category, filename, line_no):
         """

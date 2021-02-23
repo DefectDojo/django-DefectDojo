@@ -28,15 +28,14 @@ from dojo.models import Product, Engagement, Test, Finding, \
     BurpRawRequestResponse, Endpoint, Notes, JIRA_Project, JIRA_Instance, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Languages, Language_Type, App_Analysis, Product_Type, Note_Type, \
-    Endpoint_Status
+    Endpoint_Status, SEVERITY_CHOICES
 from dojo.forms import ProductForm, EngForm, TestForm, \
     ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
-    ImportScanForm, SEVERITY_CHOICES, JIRAForm, JIRAProjectForm, EditEndpointForm, \
+    ImportScanForm, JIRAForm, JIRAProjectForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
     Development_EnvironmentForm, Product_TypeForm, Test_TypeForm, NoteTypeForm
-from dojo.tools import requires_file
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import import_parser_factory, requires_file
 from datetime import datetime
 from .object.parser import import_object_eng
 
@@ -1441,7 +1440,7 @@ class ImportScanValidation(Validation):
                 get_pk_from_uri(uri=bundle.data['engagement'])
             except NotFound:
                 errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
-        scan_type_list = list([x[0] for x in ImportScanForm.SCAN_TYPE_CHOICES])
+        scan_type_list = list([x[0] for x in ImportScanForm.SORTED_SCAN_TYPE_CHOICES])
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:
                 errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
@@ -1593,11 +1592,12 @@ class ImportScanResource(MultipartResource, Resource):
         try:
             parser = import_parser_factory(bundle.data.get('file', None), t, bundle.data['active'], bundle.data['verified'],
                                            bundle.data['scan_type'])
+            parser_findings = parser.get_findings(bundle.data.get('file', None), t)
         except ValueError:
             raise NotFound("Parser ValueError")
 
         try:
-            for item in parser.items:
+            for item in parser_findings:
                 sev = item.severity
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
@@ -1645,10 +1645,11 @@ class ImportScanResource(MultipartResource, Resource):
                     ep.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
                     item.endpoints.add(ep)
-                item.save()
 
-                if item.unsaved_tags is not None:
+                if item.unsaved_tags:
                     item.tags = item.unsaved_tags
+
+                item.save()
 
         except SyntaxError:
             raise NotFound("Parser SyntaxError")
@@ -1687,7 +1688,7 @@ class ReImportScanValidation(Validation):
                 get_pk_from_uri(uri=bundle.data['test'])
             except NotFound:
                 errors.setdefault('test', []).append('A valid test must be supplied. Ex. /api/v1/tests/1/')
-        scan_type_list = list([x[0] for x in ImportScanForm.SCAN_TYPE_CHOICES])
+        scan_type_list = list([x[0] for x in ImportScanForm.SORTED_SCAN_TYPE_CHOICES])
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:
                 errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
@@ -1778,11 +1779,12 @@ class ReImportScanResource(MultipartResource, Resource):
 
         try:
             parser = import_parser_factory(bundle.data.get('file', None), test, active, verified, scan_type)
+            parser_findings = parser.get_findings(bundle.data.get('file', None), test)
         except ValueError:
             raise NotFound("Parser ValueError")
 
         try:
-            items = parser.items
+            items = parser_findings
             original_items = test.finding_set.all().values_list("id", flat=True)
             new_items = []
             mitigated_count = 0
@@ -1872,9 +1874,11 @@ class ReImportScanResource(MultipartResource, Resource):
                         find.endpoint_status.add(eps)
                         find.endpoints.add(ep)
 
-                    if item.unsaved_tags is not None:
+                    if item.unsaved_tags:
                         find.tags = item.unsaved_tags
+
                 find.save()
+
             # calculate the difference
             to_mitigate = set(original_items) - set(new_items)
             for finding_id in to_mitigate:

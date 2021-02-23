@@ -131,7 +131,7 @@
       "enable_msteams_notifications": false,
       "time_zone": "UTC",
       "enable_deduplication": true,
-      "delete_dupulicates": false,
+      "delete_duplicates": false,
       "slack_channel": "",
       "mail_notifications_to": "",
       "enable_jira": false
@@ -1636,8 +1636,8 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "<your username>",
-        "password": "<your password>",
+        "username": "<USERNAME HERE>",
+        "password": "<API TOKEN HERE>",
         "default_issue_type": "Task",
         "epic_name_id": 10011,
         "open_status_key": 11,

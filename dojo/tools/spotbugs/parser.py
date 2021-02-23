@@ -3,15 +3,25 @@ __maintainer__ = "Igor Bakalo"
 __email__ = "bigorigor.ua@gmail.com"
 __status__ = "Development"
 
-from defusedxml import ElementTree as ET
-
 import re
+
+from defusedxml import ElementTree as ET
 
 from dojo.models import Finding
 
 
-class SpotbugsXMLParser(object):
-    def __init__(self, filename, test):
+class SpotbugsParser(object):
+
+    def get_scan_types(self):
+        return ["SpotBugs Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "XML report of textui cli."
+
+    def get_findings(self, filename, test):
         bug_patterns = dict()
         dupes = dict()
 

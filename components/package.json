@@ -1,6 +1,6 @@
 {
   "name": "DefectDojo",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "dependencies": {
     "JUMFlot": "jumjum123/JUMFlot#*",
     "bootstrap": "^3.4.0",
@@ -19,7 +19,7 @@
     "datatables.net-dt": "^1.10.23",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
-    "easymde": "^2.13.0",
+    "easymde": "^2.14.0",
     "flot": "flot/flot#~0.8.3",
     "flot-axis": "markrcote/flot-axislabels#*",
     "font-awesome": "^4.0.0",
@@ -30,8 +30,8 @@
     "jquery.cookie": "1.4.1",
     "jquery.flot.tooltip": "^0.9.0",
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",
-    "jszip": "^3.5.0",
-    "justgage": "^1.4.0",
+    "jszip": "^3.6.0",
+    "justgage": "^1.4.2",
     "metismenu": "~3.0.6",
     "moment": "^2.29.1",
     "morris.js": "morrisjs/morris.js",

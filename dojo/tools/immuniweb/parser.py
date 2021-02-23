@@ -1,17 +1,26 @@
-from xml.dom import NamespaceErr
 import hashlib
 from urllib.parse import urlparse
-from dojo.models import Endpoint, Finding
+from xml.dom import NamespaceErr
+
 from defusedxml import ElementTree
+
+from dojo.models import Endpoint, Finding
 
 __author__ = 'properam'
 
 
-class ImmuniwebXMLParser(object):
-    def __init__(self, file, test):
-        self.items = ()
-        if file is None:
-            return
+class ImmuniwebParser(object):
+
+    def get_scan_types(self):
+        return ["Immuniweb Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "XML Scan Result File from Imuniweb Scan."
+
+    def get_findings(self, file, test):
 
         ImmuniScanTree = ElementTree.parse(file)
         root = ImmuniScanTree.getroot()
@@ -19,7 +28,7 @@ class ImmuniwebXMLParser(object):
         if 'Vulnerabilities' not in root.tag:
             raise NamespaceErr("This does not look like a valid expected Immuniweb XML file.")
 
-        self.dupes = dict()
+        dupes = dict()
 
         for vulnerability in root.iter("Vulnerability"):
             """
@@ -62,8 +71,8 @@ class ImmuniwebXMLParser(object):
             dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
 
             # check if finding is a duplicate
-            if dupe_key in self.dupes:
-                finding = self.dupes[dupe_key]  # fetch finding
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]  # fetch finding
                 if description is not None:
                     finding.description += description
             else:  # finding is not a duplicate
@@ -84,7 +93,7 @@ class ImmuniwebXMLParser(object):
                     dynamic_finding=True)
 
                 finding.unsaved_endpoints = list()
-                self.dupes[dupe_key] = finding
+                dupes[dupe_key] = finding
 
                 finding.unsaved_endpoints.append(Endpoint(
                         host=host, port=port,
@@ -92,4 +101,4 @@ class ImmuniwebXMLParser(object):
                         protocol=protocol,
                         query=query, fragment=fragment))
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

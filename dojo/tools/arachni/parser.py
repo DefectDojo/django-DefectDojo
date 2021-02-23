@@ -3,24 +3,32 @@ from base64 import b64encode
 from urllib.parse import urlparse
 
 import html2text
-
-from dojo.models import Finding, Endpoint
 from django.utils.encoding import force_str
 
-__author__ = "Jay Paz"
+from dojo.models import Endpoint, Finding
 
 
-class ArachniJSONParser(object):
-    def __init__(self, json_output, test):
+class ArachniParser(object):
+
+    def get_scan_types(self):
+        return ["Arachni Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Arachni Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Arachni JSON report format."
+
+    def get_findings(self, json_output, test):
         self.target = None
         self.port = "80"
         self.host = None
 
         tree = self.parse_json(json_output)
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return [data for data in self.get_items(tree, test)]
         else:
-            self.items = []
+            return []
 
     def parse_json(self, json_output):
         try:
@@ -51,10 +59,10 @@ class ArachniJSONParser(object):
                 unique_objs = []
                 new_list = []
                 for o in items[dupe_key].unsaved_endpoints:
-                    if o.__unicode__() in unique_objs:
+                    if str(o) in unique_objs:
                         continue
                     new_list.append(o)
-                    unique_objs.append(o.__unicode__())
+                    unique_objs.append(str(o))
 
                 items[dupe_key].unsaved_endpoints = new_list
             else:

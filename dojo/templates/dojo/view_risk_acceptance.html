@@ -216,7 +216,7 @@
                     {% include "dojo/form_fields.html" with form=add_findings_form %}
                 </div>
                 <div class="panel-body">
-                    {% include "dojo/paging_snippet.html" with page=add_findings parm_name="apage" %}
+                    {% include "dojo/paging_snippet.html" with page=add_findings prefix="apage" %}
                 </div>
                 <div class="panel-footer text-center">
                     <input class="btn btn-primary" name="add_findings" type="submit" value="Add Selected Findings"/>
@@ -327,35 +327,48 @@
 {% endblock %}
 
 {% block postscript %}
-<script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>
-<script type="text/javascript">
-    $("#edit_risk_acceptance textarea").each(function (index, elem) {
-        if (elem.hasAttribute("required")) {
-            elem.removeAttribute("required");
-            elem.id = "req"
-        }
-
-        var mde = new EasyMDE({
-            spellChecker: false,
-            element: elem,
-            autofocus: false,
-            forceSync: true,
-            toolbar: ["bold", "italic", "heading", "|",
-                "quote", "unordered-list", "ordered-list", "|",
-                "link", "image", "|",
-                "table", "horizontal-rule", "code", "|",
-                "guide"
-            ]
+{% if not edit_mode %}
+    <script type="text/javascript">
+        // keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key == 'e') {
+                window.location.assign('{% url 'edit_risk_acceptance' eng.id risk_acceptance.id %}')
+            }
         });
-        mde.render();
-    });
 
-    // keyboard shortcuts
-    $(document).on('keypress', null, 'e', function () {
-        window.location.assign('{% url 'edit_risk_acceptance' eng.id risk_acceptance.id %}');
-    });
+        <!-- what works on every other page with the 'e' keydown, conflicts here with the textare for notes, stoppropagation 'fixes' this -->
+        $('#id_entry').keydown( function(e) {
+            e.stopPropagation();
+        });
 
-    {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
+    </script>
+{% else %}
+    <script type="application/javascript" src="{% static 'easymde/dist/easymde.min.js' %}"></script>
+    <script>
+        $("#edit_risk_acceptance textarea").each(function (index, elem) {
+            if (elem.hasAttribute("required")) {
+                elem.removeAttribute("required");
+                elem.id = "req"
+            }
 
+            var mde = new EasyMDE({
+                spellChecker: false,
+                element: elem,
+                autofocus: false,
+                forceSync: true,
+                toolbar: ["bold", "italic", "heading", "|",
+                    "quote", "unordered-list", "ordered-list", "|",
+                    "link", "image", "|",
+                    "table", "horizontal-rule", "code", "|",
+                    "guide"
+                ]
+            });
+            mde.render();
+        });
+    </script>
+{% endif %}
+
+<script type="text/javascript">
+     {% include 'dojo/snippets/risk_acceptance_actions_snippet_js.html' %}
 </script>
 {% endblock %}

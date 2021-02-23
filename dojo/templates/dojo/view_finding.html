@@ -209,6 +209,7 @@
                     </tr>
                 {% endif %}
                 <tr>
+                    <th>ID</th>
                     <th>Severity</th>
                     {% if system_settings.enable_finding_sla %}
                     <th>SLA</th>
@@ -241,10 +242,16 @@
                     <th>Found by</th>
                 </tr>
                 <tr>
+                    <td>{{ finding.id }}</td>
                     <td>
                         <span class="label severity severity-{{ finding.severity }}">
                             {% if finding.severity %}
-                                {{ finding.severity_display }}
+                                {% if finding.cvssv3 %}
+                                    <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                        data-content="{{ finding.cvssv3 }}">{{ finding.severity_display }}</i>
+                                {% else %}
+                                    {{ finding.severity_display }}
+                                {% endif %}
                             {% else %}
                                 Unknown
                             {% endif %}
@@ -258,8 +265,7 @@
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
-                    <td>
-                        <div class="align-top">
+                    <td class="nowrap, align-top">
                             {% comment %}
                             {% if finding.duplicate %}
                                 {% include "dojo/finding_related_actions.html" with similar_finding=finding finding_context=finding intro=finding|finding_display_status|safe %}
@@ -268,7 +274,7 @@
                             {% endif %}
                             {% endcomment %}
                             {{ finding|finding_display_status|safe }}
-                        </div>
+                        &nbsp;{{ finding|import_history }}
                     </td>
                     {% if finding.risk_acceptance_set.all %}
                         <td>
@@ -502,11 +508,18 @@
                         <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
                         <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
                     {% else %}
-                        None
-                        <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
-                        {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
-                            <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
-                        </a> {% endcomment %}
+                        {% if can_be_pushed_to_jira %}
+                            None
+                            <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
+                            {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
+                                <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                            </a> {% endcomment %}
+                        {% else %}
+                            <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                            data-content="{{ can_be_pushed_to_jira_error }}"
+                             data-placement="bottom" data-container="body">
+                             </i>
+                        {% endif %}
                     {% endif %}
                     </td>
                 {% endif %}
@@ -559,9 +572,9 @@
             </div>
             <div id="duplicate_tree" class="panel-body collapse">
                 {% if finding.duplicate_finding %}
-                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster prefix='duplicate' %}
                 {% else %}
-                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding finding_list=duplicate_cluster %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding finding_list=duplicate_cluster prefix='duplicate' %}
                 {% endif %}
             </div>
         </div>
@@ -569,20 +582,33 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="has-filters">Similar Findings ({{ similar_findings.count }})
-                    <span class="pull-right"><a data-toggle="collapse" href=".similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span>
-                    {% comment %} <span class="pull-right similar_findings collapse" aria-expanded="false"><button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary dropdown" aria-expanded="false"> <i class="fa fa-filter"></i> <i class="caret"></i> </button></span> {% endcomment %}
-                    <div class="similar_findings dropdown pull-right collapse"></div>
+                <h4 class="has-filters">Similar Findings ({{ similar_findings.paginator.count }})
+                    <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                       data-content="Opening this panel shows findings that are not exact duplicates,
+                        but have similar values for CVE, CWE, file_path, line number, unique_id_from_tool.
+                        It has a filter panel where filtering can be made less or more strict, and across
+                        product boundaries. The resulting findings can be view, marked as duplicate or original.
+                        Clear filters will empty all filters. Restart will start over by matching against the fields
+                        mentioned above."
+                        data-placement="bottom" data-container="body">
+                    </i>
+                    <span class="pull-right">
+                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters-wrapper" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        <a data-toggle="collapse" href="#the-filters-wrapper"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                    </span>
                 </h4>
             </div>
-            <div id="the-filters" class="panel-body collapse">
-                {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form %}
-            </div>
-            {% if similar_findings_filter %}
-                <div id="similar_findings" class="panel-body similar_findings collapse">
-                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
+            <span id="the-filters-wrapper" class="collapse {% if similar_findings_filter.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body similar-filters">
+                    {% url 'view_finding' finding.id as finding_url %}
+                    {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form form_id="similar" clear_js=True restart_link=finding_url %}
                 </div>
-            {% endif %}
+                {% if similar_findings_filter %}
+                    <div id="similar_findings" class="panel-body">
+                        {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings prefix='similar' %}
+                    </div>
+                {% endif %}
+            </span>
         </div>
 
     {% comment %} Add a form to (ab)use to submit any actions related to similar/duplicates as POST requests {% endcomment %}
@@ -744,17 +770,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>CVSS 3.0<span class="pull-right"><a data-toggle="collapse" href="#vuln_cvss"><i
-                        class="glyphicon glyphicon-chevron-{% if finding.cvssv3 %}up{%else%}down{%endif%}"></i></a></span></h4>
-            </div>
-            <div id="vuln_cvss" class="panel-body collapse {% if finding.cvssv3 %}in{%endif%}">
-                <pre>{{ finding.cvssv3|markdown_render|default_if_none:"" }}</pre>
-            </div>
-        </div>
-
 
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -1276,6 +1291,102 @@
 
         $(".dojo-filter-set :input").not("button").addClass("form-control input-sm"); {% endcomment %}
 
+    </script>
+
+    <script type="application/javascript">
+        // DataTables Setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Findings_List_' + date;
+            var columns = [
+                { "data": "relationship" },
+                { "data": "severity" },
+                { "data": "finding" , render: function (data, type, row) {
+                        return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                }},
+                { "data": "found_date" },
+                { "data": "status" },
+                { "data": "test" },
+                { "data": "engagement" },
+                { "data": "product" },
+                { "data": "cwe" },
+                { "data": "cve" },
+                { "data": "file_path" },
+                {% if system_settings.enable_jira %}
+                    { "data": "jira_id" },
+                {% endif %}
+                { "data": "action" },
+              ];
+
+            // Filter the list of items to display based on what is shown.
+            var disallowed_entries = new Set(["checkbox", "action"]);
+            var data_column_list = [];
+            for (var i = 0; i < columns.length; i++) {
+                if (!disallowed_entries.has(columns[i]["data"])) {
+                    data_column_list.push(i);
+                }
+            }
+
+            var buttonCommon = {
+                exportOptions: {
+                    columns: data_column_list,
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Similar Findings List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#similar_findings_table').DataTable({
+                drawCallback: function(){
+                      $('.has-popover').popover({'trigger':'hover'});
+                },
+                colReorder: true,
+                "columns": columns,
+                order: [],
+                columnDefs: [
+                    {
+                        "orderable": false,
+                        "targets": [0, 1]
+                    },
+                    {
+                        targets: [0, 1],
+                        className: 'noVis'
+                    }
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                info: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
     </script>
 
     {% include "dojo/filter_js_snippet.html" %}

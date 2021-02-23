@@ -9,10 +9,12 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         {{ filter_name }} Findings
-                        <div class="dropdown pull-right"></div>
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse">
+                <div id="the-filters" class="is-filters panel-body collapse" >
                     {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
@@ -390,7 +392,7 @@
                                 <td>
                                   <a target="#" data-toggle="tooltip" data-placement="bottom" title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
                                 </td>
-                                <td>{{ finding|finding_display_status|safe }}
+                                <td class="nowrap">{{ finding|finding_display_status|safe }}&nbsp;{{ finding|import_history }}
                                 </td>
                                 {% if system_settings.enable_jira %}
                                   {% if jira_project and product_tab or not product_tab %}
@@ -419,7 +421,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="clearfix pull-right">
+                <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
@@ -509,6 +511,7 @@
                 ],
                 dom: 'Bfrtip',
                 paging: false,
+                info: false,
                 buttons: [
                     {
                         extend: 'colvis',

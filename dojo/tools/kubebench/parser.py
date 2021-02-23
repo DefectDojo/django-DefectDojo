@@ -1,31 +1,22 @@
 import json
+
 from dojo.models import Finding
 
 
 class KubeBenchParser(object):
 
-    def __init__(self, json_output, test):
-        self.items = []
+    def get_scan_types(self):
+        return ["kube-bench Scan"]
 
-        if json_output is None:
-            return
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
 
-        tree = self.parse_json(json_output)
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON reports of Kubernetes CIS benchmark scans."
 
-        if tree:
-            self.items = [data for data in self.get_chapters(tree, test)]
-
-    def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
+    def get_findings(self, json_output, test):
+        tree = json.load(json_output)
+        return self.get_chapters(tree, test)
 
     def get_chapters(self, tree, test):
         items = []

@@ -1,14 +1,24 @@
 # Author: apipia, wheelsvt
+from .importer import BlackduckCRImporter
 from dojo.models import Finding
-import dojo.tools.blackduck_component_risk.importer as import_helper
 
 
-class BlackduckHubParser(object):
+class BlackduckComponentRiskParser(object):
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv
     """
-    def __init__(self, filename, test):
+
+    def get_scan_types(self):
+        return ["Blackduck Component Risk"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Blackduck Component Risk"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Upload the zip file containing the security.csv and files.csv."
+
+    def get_findings(self, filename, test):
         """
         Function initializes the parser with a file and sets the
         self.items (eventually).
@@ -16,7 +26,7 @@ class BlackduckHubParser(object):
         :param test:
         """
         components, securities, sources = self.import_data(filename)
-        self.ingest_findings(components, securities, sources, test)
+        return self.ingest_findings(components, securities, sources, test)
 
     def import_data(self, filename) -> (dict, dict, dict):
         """
@@ -26,7 +36,7 @@ class BlackduckHubParser(object):
         :param filename: Name of the zipfile. Passed in via Defect Dojo
         :return: Returns a tuple of dictionaries, Components and Securities.
         """
-        importer = import_helper.BlackduckCRImporter()
+        importer = BlackduckCRImporter()
 
         components, securities, sources = importer.parse_findings(filename)
         return components, securities, sources
@@ -41,7 +51,7 @@ class BlackduckHubParser(object):
         :param test:
         :return:
         """
-        self.items = []
+        items = []
         # License Risk
         license_risk = []
         for component_id, component in components.items():
@@ -92,7 +102,7 @@ class BlackduckHubParser(object):
                                   static_finding=True,
                                   unique_id_from_tool=component_id)
                 license_risk.append(finding)
-        self.items.extend(license_risk)
+        items.extend(license_risk)
 
         # Security Risk
         security_risk = []
@@ -119,7 +129,8 @@ class BlackduckHubParser(object):
                               file_path=file_path,
                               unique_id_from_tool=component_id)
             security_risk.append(finding)
-        self.items.extend(security_risk)
+        items.extend(security_risk)
+        return items
 
     def license_title(self, component):
         """

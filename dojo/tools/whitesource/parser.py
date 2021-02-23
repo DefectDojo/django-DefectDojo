@@ -1,18 +1,28 @@
 import hashlib
 import json
+import logging
+
 from dojo.models import Finding
 
 __author__ = 'dr3dd589'
 
+logger = logging.getLogger(__name__)
 
-class WhitesourceJSONParser(object):
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
-        dupe_key = None
 
+class WhitesourceParser(object):
+
+    def get_scan_types(self):
+        return ["Whitesource Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Whitesource Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON report"
+
+    def get_findings(self, file, test):
         if file is None:
-            return
+            return list()
 
         data = file.read()
         try:
@@ -67,7 +77,7 @@ class WhitesourceJSONParser(object):
                             topfix_node.get('fixResolution')
                         )
                 except Exception as e:
-                    print("Error handling topFix node. {}").format(e)
+                    logger.exception("Error handling topFix node.")
 
             filepaths = []
             if 'sourceFiles' in node:
@@ -76,7 +86,7 @@ class WhitesourceJSONParser(object):
                     for sfile in sourceFiles_node:
                         filepaths.append(sfile.get('localPath'))
                 except Exception as e:
-                    print("Error handling local paths for vulnerability. {}").format(e)
+                    logger.exception("Error handling local paths for vulnerability.")
 
             return {'title': title,
                      'description': description,
@@ -90,16 +100,16 @@ class WhitesourceJSONParser(object):
                      'component_version': component_version
                     }
 
-        def _dedup_and_create_finding(vuln):
+        def _dedup_and_create_finding(dupes, vuln):
             dupe_key = hashlib.md5(vuln.get('description').encode('utf-8') + vuln.get('title').encode('utf-8')).hexdigest()
 
-            if dupe_key in self.dupes:
-                finding = self.dupes[dupe_key]
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
                 if finding.description:
                     finding.description = finding.description
-                self.dupes[dupe_key] = finding
+                dupes[dupe_key] = finding
             else:
-                self.dupes[dupe_key] = True
+                dupes[dupe_key] = True
 
                 finding = Finding(title=vuln.get('title'),
                                 test=test,
@@ -117,7 +127,7 @@ class WhitesourceJSONParser(object):
                                 severity_justification=vuln.get('severity_justification'),
                                 dynamic_finding=True)
 
-                self.dupes[dupe_key] = finding
+                dupes[dupe_key] = finding
 
         output = []
         if "libraries" in content:
@@ -138,7 +148,8 @@ class WhitesourceJSONParser(object):
             for node in tree_node:
                 output.append(_build_common_output(node))
 
+        dupes = dict()
         for vuln in output:
-            _dedup_and_create_finding(vuln)
+            _dedup_and_create_finding(dupes, vuln)
 
-        self.items = self.dupes.values()
+        return dupes.values()

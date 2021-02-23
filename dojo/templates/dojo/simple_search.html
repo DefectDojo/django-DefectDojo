@@ -3,9 +3,17 @@
 {% load display_tags %}
 
 {% block content %}
-    <h2> {{ name }} <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="This simple search function will return results whose findings or finding templates
-        title, URL, description, endpoints, tags, references, languages or technologies contain the search query and products whose
-        name, tags or description contain the search query.</br> Advanced search operators: (Restrict results to a certain type) product:, engagement:, finding:, endpoint:, tag:, language: or technology:" data-placement="right" data-container="body" data-original-title="" title=""></i></h2>
+    <h2> {{ name }} <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                       data-content="This simple search function will return results whose findings or finding templates
+                                     title, URL, description, endpoints, tags, references, languages or technologies contain the search query and products whose
+                                     name, tags or description contain the search query.</br> Advanced search operators: (Restrict results to a certain type) product:,
+                                     engagement:, finding:, endpoint:, tag:, language: or technology:.
+                                     test-tags shows findings in tests that are tagged with provided tag, similar for engagement-tags and product-tags.
+                                     After submitting the search query, tabbed results will be displayed. The findings tab will have the possibility to
+                                     to perform more finegrained filtering on status fields, test type, etc."
+                       data-placement="right" data-container="body" data-original-title="" title="">
+                    </i>
+        </h2>
 
     <div class="custom-search-form2">
         <form role="search" method="get" action="{% url 'simple_search' %}">
@@ -31,7 +39,7 @@
         <ul class="nav nav-tabs" role="tablist">
             {% if findings %}
                 <li role="presentation" {% if activetab == 'findings' %}class="active"{% endif %}>
-                    <a href="#tabs-1" role="tab" data-toggle="tab">Findings ({{ findings|length }})</a>
+                    <a href="#tabs-1" role="tab" data-toggle="tab">Findings ({{ findings.paginator.count }})</a>
                 </li>
             {% endif %}
             {% if products %}
@@ -72,7 +80,7 @@
             {% if tagged_findings or tagged_finding_templates or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
                 <li role="presentation" {% if activetab == 'tagged' %}class="active"{% endif %}>
                     <a href="#tabs-9" role="tab" data-toggle="tab">Tagged
-                        ({{ tagged_findings|length }}, {{ tagged_products|length }}, {{ tagged_engagements|length }}, {{ tagged_tests|length }}, {{ tagged_endpoints|length }}, 
+                        ({{ tagged_findings|length }}, {{ tagged_products|length }}, {{ tagged_engagements|length }}, {{ tagged_tests|length }}, {{ tagged_endpoints|length }},
                         {{ tagged_finding_templates|length }})
                     </a>
                 </li>
@@ -81,7 +89,7 @@
                 <li role="presentation" {% if activetab == 'generic' %}class="active"{% endif %}>
                     <a href="#tabs-10" role="tab" data-toggle="tab">Experimental ({{ generic|length }})</a>
                 </li>
-            {% endif %}            
+            {% endif %}
         </ul>
         <!-- Tab panes -->
         <div class="tab-content">
@@ -90,7 +98,7 @@
                     {% comment %} include inherits the current context so findings, filtered and other variables {% endcomment %}
                     {% include "dojo/findings_list_snippet.html" with form_id="custom_search_filter" %}
                 </div>
-            {% endif %}                     
+            {% endif %}
             {% if products %}
                 <div role="tabpanel" class="table-responsive tab-pane  {% if activetab == 'products' %}active{% endif %}" id="tabs-2">
                     <table class="table table-bordered table-striped">
@@ -103,7 +111,7 @@
                         <tbody>
                         {% for product in products %}
                             {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
-                            {% if product.id %}                        
+                            {% if product.id %}
                             <tr>
                                 <td>
                                     <a class="search-finding"
@@ -137,7 +145,7 @@
                         <tbody>
                         {% for engagement in engagements %}
                             {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
-                            {% if engagement.id %}                            
+                            {% if engagement.id %}
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'view_engagement' engagement.id %}">{{ engagement.name }}</a>
@@ -159,7 +167,7 @@
                                 <td>{{ engagement.target_start|date }} - {{ engagement.target_end|date }}</td>
                                 <td>{{ engagement.status }}</td>
                             </tr>
-                            {% endif %}                            
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
@@ -180,7 +188,7 @@
                         <tbody>
                         {% for test in tests %}
                             {% comment %} sometimes the index contains references to findings that no longer exist. even after rebuilding the index. {% endcomment %}
-                            {% if test.id %}                            
+                            {% if test.id %}
                             <tr>
                                 <td><a class="search-finding"
                                        href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
@@ -210,7 +218,7 @@
                                 <td>{{ test.engagement.target_start|date }} - {{ test.engagement.target_end|date }}</td>
                                 <td>{{ test.engagement.status }}</td>
                             </tr>
-                            {% endif %}                            
+                            {% endif %}
                         {% endfor %}
                         </tbody>
                     </table>
@@ -286,7 +294,7 @@
                         </tbody>
                     </table>
                 </div>
-            {% endif %}            
+            {% endif %}
             {% if languages %}
             <div role="tabpanel"
                  class="table-responsive tab-pane"
@@ -503,10 +511,10 @@
                                         {% if result.meta.cve %}
                                             <a target="_blank" href="{{ result.meta.cve|cve_url }}">
                                                 <i class="fa fa-external-link"></i> {{ result.meta.cve|default:"" }}
-                                            </a>                                            
+                                            </a>
                                         {% else %}
                                             None
-                                        {% endif %}                                            
+                                        {% endif %}
                                     </td>
                                     <td width="50%">
                                         {% comment %} {{ result.content }} {% endcomment %}

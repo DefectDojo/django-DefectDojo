@@ -5,7 +5,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
-from celery.decorators import task
+from dojo.celery import app
 from dojo.models import System_Settings, Risk_Acceptance
 import logging
 
@@ -121,7 +121,7 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
     post_jira_comments(risk_acceptance, findings, accepted_message_creator)
 
 
-@task(name='risk_acceptance_expiration_handler')
+@app.task
 def expiration_handler(*args, **kwargs):
     """
     Creates a notification upon risk expiration and X days beforehand if configured.

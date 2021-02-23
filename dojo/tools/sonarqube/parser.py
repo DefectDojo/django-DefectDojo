@@ -1,39 +1,46 @@
-from lxml import etree
-from dojo.models import Finding
-from django.utils.html import strip_tags
 import logging
 import re
+
+from django.utils.html import strip_tags
+from lxml import etree
+
+from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
 
-class SonarQubeHtmlParser(object):
+class SonarQubeParser(object):
 
-    def __init__(self, filename, test, mode=None):
+    mode = None
+
+    def set_mode(self, mode):
+        self.mode = mode
+
+    def get_scan_types(self):
+        return ["SonarQube Scan", "SonarQube Scan detailed"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        if scan_type == "SonarQube Scan":
+            return "Aggregates findings per cwe, title, description, file_path. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
+        else:
+            return "Import all findings from sonarqube html report. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
+
+    def get_findings(self, filename, test):
         parser = etree.HTMLParser()
         tree = etree.parse(filename, parser)
-        if(mode in [None, 'detailed']):
-            self.mode = mode
-        else:
-            raise Exception("Internal error: Invalid mode " + mode + ". Expected: one of None, 'detailed'")
+        if self.mode not in [None, 'detailed']:
+            raise ValueError("Internal error: Invalid mode " + self.mode + ". Expected: one of None, 'detailed'")
 
-        # Dictonary to hold the aggregated findings with:
-        #  - key: the concatenated aggregate keys
-        #  - value: the finding
-        self.dupes = dict()
+        return self.get_items(tree, test, self.mode)
 
-        self.test = test
-        self.impact = "No impact provided"
-
-        if tree:
-            self.items = self.get_items(tree)
-        else:
-            self.items = []
-
-    def get_items(self, tree):
+    def get_items(self, tree, test, mode):
         # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
         detailTbody = tree.xpath("/html/body/div[contains(@class,'detail')]/table/tbody")
-        if(len(detailTbody) == 2):
+        dupes = dict()
+        if (len(detailTbody) == 2):
             # First is "Detail of the Detected Vulnerabilities" (not present if no vuln)
             # Second is "Known Security Rules"
             vulnerabilities_table = list(detailTbody[0].iter("tr"))
@@ -67,21 +74,17 @@ class SonarQubeHtmlParser(object):
                     vuln_description = "No description provided"
                     vuln_references = ""
                     vuln_cwe = 0
-                if(self.mode is None):
+                if mode is None:
                     self.process_result_file_name_aggregated(
-                        vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references)
-                elif (self.mode == 'detailed'):
+                        test, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references)
+                else:
                     self.process_result_detailed(
-                        vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key)
-            items = list(self.dupes.values())
-        else:
-            # No vuln were found
-            items = list()
-        return items
+                        test, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key)
+        return list(dupes.values())
 
     # Process one vuln from the report for "SonarQube Scan detailed"
     # Create the finding and add it into the dupes list
-    def process_result_detailed(self, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key):
+    def process_result_detailed(self, test, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references, vuln_key):
         # vuln_key is the unique id from tool which means that there is basically no aggregation except real duplicates
         aggregateKeys = "{}{}{}{}{}".format(vuln_cwe, vuln_title, vuln_description, vuln_file_path, vuln_key)
         find = Finding(title=vuln_title,
@@ -89,7 +92,7 @@ class SonarQubeHtmlParser(object):
                        description=vuln_description,
                        file_path=vuln_file_path,
                        line=vuln_line,
-                       test=self.test,
+                       test=test,
                        severity=vuln_severity,
                        mitigation=vuln_mitigation,
                        references=vuln_references,
@@ -99,28 +102,28 @@ class SonarQubeHtmlParser(object):
                        duplicate=False,
                        out_of_scope=False,
                        mitigated=None,
-                       impact=self.impact,
+                       impact="No impact provided",
                        numerical_severity=Finding.get_numerical_severity(vuln_severity),
                        static_finding=True,
                        dynamic_finding=False,
                        unique_id_from_tool=vuln_key)
-        self.dupes[aggregateKeys] = find
+        dupes[aggregateKeys] = find
 
     # Process one vuln from the report for "SonarQube Scan"
     # Create the finding and add it into the dupes list
     # For aggregated findings:
     #  - the description is enriched with each finding line number
     #  - the mitigation (message) is concatenated with each finding's mitigation value
-    def process_result_file_name_aggregated(self, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references):
+    def process_result_file_name_aggregated(self, test, dupes, vuln_title, vuln_cwe, vuln_description, vuln_file_path, vuln_line, vuln_severity, vuln_mitigation, vuln_references):
         aggregateKeys = "{}{}{}{}".format(vuln_cwe, vuln_title, vuln_description, vuln_file_path)
         descriptionOneOccurence = "Line: {}".format(vuln_line)
-        if not(aggregateKeys in self.dupes):
+        if aggregateKeys not in dupes:
             find = Finding(title=vuln_title,
                            cwe=int(vuln_cwe),
                            description=vuln_description + '\n\n-----\nOccurences:\n' + descriptionOneOccurence,
                            file_path=vuln_file_path,
                            # No line number because we have aggregated different vulnerabilities that may have different line numbers
-                           test=self.test,
+                           test=test,
                            severity=vuln_severity,
                            mitigation=vuln_mitigation,
                            references=vuln_references,
@@ -130,15 +133,15 @@ class SonarQubeHtmlParser(object):
                            duplicate=False,
                            out_of_scope=False,
                            mitigated=None,
-                           impact=self.impact,
+                           impact="No impact provided",
                            numerical_severity=Finding.get_numerical_severity(vuln_severity),
                            static_finding=True,
                            dynamic_finding=False,
                            nb_occurences=1)
-            self.dupes[aggregateKeys] = find
+            dupes[aggregateKeys] = find
         else:
             # We have already created a finding for this aggregate: updates the description, nb_occurences and mitigation (message field in the report which may vary for each vuln)
-            find = self.dupes[aggregateKeys]
+            find = dupes[aggregateKeys]
             find.description = "{}\n{}".format(find.description, descriptionOneOccurence)
             find.mitigation = "{}\n______\n{}".format(find.mitigation, vuln_mitigation)
             find.nb_occurences = find.nb_occurences + 1
@@ -167,7 +170,7 @@ class SonarQubeHtmlParser(object):
     def get_references(self, rule_name, vuln_details):
         rule_references = rule_name
         for a in vuln_details.iter("a"):
-            rule_references += "\n" + a.text
+            rule_references += "\n" + str(a.text)
         return rule_references
 
     def get_cwe(self, vuln_references):

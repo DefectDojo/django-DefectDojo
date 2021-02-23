@@ -7,7 +7,6 @@ from datetime import datetime, date, timedelta
 from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -17,15 +16,15 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
+from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
-
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
+                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 
 from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F
@@ -36,6 +35,10 @@ from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.product.queries import get_authorized_products
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -48,13 +51,7 @@ def product(request):
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
 
-    prods = Product.objects.all()
-
-    if not request.user.is_staff:
-        prods = prods.filter(
-            Q(authorized_users__in=[request.user]) |
-            Q(prod_type__authorized_users__in=[request.user])
-        )
+    prods = get_authorized_products(Permissions.Product_View)
 
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
@@ -91,16 +88,22 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id',
                                                                                 filter=Q(
                                                                                     engagement__test__finding__active=True)))
+        prefetched_prods = prefetched_prods.annotate(active_verified_finding_count=Count('engagement__test__finding__id',
+                                                                                filter=Q(
+                                                                                    engagement__test__finding__active=True,
+                                                                                    engagement__test__finding__verified=True)))
         prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
-        prefetched_prods = prefetched_prods.prefetch_related(
-            Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'),
-                     to_attr='github_confs'))
         active_endpoint_query = Endpoint.objects.filter(
             finding__active=True,
             finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(
             Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
         prefetched_prods = prefetched_prods.prefetch_related('tags')
+
+        if get_system_setting('enable_github'):
+            prefetched_prods = prefetched_prods.prefetch_related(
+                Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'),
+                        to_attr='github_confs'))
 
     else:
         logger.debug('unable to prefetch because query was already executed')
@@ -453,7 +456,7 @@ def view_product_metrics(request, pid):
         request.GET,
         queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
 
-    i_engs_page = get_page_items(request, result.qs, 10)
+    inactive_engs_page = get_page_items(request, result.qs, 10)
 
     scan_sets = ScanSettings.objects.filter(product=prod)
 
@@ -575,7 +578,7 @@ def view_product_metrics(request, pid):
                   {'prod': prod,
                    'product_tab': product_tab,
                    'engs': engs,
-                   'i_engs': i_engs_page,
+                   'inactive_engs': inactive_engs_page,
                    'scan_sets': scan_sets,
                    'view': view,
                    'verified_objs': filters.get('verified', None),
@@ -614,24 +617,24 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     # In Progress Engagements
     engs = Engagement.objects.filter(product=prod, active=True, status="In Progress",
                                      engagement_type=engagement_type).order_by('-updated')
-    active_engs = EngagementFilter(request.GET, queryset=engs)
-    result_active_engs = get_page_items(request, active_engs.qs, default_page_num, param_name="engs")
+    active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
+    result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list)
 
     # Engagements that are queued because they haven't started or paused
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True,
                                      engagement_type=engagement_type).order_by('-updated')
-    queued_engs = EngagementFilter(request.GET, queryset=engs)
-    result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, param_name="queued_engs")
+    queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
+    result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
     result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list)
 
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by(
         '-target_end')
-    result_inactive = EngagementFilter(request.GET, queryset=engs)
-    result_inactive_engs_page = get_page_items(request, result_inactive.qs, default_page_num, param_name="i_engs")
-    result_inactive_engs_page.object_list = prefetch_for_view_engagements(result_inactive_engs_page.object_list)
+    inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
+    result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
+    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list)
 
     title = "All Engagements"
     if engagement_type == "CI/CD":
@@ -645,10 +648,13 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'engagement_type': engagement_type,
                    'engs': result_active_engs,
                    'engs_count': result_active_engs.paginator.count,
+                   'engs_filter': active_engs_filter,
                    'queued_engs': result_queued_engs,
                    'queued_engs_count': result_queued_engs.paginator.count,
-                   'i_engs': result_inactive_engs_page,
-                   'i_engs_count': result_inactive_engs_page.paginator.count,
+                   'queued_engs_filter': queued_engs_filter,
+                   'inactive_engs': result_inactive_engs,
+                   'inactive_engs_count': result_inactive_engs.paginator.count,
+                   'inactive_engs_filter': inactive_engs_filter,
                    'user': request.user,
                    'authorized': auth})
 
@@ -660,6 +666,8 @@ def prefetch_for_view_engagements(engs):
         prefetched_engs = prefetched_engs.select_related('lead')
         prefetched_engs = prefetched_engs.prefetch_related('test_set')
         prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
+        prefetched_engs = prefetched_engs.prefetch_related('jira_project__jira_instance')
+        prefetched_engs = prefetched_engs.prefetch_related('product__jira_project_set__jira_instance')
         prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
         prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
         prefetched_engs = prefetched_engs.annotate(count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)))
@@ -683,7 +691,7 @@ def import_scan_results_prod(request, pid=None):
     return import_scan_results(request, pid=pid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
 def new_product(request, ptid=None):
     jira_project_form = None
     error = False
@@ -703,6 +711,12 @@ def new_product(request, ptid=None):
             gform = None
 
         if form.is_valid():
+            if settings.FEATURE_NEW_AUTHORIZATION:
+                product_type = form.instance.prod_type
+                user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
+            else:
+                if not request.user.is_staff:
+                    raise PermissionDenied
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -1137,7 +1151,7 @@ def ad_hoc_finding(request, pid):
                                      extra_tags='alert-danger')
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues,
-                                    jira_project=jira_helper.get_jira_project(test))
+                                    jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
@@ -1149,6 +1163,7 @@ def ad_hoc_finding(request, pid):
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
+            new_finding.tags = form.cleaned_data['tags']
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
             for endpoint in form.cleaned_data['endpoints']:
@@ -1277,14 +1292,14 @@ def ad_hoc_finding(request, pid):
             else:
                 form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'The form has errors, please correct them below.',
-                                 extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
+
     else:
         if use_jira:
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform',
-                                    jira_project=jira_helper.get_jira_project(test))
+                                    jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:

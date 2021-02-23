@@ -109,7 +109,7 @@
             {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
 
             {% if finding.cvssv3 %}
-                <h6>CVSSv3</h6>
+                <h6>CVSS v3</h6>
                 <pre>{{ finding.cvssv3|markdown_render }}</pre>
             {% endif %}
 

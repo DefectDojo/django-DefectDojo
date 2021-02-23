@@ -1,11 +1,10 @@
 import hashlib
 import json
+
 from dojo.models import Finding
 
-__author__ = 'mohcer'
 
-
-class ScantistJSONParser(object):
+class ScantistParser(object):
     """
     Scantist Parser: Scantist does a deep scan of source code and binaries for vulnerabilities and has reports
     following three main categories
@@ -18,22 +17,19 @@ class ScantistJSONParser(object):
 
     Website: https://scantist.com/
     """
-    def __init__(self, file, test):
-        self.items = []
 
-        if file is None:
-            return
+    def get_scan_types(self):
+        return ["Scantist Scan"]
 
-        result_data = file.read()
-        try:
-            content = json.loads(str(result_data, 'utf-8'))
-        except:
-            content = json.loads(result_data)
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
 
-        if content is None:
-            return
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Scantist Dependency Scanning Report vulnerabilities in JSON format."
 
-        self.items = [data for data in self.get_items(content, test)]
+    def get_findings(self, file, test):
+        tree = json.load(file)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         """

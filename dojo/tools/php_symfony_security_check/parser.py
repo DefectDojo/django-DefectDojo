@@ -4,14 +4,19 @@ from dojo.models import Finding
 
 
 class PhpSymfonySecurityCheckParser(object):
-    def __init__(self, json_file, test):
 
+    def get_scan_types(self):
+        return ["PHP Symfony Security Check"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import results from the PHP Symfony Security Checker by Sensioslabs."
+
+    def get_findings(self, json_file, test):
         tree = self.parse_json(json_file)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+        return self.get_items(tree, test)
 
     def parse_json(self, json_file):
         if json_file is None:
@@ -29,7 +34,6 @@ class PhpSymfonySecurityCheckParser(object):
         return tree
 
     def get_items(self, tree, test):
-        # print(('tree: ', tree))
         items = {}
 
         for dependency_name, dependency_data in list(tree.items()):
@@ -42,7 +46,6 @@ class PhpSymfonySecurityCheckParser(object):
                 item = get_item(dependency_name, dependency_version, advisory, test)
                 unique_key = str(dependency_name) + str(dependency_data['version'] + str(advisory['cve']))
                 items[unique_key] = item
-                # print(('item: ', item))
 
         return list(items.values())
 

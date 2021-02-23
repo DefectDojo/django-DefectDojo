@@ -1,15 +1,26 @@
 __author__ = 'feeltheajf'
 
-from dateutil import parser
 import json
+
+from dateutil import parser
+
 from dojo.models import Finding
 
 
-class BrakemanScanParser(object):
-    def __init__(self, filename, test):
+class BrakemanParser(object):
+
+    def get_scan_types(self):
+        return ["Brakeman Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Brakeman Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Brakeman Scanner findings in JSON format."
+
+    def get_findings(self, filename, test):
         if filename is None:
-            self.items = ()
-            return
+            return ()
 
         tree = filename.read()
         try:
@@ -64,4 +75,4 @@ class BrakemanScanParser(object):
 
                 dupes[dupe_key] = find
 
-        self.items = list(dupes.values())
+        return list(dupes.values())

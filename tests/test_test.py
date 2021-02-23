@@ -1,8 +1,9 @@
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
 import unittest
 import sys
-from base_test_class import BaseTestCase
-from product_test import ProductTest
+from base_test_class import BaseTestCase, on_exception_html_source_logger
+from product_test import ProductTest, WaitForPageLoad
 
 
 class TestUnitTest(BaseTestCase):
@@ -99,6 +100,7 @@ class TestUnitTest(BaseTestCase):
         # Navigate to the engagement page
         self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Beta Test").click()
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
@@ -113,6 +115,7 @@ class TestUnitTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Test saved.'))
 
+    @on_exception_html_source_logger
     def test_add_note(self):
         # Login to the site.
         driver = self.driver
@@ -122,7 +125,7 @@ class TestUnitTest(BaseTestCase):
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
-        # "Click" the Edit Test option
+        # "Click" the Add Notes option
         driver.find_element_by_link_text("Add Notes").click()
         # Select entry, clear field and input note
         driver.find_element_by_id("id_entry").clear()
@@ -133,6 +136,64 @@ class TestUnitTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Note added successfully.'))
+
+    def test_add_test_finding(self):
+        # Test To Add Finding To Test
+        # Login to the site.
+        driver = self.driver
+        # Navigate to the engagement page
+        self.goto_active_engagements_overview(driver)
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Beta Test").click()
+        # "Click" the dropdown button to see options
+        test_menu = driver.find_element_by_id("test-menu")
+        test_menu.click()
+
+        driver.find_element_by_link_text("Add Finding to Test").click()
+        # Keep a good practice of clearing field before entering value
+        # fill up at least all required input field options.
+        # fields: 'Title', 'Date', 'Severity', 'Description', 'Mitigation' and 'Impact'
+        # finding Title
+        driver.find_element_by_id("id_title").clear()
+        driver.find_element_by_id("id_title").send_keys("App Vulnerable to XSS2")
+        # finding Date as a default value and can be safely skipped
+        # finding Severity
+        Select(driver.find_element_by_id("id_severity")).select_by_visible_text("High")
+        # cvss
+        driver.find_element_by_id("id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
+        # finding Description
+        driver.find_element_by_id("id_cvssv3").send_keys(Keys.TAB, "This is just a Test Case Finding2")
+        # Finding Mitigation
+        # Use Javascript to bypass the editor by making Setting textArea style from none to inline
+        # Any Text written to textarea automatically reflects in Editor field.
+        driver.execute_script("document.getElementsByName('mitigation')[0].style.display = 'inline'")
+        driver.find_element_by_name("mitigation").send_keys(Keys.TAB, "How to mitigate this finding2")
+        # Finding Impact
+        # Use Javascript to bypass the editor by making Setting textArea style from none to inline
+        # Any Text written to textarea automatically reflects in Editor field.
+        driver.execute_script("document.getElementsByName('impact')[0].style.display = 'inline'")
+        driver.find_element_by_name("impact").send_keys(Keys.TAB, "This has a very critical effect on production2")
+        # Add an endpoint
+        main_window_handle = driver.current_window_handle
+        driver.find_element_by_id("add_id_endpoints").click()
+        popup_window = None
+        while not popup_window:
+            for handle in driver.window_handles:
+                if handle != main_window_handle:
+                    popup_window = handle
+                    break
+        driver.switch_to.window(popup_window)
+        driver.find_element_by_id("id_endpoint").clear()
+        driver.find_element_by_id("id_endpoint").send_keys("product2.finding.com")
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        driver.switch_to.window(main_window_handle)
+        # "Click" the Done button to Add the finding with other defaults
+        with WaitForPageLoad(driver, timeout=30):
+            driver.find_element_by_xpath("//input[@name='_Finished']").click()
+        # Query the site to determine if the finding has been added
+
+        # Assert to the query to dtermine status of failure
+        self.assertTrue(self.is_text_present_on_page(text='App Vulnerable to XSS2'))
 
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
@@ -167,6 +228,7 @@ def suite():
     suite.addTest(TestUnitTest('test_view_test'))
     suite.addTest(TestUnitTest('test_create_test'))
     suite.addTest(TestUnitTest('test_edit_test'))
+    suite.addTest(TestUnitTest('test_add_test_finding'))
     # suite.addTest(TestUnitTest('test_add_note'))
     # suite.addTest(TestUnitTest('test_delete_test'))
     suite.addTest(ProductTest('test_delete_product'))

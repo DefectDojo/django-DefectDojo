@@ -1,26 +1,31 @@
-import json
 import hashlib
-from dojo.models import Finding
+import json
 from datetime import datetime
+
+from dojo.models import Finding
 
 __author__ = 'Kirill Gotsman'
 
 
-class HackerOneJSONParser(object):
+class H1Parser(object):
     """
     A class that can be used to parse the Get All Reports JSON export from HackerOne API.
     """
 
-    def __init__(self, file, test):
+    def get_scan_types(self):
+        return ["HackerOne Cases"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import HackerOne cases findings in JSON format."
+
+    def get_findings(self, file, test):
         """
         Converts a HackerOne reports to a DefectDojo finding
         """
-        self.dupes = dict()
-        # Start with an empty findings
-        self.items = ()
-        # Exit if file is not provided
-        if file is None:
-            return
+
         # Load the contents of the JSON file into a dictionary
         data = file.read()
         try:
@@ -28,6 +33,7 @@ class HackerOneJSONParser(object):
         except:
             tree = json.loads(data)
         # Convert JSON  report to DefectDojo format
+        dupes = dict()
         for content in tree["data"]:
             # Get all relevant data
             date = content['attributes']['created_at']
@@ -69,13 +75,13 @@ class HackerOneJSONParser(object):
                 cwe = 0
 
             dupe_key = hashlib.md5(str(references + title).encode('utf-8')).hexdigest()
-            if dupe_key in self.dupes:
-                finding = self.dupes[dupe_key]
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
                 if finding.references:
                     finding.references = finding.references
-                self.dupes[dupe_key] = finding
+                dupes[dupe_key] = finding
             else:
-                self.dupes[dupe_key] = True
+                dupes[dupe_key] = True
 
                 # Build and return Finding model
                 finding = Finding(
@@ -93,8 +99,8 @@ class HackerOneJSONParser(object):
                     cwe=cwe,
                     dynamic_finding=False,)
                 finding.unsaved_endpoints = list()
-                self.dupes[dupe_key] = finding
-        self.items = self.dupes.values()
+                dupes[dupe_key] = finding
+        return dupes.values()
 
     def build_description(self, content):
         date = content['attributes']['created_at']

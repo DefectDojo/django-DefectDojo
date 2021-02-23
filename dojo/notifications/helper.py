@@ -85,6 +85,8 @@ def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
             kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+        elif event == 'product_type_added':
+            kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
         else:
             kwargs["description"] = "Event " + str(event) + " has occured."
 
@@ -143,7 +145,7 @@ def process_notifications(event, notifications=None, **kwargs):
 # notifications are made synchronous again due to serialization bug in django-tagulous
 # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
 # @dojo_async_task
-@app.task(name='send_slack_notification')
+@app.task
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -203,7 +205,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 # notifications are made synchronous again due to serialization bug in django-tagulous
 # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
 # @dojo_async_task
-@app.task(name='send_msteams_notification')
+@app.task
 def send_msteams_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -231,7 +233,7 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
 # notifications are made synchronous again due to serialization bug in django-tagulous
 # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
 # @dojo_async_task
-@app.task(name='send_mail_notification')
+@app.task
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 

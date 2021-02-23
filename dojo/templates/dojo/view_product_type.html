@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load authorization_tags %}
+
+{% block content %}
+    <h3 id="id_heading"> Product Type {{ pt.name }}</h3>
+    <div class="row">
+        <div id="tests" class="col-md-8">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                  <div class="clearfix">
+                    <h3 class="pull-left">Description</h3>
+                    <div class="dropdown pull-right">
+                      <div class="btn-group">
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" label="Actions" data-toggle="dropdown" aria-expanded="true">
+                                      <span class="fa fa-bars"></span>
+                                      <span class="caret"></span>
+                                  </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            {% if pt|has_object_permission:Permissions.Product_Type_Edit %}
+                            <li>
+                                <a class="" href="{% url 'edit_product_type' pt.id %}">
+                                <i class="fa fa-pencil-square-o"></i> Edit</a>
+                            </li>
+                            <li role="separator" class="divider"></li>
+                            {% endif %}
+                            <li>
+                                <a class="" href="{% url 'product_type_metrics' pt.id %}">
+                                <i class="fa fa-line-chart"></i> Metrics</a>
+                            </li>
+                            <li>
+                                <a class="" href="{% url 'product_type_report' pt.id %}">
+                                <i class="fa fa-file-text-o"></i> Product Type Report</a>
+                            </li>
+                            {% if pt|has_object_permission:Permissions.Product_Type_Delete %}
+                            <li role="separator" class="divider"></li>
+                            <li>
+                                <a class="" href="{% url 'delete_product_type' pt.id %}">
+                                <i class="fa fa-trash"></i> Delete</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  {{ pt.description|markdown_render }}
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="clearfix">
+                        <h4 class="pull-left">Products</h4>
+                        {% if pt|has_object_permission:Permissions.Product_Type_Add_Product %}
+                        <div class="dropdown pull-right">
+                            <div class="btn-group">
+                                <button class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
+                                            <span class="fa fa-bars"></span>
+                                            <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li>
+                                        <a class="" href="{% url 'add_product_to_product_type' pt.id %}">
+                                        <i class="fa fa-plus"></i> Add Product</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if products %}
+                    <div class="table-responsive">
+                        <table class="tablesorter-bootstrap table table-condensed table-striped">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th class="text-center">Tags</th>
+                                <th class="text-center">Criticality</th>
+                                <th class="text-center">Metadata</th>
+                                <th class="text-center">Active (Verified) Findings</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for product in products %}
+                                <tr>
+                                    <td><a href="{% url 'view_product' product.id %}">{{ product.name }}</a></td>
+                                    <!-- Tags column -->
+                                    <td class="text-center">
+                                        <sup>
+                                        {% for tag in product.tags.all %}
+                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                        </sup>
+                                    </td>
+                                    <!-- End of Tags Column -->
+                                    <td class="text-center">{{ product.business_criticality|business_criticality_icon }}</td>
+                                    <td class="text-center">
+                                    {{ product.platform|platform_icon }}
+                                    {{ product.lifecycle|lifecycle_icon }}
+                                    {{ product.origin|origin_icon }}
+                                    {{ product.external_audience|external_audience_icon }}
+                                    {{ product.internet_accessible|internet_accessible_icon }}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if product.findings_count %}
+                                            <a href="{% url 'product_open_findings' product.id %}?test__engagement__product={{ product.id }}"><b>{{ product.findings_count }}</b></a>
+                                            &nbsp;(<a href="{% url 'product_verified_findings' product.id %}?test__engagement__product={{ product.id }}">{{ product.findings_active_verified_count }}</a>)
+                                        {% else %}
+                                            0
+                                        {% endif %}
+                                    </td>
+                                    </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="panel-body">
+                        <small class="text-muted"><em>No products found.</em></small>
+                    </div>
+                {% endif %}
+            </div>
+        {% feature_new_authorization as feature_new_authorization_flag %}
+            {% if feature_new_authorization_flag %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="clearfix">
+                            <h4 class="pull-left">Members</h4>
+                            {% if pt|has_object_permission:Permissions.Product_Type_Manage_Members %}
+                            <div class="dropdown pull-right">
+                                <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu1"
+                                        data-toggle="dropdown" aria-expanded="true">
+                                    <span class="fa fa-bars"></span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a class="" href="{% url 'add_product_type_member' pt.id %}">
+                                            <i class="fa fa-plus"></i> Add Member
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if members %}
+                        <div class="table-responsive">
+                            <table class="tablesorter-bootstrap table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for member in members %}
+                                    <tr>
+                                        <td>
+                                            <ul>
+                                            <li class="dropdown" style="list-style:none;position:absolute">
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                                <ul class="dropdown-menu">
+                                                    {% if pt|has_object_permission:Permissions.Product_Type_Manage_Members %}
+                                                    <li>
+                                                        <a class="" href="{% url 'edit_product_type_member' member.id %}">
+                                                        <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                    </li>
+                                                    {% endif %}
+                                                    {% if member|has_object_permission:Permissions.Product_Type_Remove_Member %}
+                                                    <li>
+                                                        <a class="" href="{% url 'delete_product_type_member' member.id %}">
+                                                        <i class="fa fa-trash"></i> Delete</a>
+                                                    </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </li>
+                                            </ul>
+                                        </td>
+                                        <td>{{ member.user|full_name }}</td>
+                                        <td>{% role_as_string member.role %}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="panel-body">
+                            <small class="text-muted"><em>No members found.</em></small>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default-secondary">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span>
+                        {{ pt.name }}
+                    </h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                      <tbody>
+                        <tr>
+                          <td style="width: 150px;"><strong>Critical product</strong></td>
+                          <td>
+                            {% if pt.critical_product %}
+                            <i class="text-success fa fa-check"></i>
+                            {% else %}
+                            <i class="text-danger fa fa-times"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                        <tr>
+                            <td style="width: 150px;"><strong>Key product</strong></td>
+                            <td>
+                                {% if pt.key_product %}
+                                <i class="text-success fa fa-check"></i>
+                                {% else %}
+                                <i class="text-danger fa fa-times"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% feature_new_authorization as feature_new_authorization_flag %}
+                        {% if feature_new_authorization_flag is False %}
+                        <tr>
+                            <td style="width: 150px;"><strong>Authorized Users</strong></td>
+                            <td>
+                                {% if pt.authorized_users.all %}
+                                    {% if pt.authorized_users.all.count > 1 %}
+                                        {% for au in pt.authorized_users.all %}
+                                            {{au}}{%if not forloop.last%},{%endif%}
+                                        {% endfor %}
+                                    {% else %}
+                                        {{ pt.authorized_users.all.0 }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,26 +1,35 @@
-__author__ = 'omerlh'
-
 import json
+
 from dojo.models import Finding
 
 
 class ESLintParser(object):
+
+    def get_scan_types(self):
+        return ["ESLint Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JSON report format"
+
     def _convert_eslint_severity_to_dojo_severity(self, eslint_severity):
         if eslint_severity == 2:
             return "High"
         elif eslint_severity == 1:
             return "Medium"
         else:
-            return None
+            return "Info"
 
-    def __init__(self, filename, test):
-        self.items = []
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))
         except:
             data = json.loads(tree)
 
+        items = list()
         for item in data:
             findingdetail = ''
 
@@ -37,8 +46,6 @@ class ESLintParser(object):
                 if message["ruleId"] is not None:
                     title = title + ' Test ID: ' + str(message["ruleId"])
 
-
-                #  ##### Finding details information ######
                 findingdetail += "Filename: " + item["filePath"] + "\n"
                 findingdetail += "Line number: " + str(message["line"]) + "\n"
 
@@ -58,4 +65,5 @@ class ESLintParser(object):
                             mitigation='N/A',
                             impact='N/A')
 
-                self.items.append(find)
+                items.append(find)
+        return items

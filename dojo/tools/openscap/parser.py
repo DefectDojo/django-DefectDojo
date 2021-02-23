@@ -1,20 +1,27 @@
-from xml.dom import NamespaceErr
 import hashlib
-from urllib.parse import urlparse
 import re
+from urllib.parse import urlparse
+from xml.dom import NamespaceErr
+
 from defusedxml import ElementTree as ET
+
 from dojo.models import Endpoint, Finding
 
 __author__ = 'dr3dd589'
 
 
-class OpenscapXMLParser(object):
-    def __init__(self, file, test):
-        self.dupes = dict()
-        self.items = ()
-        if file is None:
-            return
+class OpenscapParser(object):
 
+    def get_scan_types(self):
+        return ["Openscap Vulnerability Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Openscap Vulnerability Scan in XML formats."
+
+    def get_findings(self, file, test):
         tree = ET.parse(file)
         # get root of tree.
         root = tree.getroot()
@@ -28,7 +35,7 @@ class OpenscapXMLParser(object):
         # check if xml file hash correct root or not.
         if 'Benchmark' not in root.tag:
             raise NamespaceErr("This doesn't seem to be a valid Openscap vulnerability scan xml file.")
-
+        dupes = dict()
         # run both rule, and rule-result in parallel so that we can get title for failed test from rule.
         for rule, rule_result in zip(root.findall('./{0}Rule'.format(namespace)), test_result.findall('./{0}rule-result'.format(namespace))):
             cves = []
@@ -63,15 +70,15 @@ class OpenscapXMLParser(object):
 
                 dupe_key = hashlib.md5(references.encode('utf-8')).hexdigest()
 
-                if dupe_key in self.dupes:
-                    finding = self.dupes[dupe_key]
+                if dupe_key in dupes:
+                    finding = dupes[dupe_key]
                     if finding.references:
                         finding.references = finding.references
                     for ip in ips:
                         self.process_endpoints(finding, ip)
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
                 else:
-                    self.dupes[dupe_key] = True
+                    dupes[dupe_key] = True
 
                     finding = Finding(title=title,
                                     test=test,
@@ -87,11 +94,11 @@ class OpenscapXMLParser(object):
                                     references=references,
                                     dynamic_finding=True)
 
-                    self.dupes[dupe_key] = finding
+                    dupes[dupe_key] = finding
                     for ip in ips:
                         self.process_endpoints(finding, ip)
 
-            self.items = list(self.dupes.values())
+        return list(dupes.values())
 
     # this function is extract namespace present in xml file.
     def get_namespace(self, element):

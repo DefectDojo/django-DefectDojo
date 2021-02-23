@@ -1,6 +1,4 @@
 from django.conf.urls import url
-from django.contrib import admin
-from django.apps import apps
 from . import views
 
 urlpatterns = [
@@ -9,4 +7,5 @@ urlpatterns = [
     url(r'^product/(?P<pid>\d+)/object/(?P<ttid>\d+)/edit$', views.edit_object, name='edit_object'),
     url(r'^product/(?P<pid>\d+)/object/view$', views.view_objects, name='view_objects'),
     url(r'^product/(?P<pid>\d+)/object/(?P<ttid>\d+)/delete$', views.delete_object,
-        name='delete_object'), ]
+        name='delete_object'),
+]

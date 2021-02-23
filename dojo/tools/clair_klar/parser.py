@@ -1,23 +1,32 @@
 import json
 import logging
 
-
 from dojo.models import Finding
-
 
 logger = logging.getLogger(__name__)
 
 
 class ClairKlarParser(object):
-    def __init__(self, json_output, test):
+
+    def get_scan_types(self):
+        return ["Clair Klar Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON reports of Docker image vulnerabilities from clair klar client."
+
+    def get_findings(self, json_output, test):
 
         tree = self.parse_json(json_output)
 
-        self.items = []
+        items = list()
         clair_severities = ["Unknown", "Negligible", "Low", "Medium", "High", "Critical", "Defcon1"]
         if tree:
             for clair_severity in clair_severities:
-                self.set_items_for_severity(tree, test, clair_severity)
+                items.extend(self.set_items_for_severity(tree, test, clair_severity))
+        return items
 
     def parse_json(self, json_output):
         try:
@@ -33,13 +42,15 @@ class ClairKlarParser(object):
         return subtree
 
     def set_items_for_severity(self, tree, test, severity):
+        items = list()
         tree_severity = tree.get(severity)
         if tree_severity:
             for data in self.get_items(tree_severity, test):
-                self.items.append(data)
-            logger.info("Appended findings for severity " + severity)
+                items.append(data)
+            logger.debug("Appended findings for severity " + severity)
         else:
-            logger.info("No findings for severity " + severity)
+            logger.debug("No findings for severity " + severity)
+        return items
 
     def get_items(self, tree_severity, test):
         items = {}

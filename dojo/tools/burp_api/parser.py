@@ -1,7 +1,8 @@
-import logging
 import json
-from dojo.models import Finding, Endpoint
+import logging
 from urllib.parse import urlparse
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +18,16 @@ DESCRIPTION_TEMPLATE = """**{title}**
 class BurpApiParser(object):
     """Parser that can load data from Burp API"""
 
-    def __init__(self, file, test):
-        self.items = []
+    def get_scan_types(self):
+        return ["Burp REST API"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Burp REST API"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Burp REST API scan data in JSON format (/scan/[task_id] endpoint)."
+
+    def get_findings(self, file, test):
 
         if file is None:
             return
@@ -29,6 +38,7 @@ class BurpApiParser(object):
         # by default give the test a title
         test.title = "Burp REST API"
 
+        items = []
         # for each issue found
         for issue_event in tree.get("issue_events", list()):
             if "issue_found" == issue_event.get("type") and "issue" in issue_event:
@@ -87,7 +97,8 @@ class BurpApiParser(object):
                                                             fragment=parts.fragment,
                                                             product=test.engagement.product)
                                                  ]
-                self.items.append(finding)
+                items.append(finding)
+        return items
 
 
 def convert_severity(issue):
