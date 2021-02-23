@@ -52,3 +52,20 @@ class TestQualysInfrascanWebguiParser(TestCase):
         self.assertEqual("Low", finding.severity)
         self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=pytz.utc), finding.date)
         self.assertEqual("Some impact\n\n", finding.impact)
+
+    # Sample with Multiple Test
+    def test_parse_file_with_finding_no_dns(self):
+        testfile = open(
+            "dojo/unittests/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_3.xml"
+        )
+        parser = QualysInfrascanWebguiParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # finding 0
+        finding = findings[0]
+        self.assertEqual("UDP Constant IP Identification Field Fingerprinting Vulnerability", finding.title)
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=pytz.utc), finding.date)
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        unsaved_endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual('10.1.10.1', unsaved_endpoint.host)
