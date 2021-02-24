@@ -15,6 +15,9 @@ def get_authorized_products(permission):
         return Product.objects.all().order_by('name')
 
     if settings.FEATURE_NEW_AUTHORIZATION:
+        if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+            return Product.objects.all().order_by('name')
+
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
             product_type=OuterRef('prod_type_id'),

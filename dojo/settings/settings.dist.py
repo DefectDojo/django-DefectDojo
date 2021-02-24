@@ -173,7 +173,9 @@ env = environ.Env(
 
     # Feature toggle for new authorization, which is incomplete at the moment.
     # Don't set it to True for productive environments!
-    DD_FEATURE_NEW_AUTHORIZATION=(bool, False)
+    DD_FEATURE_NEW_AUTHORIZATION=(bool, False),
+    # When enabled, staff users have full access to all product types and products
+    DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False)
 )
 
 
@@ -1016,6 +1018,8 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 # Feature toggle for new authorization, which is incomplete at the moment.
 # Don't set it to True for productive environments!
 FEATURE_NEW_AUTHORIZATION = env('DD_FEATURE_NEW_AUTHORIZATION')
+# When enabled, staff users have full access to all product types and products
+AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
