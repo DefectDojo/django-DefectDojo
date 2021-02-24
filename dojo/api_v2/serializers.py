@@ -1262,6 +1262,7 @@ class ImportScanSerializer(serializers.Serializer):
 
             for old_finding in old_findings:
                 old_finding.active = False
+                old_finding.is_Mitigated = True
                 old_finding.mitigated = datetime.datetime.combine(
                     test.target_start,
                     timezone.now().time())
