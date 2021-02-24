@@ -1,6 +1,6 @@
 {{- if .Values.django.ingress.enabled -}}
 {{- $fullName := include "defectdojo.fullname" . -}}
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -36,8 +36,11 @@ spec:
   - host: {{ .Values.host }}
     http:
       paths:
-        - path: /
+        - pathType: Prefix
+          path: "/"
           backend:
-            serviceName: {{ $fullName }}-django
-            servicePort: http
+            service:
+              name: {{ $fullName }}-django
+              port:
+                name: http
 {{- end }}
