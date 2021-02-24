@@ -3,7 +3,6 @@ from django.conf import settings
 from crum import get_current_user
 from dojo.authorization.roles_permissions import Roles, Permissions
 from dojo.authorization.authorization import user_has_permission
-from dojo.user.helper import user_is_authorized
 
 register = template.Library()
 

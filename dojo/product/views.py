@@ -192,7 +192,7 @@ def view_product(request, pid):
         'personal_notifications_form': personal_notifications_form})
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Component_View, 'pid', 'view')
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
@@ -613,7 +613,7 @@ def view_product_metrics(request, pid):
                    'user': request.user})
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
 def view_engagements(request, pid, engagement_type="Interactive"):
     prod = get_object_or_404(Product, id=pid)
 
@@ -686,7 +686,7 @@ def prefetch_for_view_engagements(engs):
     return prefetched_engs
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+@user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
 def view_engagements_cicd(request, pid):
     return view_engagements(request, pid=pid, engagement_type="CI/CD")
 

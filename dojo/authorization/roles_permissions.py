@@ -70,6 +70,8 @@ class Permissions(IntEnum):
     Benchmark_Edit = 1606
     Benchmark_Delete = 1607
 
+    Component_View = 1702
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -118,7 +120,9 @@ def get_roles_with_permissions():
 
             Permissions.Finding_View,
 
-            Permissions.Endpoint_View
+            Permissions.Endpoint_View,
+
+            Permissions.Component_View
         },
         Roles.Technical_User: {
             Permissions.Import_Scan_Result
@@ -147,7 +151,9 @@ def get_roles_with_permissions():
             Permissions.Endpoint_Add,
             Permissions.Endpoint_Edit,
 
-            Permissions.Benchmark_Edit
+            Permissions.Benchmark_Edit,
+
+            Permissions.Component_View
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -184,7 +190,9 @@ def get_roles_with_permissions():
             Permissions.Endpoint_Delete,
 
             Permissions.Benchmark_Edit,
-            Permissions.Benchmark_Delete
+            Permissions.Benchmark_Delete,
+
+            Permissions.Component_View
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -225,6 +233,8 @@ def get_roles_with_permissions():
             Permissions.Endpoint_Delete,
 
             Permissions.Benchmark_Edit,
-            Permissions.Benchmark_Delete
+            Permissions.Benchmark_Delete,
+
+            Permissions.Component_View
         }
     }
