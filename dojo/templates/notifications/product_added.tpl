@@ -38,11 +38,6 @@
     </html>
 {% elif type == 'alert' %}
     The new product "{{ title }}" has been added
-    {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
-        
-        Disclaimer:
-        {{ system_settings.disclaimer }}
-    {% endif %}
 {% elif type == 'slack' %}
     The new product "{{ title }}" has been added. It can be viewed here: {{ url|full_url }}
     {% if system_settings.disclaimer and system_settings.disclaimer.strip %}

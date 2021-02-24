@@ -25,11 +25,6 @@
     User {{ user }} jotted a note on {{ section }}:
 
     {{ note }}
-    {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
-        
-        Disclaimer:
-        {{ system_settings.disclaimer }}
-    {% endif %}
 {% elif type == 'slack' %}
     User {{ user }} jotted a note on {{ section }}:
 

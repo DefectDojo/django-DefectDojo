@@ -53,11 +53,6 @@
     </html>
 {% elif type == 'alert' %}
     SLA breach alert for finding {{ finding.id }}. Relative days count to SLA due date: {{sla_age}}.
-    {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
-        
-        Disclaimer:
-        {{ system_settings.disclaimer }}
-    {% endif %}
 {% elif type == 'slack' %}
     SLA breach alert for finding {{ finding.id }}. Relative days count to SLA due date: {{sla_age}}.
     Title: {{finding.title}}

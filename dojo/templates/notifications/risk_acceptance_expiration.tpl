@@ -64,11 +64,6 @@
     </html>
 {% elif type == 'alert' %}
     {{ description }}
-    {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
-        
-        Disclaimer:
-        {{ system_settings.disclaimer }}
-    {% endif %}
 {% elif type == 'slack' %}
     {{ description }}
 

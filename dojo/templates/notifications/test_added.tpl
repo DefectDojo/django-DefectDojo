@@ -40,11 +40,6 @@
     </html>
 {% elif type == 'alert' %}
     New test added for engagement {{ engagement.product }}: {{ test.test_type }}.
-    {% if system_settings.disclaimer and system_settings.disclaimer.strip %}
-        
-        Disclaimer:
-        {{ system_settings.disclaimer }}
-    {% endif %}
 {% elif type == 'slack' %}
     New test added for engagement {{ engagement.product }}.
     Title: {{test.title}}
