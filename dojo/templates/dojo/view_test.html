@@ -274,9 +274,9 @@
                         </ul>
                     </div>
                     <form method="get" action="{% url 'quick_report' %}" class="pull-right">
-                        <input type="hidden" name="url" value="{{ request.get_full_path }}">
-                        <input type="hidden" name="_generate" value="_generate">
-                        <button class="btn btn-primary" type="submit" id="quick_report" aria-expanded="true">
+                        <input type="hidden" label="url" name="url" value="{{ request.get_full_path }}">
+                        <input type="hidden" label="_generate" name="_generate" value="_generate">
+                        <button class="btn btn-primary" type="submit" label="quick_report" id="quick_report" aria-expanded="true">
                             <i class="fa fa-file-text-o"></i>
                         </button>
                     </form>
