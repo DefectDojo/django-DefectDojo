@@ -353,7 +353,6 @@
           <tr>
               <td id="saving_notifications">&nbsp;</td>
               <td class="centered">Slack</td>
-              <td class="centered">Microsoft Teams</td>
               <td class="centered">Mail</td>
               <td class="centered">Alert</td>
           </tr>
@@ -365,7 +364,9 @@
               {% endif %}
             </td>
             {% for pk,c in field.field.widget.choices %}
+            {% if c != "msteams" %}
             <td class="centered"><input id="{{ field.name }}_{{ c }}" type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/></td>
+            {% endif %}
             {% endfor %}
          </tr>
           {% endfor %}
