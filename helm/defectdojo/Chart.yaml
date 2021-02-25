@@ -4,11 +4,7 @@ description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
 version: 1.6.0
 icon: https://www.defectdojo.org/img/favicon.ico
-<<<<<<< HEAD
 # kubeVersion: ">= 1.19.0"
-=======
-# kubeVersion: ">= 1.19.0" 
->>>>>>> a218c07e42e93cd1fa830fa9bdae54c3e6b42b9c
 dependencies:
   - name: mysql
     version: 1.6.9
