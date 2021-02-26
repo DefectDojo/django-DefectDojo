@@ -3,7 +3,7 @@ from dojo.tools.spotbugs.parser import SpotbugsXMLParser
 from dojo.models import Test
 
 
-class TestSpotbugsXMLParser(TestCase):
+class TestSpotbugsParser(TestCase):
 
     def test_no_findings(self):
         testfile = open("dojo/unittests/scans/spotbugs/no_finding.xml")
