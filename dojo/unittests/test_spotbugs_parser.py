@@ -16,3 +16,17 @@ class TestSpotbugsXMLParser(TestCase):
         parser = SpotbugsXMLParser(testfile, Test())
         testfile.close()
         self.assertEqual(81, len(parser.items))
+
+    def test_find_sast_source_line(self):
+        testfile = open("dojo/unittests/scans/spotbugs/many_findings.xml")
+        parser = SpotbugsXMLParser(testfile, Test())
+        testfile.close()
+        finding = parser.items[0]
+        self.assertEqual("93", finding.sast_source_line)
+
+    def test_find_sast_source_path(self)):
+        testfile = open("dojo/unittests/scans/spotbugs/many_findings.xml")
+        parser = SpotbugsXMLParser(testfile, Test())
+        testfile.close()
+        finding = parser.items[0]
+        self.assertEqual("securitytest/command/IdentityFunctionCommandInjection.kt", finding.sast_source_file_path)
