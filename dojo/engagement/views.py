@@ -129,9 +129,20 @@ def engagements_all(request):
 
     prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
 
+    products = [
+        prod
+        for prod in products_with_engagements.prefetch_related(
+            'engagement_set',
+            'prod_type',
+            'engagement_set__lead',
+            'engagement_set__test_set__lead',
+            'engagement_set__test_set__test_type'
+        )
+    ]
+
     return render(
         request, 'dojo/engagements_all.html', {
-            'products': prods,
+            'products': products,
             'filtered': filtered,
             'name_words': sorted(set(name_words)),
             'eng_words': sorted(set(eng_words)),
