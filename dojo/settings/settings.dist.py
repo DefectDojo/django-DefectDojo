@@ -173,7 +173,10 @@ env = environ.Env(
 
     # Feature toggle for new authorization, which is incomplete at the moment.
     # Don't set it to True for productive environments!
-    DD_FEATURE_NEW_AUTHORIZATION=(bool, False)
+    DD_FEATURE_NEW_AUTHORIZATION=(bool, False),
+
+    DD_JIRA_TEMPLATE_DIR=(str, 'dojo/templates/issue-trackers'),
+    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/')
 )
 
 
@@ -1020,3 +1023,6 @@ FEATURE_NEW_AUTHORIZATION = env('DD_FEATURE_NEW_AUTHORIZATION')
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
+
+JIRA_TEMPLATE_DIR = env('DD_JIRA_TEMPLATE_DIR')
+TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')

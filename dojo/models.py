@@ -2593,6 +2593,10 @@ class JIRA_Instance(models.Model):
                                           choices=default_issue_type_choices,
                                           default='Bug',
                                           help_text='You can define extra issue types in settings.py')
+    issue_template = models.CharField(max_length=255,
+                                      null=True,
+                                      blank=True,
+                                      help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
     epic_name_id = models.IntegerField(help_text="To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here.")
     open_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
     close_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
@@ -2664,6 +2668,10 @@ class JIRA_Project(models.Model):
                              null=True, blank=True, on_delete=models.CASCADE)
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    issue_template = models.CharField(max_length=255,
+                                      null=True,
+                                      blank=True,
+                                      help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True,
