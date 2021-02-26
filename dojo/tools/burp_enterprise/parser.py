@@ -2,16 +2,25 @@ import logging
 import re
 from urllib.parse import urlparse
 
-from lxml import etree
+from defusedxml import ElementTree as etree
 
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
 
-class BurpEnterpriseHtmlParser(object):
+class BurpEnterpriseParser(object):
 
-    def get_findings(self, filename, test, mode=None):
+    def get_scan_types(self):
+        return ["Burp Enterprise Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Burp Enterprise Edition findings in HTML format"
+
+    def get_findings(self, filename, test):
         parser = etree.HTMLParser()
         tree = etree.parse(filename, parser)
         if tree:
@@ -25,7 +34,6 @@ class BurpEnterpriseHtmlParser(object):
             s += ''.join(container.itertext()).strip().replace('Snip', '\n<-------------- Snip -------------->').replace('\t', '')
         else:
             for elem in container.iterchildren():
-                # print(elem.tag, ' : ', elem.text, '\n')
                 if elem.text is not None and elem.text.strip() != '':
                     if elem.tag == 'a':
                         s += '(' + elem.text + ')[' + elem.attrib['href'] + ']' + '\n'

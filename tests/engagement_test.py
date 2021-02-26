@@ -18,8 +18,8 @@ class EngagementTest(BaseTestCase):
     def test_add_new_engagement(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
-        driver.find_element_by_link_text("Add New Engagement").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
+        driver.find_element_by_partial_link_text("Add New Engagement").click()
         driver.find_element_by_id("id_name").send_keys("test engagement")
         driver.find_element_by_id("id_name").send_keys("\tthis is engagement test.")
         driver.find_element_by_id("id_test_strategy").clear()
@@ -32,7 +32,7 @@ class EngagementTest(BaseTestCase):
     def test_edit_created_new_engagement(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text("View Engagements").click()
         driver.find_element_by_link_text("test engagement").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -47,7 +47,7 @@ class EngagementTest(BaseTestCase):
     def test_close_new_engagement(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text("View Engagements").click()
         driver.find_element_by_link_text("edited test engagement").click()
         driver.find_element_by_id("dropdownMenu1").click()
@@ -58,7 +58,7 @@ class EngagementTest(BaseTestCase):
     def test_delete_new_closed_engagement(self):
         driver = self.driver
         self.goto_product_overview(driver)
-        driver.find_element_by_class_name("pull-left").click()
+        driver.find_element_by_css_selector(".dropdown-toggle.pull-left").click()
         driver.find_element_by_link_text('View Engagements').click()
 
         self.wait_for_datatable_if_content("no_active_engagements", "open_wrapper")

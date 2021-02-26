@@ -2,9 +2,10 @@ __author__ = 'Jay Paz'
 import collections
 import logging
 from datetime import timedelta, datetime
+from django import forms
 from django.apps import apps
 from auditlog.models import LogEntry
-from django.contrib.auth.models import User
+from django.conf import settings
 import six
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, CharFilter, OrderingFilter, \
@@ -24,6 +25,8 @@ import tagulous
 # from tagulous.forms import TagWidget
 # import tagulous
 from crum import get_current_user
+from dojo.authorization.roles_permissions import Permissions
+from dojo.product_type.queries import get_authorized_product_types
 from django.forms import HiddenInput
 
 logger = logging.getLogger(__name__)
@@ -75,8 +78,11 @@ class DojoFilter(FilterSet):
                 model = tags_filter.model
 
                 self.form.fields[field] = model._meta.get_field("tags").formfield()
+                # we defer applying the select2 autocomplete because there can be multiple forms on the same page
+                # and form.js would then apply select2 multiple times, resulting in duplicated fields
+                # the initialization now happens in filter_js_snippet.html
                 self.form.fields[field].widget.tag_options = \
-                    self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px'})
+                    self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px', 'defer': True})
                 tagged_model = get_tags_model_from_field_name(field)
                 if tagged_model:  # only if not the normal tags field
                     self.form.fields[field].label = get_tags_label_from_model(tagged_model)
@@ -347,14 +353,15 @@ class ComponentFilter(ProductComponentFilter):
 
 
 class EngagementFilter(DojoFilter):
+    engagement__name = CharFilter(lookup_expr='icontains', label='Engagement name contains')
     engagement__lead = ModelChoiceFilter(
-        queryset=User.objects.filter(
+        queryset=Dojo_User.objects.filter(
             engagement__lead__isnull=False).distinct(),
         label="Lead")
     engagement__version = CharFilter(field_name='engagement__version', lookup_expr='icontains', label='Engagement version')
     engagement__test__version = CharFilter(field_name='engagement__test__version', lookup_expr='icontains', label='Test version')
 
-    name = CharFilter(lookup_expr='icontains')
+    name = CharFilter(lookup_expr='icontains', label='Product name contains')
     prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all().order_by('name'),
         label="Product Type")
@@ -388,6 +395,51 @@ class EngagementFilter(DojoFilter):
         fields = ['name', 'prod_type']
 
 
+class ProductEngagementFilter(DojoFilter):
+    lead = ModelChoiceFilter(
+        queryset=Dojo_User.objects.filter(
+            engagement__lead__isnull=False).distinct(),
+        label="Lead")
+    version = CharFilter(lookup_expr='icontains', label='Engagement version')
+    test__version = CharFilter(field_name='test__version', lookup_expr='icontains', label='Test version')
+
+    name = CharFilter(lookup_expr='icontains')
+    status = MultipleChoiceFilter(choices=ENGAGEMENT_STATUS_CHOICES,
+                                              label="Status")
+
+    target_start = DateRangeFilter()
+    target_end = DateRangeFilter()
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+            ('version', 'version'),
+            ('target_start', 'target_start'),
+            ('target_end', 'target_end'),
+            ('status', 'status'),
+            ('lead', 'lead'),
+        ),
+        field_labels={
+            'name': 'Engagement Name',
+        }
+
+    )
+
+    class Meta:
+        model = Product
+        fields = ['id', 'name']
+
+
 class ApiEngagementFilter(DojoFilter):
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
 
@@ -402,7 +454,7 @@ class ApiEngagementFilter(DojoFilter):
 class ProductFilter(DojoFilter):
     name = CharFilter(lookup_expr='icontains', label="Product Name")
     prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.all().order_by('name'),
+        queryset=None,
         label="Product Type")
     business_criticality = MultipleChoiceFilter(choices=Product.BUSINESS_CRITICALITY_CHOICES)
     platform = MultipleChoiceFilter(choices=Product.PLATFORM_CHOICES)
@@ -519,10 +571,7 @@ class ProductFilter(DojoFilter):
 
         super(ProductFilter, self).__init__(*args, **kwargs)
 
-        if self.user is not None and not self.user.is_staff:
-            self.form.fields[
-                'prod_type'].queryset = Product_Type.objects.filter(
-                authorized_users__in=[self.user])
+        self.form.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
     class Meta:
         model = Product
@@ -655,7 +704,7 @@ class ApiFindingFilter(DojoFilter):
     test__engagement = NumberInFilter(field_name='test__engagement', lookup_expr='in')
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
     # ReportRiskAcceptanceFilter
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter()
+    risk_acceptance = ReportRiskAcceptanceFilter()
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 
@@ -715,10 +764,10 @@ class OpenFindingFilter(DojoFilter):
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.all(),
         label="Engagement")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
-    test_import_finding_action__test_import = NumberFilter()
+    test_import_finding_action__test_import = NumberFilter(widget=HiddenInput())
 
     has_jira_issue = BooleanFilter(field_name='jira_issue',
                                 lookup_expr='isnull',
@@ -825,8 +874,6 @@ class OpenFindingFilter(DojoFilter):
                 product_id=self.pid
             ).all()
 
-        self.form.fields['test_import_finding_action__test_import'].widget = HiddenInput()
-
 
 class OpenFindingSuperFilter(OpenFindingFilter):
     reporter = ModelMultipleChoiceFilter(
@@ -838,6 +885,7 @@ class OpenFindingSuperFilter(OpenFindingFilter):
 
 class ClosedFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
+    duplicate = ReportBooleanFilter()
     sourcefile = CharFilter(lookup_expr='icontains')
     sourcefilepath = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
@@ -856,7 +904,7 @@ class ClosedFindingFilter(DojoFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Product Type")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
     has_jira_issue = BooleanFilter(field_name='jira_issue',
@@ -962,11 +1010,12 @@ class ClosedFindingSuperFilter(ClosedFindingFilter):
 
 class AcceptedFindingFilter(DojoFilter):
     title = CharFilter(lookup_expr='icontains')
+    duplicate = ReportBooleanFilter()
     sourcefile = CharFilter(lookup_expr='icontains')
     sourcefilepath = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
     payload = CharFilter(lookup_expr='icontains')
-    test__engagement__risk_acceptance__created = \
+    risk_acceptance__created__date = \
         DateRangeFilter(label="Acceptance Date")
     date = DateRangeFilter(label="Finding Date")
     cwe = MultipleChoiceFilter(choices=[])
@@ -1018,8 +1067,8 @@ class AcceptedFindingFilter(DojoFilter):
         fields=(
             ('numerical_severity', 'numerical_severity'),
             ('date', 'date'),
-            ('test__engagement__risk_acceptance__created',
-             'test__engagement__risk_acceptance__created'),
+            ('risk_acceptance__created__date',
+             'risk_acceptance__created__date'),
             ('title', 'title'),
             ('test__engagement__product__name',
              'test__engagement__product__name'),
@@ -1027,7 +1076,7 @@ class AcceptedFindingFilter(DojoFilter):
         field_labels={
             'numerical_severity': 'Severity',
             'date': 'Finding Date',
-            'test__engagement__risk_acceptance__created': 'Acceptance Date',
+            'risk_acceptance__created__date': 'Acceptance Date',
             'title': 'Finding Name',
             'test__engagement__product__name': 'Product Name',
         }
@@ -1036,7 +1085,7 @@ class AcceptedFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        fields = ['title', 'test__engagement__risk_acceptance__created']
+        fields = ['title', 'risk_acceptance__created__date']
         exclude = ['url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template',
                    'active', 'verified', 'out_of_scope', 'false_p',
@@ -1064,7 +1113,7 @@ class AcceptedFindingFilter(DojoFilter):
 
 
 class AcceptedFindingSuperFilter(AcceptedFindingFilter):
-    test__engagement__risk_acceptance__owner = \
+    risk_acceptance__owner = \
         ModelMultipleChoiceFilter(
             queryset=Dojo_User.objects.all(),
             label="Risk Acceptance Owner")
@@ -1081,7 +1130,7 @@ class ProductFindingFilter(DojoFilter):
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all())
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
     tags = ModelMultipleChoiceFilter(
@@ -1119,8 +1168,8 @@ class ProductFindingFilter(DojoFilter):
         fields=(
             ('numerical_severity', 'numerical_severity'),
             ('date', 'date'),
-            ('test__engagement__risk_acceptance__created',
-             'test__engagement__risk_acceptance__created'),
+            ('risk_acceptance__created__date',
+             'risk_acceptance__created__date'),
             ('title', 'title'),
             ('test__engagement__product__name',
              'test__engagement__product__name'),
@@ -1128,7 +1177,7 @@ class ProductFindingFilter(DojoFilter):
         field_labels={
             'numerical_severity': 'Severity',
             'date': 'Finding Date',
-            'test__engagement__risk_acceptance__created': 'Acceptance Date',
+            'risk_acceptance__created__date': 'Acceptance Date',
             'title': 'Finding Name',
             'test__engagement__product__name': 'Product Name',
         }
@@ -1156,6 +1205,7 @@ class ProductFindingFilter(DojoFilter):
 
 
 class SimilarFindingFilter(DojoFilter):
+    hash_code = MultipleChoiceFilter()
     cve = CharFilter(lookup_expr='icontains')
     cwe = NumberFilter()
     title = CharFilter(lookup_expr='icontains')
@@ -1232,7 +1282,8 @@ class SimilarFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        fields = ['cwe', 'hash_code', 'unique_id_from_tool', 'line', 'id', 'tags']
+        fields = ['id', 'title', 'cve', 'cwe', 'unique_id_from_tool', 'file_path', 'line', 'hash_code', 'active',
+                    'duplicate', 'risk_accepted', 'false_p', 'out_of_scope', 'is_Mitigated', 'tags']
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1244,7 +1295,9 @@ class SimilarFindingFilter(DojoFilter):
             self.finding = kwargs.pop('finding')
 
         # if filterset is bound, use initial values as defaults
-        if not data:
+        # because of this, we can't rely on the self.form.has_changed
+        self.has_changed = True
+        if not data and self.finding:
             # get a mutable copy of the QueryDict
             data = data.copy()
 
@@ -1257,9 +1310,14 @@ class SimilarFindingFilter(DojoFilter):
             data['test__engagement__product'] = self.finding.test.engagement.product
             data['test__engagement__product__prod_type'] = self.finding.test.engagement.product.prod_type
 
+            self.has_changed = False
+
         super().__init__(data, *args, **kwargs)
 
-        if get_system_setting('enable_jira'):
+        if self.finding and self.finding.hash_code:
+            self.form.fields['hash_code'] = forms.MultipleChoiceField(choices=[(self.finding.hash_code, self.finding.hash_code[:24] + '...')], required=False, initial=[])
+
+        if not get_system_setting('enable_jira'):
             self.form.fields.pop('jira_issue__jira_key')
             self.form.fields.pop('has_jira_issue')
 
@@ -1730,6 +1788,54 @@ class ApiEndpointFilter(DojoFilter):
         fields = ['id', 'host', 'product']
 
 
+class EngagementTestFilter(DojoFilter):
+    lead = ModelChoiceFilter(
+        queryset=Dojo_User.objects.filter(
+            engagement__lead__isnull=False).distinct(),
+        label="Lead")
+    version = CharFilter(lookup_expr='icontains', label='Version')
+
+    if settings.TRACK_IMPORT_HISTORY:
+        test_import__version = CharFilter(field_name='test_import__version', lookup_expr='icontains', label='Reimported Version')
+
+    target_start = DateRangeFilter()
+    target_end = DateRangeFilter()
+
+    tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('title', 'title'),
+            ('version', 'version'),
+            ('target_start', 'target_start'),
+            ('target_end', 'target_end'),
+            ('lead', 'lead'),
+        ),
+        field_labels={
+            'name': 'Test Name',
+        }
+
+    )
+
+    class Meta:
+        model = Test
+        fields = ['id', 'title', 'test_type', 'target_start',
+                     'target_end', 'percent_complete',
+                     'version']
+
+    def __init__(self, *args, **kwargs):
+        self.engagement = kwargs.pop('engagement')
+        super(DojoFilter, self).__init__(*args, **kwargs)
+        self.form.fields['test_type'].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by('name')
+
+
 class ApiTestFilter(DojoFilter):
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
 
@@ -1777,7 +1883,7 @@ class ReportFindingFilter(DojoFilter):
     mitigated = MitigatedDateRangeFilter()
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
     # queryset will be restricted in __init__, here we don't have access to the logged in user
     duplicate = ReportBooleanFilter()
@@ -1876,7 +1982,7 @@ class ReportAuthedFindingFilter(DojoFilter):
     mitigated = MitigatedDateRangeFilter()
     verified = ReportBooleanFilter()
     false_p = ReportBooleanFilter(label="False Positive")
-    test__engagement__risk_acceptance = ReportRiskAcceptanceFilter(
+    risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
     duplicate = ReportBooleanFilter()
     duplicate_finding = ModelChoiceFilter(queryset=Finding.objects.filter(original_finding__isnull=False).distinct())

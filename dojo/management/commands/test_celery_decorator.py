@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 
 from dojo.models import Finding, Notes
 # from dojo.utils import get_system_setting, do_dedupe_finding, dojo_async_task
-from celery import task
+from dojo.celery import app
 from functools import wraps
 from dojo.utils import test_valentijn
 
@@ -73,7 +73,7 @@ def my_decorator_inside(func):
 
 
 @my_decorator_outside
-@task
+@app.task
 @my_decorator_inside
 def my_test_task(new_finding, *args, **kwargs):
     print('oh la la what a nice task')
@@ -83,7 +83,7 @@ def my_test_task(new_finding, *args, **kwargs):
 @dojo_model_to_id(parameter=1)
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
 def test_valentijn_task(new_finding, note):

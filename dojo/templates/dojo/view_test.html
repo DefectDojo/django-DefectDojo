@@ -254,6 +254,7 @@
                 <h4 class="has-filters"> Findings ({{findings.total_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
                     <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
+                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
                             <span class="fa fa-plus"></span>
@@ -275,7 +276,7 @@
                 </h4>
             </div>
         </div>
-        <div id="the-filters" class="panel-body collapse">
+        <div id="the-filters" class="is-filters panel-body collapse">
             {% include "dojo/filter_snippet.html" with form=filtered.form %}
         </div>
     </div>
@@ -933,6 +934,7 @@
                 ],
                 dom: 'Bfrtip',
                 paging: false,
+                info: false,
                 buttons: [
                     {
                         extend: 'colvis',

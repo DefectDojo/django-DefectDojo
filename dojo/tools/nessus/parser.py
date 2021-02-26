@@ -241,6 +241,15 @@ class NessusXMLParser(object):
 
 class NessusParser(object):
 
+    def get_scan_types(self):
+        return ["Nessus Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Nessus Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Reports can be imported as CSV or .nessus (XML) report formats."
+
     def get_findings(self, filename, test):
 
         if filename.name.lower().endswith('.xml'):

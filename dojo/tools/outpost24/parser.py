@@ -7,7 +7,17 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class Outpost24Parser:
+class Outpost24Parser(object):
+
+    def get_scan_types(self):
+        return ["Outpost24 Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Outpost24 Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Outpost24 endpoint vulnerability scan in XML format."
+
     def get_findings(self, file, test):
         tree = ElementTree.parse(file)
         items = list()

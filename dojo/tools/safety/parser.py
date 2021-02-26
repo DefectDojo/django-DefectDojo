@@ -8,6 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 class SafetyParser(object):
+
+    def get_scan_types(self):
+        return ["Safety Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Safety Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Safety scan (--json) output file can be imported in JSON format."
+
     def get_findings(self, json_output, test):
 
         # Grab Safety DB for CVE lookup

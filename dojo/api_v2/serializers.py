@@ -8,7 +8,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING, \
-    IMPORT_REACTIVATED_FINDING
+    IMPORT_REACTIVATED_FINDING, Product_Type_Member
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import import_parser_factory, requires_file
@@ -393,13 +393,28 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.open_findings_list()
 
 
+class ProductTypeMemberSerializer(serializers.ModelSerializer):
+    user = UserStubSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Product_Type_Member
+        exclude = ['product_type']
+
+
 class ProductTypeSerializer(serializers.ModelSerializer):
+    if settings.FEATURE_NEW_AUTHORIZATION:
+        members = ProductTypeMemberSerializer(source='product_type_member_set', read_only=True, many=True)
+
     class Meta:
         model = Product_Type
-        fields = '__all__'
-        extra_kwargs = {
-            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-        }
+
+        if not settings.FEATURE_NEW_AUTHORIZATION:
+            exclude = ['members']
+            extra_kwargs = {
+                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+            }
+        else:
+            exclude = ['authorized_users']
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1067,6 +1082,7 @@ class ImportScanSerializer(serializers.Serializer):
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
     version = serializers.CharField(required=False)
+    test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
     # class Meta:
     #     model = Test
@@ -1214,7 +1230,8 @@ class ImportScanSerializer(serializers.Serializer):
 
                     endpoint_to_add.endpoint_status.add(eps)
                     item.endpoint_status.add(eps)
-                if item.unsaved_tags is not None:
+
+                if item.unsaved_tags:
                     item.tags = item.unsaved_tags
 
                 item.save(push_to_jira=push_to_jira)
@@ -1438,7 +1455,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 if findings:
                     # existing finding found
                     finding = findings[0]
-                    if finding.mitigated or finding.is_Mitigated:
+                    if finding.false_p or finding.out_of_scope or finding.risk_accepted:
+                        logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
+                    elif finding.mitigated or finding.is_Mitigated:
                         logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
                         finding.mitigated = None
                         finding.is_Mitigated = False

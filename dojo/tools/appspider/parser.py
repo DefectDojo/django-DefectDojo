@@ -7,8 +7,18 @@ from defusedxml import ElementTree
 from dojo.models import Endpoint, Finding
 
 
-class AppSpiderXMLParser(object):
+class AppSpiderParser(object):
     """Parser for Rapid7 AppSpider reports"""
+
+    def get_scan_types(self):
+        return ["AppSpider Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "AppSpider Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "AppSpider (Rapid7) - Use the VulnerabilitiesSummary.xml file found in the zipped report download."
+
     def get_findings(self, filename, test):
 
         if filename is None:

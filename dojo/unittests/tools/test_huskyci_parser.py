@@ -1,13 +1,13 @@
 from django.test import TestCase
-from dojo.tools.huskyci.parser import HuskyCIReportParser
+from dojo.tools.huskyci.parser import HuskyCIParser
 from dojo.models import Test
 
 
-class TestHuskyCIReportParser(TestCase):
+class TestHuskyCIParser(TestCase):
 
     def test_parse_file_no_finding(self):
         testfile = open("dojo/unittests/scans/huskyci/huskyci_report_no_finding.json")
-        parser = HuskyCIReportParser()
+        parser = HuskyCIParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
@@ -15,7 +15,7 @@ class TestHuskyCIReportParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/huskyci/huskyci_report_one_finding_one_tool.json"
         )
-        parser = HuskyCIReportParser()
+        parser = HuskyCIParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
@@ -24,7 +24,7 @@ class TestHuskyCIReportParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/huskyci/huskyci_report_many_finding_one_tool.json"
         )
-        parser = HuskyCIReportParser()
+        parser = HuskyCIParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
@@ -33,7 +33,7 @@ class TestHuskyCIReportParser(TestCase):
         testfile = open(
             "dojo/unittests/scans/huskyci/huskyci_report_many_finding_two_tools.json"
         )
-        parser = HuskyCIReportParser()
+        parser = HuskyCIParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(15, len(findings))

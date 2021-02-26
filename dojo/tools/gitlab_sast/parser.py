@@ -3,7 +3,17 @@ import json
 from dojo.models import Finding
 
 
-class GitlabSastReportParser(object):
+class GitlabSastParser(object):
+
+    def get_scan_types(self):
+        return ["GitLab SAST Report"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import GitLab SAST Report vulnerabilities in JSON format."
+
     def get_findings(self, json_output, test):
 
         if json_output is None:

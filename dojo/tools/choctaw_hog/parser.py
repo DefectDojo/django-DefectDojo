@@ -4,15 +4,19 @@ from dojo.models import Finding
 
 
 class ChoctawhogParser(object):
-    def get_findings(self, json_output, test):
-        if json_output is None:
-            return list()
 
-        tree = self.parse_json(json_output)
-        if tree:
-            return [data for data in self.get_items(tree, test)]
-        else:
-            return list()
+    def get_scan_types(self):
+        return ["Choctaw Hog Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Choctaw Hog Scan - JSON Report"
+
+    def get_findings(self, json_output, test):
+        tree = json.load(json_output)
+        return self.get_items(tree, test)
 
     def parse_json(self, json_output):
         try:

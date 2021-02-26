@@ -15,6 +15,7 @@ env = environ.Env(
     DD_LOG_LEVEL=(str, ''),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
+    DD_LOGIN_URL=(str, '/login'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
@@ -165,9 +166,14 @@ env = environ.Env(
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
     # APIv1 is depreacted and will be removed at 2021-06-30
     DD_LEGACY_API_V1_ENABLE=(bool, False),
-
+    # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
+    DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new experimental feature that tracks history across multiple reimports for the same test
-    DD_TRACK_IMPORT_HISTORY=(bool, False)
+    DD_TRACK_IMPORT_HISTORY=(bool, False),
+
+    # Feature toggle for new authorization, which is incomplete at the moment.
+    # Don't set it to True for productive environments!
+    DD_FEATURE_NEW_AUTHORIZATION=(bool, False)
 )
 
 
@@ -347,7 +353,7 @@ URL_PREFIX = env('DD_URL_PREFIX')
 # ------------------------------------------------------------------------------
 
 LOGIN_REDIRECT_URL = env('DD_LOGIN_REDIRECT_URL')
-LOGIN_URL = '/login'
+LOGIN_URL = env('DD_LOGIN_URL')
 
 # These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
@@ -726,7 +732,7 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(hours=3),
     },
     'compute-sla-age-and-notify': {
-        'task': 'dojo.tasks.async_sla_compute_and_notify',
+        'task': 'dojo.tasks.async_sla_compute_and_notify_task',
         'schedule': crontab(hour=7, minute=30),
     },
     'risk_acceptance_expiration_handler': {
@@ -1006,4 +1012,11 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
+
+# Feature toggle for new authorization, which is incomplete at the moment.
+# Don't set it to True for productive environments!
+FEATURE_NEW_AUTHORIZATION = env('DD_FEATURE_NEW_AUTHORIZATION')
+
+EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
+
 USE_L10N = True
