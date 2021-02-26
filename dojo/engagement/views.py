@@ -81,16 +81,26 @@ def engagement_calendar(request):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
 def engagement(request):
-    products_with_engagements = Product.objects.filter(~Q(engagement=None), engagement__active=True).distinct()
+    if request.user.is_staff:
+        products = Product.objects.all()
+        engagements = Engagement.objects.all()
+    else:
+        products = Product.objects\
+            .filter(Q(authorized_users=request.user) | Q(prod_type__authorized_users=request.user))\
+            .distinct()
+        engagements = Engagement.objects\
+            .filter(Q(product__authorized_users=request.user) | Q(product__prod_type__authorized_users=request.user))\
+            .distinct()
+
+    products_with_engagements = products.filter(~Q(engagement=None), engagement__active=True).distinct()
     filtered = EngagementFilter(
         request.GET,
         queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
                                                             'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
     prods = get_page_items(request, filtered.qs, 25)
     name_words = products_with_engagements.values_list('name', flat=True)
-    eng_words = Engagement.objects.filter(active=True).values_list('name', flat=True).distinct()
+    eng_words = engagements.filter(active=True).values_list('name', flat=True).distinct()
 
     add_breadcrumb(
         title="Active Engagements",
@@ -182,7 +192,7 @@ def edit_engagement(request, eid):
                 create_notification(event='close_engagement',
                         title='Closure of %s' % engagement.name,
                         description='The engagement "%s" was closed' % (engagement.name),
-                        engagement=engagaement, url=reverse('engagment_all_findings', args=(engagement.id, ))),
+                        engagement=engagement, url=reverse('engagment_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
             engagement.save()
@@ -693,11 +703,11 @@ def import_scan_results(request, eid=None, pid=None):
                         item.endpoints.add(ep)
                         item.endpoint_status.add(eps)
 
+                    if item.unsaved_tags:
+                        item.tags = item.unsaved_tags
+
                     item.save(false_history=True, push_to_jira=push_to_jira)
                     new_findings.append(item)
-
-                    if item.unsaved_tags is not None:
-                        item.tags = item.unsaved_tags
 
                     finding_count += 1
                     i += 1
@@ -827,6 +837,12 @@ method to complete checklists from the engagement view
 @user_must_be_authorized(Engagement, 'staff', 'eid')
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
+    try:
+        checklist = Check_List.objects.get(engagement=eng)
+    except:
+        checklist = None
+        pass
+
     add_breadcrumb(
         parent=eng,
         title="Complete checklist",
@@ -835,7 +851,7 @@ def complete_checklist(request, eid):
     if request.method == 'POST':
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
-        form = CheckForm(request.POST, findings=findings)
+        form = CheckForm(request.POST, instance=checklist, findings=findings)
         if form.is_valid():
             cl = form.save(commit=False)
             try:
@@ -844,7 +860,6 @@ def complete_checklist(request, eid):
                 cl.save()
                 form.save_m2m()
             except:
-
                 cl.engagement = eng
                 cl.save()
                 form.save_m2m()
@@ -859,7 +874,7 @@ def complete_checklist(request, eid):
     else:
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
-        form = CheckForm(findings=findings)
+        form = CheckForm(instance=checklist, findings=findings)
 
     product_tab = Product_Tab(eng.product.id, title="Checklist", tab="engagements")
     product_tab.setEngagement(eng)

@@ -42,7 +42,8 @@ class TestCheckmarxParser(TestCase):
             "dojo/unittests/scans/checkmarx/no_finding.xml"
         )
         parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(0, len(findings))
 
@@ -84,7 +85,8 @@ class TestCheckmarxParser(TestCase):
             "dojo/unittests/scans/checkmarx/single_finding.xml"
         )
         parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_single_vulnerability_has_single_finding(findings)
@@ -235,7 +237,8 @@ class TestCheckmarxParser(TestCase):
             "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
         )
         parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_false_positive_is_false_positive(findings)
@@ -299,7 +302,8 @@ class TestCheckmarxParser(TestCase):
             "dojo/unittests/scans/checkmarx/multiple_findings.xml"
         )
         parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(3, len(findings))
 
@@ -328,7 +332,8 @@ class TestCheckmarxParser(TestCase):
             "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
         )
         parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(2, len(findings))
         self.assertIsNone(findings[0].nb_occurences)
@@ -356,7 +361,8 @@ class TestCheckmarxParser(TestCase):
             "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
         )
         parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(2, len(findings))
 
@@ -399,7 +405,8 @@ class TestCheckmarxParser(TestCase):
             "dojo/unittests/scans/checkmarx/utf8_replacement_char.xml"
         )
         parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_utf8_replacement_char(findings)
@@ -553,7 +560,8 @@ class TestCheckmarxParser(TestCase):
             "dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml"
         )
         parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_utf8_various_non_ascii_char(findings)

@@ -7,7 +7,6 @@ from datetime import datetime, date, timedelta
 from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -24,8 +23,8 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
-
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
+                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 
 from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F
@@ -36,6 +35,10 @@ from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.product.queries import get_authorized_products
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -48,13 +51,7 @@ def product(request):
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
 
-    prods = Product.objects.all()
-
-    if not request.user.is_staff:
-        prods = prods.filter(
-            Q(authorized_users__in=[request.user]) |
-            Q(prod_type__authorized_users__in=[request.user])
-        )
+    prods = get_authorized_products(Permissions.Product_View)
 
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
@@ -694,7 +691,7 @@ def import_scan_results_prod(request, pid=None):
     return import_scan_results(request, pid=pid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+# @user_passes_test(lambda u: u.is_staff)
 def new_product(request, ptid=None):
     jira_project_form = None
     error = False
@@ -714,6 +711,12 @@ def new_product(request, ptid=None):
             gform = None
 
         if form.is_valid():
+            if settings.FEATURE_NEW_AUTHORIZATION:
+                product_type = form.instance.prod_type
+                user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
+            else:
+                if not request.user.is_staff:
+                    raise PermissionDenied
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -1148,7 +1151,7 @@ def ad_hoc_finding(request, pid):
                                      extra_tags='alert-danger')
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues,
-                                    jira_project=jira_helper.get_jira_project(test))
+                                    jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
@@ -1289,14 +1292,14 @@ def ad_hoc_finding(request, pid):
             else:
                 form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'The form has errors, please correct them below.',
-                                 extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
+
     else:
         if use_jira:
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform',
-                                    jira_project=jira_helper.get_jira_project(test))
+                                    jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:

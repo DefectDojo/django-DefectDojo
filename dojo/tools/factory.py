@@ -7,8 +7,10 @@ SCAN_SONARQUBE_API = 'SonarQube API Import'
 
 
 def register(parser_type):
-    parser = parser_type()
-    for scan_type in parser.get_scan_types():
+    for scan_type in parser_type().get_scan_types():
+        parser = parser_type()
+        if scan_type.endswith('detailed'):
+            parser.set_mode('detailed')
         register_parser(scan_type, parser)
 
 
