@@ -752,6 +752,10 @@ to a certain Slack channel, whereas an individual user wants email
 notifications to be sent to the user\'s specified email address when a
 report has finished generating.
 
+Microsoft Teams does not provide an easy way to send messages to a personal
+channel. Therefore, DefectDojo can only send system scope notifications
+to Microsoft Teams.
+
 In order to identify and notify you about things like upcoming
 engagements, DefectDojo runs scheduled tasks for this purpose. These
 tasks are scheduled and run using Celery beat, so this needs to run for
