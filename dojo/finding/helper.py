@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
@@ -60,14 +59,16 @@ def is_mitigated_meta_fields_modified(changed_fields) -> bool:
 
 
 def update_finding_status(new_state_finding, user, changed_fields=None):
+    now = timezone.now()
+
     if is_newly_mitigated(changed_fields):
         # when mitigating a finding, the meta fields can only be editted if allowed
         if can_edit_mitigated_data(user):
             # only set if it was not already set by user
-            new_state_finding.mitigated = new_state_finding.mitigated or timezone.now()
+            new_state_finding.mitigated = new_state_finding.mitigated or now
             new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
         else:
-            new_state_finding.mitigated = timezone.now()
+            new_state_finding.mitigated = now
             new_state_finding.mitigated_by = user
         new_state_finding.is_Mitigated = True
 
@@ -79,7 +80,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
 
     if 'false_p' in changed_fields or 'out_of_scope' in changed_fields:
         if new_state_finding.false_p or new_state_finding.out_of_scope:
-            new_state_finding.mitigated = new_state_finding.mitigated or timezone.now()
+            new_state_finding.mitigated = new_state_finding.mitigated or now
             new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
             new_state_finding.is_Mitigated = True
             new_state_finding.active = False
@@ -99,23 +100,8 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
         new_state_finding.duplicate = False
         new_state_finding.duplicate_finding = None
 
-    # ensure mitigate data is set or cleared based on is_Mitigated boolean
-    if new_state_finding.is_Mitigated and new_state_finding.mitigated is None:
-        new_state_finding.mitigated = datetime.now()
-        if settings.USE_TZ and new_state_finding.mitigated and new_state_finding.mitigated.tzinfo is None:
-            new_state_finding.mitigated = timezone.make_aware(new_state_finding.mitigated,
-                                                              timezone.get_default_timezone())
-
-    if new_state_finding.is_Mitigated and new_state_finding.mitigated_by is None:
-        finding_status_changed = True
-        new_state_finding.mitigated_by = user
-
-    if not new_state_finding.is_Mitigated and new_state_finding.mitigated is not None:
-        finding_status_changed = True
+    if not new_state_finding.is_Mitigated:
         new_state_finding.mitigated = None
-
-    if not new_state_finding.is_Mitigated and new_state_finding.mitigated_by is not None:
-        finding_status_changed = True
         new_state_finding.mitigated_by = None
 
 
