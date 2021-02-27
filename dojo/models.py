@@ -1548,6 +1548,14 @@ class Finding(models.Model):
     under_review = models.BooleanField(default=False,
                                        verbose_name="Under Review",
                                        help_text="Denotes is this flaw is currently being reviewed.")
+
+    last_status_update = models.DateTimeField(editable=False,
+                                            null=False,
+                                            blank=False,
+                                            auto_now=True,
+                                            verbose_name="Last Status Update",
+                                            help_text="Timestamp of latest status update (change in status related fields).")
+
     review_requested_by = models.ForeignKey(Dojo_User,
                                             null=True,
                                             blank=True,
@@ -2064,7 +2072,7 @@ class Finding(models.Model):
         return long_desc
 
     def save_no_options(self, *args, **kwargs):
-        return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=True,
+        return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=False,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
@@ -3129,7 +3137,7 @@ class Benchmark_Product_Summary(models.Model):
 # product_opts = [f.name for f in Product._meta.fields]
 # test_opts = [f.name for f in Test._meta.fields]
 # test_type_opts = [f.name for f in Test_Type._meta.fields]
-finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['tags_from_django_tagging']]
+finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['tags_from_django_tagging', 'last_status_update']]
 # endpoint_opts = [f.name for f in Endpoint._meta.fields]
 # engagement_opts = [f.name for f in Engagement._meta.fields]
 # product_type_opts = [f.name for f in Product_Type._meta.fields]
