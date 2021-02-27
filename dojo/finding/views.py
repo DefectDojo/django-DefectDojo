@@ -712,7 +712,6 @@ def edit_finding(request, fid):
             new_finding.test = finding.test
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            finding_helper.update_finding_status(new_finding, request.user, old_state_finding=old_finding)
 
             if 'risk_accepted' in form.cleaned_data and form['risk_accepted'].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:

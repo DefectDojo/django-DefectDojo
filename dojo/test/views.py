@@ -368,7 +368,6 @@ def add_findings(request, tid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            finding_helper.update_finding_status(new_finding, request.user)
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
