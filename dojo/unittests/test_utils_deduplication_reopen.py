@@ -3,6 +3,8 @@ import datetime
 from dojo.utils import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Finding
+import logging
+logger = logging.getLogger(__name__)
 
 
 class TestDuplicationReopen(TestCase):
@@ -15,6 +17,7 @@ class TestDuplicationReopen(TestCase):
         self.finding_a.mitigated = datetime.date(1970, 1, 1)
         self.finding_a.is_Mitigated = True
         self.finding_a.false_p = True
+        self.finding_a.active = False
         self.finding_a.duplicate_finding = None
         self.finding_a.save()
         self.finding_b = Finding.objects.get(id=3)
@@ -27,13 +30,16 @@ class TestDuplicationReopen(TestCase):
         self.finding_c = Finding.objects.get(id=4)
         self.finding_c.duplicate = False
         self.finding_c.out_of_scope = True
+        self.finding_c.active = False
         self.finding_c.duplicate_finding = None
         self.finding_c.pk = None
+        logger.debug('creating finding_c')
         self.finding_c.save()
         self.finding_d = Finding.objects.get(id=5)
         self.finding_d.duplicate = False
         self.finding_d.duplicate_finding = None
         self.finding_d.pk = None
+        logger.debug('creating finding_d')
         self.finding_d.save()
 
     def tearDown(self):
@@ -78,13 +84,17 @@ class TestDuplicationReopen(TestCase):
     def test_out_of_scope_reopen(self):
         self.finding_c.active = False
         self.finding_c.verified = False
+        logger.debug('set_duplicate(d,c)')
         set_duplicate(self.finding_d, self.finding_c)
         self.finding_d.duplicate = True
         self.finding_d.duplicate_finding = self.finding_c
 
+        logger.debug('saving finding_c')
         super(Finding, self.finding_c).save()
+        logger.debug('saving finding_d')
         super(Finding, self.finding_d).save()
 
+        logger.debug('fix loop duplicates')
         fix_loop_duplicates()
 
         candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()

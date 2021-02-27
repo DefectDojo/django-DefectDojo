@@ -15,14 +15,20 @@ logger = logging.getLogger(__name__)
 # - set any depending fields such as mitigated_by, mitigated, etc.
 # - update any audit log / status history
 def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwargs):
-    logger.info('SIGNAL STATUS CHANGED!: %s', changed_fields)
+    # some code is cloning findings by setting id/pk to None, ignore those, will be handled on next save
+    if not instance.id:
+        logger.info('ignoring save of finding without id')
+        return
+
+    logger.info('%i: changed status fields pre_save: %s', instance.id or 0, changed_fields)
+
     for field, (old, new) in changed_fields.items():
-        logger.debug("%s changed from %s to %s" % (field, old, new))
+        logger.debug("%i: %s changed from %s to %s" % (instance.id or 0, field, old, new))
         update_finding_status(instance, get_current_user(), changed_fields)
 
 
 # also get signal when id is set/changed so we can process new findings
-pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_Mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
+pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_Mitigated', 'mitigated', 'mitigated_by', 'out_of_scope', 'risk_accepted'])
 # pre_save_changed.connect(pre_save_finding_status_change, sender=Finding)
 # post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_Mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
 
@@ -54,7 +60,6 @@ def is_mitigated_meta_fields_modified(changed_fields) -> bool:
 
 
 def update_finding_status(new_state_finding, user, changed_fields=None):
-
     if is_newly_mitigated(changed_fields):
         # when mitigating a finding, the meta fields can only be editted if allowed
         if can_edit_mitigated_data(user):
@@ -82,6 +87,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
 
     # always reset some fields if the finding is active
     if new_state_finding.active is True:
+        logger.debug('finding is active, so setting all other fields to False/None')
         new_state_finding.false_p = False
         new_state_finding.out_of_scope = False
         new_state_finding.mitigated = None
