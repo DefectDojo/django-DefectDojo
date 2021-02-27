@@ -111,31 +111,6 @@ class TestUpdateFindingStatusSignal(TestCase):
             )
 
     @mock.patch('dojo.finding.helper.timezone')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
-    def test_update_old_mitigated_with_custom_edit_not_allowed(self, mock_can_edit, mock_tz):
-        mock_tz.now.return_value = frozen_datetime
-
-        custom_mitigated = datetime.datetime.now()
-
-        with self.assertRaises(PermissionError):
-            with impersonate(self.user_1):
-                test = Test.objects.last()
-                logger.debug('creating finding')
-                finding = Finding(test=test, is_Mitigated=True, active=False, mitigated=frozen_datetime, mitigated_by=self.user_1)
-                finding.save(dedupe_option=False)
-                finding.is_Mitigated = True
-                finding.active = False
-                finding.mitigated = custom_mitigated
-                finding.mitigated_by = self.user_2
-                logger.debug('saving updated finding')
-                finding.save(dedupe_option=False)
-
-                self.assertEqual(
-                    self.get_mitigation_status_fields(finding),
-                    (False, True, False, False, True, frozen_datetime, self.user_1)
-                )
-
-    @mock.patch('dojo.finding.helper.timezone')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
     def test_update_old_mitigated_with_missing_data(self, mock_can_edit, mock_tz):
         mock_tz.now.return_value = frozen_datetime

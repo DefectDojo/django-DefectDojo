@@ -82,20 +82,27 @@ class TestDuplicationReopen(TestCase):
         self.assertFalse(self.finding_b.verified)
 
     def test_out_of_scope_reopen(self):
+        logger.debug('c: is_mitigated1: %s', self.finding_c.is_Mitigated)
+        logger.debug('d: is_mitigated1: %s', self.finding_d.is_Mitigated)
         self.finding_c.active = False
         self.finding_c.verified = False
+
         logger.debug('set_duplicate(d,c)')
         set_duplicate(self.finding_d, self.finding_c)
-        self.finding_d.duplicate = True
-        self.finding_d.duplicate_finding = self.finding_c
+
+        logger.debug('c: is_mitigated2: %s', self.finding_c.is_Mitigated)
+        logger.debug('d: is_mitigated2: %s', self.finding_d.is_Mitigated)
+
+        # self.finding_d.duplicate = True
+        # self.finding_d.duplicate_finding = self.finding_c
 
         logger.debug('saving finding_c')
         super(Finding, self.finding_c).save()
         logger.debug('saving finding_d')
         super(Finding, self.finding_d).save()
 
-        logger.debug('fix loop duplicates')
-        fix_loop_duplicates()
+        logger.debug('c: is_mitigated3: %s', self.finding_c.is_Mitigated)
+        logger.debug('d: is_mitigated3: %s', self.finding_d.is_Mitigated)
 
         candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
         self.assertEqual(candidates, 0)

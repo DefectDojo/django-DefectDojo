@@ -56,19 +56,20 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     if is_newly_mitigated(new_state_finding, changed_fields):
         # when mitigating a finding, the meta fields can only be editted if allowed
         logger.debug('finding being mitigated, set mitigated and mitigated_by fields')
-        logger.debug('mitigated before: %s', new_state_finding.mitigated)
-        logger.debug('mitigated_by before: %s', new_state_finding.mitigated_by)
 
         if can_edit_mitigated_data(user):
             # only set if it was not already set by user
+            # not sure if this check really covers all cases, but if we make it more strict
+            # it will cause all kinds of issues I believe with new findings etc
             new_state_finding.mitigated = new_state_finding.mitigated or now
             new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
         else:
             new_state_finding.mitigated = now
             new_state_finding.mitigated_by = user
-        logger.debug('mitigated: %s', new_state_finding.mitigated)
-        logger.debug('mitigated_by: %s', new_state_finding.mitigated_by)
-        new_state_finding.is_Mitigated = True
+
+        if not new_state_finding.duplicate:
+            # duplicate doesn't mean mitigated (but false_p and out_of_scope does....)
+            new_state_finding.is_Mitigated = True
 
     if 'false_p' in changed_fields or 'out_of_scope' in changed_fields:
         if new_state_finding.false_p or new_state_finding.out_of_scope:
