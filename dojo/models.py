@@ -1550,8 +1550,8 @@ class Finding(models.Model):
                                        help_text="Denotes is this flaw is currently being reviewed.")
 
     last_status_update = models.DateTimeField(editable=False,
-                                            null=False,
-                                            blank=False,
+                                            null=True,
+                                            blank=True,
                                             auto_now=True,
                                             verbose_name="Last Status Update",
                                             help_text="Timestamp of latest status update (change in status related fields).")
