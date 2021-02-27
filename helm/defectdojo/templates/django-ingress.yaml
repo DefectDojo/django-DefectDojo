@@ -3,7 +3,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $fullName }}}
+  name: {{ $fullName }}
   labels:
     defectdojo.org/component: django
     app.kubernetes.io/name: {{ include "defectdojo.name" . }}
@@ -18,7 +18,7 @@ metadata:
   {{- if .Values.gke.useGKEIngress }}
     kubernetes.io/ingress.class: gce
     {{- if .Values.gke.useManagedCertificate }}
-    kubernetes.io/ingress.allow-http: "false"
+   kubernetes.io/ingress.allow-http: "false"
     networking.gke.io/managed-certificates: {{ $fullName }}-django
     {{- end }}
   {{- end }}
