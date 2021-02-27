@@ -18,7 +18,7 @@ metadata:
   {{- if .Values.gke.useGKEIngress }}
     kubernetes.io/ingress.class: gce
     {{- if .Values.gke.useManagedCertificate }}
-   kubernetes.io/ingress.allow-http: "false"
+    kubernetes.io/ingress.allow-http: "false"
     networking.gke.io/managed-certificates: {{ $fullName }}-django
     {{- end }}
   {{- end }}
@@ -34,7 +34,7 @@ spec:
 {{- end }}
   rules:
   - host: {{ .Values.host }}
-    http:
+     http:
       paths:
         - pathType: Prefix
           path: "/"
