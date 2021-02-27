@@ -5,6 +5,6 @@ name: defectdojo
 version: 1.5.1
 icon: https://www.defectdojo.org/img/favicon.ico
 maintainers:
-  - name: DefectDojo maintainers
+  - name: madchap
     email: defectdojo-project@owasp.org
     url: https://github.com/DefectDojo/django-DefectDojo
