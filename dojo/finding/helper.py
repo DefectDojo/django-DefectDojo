@@ -82,15 +82,6 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
         logger.debug('mitigated_by: %s', new_state_finding.mitigated_by)
         new_state_finding.is_Mitigated = True
 
-    elif is_mitigated_meta_fields_modified(changed_fields):
-        # if edit not allowed, restore old values
-        if not can_edit_mitigated_data(user):
-            # this shouldn't occur due to access checks earlier in the request
-            raise PermissionError('user %s is not allowed to change mitigated and mitigated_by fields', user)
-        else:
-            new_state_finding.mitigated = new_state_finding.mitigated or now
-            new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
-
     if 'false_p' in changed_fields or 'out_of_scope' in changed_fields:
         if new_state_finding.false_p or new_state_finding.out_of_scope:
             new_state_finding.mitigated = new_state_finding.mitigated or now

@@ -2064,10 +2064,10 @@ class Finding(models.Model):
         return long_desc
 
     def save_no_options(self, *args, **kwargs):
-        return self.save(dedupe_option=False, false_history=False, rules_option=False,
+        return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=True,
              issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True,
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
@@ -2114,8 +2114,9 @@ class Finding(models.Model):
             from dojo.utils import do_apply_rules
             do_apply_rules(self, *args, **kwargs)
 
-        from dojo.utils import calculate_grade
-        calculate_grade(self.test.engagement.product)
+        if product_grading_option:
+            from dojo.utils import calculate_grade
+            calculate_grade(self.test.engagement.product)
 
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
