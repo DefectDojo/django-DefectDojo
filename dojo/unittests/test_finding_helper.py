@@ -20,39 +20,55 @@ class TestUpdateFindingStatusSignal(TestCase):
         self.user_1 = User.objects.get(id='1')
         self.user_2 = User.objects.get(id='2')
 
-    def get_mitigation_status_fields(self, finding):
-        return finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_Mitigated, finding.mitigated, finding.mitigated_by
+    def get_status_fields(self, finding):
+        return finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_Mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update
 
-    @mock.patch('dojo.finding.helper.timezone')
+    @mock.patch('dojo.finding.helper.timezone.now')
     def test_new_finding(self, mock_tz):
-        mock_tz.now.return_value = frozen_datetime
+        mock_tz.return_value = frozen_datetime
         with impersonate(self.user_1):
             test = Test.objects.last()
             finding = Finding(test=test)
             finding.save()
 
             self.assertEqual(
-                self.get_mitigation_status_fields(finding),
-                (True, True, False, False, False, None, None)
+                self.get_status_fields(finding),
+                (True, True, False, False, False, None, None, frozen_datetime)
             )
 
-    @mock.patch('dojo.finding.helper.timezone')
+    def test_no_status_change(self):
+        with impersonate(self.user_1):
+            test = Test.objects.last()
+            finding = Finding(test=test)
+            finding.save()
+
+            status_fields = self.get_status_fields(finding)
+
+            finding.title = finding.title + '!!!'
+            finding.save()
+
+            self.assertEqual(
+                self.get_status_fields(finding),
+                status_fields
+            )
+
+    @mock.patch('dojo.finding.helper.timezone.now')
     def test_mark_fresh_as_mitigated(self, mock_dt):
-        mock_dt.now.return_value = frozen_datetime
+        mock_dt.return_value = frozen_datetime
         with impersonate(self.user_1):
             test = Test.objects.last()
             finding = Finding(test=test, is_Mitigated=True, active=False)
             finding.save()
 
             self.assertEqual(
-                self.get_mitigation_status_fields(finding),
-                (False, True, False, False, True, frozen_datetime, self.user_1)
+                self.get_status_fields(finding),
+                (False, True, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
             )
 
-    @mock.patch('dojo.finding.helper.timezone')
+    @mock.patch('dojo.finding.helper.timezone.now')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
     def test_mark_old_active_as_mitigated(self, mock_can_edit, mock_tz):
-        mock_tz.now.return_value = frozen_datetime
+        mock_tz.return_value = frozen_datetime
 
         with impersonate(self.user_1):
             test = Test.objects.last()
@@ -63,14 +79,14 @@ class TestUpdateFindingStatusSignal(TestCase):
             finding.save()
 
             self.assertEqual(
-                self.get_mitigation_status_fields(finding),
-                (False, True, False, False, True, frozen_datetime, self.user_1)
+                self.get_status_fields(finding),
+                (False, True, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
             )
 
-    @mock.patch('dojo.finding.helper.timezone')
+    @mock.patch('dojo.finding.helper.timezone.now')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
     def test_mark_old_active_as_mitigated_custom_edit(self, mock_can_edit, mock_tz):
-        mock_tz.now.return_value = frozen_datetime
+        mock_tz.return_value = frozen_datetime
 
         custom_mitigated = datetime.datetime.now()
 
@@ -85,14 +101,14 @@ class TestUpdateFindingStatusSignal(TestCase):
             finding.save()
 
             self.assertEqual(
-                self.get_mitigation_status_fields(finding),
-                (False, True, False, False, True, custom_mitigated, self.user_2)
+                self.get_status_fields(finding),
+                (False, True, False, False, True, custom_mitigated, self.user_2, frozen_datetime)
             )
 
-    @mock.patch('dojo.finding.helper.timezone')
+    @mock.patch('dojo.finding.helper.timezone.now')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
     def test_update_old_mitigated_with_custom_edit(self, mock_can_edit, mock_tz):
-        mock_tz.now.return_value = frozen_datetime
+        mock_tz.return_value = frozen_datetime
 
         custom_mitigated = datetime.datetime.now()
 
@@ -107,14 +123,14 @@ class TestUpdateFindingStatusSignal(TestCase):
             finding.save()
 
             self.assertEqual(
-                self.get_mitigation_status_fields(finding),
-                (False, True, False, False, True, custom_mitigated, self.user_2)
+                self.get_status_fields(finding),
+                (False, True, False, False, True, custom_mitigated, self.user_2, frozen_datetime)
             )
 
-    @mock.patch('dojo.finding.helper.timezone')
+    @mock.patch('dojo.finding.helper.timezone.now')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
     def test_update_old_mitigated_with_missing_data(self, mock_can_edit, mock_tz):
-        mock_tz.now.return_value = frozen_datetime
+        mock_tz.return_value = frozen_datetime
 
         custom_mitigated = datetime.datetime.now()
 
@@ -130,14 +146,14 @@ class TestUpdateFindingStatusSignal(TestCase):
             finding.save()
 
             self.assertEqual(
-                self.get_mitigation_status_fields(finding),
-                (False, True, False, False, True, frozen_datetime, self.user_1)
+                self.get_status_fields(finding),
+                (False, True, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
             )
 
-    @mock.patch('dojo.finding.helper.timezone')
+    @mock.patch('dojo.finding.helper.timezone.now')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
     def test_set_old_mitigated_as_active(self, mock_can_edit, mock_tz):
-        mock_tz.now.return_value = frozen_datetime
+        mock_tz.return_value = frozen_datetime
 
         with impersonate(self.user_1):
             test = Test.objects.last()
@@ -149,14 +165,14 @@ class TestUpdateFindingStatusSignal(TestCase):
             finding.save()
 
             self.assertEqual(
-                self.get_mitigation_status_fields(finding),
-                (True, True, False, False, False, None, None)
+                self.get_status_fields(finding),
+                (True, True, False, False, False, None, None, frozen_datetime)
             )
 
-    @mock.patch('dojo.finding.helper.timezone')
+    @mock.patch('dojo.finding.helper.timezone.now')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
     def test_set_active_as_false_p(self, mock_can_edit, mock_tz):
-        mock_tz.now.return_value = frozen_datetime
+        mock_tz.return_value = frozen_datetime
 
         with impersonate(self.user_1):
             test = Test.objects.last()
@@ -166,7 +182,7 @@ class TestUpdateFindingStatusSignal(TestCase):
             finding.save()
 
             self.assertEqual(
-                self.get_mitigation_status_fields(finding),
+                self.get_status_fields(finding),
                 # TODO marking as false positive resets verified to False, possible bug / undesired behaviour?
-                (False, False, True, False, True, frozen_datetime, self.user_1)
+                (False, False, True, False, True, frozen_datetime, self.user_1, frozen_datetime)
             )

@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='last_status_update',
-            field=models.DateTimeField(auto_now=True, null=True, blank=True, help_text='Timestamp of latest status update (change in status related fields).', verbose_name='Last Status Update'),
+            field=models.DateTimeField(auto_now_add=True, null=True, blank=True, help_text='Timestamp of latest status update (change in status related fields).', verbose_name='Last Status Update'),
         ),
     ]

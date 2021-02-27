@@ -97,6 +97,9 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
         new_state_finding.duplicate = False
         new_state_finding.duplicate_finding = None
 
+    print('setting last status update: ' + str(now))
+    new_state_finding.last_status_update = now
+
 
 def can_edit_mitigated_data(user):
     return settings.EDITABLE_MITIGATED_DATA and user.is_superuser

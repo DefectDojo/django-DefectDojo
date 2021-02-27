@@ -1552,7 +1552,7 @@ class Finding(models.Model):
     last_status_update = models.DateTimeField(editable=False,
                                             null=True,
                                             blank=True,
-                                            auto_now=True,
+                                            auto_now_add=True,
                                             verbose_name="Last Status Update",
                                             help_text="Timestamp of latest status update (change in status related fields).")
 
