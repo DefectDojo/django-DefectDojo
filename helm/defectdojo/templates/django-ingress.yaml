@@ -34,7 +34,7 @@ spec:
 {{- end }}
   rules:
   - host: {{ .Values.host }}
-     http:
+    http:
       paths:
         - pathType: Prefix
           path: "/"
