@@ -50,18 +50,6 @@ def is_newly_mitigated(finding, changed_fields) -> bool:
     return False
 
 
-def is_mitigated_meta_fields_modified(changed_fields) -> bool:
-    # logger.debug('changed_fields: %s', changed_fields)
-    if not changed_fields:
-        return False
-
-    if 'mitigated' in changed_fields:
-        return changed_fields['mitigated'][0] is not None and changed_fields['mitigated'][1] is not None
-
-    if 'mitigated_by' in changed_fields:
-        return changed_fields['mitigated_by'][0] is not None and changed_fields['mitigated_by'][1] is not None
-
-
 def update_finding_status(new_state_finding, user, changed_fields=None):
     now = timezone.now()
 
