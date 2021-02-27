@@ -112,7 +112,7 @@ class TestDuplicationReopen(TestCase):
         self.finding_d = Finding.objects.get(id=self.finding_d.id)
 
         self.assertTrue(self.finding_c.out_of_scope)
-        self.assertFalse(self.finding_c.is_Mitigated)
+        self.assertTrue(self.finding_c.is_Mitigated)
         self.assertFalse(self.finding_c.active)
         self.assertFalse(self.finding_c.verified)
 

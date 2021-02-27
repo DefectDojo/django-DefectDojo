@@ -9,7 +9,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-frozen_datetime = timezone.make_aware(datetime.datetime(2021, 1, 1, 2, 2, 2), timezone.get_default_timezone())
+# frozen_datetime = timezone.make_aware(datetime.datetime(2021, 1, 1, 2, 2, 2), timezone.get_default_timezone())
+frozen_datetime = timezone.now()
 
 
 class TestUpdateFindingStatusSignal(TestCase):
