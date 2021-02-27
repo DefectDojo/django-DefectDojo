@@ -22,9 +22,9 @@ class TestUpdateFindingStatusSignal(TestCase):
     def get_mitigation_status_fields(self, finding):
         return finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_Mitigated, finding.mitigated, finding.mitigated_by
 
-    @mock.patch('dojo.finding.helper.datetime')
-    def test_new_finding(self, mock_dt):
-        mock_dt.now.return_value = frozen_datetime
+    @mock.patch('dojo.finding.helper.timezone')
+    def test_new_finding(self, mock_tz):
+        mock_tz.now.return_value = frozen_datetime
         with impersonate(self.user_1):
             test = Test.objects.last()
             finding = Finding(test=test)
@@ -35,7 +35,7 @@ class TestUpdateFindingStatusSignal(TestCase):
                 (True, True, False, False, False, None, None)
             )
 
-    @mock.patch('dojo.finding.helper.datetime')
+    @mock.patch('dojo.finding.helper.timezone')
     def test_mark_fresh_as_mitigated(self, mock_dt):
         mock_dt.now.return_value = frozen_datetime
         with impersonate(self.user_1):
@@ -48,11 +48,9 @@ class TestUpdateFindingStatusSignal(TestCase):
                 (False, True, False, False, True, frozen_datetime, self.user_1)
             )
 
-    @mock.patch('dojo.finding.helper.datetime')
     @mock.patch('dojo.finding.helper.timezone')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
-    def test_mark_old_active_as_mitigated(self, mock_can_edit, mock_tz, mock_dt):
-        mock_dt.now.return_value = frozen_datetime
+    def test_mark_old_active_as_mitigated(self, mock_can_edit, mock_tz):
         mock_tz.now.return_value = frozen_datetime
 
         with impersonate(self.user_1):
@@ -68,11 +66,9 @@ class TestUpdateFindingStatusSignal(TestCase):
                 (False, True, False, False, True, frozen_datetime, self.user_1)
             )
 
-    @mock.patch('dojo.finding.helper.datetime')
     @mock.patch('dojo.finding.helper.timezone')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
-    def test_mark_old_active_as_mitigated_custom_edit(self, mock_can_edit, mock_tz, mock_dt):
-        mock_dt.now.return_value = frozen_datetime
+    def test_mark_old_active_as_mitigated_custom_edit(self, mock_can_edit, mock_tz):
         mock_tz.now.return_value = frozen_datetime
 
         custom_mitigated = datetime.datetime.now()
@@ -92,11 +88,9 @@ class TestUpdateFindingStatusSignal(TestCase):
                 (False, True, False, False, True, custom_mitigated, self.user_2)
             )
 
-    @mock.patch('dojo.finding.helper.datetime')
     @mock.patch('dojo.finding.helper.timezone')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
-    def test_update_old_mitigated_with_custom_edit(self, mock_can_edit, mock_tz, mock_dt):
-        mock_dt.now.return_value = frozen_datetime
+    def test_update_old_mitigated_with_custom_edit(self, mock_can_edit, mock_tz):
         mock_tz.now.return_value = frozen_datetime
 
         custom_mitigated = datetime.datetime.now()
@@ -116,11 +110,9 @@ class TestUpdateFindingStatusSignal(TestCase):
                 (False, True, False, False, True, custom_mitigated, self.user_2)
             )
 
-    @mock.patch('dojo.finding.helper.datetime')
     @mock.patch('dojo.finding.helper.timezone')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
-    def test_update_old_mitigated_with_custom_edit_not_allowed(self, mock_can_edit, mock_tz, mock_dt):
-        mock_dt.now.return_value = frozen_datetime
+    def test_update_old_mitigated_with_custom_edit_not_allowed(self, mock_can_edit, mock_tz):
         mock_tz.now.return_value = frozen_datetime
 
         custom_mitigated = datetime.datetime.now()
@@ -143,11 +135,9 @@ class TestUpdateFindingStatusSignal(TestCase):
                     (False, True, False, False, True, frozen_datetime, self.user_1)
                 )
 
-    @mock.patch('dojo.finding.helper.datetime')
     @mock.patch('dojo.finding.helper.timezone')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
-    def test_update_old_mitigated_with_missing_data(self, mock_can_edit, mock_tz, mock_dt):
-        mock_dt.now.return_value = frozen_datetime
+    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
+    def test_update_old_mitigated_with_missing_data(self, mock_can_edit, mock_tz):
         mock_tz.now.return_value = frozen_datetime
 
         custom_mitigated = datetime.datetime.now()
@@ -168,18 +158,18 @@ class TestUpdateFindingStatusSignal(TestCase):
                 (False, True, False, False, True, frozen_datetime, self.user_1)
             )
 
-    @mock.patch('dojo.finding.helper.datetime')
     @mock.patch('dojo.finding.helper.timezone')
-    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
-    def test_set_old_mitigated_as_active(self, mock_can_edit, mock_tz, mock_dt):
-        mock_dt.now.return_value = frozen_datetime
+    @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=True)
+    def test_set_old_mitigated_as_active(self, mock_can_edit, mock_tz):
         mock_tz.now.return_value = frozen_datetime
 
         with impersonate(self.user_1):
             test = Test.objects.last()
             finding = Finding(test=test, is_Mitigated=True, active=False, mitigated=frozen_datetime, mitigated_by=self.user_2)
+            logger.debug('save1')
             finding.save()
             finding.active = True
+            logger.debug('save2')
             finding.save()
 
             self.assertEqual(
@@ -187,11 +177,9 @@ class TestUpdateFindingStatusSignal(TestCase):
                 (True, True, False, False, False, None, None)
             )
 
-    @mock.patch('dojo.finding.helper.datetime')
     @mock.patch('dojo.finding.helper.timezone')
     @mock.patch('dojo.finding.helper.can_edit_mitigated_data', return_value=False)
-    def test_set_active_as_false_p(self, mock_can_edit, mock_tz, mock_dt):
-        mock_dt.now.return_value = frozen_datetime
+    def test_set_active_as_false_p(self, mock_can_edit, mock_tz):
         mock_tz.now.return_value = frozen_datetime
 
         with impersonate(self.user_1):

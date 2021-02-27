@@ -2063,6 +2063,10 @@ class Finding(models.Model):
         long_desc += '*References*:' + str(self.references)
         return long_desc
 
+    def save_no_options(self, *args, **kwargs):
+        return self.save(dedupe_option=False, false_history=False, rules_option=False,
+             issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
+
     def save(self, dedupe_option=True, false_history=False, rules_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
