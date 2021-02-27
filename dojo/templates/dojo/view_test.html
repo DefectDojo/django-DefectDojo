@@ -282,7 +282,7 @@
     </div>
     {% if findings %}
         <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=findings prefix=findings page_size=True %}
+            {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
         </div>
 
         <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
@@ -645,7 +645,7 @@
             </div>
         {% endif %}
         <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=findings prefix=findings page_size=True %}
+            {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
         </div>
 
         <div class="panel panel-default table-responsive potential-finding">
