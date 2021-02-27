@@ -47,6 +47,3 @@ jobs:
 
       - name: Run chart-testing (lint)
         run: ct lint --config ct.yaml
-
-      - name: Run chart-testing (install)
-        run: ct install --config ct.yaml
