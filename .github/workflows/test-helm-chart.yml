@@ -47,3 +47,10 @@ jobs:
 
       - name: Run chart-testing (lint)
         run: ct lint --config ct.yaml
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.0.0
+        if: steps.list-changed.outputs.changed == 'true'
+
+      - name: Run chart-testing (install)
+        run: ct install
