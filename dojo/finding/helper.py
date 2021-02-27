@@ -32,7 +32,7 @@ pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=
 # post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_Mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
 
 
-def is_newly_mitigated(finding, changed_fields) -> bool:
+def is_being_mitigated(finding, changed_fields) -> bool:
     # logger.debug('changed_fields: %s', changed_fields)
     if not changed_fields:
         return False
@@ -50,10 +50,36 @@ def is_newly_mitigated(finding, changed_fields) -> bool:
     return False
 
 
+def is_being_activated(finding, changed_fields) -> bool:
+    # logger.debug('changed_fields: %s', changed_fields)
+    if not changed_fields:
+        return False
+
+    if 'active' in changed_fields:
+        return changed_fields['active'] == (False, True)
+
+    if 'is_Mitigated' in changed_fields:
+        return changed_fields['is_Mitigated'] == (True, False)
+
+    # new findings arrive here with only the id field changed
+    if 'id' in changed_fields and len(changed_fields) == 1 and finding.active is True:
+        return True
+
+    return False
+
+
 def update_finding_status(new_state_finding, user, changed_fields=None):
     now = timezone.now()
 
-    if is_newly_mitigated(new_state_finding, changed_fields):
+    # activated
+    # reactivated
+    # closed / mitigated
+    # false positivized
+    # out_of_scopified
+    # marked as duplicate
+    # marked as original
+
+    if is_being_mitigated(new_state_finding, changed_fields):
         # when mitigating a finding, the meta fields can only be editted if allowed
         logger.debug('finding being mitigated, set mitigated and mitigated_by fields')
 
@@ -67,9 +93,18 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             new_state_finding.mitigated = now
             new_state_finding.mitigated_by = user
 
+        new_state_finding.active = False
         if not new_state_finding.duplicate:
             # duplicate doesn't mean mitigated (but false_p and out_of_scope does....)
             new_state_finding.is_Mitigated = True
+
+    if is_being_activated(new_state_finding, changed_fields):
+        new_state_finding.active = True
+        new_state_finding.false_p = False
+        new_state_finding.out_of_scope = False
+        new_state_finding.mitigated = None
+        new_state_finding.mitigated_by = None
+        new_state_finding.is_Mitigated = False
 
     if 'false_p' in changed_fields or 'out_of_scope' in changed_fields:
         if new_state_finding.false_p or new_state_finding.out_of_scope:
@@ -79,14 +114,14 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             new_state_finding.active = False
             new_state_finding.verified = False
 
-    # always reset some fields if the finding is active
-    if new_state_finding.active:
-        logger.debug('finding is active, so setting all other fields to False/None')
-        new_state_finding.false_p = False
-        new_state_finding.out_of_scope = False
-        new_state_finding.mitigated = None
-        new_state_finding.mitigated_by = None
-        new_state_finding.is_Mitigated = False
+    # # always reset some fields if the finding is active
+    # if new_state_finding.active:
+    #     logger.debug('finding is active, so setting all other fields to False/None')
+    #     new_state_finding.false_p = False
+    #     new_state_finding.out_of_scope = False
+    #     new_state_finding.mitigated = None
+    #     new_state_finding.mitigated_by = None
+    #     new_state_finding.is_Mitigated = False
 
     # always reset some fields if the finding is not a duplicate
     if not new_state_finding.duplicate:
