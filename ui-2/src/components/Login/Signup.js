@@ -58,7 +58,10 @@ function SignUp() {
               Register
             </button>
             <p className="forgot-password text-right">
-              Already registered <a href="/sign-in">log in?</a>
+              Already registered{" "}
+              <a className={styles.ancor} href="/sign-in">
+                log in?
+              </a>
             </p>
           </form>
         </div>

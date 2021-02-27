@@ -58,7 +58,10 @@ function Login() {
             </button>
             <p className="forgot-password text-right">
               {" "}
-              Forgot <a href="www.google.com">password?</a>
+              Forgot{" "}
+              <a className={styles.ancor} href="www.google.com">
+                password?
+              </a>
             </p>
           </form>
         </div>

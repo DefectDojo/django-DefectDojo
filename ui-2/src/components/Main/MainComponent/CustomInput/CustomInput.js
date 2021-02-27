@@ -45,6 +45,7 @@ function CustomInput(props) {
     >
       {labelText !== undefined ? (
         <InputLabel
+          id="custom_InputForm"
           className={classes.labelRoot + labelClasses}
           htmlFor={id}
           {...labelProps}

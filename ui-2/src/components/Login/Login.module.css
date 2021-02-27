@@ -64,6 +64,10 @@
 .forgot-password a {
   color: #167bff;
 }
+.ancor:hover {
+  color: #167bff;
+  text-decoration: underline;
+}
 @media all and (min-width: 480px) {
   .Login {
     padding: 60px 0;

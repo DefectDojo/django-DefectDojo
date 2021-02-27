@@ -3,12 +3,7 @@ import {
   transition,
   boxShadow,
   defaultFont,
-  primaryColor,
-  primaryBoxShadow,
   infoColor,
-  successColor,
-  warningColor,
-  dangerColor,
   whiteColor,
   grayColor,
   blackColor,
@@ -168,14 +163,7 @@ const sidebarStyle = (theme) => ({
   whiteFont: {
     color: whiteColor,
   },
-  purple: {
-    backgroundColor: primaryColor[0],
-    ...primaryBoxShadow,
-    "&:hover,&:focus": {
-      backgroundColor: primaryColor[0],
-      ...primaryBoxShadow,
-    },
-  },
+
   blue: {
     backgroundColor: infoColor[0],
     boxShadow:

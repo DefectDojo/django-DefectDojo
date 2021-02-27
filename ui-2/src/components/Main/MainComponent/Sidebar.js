@@ -23,7 +23,7 @@ function Sidebar(props) {
   function activeRoute(routeName) {
     return window.location.href.indexOf(routeName) > -1 ? true : false;
   }
-  const { color, logo, image, routes } = props;
+  const { logo, image, routes } = props;
   var links = (
     <List classNames={classes.list}>
       {routes.map((prop, key) => {
@@ -36,7 +36,7 @@ function Sidebar(props) {
         });
         return (
           <NavLink
-            to={prop.layout + prop.path}
+            to={prop.path}
             className={activePro + classes.item}
             activeClassName="active"
             key={key}
@@ -128,7 +128,7 @@ function Sidebar(props) {
 
 Sidebar.propTypes = {
   handleDrawerToggle: PropTypes.func,
-  bgColor: PropTypes.oneOf(["purple", "blue", "green", "orange", "red"]),
+
   logo: PropTypes.string,
   image: PropTypes.string,
   logoText: PropTypes.string,

@@ -9,8 +9,8 @@ const dashboardRouters = [
     component: DashboardPage,
   },
   {
-    path: "/user",
-    name: "User Profile",
+    path: "/product",
+    name: "Product",
 
     icon: Person,
   },
