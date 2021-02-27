@@ -86,7 +86,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             new_state_finding.verified = False
 
     # always reset some fields if the finding is active
-    if new_state_finding.active is True:
+    if new_state_finding.active:
         logger.debug('finding is active, so setting all other fields to False/None')
         new_state_finding.false_p = False
         new_state_finding.out_of_scope = False
