@@ -1,3 +1,10 @@
+# This docker-compose.yml file  is fully functional to evaluate DefectDojo
+# in your local environment. 
+#
+# Although Docker Compose is one of the supported installation methods to
+# deploy a containerized DefectDojo in a production environment, the 
+# docker-compose.yml file is not intended for production use without first
+# customizing it to your particular situation.
 ---
 version: '3.7'
 services:
@@ -10,6 +17,8 @@ services:
       - uwsgi
     environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
+    volumes:
+      - defectdojo_media:/usr/share/nginx/html/media
     ports:
       - target: 8080
         published: ${DD_PORT:-8080}
@@ -40,6 +49,7 @@ services:
         - type: bind
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
+        - defectdojo_media:${DD_MEDIA_ROOT:-/app/media}
   celerybeat:
     image: defectdojo/defectdojo-django:latest
     depends_on:
@@ -105,3 +115,4 @@ services:
     image: rabbitmq:3.8.12@sha256:bbd86b54a03a437e67d160462a12dd949746c3f1cdd82add64aa258c292fca29
 volumes:
   defectdojo_data: {}
+  defectdojo_media: {}
