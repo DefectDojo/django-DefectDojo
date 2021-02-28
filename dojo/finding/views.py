@@ -516,14 +516,14 @@ def defect_finding_review(request, fid):
                     if resolution_id is None:
                         resolution_id = jira_helper.jira_get_resolution_id(
                             jira, issue, "Resolve Issue")
-                        jira_helper.jira_change_resolution_id(jira, issue, resolution_id)
+                        jira_helper.jira_transition(jira, issue, resolution_id)
                         new_note.entry = new_note.entry + "\nJira issue set to resolved."
                 else:
                     # Re-open finding with notes stating why re-open
                     resolution_id = jira_helper.jira_get_resolution_id(jira, issue,
                                                         "Resolve Issue")
                     if resolution_id is not None:
-                        jira_helper.jira_change_resolution_id(jira, issue, resolution_id)
+                        jira_helper.jira_transition(jira, issue, resolution_id)
                         new_note.entry = new_note.entry + "\nJira issue re-opened."
 
             # Update Dojo and Jira with a notes
