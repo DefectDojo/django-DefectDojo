@@ -4,38 +4,34 @@ import json
 from dojo.models import Finding
 
 
-class TruffleHogParser(object):
+class TruffleHog3Parser(object):
 
     def get_scan_types(self):
-        return ["Trufflehog Scan"]
+        return ["Trufflehog3 Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Trufflehog Scan"
+        return "Trufflehog3 Scan"
 
     def get_description_for_scan_types(self, scan_type):
         return "JSON Output of Trufflehog."
 
     def get_findings(self, filename, test):
+        data = json.load(filename)
 
-        data = filename.read()
         dupes = dict()
 
-        for line in data.splitlines():
-            try:
-                json_data = json.loads(str(line, 'utf-8'))
-            except:
-                json_data = json.loads(line)
+        for json_data in data:
             file = json_data["path"]
 
             reason = json_data["reason"]
             titleText = "Hard Coded " + reason + " in: " + file
 
-            commit = json_data["commit"]
+            description = ""
             description = "**Commit:** " + str(json_data.get("commit")).split("\n")[0] + "\n"
-            description += "```\n" + str(json_data.get("commit")).replace('```', '\\`\\`\\`') + "\n```\n"
-            description += "**Commit Hash:** " + json_data["commitHash"] + "\n"
+            description += "\n```\n" + str(json_data.get("commit")).replace('```', '\\`\\`\\`') + "\n```\n"
+            description += "**Commit Hash:** " + str(json_data.get("commitHash")) + "\n"
             description += "**Commit Date:** " + json_data["date"] + "\n"
-            description += "**Branch:** " + json_data["branch"] + "\n"
+            description += "**Branch:** " + str(json_data.get("branch")) + "\n"
             description += "**Reason:** " + json_data["reason"] + "\n"
             description += "**Path:** " + file + "\n"
 
@@ -52,7 +48,7 @@ class TruffleHogParser(object):
                 strings_found += string + "\n"
 
             dupe_key = hashlib.md5((file + reason).encode("utf-8")).hexdigest()
-            description += "\n**Strings Found:**\n```" + strings_found + "```\n"
+            description += "\n**Strings Found:**\n```\n" + strings_found + "\n```\n"
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
