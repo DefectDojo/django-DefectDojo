@@ -10,13 +10,17 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 # - cross scanner deduplication is still flaky as if some scanners don't provide severity, but another doesn, the hashcode will be different so no deduplication happens.
 #   so I couldn't create any good tests
 # - hash_code is only calculated once and never changed. should we add a feature to run dedupe when somebody modifies a finding? bulk edit action to trigger dedupe?
+#   -> this is handled by the dedupe.py script but which suffers stabiblity issues currently
 # - deduplication is using the default ordering for findings, so most of the time this means a new finding will be marked as duplicate of the most recent existing finding
-#   that matches the criteria. I thinkg it would be better to consider the oldest existing findings first? Otherwise we have the chance that an old finding becomes
+#   that matches the criteria. I think it would be better to consider the oldest existing findings first? Otherwise we have the chance that an old finding becomes
 #   marked as duplicate of a newer one at some point.
 # - legacy: if file_path and line or both empty and there are no endpoints, no dedupe will happen. Is this desirable or a BUG?
+#    -> this is just one of the many limitations of the legacy algorithm.
+#       For non standard parsers, it's advised to use the deduplication configuration to finely tune which fields should be used
 # - DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE should:
 #   - try to match on uniquer_id first before falling back to hash_Code. Currently it just takes the first finding it can find
 #     that mathces either the hash_code or unique id.
+#    -> that is an insteresting improvment to consider
 #   - If the unique_id does NOT match, the finding is still considered for dedupe if the hash_code matches. We may need to forbid as the unique_id should be leading for the same test_type
 
 # false positive history observations:
@@ -367,8 +371,8 @@ class TestDuplicationLogic(TestCase):
         finding_new3.endpoints.add(ep3)
         finding_new3.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, not_hash_code=finding_new.hash_code)
+        # expect: marked as duplicate as hash_code is not affected by endpoints anymore with the legacy algorithm
+        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=True, hash_code=finding_new.hash_code)
 
     def test_identical_legacy_different_endpoints_dynamic(self):
         # this test is using the pattern currently in use in the import / serializers.py.
@@ -392,8 +396,9 @@ class TestDuplicationLogic(TestCase):
         finding_new3.endpoints.add(ep2)
         finding_new3.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, not_hash_code=finding_new.hash_code)
+        # expected: hash_code is not affected by endpoints anymore in legacy algorithm
+        # but not duplicate because the legacy dedupe algo examines not only hash_code but endpoints too
+        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, hash_code=finding_new.hash_code)
 
     def test_identical_legacy_no_endpoints_dynamic(self):
         finding_new, finding_24 = self.copy_and_reset_finding_add_endpoints(id=24)
@@ -404,8 +409,9 @@ class TestDuplicationLogic(TestCase):
         finding_new3.save(dedupe_option=False)
         finding_new3.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, not_hash_code=finding_new.hash_code)
+        # expect: marked as duplicate, hash_code not affected by endpoints with the legacy algorithm
+        # but not duplicate because the legacy dedupe algo examines not only hash_code but endpoints too
+        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, hash_code=finding_new.hash_code)
 
     # hash_code based algorithm tests
 
@@ -885,10 +891,10 @@ class TestDuplicationLogic(TestCase):
         finding_new.dynamic_finding = True
         finding_new.save()
 
-        # different uid. and different endpoints, so different hash, so no duplicate
-        self.assert_finding(finding_new, not_pk=224, duplicate=False, not_hash_code=finding_224.hash_code)
+        # different uid. and different endpoints, but endpoints not used for hash anymore -> duplicate
+        self.assert_finding(finding_new, not_pk=224, duplicate=True, hash_code=finding_224.hash_code)
 
-        # same scenario, now with different uid. and different endpoints, but hash will not be affected by endpoints because dynamic_finding is set to False
+        # same scenario, now with different uid. and different endpoints
         finding_new, finding_224 = self.copy_and_reset_finding(id=224)
 
         finding_new.save(dedupe_option=False)
@@ -899,7 +905,7 @@ class TestDuplicationLogic(TestCase):
         finding_new.dynamic_finding = False
         finding_new.save()
 
-        # different uid. and different endpoints, but hash will not be affected by endpoints because dynamic_finding is set to False
+        # different uid. and different endpoints, dynamic_finding is set to False hash_code still not affected by endpoints
         self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
 
     # sync false positive history tests

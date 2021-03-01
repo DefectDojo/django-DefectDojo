@@ -1753,13 +1753,6 @@ class Finding(models.Model):
 
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
-            # Default fields
-            if self.dynamic_finding:
-                deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation in default fields (they may be overriden by configuration)')
-                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
-            else:
-                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
-
             # Check for an override for this scan_type in the deduplication configuration
             scan_type = self.test.test_type.name
             if (scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
@@ -1774,6 +1767,7 @@ class Finding(models.Model):
                             deduplicationLogger.warn(
                                 "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
                                 "'. Fallback to legacy mode for this finding.")
+                            return self.compute_hash_code_legacy()
                     else:
                         # no configuration found for this scanner: defaulting to accepting null cwe when we find one
                         hashcodeFields = hashcodeFieldsCandidate
@@ -1785,9 +1779,11 @@ class Finding(models.Model):
                     deduplicationLogger.debug(
                         "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
                         "Using default fields")
+                    return self.compute_hash_code_legacy()
             else:
                 deduplicationLogger.debug(
                     "No configuration for hash_code computation found; using default fields for " + ('dynamic' if self.dynamic_finding else 'static') + ' scanners')
+                return self.compute_hash_code_legacy()
             deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " for scan_type " + scan_type + " based on: " + ', '.join(hashcodeFields))
             fields_to_hash = ''
             for hashcodeField in hashcodeFields:
@@ -1808,9 +1804,6 @@ class Finding(models.Model):
 
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
-        if self.dynamic_finding:
-            deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation for legacy algo')
-            fields_to_hash = fields_to_hash + self.get_endpoints()
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
 
