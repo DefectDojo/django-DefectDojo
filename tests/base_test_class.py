@@ -284,7 +284,7 @@ class BaseTestCase(unittest.TestCase):
         for entry in WebdriverOnlyNewLogFacade(self.driver).get_log('browser'):
             """
             Images are now working after https://github.com/DefectDojo/django-DefectDojo/pull/3954,
-            but http://localhost:8080/static/dojo/img/zoom-in.cur still produces a 404  
+            but http://localhost:8080/static/dojo/img/zoom-in.cur still produces a 404
 
             The addition of the trigger exception is due to the Report Builder tests. All of the moving objects are from javascrip
             Tooltips are attached to each object and operate fine at human speeds. Selenium moves too fast for tooltips to be
