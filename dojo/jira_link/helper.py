@@ -547,8 +547,6 @@ def add_jira_issue(find):
         j_issue.save()
         issue = jira.issue(new_issue.id)
 
-        find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
         # Upload dojo finding screenshots to Jira
         for pic in find.images.all():
             jira_attachment(
@@ -651,7 +649,6 @@ def update_jira_issue(find):
 
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
-        find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         if jira_project.enable_engagement_epic_mapping:
             eng = find.test.engagement
