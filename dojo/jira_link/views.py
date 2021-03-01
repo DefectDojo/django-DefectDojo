@@ -11,6 +11,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
 # Local application/library imports
@@ -82,7 +83,8 @@ def webhook(request, secret=None):
                     resolution = resolution if resolution and resolution != "None" else None
                     resolution_id = resolution['id'] if resolution else None
                     resolution_name = resolution['name'] if resolution else None
-                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name)
+                    jira_now = parse_datetime(['issue']['fields']['updated'])
+                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now)
                 elif jissue.engagement:
                     # if parsed['issue']['fields']['resolution'] != None:
                     #     eng.active = False

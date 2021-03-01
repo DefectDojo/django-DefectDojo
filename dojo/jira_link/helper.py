@@ -722,7 +722,8 @@ def issue_from_jira_is_active(issue_from_jira):
     # or
     #         "resolution": "None"
 
-    if not hasattr(issue_from_jira, 'resolution'):
+    if not hasattr(issue_from_jira.fields, 'resolution'):
+        print(vars(issue_from_jira))
         return True
 
     if not issue_from_jira.fields.resolution:
@@ -738,20 +739,21 @@ def issue_from_jira_is_active(issue_from_jira):
 def push_status_to_jira(find, jira_instance, jira, issue):
 
     status_list = find.status()
-    if any(item in status_list for item in OPEN_STATUS):
-        if not issue_from_jira_is_active(issue):
-            logger.debug('Transitioning Jira issue to Active (Reopen)')
-            return jira_transition(jira, issue, jira_instance.open_status_key)
-        else:
-            logger.debug('Jira issue already Active')
-            return False
-
+    # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
     if any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
             logger.debug('Transitioning Jira issue to Resolved')
             return jira_transition(jira, issue, jira_instance.close_status_key)
         else:
             logger.debug('Jira issue already Resolved')
+            return False
+
+    if any(item in status_list for item in OPEN_STATUS):
+        if not issue_from_jira_is_active(issue):
+            logger.debug('Transitioning Jira issue to Active (Reopen)')
+            return jira_transition(jira, issue, jira_instance.open_status_key)
+        else:
+            logger.debug('Jira issue already Active')
             return False
 
 
@@ -1189,10 +1191,9 @@ def escape_for_jira(text):
     return text.replace('|', '%7D')
 
 
-def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name) -> bool:
+def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now) -> bool:
     """ Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly """
     import dojo.risk_acceptance.helper as ra_helper
-    now = timezone.now()
     status_changed = False
     resolved = resolution_id is not None
     jira_instance = get_jira_instance(finding)
@@ -1223,7 +1224,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 # Mitigated by default as before
                 logger.debug("Marking related finding of {} as mitigated (default)".format(finding.jira_issue.jira_key))
                 finding.active = False
-                finding.mitigated = now
+                finding.mitigated = jira_now
                 finding.is_Mitigated = True
                 finding.endpoints.clear()
                 finding.false_p = False
@@ -1248,6 +1249,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
         ra_helper.remove_from_any_risk_acceptance(finding)
         status_changed = True
 
-    finding.jira_issue.jira_change = now
+    finding.jira_issue.jira_change = jira_now
     finding.jira_issue.save()
     finding.save()
+    return status_changed
