@@ -32,7 +32,7 @@ class TestSafetyParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         for finding in findings:
-            if "37863" == finding.vuln_id_from_tool:
+            if "37863" == finding.unique_id_from_tool:
                 self.assertIsNone(finding.cve)
 
     def test_multiple2(self):
@@ -41,9 +41,9 @@ class TestSafetyParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(5, len(findings))
         for finding in findings:
-            if "39608" == finding.vuln_id_from_tool:
+            if "39608" == finding.unique_id_from_tool:
                 self.assertEqual("httplib2", finding.component_name)
                 self.assertEqual("0.18.1", finding.component_version)
                 self.assertEqual("CVE-2021-21240", finding.cve)
-            elif "39525" == finding.vuln_id_from_tool:
+            elif "39525" == finding.unique_id_from_tool:
                 self.assertIsNone(finding.cve)

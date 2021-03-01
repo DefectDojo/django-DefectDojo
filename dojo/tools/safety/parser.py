@@ -44,7 +44,7 @@ class SafetyParser(object):
                 'description': str(node[3]),
                 'id': str(node[4])
             }
-            severity = 'Info'  # Because Safety doesn't include severity rating
+            severity = 'Medium'  # Because Safety doesn't include severity rating
             cve = None
             for a in safety_db[item_node['package']]:
                 if a['id'] == 'pyup.io-' + item_node['id']:
@@ -74,7 +74,7 @@ class SafetyParser(object):
                             impact="No impact provided",
                             component_name=item_node['package'],
                             component_version=item_node['installed'],
-                            vuln_id_from_tool=item_node['id'])
-            items[finding.vuln_id_from_tool] = finding
+                            unique_id_from_tool=item_node['id'])
+            items[finding.unique_id_from_tool] = finding
 
         return list(items.values())
