@@ -685,19 +685,8 @@ def get_jira_issue_from_jira(find):
         JIRAError.log_to_tempfile = False
         jira = get_jira_connection(jira_instance)
 
-        # import http
-        # http.client.HTTPConnection.debuglevel = 1
-
-        # logging.basicConfig()
-        # logging.getLogger().setLevel(logging.DEBUG)
-        # requests_log = logging.getLogger("requests.packages.urllib3")
-        # requests_log.setLevel(logging.DEBUG)
-        # requests_log.propagate = True
-
         logger.debug('getting issue from JIRA')
         issue_from_jira = jira.issue(j_issue.jira_id)
-
-        # logger.debug(json.dumps(issue, indent=4))
 
         return issue_from_jira
 
