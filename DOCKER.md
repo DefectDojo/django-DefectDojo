@@ -152,7 +152,7 @@ docker-compose logs initializer | grep "Admin password:"
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
 
-# Option to change the password 
+## Option to change the password 
 * If you dont have admin password use the below command to change the password. 
 * After starting the container and open another tab in the same folder.  
 * django-defectdojo_uwsgi_1 -- name obtained from running containers using ```zsh docker ps ``` command
@@ -160,6 +160,29 @@ Make sure you write down the first password generated as you'll need it when re-
 ```zsh
 docker exec -it django-defectdojo_uwsgi_1 ./manage.py changepassword admin
 ```
+
+# Logging
+For docker-compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
+
+
+```
+LOGGING['loggers']['dojo.specific-loggers.deduplication']['level'] = 'DEBUG'
+```
+
+Or you can modify `settings.dist.py` directly, but this adds the risk of having conflicts when `settings.dist.py` gets updated upstream. 
+
+```
+          'dojo.specific-loggers.deduplication': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
+```
+
+## Debug Toolbar
+In the `dojo/settings/template-local_settings.py` you'll find instructions on how to enable the [Django Debug Toolbar](https://github.com/jazzband/django-debug-toolbar).
+This toolbar allows you to debug SQL queries, and shows some other interesting information.
+
 
 # Exploitation, versioning
 ## Disable the database initialization

@@ -1,18 +1,32 @@
-import json
 import hashlib
-
+import json
 from collections import namedtuple
+
 from dojo.models import Finding
 
 
-# Oss Review Toolkit Parser
 class OrtParser(object):
-    def __init__(self, json_output, test):
+    """Oss Review Toolkit Parser"""
+
+    def get_scan_types(self):
+        return ["ORT evaluated model Importer"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "ORT evaluated model Importer"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Outpost24 endpoint vulnerability scan in XML format."
+
+    def get_findings(self, json_output, test):
+
+        if json_output is None:
+            return list()
+
         evaluated_model = self.parse_json(json_output)
         if evaluated_model:
-            self.items = [data for data in self.get_items(evaluated_model, test)]
+            return self.get_items(evaluated_model, test)
         else:
-            self.items = []
+            return list()
 
     def parse_json(self, json_output):
         try:

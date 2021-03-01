@@ -7,6 +7,7 @@ services:
       - '.:/app:z'
       - './media:/app/media/finding_images'
       - './media/CACHE:/app/media/CACHE'
+      - './media/threat:/app/media/threat'
     environment:
       DD_DEBUG: 'True'
       DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}

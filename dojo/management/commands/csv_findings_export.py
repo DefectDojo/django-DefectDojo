@@ -49,7 +49,7 @@ class Command(BaseCommand):
             row = []
             row.append(obj.test.engagement.product)
             for field in headers:
-                if field is not "product_name":
+                if field != "product_name":
                     value = getattr(obj, field)
                     if isinstance(value, str):
                         value = value.encode('utf-8').strip()

@@ -9,6 +9,7 @@
                     <h3 class="has-filters">
                         Product List
                         <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -26,14 +27,14 @@
 
                                 <li role="presentation">
                                     <a href="{% url 'product_findings_report' %}">
-                                        <i class="fa fa-file-text-o"></i> Product Report
+                                        <i class="fa fa-file-text-o"></i> Findings Report
                                     </a>
                                 </li>
                             </ul>
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
             </div>
@@ -58,7 +59,7 @@
                             {% if system_settings.enable_github %}
                             <th class="text-center">GitHub</th>
                             {% endif %}
-                            <th class="text-center"> Findings</th>
+                            <th class="text-center"> Active (Verified) Findings</th>
                             <th class="text-center"> Endpoints</th>
                             <th> Contact</th>
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
@@ -178,8 +179,8 @@
                                 <!-- Tags column -->
                                 <td>
                                     <sup>
-                                    {% for tag in prod.tags %}
-                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                    {% for tag in prod.tags.all %}
+                                      <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
                                     {% endfor %}
                                   </sup>
                                 </td>
@@ -194,10 +195,10 @@
                                 </td>
                                 <td class="text-center">
                                   {% if prod.last_engagement_date %}
-                                    <i style="position:absolute;" class="fa fa-calendar happy-green-color has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                    <i class="fa fa-calendar happy-green-color has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
                                     data-content="{{ prod.active_engagement_count }} Active,
                                     {{ prod.closed_engagement_count }} Closed<br>
-                                    <b>Last Assessed:</b> {{ prod.last_engagement_date.target_end }}"></i>
+                                    <b>Last Assessed:</b> {{ prod.last_engagement_date }}"></i>
                                   {% else %}
                                     <i class="fa fa-calendar text-danger has-popover" title="<i class='fa fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-container="body" data-placement="bottom" data-html="true"
                                     data-content="No Engagements Exist"></i>
@@ -226,6 +227,7 @@
                                 <td class="text-center">
                                     {% if prod.findings_count %}
                                         <a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><b>{{ prod.findings_count }}</b></a>
+                                        &nbsp;(<a href="{% url 'product_verified_findings' prod.id %}?test__engagement__product={{ prod.id }}">{{ prod.findings_active_verified_count }}</a>)
                                     {% else %}
                                         0
                                     {% endif %}
@@ -345,7 +347,7 @@
                 ],
                 order: [],
                 columnDefs: [
-                    { 
+                    {
                         "orderable": false,
                         "targets": [0]
                     },
@@ -356,6 +358,7 @@
                 ],
                 dom: 'Bfrtip',
                 paging: false,
+                info: false,
                 buttons: [
                     {
                         extend: 'colvis',

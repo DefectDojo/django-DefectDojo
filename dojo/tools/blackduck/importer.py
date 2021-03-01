@@ -1,13 +1,14 @@
 
+import csv
+import io
+import re
+import zipfile
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from pathlib import Path
 from typing import Iterable
-from dojo.tools.blackduck.model import BlackduckFinding
-import csv
-import io
-import zipfile
-import re
+
+from .model import BlackduckFinding
 
 
 class Importer(ABC):
@@ -22,13 +23,10 @@ class BlackduckImporter(Importer):
         if not issubclass(type(report), Path):
             report = Path(report.temporary_file_path())
 
-        try:
-            if zipfile.is_zipfile(str(report)):
-                return self._process_zipfile(report)
-            else:
-                return self._process_csvfile(report)
-        except Exception as e:
-            print("Error processing file: {}".format(e))
+        if zipfile.is_zipfile(str(report)):
+            return self._process_zipfile(report)
+        else:
+            return self._process_csvfile(report)
 
     def _process_csvfile(self, report):
         """
@@ -36,12 +34,8 @@ class BlackduckImporter(Importer):
         No file information then.
         """
         security_issues = dict()
-        try:
-            with open(str(report), 'r') as f:
-                security_issues = self.__partition_by_key(f)
-
-        except Exception as e:
-            print("Could not process csv file: {}".format(e))
+        with open(str(report), 'r') as f:
+            security_issues = self.__partition_by_key(f)
 
         project_ids = set(security_issues.keys())
         return self._process_project_findings(project_ids, security_issues, None)
@@ -53,21 +47,18 @@ class BlackduckImporter(Importer):
         """
         files = dict()
         security_issues = dict()
-        try:
-            with zipfile.ZipFile(str(report)) as zip:
-                for full_file_name in zip.namelist():
-                    file_name = full_file_name.split("/")[-1]
-                    # Backwards compatibility, newer versions of Blackduck have a source file rather
-                    # than a "files" file.
-                    if 'source' in file_name or 'files' in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
-                            files = self.__partition_by_key(f)
-                    elif 'security' in file_name:
-                        with io.TextIOWrapper(zip.open(full_file_name)) as f:
-                            security_issues = self.__partition_by_key(f)
 
-        except Exception as e:
-            print("Could not process zip file: {}".format(e))
+        with zipfile.ZipFile(str(report)) as zip:
+            for full_file_name in zip.namelist():
+                file_name = full_file_name.split("/")[-1]
+                # Backwards compatibility, newer versions of Blackduck have a source file rather
+                # than a "files" file.
+                if 'source' in file_name or 'files' in file_name:
+                    with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                        files = self.__partition_by_key(f)
+                elif 'security' in file_name:
+                    with io.TextIOWrapper(zip.open(full_file_name)) as f:
+                        security_issues = self.__partition_by_key(f)
 
         project_ids = set(files.keys()) & set(security_issues.keys())
         return self._process_project_findings(project_ids, security_issues, files)

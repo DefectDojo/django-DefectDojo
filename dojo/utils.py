@@ -32,8 +32,9 @@ import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
-from celery.decorators import task
+from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -46,7 +47,7 @@ Helper functions for DefectDojo
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def do_false_positive_history(new_finding, *args, **kwargs):
     logger.debug('%s: sync false positive history', new_finding.id)
@@ -103,7 +104,7 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
@@ -131,8 +132,9 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             elif(deduplicationAlgorithm == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE):
                 deduplicate_uid_or_hash_code(new_finding)
             else:
+                logger.debug('dedupe legacy start')
                 deduplicate_legacy(new_finding)
-                logger.debug('done legacy')
+                logger.debug('dedupe legacy start.done.')
         else:
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
@@ -326,7 +328,7 @@ def set_duplicate(new_finding, existing_finding):
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
-        set_duplicate_reopen_(new_finding, existing_finding)
+        set_duplicate_reopen(new_finding, existing_finding)
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
@@ -335,7 +337,9 @@ def set_duplicate(new_finding, existing_finding):
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
+    logger.debug('saving new finding')
     super(Finding, new_finding).save()
+    logger.debug('saving existing finding')
     super(Finding, existing_finding).save()
 
 
@@ -358,7 +362,7 @@ def set_duplicate_reopen(new_finding, existing_finding):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
@@ -675,8 +679,6 @@ def get_punchcard_data(objs, start_date, weeks, view='Finding'):
             day_count = day['count']
 
             created = timezone.make_aware(datetime.combine(created, datetime.min.time()))
-
-            # print('%s %s %s', created, created.weekday(), calendar.day_name[created.weekday()], day_count)
 
             if created < start_of_week:
                 raise ValueError('date found outside supported range: ' + str(created))
@@ -1175,22 +1177,27 @@ def template_search_helper(fields=None, query_string=None):
     return found_entries
 
 
-def get_page_items(request, items, page_size, param_name='page'):
-    size = request.GET.get('page_size', page_size)
+def get_page_items(request, items, page_size, prefix=''):
+    return get_page_items_and_count(request, items, page_size, prefix=prefix, do_count=False)
+
+
+def get_page_items_and_count(request, items, page_size, prefix='', do_count=True):
+    page_param = prefix + 'page'
+    page_size_param = prefix + 'page_size'
+
+    page = request.GET.get(page_param, 1)
+    size = request.GET.get(page_size_param, page_size)
     paginator = Paginator(items, size)
-    page = request.GET.get(param_name)
 
     # new get_page method will handle invalid page value, out of bounds pages, etc
-    return paginator.get_page(page)
+    page = paginator.get_page(page)
 
+    # we add the total_count here which is usually before prefetching
+    # which is goog in this case because for counting we don't want to join too many tables
+    if do_count:
+        page.total_count = paginator.count
 
-def get_page_items_and_count(request, items, page_size, param_name='page'):
-    size = request.GET.get('page_size', page_size)
-    paginator = Paginator(items, size)
-    page = request.GET.get(param_name)
-
-    # new get_page method will handle invalid page value, out of bounds pages, etc
-    return paginator.get_page(page), paginator.count
+    return page
 
 
 def handle_uploaded_threat(f, eng):
@@ -1217,7 +1224,7 @@ def handle_uploaded_selenium(f, cred):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def add_external_issue(find, external_issue_provider):
     eng = Engagement.objects.get(test=find.test)
@@ -1230,7 +1237,7 @@ def add_external_issue(find, external_issue_provider):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def update_external_issue(find, old_status, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1242,7 +1249,7 @@ def update_external_issue(find, old_status, external_issue_provider):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def close_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1254,7 +1261,7 @@ def close_external_issue(find, note, external_issue_provider):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def reopen_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1306,7 +1313,6 @@ def process_notifications(request, note, parent_url, parent_title):
         event='user_mentioned',
         section=parent_title,
         note=note,
-        initiator=request.user,
         title='%s jotted a note' % request.user,
         url=parent_url,
         icon='commenting',
@@ -1418,9 +1424,9 @@ def prepare_for_view(encrypted_value):
     return decrypted_value
 
 
-def get_system_setting(setting):
+def get_system_setting(setting, default=None):
     system_settings = System_Settings.objects.get()
-    return getattr(system_settings, setting, None)
+    return getattr(system_settings, setting, (default if default is not None else None))
 
 
 def calculate_grade(product):
@@ -1629,6 +1635,18 @@ def merge_sets_safe(set1, set2):
     # return {*set1, *set2}
 
 
+def is_safe_url(url):
+    try:
+        # available in django 3+
+        from django.utils.http import url_has_allowed_host_and_scheme
+    except ImportError:
+        # django < 3
+        from django.utils.http import \
+            is_safe_url as url_has_allowed_host_and_scheme
+
+    return url_has_allowed_host_and_scheme(url, allowed_hosts=None)
+
+
 def get_return_url(request):
     return_url = request.POST.get('return_url', None)
     # print('return_url from POST: ', return_url)
@@ -1642,13 +1660,22 @@ def get_return_url(request):
 
 def redirect_to_return_url_or_else(request, or_else):
     return_url = get_return_url(request)
+
     if return_url:
-        return HttpResponseRedirect(return_url.strip())
+        # logger.debug('redirecting to %s: ', return_url.strip())
+        return redirect(request, return_url.strip())
     elif or_else:
-        return HttpResponseRedirect(or_else)
+        return redirect(request, or_else)
     else:
         messages.add_message(request, messages.ERROR, 'Unable to redirect anywhere.', extra_tags='alert-danger')
-        return HttpResponseRedirect(request.get_full_path())
+        return redirect(request, request.get_full_path())
+
+
+def redirect(request, redirect_to):
+    """Only allow redirects to allowed_hosts to prevent open redirects"""
+    if is_safe_url(redirect_to):
+        return HttpResponseRedirect(redirect_to)
+    raise ValueError('invalid redirect, host and scheme not in allowed_hosts')
 
 
 def file_size_mb(file_obj):
@@ -1834,3 +1861,43 @@ def create_bleached_link(url, title):
     link += title
     link += '</a>'
     return bleach.clean(link, tags=['a'], attributes={'a': ['href', 'target', 'title']})
+
+
+def get_object_or_none(klass, *args, **kwargs):
+    """
+    Use get() to return an object, or return None
+    does not exist.
+    klass may be a Model, Manager, or QuerySet object. All other passed
+    arguments and keyword arguments are used in the get() query.
+    Like with QuerySet.get(), MultipleObjectsReturned is raised if more than
+    one object is found.
+    """
+    queryset = klass
+
+    if hasattr(klass, '_default_manager'):
+        queryset = klass._default_manager.all()
+
+    if not hasattr(queryset, 'get'):
+        klass__name = klass.__name__ if isinstance(klass, type) else klass.__class__.__name__
+        raise ValueError(
+            "First argument to get_object_or_None() must be a Model, Manager, "
+            "or QuerySet, not '%s'." % klass__name
+        )
+    try:
+        return queryset.get(*args, **kwargs)
+    except queryset.model.DoesNotExist:
+        return None
+
+
+def add_error_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            message,
+                            extra_tags='alert-danger')
+
+
+def add_field_errors_to_response(form):
+    if form and get_current_request():
+        for field, error in form.errors.items():
+            add_error_message_to_response(error)

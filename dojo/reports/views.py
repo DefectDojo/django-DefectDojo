@@ -27,7 +27,7 @@ from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGC
     CustomReportJsonForm, ReportOptions, report_widget_factory
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
-    get_words_for_field
+    get_words_for_field, redirect
 from dojo.user.helper import user_must_be_authorized, check_auth_users_list
 
 logger = logging.getLogger(__name__)
@@ -53,7 +53,7 @@ def report_url_resolver(request):
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = Finding.objects.all()
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
                                         finding__false_p=False,
@@ -64,7 +64,7 @@ def report_builder(request):
 
     endpoints = Endpoint.objects.filter(id__in=ids)
 
-    endpoints = EndpointFilter(request.GET, queryset=endpoints)
+    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     in_use_widgets = [ReportOptions(request=request)]
     available_widgets = [CoverPage(request=request),
@@ -149,7 +149,7 @@ def custom_report(request):
 def report_findings(request):
     findings = Finding.objects.filter()
 
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings, user=request.user)
+    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
 
     title_words = get_words_for_field(findings.qs, 'title')
     component_words = get_words_for_field(findings.qs, 'component_name')
@@ -184,7 +184,7 @@ def report_endpoints(request):
     ids = get_endpoint_ids(endpoints)
 
     endpoints = Endpoint.objects.filter(id__in=ids)
-    endpoints = EndpointFilter(request.GET, queryset=endpoints)
+    endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
 
@@ -318,7 +318,7 @@ def reports(request):
 def regen_report(request, rid):
     report = get_object_or_404(Report, id=rid)
     if report.type != 'Custom':
-        return HttpResponseRedirect(report.options + "&regen=" + rid)
+        return redirect(request, report.options + "&regen=" + rid)
     else:
         report.datetime = timezone.now()
         report.status = 'requested'
@@ -383,18 +383,18 @@ def endpoint_report(request, eid):
 @user_must_be_authorized(Product, 'view', 'pid')
 def product_endpoint_report(request, pid):
     user = Dojo_User.objects.get(id=request.user.id)
-    product = get_object_or_404(Product, id=pid)
-    endpoints = Endpoint.objects.filter(product=product,
-                                        finding__active=True,
-                                        finding__verified=True,
-                                        finding__false_p=False,
-                                        finding__duplicate=False,
-                                        finding__out_of_scope=False,
-                                        )
+    product = get_object_or_404(Product.objects.all().prefetch_related('engagement_set__test_set__test_type', 'engagement_set__test_set__environment'), id=pid)
+    endpoint_ids = Endpoint.objects.filter(product=product,
+                                           finding__active=True,
+                                           finding__verified=True,
+                                           finding__false_p=False,
+                                           finding__duplicate=False,
+                                           finding__out_of_scope=False,
+                                           ).values_list('id', flat=True)
 
-    ids = get_endpoint_ids(endpoints)
+    # ids = get_endpoint_ids(endpoints)
 
-    endpoints = Endpoint.objects.filter(id__in=ids)
+    endpoints = prefetch_related_endpoints_for_report(Endpoint.objects.filter(id__in=endpoint_ids))
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
@@ -403,6 +403,10 @@ def product_endpoint_report(request, pid):
     include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
+    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
+    disclaimer = get_system_setting('disclaimer')
+    if include_disclaimer and len(disclaimer) == 0:
+        disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
     add_breadcrumb(parent=product, title="Vulnerable Product Endpoints Report", top_level=False, request=request)
     report_form = ReportOptionsForm()
@@ -468,6 +472,8 @@ def product_endpoint_report(request, pid):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': request.user,
                            'title': 'Generate Report',
                            })
@@ -506,6 +512,8 @@ def product_endpoint_report(request, pid):
                                             'include_finding_images': include_finding_images,
                                             'include_executive_summary': include_executive_summary,
                                             'include_table_of_contents': include_table_of_contents,
+                                            'include_disclaimer': include_disclaimer,
+                                            'disclaimer': disclaimer,
                                             'user': user,
                                             'team_name': get_system_setting('team_name'),
                                             'title': 'Generate Report',
@@ -530,6 +538,8 @@ def product_endpoint_report(request, pid):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': request.user,
                            'title': 'Generate Report',
                            })
@@ -577,7 +587,7 @@ def generate_report(request, obj):
             pass  # user is authorized for this product
         else:
             raise PermissionDenied
-    elif type(obj).__name__ == "QuerySet":
+    elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet":
         # authorization taken care of by only selecting findings from product user is authed to see
         pass
     else:
@@ -589,6 +599,10 @@ def generate_report(request, obj):
     include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
+    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
+    disclaimer = get_system_setting('disclaimer')
+    if include_disclaimer and len(disclaimer) == 0:
+        disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
     report_name = str(obj)
     report_type = type(obj).__name__
@@ -601,10 +615,8 @@ def generate_report(request, obj):
         report_title = "Product Type Report"
         report_subtitle = str(product_type)
 
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product__prod_type=product_type).distinct().prefetch_related('test',
-                                                                                           'test__engagement__product',
-                                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, prod_type=product_type, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product__prod_type=product_type)))
         products = Product.objects.filter(prod_type=product_type,
                                           engagement__test__finding__in=findings.qs).distinct()
         engagements = Engagement.objects.filter(product__prod_type=product_type,
@@ -640,6 +652,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -653,10 +667,8 @@ def generate_report(request, obj):
         report_name = "Product Report: " + str(product)
         report_title = "Product Report"
         report_subtitle = str(product)
-        findings = ReportFindingFilter(request.GET, queryset=Finding.objects.filter(
-            test__engagement__product=product).distinct().prefetch_related('test',
-                                                                           'test__engagement__product',
-                                                                           'test__engagement__product__prod_type'))
+        findings = ReportFindingFilter(request.GET, product=product, queryset=prefetch_related_findings_for_report(Finding.objects.filter(
+            test__engagement__product=product)))
         ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
@@ -671,6 +683,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -679,12 +693,10 @@ def generate_report(request, obj):
                    'user_id': request.user.id}
 
     elif type(obj).__name__ == "Engagement":
+        logger.debug('generating report for Engagement')
         engagement = obj
-        findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(test__engagement=engagement,
-                                                                       ).prefetch_related('test',
-                                                                                          'test__engagement__product',
-                                                                                          'test__engagement__product__prod_type').distinct())
+        findings = ReportFindingFilter(request.GET, engagement=engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test__engagement=engagement)))
         report_name = "Engagement Report: " + str(engagement)
         filename = "engagement_finding_report.pdf"
         template = 'dojo/engagement_pdf_report.html'
@@ -695,6 +707,7 @@ def generate_report(request, obj):
         tests = Test.objects.filter(finding__id__in=ids).distinct()
         ids = get_endpoint_ids(Endpoint.objects.filter(product=engagement.product).distinct())
         endpoints = Endpoint.objects.filter(id__in=ids)
+
         context = {'engagement': engagement,
                    'tests': tests,
                    'report_name': report_name,
@@ -703,6 +716,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -712,10 +727,8 @@ def generate_report(request, obj):
 
     elif type(obj).__name__ == "Test":
         test = obj
-        findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(test=test).prefetch_related('test',
-                                                                                                   'test__engagement__product',
-                                                                                                   'test__engagement__product__prod_type').distinct())
+        findings = ReportFindingFilter(request.GET, engagement=test.engagement,
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(test=test)))
         filename = "test_finding_report.pdf"
         template = "dojo/test_pdf_report.html"
         report_name = "Test Report: " + str(test)
@@ -729,6 +742,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -747,10 +762,7 @@ def generate_report(request, obj):
         report_title = "Endpoint Report"
         report_subtitle = host
         findings = ReportFindingFilter(request.GET,
-                                       queryset=Finding.objects.filter(endpoints__in=endpoints,
-                                                                       ).prefetch_related('test',
-                                                                                          'test__engagement__product',
-                                                                                          'test__engagement__product__prod_type').distinct())
+                                       queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
         context = {'endpoint': endpoint,
                    'endpoints': endpoints,
@@ -760,17 +772,16 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': get_system_setting('team_name'),
                    'title': report_title,
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
-    elif type(obj).__name__ == "QuerySet":
+    elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet":
         findings = ReportAuthedFindingFilter(request.GET,
-                                             queryset=obj.prefetch_related('test',
-                                                                           'test__engagement__product',
-                                                                           'test__engagement__product__prod_type').distinct(),
-                                             user=request.user)
+                                             queryset=prefetch_related_findings_for_report(obj).distinct())
         filename = "finding_report.pdf"
         report_name = 'Finding'
         report_type = 'Finding'
@@ -784,6 +795,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -809,6 +822,8 @@ def generate_report(request, obj):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': user,
                            'team_name': settings.TEAM_NAME,
                            'title': report_title,
@@ -863,6 +878,8 @@ def generate_report(request, obj):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': user,
                            'team_name': settings.TEAM_NAME,
                            'title': report_title,
@@ -899,3 +916,26 @@ def generate_report(request, obj):
                    'report_form': report_form,
                    'context': context,
                    })
+
+
+def prefetch_related_findings_for_report(findings):
+    return findings.prefetch_related('test',
+                                     'test__engagement__product',
+                                     'test__engagement__product__prod_type',
+                                     'risk_acceptance_set',
+                                     'risk_acceptance_set__accepted_findings',
+                                     'burprawrequestresponse_set',
+                                     'endpoints',
+                                     'tags',
+                                     'notes',
+                                     'images',
+                                     'reporter',
+                                     'mitigated_by'
+                                     )
+
+
+def prefetch_related_endpoints_for_report(endpoints):
+    return endpoints.prefetch_related(
+                                      'product',
+                                      'tags'
+                                     )

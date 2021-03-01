@@ -1,9 +1,11 @@
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Notes
-from django.contrib.auth.models import User
+import io
 from datetime import datetime
+
+from django.contrib.auth.models import User
+
+from dojo.models import Finding, Notes
 
 
 class ColumnMappingStrategy(object):
@@ -80,7 +82,16 @@ class NotesColumnMappingStrategy(ColumnMappingStrategy):
             finding.notes.add(note)
 
 
-class SKFCsvParser(object):
+class SKFParser(object):
+
+    def get_scan_types(self):
+        return ["SKF Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Output of SKF Sprint summary export."
 
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()
@@ -102,7 +113,7 @@ class SKFCsvParser(object):
             self.column_names[index] = column
             index += 1
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         self.chain = None
         self.column_names = dict()
         self.dupes = dict()

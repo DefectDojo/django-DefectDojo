@@ -1,37 +1,51 @@
-__author__ = 'Aaron Weaver'
+
+import re
+from datetime import datetime
+import sys
+import io
+import csv
+from django.utils.text import Truncator
 
 from dojo.models import Finding
-from datetime import datetime
-import pandas as pd
-import re
-from django.utils.text import Truncator
 
 
 class AWSProwlerParser(object):
-    item_data = ""
-    pdepth = 0
 
-    def __init__(self, filename, test):
+    def get_scan_types(self):
+        return ["AWS Prowler Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "AWS Prowler Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "AWS Security Hub exports in JSON format."
+
+    def get_findings(self, filename, test):
+        content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        csv.field_size_limit(int(sys.maxsize / 10))  # the request/resp are big
+        reader = csv.DictReader(io.StringIO(content))
+        dupes = dict()
+
         find_date = datetime.now()
-        dupes = {}
         account = None
 
-        df = pd.read_csv(filename, header=0, error_bad_lines=False)
-
-        for i, row in df.iterrows():
-            profile = df.loc[i, 'PROFILE']
-            account = df.loc[i, 'ACCOUNT_NUM']
-            region = df.loc[i, 'REGION']
-            title_id = df.loc[i, 'TITLE_ID']
-            result = df.loc[i, 'RESULT']
-            scored = df.loc[i, 'SCORED']
-            level = df.loc[i, 'LEVEL']
-            title_text = df.loc[i, 'TITLE_TEXT']
+        for row in reader:
+            profile = row.get('PROFILE')
+            account = row.get('ACCOUNT_NUM')
+            region = row.get('REGION')
+            title_id = row.get('TITLE_ID')
+            result = row.get('RESULT')
+            scored = row.get('SCORED')
+            level = row.get('LEVEL')
+            severity = row.get('SEVERITY')
+            title_text = row.get('TITLE_TEXT')
             title_text = re.sub(r'\[.*\]\s', '', title_text)
             title_text_trunc = Truncator(title_text).words(8)
-            notes = df.loc[i, 'NOTES']
+            notes = row.get('NOTES')
 
-            sev = self.getCriticalityRating(result, level)
+            sev = self.getCriticalityRating(result, level, severity)
             description = "**Region:** " + region + "\n\n" + notes + "\n"
             dupe_key = sev + title_text
             if dupe_key in dupes:
@@ -51,49 +65,32 @@ class AWSProwlerParser(object):
                                date=find_date,
                                dynamic_finding=True)
                 dupes[dupe_key] = find
-        self.items = list(dupes.values())
 
         if account:
             test_description = ""
             test_description = "%s\n* **AWS Account:** %s\n" % (test_description, str(account))
             test.description = test_description
             test.save()
+        return list(dupes.values())
 
     def formatview(self, depth):
         if depth > 1:
             return "* "
-            # print("depth hit")
         else:
             return ""
 
-    def recursive_print(self, src, depth=0, key=''):
-        tabs = lambda n: ' ' * n * 2
-        if isinstance(src, dict):
-            for key, value in src.items():
-                if isinstance(src, str):
-                    self.item_data = self.item_data + key + "\n"
-                self.recursive_print(value, depth + 1, key)
-        elif isinstance(src, list):
-            for litem in src:
-                self.recursive_print(litem, depth + 2)
-        else:
-            if self.pdepth != depth:
-                self.item_data = self.item_data + "\n"
-            if key:
-                self.item_data = self.item_data + self.formatview(depth) + '**%s:** %s\n\n' % (key.title(), src)
-            else:
-                self.item_data = self.item_data + self.formatview(depth) + '%s\n' % src
-            self.pdepth = depth
-
     # Criticality rating
-    def getCriticalityRating(self, result, level):
+    def getCriticalityRating(self, result, level, severity):
         criticality = "Info"
         if result == "INFO" or result == "PASS":
             criticality = "Info"
         elif result == "FAIL":
-            if level == "Level 1":
-                criticality = "Critical"
+            if severity:
+                return severity
             else:
-                criticality = "High"
+                if level == "Level 1":
+                    criticality = "Critical"
+                else:
+                    criticality = "High"
 
         return criticality

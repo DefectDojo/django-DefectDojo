@@ -40,5 +40,12 @@
     },
     "model": "dojo.development_environment",
     "pk": 6
+  },
+  {
+    "fields": {
+      "name": "Default"
+    },
+    "model": "dojo.development_environment",
+    "pk": 7
   }
 ]

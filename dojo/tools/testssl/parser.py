@@ -1,24 +1,28 @@
-import io
 import csv
 import hashlib
+import io
 import re
 from urllib.parse import urlparse
-from dojo.models import Finding, Endpoint
+
+from dojo.models import Endpoint, Finding
 
 __author__ = 'dr3dd589'
 
 SEV = ['INFO', 'LOW', 'HIGH', 'WARN']
 
 
-class TestsslCSVParser(object):
-    def __init__(self, filename, test):
-        self.dupes = dict()
-        self.items = ()
+class TestsslParser(object):
 
-        if filename is None:
-            self.items = ()
-            return
+    def get_scan_types(self):
+        return ["Testssl Scan"]
 
+    def get_label_for_scan_types(self, scan_type):
+        return "Testssl Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import CSV output of testssl scan report."
+
+    def get_findings(self, filename, test):
         content = filename.read()
         if type(content) is bytes:
             content = content.decode('utf-8')
@@ -27,7 +31,7 @@ class TestsslCSVParser(object):
 
         for row in reader:
             csvarray.append(row)
-
+        dupes = dict()
         for row in csvarray:
             if row['severity'] in SEV:
                 url = row['fqdn/ip'].split('/')[0]
@@ -55,12 +59,12 @@ class TestsslCSVParser(object):
                     cwe = None
                 if title and description is not None:
                     dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
-                    if dupe_key in self.dupes:
-                        finding = self.dupes[dupe_key]
+                    if dupe_key in dupes:
+                        finding = dupes[dupe_key]
                         self.process_endpoints(finding, url)
-                        self.dupes[dupe_key] = finding
+                        dupes[dupe_key] = finding
                     else:
-                        self.dupes[dupe_key] = True
+                        dupes[dupe_key] = True
 
                         finding = Finding(
                             title=title,
@@ -73,10 +77,11 @@ class TestsslCSVParser(object):
                             cwe=cwe,
                             numerical_severity=Finding.get_numerical_severity(severity))
                         finding.unsaved_endpoints = list()
-                        self.dupes[dupe_key] = finding
+                        dupes[dupe_key] = finding
                         self.process_endpoints(finding, url)
-                self.items = self.dupes.values()
+        return dupes.values()
 
+    # FIXME remove special endpoint management
     def process_endpoints(self, finding, host):
         protocol = "http"
         query = ""

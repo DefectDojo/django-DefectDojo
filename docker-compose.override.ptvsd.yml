@@ -6,7 +6,8 @@ services:
     volumes:
       - '.:/app:z'
       - './media:/app/media/finding_images'
-      - './media/CACHE:/app/media/CACHE'      
+      - './media/CACHE:/app/media/CACHE'
+      - './media/threat:/app/media/threat'
     environment:
       DD_DEBUG: 'True'
     ports:

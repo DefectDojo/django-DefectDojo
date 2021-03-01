@@ -1,6 +1,8 @@
 import json
+
 from dojo.models import Endpoint, Finding
 
+# FIXME discuss this list as maintenance subject
 # Recommended cipher suites according to German BSI as of 2020
 TLS12_RECOMMENDED_CIPHERS = [
     'TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256',
@@ -68,8 +70,7 @@ REFERENCES = 'TLS recommendations of German BSI: ' + BSI_LINK
 
 class SSLyzeJSONParser(object):
 
-    def __init__(self, json_output, test):
-        self.items = []
+    def get_findings(self, json_output, test):
 
         if json_output is None:
             return
@@ -77,7 +78,7 @@ class SSLyzeJSONParser(object):
         tree = self.parse_json(json_output)
 
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return self.get_items(tree, test)
 
     def parse_json(self, json_output):
         try:
@@ -286,5 +287,4 @@ def get_endpoint(node):
             host=hostname,
             port=port)
     else:
-        print("No endpoint found")
         return None

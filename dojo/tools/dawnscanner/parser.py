@@ -1,19 +1,25 @@
-__author__ = 'jaguasch'
+import hashlib
+import json
+import re
 
 from dateutil import parser
-import json
-import hashlib
+
 from dojo.models import Finding
-import re
 
 
 class DawnScannerParser(object):
-    def __init__(self, filename, test):
-        tree = filename.read()
-        try:
-            data = json.loads(str(tree, 'utf-8'))
-        except:
-            data = json.loads(tree)
+
+    def get_scan_types(self):
+        return ["DawnScanner Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Dawnscanner (-j) output file can be imported in JSON format."
+
+    def get_findings(self, filename, test):
+        data = json.load(filename)
 
         dupes = dict()
         find_date = parser.parse(data['scan_started'])
@@ -31,6 +37,7 @@ class DawnScannerParser(object):
 
             title = item['name'].upper()
             if "CVE" in title:
+                # FIXME switch to a function
                 cve = re.findall(r'CVE-\d{4}-\d{4,7}', title)[0]
             else:
                 cve = None
@@ -40,7 +47,7 @@ class DawnScannerParser(object):
             mitigation = item['remediation']
             references = item['cve_link']
 
-            dupe_key = hashlib.md5(str(sev + '|' + title).encode("utf-8")).hexdigest()
+            dupe_key = hashlib.sha256(str(sev + '|' + title).encode("utf-8")).hexdigest()
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -64,5 +71,4 @@ class DawnScannerParser(object):
                     static_finding=True)
 
                 dupes[dupe_key] = find
-        # raise Exception('Stopping import')
-        self.items = list(dupes.values())
+        return list(dupes.values())

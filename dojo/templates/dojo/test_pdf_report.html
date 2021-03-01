@@ -1,5 +1,5 @@
 {% extends "report_base.html" %}
-{% load static from staticfiles %}
+{% load static %}
 {% load display_tags %}
 {% load humanize %}
 {% load get_endpoint_status %}
@@ -42,7 +42,7 @@
                         <div class="panel-heading finding-title">
                             <div class="clearfix">
                                 <h5>
-                                    {{ test.test_type.name }}
+                                    {{ test }}
                                 </h5>
                             </div>
                         </div>
@@ -78,7 +78,7 @@
                 </div>
                 <div class="col-lg-12">
                     <p>
-                        A {{ test.test_type.name }} was conducted in the {{ test.environment.name }} environment
+                        A {{ test }} was conducted in the {{ test.environment.name }} environment
                         {% if test.target_end %}
                             from {{ test.target_start|date:"SHORT_DATE_FORMAT" }} to
                             {{ test.target_end|date:"SHORT_DATE_FORMAT" }}
@@ -108,7 +108,7 @@
                         <ul>
                             {% for t in test.engagement.test_set.all %}
                                 {% if test.id != t.id %}
-                                    <li>{{ t.test_type.name }}
+                                    <li>{{ t }}
                                         ({{ t.environment.name|default:"unknown" }}):
                                         {{ t.target_start|date:"SHORT_DATE_FORMAT" }}</li>
                                 {% endif %}
@@ -142,6 +142,12 @@
                 </div>
             </div>
         {% endif %}
+        {% if include_disclaimer%}
+            <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
+                <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
+                <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer }}</p>
+            </div>
+		{% endif %}
         <div class="row">
             <div class="col-lg-12">
                 {% if include_finding_notes %}
@@ -231,7 +237,7 @@
                                     Finding {{ forloop.counter }}: {{ finding.title }}
                                     {% if finding.tags %}
                                         <sup>
-                                            {% for tag in finding.tags %}
+                                            {% for tag in finding.tags.all %}
                                             {{ tag }}
                                             {% endfor %}
                                         </sup>
@@ -271,10 +277,13 @@
                                     </td>
                                     <td>{{ finding.status }}</td>
                                     {% if finding.risk_acceptance_set.all %}
-                                        <td>
-                                            <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                                View Risk Acceptance</a>
-                                        </td>
+                                    <td>
+                                        {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
+                                        {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                            <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                            class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
+                                        {% endfor %}
+                                    </td>
                                     {% endif %}
                                     <td>{{ finding.date }}</td>
                                     <td>{{ finding.age }} days</td>
@@ -296,10 +305,10 @@
                             </table>
                         </div>
                     </div>
-                    
+
                     {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
 
-                     <h6>CVSSv3</h6>
+                     <h6>CVSS v3</h6>
                     <pre>{{ finding.cvssv3|markdown_render }}</pre>
 
                     <h6>Description</h6>
@@ -393,7 +402,7 @@
     </div> <!-- /container -->
 {% endblock %}
 {% block js %}
-    
+
     <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
     <!-- Flot Charts JavaScript -->
     <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
@@ -403,7 +412,7 @@
     <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{{ host }}{% static "flot-axis/jquery.flot.axislabels.js" %}"></script>
     <script type="text/javascript">
-        
+
         {% if include_executive_summary %}
             $(function () {
 
@@ -692,7 +701,7 @@
                                 return str;
                             }
 
-                            
+
                             if(tags)
                             {
                                 openLevel = openLevel_t;
@@ -708,17 +717,17 @@
                             }
 
                             level = parseInt(openLevel);
-                            
+
                             var anchor = titleText.trim().replace(/ /g, "_");
 
                             if(tags)
                             {
                                 if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                     "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                                 }
                                 else {
-                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                     titleText + "<sup>" + tags + "</sup></a></li>";
                                 }
 
@@ -728,11 +737,11 @@
                             else
                             {
                                 if (['Info', 'Low', 'Medium', 'High', 'Critical'].indexOf(titleText) >= 0) {
-                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                     "<span class=\"label severity severity-" + titleText + "\">" + titleText + "</span></a></li>";
                                 }
                                 else {
-                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" + 
+                                    toc += "<li><a style=\"font-size:" + (160 - (level * 7)) + "%; color:black;\" href=\"#" + anchor + "\">" +
                                     titleText + "</a></li>";
                                 }
 
@@ -744,7 +753,7 @@
                                 + titleText + "<sup>" + tags + "</sup></h" + closeLevel + "></a>";
                         }
                     );
-                    
+
                 if (level) {
                     toc += (new Array(level + 1)).join("</ul>");
                 }

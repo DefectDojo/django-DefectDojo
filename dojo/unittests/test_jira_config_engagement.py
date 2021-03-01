@@ -10,23 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class JIRAConfigEngagementTest(DojoTestCase):
-    fixtures = ['dojo_testdata.json']
-
-    product_id = 999
-
-    def __init__(self, *args, **kwargs):
-        DojoTestCase.__init__(self, *args, **kwargs)
-
-    def setUp(self):
-        self.system_settings(enable_jira=True)
-        self.client.force_login(self.get_test_admin())
-        # product 3 has no jira project config, double check to make sure someone didn't molest the fixture
-        # running this in __init__ throws database access denied error
-        self.product_id = 3
-        product = Product.objects.get(id=self.product_id)
-        self.assertIsNone(jira_helper.get_jira_project(product))
-
+class JIRAConfigEngagementBase(object):
     def get_new_engagement_with_jira_project_data(self):
         return {
             'name': 'new engagement',
@@ -39,6 +23,22 @@ class JIRAConfigEngagementTest(DojoTestCase):
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'IUNSEC',
             'jira-project-form-product_jira_sla_notification': 'on',
+        }
+
+    def get_new_engagement_with_jira_project_data_and_epic_mapping(self):
+        return {
+            'name': 'new engagement',
+            'description': 'new description',
+            'lead': 1,
+            'product': self.product_id,
+            'target_start': '2070-11-27',
+            'target_end': '2070-12-04',
+            'status': 'Not Started',
+            'jira-project-form-jira_instance': 2,
+            'jira-project-form-project_key': 'IUNSEC',
+            'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-enable_engagement_epic_mapping': 'on',
+            'jira-epic-form-push_to_jira': 'on',
         }
 
     def get_new_engagement_without_jira_project_data(self):
@@ -162,6 +162,9 @@ class JIRAConfigEngagementTest(DojoTestCase):
     def add_engagement_without_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
         return self.add_engagement_jira_with_data(self.get_new_engagement_without_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
+    def add_engagement_with_jira_project_and_epic_mapping(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+        return self.add_engagement_jira_with_data(self.get_new_engagement_with_jira_project_data_and_epic_mapping(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
+
     def edit_engagement_jira(self, engagement, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse('edit_engagement', args=(engagement.id, )))
 
@@ -214,6 +217,27 @@ class JIRAConfigEngagementTest(DojoTestCase):
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
+
+
+class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
+    fixtures = ['dojo_testdata.json']
+
+    product_id = 999
+
+    def __init__(self, *args, **kwargs):
+        DojoTestCase.__init__(self, *args, **kwargs)
+
+    def setUp(self):
+        self.system_settings(enable_jira=True)
+        self.user = self.get_test_admin()
+        self.client.force_login(self.user)
+        self.user.usercontactinfo.block_execution = True
+        self.user.usercontactinfo.save()
+        # product 3 has no jira project config, double check to make sure someone didn't molest the fixture
+        # running this in __init__ throws database access denied error
+        self.product_id = 3
+        product = Product.objects.get(id=self.product_id)
+        self.assertIsNone(jira_helper.get_jira_project(product))
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_jira_project_to_engagement_without_jira_project(self, jira_mock):

@@ -1,20 +1,21 @@
 # Based on CSV, but rewrote because
 # values in different columns required concatinaton
 
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
+import io
 import re
-from urllib.parse import urlparse
 import socket
+from urllib.parse import urlparse
+
+from dojo.models import Endpoint, Finding
 
 MAPPINGS = {"title": "Vulnerability Name",
             'description': 'Description',
             'protocol': 'Port',
             'references': 'Evidence',
             'mitigation': 'Remediation',
-            'cwe': 'CVE',
+            'cve': 'CVE',
             'fqdn': 'Domain',
             'severity': 'Severity',
             'ip': 'IP'
@@ -89,9 +90,18 @@ class Severityfilter():
             self.severity = 'Info'
 
 
-class TrustwaveUploadCsvParser(object):
+class TrustwaveParser(object):
 
-    def __init__(self, filename, test):
+    def get_scan_types(self):
+        return ["Trustwave Scan (CSV)"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Trustwave Scan (CSV)"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "CSV output of Trustwave vulnerability scan."
+
+    def get_findings(self, filename, test):
         self.dupes = dict()
         self.items = ()
 
@@ -127,7 +137,10 @@ class TrustwaveUploadCsvParser(object):
                     findingdict['severity'] = severityfilter.severity
                 elif column_name == 'Port':
                     endpointdict[field] = row[column_name]
-                elif column_name in ['Evidence', 'CVE']:
+                elif column_name == 'CVE':
+                    findingdict[field] = row[column_name]
+                    referencesarray.append(row[column_name])
+                elif column_name in ['Evidence']:
                     referencesarray.append(row[column_name])
                 else:
                     if column_name in list(row.keys()):
@@ -166,6 +179,7 @@ class TrustwaveUploadCsvParser(object):
             finding.fqdn = findingdict['fqdn']
             finding.severity = findingdict['severity']
             finding.url = findingdict['url']
+            finding.cve = findingdict.get('cve')
 
             if finding is not None:
                 if finding.url is None:
@@ -175,9 +189,14 @@ class TrustwaveUploadCsvParser(object):
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.md5(finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).hexdigest()
+                key = hashlib.sha256("|".join([
+                    finding.url,
+                    finding.severity,
+                    finding.title,
+                    finding.description
+                ]).encode()).hexdigest()
 
                 if key not in self.dupes:
                     self.dupes[key] = finding
 
-        self.items = list(self.dupes.values())
+        return list(self.dupes.values())

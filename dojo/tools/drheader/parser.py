@@ -1,41 +1,35 @@
-__author__ = 'Spoint42'
-
 import json
+
 from dojo.models import Finding
 
 
-class DrHeaderJSONParser(object):
-    def _convert_drheader_severity_to_dojo_severity(self, drheader_severity):
-        if drheader_severity == "high":
-            return "High"
-        elif drheader_severity == "medium":
-            return "Medium"
-        else:
-            return None
+class DrHeaderParser(object):
 
-    def __init__(self, filename, test):
-        self.items = []
-        if filename is None:
-            return
-        tree = filename.read()
-        try:
-            data = json.loads(str(tree, 'utf-8'))
-        except:
-            data = json.loads(tree)
+    def get_scan_types(self):
+        return ["DrHeader JSON Importer"]
 
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import result of DrHeader JSON output."
+
+    def get_findings(self, filename, test):
+        data = json.load(filename)
+        items = []
         for item in data:
             findingdetail = ''
             title = "Header : " + item["rule"]
-            sev = self._convert_drheader_severity_to_dojo_severity(item["severity"])
             message = item["message"]
-
+            severity = item["severity"].title()
             find = Finding(title=title,
                            test=test,
                            active=True,
                            verified=True,
                            description=message,
-                           severity=sev.title(),
-                           numerical_severity=Finding.get_numerical_severity(sev),
+                           severity=severity,
+                           numerical_severity=Finding.get_numerical_severity(severity),
                            static_finding=False)
 
-            self.items.append(find)
+            items.append(find)
+        return items

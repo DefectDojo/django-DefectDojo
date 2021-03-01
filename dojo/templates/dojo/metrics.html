@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load event_tags %}
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_styles %}
     .tabs-below > .nav-tabs,
     .tabs-right > .nav-tabs,
@@ -122,6 +122,7 @@
                         {% endif %} {% endcomment %}
                         {% if not critical_prods %}
                             <div class="dropdown pull-right">
+                                <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                         data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
                                     <span class="fa fa-bars"></span>
@@ -142,10 +143,10 @@
                             </div>
                         {% endif %}
                     </h3>
-                    
+
                 </div>
             </div>
-            <div id="the-filters" class="panel-body collapse">
+            <div id="the-filters" class="is-filters panel-body collapse">
                 {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics/product/type" %}
             </div>
         </div>
@@ -643,7 +644,7 @@
     {% include "dojo/filter_js_snippet.html" %}
     <script src="{% static "justgage/raphael.min.js" %}"></script>
     <script src="{% static "justgage/justgage.js" %}"></script>
-    
+
     <script>
         $('.gaugeloop').each(function () {
             j_obj = $(this);
@@ -672,8 +673,10 @@
             {%  if accepted_per_month %}
                 chart_div2();
             {%  endif %}
-            chart_div3();
-            chart_div4();
+            {% if  not critical_prods %}
+                chart_div3();
+                chart_div4();
+            {% endif %}
 
             {% if opened_per_month %}
                 function chart_div() {

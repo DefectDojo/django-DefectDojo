@@ -1,7 +1,8 @@
 [
   {
     "fields": {
-      "name": "Research and Development"
+      "name": "Research and Development",
+      "critical_product": true
     },
     "model": "dojo.product_type",
     "pk": 1

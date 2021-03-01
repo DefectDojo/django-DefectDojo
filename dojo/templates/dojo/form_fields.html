@@ -1,4 +1,10 @@
 {% load event_tags %}
+{% block css %}
+    {{ form.media.css }}
+{% endblock %}
+{% block js %}
+    {{ form.media.js }}
+{% endblock %}
 {% if form.non_field_errors %}
     <div class="alert alert-danger alert-dismissible" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
@@ -35,7 +41,7 @@
                 <label class="col-sm-2 control-label
                         {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}</label>
             {% endif %}
-            <div class="col-sm-offset-2 col-sm-10 {{ classes.value }}">
+            <div class="col-sm-10 {{ classes.value }}">
                 {% for choice in field %}
                     <div class="radio">
                         <label>
@@ -67,6 +73,7 @@
             {% endif %}
             <div class="col-sm-10 {{ classes.value }} {% if field|is_multiple_checkbox %}multiple-checkbox{% endif %}">
                 {{ field|addcss:"class:form-control" }}
+
 
                 {% for error in field.errors %}
                     <span class="help-block {{ form.error_css_class }}">{{ error }}</span>

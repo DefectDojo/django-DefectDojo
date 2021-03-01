@@ -1,27 +1,35 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
-class GitleaksJSONParser(object):
+class GitleaksParser(object):
     """
     A class that can be used to parse the Gitleaks JSON report files
     """
 
-    def __init__(self, filename, test):
+    def get_scan_types(self):
+        return ["Gitleaks Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Gitleaks Scan findings in JSON format."
+
+    def get_findings(self, filename, test):
         """
         Converts a Gitleaks report to DefectDojo findings
         """
 
-        self.dupes = dict()
-        # Start with an empty findings
-        self.items = ()
         # Exit if file is not provided
         if filename is None:
             return
 
         data = filename.read()
 
+        dupes = dict()
         for issue in self.parse_json(data):
             line = None
             file_path = issue["file"]
@@ -46,8 +54,8 @@ class GitleaksJSONParser(object):
 
             dupe_key = hashlib.md5((issue["offender"]).encode("utf-8")).hexdigest()
 
-            if dupe_key not in self.dupes:
-                self.dupes[dupe_key] = Finding(title=titleText,
+            if dupe_key not in dupes:
+                dupes[dupe_key] = Finding(title=titleText,
                                   test=test,
                                   cwe=798,
                                   active=False,
@@ -61,7 +69,7 @@ class GitleaksJSONParser(object):
                                   line=line,
                                   dynamic_finding=False,
                                   static_finding=True)
-        self.items = list(self.dupes.values())
+        return list(dupes.values())
 
     def parse_json(self, json_output):
         # Load json data from the report file

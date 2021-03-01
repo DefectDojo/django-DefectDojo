@@ -321,22 +321,6 @@
   },
   {
     "fields": {
-      "model": "customfield",
-      "app_label": "custom_field"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 41
-  },
-  {
-    "fields": {
-      "model": "customfieldvalue",
-      "app_label": "custom_field"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 42
-  },
-  {
-    "fields": {
       "expire_date": "2016-09-10T12:40:25.483Z",
       "session_data": "NjIzODFjMWIxMjVhNzQ1NzNhMTRjMzM1MzQ1MjVkY2VmZGI4YjIzNDp7ImRvam9fYnJlYWRjcnVtYnMiOlt7InVybCI6Ii8iLCJ0aXRsZSI6IkhvbWUifSx7InVybCI6Ii9wcm9maWxlIiwidGl0bGUiOiJFbmdpbmVlciBQcm9maWxlIC0gKGFkbWluKSJ9XSwiX2F1dGhfdXNlcl9oYXNoIjoiYzU0NTg4NGExYTNiOWM3NTA0YjAzM2VhOWMxYTJlMzRiMjQ4Nzk1OSIsIl9hdXRoX3VzZXJfYmFja2VuZCI6ImRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kIiwiX2F1dGhfdXNlcl9pZCI6IjEifQ=="
     },
@@ -1363,60 +1347,27 @@
     "model": "watson.searchentry",
     "pk": 13
   },
+
   {
+    "model": "dojo.tagulous_product_tags",
+    "pk": 1,
     "fields": {
-      "name": "java"
-    },
-    "model": "tagging.tag",
-    "pk": 1
-  },
-  {
+        "name": "java",
+        "slug": "java",
+        "count": 1,
+        "protected": false
+    }
+},
+{
+    "model": "dojo.tagulous_product_tags",
+    "pk": 2,
     "fields": {
-      "name": "tomcat"
-    },
-    "model": "tagging.tag",
-    "pk": 2
-  },
-  {
-    "fields": {
-      "tag": 1,
-      "object_id": 1,
-      "content_type": 16
-    },
-    "model": "tagging.taggeditem",
-    "pk": 1
-  },
-  {
-    "fields": {
-      "tag": 2,
-      "object_id": 1,
-      "content_type": 16
-    },
-    "model": "tagging.taggeditem",
-    "pk": 2
-  },
-  {
-    "fields": {
-      "default_value": "",
-      "field_type": "a",
-      "field_choices": "",
-      "name": "Slack Channels",
-      "content_type": 16,
-      "is_required": false
-    },
-    "model": "custom_field.customfield",
-    "pk": 1
-  },
-  {
-    "fields": {
-      "field": 1,
-      "content_type": 16,
-      "object_id": 1,
-      "value": "#dev-app-1"
-    },
-    "model": "custom_field.customfieldvalue",
-    "pk": 1
-  },
+        "name": "tomcat",
+        "slug": "tomcat",
+        "count": 1,
+        "protected": false
+    }
+},
   {
     "fields": {
       "codename": "add_permission",
@@ -2498,59 +2449,293 @@
     "pk": 120
   },
   {
-    "fields": {
-      "codename": "add_customfield",
-      "name": "Can add custom field",
-      "content_type": 41
-    },
     "model": "auth.permission",
-    "pk": 121
-  },
-  {
+    "pk": 489,
     "fields": {
-      "codename": "change_customfield",
-      "name": "Can change custom field",
-      "content_type": 41
+        "name": "Can add tagulous_ test_tags",
+        "content_type": 120,
+        "codename": "add_tagulous_test_tags"
+    }
     },
-    "model": "auth.permission",
-    "pk": 122
-  },
-  {
-    "fields": {
-      "codename": "delete_customfield",
-      "name": "Can delete custom field",
-      "content_type": 41
+    {
+        "model": "auth.permission",
+        "pk": 490,
+        "fields": {
+            "name": "Can change tagulous_ test_tags",
+            "content_type": 120,
+            "codename": "change_tagulous_test_tags"
+        }
     },
-    "model": "auth.permission",
-    "pk": 123
-  },
-  {
-    "fields": {
-      "codename": "add_customfieldvalue",
-      "name": "Can add custom field value",
-      "content_type": 42
+    {
+        "model": "auth.permission",
+        "pk": 491,
+        "fields": {
+            "name": "Can delete tagulous_ test_tags",
+            "content_type": 120,
+            "codename": "delete_tagulous_test_tags"
+        }
     },
-    "model": "auth.permission",
-    "pk": 124
-  },
-  {
-    "fields": {
-      "codename": "change_customfieldvalue",
-      "name": "Can change custom field value",
-      "content_type": 42
+    {
+        "model": "auth.permission",
+        "pk": 492,
+        "fields": {
+            "name": "Can view tagulous_ test_tags",
+            "content_type": 120,
+            "codename": "view_tagulous_test_tags"
+        }
     },
-    "model": "auth.permission",
-    "pk": 125
-  },
-  {
-    "fields": {
-      "codename": "delete_customfieldvalue",
-      "name": "Can delete custom field value",
-      "content_type": 42
+    {
+        "model": "auth.permission",
+        "pk": 493,
+        "fields": {
+            "name": "Can add tagulous_ product_tags",
+            "content_type": 121,
+            "codename": "add_tagulous_product_tags"
+        }
     },
-    "model": "auth.permission",
-    "pk": 126
-  },
+    {
+        "model": "auth.permission",
+        "pk": 494,
+        "fields": {
+            "name": "Can change tagulous_ product_tags",
+            "content_type": 121,
+            "codename": "change_tagulous_product_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 495,
+        "fields": {
+            "name": "Can delete tagulous_ product_tags",
+            "content_type": 121,
+            "codename": "delete_tagulous_product_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 496,
+        "fields": {
+            "name": "Can view tagulous_ product_tags",
+            "content_type": 121,
+            "codename": "view_tagulous_product_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 497,
+        "fields": {
+            "name": "Can add tagulous_ finding_ template_tags",
+            "content_type": 122,
+            "codename": "add_tagulous_finding_template_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 498,
+        "fields": {
+            "name": "Can change tagulous_ finding_ template_tags",
+            "content_type": 122,
+            "codename": "change_tagulous_finding_template_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 499,
+        "fields": {
+            "name": "Can delete tagulous_ finding_ template_tags",
+            "content_type": 122,
+            "codename": "delete_tagulous_finding_template_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 500,
+        "fields": {
+            "name": "Can view tagulous_ finding_ template_tags",
+            "content_type": 122,
+            "codename": "view_tagulous_finding_template_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 501,
+        "fields": {
+            "name": "Can add tagulous_ finding_tags",
+            "content_type": 123,
+            "codename": "add_tagulous_finding_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 502,
+        "fields": {
+            "name": "Can change tagulous_ finding_tags",
+            "content_type": 123,
+            "codename": "change_tagulous_finding_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 503,
+        "fields": {
+            "name": "Can delete tagulous_ finding_tags",
+            "content_type": 123,
+            "codename": "delete_tagulous_finding_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 504,
+        "fields": {
+            "name": "Can view tagulous_ finding_tags",
+            "content_type": 123,
+            "codename": "view_tagulous_finding_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 505,
+        "fields": {
+            "name": "Can add tagulous_ engagement_tags",
+            "content_type": 124,
+            "codename": "add_tagulous_engagement_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 506,
+        "fields": {
+            "name": "Can change tagulous_ engagement_tags",
+            "content_type": 124,
+            "codename": "change_tagulous_engagement_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 507,
+        "fields": {
+            "name": "Can delete tagulous_ engagement_tags",
+            "content_type": 124,
+            "codename": "delete_tagulous_engagement_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 508,
+        "fields": {
+            "name": "Can view tagulous_ engagement_tags",
+            "content_type": 124,
+            "codename": "view_tagulous_engagement_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 509,
+        "fields": {
+            "name": "Can add tagulous_ endpoint_tags",
+            "content_type": 125,
+            "codename": "add_tagulous_endpoint_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 510,
+        "fields": {
+            "name": "Can change tagulous_ endpoint_tags",
+            "content_type": 125,
+            "codename": "change_tagulous_endpoint_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 511,
+        "fields": {
+            "name": "Can delete tagulous_ endpoint_tags",
+            "content_type": 125,
+            "codename": "delete_tagulous_endpoint_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 512,
+        "fields": {
+            "name": "Can view tagulous_ endpoint_tags",
+            "content_type": 125,
+            "codename": "view_tagulous_endpoint_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 513,
+        "fields": {
+            "name": "Can add tagulous_ app_ analysis_tags",
+            "content_type": 126,
+            "codename": "add_tagulous_app_analysis_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 514,
+        "fields": {
+            "name": "Can change tagulous_ app_ analysis_tags",
+            "content_type": 126,
+            "codename": "change_tagulous_app_analysis_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 515,
+        "fields": {
+            "name": "Can delete tagulous_ app_ analysis_tags",
+            "content_type": 126,
+            "codename": "delete_tagulous_app_analysis_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 516,
+        "fields": {
+            "name": "Can view tagulous_ app_ analysis_tags",
+            "content_type": 126,
+            "codename": "view_tagulous_app_analysis_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 517,
+        "fields": {
+            "name": "Can add tagulous_ objects_ product_tags",
+            "content_type": 127,
+            "codename": "add_tagulous_objects_product_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 518,
+        "fields": {
+            "name": "Can change tagulous_ objects_ product_tags",
+            "content_type": 127,
+            "codename": "change_tagulous_objects_product_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 519,
+        "fields": {
+            "name": "Can delete tagulous_ objects_ product_tags",
+            "content_type": 127,
+            "codename": "delete_tagulous_objects_product_tags"
+        }
+    },
+    {
+        "model": "auth.permission",
+        "pk": 520,
+        "fields": {
+            "name": "Can view tagulous_ objects_ product_tags",
+            "content_type": 127,
+            "codename": "view_tagulous_objects_product_tags"
+        }
+    },
   {
     "fields": {
       "remote_addr": null,
@@ -3346,7 +3531,11 @@
       "tech_contact": "Jeffrey Williams",
       "tid": 0,
       "prod_manager": "John Smith",
-      "description": "The BodgeIt Store is a vulnerable web application which is currently aimed at people who are new to pen testing."
+      "description": "The BodgeIt Store is a vulnerable web application which is currently aimed at people who are new to pen testing.",
+      "tags": [
+          "java",
+          "tomcat"
+      ]
     },
     "model": "dojo.product",
     "pk": 1

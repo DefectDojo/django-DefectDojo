@@ -1,35 +1,32 @@
-from lxml import etree
-from dojo.models import Endpoint, Finding
 import logging
 import re
 from urllib.parse import urlparse
 
+from defusedxml import ElementTree as etree
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
 
-class BurpEnterpriseHtmlParser(object):
+class BurpEnterpriseParser(object):
 
-    def __init__(self, filename, test, mode=None):
+    def get_scan_types(self):
+        return ["Burp Enterprise Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Burp Enterprise Edition findings in HTML format"
+
+    def get_findings(self, filename, test):
         parser = etree.HTMLParser()
         tree = etree.parse(filename, parser)
-        if(mode in [None, 'detailed']):
-            self.mode = mode
-        else:
-            raise Exception("Internal error: Invalid mode " + mode + ". Expected: one of None, 'detailed'")
-
-        # Dictonary to hold the aggregated findings with:
-        #  - key: the concatenated aggregate keys
-        #  - value: the finding
-        self.dupes = dict()
-
-        self.test = test
-        self.impact = "No impact provided"
-
         if tree:
-            self.items = self.get_items(tree)
+            return self.get_items(tree, test)
         else:
-            self.items = dict()
+            return ()
 
     def get_content(self, container):
         s = ''
@@ -37,7 +34,6 @@ class BurpEnterpriseHtmlParser(object):
             s += ''.join(container.itertext()).strip().replace('Snip', '\n<-------------- Snip -------------->').replace('\t', '')
         else:
             for elem in container.iterchildren():
-                # print(elem.tag, ' : ', elem.text, '\n')
                 if elem.text is not None and elem.text.strip() != '':
                     if elem.tag == 'a':
                         s += '(' + elem.text + ')[' + elem.attrib['href'] + ']' + '\n'
@@ -93,70 +89,67 @@ class BurpEnterpriseHtmlParser(object):
                     items.append(vuln)
         return items
 
-    def get_items(self, tree):
+    def get_items(self, tree, test):
         # Check that there is at least one vulnerability (the vulnerabilities table is absent when no vuln are found)
-        items = self.pre_allocate_items(tree)
         vulns = tree.xpath("/html/body/div/div[contains(@class, 'section details')]/div[contains(@class, 'issue-container')]")
+        if len(vulns) == 0:
+            return list()
 
-        if(len(vulns) > 0):
-            dict_index = 0
-            description = ['Issue detail:', 'Issue description']
-            reqrsp = ['Request', 'Response']
-            impact = ['Issue background', 'Issue remediation']
-            mitigation = ['Remediation detail:', 'Remediation background']
-            references = ['Vulnerability classifications', 'References']
-            vuln = None
-            merge = False
-            for issue in vulns:
-                elems = list(issue.iterchildren())
-                curr_vuln = items[dict_index]
-                if vuln is None or (curr_vuln['Title'] != vuln['Title'] or curr_vuln['URL'] != vuln['URL']):
-                    vuln = curr_vuln
-                    merge = False
-                else:
-                    if curr_vuln['Endpoint'][0] not in vuln['Endpoint']:
-                        vuln_list = vuln['Endpoint']
-                        vuln_list.append(curr_vuln['Endpoint'][0])
-                        vuln['Endpoint'] = vuln_list
-                    merge = True
+        dict_index = 0
+        description = ['Issue detail:', 'Issue description']
+        reqrsp = ['Request', 'Response']
+        impact = ['Issue background', 'Issue remediation']
+        mitigation = ['Remediation detail:', 'Remediation background']
+        references = ['Vulnerability classifications', 'References']
+        vuln = None
+        merge = False
+        items = self.pre_allocate_items(tree)
+        for issue in vulns:
+            elems = list(issue.iterchildren())
+            curr_vuln = items[dict_index]
+            if vuln is None or (curr_vuln['Title'] != vuln['Title'] or curr_vuln['URL'] != vuln['URL']):
+                vuln = curr_vuln
+                merge = False
+            else:
+                if curr_vuln['Endpoint'][0] not in vuln['Endpoint']:
+                    vuln_list = vuln['Endpoint']
+                    vuln_list.append(curr_vuln['Endpoint'][0])
+                    vuln['Endpoint'] = vuln_list
+                merge = True
 
-                for index in range(3, len(elems), 2):
-                    primary, secondary = elems[index].text.strip(), elems[index + 1]
-                    field = self.get_content(secondary)
-                    webinfo = primary.split(':')[0]
-                    details = '**' + primary + '**\n' + field + '\n\n'
-                    # Description
-                    if primary in description:
-                        if merge:
-                            if field != vuln['Description'].split('\n')[1]:
-                                vuln['Description'] = vuln['Description'] + field + '\n\n'
-                        else:
-                            vuln['Description'] = vuln['Description'] + details
-                    # Impact
-                    if primary in impact and not merge:
-                        vuln['Impact'] = vuln['Impact'] + details
-                    # Mitigation
-                    if primary in mitigation and not merge:
-                        vuln['Mitigation'] = vuln['Mitigation'] + details
-                    # References and CWE
-                    if primary in references and not merge:
-                        if len(vuln['CWE']) < 1 and field.find('CWE') != -1:
-                            vuln['CWE'] += str(self.get_cwe(field))
-                        vuln['References'] = vuln['References'] + details
-                    # Request and Response pairs
-                    if webinfo in reqrsp:
-                        if webinfo == 'Request':
-                            vuln['Request'] = vuln['Request'] + field + 'SPLITTER'
-                        else:
-                            vuln['Response'] = vuln['Response'] + field + 'SPLITTER'
+            for index in range(3, len(elems), 2):
+                primary, secondary = elems[index].text.strip(), elems[index + 1]
+                field = self.get_content(secondary)
+                webinfo = primary.split(':')[0]
+                details = '**' + primary + '**\n' + field + '\n\n'
+                # Description
+                if primary in description:
+                    if merge:
+                        if field != vuln['Description'].split('\n')[1]:
+                            vuln['Description'] = vuln['Description'] + field + '\n\n'
+                    else:
+                        vuln['Description'] = vuln['Description'] + details
+                # Impact
+                if primary in impact and not merge:
+                    vuln['Impact'] = vuln['Impact'] + details
+                # Mitigation
+                if primary in mitigation and not merge:
+                    vuln['Mitigation'] = vuln['Mitigation'] + details
+                # References and CWE
+                if primary in references and not merge:
+                    if len(vuln['CWE']) < 1 and field.find('CWE') != -1:
+                        vuln['CWE'] += str(self.get_cwe(field))
+                    vuln['References'] = vuln['References'] + details
+                # Request and Response pairs
+                if webinfo in reqrsp:
+                    if webinfo == 'Request':
+                        vuln['Request'] = vuln['Request'] + field + 'SPLITTER'
+                    else:
+                        vuln['Response'] = vuln['Response'] + field + 'SPLITTER'
 
-                dict_index += 1
+            dict_index += 1
 
-            self.create_findings(items)
-            findings = list(self.dupes.values())
-        else:
-            findings = list()
-        return findings
+        return list(self.create_findings(items, test))
 
     def get_cwe(self, vuln_references):
         # Match only the first CWE!
@@ -167,14 +160,18 @@ class BurpEnterpriseHtmlParser(object):
         else:
             return 0
 
-    def create_findings(self, items):
+    def create_findings(self, items, test):
+        # Dictonary to hold the aggregated findings with:
+        #  - key: the concatenated aggregate keys
+        #  - value: the finding
+        dupes = dict()
         for details in items:
             if details.get('Description') == '':
                 continue
             aggregateKeys = "{}{}{}{}".format(details.get('Title'), details.get('Description'), details.get('CWE'), details.get('Endpoint'))
             find = Finding(title=details.get('Title'),
                            description=details.get('Description'),
-                           test=self.test,
+                           test=test,
                            severity=details.get('Severity'),
                            mitigation=details.get('Mitigation'),
                            references=details.get('References'),
@@ -200,7 +197,7 @@ class BurpEnterpriseHtmlParser(object):
                 find.unsaved_req_resp = unsaved_req_resp
 
             find.unsaved_endpoints = list()
-            self.dupes[aggregateKeys] = find
+            dupes[aggregateKeys] = find
 
             for url in details.get('Endpoint'):
                 parsedUrl = urlparse(url)
@@ -221,4 +218,4 @@ class BurpEnterpriseHtmlParser(object):
                         protocol=protocol,
                         query=query, fragment=fragment))
 
-        return list(self.dupes.values())
+        return list(dupes.values())

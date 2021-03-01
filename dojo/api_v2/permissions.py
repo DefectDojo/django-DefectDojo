@@ -1,38 +1,24 @@
 from rest_framework import permissions
+from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.roles_permissions import Permissions
 
 
-class UserHasProductPermission(permissions.BasePermission):
-    """
-    @brief      To ensure that one user can only access authorized project
-    """
+class UserHasProductTypePermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return request.user.is_staff
+        else:
+            return True
+
     def has_object_permission(self, request, view, obj):
-        return request.user in \
-            (obj.authorized_users.all() | obj.prod_type.authorized_users.all()) or \
-            request.user.is_staff
-
-
-class UserHasReportGeneratePermission(permissions.BasePermission):
-    """
-    @brief      To ensure that one user can only access authorized project
-    """
-    def has_object_permission(self, request, view, obj):
-        return request.user in \
-            (obj.product.authorized_users.all() | obj.product.prod_type.authorized_users.all()) or \
-            request.user.is_staff
-
-
-class UserHasScanSettingsPermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return request.user in \
-            (obj.product.authorized_users.all() | obj.product.prod_type.authorized_users.all()) or \
-            request.user.is_staff
-
-
-class UserHasScanPermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return request.user in \
-            (obj.scan_settings.product.authorized_users.all() | obj.scan_settings.product.prod_type.authorized_users.all()) or \
-            request.user.is_staff
+        if request.method == 'GET':
+            return user_has_permission(request.user, obj, Permissions.Product_Type_View)
+        elif request.method == 'PUT' or request.method == 'PATCH':
+            return user_has_permission(request.user, obj, Permissions.Product_Type_Edit)
+        elif request.method == 'DELETE':
+            return user_has_permission(request.user, obj, Permissions.Product_Type_Delete)
+        else:
+            return False
 
 
 class IsSuperUser(permissions.BasePermission):

@@ -1,6 +1,7 @@
-**Descriptions**
+**Description**
 
-Describe the feature / bug fix implemented by this PR
+Describe the feature / bug fix implemented by this PR.
+If this is a new parser, [the parser guide](https://defectdojo.github.io/django-DefectDojo/contributing/how-to-write-a-parser/) may be worth (re)reading.
 
 **Test results**
 
@@ -15,8 +16,9 @@ Please update any documentation when needed (in the .MD files in this repo, as w
 
 This checklist is for your information.
 
-- [ ] Features/Changes/Bugfixes should be submitted against the `dev` branch by default
-- [ ] Hotfixes should be submitted against master (urgent bugfixes requiring a hotfix release)
+- [ ] Features/Changes/Bugfixes should be submitted against the `dev` branch by default.
+- [ ] Make sure to rebase your PR against the very latest `dev`.
+- [ ] Hotfixes should be submitted against master (urgent bugfixes requiring a hotfix release).
 - [ ] Give a meaningful name to your PR, as it may end up being used in the release notes.
 - [ ] Your code is flake8 compliant.
 - [ ] Your code is python 3.6 compliant (specific python >3.6 syntax is currently not accepted).
@@ -28,7 +30,6 @@ This checklist is for your information.
 **Extra information**
 
 Please clear everything below when submitting your pull request, it's here purely for your information.
-
 
 Moderators: Labels currently accepted for PRs:
 - Import Scans (for new scanners/importers)
@@ -55,12 +56,12 @@ In case of conflict:
  git rebase --continue
  ```
 
-When everything's fine on your local branch, force push to your `myOrigin` remote: 
+When everything's fine on your local branch, force push to your `myOrigin` remote:
 ```
 git push myOrigin --force-with-lease
 ```
 
-To cancel everything: 
+To cancel everything:
 ```
 git rebase --abort
 ```
@@ -74,7 +75,7 @@ git rebase -i origin/dev
 - Replace `pick` by `reword` on the first commit if you want to change the commit message
 - Save the file and quit your editor
 
-Force push to your `myOrigin` remote: 
+Force push to your `myOrigin` remote:
 ```
 git push myOrigin --force-with-lease
 ```

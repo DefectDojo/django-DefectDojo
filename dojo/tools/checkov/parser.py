@@ -1,14 +1,23 @@
 import json
+
 from dojo.models import Finding
 
 
 class CheckovParser(object):
 
-    def __init__(self, json_output, test):
-        self.items = []
+    def get_scan_types(self):
+        return ["Checkov Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Checkov Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON reports of Infrastructure as Code vulnerabilities."
+
+    def get_findings(self, json_output, test):
 
         if json_output is None:
-            return
+            return list()
 
         tree = self.parse_json(json_output)
 
@@ -17,7 +26,9 @@ class CheckovParser(object):
             check_type = tree['check_type']
 
         if tree:
-            self.items = [data for data in self.get_items(tree, test, check_type)]
+            return [data for data in self.get_items(tree, test, check_type)]
+        else:
+            return list()
 
     def parse_json(self, json_output):
         try:

@@ -12,6 +12,10 @@ Bugs that do not have this information will be closed.
 
 Here are a few things to keep in mind when making changes to DefectDojo.
 
+## Writing a new parser
+
+Please see [the parser guide](https://defectdojo.github.io/django-DefectDojo/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
+
 ## Modifying DefectDojo and Testing
 
 Please use [these test scripts](./tests) to test your changes. These are the scripts we run in our [integration tests](DOCKER.md#run-the-tests-with-docker).
@@ -20,29 +24,6 @@ For changes that require additional settings, you can now use local_settings.py 
 
 ## Python3 version
 For compatibility reasons, the code in dev branch should be python3.6 compliant.
-
-## Logging
-Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings)
-Specific logger can be added. For example to activate logs related to the deduplication, change the level from DEBUG to INFO in `local_settings.py`:
-
-
-```
-LOGGING['loggers']['dojo.specific-loggers.deduplication']['level'] = 'DEBUG'
-```
-
-Or you can modify `settings.dist.py` directly, but this adds the risk of having conflicts when `settings.dist.py` gets updated upstream. 
-
-```
-          'dojo.specific-loggers.deduplication': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        }
-```
-
-## Debug Toolbar
-In the `dojo/settings/template-local_settings.py` you'll find instructions on how to enable the [Django Debug Toolbar](https://github.com/jazzband/django-debug-toolbar).
-This toolbar allows you to debug SQL queries, and shows some other interesting information.
 
 ## Submitting Pull Requests
 
@@ -70,5 +51,3 @@ DefectDojo.
 [setup_bash]: /setup.bash "Bash setup script"
 [pep8]: https://www.python.org/dev/peps/pep-0008/ "PEP8"
 [flake8 built-in commit hooks]: https://flake8.pycqa.org/en/latest/user/using-hooks.html#built-in-hook-integration
-
-   

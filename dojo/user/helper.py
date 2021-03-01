@@ -3,7 +3,9 @@ import logging
 from django.core.exceptions import PermissionDenied
 import functools
 from django.shortcuts import get_object_or_404
-from dojo.models import Finding, Test, Engagement, Product, Endpoint, Scan, ScanSettings
+from dojo.models import Finding, Test, Engagement, Product, Endpoint, Scan, ScanSettings, Product_Type, \
+    Risk_Acceptance
+from crum import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +83,12 @@ def user_must_be_authorized(model, perm_type, arg, lookup="pk", view_func=None):
 
 def check_auth_users_list(user, obj):
     is_authorized = False
+    if isinstance(obj, Product_Type):
+        is_authorized = user in obj.authorized_users.all()
+        if not is_authorized:
+            products = obj.prod_type.all()
+            for product in products:
+                is_authorized = is_authorized or user in product.authorized_users.all()
     if isinstance(obj, Finding):
         is_authorized = user in obj.test.engagement.product.authorized_users.all()
         is_authorized = user in obj.test.engagement.product.prod_type.authorized_users.all() or is_authorized
@@ -102,6 +110,8 @@ def check_auth_users_list(user, obj):
     if isinstance(obj, ScanSettings):
         is_authorized = user in obj.product.authorized_users.all()
         is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
+    if isinstance(obj, Risk_Acceptance):
+        return user.username == obj.owner.username or check_auth_users_list(user, obj.engagement_set.all()[0])
 
     return is_authorized
 
@@ -117,7 +127,13 @@ def user_is_authorized(user, perm_type, obj):
         raise ValueError('permtype ' + perm_type + ' not supported')
 
     if user.is_staff:
+        # print('is_staff, returning True')
         return True
+
+    # Risk Acceptance owner has always permission
+    if isinstance(obj, Risk_Acceptance):
+        if user.username == obj.owner.username:
+            return True
 
     authorized_staff = settings.AUTHORIZED_USERS_ALLOW_STAFF
 
@@ -132,3 +148,11 @@ def user_is_authorized(user, perm_type, obj):
 
     # at this point being in the authorized users lists means permission should be granted
     return check_auth_users_list(user, obj)
+
+
+def objects_authorized(objects):
+    authorized_objects = []
+    for check_object in objects:
+        if user_is_authorized(get_current_user(), "view", check_object):
+            authorized_objects.append(check_object)
+    return authorized_objects

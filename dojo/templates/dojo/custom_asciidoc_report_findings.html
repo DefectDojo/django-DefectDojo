@@ -14,7 +14,7 @@
         {% if find.tags %}
             <sup>
                 [
-                {% for tag in find.tags %}
+                {% for tag in find.tags.all %}
                 {{ tag }}
                 {% endfor %}
                 ]
@@ -32,7 +32,7 @@
         {{ find.status }}
     </p>
     <br>
-    <p><b>==== CVSSv3: ====</b>
+    <p><b>==== CVSS v3: ====</b>
         <br>
         {{ find.cvssv3|linebreaksasciidocbr }}
     </p>

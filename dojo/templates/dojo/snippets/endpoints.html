@@ -1,5 +1,5 @@
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load static %}
 {% load get_endpoint_status %}
 
 {% if destination == "Report" %}
@@ -92,11 +92,11 @@
                 </div>
             </div>
         </div>
-    {% endif %}    
+    {% endif %}
 {% else %}
     {% with endpoints=finding|get_vulnerable_endpoints %}
         {% if endpoints %}
-            <div class="row to_highlight">
+            <div class="row">
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
@@ -105,7 +105,7 @@
                                         class="glyphicon glyphicon-chevron-up"></i></a></span>
                             </h4>
                         </div>
-                       
+
                         <table id="vuln_endpoints" class="table-striped table table-hover">
                             <thead>
                                 {% if user|is_authorized_for_change:finding %}
@@ -136,8 +136,8 @@
                                             <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
                                             {% if item.tags %}
                                                 <sup>
-                                                    {% for tag in item.tags %}
-                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                    {% for tag in item.tags.all %}
+                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                                                     {% endfor %}
                                                 </sup>
                                             {% endif %}
@@ -157,7 +157,7 @@
 
     {% with endpoints=finding|get_mitigated_endpoints %}
         {% if endpoints %}
-            <div class="row to_highlight">
+            <div class="row">
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
@@ -196,8 +196,8 @@
                                             <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
                                             {% if item.tags %}
                                                 <sup>
-                                                    {% for tag in item.tags %}
-                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                                    {% for tag in item.tags.all %}
+                                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                                                     {% endfor %}
                                                 </sup>
                                             {% endif %}

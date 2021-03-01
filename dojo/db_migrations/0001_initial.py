@@ -877,6 +877,7 @@ class Migration(migrations.Migration):
             options={
                 'proxy': True,
                 'indexes': [],
+                'ordering': ['first_name'],
             },
             bases=('auth.user',),
             managers=[

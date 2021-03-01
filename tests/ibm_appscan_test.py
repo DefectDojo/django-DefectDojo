@@ -3,7 +3,7 @@ import unittest
 import sys
 import os
 from base_test_class import BaseTestCase
-from Product_unit_test import ProductTest
+from product_test import ProductTest
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -14,7 +14,7 @@ class IBMAppScanTest(BaseTestCase):
     def test_import_ibm_app_scan_result(self):
         # Login to the site.
         # Username and password will be gotten from environ
-        driver = self.login_page()
+        driver = self.driver
         # Navigate to the Endpoint page
         self.goto_product_overview(driver)
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
@@ -26,6 +26,8 @@ class IBMAppScanTest(BaseTestCase):
         driver.find_element_by_link_text("Import Scan Results").click()
         # Select scan type
         Select(driver.find_element_by_id("id_scan_type")).select_by_visible_text("IBM AppScan DAST")
+        # Select `Default` as the Environment
+        Select(driver.find_element_by_id("id_environment")).select_by_visible_text('Development')
         # Upload Scan result file
         scanner_file = os.path.join(dir_path, "ibm_appscan_xml_file.xml")
         driver.find_element_by_name("file").send_keys(scanner_file)
@@ -41,6 +43,7 @@ def suite():
     suite = unittest.TestSuite()
     # Add each test the the suite to be run
     # success and failure is output by the test
+    suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(IBMAppScanTest('test_import_ibm_app_scan_result'))
     suite.addTest(ProductTest('test_delete_product'))

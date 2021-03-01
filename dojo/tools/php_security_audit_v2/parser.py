@@ -1,10 +1,21 @@
 import json
 import math
+
 from dojo.models import Finding
 
 
-class PhpSecurityAuditV2(object):
-    def __init__(self, filename, test):
+class PhpSecurityAuditV2Parser(object):
+
+    def get_scan_types(self):
+        return ["PHP Security Audit v2"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import PHP Security Audit v2 Scan in JSON format."
+
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))

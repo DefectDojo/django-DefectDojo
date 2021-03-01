@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load event_tags %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_styles %}
     body{
         padding-top: 0px !important;
@@ -242,7 +242,9 @@
             chart_div2();
             chart_div3();
             chart_div4();
-            top_ten_products();
+            {% if top_ten_products %}
+                top_ten_products();
+            {% endif %}
             severity_pie();
             total_accepted_pie();
             total_closed_pie();

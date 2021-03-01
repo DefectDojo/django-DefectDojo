@@ -2,7 +2,7 @@ import logging
 import tempfile
 import pdfkit
 from datetime import timedelta
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.urls import reverse
@@ -10,8 +10,7 @@ from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from dojo.celery import app
 from celery.utils.log import get_task_logger
-from celery.decorators import task
-from dojo.models import Product, Finding, Engagement, System_Settings
+from dojo.models import Alerts, Product, Finding, Engagement, System_Settings, User
 from django.utils import timezone
 from dojo.utils import calculate_grade
 from dojo.reports.widgets import report_widget_factory
@@ -73,6 +72,24 @@ def add_alerts(self, runinterval):
         products = Product.objects.all()
         for product in products:
             calculate_grade(product)
+
+
+@app.task(bind=True)
+def cleanup_alerts(*args, **kwargs):
+    try:
+        max_alerts_per_user = settings.MAX_ALERTS_PER_USER
+    except System_Settings.DoesNotExist:
+        max_alerts_per_user = -1
+
+    if max_alerts_per_user > -1:
+        total_deleted_count = 0
+        logger.info('start deleting oldest alerts if a user has more than %s alerts', max_alerts_per_user)
+        users = User.objects.all()
+        for user in users:
+            alerts_to_delete = Alerts.objects.filter(user_id=user.id).order_by('-created')[max_alerts_per_user:].values_list("id", flat=True)
+            total_deleted_count += len(alerts_to_delete)
+            Alerts.objects.filter(pk__in=list(alerts_to_delete)).delete()
+        logger.info('total number of alerts deleted: %s', total_deleted_count)
 
 
 @app.task(bind=True)
@@ -221,35 +238,63 @@ def async_custom_pdf_report(self,
 def async_dupe_delete(*args, **kwargs):
     try:
         system_settings = System_Settings.objects.get()
-        enabled = system_settings.delete_dupulicates
+        enabled = system_settings.delete_duplicates
         dupe_max = system_settings.max_dupes
+        total_duplicate_delete_count_max_per_run = settings.DUPE_DELETE_MAX_PER_RUN
     except System_Settings.DoesNotExist:
         enabled = False
+
+    if enabled and dupe_max is None:
+        logger.info('skipping deletion of excess duplicates: max_dupes not configured')
+        return
+
     if enabled:
-        logger.info("delete excess duplicates")
-        deduplicationLogger.info("delete excess duplicates")
-        findings = Finding.objects \
-                .filter(original_finding__duplicate=True) \
-                .annotate(num_dupes=Count('original_finding')) \
-                .filter(num_dupes__gt=dupe_max)
-        for finding in findings:
-            duplicate_list = finding.original_finding \
-                    .filter(duplicate=True).order_by('date')
+        logger.info("delete excess duplicates (max_dupes per finding: %s, max deletes per run: %s)", dupe_max, total_duplicate_delete_count_max_per_run)
+        deduplicationLogger.info("delete excess duplicates (max_dupes per finding: %s, max deletes per run: %s)", dupe_max, total_duplicate_delete_count_max_per_run)
+
+        # limit to 100 to prevent overlapping jobs
+        results = Finding.objects \
+                .filter(duplicate=True) \
+                .order_by() \
+                .values('duplicate_finding') \
+                .annotate(num_dupes=Count('id')) \
+                .filter(num_dupes__gt=dupe_max)[:total_duplicate_delete_count_max_per_run]
+
+        originals_with_too_many_duplicates_ids = [result['duplicate_finding'] for result in results]
+
+        originals_with_too_many_duplicates = Finding.objects.filter(id__in=originals_with_too_many_duplicates_ids).order_by('id')
+
+        # prefetch to make it faster
+        originals_with_too_many_duplicates = originals_with_too_many_duplicates.prefetch_related((Prefetch("original_finding",
+            queryset=Finding.objects.filter(duplicate=True).order_by('date'))))
+
+        total_deleted_count = 0
+        for original in originals_with_too_many_duplicates:
+            duplicate_list = original.original_finding.all()
             dupe_count = len(duplicate_list) - dupe_max
+
             for finding in duplicate_list:
                 deduplicationLogger.debug('deleting finding {}:{} ({}))'.format(finding.id, finding.title, finding.hash_code))
                 finding.delete()
-                dupe_count = dupe_count - 1
-                if dupe_count == 0:
+                total_deleted_count += 1
+                dupe_count -= 1
+                if dupe_count <= 0:
+                    break
+                if total_deleted_count >= total_duplicate_delete_count_max_per_run:
                     break
 
+            if total_deleted_count >= total_duplicate_delete_count_max_per_run:
+                break
 
-@task(name='celery_status', ignore_result=False)
+        logger.info('total number of excess duplicates deleted: %s', total_deleted_count)
+
+
+@app.task(ignore_result=False)
 def celery_status():
     return True
 
 
-@app.task(name='dojo.tasks.async_sla_compute_and_notify')
+@app.task
 def async_sla_compute_and_notify_task(*args, **kwargs):
     logger.debug("Computing SLAs and notifying as needed")
     try:

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load event_tags %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_css %}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
@@ -42,23 +42,6 @@
         $('#add_id_endpoints').attr('href', '/endpoints/{{ finding.test.engagement.product.id }}/add?_popup');
 
         $(function () {
-            $('#id_tags').chosen({
-                'placeholder_text_multiple': 'Select or add some tags...',
-                'no_results_text': "Tag not found, press TAB key to add.",
-            });
-
-            $(".search-field").find("input").on("keydown", function (evt) {
-                var stroke;
-                stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
-                if (stroke == 9) { // 9 = tab key
-                    var o = new Option($(this).val(), $(this).val(), true, true);
-			        $("#id_tags").append(o);
-                    $('#id_tags').trigger('chosen:updated');
-                    $('#id_tags').focus();
-                    return false;
-                }
-            });
-
             $("textarea").each(function (index, elem) {
 
                 if (elem.hasAttribute("required")) {

@@ -6,7 +6,7 @@ import mimetypes
 import os
 import shutil
 
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from django.db import models
 from django.db.models.functions import Length
 from django.conf import settings
@@ -23,20 +23,19 @@ from django.utils import formats
 from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.views.decorators.http import require_POST
-from tagging.models import Tag
 from itertools import chain
 from dojo.user.helper import user_must_be_authorized
-from dojo.utils import close_external_issue, reopen_external_issue
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, close_external_issue, reopen_external_issue
+import copy
 
-from dojo.filters import OpenFindingFilter, \
-    OpenFindingSuperFilter, AcceptedFindingSuperFilter, \
-    ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
+from dojo.filters import OpenFindingFilter, OpenFindingSuperFilter, AcceptedFindingFilter, AcceptedFindingSuperFilter, \
+    ClosedFindingFilter, ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
-    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Risk_Acceptance, Endpoint_Status, \
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Endpoint_Status, \
     FindingImageAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
@@ -45,17 +44,21 @@ from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_
 from dojo.notifications.helper import create_notification
 
 from django.template.defaultfilters import pluralize
-from django.db.models import Q, QuerySet, Prefetch, Count
+from django.db.models import Q, QuerySet, Count
 import dojo.jira_link.helper as jira_helper
+import dojo.risk_acceptance.helper as ra_helper
+import dojo.finding.helper as finding_helper
 
 logger = logging.getLogger(__name__)
 
 OPEN_FINDINGS_QUERY = Q(active=True)
-VERIFIED_FINDINGS_QUERY = Q(verified=True)
+VERIFIED_FINDINGS_QUERY = Q(active=True, verified=True)
 OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
 FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
 INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False)
-ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False)
+ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
+NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
+WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_Mitigated=True)
 
 
@@ -67,17 +70,17 @@ def open_findings_filter(request, queryset, user, pid):
 
 
 def accepted_findings_filter(request, queryset, user, pid):
-    assert user.is_staff
-    return AcceptedFindingSuperFilter(request.GET, queryset=queryset, pid=pid)
+    filter_class = AcceptedFindingSuperFilter if user.is_staff else AcceptedFindingFilter
+    return filter_class(request.GET, queryset=queryset, pid=pid)
 
 
 def closed_findings_filter(request, queryset, user, pid):
-    assert user.is_staff
-    return ClosedFindingSuperFilter(request.GET, queryset=queryset, pid=pid)
+    filter_class = ClosedFindingSuperFilter if user.is_staff else ClosedFindingFilter
+    return filter_class(request.GET, queryset=queryset, pid=pid)
 
 
 def open_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=OPEN_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=OPEN_FINDINGS_QUERY, prefetch_type='open')
 
 
 def verified_findings(request, pid=None, eid=None, view=None):
@@ -96,27 +99,25 @@ def inactive_findings(request, pid=None, eid=None, view=None):
     return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=INACTIVE_FINDINGS_QUERY)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def accepted_findings(request, pid=None, eid=None, view=None):
     return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=ACCEPTED_FINDINGS_QUERY,
                     django_filter=accepted_findings_filter)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def closed_findings(request, pid=None, eid=None, view=None):
     return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
                     django_filter=closed_findings_filter)
 
 
 def findings(request, pid=None, eid=None, view=None, filter_name=None, query_filter=None, order_by='numerical_severity',
-django_filter=open_findings_filter):
+django_filter=open_findings_filter, prefetch_type='all'):
     show_product_column = True
     custom_breadcrumb = None
     product_tab = None
     jira_project = None
     github_config = None
 
-    tags = Tag.objects.usage_for_model(Finding)
+    tags = Finding.tags.tag_model.objects.all()
 
     findings = Finding.objects.all()
     if view == "All":
@@ -157,7 +158,9 @@ django_filter=open_findings_filter):
     title_words = get_words_for_field(findings_filter.qs, 'title')
     component_words = get_words_for_field(findings_filter.qs, 'component_name')
 
-    paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs), 25)
+    paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs, prefetch_type), 25)
+
+    bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
     # show custom breadcrumb if user has filtered by exactly 1 endpoint
     endpoint = None
@@ -183,12 +186,12 @@ django_filter=open_findings_filter):
             "component_words": component_words,
             'custom_breadcrumb': custom_breadcrumb,
             'filter_name': filter_name,
-            'tag_input': tags,
             'jira_project': jira_project,
+            'bulk_edit_form': bulk_edit_form,
         })
 
 
-def prefetch_for_findings(findings):
+def prefetch_for_findings(findings, prefetch_type='all'):
     prefetched_findings = findings
     if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         prefetched_findings = prefetched_findings.select_related('reporter')
@@ -197,13 +200,18 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_project_set__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('found_by')
-        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
-        prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
-        prefetched_findings = prefetched_findings.prefetch_related('original_finding')
 
+        # for open/active findings the following 4 prefetches are not needed
+        if prefetch_type != 'open':
+            prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
+            prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
+            prefetched_findings = prefetched_findings.prefetch_related('original_finding')
+            prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
+
+        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
-        prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+        prefetched_findings = prefetched_findings.prefetch_related('tags')
         prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
         prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
@@ -229,10 +237,11 @@ def prefetch_for_similar_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set')
         prefetched_findings = prefetched_findings.prefetch_related('risk_acceptance_set__accepted_findings')
         prefetched_findings = prefetched_findings.prefetch_related('original_finding')
-
+        prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
+        prefetched_findings = prefetched_findings.prefetch_related('test_import_finding_action_set')
         # we could try to prefetch only the latest note with SubQuery and OuterRef, but I'm getting that MySql doesn't support limits in subqueries.
         prefetched_findings = prefetched_findings.prefetch_related('notes')
-        prefetched_findings = prefetched_findings.prefetch_related('tagged_items__tag')
+        prefetched_findings = prefetched_findings.prefetch_related('tags')
         # prefetched_findings = prefetched_findings.prefetch_related('endpoints')
         # prefetched_findings = prefetched_findings.prefetch_related('endpoint_status')
         # prefetched_findings = prefetched_findings.prefetch_related('endpoint_status__endpoint')
@@ -278,6 +287,7 @@ def view_finding(request, fid):
     dojo_user = get_object_or_404(Dojo_User, id=user.id)
 
     notes = finding.notes.all()
+    files = finding.files.all()
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
         available_note_types = find_available_notetypes(notes)
@@ -301,7 +311,7 @@ def view_finding(request, fid):
             finding.last_reviewed_by = user
             finding.save()
             if finding.has_jira_issue:
-                jira_helper.add_comment_task(finding, new_note)
+                jira_helper.add_comment(finding, new_note)
             if note_type_activation:
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
@@ -337,14 +347,20 @@ def view_finding(request, fid):
     if finding.duplicate_finding:
         finding.duplicate_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, finding.duplicate_finding)
 
-    # similar_findings = get_similar_findings(request, finding)
     similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
     logger.debug('similar query: %s', similar_findings_filter.qs.query)
-    similar_findings = prefetch_for_similar_findings(similar_findings_filter.qs[:settings.SIMILAR_FINDINGS_MAX_RESULTS])
+
+    similar_findings = get_page_items(request, similar_findings_filter.qs, settings.SIMILAR_FINDINGS_MAX_RESULTS, prefix='similar')
+
+    similar_findings.object_list = prefetch_for_similar_findings(similar_findings.object_list)
+
     for similar_finding in similar_findings:
         similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
+
+    can_be_pushed_to_jira, can_be_pushed_to_jira_error, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
+
     lastPos = (len(findings)) - 1
     return render(
         request, 'dojo/view_finding.html', {
@@ -358,6 +374,7 @@ def view_finding(request, fid):
             'dojo_user': dojo_user,
             'user': user,
             'notes': notes,
+            'files': files,
             'form': form,
             'cwe_template': cwe_template,
             'found_by': finding.found_by.all().distinct(),
@@ -367,7 +384,9 @@ def view_finding(request, fid):
             'next_finding_id': next_finding_id,
             'duplicate_cluster': duplicate_cluster(request, finding),
             'similar_findings': similar_findings,
-            'similar_findings_filter': similar_findings_filter
+            'similar_findings_filter': similar_findings_filter,
+            'can_be_pushed_to_jira': can_be_pushed_to_jira,
+            'can_be_pushed_to_jira_error': can_be_pushed_to_jira_error,
         })
 
 
@@ -410,7 +429,13 @@ def close_finding(request, fid):
                 finding.is_Mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
-                finding.endpoints.clear()
+                endpoint_status = finding.endpoint_status.all()
+                for status in endpoint_status:
+                    status.mitigated_by = request.user
+                    status.mitigated_time = timezone.now()
+                    status.mitigated = True
+                    status.last_modified = timezone.now()
+                    status.save()
 
                 # only push to JIRA if there is an issue, otherwise a new one is created
                 if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
@@ -536,6 +561,13 @@ def reopen_finding(request, fid):
     finding.is_Mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
+    endpoint_status = finding.endpoint_status.all()
+    for status in endpoint_status:
+        status.mitigated_by = None
+        status.mitigated_time = None
+        status.mitigated = False
+        status.last_modified = timezone.now()
+        status.save()
 
     # only push to JIRA if there is an issue, otherwise a new one is created
     if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
@@ -594,7 +626,6 @@ def delete_finding(request, fid):
         if form.is_valid():
             tid = finding.test.id
             product = finding.test.engagement.product
-            del finding.tags
             finding.delete()
             calculate_grade(product)
             messages.add_message(
@@ -623,7 +654,10 @@ def delete_finding(request, fid):
 @user_must_be_authorized(Finding, 'change', 'fid')
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
+    # finding = finding._detag_to_serializable()
+    # finding = finding._retag_to_original()
     old_status = finding.status()
+    old_finding = copy.copy(finding)
     burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
     if burp_rr:
         req_resp = (
@@ -632,23 +666,19 @@ def edit_finding(request, fid):
         )
     else:
         req_resp = None
-    form = FindingForm(instance=finding, template=False, req_resp=req_resp)
-    form.initial['tags'] = [tag.name for tag in finding.tags]
+    form = FindingForm(instance=finding, template=False, req_resp=req_resp,
+                       can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
     form_error = False
     jform = None
-    jira_link_exists = False
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     gform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
 
-    # for key, value in request.POST.items():
-    #     print(f'Key: {key}')
-    #     print(f'Value: {value}')
-
     github_enabled = finding.has_github_issue()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, instance=finding, template=False, req_resp=None)
+        form = FindingForm(request.POST, instance=finding, template=False, req_resp=None,
+                           can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
 
         if finding.active:
             if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
@@ -671,7 +701,7 @@ def edit_finding(request, fid):
                                          extra_tags='alert-danger')
 
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding, jira_project=jira_helper.get_jira_project(finding))
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, instance=finding, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -682,23 +712,13 @@ def edit_finding(request, fid):
             new_finding.test = finding.test
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            if new_finding.false_p or new_finding.active is False:
-                new_finding.mitigated = timezone.now()
-                new_finding.mitigated_by = request.user
-                new_finding.is_Mitigated = True
-            if new_finding.active is True:
-                new_finding.false_p = False
-                new_finding.mitigated = None
-                new_finding.mitigated_by = None
-                new_finding.is_Mitigated = False
-            if not new_finding.duplicate:
-                new_finding.duplicate = False
-                new_finding.duplicate_finding = None
+            finding_helper.update_finding_status(new_finding, request.user, old_state_finding=old_finding)
 
-            if form['simple_risk_accept'].value():
-                new_finding.simple_risk_accept()
+            if 'risk_accepted' in form.cleaned_data and form['risk_accepted'].value():
+                if new_finding.test.engagement.product.enable_simple_risk_acceptance:
+                    ra_helper.simple_risk_accept(new_finding, perform_save=False)
             else:
-                new_finding.simple_risk_unaccept()
+                ra_helper.risk_unaccept(new_finding, perform_save=False)
 
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
@@ -712,9 +732,8 @@ def edit_finding(request, fid):
                 new_finding.endpoint_status.add(eps)
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_finding.tags = t
+
+            new_finding.tags = form.cleaned_data['tags']
 
             if 'request' in form.cleaned_data or 'response' in form.cleaned_data:
                 burp_rr = BurpRawRequestResponse.objects.filter(finding=finding).first()
@@ -771,10 +790,6 @@ def edit_finding(request, fid):
 
             new_finding.save(push_to_jira=push_to_jira)
 
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            new_finding.tags = t
-
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -817,15 +832,13 @@ def edit_finding(request, fid):
 
             return redirect_to_return_url_or_else(request, reverse('view_finding', args=(new_finding.id,)))
         else:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'There appears to be errors on the form, please correct below.',
-                extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
             form_error = True
     else:
         if use_jira:
-            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding, jira_project=jira_helper.get_jira_project(finding))
+            jform = JIRAFindingForm(push_all=push_all_jira_issues, prefix='jiraform', instance=finding, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=finding.test.engagement.product).exclude(git_conf_id=None):
@@ -835,7 +848,6 @@ def edit_finding(request, fid):
         form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
     else:
         form.fields['endpoints'].queryset = finding.endpoints.all()
-    form.initial['tags'] = [tag.name for tag in finding.tags]
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Edit Finding", tab="findings")
 
@@ -856,9 +868,6 @@ def touch_finding(request, fid):
     finding.last_reviewed = timezone.now()
     finding.last_reviewed_by = request.user
     finding.save()
-    # print('request:')
-    # print(vars(request))
-    # print(request.GET['return_url'])
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -866,15 +875,20 @@ def touch_finding(request, fid):
 @user_must_be_authorized(Finding, 'staff', 'fid')
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    finding.simple_risk_accept()
+
+    if not finding.test.engagement.product.enable_simple_risk_acceptance:
+        raise PermissionDenied()
+
+    ra_helper.simple_risk_accept(finding)
+
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
 # @user_passes_test(lambda u: u.is_staff)
 @user_must_be_authorized(Finding, 'staff', 'fid')
-def simple_risk_unaccept(request, fid):
+def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
-    finding.simple_risk_unaccept()
+    ra_helper.risk_unaccept(finding)
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -1017,11 +1031,11 @@ def mktemplate(request, fid):
             mitigation=finding.mitigation,
             impact=finding.impact,
             references=finding.references,
-            numerical_severity=finding.numerical_severity)
+            numerical_severity=finding.numerical_severity,
+            tags=finding.tags.all())
         template.save()
-        tags = [tag.name for tag in list(finding.tags)]
-        t = ", ".join('"{0}"'.format(w) for w in tags)
-        template.tags = t
+        template.tags = finding.tags.all()
+
         messages.add_message(
             request,
             messages.SUCCESS,
@@ -1076,7 +1090,8 @@ def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     template = get_object_or_404(Finding_Template, id=tid)
     data = finding.__dict__
-    data['tags'] = [tag.name for tag in template.tags]
+    # Not sure what's going on here, just leave same as with django-tagging
+    data['tags'] = [tag.name for tag in template.tags.all()]
     form = ApplyFindingTemplateForm(data=data, template=template)
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Finding Template Options", tab="findings")
     return render(request, 'dojo/apply_finding_template.html', {
@@ -1084,7 +1099,7 @@ def choose_finding_template_options(request, tid, fid):
         'product_tab': product_tab,
         'template': template,
         'form': form,
-        'finding_tags': [tag.name for tag in finding.tags],
+        'finding_tags': [tag.name for tag in finding.tags.all()],
     })
 
 
@@ -1109,9 +1124,7 @@ def apply_template_to_finding(request, fid, tid):
             finding.references = form.cleaned_data['references']
             finding.last_reviewed = timezone.now()
             finding.last_reviewed_by = request.user
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            finding.tags = t
+            finding.tags = form.cleaned_data['tags']
             finding.save()
         else:
             messages.add_message(
@@ -1186,8 +1199,6 @@ def delete_stub_finding(request, fid):
         form = DeleteStubFindingForm(request.POST, instance=finding)
         if form.is_valid():
             tid = finding.test.id
-            if hasattr(finding, 'tags'):
-                del finding.tags
             finding.delete()
             messages.add_message(
                 request,
@@ -1218,7 +1229,7 @@ def promote_to_finding(request, fid):
     if request.method == 'POST':
         form = PromoteFindingForm(request.POST)
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding))
+            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -1302,14 +1313,12 @@ def promote_to_finding(request, fid):
             else:
                 form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'The form has errors, please correct them below.',
-                extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
     else:
         if use_jira:
-            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test))
+            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
@@ -1413,9 +1422,7 @@ def add_template(request):
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            template.tags = t
+            form.save_m2m()
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
             if count > 0:
                 apply_message = " and " + str(count) + pluralize(count, 'finding,findings') + " "
@@ -1450,6 +1457,7 @@ def edit_template(request, tid):
             template = form.save(commit=False)
             template.numerical_severity = Finding.get_numerical_severity(template.severity)
             template.save()
+            form.save_m2m()
 
             count = apply_cwe_mitigation(form.cleaned_data["apply_to_findings"], template)
             if count > 0:
@@ -1457,9 +1465,6 @@ def edit_template(request, tid):
             else:
                 apply_message = ""
 
-            tags = request.POST.getlist('tags')
-            t = ", ".join('"{0}"'.format(w) for w in tags)
-            template.tags = t
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -1474,7 +1479,6 @@ def edit_template(request, tid):
                 extra_tags='alert-danger')
 
     count = apply_cwe_mitigation(True, template, False)
-    form.initial['tags'] = [tag.name for tag in template.tags]
     add_breadcrumb(title="Edit Template", top_level=False, request=request)
     return render(request, 'dojo/add_template.html', {
         'form': form,
@@ -1493,7 +1497,6 @@ def delete_template(request, tid):
     if request.method == 'POST':
         form = DeleteFindingTemplateForm(request.POST, instance=template)
         if form.is_valid():
-            del template.tags
             template.delete()
             messages.add_message(
                 request,
@@ -1522,6 +1525,12 @@ def manage_images(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     images_formset = FindingImageFormSet(queryset=finding.images.all())
     error = False
+
+    messages.add_message(
+                request,
+                messages.INFO,
+                'Finding Images will be removed as of 06/31/2020. Please use the File Uploads instead.',
+                extra_tags='alert-danger')
 
     if request.method == 'POST':
         images_formset = FindingImageFormSet(
@@ -1692,8 +1701,8 @@ def merge_finding_product(request, pid):
 
                         # if checked merge the tags
                         if form.cleaned_data['tag_finding']:
-                            for tag in finding.tags:
-                                Tag.objects.add_tag(finding_to_merge_into, tag)
+                            for tag in finding.tags.all():
+                                finding_to_merge_into.tags.add(tag)
 
                         # if checked re-assign the burp requests to the merged finding
                         if form.cleaned_data['dynamic_raw']:
@@ -1708,7 +1717,7 @@ def merge_finding_product(request, pid):
 
                             # If the merged finding should be tagged as merged-into
                             if form.cleaned_data['mark_tag_finding']:
-                                Tag.objects.add_tag(finding, "merged-inactive")
+                                finding.tags.add("merged-inactive")
 
                     # Update the finding to merge into
                     if finding_descriptions != '':
@@ -1741,7 +1750,7 @@ def merge_finding_product(request, pid):
 
                     # If the finding merged into should be tagged as merged
                     if form.cleaned_data['mark_tag_finding']:
-                        Tag.objects.add_tag(finding_to_merge_into, "merged")
+                        finding_to_merge_into.tags.add("merged")
 
                     finding_action = ""
                     # Take action on the findings
@@ -1814,8 +1823,6 @@ def finding_bulk_update_all(request, pid=None):
                 calculate_grade(prod)
         else:
             if form.is_valid() and finding_to_update:
-                q_simple_risk_acceptance = Risk_Acceptance.objects.filter(name=Finding.SIMPLE_RISK_ACCEPTANCE_NAME)
-
                 finding_to_update = request.POST.getlist('finding_to_update')
                 finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
 
@@ -1830,7 +1837,6 @@ def finding_bulk_update_all(request, pid=None):
                     )
 
                 finds = prefetch_for_findings(finds)
-                finds = finds.prefetch_related(Prefetch('test__engagement__risk_acceptance', queryset=q_simple_risk_acceptance, to_attr='simple_risk_acceptance'))
 
                 if form.cleaned_data['severity']:
                     finds.update(severity=form.cleaned_data['severity'],
@@ -1846,12 +1852,22 @@ def finding_bulk_update_all(request, pid=None):
                                  last_reviewed=timezone.now(),
                                  last_reviewed_by=request.user)
 
+                skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
-                    for find in finds:
+                    for finding in finds:
                         if form.cleaned_data['risk_accept']:
-                            find.simple_risk_accept()
+                            if not finding.test.engagement.product.enable_simple_risk_acceptance:
+                                skipped_risk_accept_count += 1
+                            else:
+                                ra_helper.simple_risk_accept(finding)
                         elif form.cleaned_data['risk_unaccept']:
-                            find.simple_risk_unaccept()
+                            ra_helper.risk_unaccept(finding)
+
+                if skipped_risk_accept_count > 0:
+                    messages.add_message(request,
+                                        messages.WARNING,
+                                        'Skipped simple risk acceptance of %i findings, simple risk acceptance is disabled on the related products' % skipped_risk_accept_count,
+                                        extra_tags='alert-warning')
 
                 if form.cleaned_data['push_to_github']:
                     logger.info('push selected findings to github')
@@ -1866,9 +1882,12 @@ def finding_bulk_update_all(request, pid=None):
 
                 if form.cleaned_data['tags']:
                     for finding in finds:
-                        tags = request.POST.getlist('tags')
-                        ts = ", ".join(tags)
-                        finding.tags = ts
+                        # tags = tagulous.utils.render_tags(form.cleaned_data['tags'])
+                        tags = form.cleaned_data['tags']
+                        logger.debug('bulk_edit: setting tags for: %i %s %s', finding.id, finding, tags)
+                        # currently bulk edit overwrites existing tags
+                        finding.tags = tags
+                        finding.save()
 
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
                     prev_prod = None
@@ -1896,16 +1915,22 @@ def finding_bulk_update_all(request, pid=None):
 
                     # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
+                    error_counts = defaultdict(lambda: 0)
                     if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
-                        if not jira_helper.get_jira_project(finding):
-                            jira_helper.log_jira_alert('Finding cannot be pushed to jira as there is no jira project configuration for this product.', finding)
+                        can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
+                        if not can_be_pushed_to_jira:
+                            error_counts[error_message] += 1
+                            jira_helper.log_jira_alert(error_message, finding)
                         else:
                             logger.debug('pushing to jira from finding.finding_bulk_update_all()')
                             jira_helper.push_to_jira(finding)
 
+                        for error_message, error_count in error_counts.items():
+                            add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
+
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Bulk edit of findings was successful.  Check to make sure it is what you intended.',
+                                     'Bulk edit of findings was successful. Check alerts top right and result to make sure it is what you intended.',
                                      extra_tags='alert-success')
             else:
                 messages.add_message(request,
@@ -1981,18 +2006,11 @@ def mark_finding_duplicate(request, original_id, duplicate_id):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
 
 
-@user_must_be_authorized(Finding, 'change', 'duplicate_id')
-@require_POST
-def reset_finding_duplicate_status(request, duplicate_id):
+def reset_finding_duplicate_status_internal(user, duplicate_id):
     duplicate = get_object_or_404(Finding, id=duplicate_id)
 
     if not duplicate.duplicate:
-        messages.add_message(
-            request,
-            messages.ERROR,
-            "Can't reset duplicate status of a finding that is not a duplicate",
-            extra_tags='alert-danger')
-        return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate_id,)))
+        return None
 
     logger.debug('resetting duplicate status of %i', duplicate.id)
     duplicate.duplicate = False
@@ -2001,26 +2019,34 @@ def reset_finding_duplicate_status(request, duplicate_id):
         # duplicate.duplicate_finding.original_finding.remove(duplicate)  # shouldn't be needed
         duplicate.duplicate_finding = None
     duplicate.last_reviewed = timezone.now()
-    duplicate.last_reviewed_by = request.user
+    duplicate.last_reviewed_by = user
     duplicate.save(dedupe_option=False)
 
-    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate.id,)))
+    return duplicate.id
 
 
-@user_must_be_authorized(Finding, 'change', 'finding_id')
+@user_must_be_authorized(Finding, 'change', 'duplicate_id')
 @require_POST
-def set_finding_as_original(request, finding_id, new_original_id):
+def reset_finding_duplicate_status(request, duplicate_id):
+    checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, duplicate_id)
+    if checked_duplicate_id is None:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Can't reset duplicate status of a finding that is not a duplicate",
+            extra_tags='alert-danger')
+        return redirect_to_return_url_or_else(request, reverse('view_finding', args=(duplicate_id,)))
+
+    return redirect_to_return_url_or_else(request, reverse('view_finding', args=(checked_duplicate_id,)))
+
+
+def set_finding_as_original_internal(user, finding_id, new_original_id):
     finding = get_object_or_404(Finding, id=finding_id)
     new_original = get_object_or_404(Finding, id=new_original_id)
 
     if new_original.test.engagement != new_original.test.engagement:
         if new_original.test.engagement.deduplication_on_engagement or new_original.test.engagement.deduplication_on_engagement:
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Marking finding as duplicate/original failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them',
-                extra_tags='alert-danger')
-            return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding_id,)))
+            return False
 
     if finding.duplicate or finding.original_finding.all():
         # existing cluster, so update all cluster members
@@ -2049,13 +2075,27 @@ def set_finding_as_original(request, finding_id, new_original_id):
         finding.active = False
         finding.duplicate_finding = new_original
         finding.last_reviewed = timezone.now()
-        finding.last_reviewed_by = request.user
+        finding.last_reviewed_by = user
         finding.save(dedupe_option=False)
 
     logger.debug('marking new original %i as not duplicate', new_original.id)
     new_original.duplicate = False
     new_original.duplicate_finding = None
     new_original.save(dedupe_option=False)
+
+    return True
+
+
+@user_must_be_authorized(Finding, 'change', 'finding_id')
+@require_POST
+def set_finding_as_original(request, finding_id, new_original_id):
+    success = set_finding_as_original_internal(request.user, finding_id, new_original_id)
+    if not success:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Marking finding as duplicate/original failed as they are not in the same engagement and deduplication_on_engagement is enabled for at least one of them',
+            extra_tags='alert-danger')
 
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding_id,)))
 
@@ -2128,50 +2168,6 @@ def push_to_jira(request, fid):
             extra_tags='alert-danger')
         return HttpResponse(status=500)
     # return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id,)))
-
-
-def get_similar_findings(request, finding):
-    similar = Finding.objects.all()
-
-    if not request.user.is_staff:
-        similar = similar.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-        )
-
-    if finding.test.engagement.deduplication_on_engagement:
-        similar = similar.filter(test__engagement=finding.test.engagement)
-    else:
-        similar = similar.filter(test__engagement__product=finding.test.engagement.product)
-
-    if finding.cve:
-        similar = similar.filter(cve=finding.cve)
-    if finding.cwe:
-        similar = similar.filter(cwe=finding.cwe)
-    if finding.file_path:
-        similar = similar.filter(file_path=finding.file_path)
-    if finding.line:
-        similar = similar.filter(line=finding.line)
-    if finding.unique_id_from_tool:
-        similar = similar.filter(unique_id_from_tool=finding.unique_id_from_tool)
-
-    similar = similar.exclude(id__in=finding.duplicate_finding_set())
-    if finding.duplicate_finding:
-        similar = similar.exclude(id=finding.duplicate_finding.id)
-
-    identical = Finding.objects.all().filter(test__engagement__product=finding.test.engagement.product).filter(hash_code=finding.hash_code).exclude(pk=finding.pk)
-    identical = identical.exclude(id__in=finding.duplicate_finding_set())
-    if finding.duplicate_finding:
-        identical = identical.exclude(id=finding.duplicate_finding.id)
-
-    # TODO: remove this temp testing code Valentijn
-    temp = Finding.objects.all().filter(id__in=[49046, 51314, 59225, 59227, 59229, 59223])
-
-    result = (temp | similar.exclude(pk=finding.pk) | identical)[:10]
-    for similar_finding in result:
-        similar_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, similar_finding)
-
-    return result
 
 
 # precalculate because we need related_actions to be set

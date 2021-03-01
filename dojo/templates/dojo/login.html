@@ -9,14 +9,20 @@
                 {{ "banner_message"|get_banner }}
                 </div>
             {% endif %}
-            {% include "dojo/form_fields.html" with form=form %}
+
+            {% if SHOW_LOGIN_FORM %}
+               {% include "dojo/form_fields.html" with form=form %}
+            {% endif %}
+
             <!-- Button -->
             <div class="form-group">
-                <div class="col-sm-offset-1 col-sm-4" id="toggleBox" onclick="togglePassVisibility()">
-                    <i class="fa fa-eye"></i>
-                    <span><b>Show Password</b></span>
-                </div>
-                {% if CLASSIC_AUTH_ENABLED %}
+                {% if SHOW_LOGIN_FORM %}
+                    <div class="col-sm-offset-1 col-sm-4" id="toggleBox" onclick="togglePassVisibility()">
+                        <i class="fa fa-eye"></i>
+                        <span><b>Show Password</b></span>
+                    </div>
+                {% endif %}
+                {% if CLASSIC_AUTH_ENABLED and SHOW_LOGIN_FORM %}
                     <div class="col-sm-offset-1 col-sm-1">
                         <button class="btn btn-success">Login</button>
                     </div>

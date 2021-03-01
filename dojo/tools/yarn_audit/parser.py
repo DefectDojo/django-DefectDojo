@@ -1,30 +1,24 @@
-import jsonlines
+import json
 
 from dojo.models import Finding
 
 
 class YarnAuditParser(object):
-    def __init__(self, json_output, test):
 
-        tree = self.parse_json(json_output)
+    def get_scan_types(self):
+        return ["Yarn Audit Scan"]
 
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+    def get_label_for_scan_types(self, scan_type):
+        return "Yarn Audit Scan"
 
-    def parse_json(self, json_output):
+    def get_description_for_scan_types(self, scan_type):
+        return "Yarn Audit Scan output file can be imported in JSON format."
+
+    def get_findings(self, json_output, test):
         if json_output is None:
-            self.items = []
-            return
-        try:
-            data = []
-            reader = jsonlines.Reader(json_output)
-            for obj in reader:
-                data.append(obj)
-        except:
-            raise Exception("Invalid format")
-        return data
+            return list()
+        tree = (json.loads(line) for line in json_output)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = {}

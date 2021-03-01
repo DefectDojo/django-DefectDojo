@@ -1,9 +1,20 @@
 import json
+
 from dojo.models import Finding
 
 
-class GosecScannerParser(object):
-    def __init__(self, filename, test):
+class GosecParser(object):
+
+    def get_scan_types(self):
+        return ["Gosec Scanner"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Gosec Scanner findings in JSON format."
+
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))
@@ -45,6 +56,10 @@ class GosecScannerParser(object):
             if '-' in line:
                 # if this is a range, only point to the beginning.
                 line = line.split('-', 1)[0]
+            if line.isdigit():
+                line = int(line)
+            else:
+                line = None
 
             dupe_key = title + item["file"] + str(line)
 
@@ -69,4 +84,4 @@ class GosecScannerParser(object):
 
                 dupes[dupe_key] = find
 
-        self.items = list(dupes.values())
+        return list(dupes.values())

@@ -18,13 +18,13 @@
                         {% endif %}
                         Report
                         <div class="dropdown pull-right">
-
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
 
                     </h3>
                 </div>
 
-                <div id="the-filters" class="panel-body {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body {% if findings.form.has_changed %}in{% endif %}">
                     <div class="dojo-filter-heading">Filters</div>
                     <div class="filter-set">
 
@@ -79,8 +79,8 @@
                                        href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:50 }}</a>
                                        {% if finding.tags %}
                                        <sup>
-                                           {% for tag in finding.tags %}
-                                           <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                                           {% for tag in finding.tags.all %}
+                                           <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                                            {% endfor %}
                                        </sup>
                                        {% endif %}

@@ -1,11 +1,13 @@
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
-from dateutil.parser import parse
+import io
 import re
-from urllib.parse import urlparse
 import socket
+from urllib.parse import urlparse
+
+from dateutil.parser import parse
+
+from dojo.models import Endpoint, Finding
 
 
 class ColumnMappingStrategy(object):
@@ -95,7 +97,7 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
         """
         if self.is_valid_ipv4_address(url) is False:
             rhost = re.search(
-                "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
+                r"(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
                 url)
 
             if rhost:
@@ -257,7 +259,7 @@ class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
         finding.duplicate = self.evaluate_bool_value(column_value)
 
 
-class GenericFindingUploadCsvParser(object):
+class GenericParser(object):
 
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()
@@ -295,11 +297,18 @@ class GenericFindingUploadCsvParser(object):
             self.column_names[index] = column
             index += 1
 
-    def __init__(self, filename, test, active, verified):
+    def get_scan_types(self):
+        return ["Generic Findings Import"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Generic findings in CSV format."
+
+    def get_findings(self, filename, test, active=False, verified=False):
         self.chain = None
         self.column_names = dict()
-        self.dupes = dict()
-        self.items = ()
         self.create_chain()
         self.active = active
         self.verified = verified
@@ -312,6 +321,8 @@ class GenericFindingUploadCsvParser(object):
             content = content.decode('utf-8')
         row_number = 0
         reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
+
+        dupes = dict()
         for row in reader:
             finding = Finding(test=test)
 
@@ -333,9 +344,9 @@ class GenericFindingUploadCsvParser(object):
             if finding is not None:
                 key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+                if key not in dupes:
+                    dupes[key] = finding
 
             row_number += 1
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

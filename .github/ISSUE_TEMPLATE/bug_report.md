@@ -6,6 +6,11 @@ labels: bug
 assignees: ''
 
 ---
+**Slack us first!**
+The easiest and fastest way to help you is via Slack. There's a free and easy signup to join our #defectdojo channel in the OWASP Slack workspace: [Get Access.](https://owasp-slack.herokuapp.com/)
+If you're confident you've found a bug, or are allergic to Slack, you can submit an issue anyway.
+
+**Be informative**
 Please enter as much information as possible, otherwise we can't provide support. If possible upgrade to the latest release or dev version and try again.
 
 **Bug description**
