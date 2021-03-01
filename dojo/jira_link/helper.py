@@ -548,8 +548,6 @@ def add_jira_issue(find):
         j_issue.save()
         issue = jira.issue(new_issue.id)
 
-        find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
         # Upload dojo finding screenshots to Jira
         for pic in find.images.all():
             jira_attachment(
