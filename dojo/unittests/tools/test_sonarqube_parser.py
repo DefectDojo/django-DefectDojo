@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from dojo.models import Test, Engagement, Product
-from dojo.tools.sonarqube.parser import SonarQubeHtmlParser
+from dojo.tools.sonarqube.parser import SonarQubeParser
 
 
 class TestSonarQubeParser(TestCase):
@@ -24,7 +24,7 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-no-finding.html"
         )
-        parser = SonarQubeHtmlParser()
+        parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
         self.assertEqual(0, len(findings))
 
@@ -33,8 +33,9 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-no-finding.html"
         )
-        parser = SonarQubeHtmlParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.assertEqual(0, len(findings))
 
     # SonarQube Scan - report with one vuln
@@ -44,7 +45,7 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-single-finding.html"
         )
-        parser = SonarQubeHtmlParser()
+        parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
         # common verifications
         self.assertEqual(1, len(findings))
@@ -92,8 +93,9 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-single-finding.html"
         )
-        parser = SonarQubeHtmlParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         # common verifications
         self.assertEqual(1, len(findings))
         # specific verifications
@@ -182,8 +184,9 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-6-findings.html"
         )
-        parser = SonarQubeHtmlParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         # common verifications
         self.assertEqual(6, len(findings))
 
@@ -193,8 +196,9 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-6-findings.html"
         )
-        parser = SonarQubeHtmlParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         # common verifications
         # (there is no aggregation to be done here)
         self.assertEqual(6, len(findings))
@@ -204,8 +208,9 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-table-in-table.html"
         )
-        parser = SonarQubeHtmlParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.assertEqual(1, len(findings))
 
         # check content
@@ -284,8 +289,9 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-rule-undefined.html"
         )
-        parser = SonarQubeHtmlParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.assertEqual(1, len(findings))
 
         # check content
@@ -330,7 +336,7 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-4-findings-3-to-aggregate.html"
         )
-        parser = SonarQubeHtmlParser()
+        parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
         # specific verifications
         self.assertEqual(2, len(findings))
@@ -392,8 +398,9 @@ class TestSonarQubeParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/sonarqube/sonar-4-findings-3-to-aggregate.html"
         )
-        parser = SonarQubeHtmlParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         # specific verifications
         self.assertEqual(4, len(findings))
 
@@ -402,7 +409,8 @@ class TestSonarQubeParser(TestCase):
         see: https://github.com/DefectDojo/django-DefectDojo/issues/3725
         """
         my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/sonarqube/sonar.html")
-        parser = SonarQubeHtmlParser()
-        findings = parser.get_findings(my_file_handle, test, 'detailed')
+        parser = SonarQubeParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         # specific verifications
         self.assertEqual(322, len(findings))

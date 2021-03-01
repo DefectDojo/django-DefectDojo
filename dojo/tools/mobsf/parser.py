@@ -10,6 +10,16 @@ from dojo.models import Finding
 
 
 class MobSFParser(object):
+
+    def get_scan_types(self):
+        return ["MobSF Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "MobSF Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Export a JSON file using the API, api/v1/report_json."
+
     def get_findings(self, filename, test):
         tree = filename.read()
         try:

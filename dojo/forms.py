@@ -5,7 +5,7 @@ import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from dateutil.relativedelta import relativedelta
 from django import forms
@@ -13,10 +13,12 @@ from django.core import validators
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
+from django.forms import utils as form_utils
 from django.forms.widgets import Widget, Select
 from django.utils.dates import MONTHS
 from django.utils.safestring import mark_safe
 from django.utils import timezone
+import tagulous
 
 from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings, VA, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
@@ -26,7 +28,7 @@ from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings,
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
-    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES
+    ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -35,6 +37,9 @@ from tagulous.forms import TagField
 import logging
 from crum import get_current_user
 from dojo.utils import get_system_setting
+from django.conf import settings
+from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.product_type.queries import get_authorized_product_types
 
 logger = logging.getLogger(__name__)
 
@@ -151,19 +156,25 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False)
-    authorized_users = forms.ModelMultipleChoiceField(
-        queryset=None,
-        required=False, label="Authorized Users")
+    if not settings.FEATURE_NEW_AUTHORIZATION:
+        authorized_users = forms.ModelMultipleChoiceField(
+            queryset=None,
+            required=False, label="Authorized Users")
 
     def __init__(self, *args, **kwargs):
         non_staff = Dojo_User.objects.exclude(is_staff=True) \
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(Product_TypeForm, self).__init__(*args, **kwargs)
-        self.fields['authorized_users'].queryset = non_staff
+
+        if not settings.FEATURE_NEW_AUTHORIZATION:
+            self.fields['authorized_users'].queryset = non_staff
 
     class Meta:
         model = Product_Type
-        fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
+        if settings.FEATURE_NEW_AUTHORIZATION:
+            fields = ['name', 'description', 'critical_product', 'key_product']
+        else:
+            fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
 
 
 class Delete_Product_TypeForm(forms.ModelForm):
@@ -173,6 +184,37 @@ class Delete_Product_TypeForm(forms.ModelForm):
     class Meta:
         model = Product_Type
         exclude = ['name', 'description', 'critical_product', 'key_product', 'authorized_users']
+
+
+class Edit_Product_Type_MemberForm(forms.ModelForm):
+    user = forms.ModelChoiceField(queryset=None, required=True)
+    role = forms.ChoiceField(choices=Roles.choices())
+
+    def __init__(self, *args, **kwargs):
+        super(Edit_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['product_type'].disabled = True
+        self.fields['user'].queryset = Dojo_User.objects.order_by('first_name', 'last_name')
+        self.fields['user'].disabled = True
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_type', 'user', 'role']
+
+
+class Add_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
+        self.fields['user'].queryset = Dojo_User.objects.exclude(
+            Q(is_superuser=True) |
+            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+        self.fields['user'].disabled = False
+
+
+class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Product_Type_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
 
 
 class Test_TypeForm(forms.ModelForm):
@@ -199,7 +241,7 @@ class ProductForm(forms.ModelForm):
                                   required=True)
 
     prod_type = forms.ModelChoiceField(label='Product Type',
-                                       queryset=Product_Type.objects.all().order_by('name'),
+                                       queryset=None,
                                        required=True)
 
     authorized_users = forms.ModelMultipleChoiceField(
@@ -219,6 +261,7 @@ class ProductForm(forms.ModelForm):
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(ProductForm, self).__init__(*args, **kwargs)
         self.fields['authorized_users'].queryset = non_staff
+        self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
     class Meta:
         model = Product
@@ -770,7 +813,7 @@ class AddFindingForm(forms.ModelForm):
                                      help_text="A new finding template will be created from this finding.")
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review')
 
@@ -827,7 +870,7 @@ class AdHocFindingForm(forms.ModelForm):
                                      help_text="A new finding template will be created from this finding.")
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
+    field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
                    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review', 'sla_start_date')
 
@@ -881,6 +924,51 @@ class PromoteFindingForm(forms.ModelForm):
                    'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
 
 
+class SplitDateTimeWidget(forms.MultiWidget):
+    supports_microseconds = False
+    template_name = 'dojo/field-datetime.html'
+
+    def __init__(self):
+        widgets = (
+            forms.TextInput(attrs={'type': 'date', 'autocomplete': 'off'}),
+            forms.TextInput(attrs={'type': 'time', 'autocomplete': 'off'}),
+        )
+        super().__init__(widgets)
+
+    def decompress(self, value):
+        if value:
+            value = form_utils.to_current_timezone(value)
+            return [value.date(), value.time()]
+        return [None, None]
+
+
+class SplitDateTimeField(forms.MultiValueField):
+    widget = SplitDateTimeWidget
+    hidden_widget = forms.SplitHiddenDateTimeWidget
+
+    def __init__(self, **kwargs):
+        fields = (
+            forms.DateField(),
+            forms.TimeField(),
+        )
+        super().__init__(fields, **kwargs)
+
+    def compress(self, data_list):
+        if data_list:
+            # preserve default dojo behavior and set current time if any part is empty
+            if data_list[0] in self.empty_values:
+                selected_date = date.today()
+            else:
+                selected_date = data_list[0]
+            if data_list[1] in self.empty_values:
+                selected_time = datetime.now().time()
+            else:
+                selected_time = data_list[1]
+            # keep potential tzinfo
+            return form_utils.from_current_timezone(datetime.combine(selected_date, selected_time, *data_list[2:]))
+        return None
+
+
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
@@ -905,10 +993,14 @@ class FindingForm(forms.ModelForm):
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
 
+    mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
+    mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
+
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
-                   'risk_accepted', 'under_defect_review')
+    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact',
+                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
+                   'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+                   'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
@@ -917,11 +1009,15 @@ class FindingForm(forms.ModelForm):
         if 'req_resp' in kwargs:
             req_resp = kwargs.pop('req_resp')
 
+        self.can_edit_mitigated_data = kwargs.pop('can_edit_mitigated_data') if 'can_edit_mitigated_data' in kwargs \
+            else False
+
         super(FindingForm, self).__init__(*args, **kwargs)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
-        if not self.instance.risk_accepted and not self.instance.test.engagement.product.enable_simple_risk_acceptance:
+        # when adding from template, we don't have access to the test. quickfix for now to just hide simple risk acceptance
+        if not hasattr(self.instance, 'test') or (not self.instance.risk_accepted and not self.instance.test.engagement.product.enable_simple_risk_acceptance):
             del self.fields['risk_accepted']
         else:
             if self.instance.risk_accepted:
@@ -941,6 +1037,14 @@ class FindingForm(forms.ModelForm):
 
         self.fields['sla_start_date'].disabled = True
 
+        if self.can_edit_mitigated_data:
+            if hasattr(self, 'instance'):
+                self.fields['mitigated'].initial = self.instance.mitigated
+                self.fields['mitigated_by'].initial = self.instance.mitigated_by
+        else:
+            del self.fields['mitigated']
+            del self.fields['mitigated_by']
+
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
 
@@ -956,6 +1060,17 @@ class FindingForm(forms.ModelForm):
                                         'be risk accepted.')
 
         return cleaned_data
+
+    def _post_clean(self):
+        super(FindingForm, self)._post_clean()
+
+        if self.can_edit_mitigated_data:
+            opts = self.instance._meta
+            try:
+                opts.get_field('mitigated').save_form_data(self.instance, self.cleaned_data.get('mitigated'))
+                opts.get_field('mitigated_by').save_form_data(self.instance, self.cleaned_data.get('mitigated_by'))
+            except forms.ValidationError as e:
+                self._update_errors(e)
 
     class Meta:
         model = Finding
@@ -1035,7 +1150,7 @@ class FindingTemplateForm(forms.ModelForm):
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
-    field_order = ['title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
+    field_order = ['title', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'references', 'tags', 'template_match', 'template_match_cwe', 'template_match_title', 'apply_to_findings']
 
     def __init__(self, *args, **kwargs):
         super(FindingTemplateForm, self).__init__(*args, **kwargs)
@@ -1070,6 +1185,8 @@ class FindingBulkUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(FindingBulkUpdateForm, self).__init__(*args, **kwargs)
         self.fields['severity'].required = False
+        # we need to defer initialization to prevent multiple initializations if other forms are shown
+        self.fields['tags'].widget.tag_options = tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px', 'defer': True})
 
     def clean(self):
         cleaned_data = super(FindingBulkUpdateForm, self).clean()
@@ -1530,6 +1647,7 @@ class ReportOptionsForm(forms.Form):
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
     include_executive_summary = forms.ChoiceField(choices=yes_no, label="Executive Summary")
     include_table_of_contents = forms.ChoiceField(choices=yes_no, label="Table of Contents")
+    include_disclaimer = forms.ChoiceField(choices=yes_no, label="Disclaimer")
     report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
 
@@ -2015,6 +2133,9 @@ class JIRAFindingForm(forms.Form):
         self.push_all = kwargs.pop('push_all', False)
         self.instance = kwargs.pop('instance', None)
         self.jira_project = kwargs.pop('jira_project', None)
+        # we provide the finding_form from the same page so we can add validation errors
+        # if the finding doesn't satisfy the rules to be pushed to JIRA
+        self.finding_form = kwargs.pop('finding_form', None)
 
         if self.instance is None and self.jira_project is None:
             raise ValueError('either and finding instance or jira_project is needed')
@@ -2041,12 +2162,22 @@ class JIRAFindingForm(forms.Form):
         self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
 
     def clean(self):
+        logger.debug('jform clean')
         import dojo.jira_link.helper as jira_helper
-        logger.debug('validating jirafindingform')
         cleaned_data = super(JIRAFindingForm, self).clean()
         jira_issue_key_new = self.cleaned_data.get('jira_issue')
         finding = self.instance
         jira_project = self.jira_project
+
+        logger.debug('self.cleaned_data.push_to_jira: %s', self.cleaned_data.get('push_to_jira', None))
+
+        if self.cleaned_data.get('push_to_jira', None):
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(self.instance, self.finding_form)
+            if not can_be_pushed_to_jira:
+                self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
+                # for field in error_fields:
+                #     self.finding_form.add_error(field, error)
+
         if jira_issue_key_new:
             if finding:
                 # in theory there can multiple jira instances that have similar projects

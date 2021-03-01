@@ -4,10 +4,20 @@ import json
 from dojo.models import Finding
 
 
-class CCVSReportParser(object):
+class CCVSParser(object):
     """
     Read JSON data from CCVS compatible format and import it to DefectDojo
     """
+
+    def get_scan_types(self):
+        return ["CCVS Report"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import CCVS Report vulnerabilities in JSON format."
+
     def get_findings(self, json_output, test):
 
         if json_output is None:

@@ -32,7 +32,7 @@ import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
-from celery.decorators import task
+from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 
 
@@ -47,7 +47,7 @@ Helper functions for DefectDojo
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def do_false_positive_history(new_finding, *args, **kwargs):
     logger.debug('%s: sync false positive history', new_finding.id)
@@ -104,7 +104,7 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
@@ -328,7 +328,7 @@ def set_duplicate(new_finding, existing_finding):
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
-        set_duplicate_reopen_(new_finding, existing_finding)
+        set_duplicate_reopen(new_finding, existing_finding)
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
@@ -362,7 +362,7 @@ def set_duplicate_reopen(new_finding, existing_finding):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
@@ -1224,7 +1224,7 @@ def handle_uploaded_selenium(f, cred):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def add_external_issue(find, external_issue_provider):
     eng = Engagement.objects.get(test=find.test)
@@ -1237,7 +1237,7 @@ def add_external_issue(find, external_issue_provider):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def update_external_issue(find, old_status, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1249,7 +1249,7 @@ def update_external_issue(find, old_status, external_issue_provider):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def close_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1261,7 +1261,7 @@ def close_external_issue(find, note, external_issue_provider):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def reopen_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1887,3 +1887,17 @@ def get_object_or_none(klass, *args, **kwargs):
         return queryset.get(*args, **kwargs)
     except queryset.model.DoesNotExist:
         return None
+
+
+def add_error_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            message,
+                            extra_tags='alert-danger')
+
+
+def add_field_errors_to_response(form):
+    if form and get_current_request():
+        for field, error in form.errors.items():
+            add_error_message_to_response(error)

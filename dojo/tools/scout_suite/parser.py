@@ -16,6 +16,15 @@ class ScoutSuiteParser(object):
     item_data = ""
     pdepth = 0
 
+    def get_scan_types(self):
+        return ["Scout Suite Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JS file in scoutsuite-results/scoutsuite_results_*.js."
+
     def get_findings(self, filename, test):
         with open(filename.temporary_file_path(), "r") as fileobj:
             raw_data = fileobj.read()
