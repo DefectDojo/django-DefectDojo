@@ -1253,7 +1253,6 @@ class ImportScanSerializer(serializers.Serializer):
             for old_finding in old_findings:
                 old_finding.active = False
                 old_finding.is_Mitigated = True
-                finding_helper.update_finding_status(old_finding, self.context['request'].user)
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")
