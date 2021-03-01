@@ -65,6 +65,7 @@ COPY \
   docker/entrypoint-celery-worker.sh \
   docker/entrypoint-initializer.sh \
   docker/entrypoint-uwsgi.sh \
+  docker/entrypoint-uwsgi-cb.sh \
   docker/entrypoint-uwsgi-dev.sh \
   docker/entrypoint-uwsgi-ptvsd.sh \
   docker/entrypoint-unit-tests.sh \
@@ -72,6 +73,12 @@ COPY \
   docker/wait-for-it.sh \
   docker/certs/* \
   /
+# this file must exist. If not, then check your branch. Otherwise, it will throw an error.
+# when building, you have to be in release mode, not dev or ptvsd
+COPY \
+  docker/extra_settings/local_settings.py \
+  /app/dojo/settings/local_settings.py
+
 COPY wsgi.py manage.py docker/unit-tests.sh ./
 COPY dojo/ ./dojo/
 

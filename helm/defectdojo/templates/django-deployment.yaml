@@ -76,6 +76,7 @@ spec:
           timeoutSeconds: 5
       {{- end }}
       - name: uwsgi
+        command: ["/entrypoint-uwsgi-cb.sh"]
         image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.securityContext.enabled }}
