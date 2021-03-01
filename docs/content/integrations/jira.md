@@ -99,7 +99,6 @@ might not be feasible. For this scenario there is the management command 'jira_s
 
 ```
 usage: manage.py jira_status_reconciliation [-h] [--mode MODE] [--product PRODUCT] [--engagement ENGAGEMENT] [--dryrun] [--version] [-v {0,1,2,3}]
-                                            [--settings SETTINGS] [--pythonpath PYTHONPATH] [--traceback] [--no-color] [--force-color]
 
 Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. Risk Accepted findings are skipped.
 
