@@ -81,7 +81,7 @@ class SpotbugsParser(object):
                     line=source_line,
                     file_path=source_file,
                     sast_source_line=source_line,
-                    sast_source_file_path = source_file
+                    sast_source_file_path=source_file
                 )
                 dupes[dupe_key] = finding
 
