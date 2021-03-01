@@ -1,5 +1,5 @@
 # requirements.txt for DefectDojo using Python 3.x
-asteval==0.9.22
+asteval==0.9.23
 bleach==3.3.0
 celery==4.4.7
 coverage==5.4
