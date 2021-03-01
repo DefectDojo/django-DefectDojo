@@ -52,7 +52,7 @@ titlecase==2.0.0
 social-auth-app-django==4.0.0
 social-auth-core==4.0.3
 Python-jose==3.2.0
-gitpython==2.1.13
+gitpython==3.0.7
 ptvsd==4.3.2
 python-gitlab==2.6.0
 google-auth==1.27.0
