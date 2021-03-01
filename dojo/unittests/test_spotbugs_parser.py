@@ -22,7 +22,7 @@ class TestSpotbugsParser(TestCase):
         parser = SpotbugsXMLParser(testfile, Test())
         testfile.close()
         test_finding = parser.items[0]
-        self.assertEqual("93", test_finding.sast_source_line)
+        self.assertEqual(95, test_finding.sast_source_line)
 
     def test_find_sast_source_path(self):
         testfile = open("dojo/unittests/scans/spotbugs/many_findings.xml")
@@ -36,7 +36,7 @@ class TestSpotbugsParser(TestCase):
         parser = SpotbugsXMLParser(testfile, Test())
         testfile.close()
         test_finding = parser.items[0]
-        self.assertEqual("93", test_finding.line)
+        self.assertEqual(95, test_finding.line)
 
     def test_find_file_path(self):
         testfile = open("dojo/unittests/scans/spotbugs/many_findings.xml")
