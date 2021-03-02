@@ -6,7 +6,7 @@ from dojo.models import Test
 class TestSpotbugsParser(TestCase):
 
     def test_no_findings(self):
-        parser = SpotbugsXMLParser()
+        parser = SpotbugsParser()
         parser.get_findings("dojo/unittests/scans/spotbugs/no_finding.xml", Test())
         self.assertEqual(0, len(parser.items))
 
