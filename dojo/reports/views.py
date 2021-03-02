@@ -1109,7 +1109,7 @@ def quick_report(request):
              'false_positive', 'inactive']
     request.path = url
     obj_name = obj_id = view = query = None
-    path_items = list(filter(None, re.split('/|\?', url)))
+    path_items = list(filter(None, re.split('/|\?', url))) # noqa W605
     try:
         finding_index = path_items.index('finding')
     except ValueError:
