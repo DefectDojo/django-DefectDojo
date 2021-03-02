@@ -11,7 +11,7 @@ class TestSpotbugsParser(TestCase):
         self.assertEqual(0, len(parser.items))
 
     def test_parse_many_finding(self):
-        parser = SpotbugsXMLParser()
+        parser = SpotbugsParser()
         parser.get_findings("dojo/unittests/scans/spotbugs/many_findings.xml", Test())
         self.assertEqual(81, len(parser.items))
 
