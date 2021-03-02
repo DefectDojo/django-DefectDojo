@@ -1,5 +1,5 @@
 from django.test import TestCase
-from dojo.tools.spotbugs.parser import SpotbugsXMLParser
+from dojo.tools.spotbugs.parser import SpotbugsParser
 from dojo.models import Test
 
 
