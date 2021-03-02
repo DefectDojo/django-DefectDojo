@@ -115,8 +115,9 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * Jannik Jürgens
 * [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
 * Saurabh kumar
-* Cody Maffucci
+* [Cody Maffucci](https://www.linkedin.com/in/cody-maffucci)
 * Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
+* [Damien Carol](https://www.linkedin.com/in/damien-carol/)
 
 ## Hall of Fame
 
