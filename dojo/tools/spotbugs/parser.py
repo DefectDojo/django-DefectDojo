@@ -85,4 +85,5 @@ class SpotbugsParser(object):
                 )
                 dupes[dupe_key] = finding
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
+
