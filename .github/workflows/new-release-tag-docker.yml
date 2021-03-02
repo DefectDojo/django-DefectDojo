@@ -72,7 +72,7 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
           asset_name: defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
-          asset_content_type: application/octet-stream
+          asset_content_type: application/tar+gzip
       - name: Update Helm repository index
         id: update-helm-repository-index
         run: |
