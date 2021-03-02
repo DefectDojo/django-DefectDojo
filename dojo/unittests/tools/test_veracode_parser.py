@@ -16,3 +16,18 @@ class TestVeracodeScannerParser(SimpleTestCase):
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
+        finding = findings[0]
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual(123, finding.cwe)
+
+    def test_parse_file_with_multiple_finding2(self):
+        testfile = open("dojo/unittests/scans/veracode/veracode_scan.xml")
+        parser = VeracodeParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(4, len(findings))
+        finding = findings[0]
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual(201, finding.cwe)
+        finding = findings[1]
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual(201, finding.cwe)
