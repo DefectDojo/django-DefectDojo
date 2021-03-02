@@ -107,6 +107,11 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 @app.task
 @dojo_model_from_id
 def do_dedupe_finding(new_finding, *args, **kwargs):
+    do_dedupe_finding_sync(new_finding, *args, **kwargs)
+
+
+# This function can be called directly for synchronous deduplication
+def do_dedupe_finding_sync(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
