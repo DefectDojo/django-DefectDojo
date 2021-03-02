@@ -65,7 +65,7 @@ Adding JIRA to Dojo
     4.  **Note**: dojojira uses the same celery functionality as
         reports. Make sure the celery runner is setup correctly as
         described:
-        <http://defectdojo.readthedocs.io/en/latest/features.html#reports>
+        <https://defectdojo.github.io/django-DefectDojo/basics/features/#reports>
 
     Or
 
