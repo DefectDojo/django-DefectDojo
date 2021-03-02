@@ -34,7 +34,7 @@ class TestSpotbugsParser(TestCase):
         self.assertEqual(95, test_finding.line)
 
     def test_find_file_path(self):
-        parser = SpotbugsXMLParser()
+        parser = SpotbugsParser()
         parser.get_findings("dojo/unittests/scans/spotbugs/many_findings.xml", Test())
         test_finding = parser.items[0]
         self.assertEqual("securitytest/command/IdentityFunctionCommandInjection.kt", test_finding.file_path)
