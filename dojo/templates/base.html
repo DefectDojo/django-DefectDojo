@@ -436,6 +436,8 @@
                       {% if product_tab.product|has_object_permission:"Finding_Add" or user|is_authorized_for_staff:product_tab.product %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'ad_hoc_finding' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
+                      {% endif %}
+                      {% if product_tab.product|has_object_permission:"Import_Scan_Result" or user|is_authorized_for_staff:product_tab.product %}
                       <li><a href="{% url 'import_scan_results_prod' product_tab.product.id %}"><i class="fa fa-upload"></i> Import Scan Results</a></li>
                       {% endif %}
                     </ul>

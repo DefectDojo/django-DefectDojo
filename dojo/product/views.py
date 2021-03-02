@@ -691,6 +691,7 @@ def view_engagements_cicd(request, pid):
     return view_engagements(request, pid=pid, engagement_type="CI/CD")
 
 
+# Authorization is within the import_scan_results method
 def import_scan_results_prod(request, pid=None):
     from dojo.engagement.views import import_scan_results
     return import_scan_results(request, pid=pid)
