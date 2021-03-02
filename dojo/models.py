@@ -281,6 +281,9 @@ class System_Settings(models.Model):
         help_text="Enable anyone with a link to the survey to answer a survey"
     )
     credentials = models.TextField(max_length=3000, blank=True)
+    disclaimer = models.TextField(max_length=3000, default='', blank=True,
+                                  verbose_name="Custom Disclaimer",
+                                  help_text="Include this custom disclaimer on all notifications and generated reports")
     column_widths = models.TextField(max_length=1500, blank=True)
     drive_folder_ID = models.CharField(max_length=100, blank=True)
     enable_google_sheets = models.BooleanField(default=False, null=True, blank=True)

@@ -111,6 +111,30 @@ Upgrade Celery to the latest version:
 
 > `pip install --upgrade celery`
 
+Upgrading to DefectDojo Version 1.13.x
+--------------------------------------
+- See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.13.0
+- Hashcode settings affecting deduplication have changed, to update existing findings run:
+
+    `./manage.py dedupe`
+
+If you're using docker:
+
+    docker-compose exec uwsgi ./manage.py dedupe
+
+This can take a while depeneding on your instance size. It might possible that new duplicates are detected among existing findings, so make a backup before running!
+
+
+Upgrading to DefectDojo Version 1.12.x
+--------------------------------------
+- See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.12.0
+- 1.12.1 is a security release https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.12.1
+
+Upgrading to DefectDojo Version 1.11.x
+--------------------------------------
+- See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.11.0
+- 1.11.1 is a security release https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.11.1
+
 Upgrading to DefectDojo Version 1.10.x
 --------------------------------------
 

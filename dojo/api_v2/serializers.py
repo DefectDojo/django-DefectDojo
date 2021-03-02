@@ -1262,14 +1262,8 @@ class ImportScanSerializer(serializers.Serializer):
 
             for old_finding in old_findings:
                 old_finding.active = False
-                old_finding.mitigated = datetime.datetime.combine(
-                    test.target_start,
-                    timezone.now().time())
-                if settings.USE_TZ:
-                    old_finding.mitigated = timezone.make_aware(
-                        old_finding.mitigated,
-                        timezone.get_default_timezone())
-                old_finding.mitigated_by = self.context['request'].user
+                old_finding.is_Mitigated = True
+                finding_helper.update_finding_status(old_finding, self.context['request'].user)
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")
