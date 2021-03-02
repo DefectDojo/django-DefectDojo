@@ -44,7 +44,7 @@ function Dashboard() {
               <CardIcon color="success">
                 <BugReport />
               </CardIcon>
-              <p className={classes.cardCategory}>Last Seven Days</p>
+              <p className={classes.cardCategory}>Last Seven Days </p>
               <h3 className={classes.cardTitle}>7</h3>
             </CardHeader>
             <CardFooter stats>
@@ -68,7 +68,11 @@ function Dashboard() {
               <h3 className={classes.cardTitle}>0</h3>
             </CardHeader>
             <CardFooter stats>
-              <div className={classes.stats}>Last 24 Hours</div>
+              <div className={classes.stats}>
+                <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                  View Finding Detail
+                </a>
+              </div>
             </CardFooter>
           </Card>
         </GridItem>

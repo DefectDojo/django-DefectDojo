@@ -29,13 +29,6 @@ export default function CardIcon(props) {
 
 CardIcon.propTypes = {
   className: PropTypes.string,
-  color: PropTypes.oneOf([
-    "warning",
-    "success",
-    "danger",
-    "info",
-    "primary",
-    "rose",
-  ]),
+
   children: PropTypes.node,
 };
