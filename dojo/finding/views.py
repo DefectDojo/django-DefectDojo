@@ -1529,7 +1529,7 @@ def manage_images(request, fid):
     messages.add_message(
                 request,
                 messages.INFO,
-                'Finding Images will be removed as of 06/31/2020. Please use the File Uploads instead.',
+                'Finding Images will be removed as of 06/31/2021. Please use the File Uploads instead.',
                 extra_tags='alert-danger')
 
     if request.method == 'POST':
