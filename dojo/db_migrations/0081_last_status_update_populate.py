@@ -25,10 +25,13 @@ def populate_last_status_update(apps, schema_editor):
         cursor.execute("UPDATE dojo_finding SET mitigated = CASE WHEN last_reviewed is not NULL THEN last_reviewed ELSE %s END WHERE is_Mitigated = 1 AND mitigated IS NULL", [now])
         row = cursor.fetchone()
 
-        logger.debug(connection.queries[-1])
+        # if there are no findings, there seems to be no queries?
+        if connection.queries:
+            logger.debug(connection.queries[-1])
 
         cursor.execute("UPDATE dojo_finding SET last_status_update = CASE WHEN last_reviewed is not NULL THEN last_reviewed ELSE mitigated END WHERE (last_reviewed IS NOT NULL or (is_Mitigated = 1 AND mitigated IS NOT NULL))")
-        row = cursor.fetchone()
+        if connection.queries:
+            row = cursor.fetchone()
 
         logger.debug(connection.queries[-1])
 
