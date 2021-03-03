@@ -18,3 +18,10 @@ class TestFactory(TestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
+
+    def test_nessus(self):
+        testfile = open("dojo/unittests/scans/nessus/nessus_v_unknown.xml")
+        parser = import_parser_factory(testfile, Test(), False, False, 'Nessus Scan')
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(32, len(findings))
