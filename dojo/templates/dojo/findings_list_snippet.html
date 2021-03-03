@@ -12,6 +12,13 @@
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
+                        <form method="get" action="{% url 'quick_report' %}" class="pull-right">
+                            <input type="hidden" label="url" name="url" value="{{ request.get_full_path }}">
+                            <input type="hidden" label="_generate" name="_generate" value="_generate">
+                            <button class="btn btn-primary" type="submit" label="quick_report" id="quick_report" aria-expanded="true">
+                                <i class="fa fa-file-text-o"></i>
+                            </button>
+                        </form>
                     </h3>
                 </div>
                 <div id="the-filters" class="is-filters panel-body collapse" >
