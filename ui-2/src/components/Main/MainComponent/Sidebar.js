@@ -128,7 +128,6 @@ function Sidebar(props) {
 
 Sidebar.propTypes = {
   handleDrawerToggle: PropTypes.func,
-
   logo: PropTypes.string,
   image: PropTypes.string,
   logoText: PropTypes.string,

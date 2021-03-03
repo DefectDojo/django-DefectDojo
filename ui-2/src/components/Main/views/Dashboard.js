@@ -1,7 +1,9 @@
 import React from "react";
+import Chart from "chart.js";
 import { makeStyles } from "@material-ui/core/styles";
 import AdjustIcon from "@material-ui/icons/Adjust";
 import BugReport from "@material-ui/icons/BugReport";
+import CheckIcon from "@material-ui/icons/Check";
 
 //core components
 import GridItem from "../MainComponent/Grid/GridItem";
@@ -11,7 +13,7 @@ import CardHeader from "../MainComponent/Card/CardHeader";
 import CardIcon from "../MainComponent/Card/CardIcon";
 import CardBody from "../MainComponent/Card/CardBody";
 import CardFooter from "../MainComponent/Card/CardFooter";
-
+import DonutChar from "../MainComponent/Dashboard/DonutChar";
 import styles from "../Styles/jss/views/dashboardStyles";
 
 const useStyles = makeStyles(styles);
@@ -22,8 +24,8 @@ function Dashboard() {
       <GridContainer>
         <GridItem xs={12} sm={6} md={3}>
           <Card>
-            <CardHeader color="warning" stats icon>
-              <CardIcon color="warning">
+            <CardHeader color="info" stats icon>
+              <CardIcon color="info">
                 <AdjustIcon fontSize="large" />
               </CardIcon>
               <p className={classes.cardCategory}>Active Engagements</p>
@@ -40,8 +42,8 @@ function Dashboard() {
         </GridItem>
         <GridItem xs={12} sm={6} md={3}>
           <Card>
-            <CardHeader color="success" stats icon>
-              <CardIcon color="success">
+            <CardHeader color="danger" stats icon>
+              <CardIcon color="danger">
                 <BugReport />
               </CardIcon>
               <p className={classes.cardCategory}>Last Seven Days </p>
@@ -65,6 +67,24 @@ function Dashboard() {
                 </div>
               </CardIcon>
               <p className={classes.cardCategory}>Closed In Last Seven Days</p>
+              <h3 className={classes.cardTitle}>27</h3>
+            </CardHeader>
+            <CardFooter stats>
+              <div className={classes.stats}>
+                <a href="#pablo" onClick={(e) => e.preventDefault()}>
+                  View Finding Detail
+                </a>
+              </div>
+            </CardFooter>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} sm={6} md={3}>
+          <Card>
+            <CardHeader color="warning" stats icon>
+              <CardIcon color="warning">
+                <CheckIcon />
+              </CardIcon>
+              <p className={classes.cardCategory}>Risk Accept in seven days</p>
               <h3 className={classes.cardTitle}>0</h3>
             </CardHeader>
             <CardFooter stats>
@@ -74,6 +94,18 @@ function Dashboard() {
                 </a>
               </div>
             </CardFooter>
+          </Card>
+        </GridItem>
+      </GridContainer>
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={6}>
+          <Card>
+            <CardHeader color="warning">
+              <DonutChar />
+            </CardHeader>
+            <CardBody>
+              <h4 className={classes.cardTitle}>Historical Finding Severity</h4>
+            </CardBody>
           </Card>
         </GridItem>
       </GridContainer>
