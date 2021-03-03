@@ -14,7 +14,7 @@ def populate_last_status_update(apps, schema_editor):
 
     now = timezone.now()
     Finding = apps.get_model('dojo', 'Finding')
-    findings = Finding.objects.filter(Q(last_reviewed__isnull=False) | Q(is_Mitigated=True)).order_by('id')
+    findings = Finding.objects.filter(Q(last_reviewed__isnull=False) | Q(is_Mitigated=True)).order_by('id').only('id', 'is_Mitigated', 'mitigated', 'last_reviewed', 'last_status_update')
 
     paginator = Paginator(findings, 1000)
     total_count = paginator.count
@@ -26,14 +26,18 @@ def populate_last_status_update(apps, schema_editor):
         batch = []
         for find in page:
             # by default it is 'now' from the migration, but last_reviewed is better default for existing findings
-            find.last_status_update = find.last_reviewed
             if find.is_Mitigated:
                 find.mitigated = find.mitigated or now
+
+            if find.last_reviewed:
+                find.last_status_update = find.last_reviewed
+            elif find.mitigated:
+                find.last_status_update = find.mitigated
 
             batch.append(find)
             i += 1
 
-            if i > 0 and i % 1000 == 0:
+            if i > 0 and i % 10000 == 0:
                 Finding.objects.bulk_update(batch, ['last_status_update', 'mitigated'])
                 batch = []
                 logger.info('%s out of %s findings updated...', i, total_count)
