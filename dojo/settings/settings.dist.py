@@ -31,10 +31,6 @@ env = environ.Env(
     DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
-    DD_PORT_SCAN_CONTACT_EMAIL=(str, 'email@localhost'),
-    DD_PORT_SCAN_RESULT_EMAIL_FROM=(str, 'email@localhost'),
-    DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=(str, ['email@localhost']),
-    DD_PORT_SCAN_SOURCE_IP=(str, '127.0.0.1'),
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, False),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
@@ -527,11 +523,6 @@ DB_KEY = env('DD_CREDENTIAL_AES_256_KEY')
 
 # wkhtmltopdf settings
 WKHTMLTOPDF_PATH = env('DD_WKHTMLTOPDF')
-
-PORT_SCAN_CONTACT_EMAIL = env('DD_PORT_SCAN_CONTACT_EMAIL')
-PORT_SCAN_RESULT_EMAIL_FROM = env('DD_PORT_SCAN_RESULT_EMAIL_FROM')
-PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
-PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')

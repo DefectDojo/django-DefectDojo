@@ -96,10 +96,6 @@ DD_LANG=${DD_LANG:-"en-us"}                              # Change the default la
 DD_WKHTMLTOPDF=${DD_WKHTMLTOPDF:-"/usr/local/bin/wkhtmltopdf"} # Path to PDF library
 DD_TEAM_NAME=${DD_TEAM_NAME:-"Security"}                 # Security team name, used for outgoing emails
 DD_ADMINS=${DD_ADMINS:-"dojo-srv@localhost"}             # Admins for log emails, separate with comma for 2+ addresses
-DD_PORT_SCAN_CONTACT_EMAIL=${DD_PORT_SCAN_CONTACT_EMAIL:-"dojo-srv@localhost"} # Port scan contact email
-DD_PORT_SCAN_RESULT_EMAIL_FROM=${DD_PORT_SCAN_RESULT_EMAIL_FROM:-"dojo-srv@localhost"} # Port scan from email
-DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=${DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST:-"dojo-srv@localhost"} # Port scan email list
-DD_PORT_SCAN_SOURCE_IP=${DD_PORT_SCAN_SOURCE_IP:-"127.0.0.1"} # Port scan source
 
 #D=${D:-"z"}
 
