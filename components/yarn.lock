@@ -674,10 +674,10 @@ jquery.hotkeys@jeresig/jquery.hotkeys#master:
   version "0.2.0"
   resolved "https://codeload.github.com/jeresig/jquery.hotkeys/tar.gz/f24f1da275aab7881ab501055c256add6f690de4"
 
-"jquery@>= 1.0.0", jquery@>=1.7, jquery@>=1.7.0, jquery@^3.5.1:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.5.1.tgz#d7b4d08e1bfdb86ad2f1a3d039ea17304717abb5"
-  integrity sha512-XwIBPqcMn57FxfT+Go5pzySnm4KWkT1Tv7gjrpT1srtf8Weynl6R273VJ5GjkRb51IzMp5nbaPjJXMWeju2MKg==
+"jquery@>= 1.0.0", jquery@>=1.7, jquery@>=1.7.0, jquery@^3.6.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.6.0.tgz#c72a09f15c1bdce142f49dbf1170bdf8adac2470"
+  integrity sha512-JVzAR/AjBvVt2BmYhxRCSYysDsPcssdmTFnzyLEts9qNwmjmu4JTAMYubEfwVOSwpQ1I1sKKFcxhZCI2buerfw==
 
 jszip@^3.6.0:
   version "3.6.0"
