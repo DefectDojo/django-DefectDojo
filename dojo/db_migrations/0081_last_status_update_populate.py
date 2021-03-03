@@ -30,10 +30,10 @@ def populate_last_status_update(apps, schema_editor):
             logger.debug(connection.queries[-1])
 
         cursor.execute("UPDATE dojo_finding SET last_status_update = CASE WHEN last_reviewed is not NULL THEN last_reviewed ELSE mitigated END WHERE (last_reviewed IS NOT NULL or (is_Mitigated = 1 AND mitigated IS NOT NULL))")
-        if connection.queries:
-            row = cursor.fetchone()
+        row = cursor.fetchone()
 
-        logger.debug(connection.queries[-1])
+        if connection.queries:
+            logger.debug(connection.queries[-1])
 
 
 class Migration(migrations.Migration):
