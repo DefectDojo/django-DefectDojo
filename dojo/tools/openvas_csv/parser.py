@@ -144,6 +144,7 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
 
                 finding.unsaved_endpoints = endpoints
 
+        # FIXME manage port and protocole event if it's an IP address
         # URL is an IP so save as an IP endpoint
         elif self.is_valid_ipv4_address(url):
             try:
@@ -317,12 +318,10 @@ class OpenVASCsvParser(object):
         dupes = dict()
         chain = self.create_chain()
 
-        if filename is None:
-            return ()
-
-        content = open(filename.temporary_file_path(), 'rb')
-        reportCSV = io.TextIOWrapper(content, encoding='utf-8 ', errors='replace')
-        reader = csv.reader(reportCSV, delimiter=',', quotechar='"')
+        content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
 
         row_number = 0
         for row in reader:
@@ -335,7 +334,7 @@ class OpenVASCsvParser(object):
 
             column_number = 0
             for column in row:
-                self.chain.process_column(self.column_names[column_number], column, finding)
+                chain.process_column(column_names[column_number], column, finding)
                 column_number += 1
 
             if finding is not None and row_number > 0:
