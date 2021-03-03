@@ -1,6 +1,6 @@
 from drf_yasg2.utils import swagger_serializer_method
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
+    User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
@@ -1012,48 +1012,6 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
-
-
-class ScanSettingsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ScanSettings
-        fields = '__all__'
-
-
-class ScanSettingsCreateSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all())
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all())
-    data = serializers.DateTimeField(required=False)
-
-    class Meta:
-        model = ScanSettings
-        fields = '__all__'
-
-
-class IPScanSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IPScan
-        fields = '__all__'
-
-
-class ScanSerializer(serializers.ModelSerializer):
-    # scan_settings_link = serializers.PrimaryKeyRelatedField(
-    #     read_only=True,
-    #     source='scan_settings')
-    # scan_settings = serializers.PrimaryKeyRelatedField(
-    #     queryset=ScanSettings.objects.all(),
-    #     write_only=True,
-    #     )
-    # ipscan_links = serializers.PrimaryKeyRelatedField(
-    #     read_only=True,
-    #     many=True,
-    #     source='ipscan_set')
-
-    class Meta:
-        model = Scan
-        fields = '__all__'
 
 
 class ImportScanSerializer(serializers.Serializer):
