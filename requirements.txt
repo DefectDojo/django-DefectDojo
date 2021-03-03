@@ -52,14 +52,13 @@ titlecase==2.0.0
 social-auth-app-django==4.0.0
 social-auth-core==4.0.3
 Python-jose==3.2.0
-gitpython>=2.1.13
+gitpython==3.0.7
 ptvsd==4.3.2
 python-gitlab==2.6.0
 google-auth==1.27.0
 google-api-python-client==1.12.8
 google-auth-oauthlib==0.4.2
 drf_yasg2==1.19.4
-jsonlines==2.0.0  # requred by yarn audit parser
 django-saml2-auth==2.2.1
 cpe==1.2.1
 packageurl-python==0.9.4
