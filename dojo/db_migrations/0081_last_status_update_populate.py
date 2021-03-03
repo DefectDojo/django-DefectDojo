@@ -15,8 +15,10 @@ def populate_last_status_update(apps, schema_editor):
     now = timezone.now()
     Finding = apps.get_model('dojo', 'Finding')
     findings = Finding.objects.filter(Q(last_reviewed__isnull=False) | Q(is_Mitigated=True)).order_by('id').only('id', 'is_Mitigated', 'mitigated', 'last_reviewed', 'last_status_update')
+    # findings = Finding.objects.filter(id__isnull=False).order_by('id').only('id', 'is_Mitigated', 'mitigated', 'last_reviewed', 'last_status_update')
 
-    paginator = Paginator(findings, 1000)
+    page_size = 1000
+    paginator = Paginator(findings, page_size)
     total_count = paginator.count
     logger.debug('found %d findings to update:', total_count)
 
@@ -37,7 +39,7 @@ def populate_last_status_update(apps, schema_editor):
             batch.append(find)
             i += 1
 
-            if i > 0 and i % 10000 == 0:
+            if i > 0 and i % page_size == 0:
                 Finding.objects.bulk_update(batch, ['last_status_update', 'mitigated'])
                 batch = []
                 logger.info('%s out of %s findings updated...', i, total_count)
