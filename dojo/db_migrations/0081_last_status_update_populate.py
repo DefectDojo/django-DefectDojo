@@ -2,6 +2,7 @@
 
 from django.db import migrations
 from django.utils import timezone
+from django.db.models import Q
 import logging
 logger = logging.getLogger(__name__)
 
@@ -12,19 +13,25 @@ def populate_last_status_update(apps, schema_editor):
     logger.info('Setting last_status_update timestamp on findings to be initially equal to last_reviewed timestamp (may take a while)')
 
     now = timezone.now()
-    findings = apps.get_model('dojo', 'Finding').objects.all()
+    Finding = apps.get_model('dojo', 'Finding')
+    findings = Finding.objects.filter(Q(last_reviewed__isnull=False) | Q(is_Mitigated=True))
+
+    logger.debug('found %d findings to update:', findings.count())
 
     i = 0
+    batch = []
     for find in findings:
         # by default it is 'now' from the migration, but last_reviewed is better default for existing findings
         find.last_status_update = find.last_reviewed
         if find.is_Mitigated:
             find.mitigated = find.mitigated or now
 
-        find.save()
+        batch.append(find)
         i += 1
 
         if i > 0 and i % 1000 == 0:
+            Finding.objects.bulk_update(batch, ['last_status_update', 'mitigated'])
+            batch = []
             logger.info('%s findings updated...', i)
 
 
