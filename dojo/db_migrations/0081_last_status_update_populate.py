@@ -21,16 +21,25 @@ def populate_last_status_update(apps, schema_editor):
     # some dude in switzerland says he has 500k findings and the migration needed to be optimized to not take 1,5 hours to run
     # using paging (LIMIT/OFFSET) is very slow, the higher the page number, the longer the query takes
     # so we use a 'seek' method
+    logger.info("Detected database vendor:%s", connection.vendor)
     with connection.cursor() as cursor:
-        cursor.execute("UPDATE dojo_finding SET mitigated = CASE WHEN last_reviewed is not NULL THEN last_reviewed ELSE %s END WHERE is_Mitigated = 1 AND mitigated IS NULL", [now])
-        row = cursor.fetchone()
+        if connection.vendor == 'postgresql':
+            # postgres needs quotes to be able to handle the capital M in the column name
+            query1 = 'UPDATE dojo_finding SET mitigated = CASE WHEN last_reviewed is not NULL THEN last_reviewed ELSE %s END WHERE "is_Mitigated" = True AND mitigated IS NULL'
+            query2 = 'UPDATE dojo_finding SET last_status_update = CASE WHEN last_reviewed is not NULL THEN last_reviewed ELSE mitigated END WHERE (last_reviewed IS NOT NULL or ("is_Mitigated" = True AND mitigated IS NOT NULL))'
+        else:
+            query1 = 'UPDATE dojo_finding SET mitigated = CASE WHEN last_reviewed is not NULL THEN last_reviewed ELSE %s END WHERE is_Mitigated = 1 AND mitigated IS NULL'
+            query2 = 'UPDATE dojo_finding SET last_status_update = CASE WHEN last_reviewed is not NULL THEN last_reviewed ELSE mitigated END WHERE (last_reviewed IS NOT NULL or (is_Mitigated = 1 AND mitigated IS NOT NULL))'
+
+        cursor.execute(query1, [now])
+        # row = cursor.fetchone()
 
         # if there are no findings, there seems to be no queries?
         if connection.queries:
             logger.debug(connection.queries[-1])
 
-        cursor.execute("UPDATE dojo_finding SET last_status_update = CASE WHEN last_reviewed is not NULL THEN last_reviewed ELSE mitigated END WHERE (last_reviewed IS NOT NULL or (is_Mitigated = 1 AND mitigated IS NOT NULL))")
-        row = cursor.fetchone()
+        cursor.execute(query2)
+        # row = cursor.fetchone()
 
         if connection.queries:
             logger.debug(connection.queries[-1])
