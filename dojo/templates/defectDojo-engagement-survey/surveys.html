@@ -2,16 +2,55 @@
     <table id="surveys" class="tablesorter-bootstrap table table-condensed table-striped">
         <thead>
         <tr>
+            <th></th>
             <th>Name</th>
             <th>Assignee</th>
             <th>Responder</th>
             <th>Status</th>
             <th>Completion Date</th>
-            <th>Actions</th>
         </tr>
         </thead>
         {% for survey in surveys %}
             <tr>
+                <td>
+                    <ul>
+                        <li class="dropdown" style="list-style:none;position:absolute">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                            <ul class="dropdown-menu">
+                                {% if not survey.completed %}
+                                <li role="presentation">
+                                    <a class="" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer">
+                                    <i class="fa fa-edit"></i> Answer Questionnaire</a>
+                                </li>
+                                {% else %}
+                                <li role="presentation">
+                                    <a class="" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">
+                                        <i class="fa fa-list-alt"></i> View Responses</a>
+                                </li>
+                                <li role="presentation">
+                                    <a class="" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer">
+                                    <i class="fa fa-edit"></i> Edit Responses</a>
+                                </li>
+                                {% endif %}
+                                <li role="presentation"
+                                    ><a class="" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign">
+                                        <i class="fa fa-plus"></i> Assign User</a>
+                                </li>
+                                <li>
+                                    <a class="" data-toggle="modal"
+                                    data-target="#shareQuestionnaireModal"
+                                    data-whatever="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer">
+                                    <i class="fa fa-share-alt"></i> Share Questionnaire</a>
+                                </li>
+                                <li class="divider"></li>
+                                <li role="presentation">
+                                    <a class="text-danger" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/delete">
+                                    <i class="fa fa-trash-o"></i> Delete Questionnaire</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </td>
                 <td><a href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}">{{ survey.survey.name }}</a></td>  
                 <td>
                     {% if survey.assignee == None %}
@@ -35,30 +74,6 @@
                     {% endif %}
                 </td>
                 <td>{{ survey.answered_on }}</td>
-                <td>
-                    <div class="btn-group">
-                        {% if not survey.completed %}
-                            <a class="btn btn-sm btn-success"
-                               href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer"> Answer</a>
-                        {% else %}
-                            <a class="btn btn-sm btn-primary"
-                               href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}"> View Responses </a>
-                            <a class="btn btn-sm btn-warning"
-                               href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer"> Edit
-                                Responses </a>
-                        {% endif %}
-                        <a class="btn btn-sm btn-info"
-                           href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign"> Assign User </a>
-                        <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
-                                data-target="#shareQuestionnaireModal"
-                                data-whatever="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer">
-                            <i class="fa fa-share-alt"></i> Share Questionnaire
-                        </button>
-                        <a class="btn btn-sm btn-danger"
-                           href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/delete"> Delete
-                            Questionnaire </a>
-                    </div>
-                </td>
             </tr>
         {% endfor %}
     </table>

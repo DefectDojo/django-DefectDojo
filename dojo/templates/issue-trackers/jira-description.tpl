@@ -8,7 +8,7 @@
 
 *Defect Dojo link:* {{ finding_url|full_url }}
 
-*Severity:* {{ finding.severity }} 
+*Severity:* {{ finding.severity }}
 {% if finding.cwe > 0 %}
 *CWE:* [CWE-{{ finding.cwe }}|{{ finding.cwe|cwe_url }}]
 {% else %}
@@ -29,12 +29,25 @@
 
 *Commit hash:* {{ finding.test.engagement.commit_hash }}
 
-*Systems/Endpoints*:    
+*Systems/Endpoints*:
 {% for endpoint in finding.endpoints.all %}
 * {{ endpoint }}{% endfor %}
 {% comment %}
     we leave the endfor at the same line to avoid double line breaks i.e. too many blank lines
 {% endcomment %}
+
+
+{% if finding.component_name %}
+Vulnerable Component: {{finding.component_name }} - {{ finding.component_version }}
+
+{% endif %}
+{% if finding.sast_source_object %}
+Source Object: {{ finding.sast_source_object }}
+Source File: {{ finding.sast_source_file_path }}
+Source Line: {{ finding.sast_source_line }}
+Sink Object: {{ finding.sast_sink_object }}
+{% endif %}
+
 *Description*:
 {{ finding.description }}
 

@@ -5,6 +5,16 @@ from dojo.models import Finding
 
 
 class DsopParser:
+
+    def get_scan_types(self):
+        return ["DSOP Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import XLSX findings from DSOP vulnerability scan pipelines."
+
     def get_findings(self, file, test):
         book = load_workbook(file)
         items = list()

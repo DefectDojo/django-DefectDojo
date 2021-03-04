@@ -5,6 +5,15 @@ from dojo.models import Finding
 
 class CheckovParser(object):
 
+    def get_scan_types(self):
+        return ["Checkov Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Checkov Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON reports of Infrastructure as Code vulnerabilities."
+
     def get_findings(self, json_output, test):
 
         if json_output is None:

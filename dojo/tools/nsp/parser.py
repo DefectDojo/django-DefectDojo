@@ -4,6 +4,16 @@ from dojo.models import Finding
 
 
 class NspParser(object):
+
+    def get_scan_types(self):
+        return ["Node Security Platform Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Node Security Platform Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Node Security Platform (NSP) output file can be imported in JSON format."
+
     def get_findings(self, json_output, test):
 
         tree = self.parse_json(json_output)

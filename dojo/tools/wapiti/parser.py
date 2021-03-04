@@ -26,7 +26,17 @@ class Severityfilter():
             self.severity = 'Info'
 
 
-class WapitiXMLParser(object):
+class WapitiParser(object):
+
+    def get_scan_types(self):
+        return ["Wapiti Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Wapiti Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import XML report"
+
     def get_findings(self, file, test):
 
         if file is None:
@@ -92,6 +102,7 @@ class WapitiXMLParser(object):
 
         return list(dupes.values())
 
+    # FIXME remove custom endpoint management
     def process_endpoints(self, finding, host):
         protocol = "http"
         query = ""

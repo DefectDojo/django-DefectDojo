@@ -8,6 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 class NpmAuditParser(object):
+
+    def get_scan_types(self):
+        return ["NPM Audit Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "NPM Audit Scan output file can be imported in JSON format."
+
     def get_findings(self, json_output, test):
         tree = self.parse_json(json_output)
         return self.get_items(tree, test)

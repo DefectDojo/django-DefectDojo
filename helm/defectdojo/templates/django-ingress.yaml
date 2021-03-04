@@ -1,6 +1,10 @@
 {{- if .Values.django.ingress.enabled -}}
 {{- $fullName := include "defectdojo.fullname" . -}}
-apiVersion: extensions/v1beta1
+{{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: networking.k8s.io/v1
+{{ else }}
+apiVersion: networking.k8s.io/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -36,8 +40,18 @@ spec:
   - host: {{ .Values.host }}
     http:
       paths:
+        {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: {{ $fullName }}-django
+              port:
+                name: http
+        {{- else }}
         - path: /
           backend:
             serviceName: {{ $fullName }}-django
             servicePort: http
+        {{- end }}
 {{- end }}

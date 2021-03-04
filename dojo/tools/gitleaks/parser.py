@@ -4,10 +4,19 @@ import json
 from dojo.models import Finding
 
 
-class GitleaksJSONParser(object):
+class GitleaksParser(object):
     """
     A class that can be used to parse the Gitleaks JSON report files
     """
+
+    def get_scan_types(self):
+        return ["Gitleaks Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Gitleaks Scan findings in JSON format."
 
     def get_findings(self, filename, test):
         """

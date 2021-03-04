@@ -179,6 +179,10 @@
         {% endif %}
         </p>
     {% endif %}
+    {% if include_disclaimer%}
+        <h4>== Disclaimer ==</h4>
+        <h5>{{ disclaimer }}</h5>
+    {% endif %}
     <br>
     {% if test %}
         {% with notes=test.notes.all|get_public_notes %}
@@ -254,7 +258,7 @@
             {{ find.status }}
         </p>
         <br>
-        <p><b>==== CVSSv3: ====</b>
+        <p><b>==== CVSS v3: ====</b>
             <br>
             {{ find.cvssv3 }}
         </p>

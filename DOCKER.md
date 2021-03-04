@@ -1,16 +1,16 @@
 # Running with Docker Compose
 
-The docker-compose.yml in this repo is not intended for production use without first customizing it to fit your specific situation.  Please consider the docker-compose.yml files are templates to create on that fits your needs.
-Docker Compose is acceptable if you want to deploy a containerized DefectDojo to a production environment.
-It is one of the supported [Default installation](setup/README.md) methods.
+The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment. 
+
+Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](docs/content/running/running-in-production.md) gives advice on which adjustments are useful for performance and operational reliability. 
+
 
 # Prerequisites
 *  Docker version
     *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
-*  Known issues
-    * finding images only work in `dev` and `ptvsd` mode. Making them work in `release` mode requires modifications to the docker-compose configuration.
+
 
 # Setup via Docker Compose - introduction
 

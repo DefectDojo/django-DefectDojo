@@ -1,5 +1,5 @@
 from vcr_unittest import VCRTestCase
-from dojo.models import User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
+from dojo.models import Product_Type, User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
                         Product
 from dojo.models import System_Settings, Engagement
 from django.urls import reverse
@@ -37,6 +37,12 @@ class DojoTestUtilsMixin(object):
         product = Product(name=name, description=description, prod_type=prod_type)
         product.save()
 
+    def patch_product_api(self, product_id, product_details):
+        payload = copy.deepcopy(product_details)
+        response = self.client.patch(reverse('product-list') + '%s/' % product_id, payload, format='json')
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
+
     def create_engagement(self, name, product, *args, description=None, **kwargs):
         engagement = Engagement(name=name, description=description, product=product)
         engagement.save()
@@ -44,8 +50,18 @@ class DojoTestUtilsMixin(object):
     def get_test(self, id):
         return Test.objects.get(id=id)
 
+    def get_test_api(self, test_id):
+        response = self.client.patch(reverse('engagement-list') + '%s/' % test_id)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
+
     def get_engagement(self, id):
         return Engagement.objects.get(id=id)
+
+    def get_engagement_api(self, engagement_id):
+        response = self.client.patch(reverse('engagement-list') + '%s/' % engagement_id)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
 
     def assert_jira_issue_count_in_test(self, test_id, count):
         test = self.get_test(test_id)
@@ -398,6 +414,11 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         response = self.client.put(reverse('finding-list') + '%s/' % finding_id, payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
+
+    def delete_finding_api(self, finding_id):
+        response = self.client.delete(reverse('finding-list') + '%s/' % finding_id)
+        self.assertEqual(204, response.status_code, response.content[:1000])
         return response.data
 
     def patch_finding_api(self, finding_id, finding_details, push_to_jira=None):

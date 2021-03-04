@@ -9,8 +9,18 @@ from defusedxml import ElementTree as ET
 from dojo.models import Endpoint, Finding
 
 
-class MicrofocusWebinspectXMLParser(object):
+class MicrofocusWebinspectParser(object):
     """Micro Focus Webinspect XML report parser"""
+
+    def get_scan_types(self):
+        return ["Microfocus Webinspect Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import XML report"
+
     def get_findings(self, file, test):
 
         tree = ET.parse(file)
@@ -36,7 +46,7 @@ class MicrofocusWebinspectXMLParser(object):
                 description = ""
                 mitigation = ""
                 reference = ""
-                severity = MicrofocusWebinspectXMLParser.convert_severity(issue.find('Severity').text)
+                severity = MicrofocusWebinspectParser.convert_severity(issue.find('Severity').text)
                 for content in issue.findall('ReportSection'):
                     name = content.find('Name').text
                     if 'Summary' in name:
@@ -55,7 +65,7 @@ class MicrofocusWebinspectXMLParser(object):
                     # detect CWE number
                     # TODO support more than one CWE number
                     if "kind" in content.attrib and "CWE" == content.attrib["kind"]:
-                        cwe = MicrofocusWebinspectXMLParser.get_cwe(content.attrib['identifier'])
+                        cwe = MicrofocusWebinspectParser.get_cwe(content.attrib['identifier'])
                         description += "\n\n" + content.text + "\n"
 
                 # make dupe hash key

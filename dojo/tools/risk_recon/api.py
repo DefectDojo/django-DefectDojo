@@ -1,19 +1,6 @@
 import requests
 
 
-def print_map(map, tab):
-    for key, value in map.items():
-        if isinstance(key, dict):
-            print(tab, print_map(key, tab + '\t'))
-        elif key is not None:
-            print(tab, 'Key :: ', key)
-
-        if isinstance(value, dict):
-            print(tab, print_map(value, tab + '\t'))
-        elif value is not None:
-            print(tab, 'Value :: ', value)
-
-
 class RiskReconAPI:
     def __init__(self, api_key, endpoint, data):
         self.key = api_key

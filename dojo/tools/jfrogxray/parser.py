@@ -6,8 +6,18 @@ from cvss import CVSS3
 from dojo.models import Finding
 
 
-class XrayJSONParser(object):
+class JFrogXrayParser(object):
     """JFrog Xray JSON reports"""
+
+    def get_scan_types(self):
+        return ["JFrog Xray Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Xray findings in JSON format."
+
     def get_findings(self, json_output, test):
         tree = json.load(json_output)
         return self.get_items(tree, test)
