@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import datetime, date
 from urllib.parse import urlsplit, urlunsplit
@@ -1740,6 +1741,21 @@ class ExpressGITHUBForm(forms.ModelForm):
                     'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
 
 
+def get_jira_issue_template_choices():
+    template_dir = settings.JIRA_TEMPLATE_DIR
+    template_list = [('', '---')]
+    for base_dir, dirnames, filenames in os.walk(template_dir):
+        for filename in filenames:
+            if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
+                base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
+            template_list.append((os.path.join(base_dir, filename), filename))
+    logger.debug('templates: %s', template_list)
+    return template_list
+
+
+JIRA_TEMPLATE_CHOICES = sorted(get_jira_issue_template_choices())
+
+
 class JIRA_IssueForm(forms.ModelForm):
 
     class Meta:
@@ -1748,6 +1764,10 @@ class JIRA_IssueForm(forms.ModelForm):
 
 
 class JIRAForm(forms.ModelForm):
+    issue_template = forms.ChoiceField(required=False,
+                                       choices=JIRA_TEMPLATE_CHOICES,
+                                       help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
+
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
     def __init__(self, *args, **kwargs):
@@ -2073,6 +2093,9 @@ class GITHUB_Product_Form(forms.ModelForm):
 
 class JIRAProjectForm(forms.ModelForm):
     jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label='JIRA Instance', required=False)
+    issue_template = forms.ChoiceField(required=False,
+                                       choices=JIRA_TEMPLATE_CHOICES,
+                                       help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
 
     prefix = 'jira-project-form'
 
