@@ -719,6 +719,20 @@
         },
         "model": "dojo.test_type",
         "pk": 194
+    },
+    {
+        "fields": {
+            "name": "PMD Scan"
+        },
+        "model": "dojo.test_type",
+        "pk": 195
+    },
+    {
+        "fields": {
+            "name": "Tfsec Scan"
+        },
+        "model": "dojo.test_type",
+        "pk": 196
     }
 
 ]

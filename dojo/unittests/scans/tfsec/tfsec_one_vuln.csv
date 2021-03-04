@@ -1,0 +1,2 @@
+file,start_line,end_line,rule_id,severity,description,link
+/home/kali/omer/dtci-mie-aspera-prod-east-master/sg.tf,106,106,AWS009,WARNING,Resource 'aws_security_group.aspera_sg' defines a fully open egress security group.,See https://tfsec.dev/docs/aws/AWS009/ for more information.
