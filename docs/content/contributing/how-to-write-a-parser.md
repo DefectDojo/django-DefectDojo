@@ -92,8 +92,8 @@ Of course, nothing prevents you from having more files than the `parser.py` file
 
 If you want to take a look at previous parsers that are now part of DefectDojo, take a look at https://github.com/DefectDojo/django-DefectDojo/pulls?q=is%3Apr+label%3A%22import+scans%22+
 
-## Update the readthedocs documentation
+## Update the github pages documentation
 
-The DefectDojo official documentation lives in another repository, https://github.com/DefectDojo/documentation
+The DefectDojo official documentation lives in the docs folder, https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs
 
 Please update the `docs/integration.rst` with the details of your new parser and create a PR in that repo. Reference the PR in the main DefectDojo repository to establish an automatic link between the two.
