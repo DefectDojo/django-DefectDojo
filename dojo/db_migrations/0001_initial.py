@@ -404,7 +404,7 @@ class Migration(migrations.Migration):
             name='JIRA_Conf',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('url', models.URLField(help_text='For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration', max_length=2000, verbose_name='JIRA URL')),
+                ('url', models.URLField(help_text='For more information how to configure Jira, read the DefectDojo documentation.', max_length=2000, verbose_name='JIRA URL')),
                 ('username', models.CharField(max_length=2000)),
                 ('password', models.CharField(max_length=2000)),
                 ('default_issue_type', models.CharField(choices=[('Task', 'Task'), ('Story', 'Story'), ('Epic', 'Epic'), ('Spike', 'Spike'), ('Bug', 'Bug')], default='Bug', max_length=9)),
