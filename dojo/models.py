@@ -814,54 +814,6 @@ class Product_Type_Member(models.Model):
     role = models.IntegerField(default=0)
 
 
-class ScanSettings(models.Model):
-    product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
-    addresses = models.TextField(default="none")
-    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
-    date = models.DateTimeField(editable=False, blank=True,
-                                default=get_current_datetime)
-    frequency = models.CharField(max_length=10000, null=True,
-                                 blank=True)
-    email = models.CharField(max_length=512)
-    protocol = models.CharField(max_length=10, default='TCP')
-
-    def addresses_as_list(self):
-        if self.addresses:
-            return [a.strip() for a in self.addresses.split(',')]
-        return []
-
-    def get_breadcrumbs(self):
-        bc = self.product.get_breadcrumbs()
-        bc += [{'title': "Scan Settings",
-                'url': reverse('view_scan_settings',
-                               args=(self.product.id, self.id,))}]
-        return bc
-
-
-class Scan(models.Model):
-    scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False, on_delete=models.CASCADE)
-    date = models.DateTimeField(editable=False, blank=True,
-                                default=get_current_datetime)
-    protocol = models.CharField(max_length=10, default='TCP')
-    status = models.CharField(max_length=10, default='Pending', editable=False)
-    baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
-
-    def __str__(self):
-        return self.scan_settings.protocol + " Scan " + str(self.date)
-
-    def get_breadcrumbs(self):
-        bc = self.scan_settings.get_breadcrumbs()
-        bc += [{'title': str(self),
-                'url': reverse('view_scan', args=(self.id,))}]
-        return bc
-
-
-class IPScan(models.Model):
-    address = models.TextField(editable=False, default="none")
-    services = models.CharField(max_length=800, null=True)
-    scan = models.ForeignKey(Scan, default=1, editable=False, on_delete=models.CASCADE)
-
-
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000, null=True)
@@ -1395,14 +1347,6 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
     def __str__(self):
         return '%i: %s' % (self.finding.id, self.action)
-
-
-class VA(models.Model):
-    address = models.TextField(editable=False, default="none")
-    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
-    result = models.ForeignKey(Test, editable=False, null=True, blank=True, on_delete=models.CASCADE)
-    status = models.BooleanField(default=False, editable=False)
-    start = models.CharField(max_length=100)
 
 
 class Sonarqube_Issue(models.Model):
@@ -3452,9 +3396,6 @@ admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Note_Type)
 admin.site.register(Report)
-admin.site.register(Scan)
-admin.site.register(ScanSettings)
-admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Instance, JIRA_Instance_Admin)
