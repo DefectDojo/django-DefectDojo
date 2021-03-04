@@ -1639,6 +1639,7 @@
         "username": "<USERNAME HERE>",
         "password": "<API TOKEN HERE>",
         "default_issue_type": "Task",
+        "issue_template": "issue-trackers/jira-description.tpl",
         "epic_name_id": 10011,
         "open_status_key": 11,
         "close_status_key": 41,
@@ -1656,6 +1657,7 @@
     "fields": {
       "username": "defect.dojo",
       "default_issue_type": "Task",
+      "issue_template": "issue-trackers/jira-description.tpl",
       "finding_text": "",
       "low_mapping_severity": "test severity",
       "url": "http://www.testjira.com",
@@ -1674,6 +1676,7 @@
     "fields": {
       "username": "defect.dojo",
       "default_issue_type": "Spike",
+      "issue_template": "issue-trackers/jira-description.tpl",
       "finding_text": "",
       "low_mapping_severity": "test severity",
       "url": "http://www.testjira.com",
