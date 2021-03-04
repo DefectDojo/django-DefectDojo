@@ -52,7 +52,7 @@ def populate_last_status_update(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0080_last_status_update'),
+        ('dojo', '0081_last_status_update'),
     ]
 
     operations = [
