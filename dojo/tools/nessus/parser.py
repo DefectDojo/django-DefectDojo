@@ -253,8 +253,8 @@ class NessusParser(object):
     def get_findings(self, filename, test):
 
         if filename.name.lower().endswith('.xml'):
-            return list(NessusXMLParser().parse(filename, test).values())
+            return NessusXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith('.csv'):
-            return list(NessusCSVParser().parse(filename, test).values())
+            return NessusCSVParser().get_findings(filename, test)
         else:
             raise ValueError('Unknown File Format')
