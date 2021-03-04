@@ -30,7 +30,6 @@ import json
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
-import dojo.finding.helper as finding_helper
 
 
 logger = logging.getLogger(__name__)
@@ -852,12 +851,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
-        mitigation_change = finding_helper.update_finding_status(instance, self.context['request'].user)
-
         # If we need to push to JIRA, an extra save call is needed.
         # Also if we need to update the mitigation date of the finding.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
-        if push_to_jira or mitigation_change:
+        if push_to_jira:
             instance.save(push_to_jira=push_to_jira)
 
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
@@ -951,16 +948,9 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
         push_to_jira = push_to_jira or jira_helper.is_push_all_issues(new_finding)
 
-        # Allow setting the mitigation date based upon the state of is_Mitigated.
-        if new_finding.is_Mitigated:
-            new_finding.mitigated = datetime.datetime.now()
-            new_finding.mitigated_by = self.context['request'].user
-            if settings.USE_TZ:
-                new_finding.mitigated = timezone.make_aware(new_finding.mitigated, timezone.get_default_timezone())
-
         # If we need to push to JIRA, an extra save call is needed.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
-        if push_to_jira or new_finding.is_Mitigated:
+        if push_to_jira or new_finding:
             new_finding.save(push_to_jira=push_to_jira)
 
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
@@ -1263,7 +1253,6 @@ class ImportScanSerializer(serializers.Serializer):
             for old_finding in old_findings:
                 old_finding.active = False
                 old_finding.is_Mitigated = True
-                finding_helper.update_finding_status(old_finding, self.context['request'].user)
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")

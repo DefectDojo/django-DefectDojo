@@ -34,7 +34,6 @@ from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_
 from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
-import dojo.finding.helper as finding_helper
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.product.queries import get_authorized_products
@@ -1159,7 +1158,6 @@ def ad_hoc_finding(request, pid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            finding_helper.update_finding_status(new_finding, request.user)
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False

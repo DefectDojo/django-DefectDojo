@@ -351,6 +351,7 @@ def is_duplicate_reopen(new_finding, existing_finding):
 
 
 def set_duplicate_reopen(new_finding, existing_finding):
+    logger.debug('duplicate reopen existing finding')
     existing_finding.mitigated = new_finding.mitigated
     existing_finding.is_Mitigated = new_finding.is_Mitigated
     existing_finding.active = new_finding.active
