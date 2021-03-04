@@ -1,5 +1,5 @@
 from django.test import TestCase
-from dojo.tools.nessus.parser import NessusXMLParser, NessusCSVParser
+from dojo.tools.nessus.parser import NessusXMLParser, NessusCSVParser, NessusParser
 from dojo.models import Finding, Test, Engagement, Product
 
 
@@ -92,3 +92,20 @@ class TestNessusParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rb")
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
+
+    def test_parse_some_findings_samples(self):
+        """Test that come from samples repo"""
+        testfile = open("dojo/unittests/scans/nessus/nessus_v_unknown.xml")
+        parser = NessusParser()
+        findings = parser.get_findings(testfile, self.create_test())
+        self.assertEqual(32, len(findings))
+        finding = findings[0]
+        self.assertIn(finding.severity, Finding.SEVERITIES)
+        self.assertEqual('Info', finding.severity)
+        self.assertIsNone(finding.cve)
+        self.assertEqual('Nessus Scan Information', finding.title)
+        finding = findings[25]
+        self.assertIn(finding.severity, Finding.SEVERITIES)
+        self.assertEqual('Nessus SYN scanner', finding.title)
+        self.assertEqual('Info', finding.severity)
+        self.assertIsNone(finding.cve)
