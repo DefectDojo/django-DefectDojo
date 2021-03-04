@@ -35,7 +35,6 @@ setup(
         'Pillow',
         'psycopg2-binary',
         'pycrypto',
-        'python-nmap>=0.3.4',
         'pytz>=2013.9',
         'requests>=2.2.1',
         'sqlalchemy',  # Required by Celery broker transport
