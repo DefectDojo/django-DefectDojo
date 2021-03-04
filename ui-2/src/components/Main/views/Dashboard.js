@@ -1,5 +1,4 @@
 import React from "react";
-import Chart from "chart.js";
 import { makeStyles } from "@material-ui/core/styles";
 import AdjustIcon from "@material-ui/icons/Adjust";
 import BugReport from "@material-ui/icons/BugReport";
@@ -13,7 +12,7 @@ import CardHeader from "../MainComponent/Card/CardHeader";
 import CardIcon from "../MainComponent/Card/CardIcon";
 import CardBody from "../MainComponent/Card/CardBody";
 import CardFooter from "../MainComponent/Card/CardFooter";
-import DonutChar from "../MainComponent/Dashboard/DonutChar";
+import DonutChar, { BarChart } from "../MainComponent/Dashboard/Charts";
 import styles from "../Styles/jss/views/dashboardStyles";
 
 const useStyles = makeStyles(styles);
@@ -105,6 +104,18 @@ function Dashboard() {
             </CardHeader>
             <CardBody>
               <h4 className={classes.cardTitle}>Historical Finding Severity</h4>
+            </CardBody>
+          </Card>
+        </GridItem>
+        <GridItem xs={12} sm={12} md={6}>
+          <Card>
+            <CardHeader color="warning">
+              <BarChart />
+            </CardHeader>
+            <CardBody>
+              <h4 className={classes.cardTitle}>
+                Reported Finding Severity by Month
+              </h4>
             </CardBody>
           </Card>
         </GridItem>

@@ -1,6 +1,6 @@
 import React from "react";
-import { Doughnut } from "react-chartjs-2";
-function DonutChar() {
+import { Doughnut, Line } from "react-chartjs-2";
+function DonutChart() {
   return (
     <div>
       <Doughnut
@@ -24,4 +24,20 @@ function DonutChar() {
   );
 }
 
-export default DonutChar;
+function BarChart() {
+  return (
+    <Line
+      data={{
+        labels: ["Jan", "feb", "Mar", "app", "may"],
+        datasets: [
+          {
+            label: "bah bahi",
+            data: [3, 4, 5, 6, 7, 7],
+          },
+        ],
+      }}
+    />
+  );
+}
+export default DonutChart;
+export { BarChart };
