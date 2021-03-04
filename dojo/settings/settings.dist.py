@@ -23,7 +23,7 @@ env = environ.Env(
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
-    DD_SESSION_COOKIE_AGE(int, 1209600), # 14 days
+    DD_SESSION_COOKIE_AGE=(int, 1209600), # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
