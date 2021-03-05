@@ -235,6 +235,9 @@
                     <th>Type</th>
                     <th>Date discovered</th>
                     <th>Age</th>
+                    {% if finding.publish_date %}
+                        <th>Vuln Publish date</th>
+                    {% endif %}
                     <th>Reporter</th>
                     {% if finding.mitigated %}
                         <th>Date Mitigated</th>
@@ -252,6 +255,8 @@
                                 {% if finding.cvssv3 %}
                                     <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
                                         data-content="{{ finding.cvssv3 }}">{{ finding.severity_display }}</i>
+                                {% elif finding.cvssv3_score %}
+                                    {{ finding.severity_display }} ({{ finding.cvssv3_score }})</i>
                                 {% else %}
                                     {{ finding.severity_display }}
                                 {% endif %}
@@ -350,6 +355,9 @@
                     </td>
                     <td>{{ finding.date }}</td>
                     <td>{{ finding.age }} days</td>
+                    {% if finding.publish_date %}
+                        <td>{{ finding.publish_date }}</td>
+                    {% endif %}
                     <td>{{ finding.reporter }}</td>
                     {% if finding.mitigated %}
                         <td>{{ finding.mitigated }}</td>

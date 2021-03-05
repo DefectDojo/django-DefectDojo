@@ -1426,7 +1426,7 @@ class Finding(models.Model):
                            blank=True,
                            editable=False,
                            verbose_name="URL",
-                           help_text="External reference that provides more information about this flaw.")
+                           help_text="External reference that provides more information about this flaw.") # not displayed and pretty much the same as references. To remove? 
     severity = models.CharField(max_length=200,
                                 verbose_name="Severity",
                                 help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational).")
@@ -1474,6 +1474,8 @@ class Finding(models.Model):
     active = models.BooleanField(default=True,
                                  verbose_name="Active",
                                  help_text="Denotes if this flaw is active or not.")
+    # note that false positive findings cannot be verified
+    # in defectdojo verified means: "we have verified the finding and it turns out that it's not a false positive"
     verified = models.BooleanField(default=True,
                                    verbose_name="Verified",
                                    help_text="Denotes if this flaw has been manually verified by the tester.")
@@ -1693,6 +1695,17 @@ class Finding(models.Model):
                                         blank=True,
                                         verbose_name="Number of occurences",
                                         help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
+
+    # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?""
+    publish_date = models.DateTimeField(null=True,
+                                         editable=False,
+                                         verbose_name="Publish date",
+                                         help_text="Date when this vulnerability was made publicly available.")
+
+    cvssv3_score = models.FloatField(null=True,
+                                        blank=True,
+                                        verbose_name="CVSSv3 score",
+                                        help_text="Numerical CVSSv3 score for the vulnerability")
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.")
