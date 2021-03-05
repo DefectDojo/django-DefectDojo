@@ -123,10 +123,23 @@ def engagements_all(request):
 
     products_with_engagements = get_authorized_products(Permissions.Engagement_View)
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
+
+    filter_qs = products_with_engagements.prefetch_related(
+        'engagement_set',
+        'prod_type',
+        'engagement_set__lead',
+        'tags',
+    )
+    if System_Settings.objects.get().enable_jira:
+        filter_qs = filter_qs.prefetch_related(
+            'engagement_set__jira_project__jira_instance',
+            'jira_project_set__jira_instance'
+        )
+
     filtered = EngagementFilter(
         request.GET,
-        queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
-                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
+        queryset=filter_qs
+    )
 
     prods = get_page_items(request, filtered.qs, 25)
 
@@ -138,12 +151,10 @@ def engagements_all(request):
         top_level=not len(request.GET),
         request=request)
 
-    prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
-
     return render(
         request, 'dojo/engagements_all.html', {
             'products': prods,
-            'filtered': filtered,
+            'filter_form': filtered.form,
             'name_words': sorted(set(name_words)),
             'eng_words': sorted(set(eng_words)),
         })
@@ -151,11 +162,13 @@ def engagements_all(request):
 
 def prefetch_for_products_with_engagments(products_with_engagements):
     if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        return products_with_engagements.prefetch_related('tags',
+        return products_with_engagements.prefetch_related(
+            'tags',
             'engagement_set__tags',
             'engagement_set__test_set__tags',
             'engagement_set__jira_project__jira_instance',
-            'jira_project_set__jira_instance')
+            'jira_project_set__jira_instance'
+        )
 
     logger.debug('unable to prefetch because query was already executed')
     return products_with_engagements
