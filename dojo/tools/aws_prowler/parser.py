@@ -34,7 +34,7 @@ class AWSProwlerParser(object):
         for row in reader:
             profile = str(row.get('PROFILE'))
             account = str(row.get('ACCOUNT_NUM'))
-            region = str(row.get('REGION')
+            region = str(row.get('REGION'))
             title_id = str(row.get('TITLE_ID'))
             result = str(row.get('RESULT'))
             scored = str(row.get('SCORED'))
