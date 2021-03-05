@@ -186,7 +186,7 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
     class Meta:
         model = Product_Type
-        exclude = ['name', 'description', 'critical_product', 'key_product', 'authorized_users']
+        exclude = ['name', 'description', 'critical_product', 'key_product', 'authorized_users', 'members']
 
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
@@ -290,7 +290,8 @@ class DeleteProductForm(forms.ModelForm):
                    'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
                    'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                   'internet_accessible', 'regulations', 'product_meta']
+                   'internet_accessible', 'regulations', 'product_meta', 'members', 'tags', 
+                   'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
