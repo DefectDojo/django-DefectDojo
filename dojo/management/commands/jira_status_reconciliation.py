@@ -118,11 +118,11 @@ class Command(BaseCommand):
                     logger.debug('%s,%s,%s,%s',
                                     resolution_name,
                                     (not find.jira_issue.jira_change or (find.jira_issue.jira_change < issue_from_jira.fields.updated)),
-                                    (find.last_status_update < issue_from_jira.fields.updated),
+                                    not find.last_status_update or (find.last_status_update < issue_from_jira.fields.updated),
                                     (not find.last_reviewed or (find.last_reviewed < issue_from_jira.fields.updated)))
 
                     if (not find.jira_issue.jira_change or (find.jira_issue.jira_change < issue_from_jira.fields.updated)):
-                        if find.last_status_update < issue_from_jira.fields.updated:
+                        if not find.last_status_update or (find.last_status_update < issue_from_jira.fields.updated):
                             if not find.last_reviewed or (find.last_reviewed < issue_from_jira.fields.updated):
                                 action = 'import_status_from_jira'
 

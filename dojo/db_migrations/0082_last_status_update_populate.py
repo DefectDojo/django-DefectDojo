@@ -40,6 +40,8 @@ def populate_last_status_update(apps, schema_editor):
                 find.last_status_update = find.last_reviewed
             elif find.mitigated:
                 find.last_status_update = find.mitigated
+            else:
+                find.last_status_update = now
 
             batch.append(find)
 
