@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0079_system_settings_disclaimer'),
+        ('dojo', '0082_last_status_update_populate'),
     ]
 
     operations = [
