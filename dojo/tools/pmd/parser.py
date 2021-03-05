@@ -1,5 +1,3 @@
-__author__ = 'jis0324'
-
 import io
 import csv
 import hashlib
