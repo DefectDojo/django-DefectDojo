@@ -1,4 +1,5 @@
 import json
+from packageurl import PackageURL
 
 from dojo.models import Finding
 
@@ -19,7 +20,7 @@ class AnchoreGrypeParser(object):
         return "A vulnerability scanner for container images and filesystems. JSON report generated with '-o json' format"
 
     def get_findings(self, file, test):
-        data = json.load(filename)
+        data = json.load(file)
         dupes = dict()
         for item in data.get("matches", []):
             cve = item["vulnerability"]["id"]
