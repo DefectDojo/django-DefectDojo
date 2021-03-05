@@ -290,7 +290,7 @@ class DeleteProductForm(forms.ModelForm):
                    'prod_type', 'updated', 'tid', 'authorized_users', 'product_manager',
                    'technical_contact', 'team_manager', 'prod_numeric_grade', 'business_criticality',
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
-                   'internet_accessible', 'regulations', 'product_meta', 'members', 'tags', 
+                   'internet_accessible', 'regulations', 'product_meta', 'members', 'tags',
                    'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
 
