@@ -4,8 +4,8 @@ from dojo.models import Test
 
 
 class TestTfsecParser(TestCase):
-    def test_parse_file_with_no_vuln_has_no_findings(self):
 
+    def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("dojo/unittests/scans/tfsec/tfsec_no_vuln.csv")
         parser = TfsecParser()
         findings = parser.get_findings(testfile, Test())

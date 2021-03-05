@@ -4,8 +4,8 @@ from dojo.models import Test
 
 
 class TestPMDParser(TestCase):
+
     def test_parse_file_with_no_vuln_has_no_findings(self):
-    
         testfile = open("dojo/unittests/scans/pmd/pmd_no_vuln.csv")
         parser = PmdParser()
         findings = parser.get_findings(testfile, Test())
