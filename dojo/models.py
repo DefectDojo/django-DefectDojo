@@ -814,54 +814,6 @@ class Product_Type_Member(models.Model):
     role = models.IntegerField(default=0)
 
 
-class ScanSettings(models.Model):
-    product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
-    addresses = models.TextField(default="none")
-    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
-    date = models.DateTimeField(editable=False, blank=True,
-                                default=get_current_datetime)
-    frequency = models.CharField(max_length=10000, null=True,
-                                 blank=True)
-    email = models.CharField(max_length=512)
-    protocol = models.CharField(max_length=10, default='TCP')
-
-    def addresses_as_list(self):
-        if self.addresses:
-            return [a.strip() for a in self.addresses.split(',')]
-        return []
-
-    def get_breadcrumbs(self):
-        bc = self.product.get_breadcrumbs()
-        bc += [{'title': "Scan Settings",
-                'url': reverse('view_scan_settings',
-                               args=(self.product.id, self.id,))}]
-        return bc
-
-
-class Scan(models.Model):
-    scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False, on_delete=models.CASCADE)
-    date = models.DateTimeField(editable=False, blank=True,
-                                default=get_current_datetime)
-    protocol = models.CharField(max_length=10, default='TCP')
-    status = models.CharField(max_length=10, default='Pending', editable=False)
-    baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
-
-    def __str__(self):
-        return self.scan_settings.protocol + " Scan " + str(self.date)
-
-    def get_breadcrumbs(self):
-        bc = self.scan_settings.get_breadcrumbs()
-        bc += [{'title': str(self),
-                'url': reverse('view_scan', args=(self.id,))}]
-        return bc
-
-
-class IPScan(models.Model):
-    address = models.TextField(editable=False, default="none")
-    services = models.CharField(max_length=800, null=True)
-    scan = models.ForeignKey(Scan, default=1, editable=False, on_delete=models.CASCADE)
-
-
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000, null=True)
@@ -1397,14 +1349,6 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return '%i: %s' % (self.finding.id, self.action)
 
 
-class VA(models.Model):
-    address = models.TextField(editable=False, default="none")
-    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
-    result = models.ForeignKey(Test, editable=False, null=True, blank=True, on_delete=models.CASCADE)
-    status = models.BooleanField(default=False, editable=False)
-    start = models.CharField(max_length=100)
-
-
 class Sonarqube_Issue(models.Model):
     key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
     status = models.CharField(max_length=20, help_text="SonarQube issue status")
@@ -1548,6 +1492,14 @@ class Finding(models.Model):
     under_review = models.BooleanField(default=False,
                                        verbose_name="Under Review",
                                        help_text="Denotes is this flaw is currently being reviewed.")
+
+    last_status_update = models.DateTimeField(editable=False,
+                                            null=True,
+                                            blank=True,
+                                            auto_now_add=True,
+                                            verbose_name="Last Status Update",
+                                            help_text="Timestamp of latest status update (change in status related fields).")
+
     review_requested_by = models.ForeignKey(Dojo_User,
                                             null=True,
                                             blank=True,
@@ -2063,7 +2015,11 @@ class Finding(models.Model):
         long_desc += '*References*:' + str(self.references)
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True,
+    def save_no_options(self, *args, **kwargs):
+        return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=False,
+             issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
+
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
@@ -2110,8 +2066,9 @@ class Finding(models.Model):
             from dojo.utils import do_apply_rules
             do_apply_rules(self, *args, **kwargs)
 
-        from dojo.utils import calculate_grade
-        calculate_grade(self.test.engagement.product)
+        if product_grading_option:
+            from dojo.utils import calculate_grade
+            calculate_grade(self.test.engagement.product)
 
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
@@ -2574,7 +2531,7 @@ class GITHUB_PKey(models.Model):
 
 class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
-    url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
+    url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For more information how to configure Jira, read the DefectDojo documentation.")
     username = models.CharField(max_length=2000)
     password = models.CharField(max_length=2000)
 
@@ -3132,7 +3089,7 @@ class Benchmark_Product_Summary(models.Model):
 # product_opts = [f.name for f in Product._meta.fields]
 # test_opts = [f.name for f in Test._meta.fields]
 # test_type_opts = [f.name for f in Test_Type._meta.fields]
-finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['tags_from_django_tagging']]
+finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['tags_from_django_tagging', 'last_status_update']]
 # endpoint_opts = [f.name for f in Endpoint._meta.fields]
 # engagement_opts = [f.name for f in Engagement._meta.fields]
 # product_type_opts = [f.name for f in Product_Type._meta.fields]
@@ -3439,9 +3396,6 @@ admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Note_Type)
 admin.site.register(Report)
-admin.site.register(Scan)
-admin.site.register(ScanSettings)
-admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Instance, JIRA_Instance_Admin)

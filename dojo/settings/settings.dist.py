@@ -23,6 +23,8 @@ env = environ.Env(
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
+    DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
+    DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
@@ -31,10 +33,6 @@ env = environ.Env(
     DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
-    DD_PORT_SCAN_CONTACT_EMAIL=(str, 'email@localhost'),
-    DD_PORT_SCAN_RESULT_EMAIL_FROM=(str, 'email@localhost'),
-    DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=(str, ['email@localhost']),
-    DD_PORT_SCAN_SOURCE_IP=(str, '127.0.0.1'),
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, False),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
@@ -522,6 +520,9 @@ if env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS'):
     SECURE_HSTS_SECONDS = env('DD_SECURE_HSTS_SECONDS')
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS')
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = env('DD_SESSION_EXPIRE_AT_BROWSER_CLOSE')
+SESSION_COOKIE_AGE = env('DD_SESSION_COOKIE_AGE')
+
 # ------------------------------------------------------------------------------
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
@@ -532,11 +533,6 @@ DB_KEY = env('DD_CREDENTIAL_AES_256_KEY')
 
 # wkhtmltopdf settings
 WKHTMLTOPDF_PATH = env('DD_WKHTMLTOPDF')
-
-PORT_SCAN_CONTACT_EMAIL = env('DD_PORT_SCAN_CONTACT_EMAIL')
-PORT_SCAN_RESULT_EMAIL_FROM = env('DD_PORT_SCAN_RESULT_EMAIL_FROM')
-PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
-PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')

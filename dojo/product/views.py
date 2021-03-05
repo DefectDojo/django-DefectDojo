@@ -21,7 +21,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
                        Edit_Product_MemberForm, Delete_Product_MemberForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Test, GITHUB_PKey, Finding_Template, \
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
@@ -34,7 +34,6 @@ from github import Github
 from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
-import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
@@ -465,8 +464,6 @@ def view_product_metrics(request, pid):
 
     inactive_engs_page = get_page_items(request, result.qs, 10)
 
-    scan_sets = ScanSettings.objects.filter(product=prod)
-
     filters = dict()
     if view == 'Finding':
         filters = finding_querys(request, prod)
@@ -586,7 +583,6 @@ def view_product_metrics(request, pid):
                    'product_tab': product_tab,
                    'engs': engs,
                    'inactive_engs': inactive_engs_page,
-                   'scan_sets': scan_sets,
                    'view': view,
                    'verified_objs': filters.get('verified', None),
                    'open_objs': filters.get('open', None),
@@ -1156,7 +1152,6 @@ def ad_hoc_finding(request, pid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            finding_helper.update_finding_status(new_finding, request.user)
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False

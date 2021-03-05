@@ -15,7 +15,6 @@ from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 import dateutil.relativedelta
 import datetime
-from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 import git
@@ -80,14 +79,6 @@ def markdown_render(value):
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
         return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
-
-
-@register.filter(name='ports_open')
-def ports_open(value):
-    count = 0
-    for ipscan in value.ipscan_set.all():
-        count += len(literal_eval(ipscan.services))
-    return count
 
 
 @register.filter(name='url_shortner')

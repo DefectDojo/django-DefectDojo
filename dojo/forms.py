@@ -21,9 +21,9 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
-from dojo.models import Finding, Product_Type, Product, Note_Type, ScanSettings, VA, \
+from dojo.models import Finding, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Scan, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
+    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
@@ -599,57 +599,6 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
         model = Risk_Acceptance
         fields = ['accepted_findings']
         # exclude = ('name', 'owner', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
-
-
-class ScanSettingsForm(forms.ModelForm):
-    addHelpTxt = "Enter IP addresses in x.x.x.x format separated by commas"
-    proHelpTxt = "UDP scans require root privs. See docs for more information"
-    msg = 'Addresses must be x.x.x.x format, separated by commas'
-    addresses = forms.CharField(
-        max_length=2000,
-        widget=forms.Textarea,
-        help_text=addHelpTxt,
-        validators=[
-            validators.RegexValidator(
-                regex=r'^\s*([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+,*\s*)+\s*$',
-                message=msg,
-                code='invalid_address')])
-    options = (('Weekly', 'Weekly'), ('Monthly', 'Monthly'),
-               ('Quarterly', 'Quarterly'))
-    frequency = forms.ChoiceField(choices=options)
-    prots = [('TCP', 'TCP'), ('UDP', 'UDP')]
-    protocol = forms.ChoiceField(
-        choices=prots,
-        help_text=proHelpTxt)
-
-    class Meta:
-        model = ScanSettings
-        fields = ['addresses', 'frequency', 'email', 'protocol']
-
-
-class DeleteIPScanForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Scan
-        exclude = ('scan_settings',
-                   'date',
-                   'protocol',
-                   'status',
-                   'baseline')
-
-
-class VaForm(forms.ModelForm):
-    addresses = forms.CharField(max_length=2000, widget=forms.Textarea)
-    options = (('Immediately', 'Immediately'),
-               ('6AM', '6AM'),
-               ('10PM', '10PM'))
-    start = forms.ChoiceField(choices=options)
-
-    class Meta:
-        model = VA
-        fields = ['start', 'addresses']
 
 
 class CheckForm(forms.ModelForm):
