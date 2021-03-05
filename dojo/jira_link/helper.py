@@ -690,12 +690,12 @@ def get_jira_issue_from_jira(find):
     jira_project = get_jira_project(find)
     jira_instance = get_jira_instance(find)
 
+    j_issue = find.jira_issue
     if not jira_project:
-        logger.error("Unable to retrieve latest status change from JIRA for finding {}.".format(find.id))
-        log_jira_alert("Unable to retrieve latest status change from JIRA for finding {}.", find)
+        logger.error("Unable to retrieve latest status change from JIRA %s for finding {} as there is no JIRA_Project configured for this finding.", j_issue.jira_key, format(find.id))
+        log_jira_alert("Unable to retrieve latest status change from JIRA %s for finding {} as there is no JIRA_Project configured for this finding.", j_issue.jira_key, find)
         return False
 
-    j_issue = find.jira_issue
     meta = None
     try:
         JIRAError.log_to_tempfile = False

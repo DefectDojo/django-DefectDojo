@@ -84,12 +84,12 @@ class Command(BaseCommand):
             # convert from str to datetime
             issue_from_jira.fields.updated = parse_datetime(issue_from_jira.fields.updated)
 
-            # logger.debug('%s', find.jira_issue.jira_change)
-            # logger.debug('%s', issue_from_jira.fields.updated)
-            # logger.debug('%s', find.last_status_update)
-            # logger.debug('%s', issue_from_jira.fields.updated)
-            # logger.debug('%s', find.last_reviewed)
-            # logger.debug('%s', issue_from_jira.fields.updated)
+            logger.debug('find.jira_issue.jira_change: %s', find.jira_issue.jira_change)
+            logger.debug('issue_from_jira.fields.updated: %s', issue_from_jira.fields.updated)
+            logger.debug('find.last_status_update: %s', find.last_status_update)
+            logger.debug('issue_from_jira.fields.updated: %s', issue_from_jira.fields.updated)
+            logger.debug('find.last_reviewed: %s', find.last_reviewed)
+            logger.debug('issue_from_jira.fields.updated: %s', issue_from_jira.fields.updated)
 
             no_action = 'False' if not dryrun else 'dryrun'
 
