@@ -21,8 +21,7 @@ modes:
 
 class Command(BaseCommand):
     help = 'Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. \
-        Risk Accepted findings are skipped. \
-        In reconciliation mode it uses a new field finding.last_status_update introduced in 1.14.0, so only safe to run for findings created after that.'
+        Risk Accepted findings are skipped.'
 
     mode_help = \
         '- reconcile: (default)reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status change timestamp in both systems to determine which one is the correct status' \
@@ -48,6 +47,9 @@ class Command(BaseCommand):
         if mode and mode not in ('push_status_to_jira', 'import_status_from_jira', 'reconcile'):
             print('mode must be one of reconcile, push_status_to_jira or import_status_from_jira')
             return False
+
+        if not mode:
+            mode = 'reconcile'
 
         findings = Finding.objects.all()
         if product:
@@ -98,28 +100,34 @@ class Command(BaseCommand):
 
             find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated,
 
-            no_action = 'False' if not dryrun else 'dryrun'
-
             flag1, flag2, flag3 = None, None, None
 
-            if find.risk_accepted:
+            if mode == 'reconcile' and not find.last_status_update:
+                message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;skipping finding with no last_status_update;%s' % \
+                    (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), None, None, None, None,
+                    find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, 'skipped')
+                messages.append(message)
+                logger.info(message)
+                continue
+            elif find.risk_accepted:
                 message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%sskipping risk accepted findings;%s' % \
                     (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
-                    find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, no_action)
+                    find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, 'skipped')
                 messages.append(message)
                 logger.info(message)
             elif jira_helper.issue_from_jira_is_active(issue_from_jira) and find.active:
                 message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no action both sides are active/open;%s' % \
                     (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
-                     find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, no_action)
+                     find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, 'equal')
                 messages.append(message)
                 logger.info(message)
             elif not jira_helper.issue_from_jira_is_active(issue_from_jira) and not find.active:
                 message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no action both sides are inactive/closed;%s' % \
                     (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
-                    find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, no_action)
+                    find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, 'equal')
                 messages.append(message)
                 logger.info(message)
+
             else:
                 # statuses are different
                 if mode in ('push_status_to_jira', 'import_status_from_jira'):
