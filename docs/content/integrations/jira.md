@@ -130,7 +130,8 @@ might not be feasible. For this scenario there is the management command 'jira_s
 ```
 usage: manage.py jira_status_reconciliation [-h] [--mode MODE] [--product PRODUCT] [--engagement ENGAGEMENT] [--dryrun] [--version] [-v {0,1,2,3}]
 
-Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. Risk Accepted findings are skipped.
+Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results.
+Risk Accepted findings are skipped. Findings created before 1.14.0 are skipped.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -154,7 +155,7 @@ This can be executed from the uwsgi docker container using:
 $ docker-compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation'
 ```
 
-DEBUG output can be obtains via `-v 3`
+DEBUG output can be obtains via `-v 3`, but only after increasing the logging to DEBUG level in your settings.dist.py or local_settings.py file
 
 ``` {.sourceCode .bash}
 $ docker-compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation -v 3'
