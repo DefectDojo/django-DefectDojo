@@ -2,7 +2,7 @@ import functools
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.user.helper import user_is_authorized as legacy_check
 
 
@@ -28,8 +28,7 @@ def user_is_authorized(model, permission, arg, legacy_permission=None, lookup="p
         obj = get_object_or_404(model.objects.filter(**{lookup: lookup_value}))
 
         if settings.FEATURE_NEW_AUTHORIZATION:
-            if not user_has_permission(request.user, obj, permission) and not request.user.is_superuser:
-                raise PermissionDenied()
+            user_has_permission_or_403(request.user, obj, permission)
         else:
             if legacy_permission:
                 if not legacy_check(request.user, legacy_permission, obj):
