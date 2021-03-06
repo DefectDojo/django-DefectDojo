@@ -1,5 +1,7 @@
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
 from dojo.models import Engagement, Finding, Product
@@ -18,7 +20,9 @@ modes:
 
 
 class Command(BaseCommand):
-    help = 'Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. Risk Accepted findings are skipped.'
+    help = 'Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. \
+        Risk Accepted findings are skipped. \
+        In reconciliation mode it uses a new field finding.last_status_update introduced in 1.14.0, so only safe to run for findings created after that.'
 
     mode_help = \
         '- reconcile: (default)reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status change timestamp in both systems to determine which one is the correct status' \
@@ -29,12 +33,14 @@ class Command(BaseCommand):
         parser.add_argument('--mode', help=self.mode_help)
         parser.add_argument('--product', help='Only process findings in this product (name)')
         parser.add_argument('--engagement', help='Only process findings in this product (name)')
+        parser.add_argument('--daysback', type=int, help='Only process findings created in the last \'daysback\' days')
         parser.add_argument('--dryrun', action='store_true', help='Only print actions to be performed, but make no modifications.')
 
     def handle(self, *args, **options):
         mode = options['mode']
         product = options['product']
         engagement = options['engagement']
+        daysback = options['daysback']
         dryrun = options['dryrun']
 
         logger.debug('mode: %s product:%s engagement: %s dryrun: %s', mode, product, engagement, dryrun)
@@ -52,6 +58,10 @@ class Command(BaseCommand):
             engagement = Engagement.objects.filter(name=engagement).first()
             findings = findings.filter(test__engagement=engagement)
 
+        if daysback:
+            timestamp = timezone.now() - relativedelta(days=int(daysback))
+            findings = findings.filter(created__gte=timestamp)
+
         findings = findings.exclude(jira_issue__isnull=True)
 
         # order by product, engagement to increase the cance of being able to reuse jira_instance + jira connection
@@ -63,14 +73,16 @@ class Command(BaseCommand):
 
         logger.debug(findings.query)
 
-        messages = ['jira_key;finding_url;resolution_or_status;action;change_made']
+        messages = ['jira_key;finding_url;resolution_or_status;find.jira_issue.jira_change;issue_from_jira.fields.updated;find.last_status_update;issue_from_jira.fields.updated;find.last_reviewed;issue_from_jira.fields.updated;flag1;flag2;flag3;action;change_made']
         for find in findings:
             logger.debug('jira status reconciliation for: %i:%s', find.id, find)
 
             issue_from_jira = jira_helper.get_jira_issue_from_jira(find)
 
             if not issue_from_jira:
-                message = '%s; %s/finding/%d;%s;%s;unable to retrieve JIRA Issue;%s' % (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), None, 'error')
+                message = '%s;%s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;unable to retrieve JIRA Issue;%s' % \
+                    (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), None, None, None, None,
+                                find.jira_issue.jira_change, None, find.last_status_update, None, find.last_reviewed, None, 'error')
                 messages.append(message)
                 logger.info(message)
                 continue
@@ -84,25 +96,28 @@ class Command(BaseCommand):
             # convert from str to datetime
             issue_from_jira.fields.updated = parse_datetime(issue_from_jira.fields.updated)
 
-            logger.debug('find.jira_issue.jira_change: %s', find.jira_issue.jira_change)
-            logger.debug('issue_from_jira.fields.updated: %s', issue_from_jira.fields.updated)
-            logger.debug('find.last_status_update: %s', find.last_status_update)
-            logger.debug('issue_from_jira.fields.updated: %s', issue_from_jira.fields.updated)
-            logger.debug('find.last_reviewed: %s', find.last_reviewed)
-            logger.debug('issue_from_jira.fields.updated: %s', issue_from_jira.fields.updated)
+            find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated,
 
             no_action = 'False' if not dryrun else 'dryrun'
 
+            flag1, flag2, flag3 = None, None, None
+
             if find.risk_accepted:
-                message = '%s; %s/finding/%d;%s;%s;skipping risk accepted findings;%s' % (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, no_action)
+                message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%sskipping risk accepted findings;%s' % \
+                    (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
+                    find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, no_action)
                 messages.append(message)
                 logger.info(message)
             elif jira_helper.issue_from_jira_is_active(issue_from_jira) and find.active:
-                message = '%s; %s/finding/%d;%s;%s;no action both sides are active/open;%s' % (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, no_action)
+                message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no action both sides are active/open;%s' % \
+                    (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
+                     find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, no_action)
                 messages.append(message)
                 logger.info(message)
             elif not jira_helper.issue_from_jira_is_active(issue_from_jira) and not find.active:
-                message = '%s; %s/finding/%d;%s;%s;no action both sides are inactive/closed;%s' % (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, no_action)
+                message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no action both sides are inactive/closed;%s' % \
+                    (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, None, None, None,
+                    find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, no_action)
                 messages.append(message)
                 logger.info(message)
             else:
@@ -115,33 +130,31 @@ class Command(BaseCommand):
                     # dojo.jira_change < jira.updated, and
                     # dojo.last_status_update < jira.updated, and
                     # dojo.last_reviewed < jira.update,
-                    logger.debug('%s,%s,%s,%s',
-                                    resolution_name,
-                                    (not find.jira_issue.jira_change or (find.jira_issue.jira_change < issue_from_jira.fields.updated)),
-                                    not find.last_status_update or (find.last_status_update < issue_from_jira.fields.updated),
-                                    (not find.last_reviewed or (find.last_reviewed < issue_from_jira.fields.updated)))
 
-                    if (not find.jira_issue.jira_change or (find.jira_issue.jira_change < issue_from_jira.fields.updated)):
-                        if not find.last_status_update or (find.last_status_update < issue_from_jira.fields.updated):
-                            if not find.last_reviewed or (find.last_reviewed < issue_from_jira.fields.updated):
-                                action = 'import_status_from_jira'
+                    flag1 = (not find.jira_issue.jira_change or (find.jira_issue.jira_change < issue_from_jira.fields.updated))
+                    flag2 = not find.last_status_update or (find.last_status_update < issue_from_jira.fields.updated)
+                    flag3 = (not find.last_reviewed or (find.last_reviewed < issue_from_jira.fields.updated))
 
-                    # Status is DOJO is newer if:
-                    # dojo.jira_change > jira.updated or # can't happen
-                    # dojo.last_status_update > jira.updated or
-                    # dojo.last_reviewed > jira.updated
-                    # dojo.mitigated > dojo.jira_change
-                    logger.debug('%s,%s,%s,%s',
-                                    resolution_name,
-                                    (not find.jira_issue.jira_change or (find.jira_issue.jira_change > issue_from_jira.fields.updated)),
-                                    (find.last_status_update > issue_from_jira.fields.updated),
-                                    (find.is_Mitigated and find.mitigated and find.jira_issue.jira_change and find.mitigated > find.jira_issue.jira_change))
+                    logger.debug('%s,%s,%s,%s', resolution_name, flag1, flag2, flag3)
 
-                    if (not find.jira_issue.jira_change or (find.jira_issue.jira_change > issue_from_jira.fields.updated)) or \
-                        (find.last_status_update > issue_from_jira.fields.updated) or \
-                            (find.is_Mitigated and find.mitigated and find.jira_issue.jira_change and find.mitigated > find.jira_issue.jira_change):
+                    if flag1 and flag2 and flag3:
+                        action = 'import_status_from_jira'
 
-                        action = 'push_status_to_jira'
+                    else:
+                        # Status is DOJO is newer if:
+                        # dojo.jira_change > jira.updated or # can't happen
+                        # dojo.last_status_update > jira.updated or
+                        # dojo.last_reviewed > jira.updated
+                        # dojo.mitigated > dojo.jira_change
+
+                        flag1 = not find.jira_issue.jira_change or (find.jira_issue.jira_change > issue_from_jira.fields.updated)
+                        flag2 = find.last_status_update > issue_from_jira.fields.updated
+                        flag3 = find.is_Mitigated and find.mitigated and find.jira_issue.jira_change and find.mitigated > find.jira_issue.jira_change
+
+                        logger.debug('%s,%s,%s,%s', resolution_name, flag1, flag2, flag3)
+
+                        if flag1 or flag2 or flag3:
+                            action = 'push_status_to_jira'
 
                 prev_jira_instance, jira = None, None
 
@@ -150,11 +163,15 @@ class Command(BaseCommand):
 
                     status_changed = jira_helper.process_resolution_from_jira(find, resolution_id, resolution_name, assignee_name, issue_from_jira.fields.updated) if not dryrun else 'dryrun'
                     if status_changed:
-                        message = '%s; %s/finding/%d;%s;%s;%s finding in defectdojo;%s' % (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, message_action, status_changed)
+                        message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s finding in defectdojo;%s' % \
+                            (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3,
+                            find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, message_action, status_changed)
                         messages.append(message)
                         logger.info(message)
                     else:
-                        message = '%s; %s/finding/%d;%s;%s;no changes made from jira resolution;%s' % (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, status_changed)
+                        message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no changes made from jira resolution;%s' % \
+                            (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3,
+                            find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, status_changed)
                         messages.append(message)
                         logger.info(message)
 
@@ -169,17 +186,28 @@ class Command(BaseCommand):
                     status_changed = jira_helper.push_status_to_jira(find, jira_instance, jira, issue_from_jira) if not dryrun else 'dryrun'
 
                     if status_changed:
-                        message = '%s; %s/finding/%d;%s;%s;%s jira issue;%s;' % (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, message_action, status_changed)
+                        message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s jira issue;%s;' % \
+                            (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3, message_action,
+                            find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, status_changed)
                         messages.append(message)
                         logger.info(message)
                     else:
                         if status_changed is None:
                             status_changed = 'Error'
-                        message = '%s; %s/finding/%d;%s;%s;no changes made while pushing status to jira;%s' % (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, status_changed)
+                        message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;no changes made while pushing status to jira;%s' % \
+                            (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3,
+                            find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, status_changed)
                         messages.append(message)
 
                         logger.info(message)
+                else:
+                    message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;unable to determine source of truth;%s' % \
+                        (find.jira_issue.jira_key, settings.SITE_URL, find.id, find.status(), resolution_name, flag1, flag2, flag3,
+                        find.jira_issue.jira_change, issue_from_jira.fields.updated, find.last_status_update, issue_from_jira.fields.updated, find.last_reviewed, issue_from_jira.fields.updated, status_changed)
+                    messages.append(message)
 
-        logger.info('results (tab seperated)')
+                    logger.info(message)
+
+        logger.info('results (semicolon seperated)')
         for message in messages:
             print(message)
