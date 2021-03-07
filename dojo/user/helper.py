@@ -76,6 +76,7 @@ def user_must_be_authorized(model, perm_type, arg, lookup="pk", view_func=None):
         # print('user is authorized for: ', obj)
         # Django doesn't seem to easily support just passing on the original positional parameters
         # so we resort to explicitly putting lookup_value here (which is for example the 'fid' parameter)
+        print(lookup_value, *args, **kwargs)
         return view_func(request, lookup_value, *args, **kwargs)
 
     return _wrapped
@@ -93,12 +94,7 @@ def check_auth_users_list(user, obj):
         is_authorized = user in obj.test.engagement.product.authorized_users.all()
         is_authorized = user in obj.test.engagement.product.prod_type.authorized_users.all() or is_authorized
     if isinstance(obj, Finding_Group):
-        if obj.findings:
-            is_authorized = user in obj.findings[0].test.engagement.product.authorized_users.all()
-            is_authorized = user in obj.findings[0].test.engagement.product.prod_type.authorized_users.all() or is_authorized
-        else:
-            # always allow access to empty groups
-            is_authorized = True
+        return check_auth_users_list(obj.test)
     if isinstance(obj, Test):
         is_authorized = user in obj.engagement.product.authorized_users.all()
         is_authorized = user in obj.engagement.product.prod_type.authorized_users.all() or is_authorized

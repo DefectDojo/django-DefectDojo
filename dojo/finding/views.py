@@ -34,7 +34,7 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
-from dojo.models import Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
+from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Endpoint_Status, \
     FindingImageAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
@@ -2245,18 +2245,3 @@ def calculate_possible_related_actions_for_similar_finding(request, finding, sim
     # logger.debug('related_actions for %i: %s', similar_finding.id, {finding.id: actions})
 
     return actions
-
-
-@user_must_be_authorized(Finding_Group, 'view', 'fgid')
-def view_finding_group(fgid):
-    pass
-
-
-@user_must_be_authorized(Finding_Group, 'change', 'fgid')
-def edit_finding_group(fgid):
-    pass
-
-
-@user_must_be_authorized(Finding_Group, 'delete', 'fgid')
-def delete_finding_group(fgid):
-    pass

@@ -467,7 +467,13 @@ def push_to_jira(obj):
         else:
             return add_epic(engagement)
 
-    # TODO JIRA_GROUP
+    elif isinstance(obj, Finding_Group):
+        group = obj
+        # TODO FINDING_GROUP
+        if group.has_jira_issue:
+            return update_jira_issue(group, sync=True)
+        else:
+            return add_jira_issue(group, sync=True)
 
     else:
         logger.error('unsupported object passed to push_to_jira: %s %i %s', obj.__name__, obj.id, obj)
@@ -477,7 +483,7 @@ def push_to_jira(obj):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def add_jira_issue(find):
+def add_jira_issue(find, *args, **kwargs):
     logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
 
     if not is_jira_enabled():
@@ -596,7 +602,7 @@ def add_jira_issue(find):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def update_jira_issue(find):
+def update_jira_issue(find, *args, **kwargs):
     logger.debug('trying to update a linked jira issue for %d:%s', find.id, find.title)
 
     if not is_jira_enabled():

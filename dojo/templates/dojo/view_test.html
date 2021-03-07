@@ -250,27 +250,32 @@
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
-                <h4 class="has-filters"> Groups ({{ groups|length }})</small>
-                    <div class="dropdown pull-right"></div>
-                    <div id="test-pulldown" class="dropdown pull-right">
-                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" aria-expanded="true">
-                            <span class="fa fa-plus"></span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            <li role="presentation">
-                                <a title="Add Finding" href="{% url 'add_findings' test.id %}">
-                                    <span class="fa fa-bug"></span> New Finding
-                                </a>
-                            </li>
-                            <li role="presentation">
-                                <a title="Add Finding from Template" href="{% url 'search' test.id %}">
-                                    <span class="icon-add-template"></span> Finding From Template
-                                </a>
-                            </li>
-                        </ul>
+                <h4 class="has-filters"> Groups ({{ finding_groups|length }})</small>
+                    <div class="dropdown pull-right">
+                        <div id="test-pulldown" class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-plus"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                <li role="presentation">
+                                    <a title="Add Finding" href="{% url 'add_findings' test.id %}">
+                                        <span class="fa fa-bug"></span> New Finding
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a title="Add Finding from Template" href="{% url 'search' test.id %}">
+                                        <span class="icon-add-template"></span> Finding From Template
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <span class="pull-right">
+                            <a data-toggle="collapse" href="#finding_groups_panel">
+                                <i class="glyphicon glyphicon-chevron-down"></i>
+                            </a>
+                        </span>
                     </div>
                 </h4>
             </div>
@@ -280,7 +285,7 @@
         </div>
     </div>
 
-    <div class="panel panel-default table-responsive">
+    <div id="finding_groups_panel" class="panel panel-default table-responsive collapse">
         {% if finding_groups %}
             <table id="finding_groups" class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                 <thead>
@@ -373,7 +378,7 @@
                             </span>
                         </td>
                         <td><a href="{% url 'view_finding_group' group.id %}">{{ group.name|truncatechars_html:60 }}</a></td>
-                        <td>{{ group.findingsDEDUPE_ALGO_UNIQUE_ID_FROM_TOOL.all|length }}</td>
+                        <td>{{ group.findings.all|length }}</td>
                         <td>
                             {{ group.cves }}
                         </td>
@@ -397,21 +402,30 @@
                         <td class="nowrap">status
                         </td>
                         {% if system_settings.enable_jira %}
-                            {% if jira_project and product_tab or not product_tab %}
-                                <td>
-                                    {% if group.has_jira_issue %}
-                                        <a href="{{ group | jira_issue_url }}" target="_blank"
-                                            alt="Jira Bug - {{ group | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{ group | jira_key}}">{{ group | jira_key }}</a>
+                            {% if jira_project %}
+
+                                <td id="jira">
+                                    {% if group.jira_issue %}
+                                        <a href="{{ group | jira_issue_url }}"
+                                        target="_blank" title="{{ group | jira_issue_url }}">{{ group | jira_key }}</a>
+                                        <i id="unlink_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-trash unlink_to_jira" title="Unlink JIRA issue from this group of findings."></i>
+                                        <i id="push_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-share-square push_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
+                                    {% else %}
+                                        None
+                                        <i id="push_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-share-square push_to_jira" title="Create JIRA issue for this group of findings"></i>
+                                        {% comment %} <a href="{% url 'finding_link_to_jira' group.id %}" title="Link existing JIRA issue to finding.">
+                                            <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                                        </a> {% endcomment %}
                                     {% endif %}
-                                    </td>
+                                </td>
 
-                                    <td class="nowrap">
-                                        {{ group | jira_creation | timesince }}
-                                    </td>
+                                <td class="nowrap">
+                                    {{ group | jira_creation | timesince }}
+                                </td>
 
-                                    <td class="nowrap">
-                                        {{ group | jira_change | timesince }}
-                                    </td>
+                                <td class="nowrap">
+                                    {{ group | jira_change | timesince }}
+                                </td>
 
                             {% endif %}
                         {% endif %}
@@ -1419,6 +1433,46 @@
                 return false;
             });
 
+        });
+
+        function jira_action(elem, url) {
+            $(elem).removeClass().addClass('fa fa-spinner fa-spin')
+
+            $.ajax({
+                type: "post",
+                dataType:'json',
+                data: '',
+                context: this,
+                url: url,
+                // The ``X-CSRFToken`` evidently can't be set in the
+                // ``headers`` option, so force it here.
+                // This method requires jQuery 1.5+.
+                beforeSend: function (jqXHR, settings) {
+                    // Pull the token out of the DOM.
+                    jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
+                },
+                success: function (data, textStatus, jqXHR) {
+                    console.log(textStatus)
+                    console.log(data)
+                },
+                error: function (request, status, error) {
+                    console.log('error')
+                    console.log(request.responseText)
+                },
+                complete: function(e) {
+                    console.log('complete')
+                    console.log(this)
+                    <!-- location.reload() -->
+                }
+            });
+        }
+
+        $(".push_to_jira").on('click', function(e) {
+            jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/push')
+        });
+
+        $(".unlink_jira").on('click', function(e) {
+            jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/unlink')
         });
 
     </script>

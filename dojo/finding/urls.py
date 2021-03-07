@@ -119,9 +119,4 @@ urlpatterns = [
     url(r'^finding/(?P<fid>\d+)/jira/push', views.push_to_jira, name='finding_push_to_jira'),
     # url(r'^finding/(?P<fid>\d+)/jira/push', views.finding_link_to_jira, name='finding_link_to_jira'),
 
-    # finding group
-    url(r'^finding/group/(?P<fgid>\d+)', views.view_finding_group, name='view_finding_group'),
-    url(r'^finding/group/(?P<fgid>\d+)/edit', views.edit_finding_group, name='edit_finding_group'),
-    url(r'^finding/group/(?P<fgid>\d+)/delete', views.delete_finding_group, name='delete_finding_group'),
-
 ]

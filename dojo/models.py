@@ -2243,6 +2243,7 @@ class Stub_Finding(models.Model):
 
 class Finding_Group(TimeStampedModel):
     name = models.CharField(max_length=255, blank=False, null=False)
+    test = models.ForeignKey(Test, on_delete=models.CASCADE)
     findings = models.ManyToManyField(Finding)
     creator = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
 
@@ -2253,6 +2254,8 @@ class Finding_Group(TimeStampedModel):
 
     @cached_property
     def severity(self):
+        if not self.findings.all():
+            return None
         max_number_severity = max([Finding.get_number_severity(find.severity) for find in self.findings.all()])
         logger.debug('MAX:%s', max_number_severity)
         return Finding.get_severity(max_number_severity)
@@ -2277,6 +2280,9 @@ class Finding_Group(TimeStampedModel):
 
     @cached_property
     def sla_days_remaining_internal(self):
+        if not self.findings.all():
+            return None
+
         return min([find.sla_days_remaining() for find in self.findings.all()])
 
     def sla_days_remaining(self):
