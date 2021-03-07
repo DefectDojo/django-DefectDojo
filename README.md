@@ -75,7 +75,9 @@ See [Release and branch model](BRANCHING-MODEL.md)
 A magical, illusionary, non-existent, YMMV, wannabe, no guarantees list of thing we may or may not be working on:
 - New permission model
 - Push groups of findings to a single JIRA ticket
-- Reimport matching improvements- 
+- Reimport matching improvements
+- New UI (SPA on top of API)
+- More parsers (CycloneDX, OVAL)
 
 
 ## Support, Bug Reports and Getting Involved
