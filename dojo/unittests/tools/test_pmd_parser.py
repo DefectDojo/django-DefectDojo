@@ -10,6 +10,7 @@ class TestPMDParser(TestCase):
         parser = PmdParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
+        self.assertEqual("Medium", findings[0].severity)
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
         testfile = open("dojo/unittests/scans/pmd/pmd_one_vuln.csv")
