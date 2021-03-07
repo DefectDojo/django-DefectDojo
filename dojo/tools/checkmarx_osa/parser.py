@@ -45,7 +45,7 @@ class CheckmarxOsaParser(object):
                 description=item.get('description', 'NC'),
                 unique_id_from_tool=item.get('id', None),
                 references=item.get('url', None),
-                mitigation=item.get('recommendations', 'NC'),
+                mitigation=item.get('recommendations', 'No mitigation provided'),
                 impact='No impact provided',
                 component_name=library['name'],
                 component_version=library['version'],
