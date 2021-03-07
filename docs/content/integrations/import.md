@@ -23,6 +23,15 @@ Aqua
 
 JSON report format.
 
+Anchore Grype (anchore_grype)
+---------------------
+
+Anchore Grype JSON report format generated with `-o json` option.
+
+```
+grype defectdojo/defectdojo-django:1.13.1 -o json > many_vulns.json
+```
+
 Arachni Scanner
 ---------------
 
