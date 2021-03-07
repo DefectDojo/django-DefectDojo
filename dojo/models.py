@@ -1426,7 +1426,7 @@ class Finding(models.Model):
                            blank=True,
                            editable=False,
                            verbose_name="URL",
-                           help_text="External reference that provides more information about this flaw.") # not displayed and pretty much the same as references. To remove? 
+                           help_text="External reference that provides more information about this flaw.")  # not displayed and pretty much the same as references. To remove?
     severity = models.CharField(max_length=200,
                                 verbose_name="Severity",
                                 help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational).")
@@ -1696,7 +1696,7 @@ class Finding(models.Model):
                                         verbose_name="Number of occurences",
                                         help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
 
-    # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?""
+    # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?"
     publish_date = models.DateTimeField(null=True,
                                          editable=False,
                                          verbose_name="Publish date",

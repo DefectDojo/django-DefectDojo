@@ -157,8 +157,7 @@ class TestCheckmarxOsaParser(TestCase):
         self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
         item = findings[0]
-        self.assertEqual(float, type(item.cvssv3_score))
-        self.assertEqual(10.0, item.cvssv3_score)        
+        self.assertIsNone(item.cvssv3_score)
 
     # ----------------------------------------------------------------------------
     # single finding no url
@@ -174,5 +173,21 @@ class TestCheckmarxOsaParser(TestCase):
         self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
         item = findings[0]
-        self.assertEqual(str, type(item.references))
-        self.assertEqual("", item.references)
+        self.assertIsNone(item.references)
+
+    # ----------------------------------------------------------------------------
+    # single finding no libraryId (ValueError)
+    # ----------------------------------------------------------------------------
+    def test_checkmarx_osa_parse_file_with_no_libraryId_raises_ValueError(
+        self,
+    ):
+        with self.assertRaises(ValueError) as context:
+            my_file_handle, product, engagement, test = self.init(
+                "dojo/unittests/scans/checkmarx_osa/single_finding_no_libraryId.json"
+            )
+            parser = CheckmarxOsaParser()
+            parser.get_findings(my_file_handle, test)
+            self.teardown(my_file_handle)
+            self.assertTrue(
+                "Invalid format: missing mandatory field libraryId:" in str(context.exception)
+            )

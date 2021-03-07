@@ -21,34 +21,44 @@ class CheckmarxOsaParser(object):
         tree = json.load(filehandle)
         if len(tree) != 2:
             logger.error("Bad format. Expected a list of two elements: CxOSALibraries.json and CxOSAVulnerabilities.json. Found %i elements", len(tree))
-            raise Exception("Invalid format: bad structure")
+            raise ValueError("Invalid format: bad structure")
         libraries_dict = self.get_libraries(tree)
         vulnerabilities = self.get_vunlerabilities(tree)
         items = []
         for item in vulnerabilities:
+            mandatory_vulnerability_fields = ['libraryId', 'state', 'severity']
+            mandatory_library_fields = ['name', 'version']
+            self.check_mandatory(item, mandatory_vulnerability_fields)
             library = libraries_dict[item['libraryId']]
+            self.check_mandatory(library, mandatory_library_fields)
+            if 'name' not in item['state']:
+                raise ValueError("Invalid format: missing mandatory field %s", 'state.name')
+            if 'name' not in item['severity']:
+                raise ValueError("Invalid format: missing mandatory field %s", 'severity.name')
+
             # Possible status as per checkmarx 9.2: TO_VERIFY, NOT_EXPLOITABLE, CONFIRMED, URGENT, PROPOSED_NOT_EXPLOITABLE
             status = item['state']['name']
+            cve = item.get('cveName', 'NC')
             finding_item = Finding(
-                title='{0} {1} | {2}'.format(library['name'], library['version'], item['cveName']),
+                title='{0} {1} | {2}'.format(library['name'], library['version'], cve),
                 severity=item['severity']['name'],
-                description=item['description'],
-                unique_id_from_tool=item['id'],
-                references=self.safe_use_str(item, 'url'),
-                mitigation=self.safe_use_str(item, 'recommendations'),
+                description=item.get('description', 'NC'),
+                unique_id_from_tool=item.get('id', None),
+                references=item.get('url', None),
+                mitigation=item.get('recommendations', 'NC'),
                 impact='NC',
                 component_name=library['name'],
                 component_version=library['version'],
-                cve=item['cveName'],
+                cve=cve,
                 # 1035 is "Using Components with Known Vulnerabilities"
                 # Possible improvment: get the CWE from the CVE using some database?
                 # nvd.nist.gov has the info; see for eg https://nvd.nist.gov/vuln/detail/CVE-2020-25649 "Weakness Enumeration"
                 cwe=1035,
-                cvssv3_score=self.safe_use_score(item, 'score', item['cveName']),
+                cvssv3_score=item.get('score', None),
                 publish_date=datetime.strptime(item['publishDate'], '%Y-%m-%dT%H:%M:%S'),
                 static_finding=True,
                 dynamic_finding=False,
-                scanner_confidence=self.checkmarx_confidence_to_defectdojo_confidence(library['confidenceLevel']),
+                scanner_confidence=self.checkmarx_confidence_to_defectdojo_confidence(library.get('confidenceLevel', 50)),
                 active=status != 'NOT_EXPLOITABLE',
                 false_p=status == 'NOT_EXPLOITABLE',
                 verified=status != 'TO_VERIFY' and status != 'NOT_EXPLOITABLE' and status != 'PROPOSED_NOT_EXPLOITABLE',
@@ -75,7 +85,7 @@ class CheckmarxOsaParser(object):
     # Defectdojo: cf models.py get_scanner_confidence_text
     #   1->2 = Certain (0 is like null)
     #   3->5 = Firm
-    #   >=6 : Tentative 
+    #   >=6 : Tentative
     #   -> defectdojo has a quotation from 1->(say)11 with 1 the highest confidence
 
     # 100% = Certain
@@ -83,13 +93,7 @@ class CheckmarxOsaParser(object):
     def checkmarx_confidence_to_defectdojo_confidence(self, checkmarx_confidence):
         return round((100 - checkmarx_confidence) / 10) + 1
 
-    def safe_use_str(self, item, key):
-        return item[key] if key in item else ""
-
-    # Default to the max score so that we notice if it ever happens that we don't have a score
-    def safe_use_score(self, item, key, cve):
-        if key in item:
-            return item[key]
-        else:
-            logger.error("Can't find cvssv3 score for finding of cve %s. Defaulting to maximum score", cve)
-            return 10.0
+    def check_mandatory(self, item, mandatory_vulnerability_fields):
+        for field in mandatory_vulnerability_fields:
+            if field not in item:
+                raise ValueError("Invalid format: missing mandatory field %s", field)

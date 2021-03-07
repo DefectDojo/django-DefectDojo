@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0079_system_settings_disclaimer'),
+        ('dojo', '0083_remove_ipscan'),
     ]
 
     operations = [
