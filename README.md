@@ -76,8 +76,6 @@ A magical, illusionary, non-existent, YMMV, wannabe, no guarantees list of thing
 - New permission model
 - Push groups of findings to a single JIRA ticket
 - Reimport matching improvements
-- New UI (SPA on top of API)
-- More parsers (CycloneDX, OVAL)
 
 
 ## Support, Bug Reports and Getting Involved
