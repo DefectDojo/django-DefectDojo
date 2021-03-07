@@ -41,7 +41,7 @@ class PmdParser(object):
             elif row["Priority"] == "1":
                 priority = "Info"
             else:
-                priority = row["Priority"]
+                priority = "Info"
             finding.severity = priority
 
             description = "Description: {}\n".format(row['Description'].strip())
