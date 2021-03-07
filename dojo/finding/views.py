@@ -34,7 +34,7 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
-from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
+from dojo.models import Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Endpoint_Status, \
     FindingImageAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
@@ -1884,6 +1884,29 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response('Skipped %s findings in group creation, findings already part of another group' % skipped)
+
+                if form.cleaned_data['finding_group_add']:
+                    logger.debug('finding_group_add checked!')
+                    fgid = form.cleaned_data['add_to_finding_group']
+                    finding_group = Finding_Group.objects.get(id=fgid)
+                    finding_group, added, skipped = finding_helper.add_to_finding_group(finding_group, finds)
+
+                    if added:
+                        add_success_message_to_response('Added %s findings to finding group %s' % (added, finding_group.name))
+                        return_url = reverse('view_finding_group', args=(finding_group.id,))
+
+                    if skipped:
+                        add_success_message_to_response('Skipped %s findings when adding to finding group %s, findings already part of another group' % (skipped, finding_group.name))
+
+                if form.cleaned_data['finding_group_remove']:
+                    logger.debug('finding_group_remove checked!')
+                    finding_groups, removed, skipped = finding_helper.remove_from_finding_group(finds)
+
+                    if removed:
+                        add_success_message_to_response('Removed %s findings from finding groups %s' % (removed, ','.join([finding_group.name for finding_group in finding_groups])))
+
+                    if skipped:
+                        add_success_message_to_response('Skipped %s findings when removing from any finding group, findings not part of any group' % (skipped))
 
                 if skipped_risk_accept_count > 0:
                     messages.add_message(request,

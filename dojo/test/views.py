@@ -114,7 +114,7 @@ def view_test(request, tid):
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
 
-    finding_groups = test.finding_group_set.all()
+    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue')
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 

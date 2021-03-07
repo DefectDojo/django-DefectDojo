@@ -1923,6 +1923,8 @@ class Finding(models.Model):
             status += ['Duplicate']
         if self.risk_accepted:
             status += ['Risk Accepted']
+        if self.finding_group_set.all():
+            status += ['Grouped']
         if not len(status):
             status += ['Initial']
 
@@ -2246,6 +2248,9 @@ class Finding_Group(TimeStampedModel):
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     findings = models.ManyToManyField(Finding)
     creator = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
     @property
     def has_jira_issue(self):

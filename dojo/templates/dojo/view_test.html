@@ -280,9 +280,7 @@
                 </h4>
             </div>
         </div>
-        <div id="the-filters" class="is-filters panel-body collapse">
-            {% include "dojo/filter_snippet.html" with form=filtered.form %}
-        </div>
+        <!-- no filters here -->
     </div>
 
     <div id="finding_groups_panel" class="panel panel-default table-responsive collapse">
@@ -363,7 +361,7 @@
                                             <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                             <input type="hidden" name="id" value="{{ finding.id }}"/>
                                             </form>
-                                            <a class="text-danger delete-finding-group" id="delete-finding-group-menu-{{ group.id }}" href="#">
+                                            <a class="text-danger delete-finding-group" id="delete-finding-group-menu-{{ group.id }}" data-group-id={{ group.id }} href="#">
                                             <i class="fa fa-trash"></i> Delete
                                             </a>
                                         </li>
@@ -378,7 +376,7 @@
                             </span>
                         </td>
                         <td><a href="{% url 'view_finding_group' group.id %}">{{ group.name|truncatechars_html:60 }}</a></td>
-                        <td>{{ group.findings.all|length }}</td>
+                        <td><a href="{% url 'view_test' test.id %}?finding_group={{ group.id }}">{{ group.findings.all|length }}</a></td>
                         <td>
                             {{ group.cves }}
                         </td>
@@ -510,7 +508,7 @@
             </div>
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                 <li class="dropdown-header">Choose wisely...</li>
-                <li style="padding-left: 8px;">
+                <li style="padding-left: 8px;padding-right: 8px;">
                     <form action="{% url 'finding_bulk_update_all' %}" method="post" id="bulk_change_form">
                         {% csrf_token %}
                         <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
@@ -550,10 +548,25 @@
                             <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
                         </label>
 
-                        <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable" checked="false"/></label><br/>
+                        <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label><br/>
                         <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_bulk_finding_group_create" name="finding_group_create" type="checkbox" disabled/> <span>Create</span>
+                            <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
                         </label>
+                        <span>
+                            <label style="font-size: 80%; font-weight: normal;">
+                                <input id="id_bulk_finding_group_add" name="finding_group_add" class="finding_group_option" type="checkbox" disabled/> <span>Add to...</span>
+                            </label>
+                            <select name="add_to_finding_group" id="add_to_finding_group" style="font-size: 80%">
+                                <option value="">Choose...</option>
+                                {% for group in finding_groups %}
+                                    <option value="{{ group.id }}">{{ group.name|truncatechars_html:40 }}</option>
+                                {% endfor %}
+                            </select>
+                        </span>
+                        <label style="font-size: 80%; font-weight: normal; display: block">
+                            <input id="id_bulk_finding_group_remove" name="finding_group_remove" class="finding_group_option" type="checkbox" disabled/> <span>Remove from any group</span>
+                        </label>
+
 
                         {% if system_settings.enable_jira %}
                             <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
@@ -1235,7 +1248,26 @@
             $('#id_bulk_finding_group').on('click', function (e) {
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_finding_group_create').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_finding_group_add').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_finding_group_remove').prop('disabled', !checked);
             })
+
+            $('#bulk_edit_menu #id_bulk_finding_group_create').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', false);
+            })
+
+            $('.finding_group_option').click(function () {
+                outer = $(this)
+                $('.finding_group_option').each(function() {
+                    if (!$(this).is(outer)) {
+                        $(this).prop('checked', false);
+                    }
+                })
+            });
 
             //Ensures dropdown has proper zindex
             $('.table-responsive').on('show.bs.dropdown', function () {
@@ -1474,6 +1506,16 @@
         $(".unlink_jira").on('click', function(e) {
             jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/unlink')
         });
+
+        $('[id^=delete-finding-group-menu-]').on('click', function () {
+            if (confirm('Are you sure you want to delete this finding group? The findings themselves will NOT be deleted.'))
+            {
+                var form_element = "form#" + this.id + "-form";
+                $( form_element ).submit();
+            }
+          });
+
+
 
     </script>
     {% include "dojo/filter_js_snippet.html" %}

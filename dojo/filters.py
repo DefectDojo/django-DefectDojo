@@ -15,7 +15,7 @@ from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 import pytz
 from django.db.models import Q
-from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
+from dojo.models import Dojo_User, Finding_Group, Product_Type, Finding, Product, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
     ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES
@@ -764,6 +764,10 @@ class OpenFindingFilter(DojoFilter):
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.all(),
         label="Engagement")
+    finding_group = ModelMultipleChoiceFilter(
+        queryset=Finding_Group.objects.none(),
+        label="Finding Group")
+
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
@@ -861,11 +865,23 @@ class OpenFindingFilter(DojoFilter):
         cwe = collections.OrderedDict(sorted(cwe.items()))
         self.form.fields['cwe'].choices = list(cwe.items())
         if self.user is not None and not self.user.is_staff:
+
             if self.form.fields.get('test__engagement__product'):
                 qs = Product.objects.filter(authorized_users__in=[self.user])
                 self.form.fields['test__engagement__product'].queryset = qs
+
+            if self.form.fields.get('finding_group'):
+                logger.debug('setting queryset for finding_group field')
+                self.form.fields['test__engagement__product'].queryset = \
+                    Finding_Group.objects.filter(
+                        Q(test__engagement__product__authorized_users__in=[self.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[self.user])
+                                                )
+
             self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
                 product__authorized_users__in=[self.user]).distinct()
+
+        else:
+            self.form.fields['finding_group'].queryset = Finding_Group.objects.all()
 
         # Don't show the product filter on the product finding view
         if self.pid:
