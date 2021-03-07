@@ -3,7 +3,7 @@ import logging
 from django.core.exceptions import PermissionDenied
 import functools
 from django.shortcuts import get_object_or_404
-from dojo.models import Finding, Test, Engagement, Product, Endpoint, Scan, ScanSettings, Product_Type, \
+from dojo.models import Finding, Test, Engagement, Product, Endpoint, Product_Type, \
     Risk_Acceptance
 from crum import get_current_user
 
@@ -102,12 +102,6 @@ def check_auth_users_list(user, obj):
         is_authorized = user in obj.authorized_users.all()
         is_authorized = user in obj.prod_type.authorized_users.all() or is_authorized
     if isinstance(obj, Endpoint):
-        is_authorized = user in obj.product.authorized_users.all()
-        is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
-    if isinstance(obj, Scan):
-        is_authorized = user in obj.scan_settings.product.authorized_users.all()
-        is_authorized = user in obj.scan_settings.product.prod_type.authorized_users.all() or is_authorized
-    if isinstance(obj, ScanSettings):
         is_authorized = user in obj.product.authorized_users.all()
         is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
     if isinstance(obj, Risk_Acceptance):

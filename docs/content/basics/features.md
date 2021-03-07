@@ -705,33 +705,6 @@ The calendar view provides a look at all the engagements occurring
 during the month displayed. Each entry is a direct link to the
 Engagement view page.
 
-Port Scans
-----------
-
-DefectDojo has the ability to run a port scan using nmap. Scan can be
-configured for TCP or UDP ports as well as for a Weekly, Monthly or
-Quarterly frequency.
-
-![Port Scan Form](../../images/scan_1.png)
-
-In order for the scans to kick off the
-[dojo.management.commands.run\_scan.py]{.title-ref} must run. It is easy
-to set up a cron job in order to kick these off at the appropriate
-frequency. Below is an example cron entry: :
-
-    0 0 * * 0 /root/.virtualenvs/dojo/bin/python /root/defect-dojo/manage.py run_scan Weekly
-    0 0 1 * * /root/.virtualenvs/dojo/bin/python /root/defect-dojo/manage.py run_scan Monthly
-    0 0 1 3,6,9,12 * /root/.virtualenvs/dojo/bin/python /root/defect-dojo/manage.py run_scan Quarterly
-
-![Port Scan Form](../../images/scan_2.png)
-
-The scan process will email the configured recipients with the results.
-
-These scans call also be kicked off on demand by selecting the Launch
-Scan Now option in the view scan screen.
-
-![Port Scan Form](../../images/scan_3.png)
-
 Notifications
 -------------
 

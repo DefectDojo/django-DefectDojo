@@ -20,7 +20,7 @@ from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilte
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Test, GITHUB_PKey, Finding_Template, \
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
@@ -459,8 +459,6 @@ def view_product_metrics(request, pid):
 
     inactive_engs_page = get_page_items(request, result.qs, 10)
 
-    scan_sets = ScanSettings.objects.filter(product=prod)
-
     filters = dict()
     if view == 'Finding':
         filters = finding_querys(request, prod)
@@ -580,7 +578,6 @@ def view_product_metrics(request, pid):
                    'product_tab': product_tab,
                    'engs': engs,
                    'inactive_engs': inactive_engs_page,
-                   'scan_sets': scan_sets,
                    'view': view,
                    'verified_objs': filters.get('verified', None),
                    'open_objs': filters.get('open', None),
