@@ -25,7 +25,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from itertools import chain
 from dojo.user.helper import user_must_be_authorized
-from dojo.utils import add_error_message_to_response, add_field_errors_to_response, close_external_issue, reopen_external_issue
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 
 from dojo.filters import OpenFindingFilter, OpenFindingSuperFilter, AcceptedFindingFilter, AcceptedFindingSuperFilter, \
@@ -34,7 +34,7 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
-from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
+from dojo.models import Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Endpoint_Status, \
     FindingImageAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
@@ -1802,6 +1802,8 @@ def merge_finding_product(request, pid):
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     now = timezone.now()
+    return_url = None
+
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
         if request.POST.get('delete_bulk_findings') and finding_to_update:
@@ -1871,6 +1873,17 @@ def finding_bulk_update_all(request, pid=None):
                                 ra_helper.simple_risk_accept(finding)
                         elif form.cleaned_data['risk_unaccept']:
                             ra_helper.risk_unaccept(finding)
+
+                if form.cleaned_data['finding_group_create']:
+                    logger.debug('finding_group_create checked!')
+                    finding_group, added, skipped = finding_helper.create_finding_group(finds)
+
+                    if added:
+                        add_success_message_to_response('Created finding group with %s findings' % added)
+                        return_url = reverse('view_finding_group', args=(finding_group.id,))
+
+                    if skipped:
+                        add_success_message_to_response('Skipped %s findings in group creation, findings already part of another group' % skipped)
 
                 if skipped_risk_accept_count > 0:
                     messages.add_message(request,
@@ -1943,6 +1956,9 @@ def finding_bulk_update_all(request, pid=None):
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
+
+    if return_url:
+        redirect(request, return_url)
 
     return redirect_to_return_url_or_else(request, None)
 
@@ -2229,3 +2245,18 @@ def calculate_possible_related_actions_for_similar_finding(request, finding, sim
     # logger.debug('related_actions for %i: %s', similar_finding.id, {finding.id: actions})
 
     return actions
+
+
+@user_must_be_authorized(Finding_Group, 'view', 'fgid')
+def view_finding_group(fgid):
+    pass
+
+
+@user_must_be_authorized(Finding_Group, 'change', 'fgid')
+def edit_finding_group(fgid):
+    pass
+
+
+@user_must_be_authorized(Finding_Group, 'delete', 'fgid')
+def delete_finding_group(fgid):
+    pass

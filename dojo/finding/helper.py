@@ -1,8 +1,9 @@
 import logging
+from time import strftime
 from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
-from dojo.models import Finding
+from dojo.models import Finding, Finding_Group
 from dojo.utils import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -102,3 +103,23 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
 
 def can_edit_mitigated_data(user):
     return settings.EDITABLE_MITIGATED_DATA and user.is_superuser
+
+
+def create_finding_group(finds):
+    logger.debug('creating finding_group_create')
+    fg = Finding_Group()
+    fg.creator = get_current_user()
+    fg.name = 'bulk group ' + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
+    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    fg.save()
+    fg.findings.set(available_findings)
+    # if we have components, we may set a nice name but catch 'name already exist' exceptions
+    try:
+        if fg.components:
+            fg.name = fg.components
+            fg.save()
+    except:
+        pass
+    added = len(available_findings)
+    skipped = len(finds) - added
+    return fg, added, skipped

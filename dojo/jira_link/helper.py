@@ -10,7 +10,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Risk_Acceptance, Test, Engagement, Product, JIRA_Issue, JIRA_Project, \
+from dojo.models import Finding, Finding_Group, Risk_Acceptance, Test, Engagement, Product, JIRA_Issue, JIRA_Project, \
     System_Settings, Notes, JIRA_Instance
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
@@ -269,14 +269,14 @@ def get_jira_issue_template(obj):
 
 
 def get_jira_creation(obj):
-    if isinstance(obj, Finding) or isinstance(obj, Engagement):
+    if isinstance(obj, Finding) or isinstance(obj, Engagement) or isinstance(obj, Finding_Group):
         if obj.has_jira_issue:
             return obj.jira_issue.jira_creation
     return None
 
 
 def get_jira_change(obj):
-    if isinstance(obj, Finding) or isinstance(obj, Engagement):
+    if isinstance(obj, Finding) or isinstance(obj, Engagement) or isinstance(obj, Finding_Group):
         if obj.has_jira_issue:
             return obj.jira_issue.jira_change
     else:
@@ -296,7 +296,7 @@ def has_jira_issue(obj):
 
 
 def get_jira_issue(obj):
-    if isinstance(obj, Finding) or isinstance(obj, Engagement):
+    if isinstance(obj, Finding) or isinstance(obj, Engagement) or isinstance(obj, Finding_Group):
         try:
             return obj.jira_issue
         except JIRA_Issue.DoesNotExist:
@@ -466,6 +466,8 @@ def push_to_jira(obj):
             return update_epic(engagement)
         else:
             return add_epic(engagement)
+
+    # TODO JIRA_GROUP
 
     else:
         logger.error('unsupported object passed to push_to_jira: %s %i %s', obj.__name__, obj.id, obj)

@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import logging
+from operator import itemgetter
 import os
 import re
 from uuid import uuid4
@@ -30,6 +31,7 @@ from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
 from django_jsonfield_backport.models import JSONField
+from itertools import groupby
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1943,6 +1945,17 @@ class Finding(models.Model):
         else:
             return 5
 
+    @staticmethod
+    def get_severity(num_severity):
+        severities = {0: 'Info', 1: 'Low', 2: 'Medium', 3: 'High', 4: 'Critical'}
+        logger.debug(severities.keys())
+        logger.debug(num_severity in severities.keys())
+        if num_severity in severities.keys():
+            logger.debug('returning severity: %s', severities[num_severity])
+            return severities[num_severity]
+
+        return None
+
     def __str__(self):
         return self.title
 
@@ -2282,6 +2295,54 @@ class Stub_Finding(models.Model):
         bc += [{'title': "Potential Finding: " + str(self),
                 'url': reverse('view_potential_finding', args=(self.id,))}]
         return bc
+
+
+class Finding_Group(TimeStampedModel):
+    name = models.CharField(max_length=255, blank=False, null=False)
+    findings = models.ManyToManyField(Finding)
+    creator = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+
+    @property
+    def has_jira_issue(self):
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self)
+
+    @cached_property
+    def severity(self):
+        max_number_severity = max([Finding.get_number_severity(find.severity) for find in self.findings.all()])
+        logger.debug('MAX:%s', max_number_severity)
+        return Finding.get_severity(max_number_severity)
+
+    @cached_property
+    def components(self):
+        # Using defaultdict() + groupby()
+        # Convert list of tuples to dictionary value lists
+        component_tuples = [(find.component_name, find.component_version) for find in self.findings.all()]
+        components = dict((k, [v[1] for v in itr]) for k, itr in groupby(
+                                component_tuples, itemgetter(0)))
+        return ','.join([key + ':' + ', '.join(value) for key, value in components.items()])
+
+    def _age(self, start_date):
+        diff = get_current_date() - start_date
+        days = diff.days
+        return days if days > 0 else 0
+
+    @property
+    def age(self):
+        return self._age(self.created.date())
+
+    @cached_property
+    def sla_days_remaining_internal(self):
+        return min([find.sla_days_remaining() for find in self.findings.all()])
+
+    def sla_days_remaining(self):
+        return self.sla_days_remaining_internal
+
+    def cves(self):
+        return ', '.join([find.cve for find in self.findings.all()])
+
+    class Meta:
+        ordering = ['id']
 
 
 class Finding_Template(models.Model):
@@ -2736,6 +2797,7 @@ class JIRA_Issue(models.Model):
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
     engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
+    finding_group = models.OneToOneField(Finding_Group, null=True, blank=True, on_delete=models.CASCADE)
 
     jira_creation = models.DateTimeField(editable=True,
                                          null=True,

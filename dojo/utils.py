@@ -1890,6 +1890,14 @@ def get_object_or_none(klass, *args, **kwargs):
         return None
 
 
+def add_success_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.SUCCESS,
+                            message,
+                            extra_tags='alert-success')
+
+
 def add_error_message_to_response(message):
     if get_current_request():
         messages.add_message(get_current_request(),

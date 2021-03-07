@@ -26,7 +26,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
-from dojo.models import Finding, IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+from dojo.models import Finding, Finding_Group, IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Test_Import_Finding_Action
 # IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UPDATED_FINDING, \
 # IMPORT_ACTIONS
@@ -114,6 +114,8 @@ def view_test(request, tid):
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
 
+    finding_groups = Finding_Group.objects.filter(findings__test__id__in=[test.id]).distinct()
+
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
     google_sheets_enabled = system_settings.enable_google_sheets
@@ -173,6 +175,7 @@ def view_test(request, tid):
                    'sheet_url': sheet_url,
                    'bulk_edit_form': bulk_edit_form,
                    'paged_test_imports': paged_test_imports,
+                   'finding_groups': finding_groups,
                    })
 
 
