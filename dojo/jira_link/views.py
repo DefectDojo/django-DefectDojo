@@ -363,6 +363,8 @@ def new_jira(request):
                                 url=request.build_absolute_uri(reverse('jira')),
                                 )
             return HttpResponseRedirect(reverse('jira', ))
+        else:
+            logger.error('jform.errors: %s', jform.errors)
     else:
         jform = JIRAForm()
         add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)

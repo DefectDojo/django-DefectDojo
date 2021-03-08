@@ -129,30 +129,6 @@
   },
   {
     "fields": {
-      "model": "scansettings",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 17
-  },
-  {
-    "fields": {
-      "model": "scan",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 18
-  },
-  {
-    "fields": {
-      "model": "ipscan",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 19
-  },
-  {
-    "fields": {
       "model": "engagement_type",
       "app_label": "dojo"
     },
@@ -206,14 +182,6 @@
     },
     "model": "contenttypes.contenttype",
     "pk": 26
-  },
-  {
-    "fields": {
-      "model": "va",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 27
   },
   {
     "fields": {
@@ -1829,87 +1797,6 @@
   },
   {
     "fields": {
-      "codename": "add_scansettings",
-      "name": "Can add scan settings",
-      "content_type": 17
-    },
-    "model": "auth.permission",
-    "pk": 52
-  },
-  {
-    "fields": {
-      "codename": "change_scansettings",
-      "name": "Can change scan settings",
-      "content_type": 17
-    },
-    "model": "auth.permission",
-    "pk": 53
-  },
-  {
-    "fields": {
-      "codename": "delete_scansettings",
-      "name": "Can delete scan settings",
-      "content_type": 17
-    },
-    "model": "auth.permission",
-    "pk": 54
-  },
-  {
-    "fields": {
-      "codename": "add_scan",
-      "name": "Can add scan",
-      "content_type": 18
-    },
-    "model": "auth.permission",
-    "pk": 55
-  },
-  {
-    "fields": {
-      "codename": "change_scan",
-      "name": "Can change scan",
-      "content_type": 18
-    },
-    "model": "auth.permission",
-    "pk": 56
-  },
-  {
-    "fields": {
-      "codename": "delete_scan",
-      "name": "Can delete scan",
-      "content_type": 18
-    },
-    "model": "auth.permission",
-    "pk": 57
-  },
-  {
-    "fields": {
-      "codename": "add_ipscan",
-      "name": "Can add ip scan",
-      "content_type": 19
-    },
-    "model": "auth.permission",
-    "pk": 58
-  },
-  {
-    "fields": {
-      "codename": "change_ipscan",
-      "name": "Can change ip scan",
-      "content_type": 19
-    },
-    "model": "auth.permission",
-    "pk": 59
-  },
-  {
-    "fields": {
-      "codename": "delete_ipscan",
-      "name": "Can delete ip scan",
-      "content_type": 19
-    },
-    "model": "auth.permission",
-    "pk": 60
-  },
-  {
-    "fields": {
       "codename": "add_engagement_type",
       "name": "Can add engagement_ type",
       "content_type": 20
@@ -2096,33 +1983,6 @@
     },
     "model": "auth.permission",
     "pk": 81
-  },
-  {
-    "fields": {
-      "codename": "add_va",
-      "name": "Can add va",
-      "content_type": 27
-    },
-    "model": "auth.permission",
-    "pk": 82
-  },
-  {
-    "fields": {
-      "codename": "change_va",
-      "name": "Can change va",
-      "content_type": 27
-    },
-    "model": "auth.permission",
-    "pk": 83
-  },
-  {
-    "fields": {
-      "codename": "delete_va",
-      "name": "Can delete va",
-      "content_type": 27
-    },
-    "model": "auth.permission",
-    "pk": 84
   },
   {
     "fields": {

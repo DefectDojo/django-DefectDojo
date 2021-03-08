@@ -254,6 +254,20 @@ def get_jira_project_key(obj):
     return jira_project.project_key
 
 
+def get_jira_issue_template(obj):
+    jira_project = get_jira_project(obj)
+    template = jira_project.issue_template
+    if not template:
+        jira_instance = get_jira_instance(obj)
+        template = jira_instance.issue_template
+
+    # fallback to default as before
+    if not template:
+        return 'issue-trackers/jira-description.tpl'
+
+    return template
+
+
 def get_jira_creation(obj):
     if isinstance(obj, Finding) or isinstance(obj, Engagement):
         if obj.has_jira_issue:
@@ -426,11 +440,15 @@ def get_labels(find):
 
 
 def jira_description(find):
-    template = 'issue-trackers/jira-description.tpl'
+    template = get_jira_issue_template(find)
+
+    logger.debug('rendering description for jira from: %s', template)
+
     kwargs = {}
     kwargs['finding'] = find
-    kwargs['jira_instance'] = get_jira_instance(find)
-    return render_to_string(template, kwargs)
+    description = render_to_string(template, kwargs)
+    logger.debug('rendered description: %s', description)
+    return description
 
 
 def push_to_jira(obj):
@@ -547,8 +565,6 @@ def add_jira_issue(find):
         j_issue.save()
         issue = jira.issue(new_issue.id)
 
-        find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
         # Upload dojo finding screenshots to Jira
         for pic in find.images.all():
             jira_attachment(
@@ -651,7 +667,6 @@ def update_jira_issue(find):
 
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
-        find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         if jira_project.enable_engagement_epic_mapping:
             eng = find.test.engagement

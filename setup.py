@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.13.2',
+    version='1.14.0-dev',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
@@ -35,7 +35,6 @@ setup(
         'Pillow',
         'psycopg2-binary',
         'pycrypto',
-        'python-nmap>=0.3.4',
         'pytz>=2013.9',
         'requests>=2.2.1',
         'sqlalchemy',  # Required by Celery broker transport
@@ -58,7 +57,7 @@ setup(
         'pbr',
         'django-slack',
         'asteval',
-        'Markdown==3.3.3',
+        'Markdown==3.3.4',
         'pandas>=0.22.0',
         'django-dbbackup>=3.2.0',
         'whitenoise==4.1.4',

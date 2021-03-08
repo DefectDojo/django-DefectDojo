@@ -10,9 +10,9 @@ createRedisSecret: false
 createMysqlSecret: false
 # create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
-## Configuration value to select database type
-## Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
-## Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
+# Configuration value to select database type
+# Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
+# Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
 database: postgresql
 host: defectdojo.default.minikube.local
 imagePullPolicy: Always
@@ -112,10 +112,10 @@ django:
     secretName: defectdojo-tls
     annotations:
       # Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...)
-      #kubernetes.io/ingress.class: nginx
+      # kubernetes.io/ingress.class: nginx
       # Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts
-      #nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
-      #nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+      # nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+      # nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
   nginx:
     tls:
       enabled: false
@@ -150,6 +150,13 @@ django:
       processes: 2
       threads: 2
     enable_ptvsd: false  # this also requires DD_DEBUG to be set to True
+    certificates:
+    # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
+    # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
+      enabled: false
+      configName: defectdojo-ca-certs
+      certMountPath: /certs/
+      certFileName: ca.crt
 
 initializer:
   run: true
@@ -285,11 +292,11 @@ redis:
 # To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it
 # extraConfigs:
-#  DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
-#  DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
-#  DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
+#   DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true'
+#   DD_SOCIAL_AUTH_AUTH0_KEY: 'dev'
+#   DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx'
 
 # Extra secrets can be created inside of extraSecrets block:
 # NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
-#  DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
+#   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'

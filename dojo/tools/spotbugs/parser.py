@@ -53,6 +53,15 @@ class SpotbugsParser(object):
             impact = 'N/A'
             references = 'N/A'
 
+            # find the source line and file on the buginstance
+            source_line = None
+            source_file = "N/A"
+
+            source_extract = bug.find('SourceLine')
+            if source_extract is not None:
+                source_file = source_extract.get("sourcepath")
+                source_line = int(source_extract.get("start"))
+
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
             else:
@@ -68,8 +77,12 @@ class SpotbugsParser(object):
                     active=False,
                     verified=False,
                     numerical_severity=Finding.get_numerical_severity(severity),
-                    static_finding=True
+                    static_finding=True,
+                    line=source_line,
+                    file_path=source_file,
+                    sast_source_line=source_line,
+                    sast_source_file_path=source_file
                 )
                 dupes[dupe_key] = finding
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
