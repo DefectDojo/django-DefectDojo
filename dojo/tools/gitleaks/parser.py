@@ -32,7 +32,7 @@ class GitleaksParser(object):
         dupes = dict()
         issues = self.parse_json(data)
         if issues is not None:
-            for issue in issues:
+            for issue in self.parse_json(data):
                 line = None
                 file_path = issue["file"]
                 reason = issue["rule"]
