@@ -719,13 +719,5 @@
         },
         "model": "dojo.test_type",
         "pk": 194
-    },
-    {
-        "fields": {
-            "name": "Checkmarx OSA"
-        },
-        "model": "dojo.test_type",
-        "pk": 195
     }
-
 ]

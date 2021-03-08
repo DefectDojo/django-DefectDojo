@@ -55,10 +55,10 @@ class CheckmarxOsaParser(object):
                 # nvd.nist.gov has the info; see for eg https://nvd.nist.gov/vuln/detail/CVE-2020-25649 "Weakness Enumeration"
                 cwe=1035,
                 cvssv3_score=item.get('score', None),
-                publish_date=datetime.strptime(item['publishDate'], '%Y-%m-%dT%H:%M:%S'),
+                publish_date=datetime.strptime(item['publishDate'], '%Y-%m-%dT%H:%M:%S') if 'publishDate' in item else None,
                 static_finding=True,
                 dynamic_finding=False,
-                scanner_confidence=self.checkmarx_confidence_to_defectdojo_confidence(library.get('confidenceLevel', 50)),
+                scanner_confidence=self.checkmarx_confidence_to_defectdojo_confidence(library['confidenceLevel']) if 'confidenceLevel' in library else None,
                 active=status != 'NOT_EXPLOITABLE',
                 false_p=status == 'NOT_EXPLOITABLE',
                 verified=status != 'TO_VERIFY' and status != 'NOT_EXPLOITABLE' and status != 'PROPOSED_NOT_EXPLOITABLE',

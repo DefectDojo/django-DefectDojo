@@ -1698,7 +1698,7 @@ class Finding(models.Model):
 
     # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?"
     publish_date = models.DateTimeField(null=True,
-                                         editable=False,
+                                         editable=True,
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
 

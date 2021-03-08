@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='finding',
             name='publish_date',
-            field=models.DateTimeField(editable=False, help_text='Date when this vulnerability was made publicly available.', null=True, verbose_name='Publish date'),
+            field=models.DateTimeField(editable=True, help_text='Date when this vulnerability was made publicly available.', null=True, verbose_name='Publish date'),
         ),
         migrations.AlterField(
             model_name='child_rule',
