@@ -17,3 +17,15 @@ class TestWFuzzParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
+    def test_parse_many_finding(self):
+        testfile = open("dojo/unittests/scans/wfuzz/many_findings.json")
+        parser = WFuzzParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(4, len(findings))
+
+    def test_one_dup_finding(self):
+        testfile = open("dojo/unittests/scans/wfuzz/one_dup_finding.json")
+        parser = WFuzzParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(4, len(findings))
+
