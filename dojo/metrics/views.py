@@ -29,6 +29,8 @@ from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, ope
 from functools import reduce
 from dojo.user.helper import objects_authorized
 from django.views.decorators.vary import vary_on_cookie
+from dojo.authorization.roles_permissions import Permissions
+from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)
 
@@ -231,7 +233,8 @@ def finding_querys(prod_type, request):
     weekly_counts = get_period_counts(active_findings_qs, findings_qs, findings_closed, accepted_findings, weeks_between, start_date,
                                       relative_delta='weeks')
 
-    top_ten = Product.objects.filter(engagement__test__finding__verified=True,
+    top_ten = get_authorized_products(Permissions.Product_View)
+    top_ten = top_ten.filter(engagement__test__finding__verified=True,
                                      engagement__test__finding__false_p=False,
                                      engagement__test__finding__duplicate=False,
                                      engagement__test__finding__out_of_scope=False,
@@ -239,10 +242,6 @@ def finding_querys(prod_type, request):
                                      engagement__test__finding__severity__in=(
                                          'Critical', 'High', 'Medium', 'Low'),
                                      prod_type__in=prod_type)
-    if not request.user.is_staff:
-        top_ten = top_ten.filter(
-            Q(authorized_users__in=[request.user]) |
-            Q(prod_type__authorized_users__in=[request.user]))
     top_ten = severity_count(top_ten, 'annotate', 'engagement__test__finding__severity').order_by('-critical', '-high', '-medium', '-low')[:10]
 
     return {
@@ -364,16 +363,13 @@ def endpoint_querys(prod_type, request):
     weekly_counts = get_period_counts(active_endpoints_qs, endpoints_qs, endpoints_closed, accepted_endpoints, weeks_between, start_date,
                                       relative_delta='weeks')
 
-    top_ten = Product.objects.filter(engagement__test__finding__endpoint_status__mitigated=False,
+    top_ten = get_authorized_products(Permissions.Product_View)
+    top_ten = top_ten.filter(engagement__test__finding__endpoint_status__mitigated=False,
                                      engagement__test__finding__endpoint_status__false_positive=False,
                                      engagement__test__finding__endpoint_status__out_of_scope=False,
                                      engagement__test__finding__severity__in=(
                                          'Critical', 'High', 'Medium', 'Low'),
                                      prod_type__in=prod_type)
-    if not request.user.is_staff:
-        top_ten = top_ten.filter(
-            Q(authorized_users__in=[request.user]) |
-            Q(prod_type__authorized_users__in=[request.user]))
     top_ten = severity_count(top_ten, 'annotate', 'engagement__test__finding__severity').order_by('-critical', '-high', '-medium', '-low')[:10]
 
     return {
@@ -732,7 +728,8 @@ def product_type_counts(request):
                     Q(test__engagement__product__authorized_users__in=[request.user]) |
                     Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
 
-            top_ten = Product.objects.filter(engagement__test__finding__date__lte=end_date,
+            top_ten = get_authorized_products(Permissions.Product_View)
+            top_ten = top_ten.filter(engagement__test__finding__date__lte=end_date,
                                              engagement__test__finding__verified=True,
                                              engagement__test__finding__false_p=False,
                                              engagement__test__finding__duplicate=False,
@@ -741,10 +738,6 @@ def product_type_counts(request):
                                              engagement__test__finding__severity__in=(
                                                  'Critical', 'High', 'Medium', 'Low'),
                                              prod_type=pt)
-            if not request.user.is_staff:
-                top_ten = top_ten.filter(
-                    Q(authorized_users__in=[request.user]) |
-                    Q(prod_type__authorized_users__in=[request.user]))
             top_ten = severity_count(top_ten, 'annotate', 'engagement__test__finding__severity').order_by('-critical', '-high', '-medium', '-low')[:10]
 
             cip = {'S0': 0,
@@ -937,7 +930,7 @@ def view_engineer(request, eid):
 
         week[5] = sum(week[1:])
 
-    products = Product.objects.all()
+    products = get_authorized_products(Permissions.Product_Type_View)
     vulns = {}
     for product in products:
         f_count = 0

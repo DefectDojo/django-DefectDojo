@@ -46,6 +46,9 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.helper import prefetch_for_expiration
 from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
 from django.views.decorators.vary import vary_on_cookie
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
+from dojo.product.queries import get_authorized_products
 
 
 logger = logging.getLogger(__name__)
@@ -82,13 +85,10 @@ def engagement_calendar(request):
 
 
 def engagement(request):
+    products = get_authorized_products(Permissions.Engagement_View).distinct()
     if request.user.is_staff:
-        products = Product.objects.all()
         engagements = Engagement.objects.all()
     else:
-        products = Product.objects\
-            .filter(Q(authorized_users=request.user) | Q(prod_type__authorized_users=request.user))\
-            .distinct()
         engagements = Engagement.objects\
             .filter(Q(product__authorized_users=request.user) | Q(product__prod_type__authorized_users=request.user))\
             .distinct()
@@ -121,7 +121,8 @@ def engagement(request):
 @user_passes_test(lambda u: u.is_staff)
 def engagements_all(request):
 
-    products_with_engagements = Product.objects.filter(~Q(engagement=None)).distinct()
+    products_with_engagements = get_authorized_products(Permissions.Engagement_View)
+    products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
     filter_qs = products_with_engagements.prefetch_related(
         'engagement_set',
@@ -506,8 +507,11 @@ def import_scan_results(request, eid=None, pid=None):
     elif not user.is_staff:
         raise PermissionDenied
 
-    if not user_is_authorized(user, 'staff', engagement_or_product):
-        raise PermissionDenied
+    if settings.FEATURE_NEW_AUTHORIZATION:
+        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+    else:
+        if not user_is_authorized(user, 'staff', engagement_or_product):
+            raise PermissionDenied
 
     push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
 
