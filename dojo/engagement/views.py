@@ -39,7 +39,7 @@ from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
-from django.db.models.query import QuerySet
+from django.db.models.query import Prefetch, QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
@@ -125,9 +125,12 @@ def engagements_all(request):
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
     filter_qs = products_with_engagements.prefetch_related(
-        'engagement_set',
+        Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(test_count=Count('test__id')))
+    )
+
+    filter_qs = filter_qs.prefetch_related(
         'engagement_set__tags',
-        'engagement_set__test_set',
+        # 'engagement_set__test_set',
         'prod_type',
         'engagement_set__lead',
         'tags',
