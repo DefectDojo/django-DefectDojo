@@ -21,4 +21,4 @@ class TestPMDParser(TestCase):
         testfile = open("dojo/unittests/scans/pmd/pmd_many_vulns.csv")
         parser = PmdParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(9, len(findings))
+        self.assertEqual(15, len(findings))
