@@ -1,12 +1,19 @@
 from django.test import TestCase
-from dojo.tools.zap.parser import WfuzzParser
-from dojo.models import Test, Engagement, Product
+from dojo.tools.wfuzz.parser import WFuzzParser
+from dojo.models import Test
 
 
-class TestWfuzzParser(TestCase):
+class TestWFuzzParser(TestCase):
 
     def test_parse_no_findings(self):
-        testfile = open("dojo/unittests/scans/wfuzz/no_findingsjson")
-        parser = WfuzzParser()
-        findings = parser.get_findings(testfile, self.get_test())
+        testfile = open("dojo/unittests/scans/wfuzz/no_findings.json")
+        parser = WFuzzParser()
+        findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
+
+    def test_parse_one_finding(self):
+        testfile = open("dojo/unittests/scans/wfuzz/one_finding.json")
+        parser = WFuzzParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+
