@@ -124,13 +124,13 @@ def engagements_all(request):
     products_with_engagements = get_authorized_products(Permissions.Engagement_View)
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
+    # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
     filter_qs = products_with_engagements.prefetch_related(
         Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(test_count=Count('test__id')))
     )
 
     filter_qs = filter_qs.prefetch_related(
         'engagement_set__tags',
-        # 'engagement_set__test_set',
         'prod_type',
         'engagement_set__lead',
         'tags',
