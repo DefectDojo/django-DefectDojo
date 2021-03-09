@@ -126,6 +126,8 @@ def engagements_all(request):
 
     filter_qs = products_with_engagements.prefetch_related(
         'engagement_set',
+        'engagement_set__tags',
+        'engagement_set__test_set',
         'prod_type',
         'engagement_set__lead',
         'tags',
