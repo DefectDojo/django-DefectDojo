@@ -15,9 +15,6 @@ class WFuzzParser(object):
     def get_label_for_scan_types(self, scan_type):
         return scan_type
 
-    def get_label_for_scan_types(self, scan_type):
-        return "WFuzz JSON report"
-
     def get_description_for_scan_types(self, scan_type):
         return "Import WFuzz findings in JSON format."
 

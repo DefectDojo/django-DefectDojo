@@ -28,4 +28,3 @@ class TestWFuzzParser(TestCase):
         parser = WFuzzParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(4, len(findings))
-
