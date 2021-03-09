@@ -21,13 +21,9 @@ class PmdParser(object):
         content = filename.read()
         if type(content) is bytes:
             content = content.decode('utf-8')
-        reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
-        csvarray = []
+        reader = list(csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"'))
 
         for row in reader:
-            csvarray.append(row)
-
-        for row in csvarray:
             finding = Finding(test=test)
             finding.title = row["Rule"]
             if row["Priority"] == "5":
