@@ -712,7 +712,7 @@ def new_product(request, ptid=None):
             gform = None
 
         if form.is_valid():
-            if settings.FEATURE_NEW_AUTHORIZATION:
+            if settings.FEATURE_AUTHORIZATION_V2:
                 product_type = form.instance.prod_type
                 user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
             else:

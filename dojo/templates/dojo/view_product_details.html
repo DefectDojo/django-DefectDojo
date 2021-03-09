@@ -186,8 +186,8 @@
     </div>
   </div>
 </div>
-{% feature_new_authorization as feature_new_authorization_flag %}
-{% if feature_new_authorization_flag %}
+{% feature_authorization_v2 as feature_authorization_v2_flag %}
+{% if feature_authorization_v2_flag %}
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -398,8 +398,8 @@
             <td><strong>Technical Contact</strong></td>
             <td>{% if prod.technical_contact != "0" %}{{ prod.technical_contact | default:"Unknown" }}{% endif %}</td>
           </tr>
-          {% feature_new_authorization as feature_new_authorization_flag %}
-          {% if feature_new_authorization_flag is False %}
+          {% feature_authorization_v2 as feature_authorization_v2_flag %}
+          {% if feature_authorization_v2_flag is False %}
           <tr>
             <td><strong>Authorized Users</strong></td>
             <td>
