@@ -27,7 +27,7 @@ def user_is_authorized(model, permission, arg, legacy_permission=None, lookup="p
         # object must exist
         obj = get_object_or_404(model.objects.filter(**{lookup: lookup_value}))
 
-        if settings.FEATURE_NEW_AUTHORIZATION:
+        if settings.FEATURE_AUTHORIZATION_V2:
             user_has_permission_or_403(request.user, obj, permission)
         else:
             if legacy_permission:

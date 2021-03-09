@@ -507,7 +507,7 @@ def import_scan_results(request, eid=None, pid=None):
     elif not user.is_staff:
         raise PermissionDenied
 
-    if settings.FEATURE_NEW_AUTHORIZATION:
+    if settings.FEATURE_AUTHORIZATION_V2:
         user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
     else:
         if not user_is_authorized(user, 'staff', engagement_or_product):
