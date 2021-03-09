@@ -51,11 +51,11 @@ class TestAuthorization(TestCase):
         cls.product_member_owner.role = Roles.Owner
 
     def setUp(self):
-        self.setting_FEATURE_NEW_AUTHORIZATION = settings.FEATURE_NEW_AUTHORIZATION
+        self.setting_FEATURE_AUTHORIZATION_V2 = settings.FEATURE_AUTHORIZATION_V2
         self.setting_AUTHORIZATION_STAFF_OVERRIDE = settings.AUTHORIZATION_STAFF_OVERRIDE
 
     def tearDown(self):
-        settings.FEATURE_NEW_AUTHORIZATION = self.setting_FEATURE_NEW_AUTHORIZATION
+        settings.FEATURE_AUTHORIZATION_V2 = self.setting_FEATURE_AUTHORIZATION_V2
         settings.AUTHORIZATION_STAFF_OVERRIDE = self.setting_AUTHORIZATION_STAFF_OVERRIDE
 
     def test_role_has_permission_exception(self):

@@ -943,7 +943,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     queryset = Product_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
-    if settings.FEATURE_NEW_AUTHORIZATION:
+    if settings.FEATURE_AUTHORIZATION_V2:
         permission_classes = (IsAuthenticated, permissions.UserHasProductTypePermission)
 
     def get_queryset(self):
@@ -952,7 +952,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     # Overwrite perfom_create of CreateModelMixin to add current user as owner
     def perform_create(self, serializer):
         serializer.save()
-        if settings.FEATURE_NEW_AUTHORIZATION:
+        if settings.FEATURE_AUTHORIZATION_V2:
             product_type_data = serializer.data
             product_type_data.pop('members')
             member = Product_Type_Member()

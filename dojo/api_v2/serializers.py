@@ -401,13 +401,13 @@ class ProductTypeMemberSerializer(serializers.ModelSerializer):
 
 
 class ProductTypeSerializer(serializers.ModelSerializer):
-    if settings.FEATURE_NEW_AUTHORIZATION:
+    if settings.FEATURE_AUTHORIZATION_V2:
         members = ProductTypeMemberSerializer(source='product_type_member_set', read_only=True, many=True)
 
     class Meta:
         model = Product_Type
 
-        if not settings.FEATURE_NEW_AUTHORIZATION:
+        if not settings.FEATURE_AUTHORIZATION_V2:
             exclude = ['members']
             extra_kwargs = {
                 'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
