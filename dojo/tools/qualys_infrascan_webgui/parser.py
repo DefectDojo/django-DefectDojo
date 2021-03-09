@@ -90,6 +90,7 @@ def issue_r(raw_row, vuln, scan_date):
                                     impact=_temp['IMPACT'],
                                     vuln_id_from_tool=_gid,
                                     date=scan_date,
+                                    nb_occurences=1,
                               )
             finding.unsaved_endpoints = list()
             finding.unsaved_endpoints.append(ep)
