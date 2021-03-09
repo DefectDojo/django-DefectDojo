@@ -46,6 +46,7 @@ class PmdParser(object):
             finding.description = description
             finding.line = row["Line"]
             finding.file_path = row["File"]
+            finding.component_name = row["Package"]
 
             key = hashlib.sha256((finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
