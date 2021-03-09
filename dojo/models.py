@@ -2272,7 +2272,7 @@ class Finding_Group(TimeStampedModel):
         component_tuples = [(find.component_name, find.component_version) for find in self.findings.all()]
         components = dict((k, [v[1] for v in itr]) for k, itr in groupby(
                                 component_tuples, itemgetter(0)))
-        return ','.join([key + ':' + ', '.join(value) for key, value in components.items()])
+        return ','.join([key + ':' + ', '.join(value) for key, value in components.items() if key and value])
 
     def _age(self, start_date):
         diff = get_current_date() - start_date
@@ -2294,7 +2294,7 @@ class Finding_Group(TimeStampedModel):
         return self.sla_days_remaining_internal
 
     def cves(self):
-        return ', '.join([find.cve for find in self.findings.all()])
+        return ', '.join([find.cve for find in self.findings.all() if find.cve])
 
     class Meta:
         ordering = ['id']
