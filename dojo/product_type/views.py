@@ -44,7 +44,6 @@ def product_type(request):
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
-        'Permissions': Permissions,
         'pts': pts,
         'ptl': ptl,
         'name_words': name_words})
@@ -96,7 +95,7 @@ def add_product_type(request):
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid', 'view')
 def view_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     members = get_authorized_members(pt, Permissions.Product_Type_View)
@@ -104,13 +103,12 @@ def view_product_type(request, ptid):
     add_breadcrumb(title="View Product Type", top_level=False, request=request)
     return render(request, 'dojo/view_product_type.html', {
         'name': 'View Product Type',
-        'Permissions': Permissions,
         'pt': pt,
         'products': products,
         'members': members})
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Delete, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Delete, 'ptid', 'delete')
 def delete_product_type(request, ptid):
     product_type = get_object_or_404(Product_Type, pk=ptid)
     form = Delete_Product_TypeForm(instance=product_type)
@@ -143,7 +141,7 @@ def delete_product_type(request, ptid):
                    })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid', 'staff')
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     authed_users = pt.authorized_users.all()
