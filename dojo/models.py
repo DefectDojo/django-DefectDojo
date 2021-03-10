@@ -2293,8 +2293,22 @@ class Finding_Group(TimeStampedModel):
     def sla_days_remaining(self):
         return self.sla_days_remaining_internal
 
+    def sla_deadline(self):
+        if not self.findings.all():
+            return None
+
+        return min([find.sla_deadline() for find in self.findings.all()])
+
     def cves(self):
         return ', '.join([find.cve for find in self.findings.all() if find.cve])
+
+    def status(self):
+        # TODO FINDING_GROUP
+        return 'Active'
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_test', args=[str(self.test.id)])
 
     class Meta:
         ordering = ['id']
@@ -2651,6 +2665,7 @@ class JIRA_Instance(models.Model):
         return self.configuration_name + " | " + self.url + " | " + self.username
 
     def get_priority(self, status):
+        logger.debug('get_priority for: %s', status)
         if status == 'Info':
             return self.info_mapping_severity
         elif status == 'Low':
@@ -2762,6 +2777,16 @@ class JIRA_Issue(models.Model):
                                        null=True,
                                        verbose_name="Jira last update",
                                        help_text="The date the linked Jira issue was last modified.")
+
+    def set_obj(self, obj):
+        if type(obj) == Finding:
+            self.finding = obj
+        elif type(obj) == Finding_Group:
+            self.finding_group = obj
+        elif type(obj) == Engagement:
+            self.engagement = obj
+        else:
+            raise ValueError('unknown objec type whiel creating JIRA_Issue: %s', to_str_typed(obj))
 
     def __str__(self):
         text = ""
@@ -3421,7 +3446,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
-from dojo.utils import get_system_setting
+from dojo.utils import get_system_setting, to_str_typed
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
 
 tagulous.admin.register(Product.tags)

@@ -1,6 +1,6 @@
 import logging
 
-from dojo.utils import add_error_message_to_response, get_system_setting
+from dojo.utils import add_error_message_to_response, get_system_setting, to_str_typed
 import os
 import io
 import json
@@ -17,7 +17,7 @@ from dojo.notifications.helper import create_notification
 from django.contrib import messages
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
-from dojo.utils import truncate_with_dots
+from dojo.utils import truncate_with_dots, prod_name
 from django.urls import reverse
 from dojo.forms import JIRAProjectForm, JIRAEngagementForm
 
@@ -83,36 +83,45 @@ def is_push_all_issues(instance):
 # optionally provides a form with the new data for the finding
 # any finding that already has a JIRA issue can be pushed again to JIRA
 # returns True/False, error_message, error_code
-def finding_can_be_pushed_to_jira(finding, form=None):
+def can_be_pushed_to_jira(obj, form=None):
     # logger.debug('can be pushed to JIRA: %s', finding_or_form)
-    if not get_jira_project(finding):
-        return False, 'Finding cannot be pushed to jira as there is no jira project configuration for this product.', 'error_no_jira_project'
+    if not get_jira_project(obj):
+        return False, '%s cannot be pushed to jira as there is no jira project configuration for this product.' % to_str_typed(obj), 'error_no_jira_project'
 
-    if finding.has_jira_issue:
+    # if not hasattr(obj, 'has_jira_issue'):
+    #     return False, '%s cannot be pushed to jira as there is no jira_issue attribute.' % to_str_typed(obj), 'error_no_jira_issue_attribute'
+
+    if obj.has_jira_issue:
         return True, None, None
 
-    if form:
-        active = form['active'].value()
-        verified = form['verified'].value()
-        severity = form['severity'].value()
+    if type(obj) == Finding:
+        if form:
+            active = form['active'].value()
+            verified = form['verified'].value()
+            severity = form['severity'].value()
+        else:
+            active = obj.active
+            verified = obj.verified
+            severity = obj.severity
+
+        logger.debug('can_be_pushed_to_jira: %s, %s, %s', active, verified, severity)
+
+        if not active or not verified:
+            logger.debug('Findings must be active and verified to be pushed to JIRA')
+            return False, 'Findings must be active and verified to be pushed to JIRA', 'not_active_or_verified'
+
+        jira_minimum_threshold = None
+        if System_Settings.objects.get().jira_minimum_severity:
+            jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
+
+            if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
+                logger.debug('Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity)
+                return False, 'Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity, 'below_minimum_threshold'
+    elif type(obj) == Finding_Group:
+        if not obj.findings.all():
+            return False, '%s cannot be pushed to jira as it is empty.' % to_str_typed(obj), 'error_empty'
     else:
-        active = finding.active
-        verified = finding.verified
-        severity = finding.severity
-
-    logger.debug('finding_can_be_pushed_to_jira: %s, %s, %s', active, verified, severity)
-
-    if not active or not verified:
-        logger.debug('Findings must be active and verified to be pushed to JIRA')
-        return False, 'Findings must be active and verified to be pushed to JIRA', 'not_active_or_verified'
-
-    jira_minimum_threshold = None
-    if System_Settings.objects.get().jira_minimum_severity:
-        jira_minimum_threshold = Finding.get_number_severity(System_Settings.objects.get().jira_minimum_severity)
-
-        if jira_minimum_threshold and jira_minimum_threshold > Finding.get_number_severity(severity):
-            logger.debug('Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity)
-            return False, 'Finding below the minimum JIRA severity threshold (%s).' % System_Settings.objects.get().jira_minimum_severity, 'below_minimum_threshold'
+        return False, '%s cannot be pushed to jira as it is of unsupported type.' % to_str_typed(obj), 'error_unsupported'
 
     return True, None, None
 
@@ -134,6 +143,9 @@ def get_jira_project(obj, use_inheritance=True):
     if isinstance(obj, Finding):
         finding = obj
         return get_jira_project(finding.test)
+
+    if isinstance(obj, Finding_Group):
+        return get_jira_project(obj.test)
 
     if isinstance(obj, Test):
         test = obj
@@ -256,14 +268,17 @@ def get_jira_project_key(obj):
 
 def get_jira_issue_template(obj):
     jira_project = get_jira_project(obj)
-    template = jira_project.issue_template
-    if not template:
-        jira_instance = get_jira_instance(obj)
-        template = jira_instance.issue_template
+    if isinstance(obj, Finding):
+        template = jira_project.issue_template
+        if not template:
+            jira_instance = get_jira_instance(obj)
+            template = jira_instance.issue_template
 
-    # fallback to default as before
-    if not template:
-        return 'issue-trackers/jira-description.tpl'
+        # fallback to default as before
+        if not template:
+            return 'issue-trackers/jira-description.tpl'
+    else:
+        return 'issue-trackers/jira-group-description.tpl'
 
     return template
 
@@ -398,17 +413,15 @@ def log_jira_generic_alert(title, description):
 
 
 # Logs the error to the alerts table, which appears in the notification toolbar
-def log_jira_alert(error, finding):
-    prod_name = finding.test.engagement.product.name if finding else 'unknown'
-
+def log_jira_alert(error, obj):
     create_notification(
         event='jira_update',
-        title='Error pushing to JIRA ' + '(' + truncate_with_dots(prod_name, 25) + ')',
-        description='Finding: ' + str(finding.id if finding else 'unknown') + ', ' + error,
-        url=reverse('view_finding', args=(finding.id, )) if finding else None,
+        title='Error pushing to JIRA ' + '(' + truncate_with_dots(prod_name(obj), 25) + ')',
+        description=to_str_typed(obj) + ', ' + error,
+        url=obj.get_absolute_url,
         icon='bullseye',
         source='Push to JIRA',
-        finding=finding)
+        obj=obj)
 
 
 # Displays an alert for Jira notifications
@@ -422,7 +435,7 @@ def log_jira_message(text, finding):
         source='JIRA', finding=finding)
 
 
-def get_labels(find):
+def get_labels(obj):
     # Update Label with system setttings label
     labels = []
     system_settings = System_Settings.objects.get()
@@ -435,9 +448,18 @@ def get_labels(find):
         for system_label in system_labels:
             labels.append(system_label)
     # Update the label with the product name (underscore)
-    prod_name = find.test.engagement.product.name.replace(" ", "_")
-    labels.append(prod_name)
+    labels.append(prod_name(obj).replace(" ", "_"))
     return labels
+
+
+def jira_summary(obj):
+    if type(obj) == Finding:
+        return obj.title
+
+    if type(obj) == Finding_Group:
+        return obj.name
+
+    return None
 
 
 def jira_description(find):
@@ -450,6 +472,19 @@ def jira_description(find):
     description = render_to_string(template, kwargs)
     logger.debug('rendered description: %s', description)
     return description
+
+
+def jira_priority(obj):
+    return get_jira_instance(obj).get_priority(obj.severity)
+
+
+def jira_environment(obj):
+    if type(obj) == Finding:
+        return "\n".join([str(endpoint) for endpoint in obj.endpoints.all()])
+    elif type(obj) == Finding_Group:
+        return "\n".join([jira_environment(finding) for finding in obj.findings.all()])
+    else:
+        return ''
 
 
 def push_to_jira(obj):
@@ -470,9 +505,9 @@ def push_to_jira(obj):
     elif isinstance(obj, Finding_Group):
         group = obj
         if group.has_jira_issue:
-            return update_jira_issue(group.findings[0], sync=True)
+            return update_jira_issue(group, sync=True)
         else:
-            return add_jira_issue(group.findings[0], sync=True)
+            return add_jira_issue(group, sync=True)
 
     else:
         logger.error('unsupported object passed to push_to_jira: %s %i %s', obj.__name__, obj.id, obj)
@@ -482,27 +517,28 @@ def push_to_jira(obj):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def add_jira_issue(find, *args, **kwargs):
-    logger.info('trying to create a new jira issue for %d:%s', find.id, find.title)
+def add_jira_issue(obj, *args, **kwargs):
+    logger.info('trying to create a new jira issue for %d:%s', obj.id, to_str_typed(obj))
 
     if not is_jira_enabled():
         return False
 
-    if not is_jira_configured_and_enabled(find):
-        logger.error("Finding {} cannot be pushed to JIRA as there is no JIRA configuration for this product.".format(find.id))
-        log_jira_alert('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
+    if not is_jira_configured_and_enabled(obj):
+        message = 'Object %s cannot be pushed to JIRA as there is no JIRA configuration for %s.' % (obj.id, to_str_typed(obj))
+        logger.error(message)
+        log_jira_alert(message, obj)
         return False
 
-    jira_project = get_jira_project(find)
-    jira_instance = get_jira_instance(find)
+    jira_project = get_jira_project(obj)
+    jira_instance = get_jira_instance(obj)
 
-    can_be_pushed_to_jira, error_message, error_code = finding_can_be_pushed_to_jira(find)
-    if not can_be_pushed_to_jira:
-        log_jira_alert(error_message, find)
-        logger.warn("Finding %s cannot be pushed to JIRA: %s.", find.id, error_message)
+    obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
+    if not obj_can_be_pushed_to_jira:
+        log_jira_alert(error_message, obj)
+        logger.warn("%s cannot be pushed to JIRA: %s.", to_str_typed(obj), error_message)
         logger.warn("The JIRA issue will NOT be created.")
         return False
-    logger.debug('Trying to create a new JIRA issue for finding {}...'.format(find.id))
+    logger.debug('Trying to create a new JIRA issue for %s...', to_str_typed(obj))
     meta = None
     try:
         JIRAError.log_to_tempfile = False
@@ -512,8 +548,8 @@ def add_jira_issue(find, *args, **kwargs):
                 'project': {
                     'key': jira_project.project_key
                 },
-                'summary': find.title,
-                'description': jira_description(find),
+                'summary': jira_summary(obj),
+                'description': jira_description(obj),
                 'issuetype': {
                     'name': jira_instance.default_issue_type
                 },
@@ -538,10 +574,10 @@ def add_jira_issue(find, *args, **kwargs):
 
         if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
             fields['priority'] = {
-                                    'name': jira_instance.get_priority(find.severity)
+                                    'name': jira_priority(obj)
                                 }
 
-        labels = get_labels(find)
+        labels = get_labels(obj)
         if labels:
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['labels'] = labels
@@ -550,169 +586,56 @@ def add_jira_issue(find, *args, **kwargs):
 
             if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
                 # jira wants YYYY-MM-DD
-                duedate = find.sla_deadline()
+                duedate = obj.sla_deadline()
                 if duedate:
                     fields['duedate'] = duedate.strftime('%Y-%m-%d')
 
-        if len(find.endpoints.all()) > 0:
-            if not meta:
-                meta = get_jira_meta(jira, jira_project)
-
-            if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
-                environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
-                fields['environment'] = environment
-
-        logger.debug('sending fields to JIRA: %s', fields)
-
-        new_issue = jira.create_issue(fields)
-
-        j_issue = JIRA_Issue(
-            jira_id=new_issue.id, jira_key=new_issue.key, finding=find, jira_project=jira_project)
-        j_issue.jira_creation = timezone.now()
-        j_issue.jira_change = timezone.now()
-        j_issue.save()
-        issue = jira.issue(new_issue.id)
-
-        # Upload dojo finding screenshots to Jira
-        for pic in find.images.all():
-            jira_attachment(
-                find, jira, issue,
-                settings.MEDIA_ROOT + pic.image_large.name)
-
-        if jira_project.enable_engagement_epic_mapping:
-            eng = find.test.engagement
-            logger.debug('Adding to EPIC Map: %s', eng.name)
-            epic = get_jira_issue(eng)
-            if epic:
-                jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
-            else:
-                logger.info('The following EPIC does not exist: %s', eng.name)
-
-        logger.info('Created the following jira issue for %d:%s', find.id, find.title)
-        return True
-    except JIRAError as e:
-        logger.exception(e)
-        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
-        log_jira_alert(e.text, find)
-        return False
-
-
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
-def add_jira_issue_for_finding_group(group, *args, **kwargs):
-    logger.info('trying to create a new jira issue for %d:%s', group.id, group.name)
-
-    if not is_jira_enabled():
-        return False
-
-    if not is_jira_configured_and_enabled(group):
-        logger.error("Finding {} cannot be pushed to JIRA as there is no JIRA configuration for this product.".format(find.id))
-        log_jira_alert('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
-        return False
-
-    jira_project = get_jira_project(find)
-    jira_instance = get_jira_instance(find)
-
-    can_be_pushed_to_jira, error_message, error_code = finding_can_be_pushed_to_jira(find)
-    if not can_be_pushed_to_jira:
-        log_jira_alert(error_message, find)
-        logger.warn("Finding %s cannot be pushed to JIRA: %s.", find.id, error_message)
-        logger.warn("The JIRA issue will NOT be created.")
-        return False
-    logger.debug('Trying to create a new JIRA issue for finding {}...'.format(find.id))
-    meta = None
-    try:
-        JIRAError.log_to_tempfile = False
-        jira = get_jira_connection(jira_instance)
-
-        fields = {
-                'project': {
-                    'key': jira_project.project_key
-                },
-                'summary': find.title,
-                'description': jira_description(find),
-                'issuetype': {
-                    'name': jira_instance.default_issue_type
-                },
-        }
-
-        if jira_project.component:
-            fields['components'] = [
-                    {
-                        'name': jira_project.component
-                    },
-            ]
-
-        # populate duedate field, but only if it's available for this project + issuetype
         if not meta:
             meta = get_jira_meta(jira, jira_project)
 
-        epic_name_field = get_epic_name_field_name(jira_instance)
-        if epic_name_field in meta['projects'][0]['issuetypes'][0]['fields']:
-            # epic name is present in this issuetype
-            # epic name is always mandatory in jira, so we populate it
-            fields[epic_name_field] = fields['summary']
-
-        if 'priority' in meta['projects'][0]['issuetypes'][0]['fields']:
-            fields['priority'] = {
-                                    'name': jira_instance.get_priority(find.severity)
-                                }
-
-        labels = get_labels(find)
-        if labels:
-            if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
-                fields['labels'] = labels
-
-        if System_Settings.objects.get().enable_finding_sla:
-
-            if 'duedate' in meta['projects'][0]['issuetypes'][0]['fields']:
-                # jira wants YYYY-MM-DD
-                duedate = find.sla_deadline()
-                if duedate:
-                    fields['duedate'] = duedate.strftime('%Y-%m-%d')
-
-        if len(find.endpoints.all()) > 0:
-            if not meta:
-                meta = get_jira_meta(jira, jira_project)
-
-            if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
-                environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
-                fields['environment'] = environment
+        if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+            fields['environment'] = jira_environment(obj)
 
         logger.debug('sending fields to JIRA: %s', fields)
 
         new_issue = jira.create_issue(fields)
 
+        # Upload dojo finding screenshots to Jira
+        findings = [obj]
+        if type(obj) == Finding_Group:
+            findings = obj.findings.all()
+
+        for find in findings:
+            for pic in find.images.all():
+                jira_attachment(
+                    find, jira, new_issue,
+                    settings.MEDIA_ROOT + pic.image_large.name)
+
+        if jira_project.enable_engagement_epic_mapping:
+            eng = obj.test.engagement
+            logger.debug('Adding to EPIC Map: %s', eng.name)
+            epic = get_jira_issue(eng)
+            if epic:
+                jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(new_issue.id)], ignore_epics=True)
+            else:
+                logger.info('The following EPIC does not exist: %s', eng.name)
+
+        # only link the new issue if it was succefully created, incl attachments and epic link
         j_issue = JIRA_Issue(
-            jira_id=new_issue.id, jira_key=new_issue.key, finding=find, jira_project=jira_project)
+            jira_id=new_issue.id, jira_key=new_issue.key, jira_project=jira_project)
+        j_issue.set_obj(obj)
+
         j_issue.jira_creation = timezone.now()
         j_issue.jira_change = timezone.now()
         j_issue.save()
         issue = jira.issue(new_issue.id)
 
-        # Upload dojo finding screenshots to Jira
-        for pic in find.images.all():
-            jira_attachment(
-                find, jira, issue,
-                settings.MEDIA_ROOT + pic.image_large.name)
-
-        if jira_project.enable_engagement_epic_mapping:
-            eng = find.test.engagement
-            logger.debug('Adding to EPIC Map: %s', eng.name)
-            epic = get_jira_issue(eng)
-            if epic:
-                jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
-            else:
-                logger.info('The following EPIC does not exist: %s', eng.name)
-
-        logger.info('Created the following jira issue for %d:%s', find.id, find.title)
+        logger.info('Created the following jira issue for %d:%s', obj.id, to_str_typed(obj))
         return True
     except JIRAError as e:
         logger.exception(e)
         logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
-        log_jira_alert(e.text, find)
+        log_jira_alert(e.text, obj)
         return False
 
 
@@ -720,21 +643,22 @@ def add_jira_issue_for_finding_group(group, *args, **kwargs):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def update_jira_issue(find, *args, **kwargs):
-    logger.debug('trying to update a linked jira issue for %d:%s', find.id, find.title)
+def update_jira_issue(obj, *args, **kwargs):
+    logger.debug('trying to update a linked jira issue for %d:%s', obj.id, to_str_typed(obj))
 
     if not is_jira_enabled():
         return False
 
-    jira_project = get_jira_project(find)
-    jira_instance = get_jira_instance(find)
+    jira_project = get_jira_project(obj)
+    jira_instance = get_jira_instance(obj)
 
-    if not jira_project:
-        logger.error("Finding {} cannot be pushed to JIRA as there is no JIRA configuration for this product.".format(find.id))
-        log_jira_alert('Finding cannot be pushed to JIRA as there is no JIRA configuration for this product.', find)
+    if not is_jira_configured_and_enabled(obj):
+        message = 'Object %s cannot be pushed to JIRA as there is no JIRA configuration for %s.' % (obj.id, to_str_typed(obj))
+        logger.error(message)
+        log_jira_alert(message, obj)
         return False
 
-    j_issue = find.jira_issue
+    j_issue = obj.jira_issue
     meta = None
     try:
         JIRAError.log_to_tempfile = False
@@ -747,7 +671,7 @@ def update_jira_issue(find, *args, **kwargs):
         if issue.fields.components:
             log_jira_alert(
                 "Component not updated, exists in Jira already. Update from Jira instead.",
-                find)
+                obj)
         elif jira_project.component:
             # Add component to the Jira issue
             component = [
@@ -760,33 +684,32 @@ def update_jira_issue(find, *args, **kwargs):
         if not meta:
             meta = get_jira_meta(jira, jira_project)
 
-        labels = get_labels(find)
+        labels = get_labels(obj)
         if labels:
             if 'labels' in meta['projects'][0]['issuetypes'][0]['fields']:
                 fields['labels'] = labels
 
-        if len(find.endpoints.all()) > 0:
-            if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
-                environment = "\n".join([str(endpoint) for endpoint in find.endpoints.all()])
-                fields['environment'] = environment
-
-        # Upload dojo finding screenshots to Jira
-        for pic in find.images.all():
-            jira_attachment(find, jira, issue,
-                            settings.MEDIA_ROOT + pic.image_large.name)
+        if 'environment' in meta['projects'][0]['issuetypes'][0]['fields']:
+            fields['environment'] = jira_environment(obj)
 
         logger.debug('sending fields to JIRA: %s', fields)
 
         issue.update(
-            summary=find.title,
-            description=jira_description(find),
-            priority={'name': jira_instance.get_priority(find.severity)},
+            summary=jira_summary(obj),
+            description=jira_description(obj),
+            priority={'name': jira_priority(obj)},
             fields=fields)
 
-        push_status_to_jira(find, jira_instance, jira, issue)
+        # Upload dojo finding screenshots to Jira
+        findings = [obj]
+        if type(obj) == Finding_Group:
+            findings = obj.findings.all()
 
-        find.jira_issue.jira_change = timezone.now()
-        find.jira_issue.save()
+        for find in findings:
+            for pic in find.images.all():
+                jira_attachment(
+                    find, jira, issue,
+                    settings.MEDIA_ROOT + pic.image_large.name)
 
         if jira_project.enable_engagement_epic_mapping:
             eng = find.test.engagement
@@ -797,13 +720,18 @@ def update_jira_issue(find, *args, **kwargs):
             else:
                 logger.info('The following EPIC does not exist: %s', eng.name)
 
+        j_issue.jira_change = timezone.now()
+        j_issue.save()
+
+        push_status_to_jira(find, jira_instance, jira, issue)
+
         logger.debug('Updated the following linked jira issue for %d:%s', find.id, find.title)
         return True
 
     except JIRAError as e:
         logger.exception(e)
         logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
-        log_jira_alert(e.text, find)
+        log_jira_alert(e.text, obj)
         return False
 
 
@@ -867,9 +795,9 @@ def issue_from_jira_is_active(issue_from_jira):
     return False
 
 
-def push_status_to_jira(find, jira_instance, jira, issue):
+def push_status_to_jira(obj, jira_instance, jira, issue):
 
-    status_list = find.status()
+    status_list = obj.status()
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
     if any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
@@ -1202,12 +1130,14 @@ def finding_link_jira(request, finding, new_jira_issue_key):
 
 
 def finding_unlink_jira(request, finding):
-    logger.debug('removing linked jira issue %s for finding %i', finding.jira_issue.jira_key, finding.id)
-    finding.jira_issue.delete()
-    finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+    return unlink_jira(request, finding)
 
-    jira_issue_url = get_jira_url(finding)
 
+def unlink_jira(request, obj):
+    logger.debug('removing linked jira issue %s for %i:%s', obj.jira_issue.jira_key, obj.id, to_str_typed(obj))
+    obj.jira_issue.delete()
+    # finding.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
+    # jira_issue_url = get_jira_url(finding)
     return True
 
 

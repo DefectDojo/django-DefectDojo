@@ -780,6 +780,11 @@ class OpenFindingFilter(DojoFilter):
         queryset=Finding_Group.objects.none(),
         label="Finding Group")
 
+    has_finding_group = BooleanFilter(field_name='finding_group',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='is Grouped')
+
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 

@@ -359,7 +359,7 @@ def view_finding(request, fid):
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
 
-    can_be_pushed_to_jira, can_be_pushed_to_jira_error, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
+    can_be_pushed_to_jira, can_be_pushed_to_jira_error, error_code = jira_helper.can_be_pushed_to_jira(finding)
 
     lastPos = (len(findings)) - 1
     return render(
@@ -1959,7 +1959,7 @@ def finding_bulk_update_all(request, pid=None):
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
                     error_counts = defaultdict(lambda: 0)
                     if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
-                        can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
+                        can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding)
                         if not can_be_pushed_to_jira:
                             error_counts[error_message] += 1
                             jira_helper.log_jira_alert(error_message, finding)

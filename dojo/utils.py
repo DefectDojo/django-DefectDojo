@@ -22,8 +22,8 @@ from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-from dojo.models import Finding, Engagement, Finding_Template, Product, \
-    Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
+from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
+    Dojo_User, Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
@@ -1910,3 +1910,32 @@ def add_field_errors_to_response(form):
     if form and get_current_request():
         for field, error in form.errors.items():
             add_error_message_to_response(error)
+
+
+def to_str_typed(obj):
+    """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    return '%s: %s' % (type(obj), obj)
+
+
+def get_product(obj):
+    if not obj:
+        return None
+
+    if type(obj) == Finding or type(obj) == Finding_Group:
+        return obj.test.engagement.product
+
+    if type(obj) == Test:
+        return obj.engagement.product
+
+    if type(obj) == Engagement:
+        return obj.product
+
+    if type(obj) == Product:
+        return obj
+
+
+def prod_name(obj):
+    if not obj:
+        return 'Unknown'
+
+    return get_product(obj).name

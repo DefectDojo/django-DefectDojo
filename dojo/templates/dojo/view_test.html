@@ -330,29 +330,6 @@
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% comment %}
-                                    {% if user|is_authorized_for_change:finding %}
-                                        {% if finding.active %}
-                                            <li role="presentation">
-                                                <a href="{% url 'close_finding' finding.id %}">
-                                                    <i class="fa fa-fire-extinguisher"></i> Close Finding
-                                                </a>
-                                            </li>
-                                        {% else %}
-                                            <li role="presentation">
-                                                <a href="{% url 'reopen_finding' finding.id %}">
-                                                    <i class="fa fa-bug"></i> Open Finding
-                                                </a>
-                                            </li>
-                                        {% endif %}
-                                    {% endif %}
-                                    {% endcomment %}
-                                    <li class="divider"></li>
-                                    <li role="presentation">
-                                        <a href="{% url 'action_history' group|content_type group.id %}">
-                                            <i class="fa fa-history"></i> View History
-                                        </a>
-                                    </li>
                                     {% if user|is_authorized_for_delete:group %}
                                         <li>
                                             <form method="post" action="{% url 'delete_finding_group' group.id %}"
@@ -406,7 +383,7 @@
                                     {% if group.jira_issue %}
                                         <a href="{{ group | jira_issue_url }}"
                                         target="_blank" title="{{ group | jira_issue_url }}">{{ group | jira_key }}</a>
-                                        <i id="unlink_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-trash unlink_to_jira" title="Unlink JIRA issue from this group of findings."></i>
+                                        <i id="unlink_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-trash unlink_jira" title="Unlink JIRA issue from this group of findings."></i>
                                         <i id="push_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-share-square push_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
                                     {% else %}
                                         None

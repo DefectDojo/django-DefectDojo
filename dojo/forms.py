@@ -21,7 +21,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
-from dojo.models import Finding, Product_Type, Product, Note_Type, \
+from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
@@ -292,6 +292,15 @@ class DeleteProductForm(forms.ModelForm):
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                    'internet_accessible', 'regulations', 'product_meta', 'members', 'tags',
                    'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
+
+
+class DeleteFindingGroupForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Finding_Group
+        fields = ['id']
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
@@ -2188,7 +2197,7 @@ class JIRAFindingForm(forms.Form):
         logger.debug('self.cleaned_data.push_to_jira: %s', self.cleaned_data.get('push_to_jira', None))
 
         if self.cleaned_data.get('push_to_jira', None):
-            can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(self.instance, self.finding_form)
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(self.instance, self.finding_form)
             if not can_be_pushed_to_jira:
                 self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
                 # for field in error_fields:
