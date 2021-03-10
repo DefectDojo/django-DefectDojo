@@ -7,7 +7,7 @@ services:
       GENERATE_TLS_CERTIFICATE: 'true'
     ports:
       - target: 8443
-        published: ${DD_TLS_PORT:-8443}
+        published: ${DD_TLS_PORT:-443}
         protocol: tcp
         mode: host
   uwsgi:

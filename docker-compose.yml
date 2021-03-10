@@ -12,11 +12,11 @@ services:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
     ports:
       - target: 8080
-        published: ${DD_PORT:-8080}
+        published: ${DD_PORT:-80}
         protocol: tcp
         mode: host
       - target: 8443
-        published: ${DD_TLS_PORT:-8443}
+        published: ${DD_TLS_PORT:-443}
         protocol: tcp
         mode: host
   uwsgi:
@@ -31,11 +31,11 @@ services:
       DD_DEBUG: 'False'
       DD_DJANGO_METRICS_ENABLED: ${DD_DJANGO_METRICS_ENABLED:-False}
       DD_ALLOWED_HOSTS: ${DD_ALLOWED_HOSTS:-*}
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:Re0ypWsR2@p6h?f%FaiI1aas@mysql:3306/defectdojo}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
-      DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
-      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-IaoziT42tGgf%uD6a|H%i#|iPO*|TqsAk4UKK%*7AEcJ3R2i}
+      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-Il}hqxao}c1Km~|}I#1}U8wKTsSL${Sh6ER2JfEVpk}JVJ%m}
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -47,11 +47,11 @@ services:
       - rabbitmq
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-beat.sh']
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:Re0ypWsR2@p6h?f%FaiI1aas@mysql:3306/defectdojo}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
-      DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
-      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-IaoziT42tGgf%uD6a|H%i#|iPO*|TqsAk4UKK%*7AEcJ3R2i}
+      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-Il}hqxao}c1Km~|}I#1}U8wKTsSL${Sh6ER2JfEVpk}JVJ%m}
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -63,11 +63,11 @@ services:
       - rabbitmq
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-worker.sh']
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:Re0ypWsR2@p6h?f%FaiI1aas@mysql:3306/defectdojo}
       DD_CELERY_BROKER_USER: ${DD_CELERY_BROKER_USER:-guest}
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
-      DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
-      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-IaoziT42tGgf%uD6a|H%i#|iPO*|TqsAk4UKK%*7AEcJ3R2i}
+      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-Il}hqxao}c1Km~|}I#1}U8wKTsSL${Sh6ER2JfEVpk}JVJ%m}
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -78,14 +78,14 @@ services:
       - mysql
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '--', '/entrypoint-initializer.sh']
     environment:
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:Re0ypWsR2@p6h?f%FaiI1aas@mysql:3306/defectdojo}
       DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
       DD_ADMIN_MAIL: ${DD_ADMIN_USER:-admin@defectdojo.local}
       DD_ADMIN_FIRST_NAME: ${DD_ADMIN_FIRST_NAME:-Admin}
       DD_ADMIN_LAST_NAME: ${DD_ADMIN_LAST_NAME:-User}
       DD_INITIALIZE: ${DD_INITIALIZE:-true}
-      DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
-      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+      DD_SECRET_KEY: ${DD_SECRET_KEY:-IaoziT42tGgf%uD6a|H%i#|iPO*|TqsAk4UKK%*7AEcJ3R2i}
+      DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-Il}hqxao}c1Km~|}I#1}U8wKTsSL${Sh6ER2JfEVpk}JVJ%m}
     volumes:
         - type: bind
           source: ./docker/extra_settings
@@ -94,9 +94,9 @@ services:
     image: mysql:5.7.33@sha256:853105ad984a9fe87dd109be6756e1fbdba8b003b303d88ac0dda6b455f36556
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
-      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
+      DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:Re0ypWsR2@p6h?f%FaiI1aas@mysql:3306/defectdojo}
       MYSQL_USER: ${DD_DATABASE_USER:-defectdojo}
-      MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
+      MYSQL_PASSWORD: ${DD_DATABASE_PASSWORD:-Re0ypWsR2@p6h?f%FaiI1aas}
       MYSQL_DATABASE: ${DD_DATABASE_NAME:-defectdojo}
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
     volumes:
