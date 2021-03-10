@@ -1,5 +1,6 @@
 import json
 import hashlib
+import re
 
 from dojo.models import Finding
 
@@ -10,7 +11,7 @@ class WFuzzParser(object):
     """
 
     def get_scan_types(self):
-        return ["WFuzz"]
+        return ["WFuzz JSON report"]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type
@@ -19,7 +20,6 @@ class WFuzzParser(object):
         return "Import WFuzz findings in JSON format."
 
     def get_findings(self, filename, test):
-
         # table to match HTTP error code and severity
         SEVERITY = {
             200: "High",
@@ -28,6 +28,7 @@ class WFuzzParser(object):
             407: "Medium",
             403: "Medium"
         }
+        url_regexp = "(?P<url>https?:\/\/.*)(?P<url_port>[0-9]*)?\/?(?P<url_path>.*)$"
 
         # Exit if no file provided
         if filename is None:
@@ -38,23 +39,27 @@ class WFuzzParser(object):
 
         if issues is not None:
             for item in issues:
-                url = item['url']
+                m = re.match(url_regexp,item['url'])
+                url = m.group("url") + m.group('url_port')
+                url_path = m.group ("url_path")
+
                 payload = item['payload']
                 return_code = int(item['code'])
                 severity = SEVERITY[return_code]
-                dupe_key = hashlib.md5(str(url + str(return_code)).encode("utf-8")).hexdigest()
+                dupe_key = hashlib.md5(str(url + str(return_code) + url_path).encode("utf-8")).hexdigest()
 
                 if dupe_key not in dupes:
-                    dupes[dupe_key] = Finding(title='Found ' + url + ' URL',
+                    dupes[dupe_key] = Finding(title='Found ' + url + url_path,
                                               test=test,
                                               severity=severity,
                                               numerical_severity=Finding.get_numerical_severity(severity),
-                                              description=payload,
+                                              description="The URL " + url + url_path + " must not be exposed\n Please review your configuration\n",
+                                              payload=payload,
                                               mitigation='N/A',
-                                              file_path='N/A',
-                                              url=url,
+                                              url=str(url + url_path),
                                               static_finding=False,
-                                              dynamic_finding=True
+                                              dynamic_finding=True,
+                                              cwe=200
                                               )
 
         return list(dupes.values())
