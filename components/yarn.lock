@@ -235,12 +235,12 @@ datatables.net-buttons-bs@^1.7.0:
     datatables.net-buttons "1.7.0"
     jquery ">=1.7"
 
-datatables.net-buttons-dt@^1.6.5:
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/datatables.net-buttons-dt/-/datatables.net-buttons-dt-1.6.5.tgz#55a1ebff030250fe9769d8898f6f916de999fd7f"
-  integrity sha512-BeuAvOp2pHyTC7WgectJ29APyno9b+90Jg7W4YeWK/G3bOmp+ZYx4/cr4XsnluAPfLQOsnLwoPx+LEc7B7BzAQ==
+datatables.net-buttons-dt@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/datatables.net-buttons-dt/-/datatables.net-buttons-dt-1.7.0.tgz#60361e0622b29b6185c18b1f817ac303e81d28c0"
+  integrity sha512-XnUynIGiVJneTrViD92MSD0qlD8G0xybPyk5cKIveH1KhDaBpIl0Ws8HnwaJA0bBGknKkfCxDh/dgOsLmYDi8g==
   dependencies:
-    datatables.net-buttons "1.6.5"
+    datatables.net-buttons "1.7.0"
     datatables.net-dt "^1.10.15"
     jquery ">=1.7"
 
