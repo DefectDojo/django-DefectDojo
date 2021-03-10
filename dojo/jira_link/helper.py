@@ -268,7 +268,9 @@ def get_jira_project_key(obj):
 
 def get_jira_issue_template(obj):
     jira_project = get_jira_project(obj)
-    if isinstance(obj, Finding):
+    if isinstance(obj, Finding_Group):
+        return 'issue-trackers/jira-group-description.tpl'
+    else:
         template = jira_project.issue_template
         if not template:
             jira_instance = get_jira_instance(obj)
@@ -277,8 +279,6 @@ def get_jira_issue_template(obj):
         # fallback to default as before
         if not template:
             return 'issue-trackers/jira-description.tpl'
-    else:
-        return 'issue-trackers/jira-group-description.tpl'
 
     return template
 
