@@ -5,6 +5,12 @@ from dojo.models import Test
 
 class TestGitleaksParser(TestCase):
 
+    def test_parse_file_with_no_findings(self):
+        testfile = open("dojo/unittests/scans/gitleaks/no_findings.json")
+        parser = GitleaksParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(0, len(findings))
+
     def test_parse_file_with_one_finding(self):
         testfile = open("dojo/unittests/scans/gitleaks/data_one.json")
         parser = GitleaksParser()
