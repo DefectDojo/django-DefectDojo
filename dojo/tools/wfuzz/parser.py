@@ -39,9 +39,9 @@ class WFuzzParser(object):
 
         if issues is not None:
             for item in issues:
-                m = re.match(url_regexp,item['url'])
+                m = re.match(url_regexp, item['url'])
                 url = m.group("url") + m.group('url_port')
-                url_path = m.group ("url_path")
+                url_path = m.group("url_path")
 
                 payload = item['payload']
                 return_code = int(item['code'])
