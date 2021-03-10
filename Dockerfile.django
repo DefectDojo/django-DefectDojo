@@ -129,7 +129,7 @@ ENV \
   DD_DATABASE_ENGINE="django.db.backends.mysql" \
   DD_DATABASE_HOST="mysql" \
   DD_DATABASE_NAME="defectdojo" \
-  DD_DATABASE_PASSWORD="defectdojo" \
+  DD_DATABASE_PASSWORD="e0aHsKs5ab2LLcpcpEVuieT3I9" \
   DD_DATABASE_PORT="3306" \
   DD_DATABASE_USER="defectdojo" \
   DD_INITIALIZE=true \
