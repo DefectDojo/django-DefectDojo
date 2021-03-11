@@ -1747,10 +1747,16 @@ def get_jira_issue_template_choices():
     template_dir = settings.JIRA_TEMPLATE_DIR
     template_list = [('', '---')]
     for base_dir, dirnames, filenames in os.walk(template_dir):
-        for filename in filenames:
+        # for filename in filenames:
+        #     if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
+        #         base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
+        #     template_list.append((os.path.join(base_dir, filename), filename))
+
+        for dirname in dirnames:
             if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
                 base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
-            template_list.append((os.path.join(base_dir, filename), filename))
+            template_list.append((os.path.join(base_dir, dirname), dirname))
+
     logger.debug('templates: %s', template_list)
     return template_list
 
@@ -1768,7 +1774,7 @@ class JIRA_IssueForm(forms.ModelForm):
 class JIRAForm(forms.ModelForm):
     issue_template = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
-                                       help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
+                                       help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
 
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
@@ -2097,7 +2103,7 @@ class JIRAProjectForm(forms.ModelForm):
     jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label='JIRA Instance', required=False)
     issue_template = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
-                                       help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
+                                       help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
 
     prefix = 'jira-project-form'
 
