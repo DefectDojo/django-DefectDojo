@@ -79,5 +79,4 @@ class NetsparkerParser(object):
                 dupes[dupe_key] = find
                 findingdetail = ''
 
-        self.items = list(dupes.values())
-        return self.items
+        return list(dupes.values())
