@@ -433,12 +433,14 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_Mitigated=None):
         payload = {'test': test_id}
         if active is not None:
             payload['active'] = active
         if verified is not None:
             payload['verified'] = verified
+        if is_Mitigated is not None:
+            payload['is_Mitigated'] = is_Mitigated
 
         response = self.client.get(reverse('finding-list'), payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
