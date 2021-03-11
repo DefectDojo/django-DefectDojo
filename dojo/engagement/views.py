@@ -20,7 +20,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.core.exceptions import MultipleObjectsReturned
 
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.filters import EngagementFilter, EngagementTestFilter
+from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
@@ -39,7 +39,7 @@ from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
-from django.db.models.query import QuerySet
+from django.db.models.query import Prefetch, QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
@@ -85,36 +85,48 @@ def engagement_calendar(request):
 
 
 def engagement(request):
-    products = get_authorized_products(Permissions.Engagement_View).distinct()
-    if request.user.is_staff:
-        engagements = Engagement.objects.all()
-    else:
-        engagements = Engagement.objects\
-            .filter(Q(product__authorized_users=request.user) | Q(product__prod_type__authorized_users=request.user))\
-            .distinct()
+    engagements = Engagement.objects.filter(
+        product__in=get_authorized_products(Permissions.Engagement_View).distinct()
+    ).select_related(
+        'product',
+        'product__prod_type',
+    ).prefetch_related(
+        'lead',
+        'tags',
+        'product__tags',
+    )
 
-    products_with_engagements = products.filter(~Q(engagement=None), engagement__active=True).distinct()
-    filtered = EngagementFilter(
+    if System_Settings.objects.get().enable_jira:
+        engagements = engagements.prefetch_related(
+            'jira_project__jira_instance',
+            'product__jira_project_set__jira_instance'
+        )
+
+    filtered_engagements = EngagementDirectFilter(
         request.GET,
-        queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
-                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
-    prods = get_page_items(request, filtered.qs, 25)
-    name_words = products_with_engagements.values_list('name', flat=True)
-    eng_words = engagements.filter(active=True).values_list('name', flat=True).distinct()
+        queryset=engagements
+    )
+    engs = get_page_items(request, filtered_engagements.qs, 25)
+    product_name_words = sorted(set(
+        engagement.product.name
+        for engagement in engs.object_list
+    ))
+    engagement_name_words = sorted(set(
+        engagement.name
+        for engagement in engs.object_list
+    ))
 
     add_breadcrumb(
         title="Active Engagements",
         top_level=not len(request.GET),
         request=request)
 
-    prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
-
     return render(
         request, 'dojo/engagement.html', {
-            'products': prods,
-            'filtered': filtered,
-            'name_words': sorted(set(name_words)),
-            'eng_words': sorted(set(eng_words)),
+            'engagements': engs,
+            'filter_form': filtered_engagements.form,
+            'product_name_words': product_name_words,
+            'engagement_name_words': engagement_name_words,
         })
 
 
@@ -158,20 +170,6 @@ def engagements_all(request):
             'name_words': sorted(set(name_words)),
             'eng_words': sorted(set(eng_words)),
         })
-
-
-def prefetch_for_products_with_engagments(products_with_engagements):
-    if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        return products_with_engagements.prefetch_related(
-            'tags',
-            'engagement_set__tags',
-            'engagement_set__test_set__tags',
-            'engagement_set__jira_project__jira_instance',
-            'jira_project_set__jira_instance'
-        )
-
-    logger.debug('unable to prefetch because query was already executed')
-    return products_with_engagements
 
 
 @user_must_be_authorized(Engagement, 'change', 'eid')
