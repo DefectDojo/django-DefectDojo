@@ -80,3 +80,4 @@ class NetsparkerParser(object):
                 findingdetail = ''
 
         self.items = list(dupes.values())
+        return self.items
