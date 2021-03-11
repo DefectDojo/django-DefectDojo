@@ -2,7 +2,8 @@ import json
 import hashlib
 import re
 
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
+
 
 
 class WFuzzParser(object):
@@ -19,6 +20,36 @@ class WFuzzParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import WFuzz findings in JSON format."
 
+    def process_endpoints(self, finding, url, url_protocol, url_path):
+
+        try:
+            dupe_endpoint = Endpoint.objects.get(protocol=url_protocol,
+                                                 host=url,
+                                                 query="",
+                                                 fragment="",
+                                                 path=url_path
+                                                 )
+        except Endpoint.DoesNotExist:
+            dupe_endpoint = None
+
+        if not dupe_endpoint:
+            endpoint = Endpoint(protocol=url_protocol,
+                                host=url,
+                                query="",
+                                fragment="",
+                                path=url_path
+                                )
+        else:
+            endpoint = dupe_endpoint
+
+        if not dupe_endpoint:
+            endpoints = [endpoint]
+        else:
+            endpoints = [endpoint, dupe_endpoint]
+
+        finding.unsaved_endpoints = finding.unsaved_endpoints + endpoints
+
+
     def get_findings(self, filename, test):
         # table to match HTTP error code and severity
         SEVERITY = {
@@ -28,7 +59,7 @@ class WFuzzParser(object):
             407: "Medium",
             403: "Medium"
         }
-        url_regexp = "(?P<url>https?:\/\/.*)(?P<url_port>[0-9]*)?\/?(?P<url_path>.*)$"
+        url_regexp = "(?P<url_protocol>(https|http))?:\/\/(?P<url>.*)(?P<url_port>[0-9]*)?\/?(?P<url_path>.*)$"
 
         # Exit if no file provided
         if filename is None:
@@ -49,11 +80,13 @@ class WFuzzParser(object):
                 dupe_key = hashlib.md5(str(url + str(return_code) + url_path).encode("utf-8")).hexdigest()
 
                 if dupe_key not in dupes:
-                    dupes[dupe_key] = Finding(title='Found ' + url + url_path,
+                    finding = Finding(title='Found ' + m.group('url_protocol') + '://' + url + url_path,
                                               test=test,
                                               severity=severity,
                                               numerical_severity=Finding.get_numerical_severity(severity),
-                                              description="The URL " + url + url_path + " must not be exposed\n Please review your configuration\n",
+                                              description="The URL " + m.group('url_protocol') + '://' +
+                                                          url + url_path +
+                                                          " must not be exposed\n Please review your configuration\n",
                                               payload=payload,
                                               mitigation='N/A',
                                               url=str(url + url_path),
@@ -61,5 +94,6 @@ class WFuzzParser(object):
                                               dynamic_finding=True,
                                               cwe=200
                                               )
-
+                    self.process_endpoints(finding, url, m.group("url_protocol"), url_path)
+                    dupes[dupe_key] = finding
         return list(dupes.values())
