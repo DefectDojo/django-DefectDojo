@@ -104,16 +104,26 @@ id -u
 
 If you want to be able to step in your code, you can activate ptvsd.Server.
 
-You can launch your local dev instance of DefectDojo as
+If your environment support linux symlinks, you can launch your local dev instance of DefectDojo with
 
 ```zsh
+# switch to ptvsd configuration
 docker/setEnv.sh ptvsd
+# then use docker-compose as usual
 docker-compose up
 ```
 
 This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.ptvsd.yml.
 
+Alternatively (if using docker for windows for example), you can copy the override file over (and re-create the containers):
+```
+cp docker-compose.override.ptvsd.yml docker-compose.override.yml 
+docker-compose down
+docker-compose up
+```
+
 The default configuration assumes port 3000 by default for ptvsd.
+
 
 ### VS code
 Add the following python debug configuration (You would have to install the `ms-python.python`. Other setup may work.)
@@ -316,6 +326,13 @@ This will run all integration-tests and leave the containers up:
 ```
 docker/setEnv.sh integration_tests
 docker-compose up
+```
+
+NB: the first time you run it, initializing the database may be too long for the tests to succeed. In that case, you'll need to wait for the initializer container to end, then re-run `docker-compose up`
+
+Check the logs with:
+```
+docker logs -f django-defectdojo_integration-tests_1
 ```
 
 # Checking Docker versions

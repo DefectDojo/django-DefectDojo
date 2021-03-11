@@ -107,6 +107,11 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 @app.task
 @dojo_model_from_id
 def do_dedupe_finding(new_finding, *args, **kwargs):
+    do_dedupe_finding_sync(new_finding, *args, **kwargs)
+
+
+# This function can be called directly for synchronous deduplication
+def do_dedupe_finding_sync(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -292,19 +297,18 @@ def deduplicate_hash_code(new_finding):
 def deduplicate_uid_or_hash_code(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
         existing_findings = Finding.objects.filter(
-            Q(hash_code=new_finding.hash_code) |
-            (Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
+            # unique_id_from_tool can only apply to the same test_type because it is parser dependent
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
             test__engagement=new_finding.test.engagement).exclude(
                 id=new_finding.id).exclude(
-                    hash_code=None).exclude(
                         duplicate=True)
     else:
+        # same without "test__engagement=new_finding.test.engagement" condition
         existing_findings = Finding.objects.filter(
-            Q(hash_code=new_finding.hash_code) |
-            (Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
-            test__engagement__product=new_finding.test.engagement.product).exclude(
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type))).exclude(
                 id=new_finding.id).exclude(
-                    hash_code=None).exclude(
                         duplicate=True)
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
