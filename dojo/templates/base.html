@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -408,12 +409,12 @@
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'view_engagements' product_tab.product.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
-                      {% if user|is_authorized_for_staff:product_tab.product %}
+                      {% if product_tab.product|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:product_tab.product %}
                       <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
                       {% endif %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'view_engagements_cicd' product_tab.product.id %}"><i class="fa fa-calendar"></i> View CI/CD Engagements</a></li>
-                      {% if user|is_authorized_for_staff:product_tab.product%}
+                      {% if product_tab.product|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:product_tab.product%}
                       <li><a href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New CI/CD Engagement</a></li>
                       {% endif %}
                     </ul>
@@ -432,9 +433,11 @@
                       <li><a href="{% url 'product_accepted_findings' product_tab.product.id %}"><i class="fa fa-check"></i> View Risk Accepted Findings</a></li>
                       <li><a href="{% url 'product_all_findings' product_tab.product.id %}"><i class="fa fa-search"></i> View All Findings</a></li>
                       <li><a href="{% url 'product_closed_findings' product_tab.product.id %}"><i class="fa fa-fire-extinguisher"></i>&nbsp;&nbsp;View Closed Findings </a></li>
-                      {% if user|is_authorized_for_staff:product_tab.product %}
+                      {% if product_tab.product|has_object_permission:"Finding_Add" or user|is_authorized_for_staff:product_tab.product %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'ad_hoc_finding' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
+                      {% endif %}
+                      {% if product_tab.product|has_object_permission:"Import_Scan_Result" or user|is_authorized_for_staff:product_tab.product %}
                       <li><a href="{% url 'import_scan_results_prod' product_tab.product.id %}"><i class="fa fa-upload"></i> Import Scan Results</a></li>
                       {% endif %}
                     </ul>
@@ -449,14 +452,15 @@
                       <li><a href="{% url 'vulnerable_endpoints' %}?product={{ product_tab.product.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'product_endpoint_report' product_tab.product.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
-                      {% if user|is_authorized_for_staff:product_tab.product %}
+                      {% if product_tab.product|has_object_permission:"Endpoint_Add" or user|is_authorized_for_staff:product_tab.product %}
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'add_endpoint' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
                       {% endif %}
                     </ul>
                   </li>
                   <!-- Benchmarks Tab -->
-                  {% if system_settings.enable_benchmark %}
+                  {% if system_settings.enable_benchmark %}                  
+                  {% if product_tab.product|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:product_tab.product %}                  
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'benchmarks' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-balance-scale" aria-hidden="true"></span>
                     <span class="hidden-xs"> Benchmarks</span>
@@ -469,25 +473,40 @@
                     </ul>
                   </li>
                   {% endif %}
-                  {% if user|is_authorized_for_staff:product_tab.product%}
+                  {% endif %}
+                  {% if product_tab.product|has_object_permission:"Product_Edit" or product_tab.product|has_object_permission:"Product_Delete" or user|is_authorized_for_staff:product_tab.product %}
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'settings' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-cogs" aria-hidden="true"></span>
                       <span class="hidden-xs"> Settings</span>
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
+                        {% if product_tab.product|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:product_tab.product %}
                         <li role="presentation">
                             <a class="" href="{% url 'edit_product' product_tab.product.id %}">
                                 <i class="fa fa-pencil-square-o"></i> Edit
                             </a>
                         </li>
+                        <li role="separator" class="divider"></li>
                         <li role="presentation">
                             <a class="" href="{% url 'add_meta_data' product_tab.product.id %}">
                                 <i class="fa fa-plus"></i> Add Custom Fields
                             </a>
                         </li>
                         <li role="presentation">
+                            <a title="Edit Custom Fields"
+                              href="{% url 'edit_meta_data' product_tab.product.id %}">
+                                <i class="fa fa-pencil-square-o"></i> Edit Custom Fields
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
                             <a class="" href="{% url 'new_object' product_tab.product.id %}">
                                 <i class="fa fa-plus"></i> Add Product Tracking Files
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'view_objects' product_tab.product.id %}">
+                                <i class="fa fa-history"></i> View Product Tracking Files
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -529,12 +548,15 @@
                                 <i class="fa fa-history"></i> View History
                             </a>
                         </li>
+                        {% endif %}
+                        {% if product_tab.product|has_object_permission:"Product_Delete" or user|is_authorized_for_staff:product_tab.product %}
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
                                 <a class="text-danger" href="{% url 'delete_product' product_tab.product.id %}">
                                     <i class="fa fa-trash"></i> Delete
                                 </a>
                             </li>
+                        {% endif %}
                        </ul>
                   </li>
                   {% endif %}
