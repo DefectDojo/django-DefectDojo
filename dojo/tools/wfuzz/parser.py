@@ -5,7 +5,6 @@ import re
 from dojo.models import Finding, Endpoint
 
 
-
 class WFuzzParser(object):
     """
         A class that can be used to parse the WFuzz JSON report files
@@ -21,7 +20,9 @@ class WFuzzParser(object):
         return "Import WFuzz findings in JSON format."
 
     def process_endpoints(self, finding, url, url_protocol, url_path):
-
+        """
+            Find if a endpoint exist, and add it if not
+        """
         try:
             dupe_endpoint = Endpoint.objects.get(protocol=url_protocol,
                                                  host=url,
@@ -49,7 +50,6 @@ class WFuzzParser(object):
 
         finding.unsaved_endpoints = finding.unsaved_endpoints + endpoints
 
-
     def get_findings(self, filename, test):
         # table to match HTTP error code and severity
         SEVERITY = {
@@ -59,7 +59,7 @@ class WFuzzParser(object):
             407: "Medium",
             403: "Medium"
         }
-        url_regexp = "(?P<url_protocol>(https|http))?:\/\/(?P<url>.*)(?P<url_port>[0-9]*)?\/?(?P<url_path>.*)$"
+        url_regexp = "(?P<url_protocol>(https|http))?://(?P<url>.*)(?P<url_port>[0-9]*)?/?(?P<url_path>.*)$"
 
         # Exit if no file provided
         if filename is None:
@@ -93,7 +93,7 @@ class WFuzzParser(object):
                                               static_finding=False,
                                               dynamic_finding=True,
                                               cwe=200
-                                              )
+                                      )
                     self.process_endpoints(finding, url, m.group("url_protocol"), url_path)
                     dupes[dupe_key] = finding
         return list(dupes.values())
