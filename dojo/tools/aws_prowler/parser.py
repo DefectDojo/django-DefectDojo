@@ -56,8 +56,6 @@ class AWSProwlerParser(object):
                 find = Finding(title=title_text_trunc,
                                cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                                test=test,
-                               active=False,
-                               verified=False,
                                description="**AWS Account:** " + str(account) + "\n**Control:** " + title_text + "\n**CIS Control:** " + str(title_id) + ", " + level + "\n\n" + description,
                                severity=sev,
                                numerical_severity=Finding.get_numerical_severity(sev),

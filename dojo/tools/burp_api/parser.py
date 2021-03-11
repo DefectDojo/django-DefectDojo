@@ -68,8 +68,6 @@ class BurpApiParser(object):
                     references="No references provided",
                     cve=None,
                     cwe=0,
-                    active=True,
-                    verified=False,
                     false_p=false_p,
                     duplicate=False,
                     out_of_scope=False,

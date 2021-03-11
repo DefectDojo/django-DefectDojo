@@ -69,8 +69,6 @@ class TestsslParser(object):
                         finding = Finding(
                             title=title,
                             test=test,
-                            active=False,
-                            verified=False,
                             description=description,
                             severity=severity,
                             cve=cve,

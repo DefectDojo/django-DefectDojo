@@ -84,8 +84,6 @@ class NmapParser(object):
                 else:
                     find = Finding(title=title,
                                 test=test,
-                                active=False,
-                                verified=False,
                                 description=description,
                                 severity=severity,
                                 mitigation="N/A",
@@ -138,8 +136,6 @@ class NmapParser(object):
                     find = Finding(title=cve,
                                     cve=cve,
                                     test=test,
-                                    active=False,
-                                    verified=False,
                                     description=description,
                                     severity=severity,
                                     mitigation="N/A",

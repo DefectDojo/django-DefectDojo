@@ -82,8 +82,6 @@ class OpenscapParser(object):
 
                     finding = Finding(title=title,
                                     test=test,
-                                    active=False,
-                                    verified=False,
                                     cve=cve,
                                     description=description,
                                     severity=severity,

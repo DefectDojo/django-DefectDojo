@@ -81,8 +81,6 @@ class MicrofocusWebinspectParser(object):
 
                     finding = Finding(title=title,
                                     test=test,
-                                    active=False,
-                                    verified=False,
                                     cwe=cwe,
                                     description=description,
                                     severity=severity,
