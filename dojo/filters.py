@@ -28,6 +28,7 @@ from crum import get_current_user
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
+from dojo.engagement.queries import get_authorized_engagements
 from django.forms import HiddenInput
 
 logger = logging.getLogger(__name__)
@@ -794,7 +795,7 @@ class OpenFindingFilter(DojoFilter):
         queryset=Product.objects.none(),
         label="Product")
     test__engagement = ModelMultipleChoiceFilter(
-        queryset=Engagement.objects.all(),
+        queryset=Engagement.objects.none(),
         label="Engagement")
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
@@ -904,6 +905,8 @@ class OpenFindingFilter(DojoFilter):
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
+        else:
+            self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class OpenFindingSuperFilter(OpenFindingFilter):
@@ -935,7 +938,7 @@ class ClosedFindingFilter(DojoFilter):
         queryset=Product.objects.none(),
         label="Product")
     test__engagement = ModelMultipleChoiceFilter(
-        queryset=Engagement.objects.all(),
+        queryset=Engagement.objects.none(),
         label="Engagement")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
@@ -1042,6 +1045,8 @@ class ClosedFindingFilter(DojoFilter):
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
+        else:
+            self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class ClosedFindingSuperFilter(ClosedFindingFilter):
@@ -1067,7 +1072,7 @@ class AcceptedFindingFilter(DojoFilter):
         queryset=Product.objects.none(),
         label="Product")
     test__engagement = ModelMultipleChoiceFilter(
-        queryset=Engagement.objects.all(),
+        queryset=Engagement.objects.none(),
         label="Engagement")
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
@@ -1157,6 +1162,8 @@ class AcceptedFindingFilter(DojoFilter):
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
+        else:
+            self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View)
 
 
 class AcceptedFindingSuperFilter(AcceptedFindingFilter):
@@ -1660,7 +1667,7 @@ class ProductMetricsFindingFilter(FilterSet):
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     # date = MetricsDateRangeFilter()
     test__engagement = ModelMultipleChoiceFilter(
-        queryset=Engagement.objects.all().order_by('name'),
+        queryset=Engagement.objects.none(),
         label="Engagement")
     test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
@@ -1720,6 +1727,8 @@ class ProductMetricsFindingFilter(FilterSet):
             self.form.fields['test'].queryset = Test.objects.filter(
                 engagement__product_id=self.pid
             ).all()
+        else:
+            self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View).order_by('name')
 
         # str() uses test_type
         self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
@@ -1757,7 +1766,7 @@ class ProductMetricsEndpointFilter(FilterSet):
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
     finding__test__engagement = ModelMultipleChoiceFilter(
-        queryset=Engagement.objects.all().order_by('name'),
+        queryset=Engagement.objects.none(),
         label="Engagement")
     finding__test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
@@ -1772,6 +1781,7 @@ class ProductMetricsEndpointFilter(FilterSet):
         self.form.fields['finding__severity'].choices = self.queryset.order_by(
             'finding__numerical_severity'
         ).values_list('finding__severity', 'finding__severity').distinct()
+        self.form.fields['finding__test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View).order_by('name')
 
     class Meta:
         model = Endpoint_Status

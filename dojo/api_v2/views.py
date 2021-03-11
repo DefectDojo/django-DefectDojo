@@ -40,6 +40,7 @@ import logging
 import tagulous
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.authorization.roles_permissions import Permissions, Roles
 
 logger = logging.getLogger(__name__)
@@ -123,25 +124,21 @@ class EngagementViewSet(mixins.ListModelMixin,
                         ra_api.AcceptedRisksMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.EngagementSerializer
-    queryset = Engagement.objects.all().prefetch_related(
-                                                    'notes',
-                                                    'risk_acceptance',
-                                                    'files')
+    queryset = Engagement.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiEngagementFilter
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasEngagementPermission)
 
     @property
     def risk_application_model_class(self):
         return Engagement
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(
-                Q(product__authorized_users__in=[self.request.user]) |
-                Q(product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return self.queryset
+        return get_authorized_engagements(Permissions.Engagement_View).prefetch_related(
+                                                    'notes',
+                                                    'risk_acceptance',
+                                                    'files').distinct()
 
     @swagger_auto_schema(
         request_body=no_body, responses={status.HTTP_200_OK: ""}
@@ -898,12 +895,13 @@ class ProductViewSet(prefetch.PrefetchListMixin,
     serializer_class = serializers.ProductSerializer
     # TODO: prefetch
     queryset = Product.objects.none()
-    queryset = queryset.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
     filter_backends = (DjangoFilterBackend,)
 
     filterset_class = ApiProductFilter
     swagger_schema = prefetch.get_prefetch_schema(["products_list", "products_read"], serializers.ProductSerializer). \
         to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasProductPermission)
 
     def get_queryset(self):
         return get_authorized_products(Permissions.Product_View).distinct()
