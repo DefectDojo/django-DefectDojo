@@ -30,6 +30,7 @@ from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
 from django_jsonfield_backport.models import JSONField
+import hyperlink
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1143,6 +1144,12 @@ class Endpoint(models.Model):
             url = url + '#' + fragment
         return url
 
+    # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
+    # Example: https://google.com and https://google.com:443
+    def get_normalized_url(self):
+        url = hyperlink.parse(str(self))
+        return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_text()
+
     def __hash__(self):
         return self.__str__().__hash__()
 
@@ -1746,13 +1753,6 @@ class Finding(models.Model):
 
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
-            # Default fields
-            if self.dynamic_finding:
-                deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation as default')
-                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
-            else:
-                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
-
             # Check for an override for this scan_type in the deduplication configuration
             scan_type = self.test.test_type.name
             if (scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
@@ -1767,6 +1767,7 @@ class Finding(models.Model):
                             deduplicationLogger.warn(
                                 "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
                                 "'. Fallback to legacy mode for this finding.")
+                            return self.compute_hash_code_legacy()
                     else:
                         # no configuration found for this scanner: defaulting to accepting null cwe when we find one
                         hashcodeFields = hashcodeFieldsCandidate
@@ -1778,9 +1779,11 @@ class Finding(models.Model):
                     deduplicationLogger.debug(
                         "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
                         "Using default fields")
+                    return self.compute_hash_code_legacy()
             else:
                 deduplicationLogger.debug(
                     "No configuration for hash_code computation found; using default fields for " + ('dynamic' if self.dynamic_finding else 'static') + ' scanners')
+                return self.compute_hash_code_legacy()
             deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " for scan_type " + scan_type + " based on: " + ', '.join(hashcodeFields))
             fields_to_hash = ''
             for hashcodeField in hashcodeFields:
@@ -1801,24 +1804,46 @@ class Finding(models.Model):
 
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
-        if self.dynamic_finding:
-            deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation for legacy algo')
-            fields_to_hash = fields_to_hash + self.get_endpoints()
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
 
-    # Get endpoints from self.unsaved_endpoints
-    # This sometimes reports "None" for some endpoints but we keep it to avoid hash_code change due to this historically behavior
+    # Get endpoints to use for hash_code computation
+    # (This sometimes reports "None")
     def get_endpoints(self):
         endpoint_str = ''
-        if len(self.unsaved_endpoints) > 0 and self.id is None:
-            deduplicationLogger.debug("get_endpoints: there are unsaved_endpoints and self.id is None")
-            for e in self.unsaved_endpoints:
-                endpoint_str += str(e.host_with_port)
+        if(self.id is None):
+            if len(self.unsaved_endpoints) > 0:
+                deduplicationLogger.debug("get_endpoints before the finding was saved")
+                # convert list of unsaved endpoints to the list of their canonical representation
+                endpoint_str_list = list(
+                    map(
+                        lambda endpoint: endpoint.get_normalized_url(),
+                        self.unsaved_endpoints
+                    ))
+                # deduplicate (usually done upon saving finding) and sort endpoints
+                endpoint_str = ''.join(
+                    sorted(
+                        list(
+                            dict.fromkeys(endpoint_str_list)
+                        )))
+            else:
+                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+                # In this case, before saving the finding, both static_finding and dynamic_finding are True
+                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+                deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
         else:
-            deduplicationLogger.debug("get_endpoints: there aren't unsaved_endpoints or self.id is not None. endpoints count: " + str(self.endpoints.count()))
-            for e in self.endpoints.all():
-                endpoint_str += str(e.host_with_port)
+            deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
+            # convert list of endpoints to the list of their canonical representation
+            endpoint_str_list = list(
+                map(
+                    lambda endpoint: endpoint.get_normalized_url(),
+                    self.endpoints.all()
+                ))
+            # sort endpoints strings
+            endpoint_str = ''.join(
+                sorted(
+                    endpoint_str_list
+                ))
         return endpoint_str
 
     # Compute the hash_code from the fields to hash
