@@ -165,7 +165,6 @@ def get_item(result, rules, artifacts, test):
                         references=references,
                         cve=None,  # for now CVE are not managed or it's not very clear how in the spec
                         cwe=cwe,
-                        active=True,
                         verified=verified,
                         false_p=false_p,
                         duplicate=duplicate,

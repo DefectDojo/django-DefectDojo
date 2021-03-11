@@ -100,8 +100,6 @@ class AWSScout2Parser(object):
                 find = Finding(title=Truncator(title).words(6),
                                cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                                test=test,
-                               active=False,
-                               verified=False,
                                description="**AWS Account:** " + aws_account_id + "\n" + description,
                                severity=sev,
                                numerical_severity=Finding.get_numerical_severity(sev),
