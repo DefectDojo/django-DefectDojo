@@ -96,6 +96,19 @@ def engagement(request):
         'product__tags',
     )
 
+    # Get the test counts per engagments. As a separate query, this is much
+    # faster than annotating the above `engagements` query.
+    engagement_test_counts = {
+        test['engagement']: test['test_count']
+        for test in Test.objects.filter(
+            engagement__in=[engagement.pk for engagement in engagements]
+        ).values(
+            'engagement'
+        ).annotate(
+            test_count=Count('engagement')
+        )
+    }
+
     if System_Settings.objects.get().enable_jira:
         engagements = engagements.prefetch_related(
             'jira_project__jira_instance',
@@ -124,6 +137,7 @@ def engagement(request):
     return render(
         request, 'dojo/engagement.html', {
             'engagements': engs,
+            'engagement_test_counts': engagement_test_counts,
             'filter_form': filtered_engagements.form,
             'product_name_words': product_name_words,
             'engagement_name_words': engagement_name_words,

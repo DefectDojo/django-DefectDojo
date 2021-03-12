@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load dict_key %}
+
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -78,7 +80,9 @@
                                 <td>{{ e.lead.first_name }}</td>
                                 <td>
                                     <a class="eng_link" href="{%url 'view_engagement' e.id %}#tests">
-                                        {{ e.test_set.count }} Tests
+                                        {% with test_count=engagement_test_counts|dict_key:e.pk %}
+                                            {{ test_count }} Test{{ test_count|pluralize }}
+                                        {% endwith %}
                                     </a>
                                 </td>
                                 {% if system_settings.enable_jira %}
