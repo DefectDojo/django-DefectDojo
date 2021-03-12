@@ -71,6 +71,13 @@ See [Wrappers](WRAPPERS.md)
 See [Release and branch model](BRANCHING-MODEL.md)
 
 
+## Roadmap
+A magical, illusionary, non-existent, YMMV, wannabe, no guarantees list of thing we may or may not be working on:
+- New permission model
+- Push groups of findings to a single JIRA ticket
+- Reimport matching improvements
+
+
 ## Support, Bug Reports and Getting Involved
 Please come to our Slack channel first, where we can try to help you or point you in the right direction:
 
