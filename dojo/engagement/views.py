@@ -101,7 +101,7 @@ def engagement(request):
     engagement_test_counts = {
         test['engagement']: test['test_count']
         for test in Test.objects.filter(
-            engagement__in=[engagement.pk for engagement in engagements]
+            engagement__in=engagements
         ).values(
             'engagement'
         ).annotate(
