@@ -21,6 +21,7 @@ class Command(BaseCommand):
 def fix_loop_duplicates():
     candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
     deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
+    # raise ValueError('b')
     for find_id in candidates.values_list('id', flat=True):
         removeLoop(find_id, 5)
 
@@ -48,7 +49,7 @@ def removeLoop(finding_id, counter):
     if finding_id == real_original.id:
         # loop fully removed
         finding.duplicate_finding = None
-        finding.duplicate = False
+        # duplicate remains True, will be set to False in fix_loop_duplicates (and logged as New Original?).
         super(Finding, finding).save()
         return
 
@@ -66,7 +67,6 @@ def removeLoop(finding_id, counter):
         super(Finding, finding).save()
     if counter <= 0:
         # Maximum recursion depth as safety method to circumvent recursion here
-        deduplicationLogger.info('removeloop: maximum recursion depth hit for finding: %s', finding_id)
         return
     for f in finding.original_finding.all():
         # for all duplicates set the original as their original, get rid of self in between
