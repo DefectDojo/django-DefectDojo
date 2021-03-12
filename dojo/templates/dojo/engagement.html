@@ -31,7 +31,6 @@
                             <th class="prod_name">{% dojo_sort request 'Product' 'name' 'asc' %}</th>
                             <th class="prod_name">{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                             <th>Lead</th>
-                            <th>Status</th>
                             <th>Tests</th>
                             {% if system_settings.enable_jira %}
                                 <th>Jira</th>
@@ -40,8 +39,13 @@
 
                         {% for e in engagements %}
                             <tr>
-                                <td>
-                                    <a style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
+                                <td style="white-space: normal">
+                                    {% if e.is_overdue %}
+                                        <span style="float: right" class="tag-label warning-color">
+                                             {{ e.target_end|overdue }} overdue
+                                         </span>
+                                     {% endif %}
+                                     <a class="eng_link" href="{%url 'view_engagement' e.id %}">
                                         {% if e.name %}{{ e.name }}{% endif %}
                                         {{ e.target_start|date }} - {{ e.target_end|date }}
                                     </a>
@@ -58,9 +62,13 @@
                                         {{ e.product.name }}
                                     </a>
                                     {{ e.product|jira_project_tag }}
-                                    {% for tag in e.product.tags.all %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                    {% endfor %}
+                                    {% if e.product.tags.all %}
+                                        <div>
+                                            {% for tag in e.product.tags.all %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </td>
                                 <td class="prod_name">
                                     <a href="{% url 'product_type_metrics' e.product.prod_type.id %}">
@@ -69,20 +77,15 @@
                                 </td>
                                 <td>{{ e.lead.first_name }}</td>
                                 <td>
-                                    {% if e.is_overdue %}
-                                        <div class="tag-label warning-color">
-                                            {{ e.target_end|overdue }} overdue
-                                        </div>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <a style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}#tests">
+                                    <a class="eng_link" href="{%url 'view_engagement' e.id %}#tests">
                                         {{ e.test_set.count }} Tests
                                     </a>
                                 </td>
-                                <td>
-                                    {{ e|jira_project_tag }}
-                                </td>
+                                {% if system_settings.enable_jira %}
+                                    <td>
+                                        {{ e|jira_project_tag }}
+                                    </td>
+                                {% endif %}
                             </tr>
                         {% endfor %}
                     </table>
