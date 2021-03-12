@@ -39,7 +39,7 @@ from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
-from django.db.models.query import Prefetch, QuerySet
+from django.db.models.query import QuerySet
 from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
