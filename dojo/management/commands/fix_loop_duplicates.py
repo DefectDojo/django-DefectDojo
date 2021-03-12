@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from dojo.models import Finding
 import logging
+logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
@@ -30,7 +31,8 @@ def fix_loop_duplicates():
         super(Finding, f).save()
 
     loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
-    deduplicationLogger.info("%d Finding found with Loops" % loop_count)
+    deduplicationLogger.info("%d Finding found which still has Loops" % loop_count)
+    return loop_count
 
 
 def removeLoop(finding_id, counter):
@@ -39,15 +41,20 @@ def removeLoop(finding_id, counter):
     real_original = finding.duplicate_finding
 
     if not real_original or real_original is None:
+        # loop fully removed
         return
 
+    # duplicate of itself -> clear duplicate status
     if finding_id == real_original.id:
+        # loop fully removed
         finding.duplicate_finding = None
+        finding.duplicate = False
         super(Finding, finding).save()
         return
 
     # Only modify the findings if the original ID is lower to get the oldest finding as original
     if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
+        # If not, swap them around
         tmp = finding_id
         finding_id = real_original.id
         real_original = Finding.objects.get(id=tmp)
@@ -59,6 +66,7 @@ def removeLoop(finding_id, counter):
         super(Finding, finding).save()
     if counter <= 0:
         # Maximum recursion depth as safety method to circumvent recursion here
+        deduplicationLogger.info('removeloop: maximum recursion depth hit for finding: %s', finding_id)
         return
     for f in finding.original_finding.all():
         # for all duplicates set the original as their original, get rid of self in between

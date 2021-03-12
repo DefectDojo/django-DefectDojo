@@ -337,6 +337,10 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
+
+    # Make sure transitive duplication is flattened
+    # if A -> B and B is made a duplicate of C here, aferwards:
+    # A -> C and B -> C should be true
     for find in new_finding.original_finding.all():
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
