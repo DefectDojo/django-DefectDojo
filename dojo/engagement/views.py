@@ -318,7 +318,7 @@ def view_engagement(request, eid):
     form = DoneForm()
     files = eng.files.all()
     if request.method == 'POST':
-        user_has_permission_or_403(request.user, eng, Permissions.Engagement_Edit)
+        user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
         eng.progress = 'check_list'
         eng.save()
 
@@ -887,7 +887,7 @@ def complete_checklist(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     finding = None
@@ -962,7 +962,7 @@ def view_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def edit_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
 
@@ -1126,7 +1126,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1136,7 +1136,7 @@ def expire_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1149,7 +1149,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Risk_Acceptance, 'eid', 'staff')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)

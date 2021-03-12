@@ -34,13 +34,14 @@ from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions, prefetch, schema
-from django.db.models import Count, Q
+from django.db.models import Q
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.test.queries import get_authorized_tests
 from dojo.authorization.roles_permissions import Permissions, Roles
 
 logger = logging.getLogger(__name__)
@@ -1033,24 +1034,20 @@ class TestsViewSet(mixins.ListModelMixin,
                    ra_api.AcceptedRisksMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.TestSerializer
-    queryset = Test.objects.all().prefetch_related(
-                                                'notes',
-                                                'files')
+    queryset = Test.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiTestFilter
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasTestPermission)
 
     @property
     def risk_application_model_class(self):
         return Test
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(
-                Q(engagement__product__authorized_users__in=[self.request.user]) |
-                Q(engagement__product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return self.queryset
+        return get_authorized_tests(Permissions.Test_View).prefetch_related(
+                                                'notes',
+                                                'files').distinct()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -1313,7 +1310,7 @@ class ImportScanView(mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
-    queryset = Test.objects.all()
+    queryset = Test.objects.none()
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def perform_create(self, serializer):
@@ -1327,14 +1324,20 @@ class ImportScanView(mixins.CreateModelMixin,
         logger.debug('push_to_jira: %s', serializer.validated_data.get('push_to_jira'))
         serializer.save(push_to_jira=push_to_jira)
 
+    def get_queryset(self):
+        return get_authorized_tests(Permissions.Import_Scan_Result)
+
 
 # Authorization: authenticated users, DjangoModelPermissions
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
-    queryset = Test.objects.all()
+    queryset = Test.objects.none()
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
+
+    def get_queryset(self):
+        return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
         test = serializer.validated_data['test']

@@ -29,6 +29,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.test.queries import get_authorized_tests
 from django.forms import HiddenInput
 
 logger = logging.getLogger(__name__)
@@ -350,7 +351,7 @@ class ComponentFilter(ProductComponentFilter):
         queryset=Product_Type.objects.none(),
         label="Product Type")
     test__engagement__product = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.none(),
+        queryset=Product.objects.none(),
         label="Product")
 
     def __init__(self, *args, **kwargs):
@@ -1587,13 +1588,7 @@ class MetricsFindingFilter(FilterSet):
         ).values_list('severity', 'severity').distinct()
         self.form.fields[
             'test__engagement__product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
-        if get_current_user() is not None and not get_current_user().is_staff:
-            self.form.fields[
-                'test'].queryset = Test.objects.filter(
-                Q(engagement__product__authorized_users__in=[get_current_user()]) |
-                Q(engagement__product__prod_type__authorized_users__in=[get_current_user()]))
-        # str() uses test_type
-        self.form.fields['test'].queryset = self.form.fields['test'].queryset.prefetch_related('test_type')
+        self.form.fields['test'].queryset = get_authorized_tests(Permissions.Test_View).prefetch_related('test_type')
 
     class Meta:
         model = Finding
@@ -2272,7 +2267,10 @@ class ProductTypeFilter(DojoFilter):
 
     class Meta:
         model = Product_Type
-        exclude = []
+        if settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['authorized_users']
+        else:
+            exclude = ['members']
         include = ('name',)
 
 

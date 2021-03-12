@@ -376,7 +376,7 @@
             <div class="panel-heading">
                 <h4> Risk Acceptance
                     {% if eng.product.enable_full_risk_acceptance %}
-                    {% if eng|has_object_permission:"Engagement_Risk_Acceptance" or user|is_authorized_for_staff:eng %}
+                    {% if eng|has_object_permission:"Risk_Acceptance" or user|is_authorized_for_staff:eng %}
                         <a title="Add Risk Acceptance..." class="pull-right btn btn-sm btn-primary"
                            href="{% url 'add_risk_acceptance' eng.id %}?return_url={{ request.get_full_path|urlencode }}"><span class="fa fa-plus"></span></a>
                         </a>
