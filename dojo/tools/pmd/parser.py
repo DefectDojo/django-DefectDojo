@@ -25,7 +25,7 @@ class PmdParser(object):
 
         for row in reader:
             finding = Finding(test=test)
-            finding.title = row["Rule"]
+            finding.title = f'PMD rule {row["Rule"]}'
             if row["Priority"] == "5":
                 priority = "Critical"
             elif row["Priority"] == "4":
@@ -43,12 +43,19 @@ class PmdParser(object):
             description = "Description: {}\n".format(row['Description'].strip())
             description += "Rule set: {}\n".format(row["Rule set"].strip())
             description += "Problem: {}\n".format(row["Problem"].strip())
+            description += "Package: {}\n".format(row["Package"].strip())
             finding.description = description
             finding.line = row["Line"]
             finding.file_path = row["File"]
-            finding.component_name = row["Package"]
+            finding.impact = "No impact provided"
+            finding.mitigation = "No mitigation provided"
 
-            key = hashlib.sha256((finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
+            key = hashlib.sha256("|".join([
+                finding.title,
+                finding.description,
+                finding.file_path,
+                finding.line
+            ]).encode("utf-8")).hexdigest()
 
             if key not in dupes:
                 dupes[key] = finding
