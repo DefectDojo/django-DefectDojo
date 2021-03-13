@@ -731,18 +731,26 @@ def finding_display_status(finding):
 
 @register.filter
 def is_authorized_for_change(user, obj):
-    return user_is_authorized(user, 'change', obj)
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        return user_is_authorized(user, 'change', obj)
+    else:
+        return False
 
 
 @register.filter
 def is_authorized_for_delete(user, obj):
-    return user_is_authorized(user, 'delete', obj)
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        return user_is_authorized(user, 'delete', obj)
+    else:
+        return False
 
 
 @register.filter
 def is_authorized_for_staff(user, obj):
-    result = user_is_authorized(user, 'staff', obj)
-    return result
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        return user_is_authorized(user, 'staff', obj)
+    else:
+        return False
 
 
 @register.filter

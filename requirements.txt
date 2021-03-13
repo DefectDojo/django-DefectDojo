@@ -3,7 +3,7 @@ asteval==0.9.23
 bleach==3.3.0
 celery==4.4.7
 coverage==5.5
-defusedxml==0.7.0
+defusedxml==0.7.1
 django_celery_results==2.0.1
 django-auditlog==1.0a1
 django-dbbackup==3.3.0
@@ -31,10 +31,10 @@ PyGithub==1.54.1
 lxml==4.6.2
 Markdown==3.3.4
 mysqlclient==2.0.3
-openpyxl==3.0.6
+openpyxl==3.0.7
 xlrd==1.2.0
 pdfkit==0.6.1
-Pillow==8.1.1  # required by django-imagekit
+Pillow==8.1.2  # required by django-imagekit
 psycopg2-binary==2.8.6
 cryptography==3.4.6
 python-dateutil==2.8.1
@@ -49,7 +49,7 @@ vobject==0.9.6.1
 whitenoise==5.2.0
 titlecase==2.0.0
 social-auth-app-django==4.0.0
-social-auth-core==4.0.3
+social-auth-core==4.1.0
 Python-jose==3.2.0
 gitpython==3.1.14
 ptvsd==4.3.2
@@ -73,3 +73,4 @@ PyJWT==2.0.1
 cvss==2.2
 django-jsonfield-backport==1.0.3
 django-fieldsignals==0.6.0
+hyperlink==21.0.0
