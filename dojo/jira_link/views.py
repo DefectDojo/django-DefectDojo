@@ -108,7 +108,7 @@ def webhook(request, secret=None):
                                 finding.active = False
                                 finding.mitigated = now
                                 finding.is_Mitigated = True
-                                finding.mitigated_by = User.objects.get_or_create(username='JIRA')
+                                finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
                                 finding.endpoints.clear()
                                 finding.false_p = False
                                 ra_helper.remove_from_any_risk_acceptance(finding)
