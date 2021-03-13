@@ -23,7 +23,10 @@ def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwar
 
     for field, (old, new) in changed_fields.items():
         logger.debug("%i: %s changed from %s to %s" % (instance.id or 0, field, old, new))
-        update_finding_status(instance, get_current_user(), changed_fields)
+        user = None
+        if get_current_user() and get_current_user().is_authenticated:
+            user = get_current_user()
+        update_finding_status(instance, user, changed_fields)
 
 
 # also get signal when id is set/changed so we can process new findings
