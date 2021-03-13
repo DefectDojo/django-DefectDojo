@@ -455,6 +455,24 @@ class ProductEngagementFilter(DojoFilter):
 class ApiEngagementFilter(DojoFilter):
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
 
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('name', 'name'),
+            ('version', 'version'),
+            ('target_start', 'target_start'),
+            ('target_end', 'target_end'),
+            ('status', 'status'),
+            ('lead', 'lead'),
+            ('created', 'created'),
+            ('updated', 'updated'),
+        ),
+        field_labels={
+            'name': 'Engagement Name',
+        }
+
+    )
+
     class Meta:
         model = Engagement
         fields = ['id', 'active', 'eng_type', 'target_start',
@@ -1442,6 +1460,14 @@ class TemplateFindingFilter(DojoFilter):
 class ApiTemplateFindingFilter(DojoFilter):
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
 
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('title', 'title'),
+            ('cwe', 'cwe'),
+        ),
+    )
+
     class Meta:
         model = Finding_Template
         fields = ['id', 'title', 'cwe', 'severity', 'description',
@@ -1803,6 +1829,14 @@ class EndpointFilter(DojoFilter):
 class ApiEndpointFilter(DojoFilter):
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
 
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('host', 'host'),
+            ('product', 'product'),
+        ),
+    )
+
     class Meta:
         model = Endpoint
         fields = ['id', 'host', 'product']
@@ -1858,6 +1892,25 @@ class EngagementTestFilter(DojoFilter):
 
 class ApiTestFilter(DojoFilter):
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('title', 'title'),
+            ('version', 'version'),
+            ('target_start', 'target_start'),
+            ('target_end', 'target_end'),
+            ('test_type', 'test_type'),
+            ('lead', 'lead'),
+            ('version', 'version'),
+            ('engagement', 'engagement'),
+            ('created', 'created'),
+            ('updated', 'updated'),
+        ),
+        field_labels={
+            'name': 'Test Name',
+        }
+    )
 
     class Meta:
         model = Test
