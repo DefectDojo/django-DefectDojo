@@ -462,7 +462,7 @@
                                         </li>
                                         <li class="divider"></li>
                                         {% endif %}
-                                    {% if user|is_authorized_for_staff:finding %}
+                                    {% if finding|has_object_permission:"Finding_Edit" or user|is_authorized_for_staff:finding %}
                                         <li role="presentation">
                                             <a href="{% url 'manage_images' finding.id %}">
                                                 <i class="fa fa-file-image-o"></i> Manage Images

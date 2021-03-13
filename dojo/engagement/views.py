@@ -39,7 +39,6 @@ from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 from django.db.models.query import QuerySet
-from dojo.user.helper import check_auth_users_list
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.helper import prefetch_for_expiration
@@ -971,7 +970,7 @@ def edit_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
 
 
-# TODO: what kind of permission here?
+# will only be called by view_risk_acceptance and edit_risk_acceptance
 def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1175,11 +1174,6 @@ def download_risk_acceptance(request, eid, raid):
     mimetypes.init()
 
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    en = get_object_or_404(Engagement, pk=eid)
-    if request.user.is_staff or check_auth_users_list(request.user, en):
-        pass
-    else:
-        raise PermissionDenied
 
     response = StreamingHttpResponse(
         FileIterWrapper(
