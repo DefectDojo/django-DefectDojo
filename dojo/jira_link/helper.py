@@ -11,7 +11,7 @@ from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
 from dojo.models import Finding, Finding_Group, Risk_Acceptance, Test, Engagement, Product, JIRA_Issue, JIRA_Project, \
-    System_Settings, Notes, JIRA_Instance
+    System_Settings, Notes, JIRA_Instance, User
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 from django.contrib import messages
@@ -1287,6 +1287,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.active = False
                 finding.mitigated = jira_now
                 finding.is_Mitigated = True
+                finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
                 finding.endpoints.clear()
                 finding.false_p = False
                 ra_helper.remove_from_any_risk_acceptance(finding)
