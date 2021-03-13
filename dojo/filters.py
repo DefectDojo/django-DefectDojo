@@ -747,6 +747,8 @@ class ApiFindingFilter(DojoFilter):
             ('component_name', 'component_name'),
             ('component_version', 'component_version'),
             ('created', 'created'),
+            ('last_status_update', 'last_status_update'),
+            ('last_reviewed', 'last_reviewed'),
             ('cve', 'cve'),
             ('cwe', 'cwe'),
             ('date', 'date'),
