@@ -10,7 +10,7 @@ import googleapiclient.discovery
 from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -75,7 +75,11 @@ def view_test(request, tid):
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
     system_settings = get_object_or_404(System_Settings, id=1)
     if request.method == 'POST':
-        user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
         if note_type_activation:
             form = TypedNoteForm(request.POST, available_note_types=available_note_types)
         else:

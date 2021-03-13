@@ -34,7 +34,7 @@
             </form>
           </div>
           {% endif %}
-          {% if user.username == note.author.username or object|has_object_permission:"Note_Edit" or user|is_authorized_for_staff:obj %}
+          {% if user.username == note.author.username or object|has_object_permission:"Note_Edit" or user|is_authorized_for_staff:object %}
           <div class="pull-right">
             <form method="get" action="{% url 'edit_note' note.id destination object.id %}">
                 {% csrf_token %}

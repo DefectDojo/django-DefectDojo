@@ -318,7 +318,11 @@ def view_engagement(request, eid):
     form = DoneForm()
     files = eng.files.all()
     if request.method == 'POST':
-        user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
         eng.progress = 'check_list'
         eng.save()
 
