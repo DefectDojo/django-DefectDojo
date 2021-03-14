@@ -77,7 +77,7 @@ class WFuzzParser(object):
                 payload = item['payload']
                 return_code = int(item['code'])
                 severity = SEVERITY[return_code]
-                dupe_key = hashlib.md5(str(url + str(return_code) + url_path).encode("utf-8")).hexdigest()
+                dupe_key = hashlib.sha256(str(url + str(return_code) + url_path).encode("utf-8")).hexdigest()
 
                 if dupe_key not in dupes:
                     finding = Finding(title='Found ' + m.group('url_protocol') + '://' + url + url_path,
