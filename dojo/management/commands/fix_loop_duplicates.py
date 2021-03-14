@@ -21,7 +21,6 @@ class Command(BaseCommand):
 def fix_loop_duplicates():
     candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).all().order_by("-id")
     deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
-    # raise ValueError('b')
     for find_id in candidates.values_list('id', flat=True):
         removeLoop(find_id, 5)
 
