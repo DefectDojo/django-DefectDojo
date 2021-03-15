@@ -21,7 +21,7 @@ echo "Unit Tests"
 echo "------------------------------------------------------------"
 python3 manage.py test dojo.unittests -v 3 --no-input --exclude-tag broken
 
-# you can select a single file to "test" unit tests 
+# you can select a single file to "test" unit tests
 # python3 manage.py test dojo.unittests.test_npm_audit_scan_parser.TestNpmAuditParser --keepdb -v 3
 
 # or even a single method
