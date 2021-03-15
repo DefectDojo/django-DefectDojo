@@ -1122,9 +1122,9 @@ class ImportScanSerializer(serializers.Serializer):
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = self.context['request'].user
 
-                if item.active is None:
+                if item.active:
                     item.active = data['active']
-                if item.verified is None:
+                if item.verified:
                     item.verified = data['verified']
 
                 logger.debug('going to save finding')
