@@ -10,16 +10,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-"""
-Author: Valentijn scholten
-modes:
-- reconcile: reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status update in Defect Dojo and the 'updated' field in the JIRA Issue.
-- push_to_jira: overwrite status in JIRA with status in Defect Dojo
-- sync_from_jira: overwrite status in Defect Dojo with status from JIRA
-"""
-
-
 class Command(BaseCommand):
+    """
+    Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results.
+    Risk Accepted findings are skipped.'
+
+    modes:
+    - reconcile: reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status update in Defect Dojo and the 'updated' field in the JIRA Issue.
+    - push_to_jira: overwrite status in JIRA with status in Defect Dojo
+    - sync_from_jira: overwrite status in Defect Dojo with status from JIRA
+    """
+
     help = 'Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. \
         Risk Accepted findings are skipped. Findings created before 1.14.0 are skipped.'
 
@@ -191,7 +192,7 @@ class Command(BaseCommand):
 
                     message_action = 'reopening' if find.active else 'closing'
 
-                    status_changed = jira_helper.push_status_to_jira(find, jira_instance, jira, issue_from_jira) if not dryrun else 'dryrun'
+                    status_changed = jira_helper.push_status_to_jira(find, jira_instance, jira, issue_from_jira, save=True) if not dryrun else 'dryrun'
 
                     if status_changed:
                         message = '%s; %s/finding/%d;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s;%s jira issue;%s;' % \

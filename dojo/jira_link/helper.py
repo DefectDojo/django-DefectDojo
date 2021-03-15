@@ -795,25 +795,30 @@ def issue_from_jira_is_active(issue_from_jira):
     return False
 
 
-def push_status_to_jira(obj, jira_instance, jira, issue):
+def push_status_to_jira(obj, jira_instance, jira, issue, save=False):
 
     status_list = obj.status()
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
     if any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
             logger.debug('Transitioning Jira issue to Resolved')
-            return jira_transition(jira, issue, jira_instance.close_status_key)
+            updated = jira_transition(jira, issue, jira_instance.close_status_key)
         else:
             logger.debug('Jira issue already Resolved')
-            return False
+            updated = False
+        issue_closed = True
 
-    if any(item in status_list for item in OPEN_STATUS):
+    if not issue_closed and any(item in status_list for item in OPEN_STATUS):
         if not issue_from_jira_is_active(issue):
             logger.debug('Transitioning Jira issue to Active (Reopen)')
-            return jira_transition(jira, issue, jira_instance.open_status_key)
+            updated = jira_transition(jira, issue, jira_instance.open_status_key)
         else:
             logger.debug('Jira issue already Active')
-            return False
+            updated = False
+
+    if updated and save:
+        obj.jira_issue.jira_change = timezone.now()
+        obj.jira_issue.save()
 
 
 # gets the metadata for the default issue type in this jira project
