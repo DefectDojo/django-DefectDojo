@@ -166,9 +166,8 @@ class TestDuplicationLogic(TestCase):
 
     def test_identical_ordering_legacy(self):
         finding_22 = Finding.objects.get(id=22)
-        # 23 is already a duplicate of 22, but let's reset it's status. then update 24 and see if it gets marked as duplicate of 22 or 23
-        # expect: marked as duplicate of 23 as 23 is older (date field on finding)
-        # but feature or BUG? it will get marked as duplicate of 22 as it becomes earlier in the findings list (or ordering is by date desc)
+        # 23 is already a duplicate of 22, but let's reset it's status. then create a new finding and see if it gets marked as duplicate of 22 or 23
+        # expect: marked as duplicate of 22 as lowest finding_id should be chosen as original
 
         finding_23 = Finding.objects.get(id=23)
         finding_23.duplicate = False
@@ -426,9 +425,8 @@ class TestDuplicationLogic(TestCase):
 
     def test_identical_ordering_hash_code(self):
         finding_2 = Finding.objects.get(id=2)
-        # 3 is already a duplicate of 2, but let's reset it's status. then update 24 and see if it gets marked as duplicate of 22 or 23
-        # expect: marked as duplicate of 3 as 3 is older (date field on finding)
-        # but feature or BUG? it will get marked as duplicate of 2 as it becomes earlier in the findings list (or ordering is by date desc)
+        # 3 is already a duplicate of 2, but let's reset it's status. then update 24 and see if it gets marked as duplicate of 2 or 3
+        # expect: marked as duplicate of 2 as lowest finding_id should be chosen as original
 
         finding_3 = Finding.objects.get(id=3)
         finding_3.duplicate = False
@@ -709,7 +707,7 @@ class TestDuplicationLogic(TestCase):
         finding_new.title = finding_124.title  # use title from 124 to get matching hashcode
         finding_new.save()
 
-        # it should match finding 224 as uid matches, but dd currently matches against 124 as that has the same hashcode and is earlier in the list of findings
+        # marked as duplicate of 124 as that has the same hashcode and is earlier in the list of findings ordered by id
         self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
 
     def test_different_unique_id_unique_id_or_hash_code(self):
