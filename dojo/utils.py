@@ -495,8 +495,7 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
         for f in findings:
             if f.mitigated is not None and end_of_period >= f.mitigated >= start_of_period:
                 o_count['closed'] += 1
-            elif f.mitigated is not None and f.mitigated > end_of_period and f.date <= end_of_period.date(
-            ):
+            elif f.mitigated is not None and f.mitigated > end_of_period and f.date <= end_of_period.date():
                 if f.severity == 'Critical':
                     o_count['zero'] += 1
                 elif f.severity == 'High':
@@ -508,20 +507,15 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
             elif f.mitigated is None and f.date <= end_of_period.date():
                 if f.severity == 'Critical':
                     o_count['zero'] += 1
-                elif f.severity == 'High':
-                    o_count['one'] += 1
-                elif f.severity == 'Medium':
-                    o_count['two'] += 1
-                elif f.severity == 'Low':
-                    o_count['three'] += 1
-            elif f.mitigated is None and f.date <= end_of_period.date():
-                if f.severity == 'Critical':
                     a_count['zero'] += 1
                 elif f.severity == 'High':
+                    o_count['one'] += 1
                     a_count['one'] += 1
                 elif f.severity == 'Medium':
+                    o_count['two'] += 1
                     a_count['two'] += 1
                 elif f.severity == 'Low':
+                    o_count['three'] += 1
                     a_count['three'] += 1
 
         total = sum(o_count.values()) - o_count['closed']
