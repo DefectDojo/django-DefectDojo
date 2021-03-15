@@ -700,6 +700,8 @@ def update_jira_issue(obj, *args, **kwargs):
             priority={'name': jira_priority(obj)},
             fields=fields)
 
+        push_status_to_jira(obj, jira_instance, jira, issue)
+
         # Upload dojo finding screenshots to Jira
         findings = [obj]
         if type(obj) == Finding_Group:

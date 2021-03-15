@@ -361,7 +361,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "url": "http://www.example.com",
             "thread_id": 1,
             "found_by": [],
-            "title": "DUMMY FINDING",
+            "title": "DUMMY FINDING123",
             "date": "2020-05-20",
             "cwe": 1,
             "severity": "HIGH",
@@ -387,7 +387,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "images": [],
             "tags": ['tag1', 'tag_2'],
         }
-        self.update_fields = {'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
+        self.update_fields = {'duplicate': False, 'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_duplicate(self):
