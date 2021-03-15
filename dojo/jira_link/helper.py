@@ -10,8 +10,8 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Test, Engagement, Product, JIRA_Issue, JIRA_Project, \
-    System_Settings, Notes, JIRA_Instance
+from dojo.models import Finding, Risk_Acceptance, Test, Engagement, Product, JIRA_Issue, JIRA_Project, \
+    System_Settings, Notes, JIRA_Instance, User
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 from django.contrib import messages
@@ -366,10 +366,11 @@ def jira_get_resolution_id(jira, issue, status):
     return resolution_id
 
 
-def jira_change_resolution_id(jira, issue, jid):
+def jira_transition(jira, issue, transition_id):
     try:
-        if issue and jid:
-            jira.transition_issue(issue, jid)
+        if issue and transition_id:
+            jira.transition_issue(issue, transition_id)
+            return True
     except JIRAError as jira_error:
         logger.debug('error transisioning jira issue ' + issue.key + ' ' + str(jira_error))
         logger.exception(jira_error)
@@ -656,14 +657,7 @@ def update_jira_issue(find):
             priority={'name': jira_instance.get_priority(find.severity)},
             fields=fields)
 
-        status_list = find.status()
-        if any(item in status_list for item in OPEN_STATUS):
-            logger.debug('Transitioning Jira issue to Active')
-            jira_change_resolution_id(jira, issue, jira_instance.open_status_key)
-
-        if any(item in status_list for item in RESOLVED_STATUS):
-            logger.debug('Transitioning Jira issue to Resolved')
-            jira_change_resolution_id(jira, issue, jira_instance.close_status_key)
+        push_status_to_jira(find, jira_instance, jira, issue)
 
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
@@ -685,6 +679,93 @@ def update_jira_issue(find):
         logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
         log_jira_alert(e.text, find)
         return False
+
+
+def get_jira_issue_from_jira(find):
+    logger.debug('getting jira issue from JIRA for %d:%s', find.id, find)
+
+    if not is_jira_enabled():
+        return False
+
+    jira_project = get_jira_project(find)
+    jira_instance = get_jira_instance(find)
+
+    j_issue = find.jira_issue
+    if not jira_project:
+        logger.error("Unable to retrieve latest status change from JIRA %s for finding %s as there is no JIRA_Project configured for this finding.", j_issue.jira_key, format(find.id))
+        log_jira_alert("Unable to retrieve latest status change from JIRA %s for finding %s as there is no JIRA_Project configured for this finding." % (j_issue.jira_key, find), find)
+        return False
+
+    meta = None
+    try:
+        JIRAError.log_to_tempfile = False
+        jira = get_jira_connection(jira_instance)
+
+        logger.debug('getting issue from JIRA')
+        issue_from_jira = jira.issue(j_issue.jira_id)
+
+        return issue_from_jira
+
+    except JIRAError as e:
+        logger.exception(e)
+        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+        log_jira_alert(e.text, find)
+        return None
+
+
+def issue_from_jira_is_active(issue_from_jira):
+    #         "resolution":{
+    #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
+    #             "id":"11",
+    #             "description":"Cancelled by the customer.",
+    #             "name":"Cancelled"
+    #         },
+
+    # or
+    #         "resolution": null
+
+    # or
+    #         "resolution": "None"
+
+    if not hasattr(issue_from_jira.fields, 'resolution'):
+        print(vars(issue_from_jira))
+        return True
+
+    if not issue_from_jira.fields.resolution:
+        return True
+
+    if issue_from_jira.fields.resolution == "None":
+        return True
+
+    # some kind of resolution is present that is not null or None
+    return False
+
+
+def push_status_to_jira(find, jira_instance, jira, issue, save=False):
+
+    status_list = find.status()
+    issue_closed = False
+    # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
+    if any(item in status_list for item in RESOLVED_STATUS):
+        if issue_from_jira_is_active(issue):
+            logger.debug('Transitioning Jira issue to Resolved')
+            updated = jira_transition(jira, issue, jira_instance.close_status_key)
+        else:
+            logger.debug('Jira issue already Resolved')
+            updated = False
+        issue_closed = True
+
+    if not issue_closed and any(item in status_list for item in OPEN_STATUS):
+        if not issue_from_jira_is_active(issue):
+            logger.debug('Transitioning Jira issue to Active (Reopen)')
+            updated = jira_transition(jira, issue, jira_instance.open_status_key)
+        else:
+            logger.debug('Jira issue already Active')
+            updated = False
+
+    if updated and save:
+        find.jira_issue.jira_change = timezone.now()
+        find.jira_issue.save()
 
 
 # gets the metadata for the default issue type in this jira project
@@ -1119,3 +1200,68 @@ def process_jira_epic_form(request, engagement=None):
 # so [%s|%s] % (escape_for_jira(name), url)
 def escape_for_jira(text):
     return text.replace('|', '%7D')
+
+
+def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now) -> bool:
+    """ Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly """
+    import dojo.risk_acceptance.helper as ra_helper
+    status_changed = False
+    resolved = resolution_id is not None
+    jira_instance = get_jira_instance(finding)
+
+    if finding.active is resolved:
+        if finding.active:
+            if jira_instance and resolution_name in jira_instance.accepted_resolutions:
+                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(finding.jira_issue.jira_key))
+                finding.active = False
+                finding.mitigated = None
+                finding.is_Mitigated = False
+                finding.false_p = False
+                Risk_Acceptance.objects.create(
+                    accepted_by=assignee_name,
+                    owner=finding.reporter,
+                ).accepted_findings.set([finding])
+                status_changed = True
+            elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
+                logger.debug("Marking related finding of {} as false-positive".format(finding.jira_issue.jira_key))
+                finding.active = False
+                finding.verified = False
+                finding.mitigated = None
+                finding.is_Mitigated = False
+                finding.false_p = True
+                ra_helper.remove_from_any_risk_acceptance(finding)
+                status_changed = True
+            else:
+                # Mitigated by default as before
+                logger.debug("Marking related finding of {} as mitigated (default)".format(finding.jira_issue.jira_key))
+                finding.active = False
+                finding.mitigated = jira_now
+                finding.is_Mitigated = True
+                finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
+                finding.endpoints.clear()
+                finding.false_p = False
+                ra_helper.remove_from_any_risk_acceptance(finding)
+                status_changed = True
+        else:
+            # Reopen / Open Jira issue
+            logger.debug("Re-opening related finding of {}".format(finding.jira_issue.jira_key))
+            finding.active = True
+            finding.mitigated = None
+            finding.is_Mitigated = False
+            finding.false_p = False
+            ra_helper.remove_from_any_risk_acceptance(finding)
+            status_changed = True
+    else:
+        # Reopen / Open Jira issue
+        logger.debug("Re-opening related finding of {}".format(finding.jira_issue.jira_key))
+        finding.active = True
+        finding.mitigated = None
+        finding.is_Mitigated = False
+        finding.false_p = False
+        ra_helper.remove_from_any_risk_acceptance(finding)
+        status_changed = True
+
+    finding.jira_issue.jira_change = jira_now
+    finding.jira_issue.save()
+    finding.save()
+    return status_changed

@@ -66,6 +66,8 @@ def product(request):
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
     prod_list.object_list = prefetch_for_product(prod_list.object_list)
 
+    # print(prod_list.object_list.explain)
+
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
                   'dojo/product.html',

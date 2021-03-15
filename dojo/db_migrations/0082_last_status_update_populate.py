@@ -12,7 +12,7 @@ def populate_last_status_update(apps, schema_editor):
 
     now = timezone.now()
     Finding = apps.get_model('dojo', 'Finding')
-    findings = Finding.objects.order_by('id').only('id', 'is_Mitigated', 'mitigated', 'last_reviewed', 'last_status_update')
+    findings = Finding.objects.order_by('id').only('id', 'is_Mitigated', 'mitigated')
 
     page_size = 1000
     # use filter to make count fast on mysql
@@ -24,29 +24,35 @@ def populate_last_status_update(apps, schema_editor):
     # so we use a 'seek' method
 
     i = 0
+    batch = []
     last_id = 0
-    for p in range(1, (total_count // page_size) + 1):
+    total_pages = (total_count // page_size) + 2
+    for p in range(1, total_pages):
         page = findings.filter(id__gt=last_id)[:page_size]
-        batch = []
         for find in page:
             i += 1
             last_id = find.id
+            # logger.info('last_id: %s', last_id)
 
+            # last_status_update is set to now by default by migration or when adding a finding
+            # for existing findings this should not be 'now'.
+            # only valid value would be from miti   gated, otherwise we set it to None
+            # to avoid code relying on it while the value is not reliable
             if find.is_Mitigated:
-                find.mitigated = find.mitigated or now
-
-            # by default it is 'now' from the migration, but last_reviewed (or mitigated) is better default for existing findings
-            if find.last_reviewed:
-                find.last_status_update = find.last_reviewed
-            elif find.mitigated:
                 find.last_status_update = find.mitigated
+            else:
+                find.last_status_update = None
 
             batch.append(find)
 
-            if i > 0 and i % page_size == 0:
-                Finding.objects.bulk_update(batch, ['last_status_update', 'mitigated'])
+            if (i > 0 and i % page_size == 0):
+                Finding.objects.bulk_update(batch, ['last_status_update'])
                 batch = []
-                logger.info('%s out of %s findings updated...', i, total_count)
+                logger.info('%s out of %s findings processed ...', i, total_count)
+
+    Finding.objects.bulk_update(batch, ['last_status_update'])
+    batch = []
+    logger.info('%s out of %s findings processed ...', i, total_count)
 
 
 class Migration(migrations.Migration):
