@@ -28,17 +28,17 @@ def match_new_finding_to_existing_finding(new_finding, test, deduplication_algor
         return Finding.objects.filter(
             test=test,
             hash_code=new_finding.hash_code).exclude(
-                        hash_code=None)
+                        hash_code=None).order_by('id')
     elif deduplication_algorithm == 'unique_id_from_tool':
         return Finding.objects.filter(
             test=test,
             unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
-                        unique_id_from_tool=None)
+                        unique_id_from_tool=None).order_by('id')
     elif deduplication_algorithm == 'unique_id_from_tool_or_hash_code':
         return Finding.objects.filter(
             Q(test=test),
             (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
-            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool)))
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool))).order_by('id')
     elif deduplication_algorithm == 'legacy':
         # This is the legacy reimport behavior. Although it's pretty flawed and doesn't match the legacy algorithm for deduplication,
         # this is left as is for simplicity.
@@ -51,13 +51,13 @@ def match_new_finding_to_existing_finding(new_finding, test, deduplication_algor
                 test=test,
                 severity=new_finding.severity,
                 numerical_severity=Finding.get_numerical_severity(new_finding.severity),
-                description=new_finding.description)
+                description=new_finding.description).order_by('id')
         else:
             return Finding.objects.filter(
                 title=new_finding.title,
                 test=test,
                 severity=new_finding.severity,
-                numerical_severity=Finding.get_numerical_severity(new_finding.severity))
+                numerical_severity=Finding.get_numerical_severity(new_finding.severity)).order_by('id')
     else:
         logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
         return None
