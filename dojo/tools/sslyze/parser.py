@@ -21,8 +21,6 @@ class SslyzeParser(object):
         if filename is None:
             return list()
 
-        content = filename.read()
-
         if filename.name.lower().endswith('.xml'):
             return SSLyzeXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith('.json'):
