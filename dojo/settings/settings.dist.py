@@ -175,6 +175,10 @@ env = environ.Env(
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
+    # Feature toggle to show legacy list of PDF reports
+    # You need to have wkhtmltopdf installed on your system to generate PDF reports
+    DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
+
     DD_JIRA_TEMPLATE_DIR=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/')
 )
@@ -1026,6 +1030,10 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
 # When enabled, staff users have full access to all product types and products
 AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
+
+# Feature toggle to show legacy list of PDF reports
+# You need to have wkhtmltopdf installed on your system to generate PDF reports
+FEATURE_REPORTS_PDF_LIST = env('DD_FEATURE_REPORTS_PDF_LIST')
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 

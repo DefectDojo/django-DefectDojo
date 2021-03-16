@@ -280,7 +280,10 @@
                                     <span class="glyphicon arrow"></span>
                                 </a>
                                 <ul class="nav nav-second-level">
-                                    <li><a href="{% url 'reports' %}"> All Reports </a></li>
+                                    {% feature_reports_pdf_list as feature_reports_pdf_list_flag %}
+                                    {% if feature_reports_pdf_list_flag %}
+                                        <li><a href="{% url 'reports' %}"> All Reports </a></li>
+                                    {% endif %}
                                     <li><a href="{% url 'report_builder' %}"> Report Builder </a></li>
                                 </ul>
                                 <!-- /.nav-second-level -->
