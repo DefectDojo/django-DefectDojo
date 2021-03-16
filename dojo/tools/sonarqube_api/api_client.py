@@ -3,6 +3,7 @@ import requests
 from dojo.models import Tool_Configuration, Tool_Type
 from dojo.utils import prepare_for_view
 
+
 class SonarQubeAPI:
 
     def __init__(self, tool_config=None):
