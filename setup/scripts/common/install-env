@@ -60,15 +60,3 @@ DD_TEAM_NAME=#DD_TEAM_NAME#
 
 # Admins for log emails - default is dojo-srv@localhost
 DD_ADMINS=#DD_ADMINS#
-
-# Port scan contact email - default is dojo-srv@localhost
-DD_PORT_SCAN_CONTACT_EMAIL=email@localhost
-
-# Port scan from email - default is dojo-srv@localhost
-DD_PORT_SCAN_RESULT_EMAIL_FROM=#DD_PORT_SCAN_RESULT_EMAIL_FROM#
-
-# Port scan email list - default is dojo-srv@localhost
-DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=#DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST#
-
-# Port scan source - default is 127.0.0.1
-DD_PORT_SCAN_SOURCE_IP=#DD_PORT_SCAN_SOURCE_IP#

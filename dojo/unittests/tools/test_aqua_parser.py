@@ -35,3 +35,25 @@ class TestAquaParser(TestCase):
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
+
+    def test_aqua_parser_cvssv3_has_no_finding(self):
+        with open("dojo/unittests/scans/aqua/many_v2.json") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            nb_cvssv3 = 0
+            for finding in findings:
+                if finding.cvssv3 is not None:
+                    nb_cvssv3 = nb_cvssv3 + 1
+
+            self.assertEqual(0, nb_cvssv3)
+
+    def test_aqua_parser_cvssv3_has_many_findings(self):
+        with open("dojo/unittests/scans/aqua/many_vulns.json") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            nb_cvssv3 = 0
+            for finding in findings:
+                if finding.cvssv3 is not None:
+                    nb_cvssv3 = nb_cvssv3 + 1
+
+            self.assertEqual(16, nb_cvssv3)

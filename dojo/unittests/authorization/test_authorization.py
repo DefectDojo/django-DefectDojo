@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint
@@ -103,6 +103,25 @@ class TestAuthorization(TestCase):
         self.assertFalse(result)
         self.assertEqual(mock_get.call_args[1]['user'], self.user)
         self.assertEqual(mock_get.call_args[1]['product_type'], self.product_type)
+
+    def test_user_has_permission_superuser(self):
+        self.user.is_superuser = True
+
+        result = user_has_permission(self.user, self.product_type, Permissions.Product_Type_Delete)
+
+        self.assertTrue(result)
+
+        self.user.is_superuser = False
+
+    @override_settings(AUTHORIZATION_STAFF_OVERRIDE=True)
+    def test_user_has_permission_staff_override(self):
+        self.user.is_staff = True
+
+        result = user_has_permission(self.user, self.product_type, Permissions.Product_Type_Delete)
+
+        self.assertTrue(result)
+
+        self.user.is_staff = False
 
     @patch('dojo.models.Product_Type_Member.objects.get')
     def test_user_has_permission_product_type_success(self, mock_get):

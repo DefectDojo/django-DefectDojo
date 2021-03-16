@@ -31,12 +31,11 @@ You'd want to build your docker images locally, and eventually pass in your loca
 
 | File                                          | Purpose
 |-------                                        |--------
-|`dojo/fixtures/test_type.json`                 | Django fixture for the type of scan. Take the next available integer if you intend to push upstream. If you're planning to use only in your own fork, you could jump ahead by 1000 to avoid any potential conflicts.
 |`dojo/tools/<parser_dir>/__init__.py`          | Empty file for class initialization
 |`dojo/tools/<parser_dir>/parser.py`            | The meat. This is where you write your actual parser
 |`dojo/unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
-|`dojo/unittests/test_<parser_dir>_parser.py`   | The unittest class, holding unit tests definitions
-|`dojo/tools/factory.py`                        | Import there your new parser class and add it to the long list of `register_parser`  statement
+|`dojo/unittests/tools/test_<parser_dir>_parser.py`   | The unittest class, holding unit tests definitions
+
 
 ## Things to pay attention to
 
@@ -92,8 +91,8 @@ Of course, nothing prevents you from having more files than the `parser.py` file
 
 If you want to take a look at previous parsers that are now part of DefectDojo, take a look at https://github.com/DefectDojo/django-DefectDojo/pulls?q=is%3Apr+label%3A%22import+scans%22+
 
-## Update the readthedocs documentation
+## Update the github pages documentation
 
-The DefectDojo official documentation lives in another repository, https://github.com/DefectDojo/documentation
+The DefectDojo official documentation lives in the docs folder, https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs
 
 Please update the `docs/integration.rst` with the details of your new parser and create a PR in that repo. Reference the PR in the main DefectDojo repository to establish an automatic link between the two.

@@ -41,7 +41,7 @@ class Permissions(IntEnum):
     Product_View = 1102
     Product_Remove_Member = 1103
     Product_Manage_Members = 1104
-    Product_Member_Add_Owner = 1005
+    Product_Member_Add_Owner = 1105
     Product_Configure_Notifications = 1106
     Product_Edit = 1107
     Product_Delete = 1108
@@ -67,6 +67,11 @@ class Permissions(IntEnum):
     Endpoint_Edit = 1506
     Endpoint_Delete = 1507
 
+    Benchmark_Edit = 1606
+    Benchmark_Delete = 1607
+
+    Component_View = 1702
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -77,19 +82,19 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_engagement_permissions(cls):
-        return {Permissions.Engagement_View, Permissions.Engagement_Add, Permissions.Engagement_Edit, Permissions.Engagement_Delete}
+        return {Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Delete}
 
     @classmethod
     def get_test_permissions(cls):
-        return {Permissions.Test_View, Permissions.Test_Add, Permissions.Test_Edit, Permissions.Test_Delete}
+        return {Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete}
 
     @classmethod
     def get_finding_permissions(cls):
-        return {Permissions.Finding_View, Permissions.Finding_Add, Permissions.Finding_Edit, Permissions.Import_Scan_Result, Permissions.Finding_Delete}
+        return {Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Import_Scan_Result, Permissions.Finding_Delete}
 
     @classmethod
     def get_endpoint_permissions(cls):
-        return {Permissions.Endpoint_View, Permissions.Endpoint_Add, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
+        return {Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete}
 
     @classmethod
     def get_product_member_permissions(cls):
@@ -115,7 +120,9 @@ def get_roles_with_permissions():
 
             Permissions.Finding_View,
 
-            Permissions.Endpoint_View
+            Permissions.Endpoint_View,
+
+            Permissions.Component_View
         },
         Roles.Technical_User: {
             Permissions.Import_Scan_Result
@@ -142,7 +149,11 @@ def get_roles_with_permissions():
 
             Permissions.Endpoint_View,
             Permissions.Endpoint_Add,
-            Permissions.Endpoint_Edit
+            Permissions.Endpoint_Edit,
+
+            Permissions.Benchmark_Edit,
+
+            Permissions.Component_View
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -176,7 +187,12 @@ def get_roles_with_permissions():
             Permissions.Endpoint_View,
             Permissions.Endpoint_Add,
             Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Delete
+            Permissions.Endpoint_Delete,
+
+            Permissions.Benchmark_Edit,
+            Permissions.Benchmark_Delete,
+
+            Permissions.Component_View
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -214,6 +230,11 @@ def get_roles_with_permissions():
             Permissions.Endpoint_View,
             Permissions.Endpoint_Add,
             Permissions.Endpoint_Edit,
-            Permissions.Endpoint_Delete
+            Permissions.Endpoint_Delete,
+
+            Permissions.Benchmark_Edit,
+            Permissions.Benchmark_Delete,
+
+            Permissions.Component_View
         }
     }

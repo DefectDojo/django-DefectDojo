@@ -1248,84 +1248,6 @@
     }
 },
 {
-    "model": "dojo.scansettings",
-    "pk": 1,
-    "fields": {
-        "product": 1,
-        "addresses": "127.0.0.1",
-        "user": [
-            "admin"
-        ],
-        "date": "2018-04-13T06:28:48.661Z",
-        "frequency": "Weekly",
-        "email": "test@example.com",
-        "protocol": "UDP"
-    }
-},
-{
-    "model": "dojo.scansettings",
-    "pk": 2,
-    "fields": {
-        "product": 2,
-        "addresses": "127.0.0.1",
-        "user": [
-            "product_manager"
-        ],
-        "date": "2018-04-13T06:28:11.843Z",
-        "frequency": "Weekly",
-        "email": "test@example.com",
-        "protocol": "TCP"
-    }
-},
-{
-    "model": "dojo.scansettings",
-    "pk": 3,
-    "fields": {
-        "product": 3,
-        "addresses": "127.0.0.1",
-        "user": [
-            "admin"
-        ],
-        "date": "2018-04-13T06:28:32.767Z",
-        "frequency": "Monthly",
-        "email": "test@example.com",
-        "protocol": "TCP"
-    }
-},
-{
-    "model": "dojo.scan",
-    "pk": 2,
-    "fields": {
-        "scan_settings": 1,
-        "date": "2018-04-13T06:33:55.548Z",
-        "protocol": "TCP",
-        "status": "Pending",
-        "baseline": false
-    }
-},
-{
-    "model": "dojo.scan",
-    "pk": 3,
-    "fields": {
-        "scan_settings": 3,
-        "date": "2018-04-13T06:34:09.127Z",
-        "protocol": "SSH",
-        "status": "Pending",
-        "baseline": true
-    }
-},
-{
-    "model": "dojo.scan",
-    "pk": 4,
-    "fields": {
-        "scan_settings": 1,
-        "date": "2018-04-13T06:34:19.385Z",
-        "protocol": "UDP",
-        "status": "Pending",
-        "baseline": false
-    }
-},
-{
     "model": "dojo.tool_type",
     "pk": 1,
     "fields": {
@@ -24289,6 +24211,7 @@
         "username": "user3",
         "password": "user3",
         "default_issue_type": "Spike",
+        "issue_template": "issue-trackers/jira-description.tpl",
         "epic_name_id": 333,
         "open_status_key": 333,
         "close_status_key": 334,
