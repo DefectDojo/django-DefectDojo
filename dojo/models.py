@@ -838,6 +838,8 @@ class Tool_Configuration(models.Model):
                                                 'Username/Password'),
                                                ('SSH', 'SSH')),
                                            null=True, blank=True)
+    extras = models.CharField(max_length=50, null=True, blank=True, help_text="Additional definitions that will be "
+                                                                              "consumed by scanner")
     username = models.CharField(max_length=200, null=True, blank=True)
     password = models.CharField(max_length=600, null=True, blank=True)
     auth_title = models.CharField(max_length=200, null=True, blank=True,
