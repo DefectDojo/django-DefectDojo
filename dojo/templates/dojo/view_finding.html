@@ -27,10 +27,13 @@
                         </sup>
                     {% endif %}
                     {% if finding.last_reviewed %}
-                        <small>Last Reviewed {{ finding.last_reviewed | naturalday }},
-                            by {{ finding.last_reviewed_by }}</small>
+                        <small>Last Reviewed {{ finding.last_reviewed | naturalday }}
+                            by {{ finding.last_reviewed_by }}, </small>
                     {% else %}
                         <small>Last Reviewed {{ finding.date | naturalday }} by {{ finding.reporter }}, </small>
+                    {% endif %}
+                    {% if finding.last_status_update %}
+                        <small>Last Status Update {{ finding.last_status_update | naturalday }}, </small>
                     {% endif %}
                     <small>Created
                     {% if finding.last_reviewed > finding.created %}
@@ -457,6 +460,7 @@
                 {% endif %}
                 {% if finding.has_jira_configured or finding.jira_issue %}
                 <th>JIRA</th>
+                <th>JIRA Change</th>
                 {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
@@ -521,6 +525,11 @@
                              </i>
                         {% endif %}
                     {% endif %}
+                    </td>
+                    <td>
+                        {% if finding.jira_issue %}
+                            <div title="{{ finding.jira_issue.jira_change|date:"DATETIME_FORMAT" }}">{{ finding.jira_issue.jira_change|naturalday }}</div>
+                        {% endif %}
                     </td>
                 {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}

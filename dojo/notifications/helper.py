@@ -206,7 +206,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
     except Exception as e:
         logger.exception(e)
-        log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs['url'])
+        log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs.get('url', None))
 
 
 # notifications are made synchronous again due to serialization bug in django-tagulous

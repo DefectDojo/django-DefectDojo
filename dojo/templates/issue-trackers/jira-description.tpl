@@ -26,4 +26,46 @@ JIRA Due Date field was automatically calculated based on it, if configured in y
 
 *Product/Engagement/Test:* [{{ finding.test.engagement.product.name }}|{{ product_url|full_url }}] / [{{ finding.test.engagement.name }}|{{ engagement_url|full_url }}] / [{{ finding.test }}|{{ test_url|full_url }}]
 
+*Branch/Tag:* {{ finding.test.engagement.branch_tag }}
+
+*BuildID:* {{ finding.test.engagement.build_id }}
+
+*Commit hash:* {{ finding.test.engagement.commit_hash }}
+
+*Systems/Endpoints*:
+{% for endpoint in finding.endpoints.all %}
+* {{ endpoint }}{% endfor %}
+{% comment %}
+    we leave the endfor at the same line to avoid double line breaks i.e. too many blank lines
+{% endcomment %}
+
+
+{% if finding.component_name %}
+Vulnerable Component: {{finding.component_name }} - {{ finding.component_version }}
+
+{% endif %}
+{% if finding.sast_source_object %}
+Source Object: {{ finding.sast_source_object }}
+Source File: {{ finding.sast_source_file_path }}
+Source Line: {{ finding.sast_source_line }}
+Sink Object: {{ finding.sast_sink_object }}
+{% endif %}
+
+*Description*:
+{{ finding.description }}
+
+*Mitigation*:
+{{ finding.mitigation }}
+
+*Impact*:
+{{ finding.impact }}
+
+*Steps to reproduce*:
+{{ finding.steps_to_reproduce }}
+
+*References*:
+{{ finding.references }}
+
+*Defect Dojo ID:* {{ finding.id }}
+
 *Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]

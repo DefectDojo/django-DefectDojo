@@ -14,7 +14,7 @@ from drf_yasg2.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
-    User, ScanSettings, Scan, Stub_Finding, Finding_Template, Notes, \
+    User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
@@ -39,6 +39,7 @@ import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
 from dojo.product_type.queries import get_authorized_product_types
+from dojo.product.queries import get_authorized_products
 from dojo.authorization.roles_permissions import Permissions, Roles
 
 logger = logging.getLogger(__name__)
@@ -896,7 +897,7 @@ class ProductViewSet(prefetch.PrefetchListMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.ProductSerializer
     # TODO: prefetch
-    queryset = Product.objects.all()
+    queryset = Product.objects.none()
     queryset = queryset.annotate(active_finding_count=Count('engagement__test__finding__id', filter=Q(engagement__test__finding__active=True)))
     filter_backends = (DjangoFilterBackend,)
 
@@ -905,13 +906,7 @@ class ProductViewSet(prefetch.PrefetchListMixin,
         to_schema()
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(
-                Q(authorized_users__in=[self.request.user]) |
-                Q(prod_type__authorized_users__in=[self.request.user])
-            )
-        else:
-            return self.queryset
+        return get_authorized_products(Permissions.Product_View)
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
@@ -945,10 +940,10 @@ class ProductTypeViewSet(mixins.ListModelMixin,
                          mixins.UpdateModelMixin,
                          viewsets.GenericViewSet):
     serializer_class = serializers.ProductTypeSerializer
-    queryset = Product_Type.objects.all()
+    queryset = Product_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
-    if settings.FEATURE_NEW_AUTHORIZATION:
+    if settings.FEATURE_AUTHORIZATION_V2:
         permission_classes = (IsAuthenticated, permissions.UserHasProductTypePermission)
 
     def get_queryset(self):
@@ -957,7 +952,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     # Overwrite perfom_create of CreateModelMixin to add current user as owner
     def perform_create(self, serializer):
         serializer.save()
-        if settings.FEATURE_NEW_AUTHORIZATION:
+        if settings.FEATURE_AUTHORIZATION_V2:
             product_type_data = serializer.data
             product_type_data.pop('members')
             member = Product_Type_Member()
@@ -989,54 +984,6 @@ class ProductTypeViewSet(mixins.ListModelMixin,
         data = report_generate(request, product_type, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
-
-
-# Authorization: object-based
-class ScanSettingsViewSet(mixins.ListModelMixin,
-                          mixins.RetrieveModelMixin,
-                          mixins.DestroyModelMixin,
-                          mixins.UpdateModelMixin,
-                          mixins.CreateModelMixin,
-                          viewsets.GenericViewSet):
-    serializer_class = serializers.ScanSettingsSerializer
-    queryset = ScanSettings.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'date', 'user', 'frequency', 'product', 'addresses')
-
-    def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return serializers.ScanSettingsCreateSerializer
-        else:
-            return serializers.ScanSettingsSerializer
-
-    def get_queryset(self):
-        if not self.request.user.is_staff:
-            return ScanSettings.objects.filter(
-                Q(product__authorized_users__in=[self.request.user]) |
-                Q(product__prod_type__authorized_users__in=[self.request.user])
-            )
-        else:
-            return ScanSettings.objects.all()
-
-
-# Authorization: object-based
-class ScansViewSet(mixins.ListModelMixin,
-                   mixins.RetrieveModelMixin,
-                   viewsets.GenericViewSet):
-    # TODO: ipscans
-    serializer_class = serializers.ScanSerializer
-    queryset = Scan.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'date', 'scan_settings')
-
-    def get_queryset(self):
-        if not self.request.user.is_staff:
-            return Scan.objects.filter(
-                Q(scan_settings__product__authorized_users__in=[self.request.user]) |
-                Q(scan_settings__product__prod_type__authorized_users__in=[self.request.user])
-            )
-        else:
-            return Scan.objects.all()
 
 
 # Authorization: object-based
