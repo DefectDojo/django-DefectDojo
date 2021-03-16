@@ -171,7 +171,7 @@ env = environ.Env(
 
     # Feature toggle for new authorization, which is incomplete at the moment.
     # Don't set it to True for productive environments!
-    DD_FEATURE_NEW_AUTHORIZATION=(bool, False),
+    DD_FEATURE_AUTHORIZATION_V2=(bool, False),
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
@@ -769,7 +769,7 @@ if env('DD_DJANGO_METRICS_ENABLED'):
 # If not present, default is the legacy behavior: see models.py, compute_hash_code_legacy function
 # legacy is:
 #   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
-#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
+#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description']
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
@@ -778,15 +778,15 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'vuln_id_from_tool'],
-    'Nessus Scan': ['title', 'severity', 'cve', 'cwe', 'endpoints'],
+    'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
-    'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
-    'Qualys Scan': ['title', 'endpoints', 'severity'],
+    'ZAP Scan': ['title', 'cwe', 'severity'],
+    'Qualys Scan': ['title', 'severity'],
     'PHP Symfony Security Check': ['title', 'cve'],
     'Clair Scan': ['title', 'cve', 'description', 'severity'],
     'Clair Klar Scan': ['title', 'description', 'severity'],
@@ -869,6 +869,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
     'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
+    'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1021,7 +1023,7 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 
 # Feature toggle for new authorization, which is incomplete at the moment.
 # Don't set it to True for productive environments!
-FEATURE_NEW_AUTHORIZATION = env('DD_FEATURE_NEW_AUTHORIZATION')
+FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
 # When enabled, staff users have full access to all product types and products
 AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
 

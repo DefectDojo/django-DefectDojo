@@ -1,7 +1,6 @@
 from django.contrib.auth.models import User
-from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint
@@ -49,14 +48,6 @@ class TestAuthorization(TestCase):
         cls.product_member_owner.user = cls.user
         cls.product_member_owner.product = cls.product
         cls.product_member_owner.role = Roles.Owner
-
-    def setUp(self):
-        self.setting_FEATURE_NEW_AUTHORIZATION = settings.FEATURE_NEW_AUTHORIZATION
-        self.setting_AUTHORIZATION_STAFF_OVERRIDE = settings.AUTHORIZATION_STAFF_OVERRIDE
-
-    def tearDown(self):
-        settings.FEATURE_NEW_AUTHORIZATION = self.setting_FEATURE_NEW_AUTHORIZATION
-        settings.AUTHORIZATION_STAFF_OVERRIDE = self.setting_AUTHORIZATION_STAFF_OVERRIDE
 
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,
@@ -122,16 +113,15 @@ class TestAuthorization(TestCase):
 
         self.user.is_superuser = False
 
+    @override_settings(AUTHORIZATION_STAFF_OVERRIDE=True)
     def test_user_has_permission_staff_override(self):
         self.user.is_staff = True
-        settings.AUTHORIZATION_STAFF_OVERRIDE = True
 
         result = user_has_permission(self.user, self.product_type, Permissions.Product_Type_Delete)
 
         self.assertTrue(result)
 
         self.user.is_staff = False
-        settings.AUTHORIZATION_STAFF_OVERRIDE = False
 
     @patch('dojo.models.Product_Type_Member.objects.get')
     def test_user_has_permission_product_type_success(self, mock_get):
