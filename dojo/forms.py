@@ -2483,7 +2483,7 @@ class ChoiceQuestionForm(QuestionForm):
 
         # re save out the choices
         choice_answer.answered_survey = self.answered_survey
-        choice_answer.answer = choices
+        choice_answer.answer.set(choices)
         choice_answer.save()
 
 
