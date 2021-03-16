@@ -3,7 +3,6 @@ import requests
 from dojo.models import Tool_Configuration, Tool_Type
 from dojo.utils import prepare_for_view
 
-
 class SonarQubeAPI:
 
     def __init__(self, tool_config=None):
@@ -25,7 +24,7 @@ class SonarQubeAPI:
                     'It has configured more than one SonarQube tool. \n'
                     'Please specify at Product configuration which one should be used.'
                 )
-
+        self.extras = tool_config.extras
         self.session = requests.Session()
         self.sonar_api_url = tool_config.url
         if tool_config.authentication_type == "Password":
@@ -104,6 +103,10 @@ class SonarQubeAPI:
         :param types: issue types (comma separated values). e.g. BUG,VULNERABILITY,CODE_SMELL
         :return:
         """
+
+        if self.extras is not None:
+            types = self.extras
+
         page = 1
         max_page = 100
         issues = list()
