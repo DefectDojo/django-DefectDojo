@@ -51,7 +51,7 @@ class ScannerTest(BaseTestCase):
 
     def test_check_for_doc(self):
         driver = self.driver
-        driver.get('https://defectdojo.readthedocs.io/en/latest/integrations.html')
+        driver.get('https://defectdojo.github.io/django-DefectDojo/integrations/import/')
 
         integration_index = integration_text.index('Integrations') + len('Integrations') + 1
         usage_index = integration_text.index('Usage Examples') - len('Models') - 2
@@ -72,7 +72,7 @@ class ScannerTest(BaseTestCase):
             print('The following scanners are missing documentation')
             print('Names must match those listed in /dojo/tools')
             print('Documentation can be added here:')
-            print('https://github.com/DefectDojo/Documentation\n')
+            print('https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs\n')
             for tool in missing_docs:
                 print(tool)
             print()

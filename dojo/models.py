@@ -30,6 +30,7 @@ from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
 from django_jsonfield_backport.models import JSONField
+import hyperlink
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -261,7 +262,7 @@ class System_Settings(models.Model):
         help_text="Enables Finding SLA's for time to remediate.")
 
     sla_critical = models.IntegerField(default=7,
-                                          verbose_name="Crital Finding SLA Days",
+                                          verbose_name="Critical Finding SLA Days",
                                           help_text="# of days to remediate a critical finding.")
 
     sla_high = models.IntegerField(default=30,
@@ -779,13 +780,11 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    # only used in APIv2 serializers.py, query should be aligned with findings_count
+    @cached_property
     def open_findings_list(self):
         findings = Finding.objects.filter(test__engagement__product=self,
-                                          mitigated__isnull=True,
-                                          verified=True,
-                                          false_p=False,
-                                          duplicate=False,
-                                          out_of_scope=False
+                                          active=True,
                                           )
         findings_list = []
         for i in findings:
@@ -812,54 +811,6 @@ class Product_Type_Member(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     role = models.IntegerField(default=0)
-
-
-class ScanSettings(models.Model):
-    product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
-    addresses = models.TextField(default="none")
-    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
-    date = models.DateTimeField(editable=False, blank=True,
-                                default=get_current_datetime)
-    frequency = models.CharField(max_length=10000, null=True,
-                                 blank=True)
-    email = models.CharField(max_length=512)
-    protocol = models.CharField(max_length=10, default='TCP')
-
-    def addresses_as_list(self):
-        if self.addresses:
-            return [a.strip() for a in self.addresses.split(',')]
-        return []
-
-    def get_breadcrumbs(self):
-        bc = self.product.get_breadcrumbs()
-        bc += [{'title': "Scan Settings",
-                'url': reverse('view_scan_settings',
-                               args=(self.product.id, self.id,))}]
-        return bc
-
-
-class Scan(models.Model):
-    scan_settings = models.ForeignKey(ScanSettings, default=1, editable=False, on_delete=models.CASCADE)
-    date = models.DateTimeField(editable=False, blank=True,
-                                default=get_current_datetime)
-    protocol = models.CharField(max_length=10, default='TCP')
-    status = models.CharField(max_length=10, default='Pending', editable=False)
-    baseline = models.BooleanField(default=False, verbose_name="Current Baseline")
-
-    def __str__(self):
-        return self.scan_settings.protocol + " Scan " + str(self.date)
-
-    def get_breadcrumbs(self):
-        bc = self.scan_settings.get_breadcrumbs()
-        bc += [{'title': str(self),
-                'url': reverse('view_scan', args=(self.id,))}]
-        return bc
-
-
-class IPScan(models.Model):
-    address = models.TextField(editable=False, default="none")
-    services = models.CharField(max_length=800, null=True)
-    scan = models.ForeignKey(Scan, default=1, editable=False, on_delete=models.CASCADE)
 
 
 class Tool_Type(models.Model):
@@ -1191,6 +1142,12 @@ class Endpoint(models.Model):
             url = url + '#' + fragment
         return url
 
+    # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
+    # Example: https://google.com and https://google.com:443
+    def get_normalized_url(self):
+        url = hyperlink.parse(str(self))
+        return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_text()
+
     def __hash__(self):
         return self.__str__().__hash__()
 
@@ -1397,14 +1354,6 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return '%i: %s' % (self.finding.id, self.action)
 
 
-class VA(models.Model):
-    address = models.TextField(editable=False, default="none")
-    user = models.ForeignKey(User, editable=False, on_delete=models.CASCADE)
-    result = models.ForeignKey(Test, editable=False, null=True, blank=True, on_delete=models.CASCADE)
-    status = models.BooleanField(default=False, editable=False)
-    start = models.CharField(max_length=100)
-
-
 class Sonarqube_Issue(models.Model):
     key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
     status = models.CharField(max_length=20, help_text="SonarQube issue status")
@@ -1548,6 +1497,14 @@ class Finding(models.Model):
     under_review = models.BooleanField(default=False,
                                        verbose_name="Under Review",
                                        help_text="Denotes is this flaw is currently being reviewed.")
+
+    last_status_update = models.DateTimeField(editable=False,
+                                            null=True,
+                                            blank=True,
+                                            auto_now_add=True,
+                                            verbose_name="Last Status Update",
+                                            help_text="Timestamp of latest status update (change in status related fields).")
+
     review_requested_by = models.ForeignKey(Dojo_User,
                                             null=True,
                                             blank=True,
@@ -1794,13 +1751,6 @@ class Finding(models.Model):
 
     def compute_hash_code(self):
         if hasattr(settings, 'HASHCODE_FIELDS_PER_SCANNER') and hasattr(settings, 'HASHCODE_ALLOWS_NULL_CWE') and hasattr(settings, 'HASHCODE_ALLOWED_FIELDS'):
-            # Default fields
-            if self.dynamic_finding:
-                deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation as default')
-                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
-            else:
-                hashcodeFields = ['title', 'cwe', 'line', 'file_path', 'description']
-
             # Check for an override for this scan_type in the deduplication configuration
             scan_type = self.test.test_type.name
             if (scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
@@ -1815,6 +1765,7 @@ class Finding(models.Model):
                             deduplicationLogger.warn(
                                 "Cannot compute hash_code based on configured fields because cwe is 0 for finding of title '" + self.title + "' found in file '" + str(self.file_path) +
                                 "'. Fallback to legacy mode for this finding.")
+                            return self.compute_hash_code_legacy()
                     else:
                         # no configuration found for this scanner: defaulting to accepting null cwe when we find one
                         hashcodeFields = hashcodeFieldsCandidate
@@ -1826,9 +1777,11 @@ class Finding(models.Model):
                     deduplicationLogger.debug(
                         "compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. "
                         "Using default fields")
+                    return self.compute_hash_code_legacy()
             else:
                 deduplicationLogger.debug(
                     "No configuration for hash_code computation found; using default fields for " + ('dynamic' if self.dynamic_finding else 'static') + ' scanners')
+                return self.compute_hash_code_legacy()
             deduplicationLogger.debug("computing hash_code for finding id " + str(self.id) + " for scan_type " + scan_type + " based on: " + ', '.join(hashcodeFields))
             fields_to_hash = ''
             for hashcodeField in hashcodeFields:
@@ -1849,24 +1802,46 @@ class Finding(models.Model):
 
     def compute_hash_code_legacy(self):
         fields_to_hash = self.title + str(self.cwe) + str(self.line) + str(self.file_path) + self.description
-        if self.dynamic_finding:
-            deduplicationLogger.debug('dynamic finding, so including endpoints in hash_code computation for legacy algo')
-            fields_to_hash = fields_to_hash + self.get_endpoints()
         deduplicationLogger.debug("compute_hash_code_legacy - fields_to_hash = " + fields_to_hash)
         return self.hash_fields(fields_to_hash)
 
-    # Get endpoints from self.unsaved_endpoints
-    # This sometimes reports "None" for some endpoints but we keep it to avoid hash_code change due to this historically behavior
+    # Get endpoints to use for hash_code computation
+    # (This sometimes reports "None")
     def get_endpoints(self):
         endpoint_str = ''
-        if len(self.unsaved_endpoints) > 0 and self.id is None:
-            deduplicationLogger.debug("get_endpoints: there are unsaved_endpoints and self.id is None")
-            for e in self.unsaved_endpoints:
-                endpoint_str += str(e.host_with_port)
+        if(self.id is None):
+            if len(self.unsaved_endpoints) > 0:
+                deduplicationLogger.debug("get_endpoints before the finding was saved")
+                # convert list of unsaved endpoints to the list of their canonical representation
+                endpoint_str_list = list(
+                    map(
+                        lambda endpoint: endpoint.get_normalized_url(),
+                        self.unsaved_endpoints
+                    ))
+                # deduplicate (usually done upon saving finding) and sort endpoints
+                endpoint_str = ''.join(
+                    sorted(
+                        list(
+                            dict.fromkeys(endpoint_str_list)
+                        )))
+            else:
+                # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
+                # In this case, before saving the finding, both static_finding and dynamic_finding are True
+                # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
+                deduplicationLogger.debug("trying to get endpoints on a finding before it was saved but no endpoints found (static parser wrongly identified as dynamic?")
         else:
-            deduplicationLogger.debug("get_endpoints: there aren't unsaved_endpoints or self.id is not None. endpoints count: " + str(self.endpoints.count()))
-            for e in self.endpoints.all():
-                endpoint_str += str(e.host_with_port)
+            deduplicationLogger.debug("get_endpoints: after the finding was saved. Endpoints count: " + str(self.endpoints.count()))
+            # convert list of endpoints to the list of their canonical representation
+            endpoint_str_list = list(
+                map(
+                    lambda endpoint: endpoint.get_normalized_url(),
+                    self.endpoints.all()
+                ))
+            # sort endpoints strings
+            endpoint_str = ''.join(
+                sorted(
+                    endpoint_str_list
+                ))
         return endpoint_str
 
     # Compute the hash_code from the fields to hash
@@ -2063,7 +2038,11 @@ class Finding(models.Model):
         long_desc += '*References*:' + str(self.references)
         return long_desc
 
-    def save(self, dedupe_option=True, false_history=False, rules_option=True,
+    def save_no_options(self, *args, **kwargs):
+        return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=False,
+             issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
+
+    def save(self, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
         # Make changes to the finding before it's saved to add a CWE template
         new_finding = False
@@ -2110,8 +2089,9 @@ class Finding(models.Model):
             from dojo.utils import do_apply_rules
             do_apply_rules(self, *args, **kwargs)
 
-        from dojo.utils import calculate_grade
-        calculate_grade(self.test.engagement.product)
+        if product_grading_option:
+            from dojo.utils import calculate_grade
+            calculate_grade(self.test.engagement.product)
 
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
@@ -2574,7 +2554,7 @@ class GITHUB_PKey(models.Model):
 
 class JIRA_Instance(models.Model):
     configuration_name = models.CharField(max_length=2000, help_text="Enter a name to give to this configuration", default='')
-    url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For configuring Jira, view: https://defectdojo.readthedocs.io/en/latest/features.html#jira-integration")
+    url = models.URLField(max_length=2000, verbose_name="JIRA URL", help_text="For more information how to configure Jira, read the DefectDojo documentation.")
     username = models.CharField(max_length=2000)
     password = models.CharField(max_length=2000)
 
@@ -2593,9 +2573,13 @@ class JIRA_Instance(models.Model):
                                           choices=default_issue_type_choices,
                                           default='Bug',
                                           help_text='You can define extra issue types in settings.py')
+    issue_template = models.CharField(max_length=255,
+                                      null=True,
+                                      blank=True,
+                                      help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
     epic_name_id = models.IntegerField(help_text="To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here.")
-    open_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
-    close_status_key = models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields")
+    open_status_key = models.IntegerField(verbose_name="Reopen Transition ID", help_text="Transition ID to Re-Open JIRA issues, visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to find the ID for your JIRA instance")
+    close_status_key = models.IntegerField(verbose_name="Close Transition ID", help_text="Transition ID to Close JIRA issues, visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to find the ID for your JIRA instance")
     info_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Info")
     low_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Low")
     medium_mapping_severity = models.CharField(max_length=200, help_text="Maps to the 'Priority' field in Jira. For example: Medium")
@@ -2664,6 +2648,10 @@ class JIRA_Project(models.Model):
                              null=True, blank=True, on_delete=models.CASCADE)
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    issue_template = models.CharField(max_length=255,
+                                      null=True,
+                                      blank=True,
+                                      help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True,
@@ -3124,7 +3112,7 @@ class Benchmark_Product_Summary(models.Model):
 # product_opts = [f.name for f in Product._meta.fields]
 # test_opts = [f.name for f in Test._meta.fields]
 # test_type_opts = [f.name for f in Test_Type._meta.fields]
-finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['tags_from_django_tagging']]
+finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['tags_from_django_tagging', 'last_status_update']]
 # endpoint_opts = [f.name for f in Endpoint._meta.fields]
 # engagement_opts = [f.name for f in Engagement._meta.fields]
 # product_type_opts = [f.name for f in Product_Type._meta.fields]
@@ -3431,9 +3419,6 @@ admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Note_Type)
 admin.site.register(Report)
-admin.site.register(Scan)
-admin.site.register(ScanSettings)
-admin.site.register(IPScan)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Instance, JIRA_Instance_Admin)

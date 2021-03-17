@@ -11,7 +11,7 @@
 {% block content %}
 
 <div class="row">
-  <div id="tests" class="col-md-8">
+  <div class="col-md-8">
       <div class="panel panel-default">
           <div class="panel-heading">
               <div class="clearfix">
@@ -217,12 +217,12 @@
                                 <li class="divider"></li>
                                 {% endif %}
                                 <li role="presentation">
-                                    <a href="{% url 'engagment_open_findings' eng.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
+                                    <a href="{% url 'engagment_open_findings' eng.id %}?active=true">
                                         <i class="fa fa-file-text-o"></i> View Open Findings
                                     </a>
                                 </li>
                                 <li role="presentation">
-                                    <a href="{% url 'engagment_all_findings' eng.id %}?test__engagement={{ eng.id }}">
+                                    <a href="{% url 'engagment_all_findings' eng.id %}">
                                         <i class="fa fa-file-text-o"></i> View All Findings
                                     </a>
                                 </li>

@@ -1,4 +1,5 @@
 from django.core.exceptions import PermissionDenied
+from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint
@@ -7,6 +8,9 @@ from dojo.models import Product_Type, Product_Type_Member, Product, Product_Memb
 def user_has_permission(user, obj, permission):
 
     if user.is_superuser:
+        return True
+
+    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return True
 
     if isinstance(obj, Product_Type):

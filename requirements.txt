@@ -1,9 +1,9 @@
 # requirements.txt for DefectDojo using Python 3.x
-asteval==0.9.22
+asteval==0.9.23
 bleach==3.3.0
 celery==4.4.7
-coverage==5.4
-defusedxml==0.6.0
+coverage==5.5
+defusedxml==0.7.1
 django_celery_results==2.0.1
 django-auditlog==1.0a1
 django-dbbackup==3.3.0
@@ -31,35 +31,33 @@ PyGithub==1.54.1
 lxml==4.6.2
 Markdown==3.3.4
 mysqlclient==2.0.3
-openpyxl==3.0.6
+openpyxl==3.0.7
 xlrd==1.2.0
 pdfkit==0.6.1
-Pillow==8.1.0  # required by django-imagekit
+Pillow==8.1.2  # required by django-imagekit
 psycopg2-binary==2.8.6
 cryptography==3.4.6
 python-dateutil==2.8.1
-python-nmap==0.6.1
 pytz==2021.1
 redis==3.5.3
 requests==2.25.1
-sqlalchemy==1.3.23  # Required by Celery broker transport
-supervisor==4.2.1
-urllib3==1.26.3
+sqlalchemy==1.4.0  # Required by Celery broker transport
+supervisor==4.2.2
+urllib3==1.26.4
 uWSGI==2.0.19.1
 vobject==0.9.6.1
 whitenoise==5.2.0
 titlecase==2.0.0
 social-auth-app-django==4.0.0
-social-auth-core==4.0.3
+social-auth-core==4.1.0
 Python-jose==3.2.0
-gitpython>=2.1.13
+gitpython==3.1.14
 ptvsd==4.3.2
 python-gitlab==2.6.0
-google-auth==1.27.0
+google-auth==1.27.1
 google-api-python-client==1.12.8
-google-auth-oauthlib==0.4.2
+google-auth-oauthlib==0.4.3
 drf_yasg2==1.19.4
-jsonlines==2.0.0  # requred by yarn audit parser
 django-saml2-auth==2.2.1
 cpe==1.2.1
 packageurl-python==0.9.4
@@ -74,3 +72,5 @@ django-tagulous==1.1.0
 PyJWT==2.0.1
 cvss==2.2
 django-jsonfield-backport==1.0.3
+django-fieldsignals==0.6.0
+hyperlink==21.0.0

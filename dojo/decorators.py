@@ -10,9 +10,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def we_want_async():
+def we_want_async(*args, **kwargs):
     from dojo.utils import get_current_user
     from dojo.models import Dojo_User
+
+    sync = kwargs.get('sync', False)
+    if sync:
+        logger.debug('dojo_async_task: running task in the foreground as sync=True has been found as kwarg')
+        return False
 
     user = get_current_user()
 
@@ -28,7 +33,7 @@ def we_want_async():
 def dojo_async_task(func):
     @wraps(func)
     def __wrapper__(*args, **kwargs):
-        if we_want_async():
+        if we_want_async(*args, **kwargs):
             return func.delay(*args, **kwargs)
         else:
             return func(*args, **kwargs)
