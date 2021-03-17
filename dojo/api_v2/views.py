@@ -62,7 +62,7 @@ class EndPointViewSet(mixins.ListModelMixin,
             return Endpoint.objects.filter(
                 Q(product__authorized_users__in=[self.request.user]) |
                 Q(product__prod_type__authorized_users__in=[self.request.user])
-            )
+            ).distinct()
         else:
             return Endpoint.objects.all()
 
@@ -109,7 +109,7 @@ class EndpointStatusViewSet(mixins.ListModelMixin,
             return Endpoint_Status.objects.filter(
                 Q(endpoint__product__authorized_users__in=[self.request.user]) |
                 Q(endpoint__product__prod_type__authorized_users__in=[self.request.user])
-            )
+            ).distinct()
         else:
             return Endpoint_Status.objects.all()
 
@@ -139,7 +139,7 @@ class EngagementViewSet(mixins.ListModelMixin,
             return self.queryset.filter(
                 Q(product__authorized_users__in=[self.request.user]) |
                 Q(product__prod_type__authorized_users__in=[self.request.user])
-            )
+            ).distinct()
         else:
             return self.queryset
 
@@ -290,7 +290,7 @@ class AppAnalysisViewSet(mixins.ListModelMixin,
             return self.queryset.filter(
                 Q(product__authorized_users__in=[self.request.user]) |
                 Q(product__prod_type__authorized_users__in=[self.request.user])
-            )
+            ).distinct()
         else:
             return self.queryset
 
@@ -370,7 +370,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
             return self.queryset.filter(
                 Q(test__engagement__product__authorized_users__in=[self.request.user]) |
                 Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            )
+            ).distinct()
         else:
             return self.queryset
 
@@ -883,7 +883,7 @@ class DojoMetaViewSet(mixins.ListModelMixin,
                 Q(endpoint__product__prod_type__authorized_users__in=[self.request.user]) |
                 Q(finding__test__engagement__product__authorized_users__in=[self.request.user]) |
                 Q(finding__test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            )
+            ).distinct()
         else:
             return self.queryset
 
@@ -906,7 +906,7 @@ class ProductViewSet(prefetch.PrefetchListMixin,
         to_schema()
 
     def get_queryset(self):
-        return get_authorized_products(Permissions.Product_View)
+        return get_authorized_products(Permissions.Product_View).distinct()
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
@@ -947,7 +947,7 @@ class ProductTypeViewSet(mixins.ListModelMixin,
         permission_classes = (IsAuthenticated, permissions.UserHasProductTypePermission)
 
     def get_queryset(self):
-        return get_authorized_product_types(Permissions.Product_Type_View)
+        return get_authorized_product_types(Permissions.Product_Type_View).distinct()
 
     # Overwrite perfom_create of CreateModelMixin to add current user as owner
     def perform_create(self, serializer):
@@ -1002,7 +1002,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
             return Finding.objects.filter(
                 Q(test__engagement__product__authorized_users__in=[self.request.user]) |
                 Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            )
+            ).distinct()
         else:
             return Finding.objects.all()
 
@@ -1050,7 +1050,7 @@ class TestsViewSet(mixins.ListModelMixin,
             return self.queryset.filter(
                 Q(engagement__product__authorized_users__in=[self.request.user]) |
                 Q(engagement__product__prod_type__authorized_users__in=[self.request.user])
-            )
+            ).distinct()
         else:
             return self.queryset
 
@@ -1205,7 +1205,7 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
             test_imports = Test_Import.objects.filter(
                 Q(test__engagement__product__authorized_users__in=[self.request.user]) |
                 Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            )
+            ).distinct()
         else:
             test_imports = Test_Import.objects.all()
         return test_imports.prefetch_related(
