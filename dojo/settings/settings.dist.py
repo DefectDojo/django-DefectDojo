@@ -777,7 +777,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'vuln_id_from_tool'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
