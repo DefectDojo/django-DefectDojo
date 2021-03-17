@@ -254,11 +254,14 @@
                             {% if finding.severity %}
                                 {% if finding.cvssv3 %}
                                     <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
-                                        data-content="{{ finding.cvssv3 }}">{{ finding.severity_display }}</i>
-                                {% elif finding.cvssv3_score %}
-                                    {{ finding.severity_display }} ({{ finding.cvssv3_score }})</i>
-                                {% else %}
-                                    {{ finding.severity_display }}
+                                        data-content="{{ finding.cvssv3 }}">
+                                {% endif %}        
+                                {{ finding.severity_display }}
+                                {% if finding.cvssv3_score %}
+                                    ({{ finding.cvssv3_score }})
+                                {% endif %}
+                                {% if finding.cvssv3 %}
+                                    </i>
                                 {% endif %}
                             {% else %}
                                 Unknown

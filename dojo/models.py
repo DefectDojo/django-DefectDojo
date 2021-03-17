@@ -31,6 +31,7 @@ from tagulous.models import TagField
 import tagulous.admin
 from django_jsonfield_backport.models import JSONField
 import hyperlink
+from cvss import CVSS3
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1422,6 +1423,11 @@ class Finding(models.Model):
                               null=True,
                               verbose_name="CVSS v3",
                               help_text="Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw.")
+    cvssv3_score = models.FloatField(null=True,
+                                        blank=True,
+                                        verbose_name="CVSSv3 score",
+                                        help_text="Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding")
+
     url = models.TextField(null=True,
                            blank=True,
                            editable=False,
@@ -1702,11 +1708,6 @@ class Finding(models.Model):
                                          editable=True,
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
-
-    cvssv3_score = models.FloatField(null=True,
-                                        blank=True,
-                                        verbose_name="CVSSv3 score",
-                                        help_text="Numerical CVSSv3 score for the vulnerability")
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.")
@@ -2111,6 +2112,13 @@ class Finding(models.Model):
 
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
+
+        # Synchronize cvssv3 score using cvssv3 vector
+        if self.cvssv3:
+            cvss_object = CVSS3(self.cvssv3)
+            # use the environmental score, which is the most refined score
+            self.cvssv3_score = cvss_object.scores()[2]
+
         super(Finding, self).save()
         system_settings = System_Settings.objects.get()
 
