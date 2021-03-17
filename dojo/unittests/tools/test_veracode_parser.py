@@ -1,3 +1,5 @@
+import datetime
+
 from django.test import SimpleTestCase
 from dojo.tools.veracode.parser import VeracodeParser
 from dojo.models import Test
@@ -31,3 +33,13 @@ class TestVeracodeScannerParser(SimpleTestCase):
         finding = findings[1]
         self.assertEqual("Low", finding.severity)
         self.assertEqual(201, finding.cwe)
+
+    def test_parse_file_with_mitigated_finding(self):
+        testfile = open("dojo/unittests/scans/veracode/mitigated_finding.xml")
+        parser = VeracodeParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("Medium", finding.severity)
+        self.assertTrue(finding.is_Mitigated)
+        self.assertEqual(datetime.datetime(2020, 6, 1, 10, 2, 1), finding.mitigated)
