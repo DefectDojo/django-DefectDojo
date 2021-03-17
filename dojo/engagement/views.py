@@ -178,6 +178,7 @@ def prefetch_for_products_with_engagments(products_with_engagements):
 def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
     is_ci_cd = engagement.engagement_type == "CI/CD"
+    jira_project_form = None
     jira_epic_form = None
     jira_project = None
     jira_error = False

@@ -774,7 +774,6 @@ def new_product(request, ptid=None):
                 # engagement was saved, but JIRA errors, so goto edit_product
                 return HttpResponseRedirect(reverse('edit_product', args=(product.id,)))
     else:
-        jira_project_form = None
         if get_system_setting('enable_jira'):
             jira_project_form = JIRAProjectForm()
 
@@ -921,8 +920,8 @@ def delete_product(request, pid):
 
 @user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
 def new_eng_for_app(request, pid, cicd=False):
-    jira_project_form = None
     jira_project = None
+    jira_project_form = None
     jira_epic_form = None
 
     product = Product.objects.get(id=pid)
@@ -991,18 +990,17 @@ def new_eng_for_app(request, pid, cicd=False):
                 return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id,)))
         else:
             logger.debug(form.errors)
+    else:
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(),
+                                'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd,
+                    product=product, user=request.user)
 
-    form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(),
-                            'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd,
-                   product=product, user=request.user)
-    jira_project_form = None
-    jira_epic_form = None
-    if get_system_setting('enable_jira'):
-        jira_project = jira_helper.get_jira_project(product)
-        logger.debug('showing jira-project-form')
-        jira_project_form = JIRAProjectForm(target='engagement', product=product)
-        logger.debug('showing jira-epic-form')
-        jira_epic_form = JIRAEngagementForm()
+        if get_system_setting('enable_jira'):
+            jira_project = jira_helper.get_jira_project(product)
+            logger.debug('showing jira-project-form')
+            jira_project_form = JIRAProjectForm(target='engagement', product=product)
+            logger.debug('showing jira-epic-form')
+            jira_epic_form = JIRAEngagementForm()
 
     product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
     return render(request, 'dojo/new_eng.html',
