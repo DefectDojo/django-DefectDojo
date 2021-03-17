@@ -57,7 +57,7 @@ def issue_r(raw_row, vuln, scan_date):
             # Vuln Description
             _description = str(vuln_details.findtext('DIAGNOSIS'))
             # Solution Strips Heading Workaround(s)
-            _temp['solution'] = htmltext(vuln_details.findtext('SOLUTION'))
+            _temp['solution'] = htmltext(str(vuln_details.findtext('SOLUTION')))
 
             # Vuln_description
             _temp['vuln_description'] = "\n".join([htmltext(_description),
@@ -67,7 +67,7 @@ def issue_r(raw_row, vuln, scan_date):
                                                     htmltext("**Result Evidence:** " + _result),
                                                    ])
             # Impact description
-            _temp['IMPACT'] = htmltext(vuln_details.findtext('CONSEQUENCE'))
+            _temp['IMPACT'] = htmltext(str(vuln_details.findtext('CONSEQUENCE')))
 
             # CVE and LINKS
             _cl = []
