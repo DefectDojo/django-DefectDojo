@@ -211,6 +211,17 @@ class NexposeParser(object):
         dupes = {}
 
         for item in x:
+            # manage findings by node only
+            for vuln in item['vulns']:
+                dupe_key = vuln['severity'] + vuln['name']
+
+                find = self.findings(dupe_key, dupes, test, vuln)
+
+                endpoint = Endpoint(host=item['name'])
+                find.unsaved_endpoints.append(endpoint)
+                find.unsaved_tags = vuln['tags']
+
+            # manage findings by service
             for service in item['services']:
                 for vuln in service['vulns']:
                     dupe_key = vuln['severity'] + vuln['name']
@@ -221,17 +232,7 @@ class NexposeParser(object):
                     if 'port' in service:
                         endpoint.port = int(service['port'])
                     find.unsaved_endpoints.append(endpoint)
-                    find.unsaved_tags = list()
                     find.unsaved_tags = vuln['tags']
-
-        # manage findings by node only
-        for vuln in host['vulns']:
-            dupe_key = vuln['severity'] + vuln['name']
-
-            find = self.findings(dupe_key, dupes, test, vuln)
-
-            find.unsaved_tags = list()
-            find.unsaved_tags = vuln['tags']
 
         return list(dupes.values())
 
