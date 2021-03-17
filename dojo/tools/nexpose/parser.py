@@ -266,12 +266,20 @@ class NexposeParser(object):
             # build references
             refs = ''
             for ref in vuln['refs']:
-                if ref.startswith('CA'):
+                if ref.startswith('BID'):
+                    refs += f" * [{vuln['refs'][ref]}](https://www.securityfocus.com/bid/{vuln['refs'][ref]})"
+                elif ref.startswith('CA'):
                     refs += f" * [{vuln['refs'][ref]}](https://www.cert.org/advisories/{vuln['refs'][ref]}.html)"
+                elif ref.startswith('CERT-VN'):
+                    refs += f" * [{vuln['refs'][ref]}](https://www.kb.cert.org/vuls/id/{vuln['refs'][ref]}.html)"
                 elif ref.startswith('CVE'):
                     refs += f" * [{vuln['refs'][ref]}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln['refs'][ref]})"
+                if ref.startswith('DEBIAN'):
+                    refs += f" * [{vuln['refs'][ref]}](https://security-tracker.debian.org/tracker/{vuln['refs'][ref]})"
                 elif ref.startswith('URL'):
                     refs += f" * URL: {vuln['refs'][ref]}"
+                if ref.startswith('XF'):
+                    refs += f" * [{vuln['refs'][ref]}](https://exchange.xforce.ibmcloud.com/vulnerabilities/{vuln['refs'][ref]})"
                 else:
                     refs += f" * {ref}: {vuln['refs'][ref]}"
                 refs += "\n"
