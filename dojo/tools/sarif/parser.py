@@ -148,7 +148,7 @@ def get_item(result, rules, artifacts, test):
     title = result['ruleId']
     if 'message' in result:
         description = get_message_from_multiformatMessageString(result['message'], rule)
-        if len(description) < 100:
+        if len(description) < 150:
             title = description
     description = ''
     severity = get_severity('warning')
@@ -170,7 +170,7 @@ def get_item(result, rules, artifacts, test):
             cwes = cwes_extracted
 
     for cwe in cwes:
-        finding = Finding(title=textwrap.shorten(title, 100),
+        finding = Finding(title=textwrap.shorten(title, 150),
                         test=test,
                         severity=severity,
                         numerical_severity=Finding.get_numerical_severity(severity),
