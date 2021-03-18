@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tool_configuration',
             name='extras',
-            field=models.CharField(blank=True, help_text='Additional definitions that will be consumed by scanner', max_length=50, null=True),
+            field=models.CharField(blank=True, help_text='Additional definitions that will be consumed by scanner', max_length=255, null=True),
         ),
     ]
