@@ -26,9 +26,9 @@ class TestNexposeParser(TestCase):
         self.assertEqual("TCP Sequence Number Approximation Vulnerability", finding.title)
         self.assertEqual("CVE-2004-0230", finding.cve)
         self.assertEqual(3, len(finding.unsaved_endpoints))
-        self.assertIn("https://www.securityfocus.com/bid/10183", finding.references) # BID: 10183
-        self.assertIn("https://www.kb.cert.org/vuls/id/415294.html", finding.references) # CERT-VN: 415294
-        self.assertIn("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2004-0230", finding.references) # CVE: CVE-2004-0230
+        self.assertIn("https://www.securityfocus.com/bid/10183", finding.references)  # BID: 10183
+        self.assertIn("https://www.kb.cert.org/vuls/id/415294.html", finding.references)  # CERT-VN: 415294
+        self.assertIn("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2004-0230", finding.references)  # CVE: CVE-2004-0230
         # vuln 2
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
