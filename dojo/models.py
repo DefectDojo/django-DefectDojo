@@ -1437,11 +1437,15 @@ class Finding(models.Model):
                                 verbose_name="Severity",
                                 help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational).")
     description = models.TextField(verbose_name="Description",
-                                   help_text="Longer more descriptive information about the flaw.")
+                                help_text="Longer more descriptive information about the flaw.")
     mitigation = models.TextField(verbose_name="Mitigation",
-                                  help_text="Text describing how to best fix the flaw.")
+                                null=True,
+                                blank=True,
+                                help_text="Text describing how to best fix the flaw.")
     impact = models.TextField(verbose_name="Impact",
-                              help_text="Text describing the impact this flaw has on systems, products, enterprise, etc.")
+                                null=True,
+                                blank=True,
+                                help_text="Text describing the impact this flaw has on systems, products, enterprise, etc.")
     steps_to_reproduce = models.TextField(null=True,
                                           blank=True,
                                           verbose_name="Steps to Reproduce",
@@ -1705,7 +1709,6 @@ class Finding(models.Model):
     # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?"
     publish_date = models.DateTimeField(null=True,
                                          blank=True,
-                                         editable=True,
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
 
@@ -2115,10 +2118,12 @@ class Finding(models.Model):
 
         # Synchronize cvssv3 score using cvssv3 vector
         if self.cvssv3:
-            cvss_object = CVSS3(self.cvssv3)
-            # use the environmental score, which is the most refined score
-            self.cvssv3_score = cvss_object.scores()[2]
-
+            try:
+                cvss_object = CVSS3(self.cvssv3)
+                # use the environmental score, which is the most refined score
+                self.cvssv3_score = cvss_object.scores()[2]
+            except Exception as ex:
+                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
         super(Finding, self).save()
         system_settings = System_Settings.objects.get()
 
@@ -2156,10 +2161,10 @@ class Finding(models.Model):
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
 
+    # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
         no_check = ["test", "reporter"]
-        bigfields = ["description", "mitigation", "references", "impact",
-                     "url"]
+        bigfields = ["description"]
         for field_obj in self._meta.fields:
             field = field_obj.name
             if field not in no_check:

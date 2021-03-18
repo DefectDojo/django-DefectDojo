@@ -796,8 +796,8 @@ class AddFindingForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -805,6 +805,7 @@ class AddFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+    publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -853,8 +854,8 @@ class AdHocFindingForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -862,6 +863,7 @@ class AdHocFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+    publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -905,8 +907,8 @@ class PromoteFindingForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
@@ -976,8 +978,8 @@ class FindingForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -989,6 +991,8 @@ class FindingForm(forms.ModelForm):
 
     mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
     mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
+
+    publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
@@ -1103,8 +1107,8 @@ class ApplyFindingTemplateForm(forms.Form):
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
     description = forms.CharField(widget=forms.Textarea)
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     tags = TagField(required=False, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.", initial=Finding.tags.tag_model.objects.all().order_by('name'))
