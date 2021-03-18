@@ -81,7 +81,7 @@ class ArachniParser(object):
         unsaved_req_resp = list()
 
         if request is not None and respz is not None:
-            unsaved_req_resp.append({"req": b64encode(req.encode("utf-8")), "resp": b64encode(resp.encode("utf-8"))})
+            unsaved_req_resp.append({"req": req, "resp": resp})
 
         endpoint = Endpoint(protocol=protocol,
                                 host=host,
