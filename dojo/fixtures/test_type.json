@@ -719,13 +719,6 @@
         },
         "model": "dojo.test_type",
         "pk": 194
-    },
-    {
-        "fields": {
-            "name": "Wfuzz JSON Report"
-        },
-        "model": "dojo.test_type",
-        "pk": 195
     }
 
 ]
