@@ -231,6 +231,8 @@ class NexposeParser(object):
                     endpoint = Endpoint(host=host['name'])
                     if 'port' in service:
                         endpoint.port = int(service['port'])
+                    if 'name' in service:
+                        endpoint.protocol = service['name'].lower()
                     find.unsaved_endpoints.append(endpoint)
                     find.unsaved_tags = vuln['tags']
 

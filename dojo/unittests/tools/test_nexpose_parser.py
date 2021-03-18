@@ -42,9 +42,11 @@ class TestNexposeParser(TestCase):
         # vuln 3 - endpoint 1
         endpoint = finding.unsaved_endpoints[0]
         self.assertIsNone(endpoint.port)
+        self.assertIsNone(endpoint.protocol)
         # vuln 3 - endpoint 2
         endpoint = finding.unsaved_endpoints[1]
         self.assertEqual(22, endpoint.port)
+        self.assertEqual("ssh", endpoint.protocol)
 
     def test_nexpose_parser_tests_outside_endpoint(self):
         testfile = open("dojo/unittests/scans/nexpose/report_auth.xml")
