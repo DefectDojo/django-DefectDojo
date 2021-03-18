@@ -424,7 +424,7 @@ report as follows
 ``` {.sourceCode .JSON}
 {
     "url_endpoint": "https://api.riskrecon.com/v1",
-    "api_key": "you-api-key", 
+    "api_key": "you-api-key",
     "companies": [
         {
             "name": "Company 1",
@@ -535,15 +535,21 @@ Follow below steps to setup API Import:
 
 1.  Configure the Sonarqube Authentication details by navigating to
     Configuration-\>Tool Configuration. Note the url should be in the
-    formation of <http://>\<sonarqube\_hostname\>/api. Select the tool
-    type to SonarQube.
+    formation of <http(s)://>\<sonarqube\_hostname\>/api. Select the tool
+    type to SonarQube. By default tool will import vulnerabilities only,
+    but additional filters can be setup using Extras field separated by commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
 2.  In the Product settings fill the details for the SonarQube Project
     Key (Key name can be found by navigating to a specific project and
     selecting the value from the url
-    <http://>\<sonarqube\_host\>/dashboard?id=\<key\_name\>
-3.  Once all of the above setting are made , the API Import should be
-    able to auto import all vulnerability information from the sonarqube
+    <http(s)://>\<sonarqube\_host\>/dashboard?id=\<key\_name\>
+3.  Once all of the above setting are made, the API Import should be
+    able to auto import all vulnerability information from the SonarQube
     instance.
+
+**NOTE**: If `https` is in use for the SonarQube than certificate should be
+trusted by DD instance. 
+
+
 
 SpotBugs
 --------
