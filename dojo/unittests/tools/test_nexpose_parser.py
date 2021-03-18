@@ -26,12 +26,25 @@ class TestNexposeParser(TestCase):
         self.assertEqual("TCP Sequence Number Approximation Vulnerability", finding.title)
         self.assertEqual("CVE-2004-0230", finding.cve)
         self.assertEqual(3, len(finding.unsaved_endpoints))
+        self.assertIn("https://www.securityfocus.com/bid/10183", finding.references) # BID: 10183
+        self.assertIn("https://www.kb.cert.org/vuls/id/415294.html", finding.references) # CERT-VN: 415294
+        self.assertIn("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2004-0230", finding.references) # CVE: CVE-2004-0230
         # vuln 2
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("TCP timestamp response", finding.title)
         self.assertIsNone(finding.cve)
         self.assertEqual(5, len(finding.unsaved_endpoints))
+        # vuln 3
+        finding = findings[3]
+        self.assertEqual("Default SSH password: root password \"root\"", finding.title)
+        self.assertEqual(2, len(finding.unsaved_endpoints))
+        # vuln 3 - endpoint 1
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertIsNone(endpoint.port)
+        # vuln 3 - endpoint 2
+        endpoint = finding.unsaved_endpoints[1]
+        self.assertEqual(22, endpoint.port)
 
     def test_nexpose_parser_tests_outside_endpoint(self):
         testfile = open("dojo/unittests/scans/nexpose/report_auth.xml")
@@ -43,13 +56,16 @@ class TestNexposeParser(TestCase):
         self.assertEqual("High", finding.severity)
         self.assertEqual("ICMP redirection enabled", finding.title)
         self.assertIsNone(finding.cve)
+        self.assertEqual(4, len(finding.unsaved_endpoints))
         # vuln 1
         finding = findings[1]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("No password for Grub", finding.title)
         self.assertIsNone(finding.cve)
+        self.assertEqual(4, len(finding.unsaved_endpoints))
         # vuln 2
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("User home directory mode unsafe", finding.title)
         self.assertIsNone(finding.cve)
+        self.assertEqual(16, len(finding.unsaved_endpoints))
