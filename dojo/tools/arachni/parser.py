@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from urllib.parse import urlparse
 
 import html2text
@@ -29,8 +30,11 @@ class ArachniParser(object):
 
     def get_items(self, tree, test):
         items = {}
+        report_date = None
+        if 'finish_datetime' in tree:
+            report_date = datetime.strptime(tree.get('finish_datetime'), '%Y-%m-%d %H:%M:%S %z')
         for node in tree['issues']:
-            item = self.get_item(node, test)
+            item = self.get_item(node, report_date)
             dupe_key = item.severity + item.title
             if dupe_key in items:
                 items[dupe_key].unsaved_endpoints = items[dupe_key].unsaved_endpoints + item.unsaved_endpoints
@@ -42,7 +46,7 @@ class ArachniParser(object):
 
         return list(items.values())
 
-    def get_item(self, item_node, test):
+    def get_item(self, item_node, report_date):
         # url management
         if 'vector' in item_node and 'action' in item_node['vector']:
             url = item_node['vector']['action']
@@ -108,7 +112,7 @@ class ArachniParser(object):
 
         # Finding and Endpoint objects returned have not been saved to the database
         finding = Finding(title=item_node['name'],
-                            test=test,
+                            date=report_date,
                             severity=severity,
                             description=description,
                             mitigation=remediation,
