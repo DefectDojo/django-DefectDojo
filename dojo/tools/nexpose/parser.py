@@ -173,7 +173,7 @@ class NexposeParser(object):
         return vulns
 
     def get_items(self, tree, vulns, test):
-        x = list()
+        hosts = list()
         for nodes in tree.iter('nodes'):
             for node in nodes.iter('node'):
                 host = dict()
@@ -206,29 +206,29 @@ class NexposeParser(object):
 
                         host['services'].append(svc)
 
-                x.append(host)
+                hosts.append(host)
 
         dupes = {}
 
-        for item in x:
+        for host in hosts:
             # manage findings by node only
-            for vuln in item['vulns']:
+            for vuln in host['vulns']:
                 dupe_key = vuln['severity'] + vuln['name']
 
                 find = self.findings(dupe_key, dupes, test, vuln)
 
-                endpoint = Endpoint(host=item['name'])
+                endpoint = Endpoint(host=host['name'])
                 find.unsaved_endpoints.append(endpoint)
                 find.unsaved_tags = vuln['tags']
 
             # manage findings by service
-            for service in item['services']:
+            for service in host['services']:
                 for vuln in service['vulns']:
                     dupe_key = vuln['severity'] + vuln['name']
 
                     find = self.findings(dupe_key, dupes, test, vuln)
 
-                    endpoint = Endpoint(host=item['name'])
+                    endpoint = Endpoint(host=host['name'])
                     if 'port' in service:
                         endpoint.port = int(service['port'])
                     find.unsaved_endpoints.append(endpoint)
