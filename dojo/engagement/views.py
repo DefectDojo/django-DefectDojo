@@ -184,7 +184,7 @@ def edit_engagement(request, eid):
     jira_error = False
 
     if request.method == 'POST':
-        form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product.id, user=request.user)
+        form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
         jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
 
         if form.is_valid():
