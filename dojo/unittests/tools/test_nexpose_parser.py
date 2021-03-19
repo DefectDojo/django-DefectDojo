@@ -35,16 +35,16 @@ class TestNexposeParser(TestCase):
         self.assertEqual("TCP timestamp response", finding.title)
         self.assertIsNone(finding.cve)
         self.assertEqual(5, len(finding.unsaved_endpoints))
-        # vuln 3
-        finding = findings[3]
-        self.assertEqual("Default SSH password: root password \"root\"", finding.title)
-        self.assertEqual(2, len(finding.unsaved_endpoints))
-        # vuln 3 - endpoint 1
+        # vuln 2 - endpoint
         endpoint = finding.unsaved_endpoints[0]
         self.assertIsNone(endpoint.port)
         self.assertIsNone(endpoint.protocol)
-        # vuln 3 - endpoint 2
-        endpoint = finding.unsaved_endpoints[1]
+        # vuln 3
+        finding = findings[3]
+        self.assertEqual("Default SSH password: root password \"root\"", finding.title)
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        # vuln 3 - endpoint
+        endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(22, endpoint.port)
         self.assertEqual("ssh", endpoint.protocol)
 
