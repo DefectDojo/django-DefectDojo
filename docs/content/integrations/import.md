@@ -35,7 +35,13 @@ grype defectdojo/defectdojo-django:1.13.1 -o json > many_vulns.json
 Arachni Scanner
 ---------------
 
-Arachni JSON report format.
+Arachni Web Scanner (http://arachni-scanner.com/wiki)
+
+Reports are generated with `arachni_reporter` tool this way:
+
+```
+arachni_reporter --reporter 'json' js.com.afr
+```
 
 AppSpider (Rapid7)
 ------------------
