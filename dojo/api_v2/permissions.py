@@ -1,4 +1,4 @@
-from dojo.models import Product_Type, Product, Engagement
+from dojo.models import Product_Type, Product
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from dojo.authorization.authorization import user_has_permission
