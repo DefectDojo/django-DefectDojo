@@ -20,7 +20,7 @@ leverage Auth0 to authenticate users on DefectDojo.
     -   Domain
     -   Client ID
     -   Client Secret
-4.  Now, edit the dojo/settings.py file and edit/replace the following
+4.  Now, edit the `dojo/settings/settings.dist.py` file and edit/replace the following
     information:
 
 > -   DD\_SOCIAL\_AUTH\_AUTH0\_OAUTH2\_ENABLED=True
