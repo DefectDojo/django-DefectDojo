@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 import io
 import csv
-from django.utils.text import Truncator
+import textwrap
 
 from dojo.models import Finding
 
@@ -41,8 +41,8 @@ class AWSProwlerParser(object):
             level = row.get('LEVEL')
             severity = row.get('SEVERITY')
             title_text = row.get('TITLE_TEXT')
+            # remove '[check000] ' at the start of each title
             title_text = re.sub(r'\[.*\]\s', '', title_text)
-            title_text_trunc = Truncator(title_text).words(8)
             notes = row.get('NOTES')
 
             sev = self.getCriticalityRating(result, level, severity)
@@ -52,8 +52,9 @@ class AWSProwlerParser(object):
                 find = dupes[dupe_key]
                 if description is not None:
                     find.description += description + "\n\n"
+                find.nb_occurences += 1
             else:
-                find = Finding(title=title_text_trunc,
+                find = Finding(title=textwrap.shorten(title_text, 150),
                                cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                                test=test,
                                active=False,
@@ -63,14 +64,11 @@ class AWSProwlerParser(object):
                                numerical_severity=Finding.get_numerical_severity(sev),
                                references=None,
                                date=find_date,
-                               dynamic_finding=True)
+                               dynamic_finding=True,
+                               nb_occurences=1,
+                               )
                 dupes[dupe_key] = find
 
-        if account:
-            test_description = ""
-            test_description = "%s\n* **AWS Account:** %s\n" % (test_description, str(account))
-            test.description = test_description
-            test.save()
         return list(dupes.values())
 
     def formatview(self, depth):
