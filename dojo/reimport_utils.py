@@ -45,15 +45,7 @@ def match_new_finding_to_existing_finding(new_finding, test, deduplication_algor
         # Re-writing the legacy deduplication here would be complicated and counter-productive.
         # If you have use cases going through this section, you're advised to create a deduplication configuration for your parser
         logger.debug("Legacy reimport. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
-        if scan_type == 'Arachni Scan':
-            return Finding.objects.filter(
-                title=new_finding.title,
-                test=test,
-                severity=new_finding.severity,
-                numerical_severity=Finding.get_numerical_severity(new_finding.severity),
-                description=new_finding.description).order_by('id')
-        else:
-            return Finding.objects.filter(
+        return Finding.objects.filter(
                 title=new_finding.title,
                 test=test,
                 severity=new_finding.severity,
