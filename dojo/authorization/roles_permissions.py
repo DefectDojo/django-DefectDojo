@@ -50,11 +50,12 @@ class Permissions(IntEnum):
     Engagement_Add = 1203
     Engagement_Edit = 1206
     Engagement_Delete = 1207
+    Risk_Acceptance = 1208
 
-    Test_View = 1202
-    Test_Add = 1203
-    Test_Edit = 1206
-    Test_Delete = 1207
+    Test_View = 1302
+    Test_Add = 1303
+    Test_Edit = 1306
+    Test_Delete = 1307
 
     Finding_View = 1402
     Finding_Add = 1403
@@ -72,6 +73,11 @@ class Permissions(IntEnum):
 
     Component_View = 1702
 
+    Note_View_History = 1802
+    Note_Add = 1803
+    Note_Edit = 1806
+    Note_Delete = 1807
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -82,15 +88,22 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_engagement_permissions(cls):
-        return {Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Delete}
+        return {Permissions.Engagement_View, Permissions.Engagement_Edit,
+            Permissions.Engagement_Delete, Permissions.Risk_Acceptance,
+            Permissions.Test_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
+            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History}
 
     @classmethod
     def get_test_permissions(cls):
-        return {Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete}
+        return {Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete,
+            Permissions.Finding_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
+            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History}
 
     @classmethod
     def get_finding_permissions(cls):
-        return {Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Import_Scan_Result, Permissions.Finding_Delete}
+        return {Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Import_Scan_Result,
+            Permissions.Finding_Delete, Permissions.Risk_Acceptance, Permissions.Note_Add,
+            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History}
 
     @classmethod
     def get_endpoint_permissions(cls):
@@ -137,6 +150,7 @@ def get_roles_with_permissions():
             Permissions.Engagement_View,
             Permissions.Engagement_Add,
             Permissions.Engagement_Edit,
+            Permissions.Risk_Acceptance,
 
             Permissions.Test_View,
             Permissions.Test_Add,
@@ -153,7 +167,11 @@ def get_roles_with_permissions():
 
             Permissions.Benchmark_Edit,
 
-            Permissions.Component_View
+            Permissions.Component_View,
+
+            Permissions.Note_View_History,
+            Permissions.Note_Edit,
+            Permissions.Note_Add
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -172,6 +190,7 @@ def get_roles_with_permissions():
             Permissions.Engagement_Add,
             Permissions.Engagement_Edit,
             Permissions.Engagement_Delete,
+            Permissions.Risk_Acceptance,
 
             Permissions.Test_View,
             Permissions.Test_Add,
@@ -192,7 +211,12 @@ def get_roles_with_permissions():
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
 
-            Permissions.Component_View
+            Permissions.Component_View,
+
+            Permissions.Note_View_History,
+            Permissions.Note_Edit,
+            Permissions.Note_Add,
+            Permissions.Note_Delete
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -215,6 +239,7 @@ def get_roles_with_permissions():
             Permissions.Engagement_Add,
             Permissions.Engagement_Edit,
             Permissions.Engagement_Delete,
+            Permissions.Risk_Acceptance,
 
             Permissions.Test_View,
             Permissions.Test_Add,
@@ -235,6 +260,11 @@ def get_roles_with_permissions():
             Permissions.Benchmark_Edit,
             Permissions.Benchmark_Delete,
 
-            Permissions.Component_View
+            Permissions.Component_View,
+
+            Permissions.Note_View_History,
+            Permissions.Note_Edit,
+            Permissions.Note_Add,
+            Permissions.Note_Delete
         }
     }
