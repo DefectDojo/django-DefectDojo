@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load display_tags %}
 {% block content %}
     <link href="{% static "google-code-prettify/src/prettify.css" %}" rel="stylesheet"/>
     <div class="row">
@@ -8,7 +9,6 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">Report Format</h4>
-                        <a class="btn btn-success disabled pull-right run_report" href="#">Save and Run</a>
                     </div>
                 </div>
                 <div class="panel-body in-use-widgets">
@@ -22,7 +22,12 @@
                 </div>
                 <div class="panel-footer">
                     <div class="clearfix">
-                        <a class="btn btn-success disabled pull-right run_report" href="#">Save and Run</a>
+                        {% feature_reports_pdf_list as feature_reports_pdf_list_flag %}
+                        {% if feature_reports_pdf_list_flag %}
+                            <a class="btn btn-success disabled pull-right run_report" href="#">Save and Run</a>
+                        {% else %}
+                            <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

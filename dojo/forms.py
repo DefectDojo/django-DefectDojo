@@ -730,7 +730,8 @@ class DeleteEngagementForm(forms.ModelForm):
                    'product', 'test_strategy', 'threat_model', 'api_test', 'pen_test',
                    'check_list', 'status', 'description', 'engagement_type', 'build_id',
                    'commit_hash', 'branch_tag', 'build_server', 'source_code_management_server',
-                   'source_code_management_uri', 'orchestration_engine', 'preset', 'tracker']
+                   'source_code_management_uri', 'orchestration_engine', 'preset', 'tracker',
+                   'deduplication_on_engagement', 'tags']
 
 
 class TestForm(forms.ModelForm):
@@ -785,7 +786,10 @@ class DeleteTestForm(forms.ModelForm):
                    'engagement',
                    'percent_complete',
                    'description',
-                   'lead')
+                   'lead',
+                   'title',
+                   'tags',
+                   'version')
 
 
 class AddFindingForm(forms.ModelForm):
@@ -1659,7 +1663,10 @@ class CustomReportOptionsForm(forms.Form):
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
+    if settings.FEATURE_REPORTS_PDF_LIST:
+        report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
+    else:
+        report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
 
 class DeleteReportForm(forms.ModelForm):
@@ -2515,7 +2522,7 @@ class ChoiceQuestionForm(QuestionForm):
 
         # re save out the choices
         choice_answer.answered_survey = self.answered_survey
-        choice_answer.answer = choices
+        choice_answer.answer.set(choices)
         choice_answer.save()
 
 
