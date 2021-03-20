@@ -2666,7 +2666,7 @@ class JIRA_Project(models.Model):
 
     def clean(self):
         if not self.jira_instance:
-            raise ValidationError('Cannot save JIRA_Project without JIRA_Instance')
+            raise ValidationError('Cannot save JIRA Project Configuration without JIRA Instance')
 
     def __str__(self):
         return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
