@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0085_jira_issue_finding_group'),
+        ('dojo', '0085_finding_group'),
     ]
 
     operations = [

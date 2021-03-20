@@ -363,7 +363,7 @@
                         <td><a href="{% url 'view_finding_group' group.id %}">{{ group.name|truncatechars_html:60 }}</a></td>
                         <td><a href="{% url 'view_test' test.id %}?finding_group={{ group.id }}">{{ group.findings.all|length }}</a></td>
                         <td>
-                            {{ group.cves }}
+                            {% for find in group.findings.all %}<a href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endfor %}
                         </td>
                         <td>
                             {{ group.components }}
@@ -841,7 +841,11 @@
                             {% endif %}
                         {% endif %}
                         <td class="centered">
-                            <a href="{% url 'view_finding_group' finding.finding_group_set.all.0.id %}">{{ finding.grouped|yesno:"Y, N" }}</a>
+                            {% if finding.grouped %}
+                                <a href="{% url 'view_finding_group' finding.finding_group_set.all.0.id %}">Y</a>
+                            {% else %}
+                                N
+                            {% endif %}
                         </td>
 
                     </tr>

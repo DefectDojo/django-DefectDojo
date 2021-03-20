@@ -207,6 +207,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 

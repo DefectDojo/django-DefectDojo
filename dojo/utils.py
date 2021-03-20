@@ -1786,7 +1786,13 @@ def sla_compute_and_notify(*args, **kwargs):
                     continue
 
                 do_jira_sla_comment = False
+                jira_issue = None
                 if finding.has_jira_issue:
+                    jira_issue = finding.jira_issue
+                elif finding.finding_group_set.all().first() and finding.finding_group_set.all().first().has_jira_issue:
+                    jira_issue = finding.finding_group_set.all().first().jira_issue
+
+                if jira_issue:
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:
@@ -1807,7 +1813,6 @@ def sla_compute_and_notify(*args, **kwargs):
                                 product_jira_sla_comment_enabled
                             ))
                             do_jira_sla_comment = True
-                            jira_issue = finding.jira_issue
                             logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
 
                 logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
