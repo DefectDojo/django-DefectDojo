@@ -3,22 +3,23 @@ import logging
 
 # Third party imports
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
+from django.conf import settings
 
 
 # Local application/library imports
 from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
 from dojo.models import Notes, Engagement, Test, Finding, NoteHistory, Note_Type
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def delete_issue(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
@@ -38,8 +39,14 @@ def delete_issue(request, id, page, objid):
         reverse_url = "view_finding"
     form = DeleteNoteForm(request.POST, instance=note)
 
-    if page is None or str(request.user) != note.author.username and not request.user.is_staff:
+    if page is None:
         raise PermissionDenied
+    if str(request.user) != note.author.username:
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, object, Permissions.Note_Delete)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
 
     if form.is_valid():
         note.delete()
@@ -61,9 +68,6 @@ def edit_issue(request, id, page, objid):
     reverse_url = None
     object_id = None
 
-    if page is None or str(request.user) != note.author.username and not request.user.is_staff:
-        raise PermissionDenied
-
     if page == "engagement":
         object = get_object_or_404(Engagement, id=objid)
         object_id = object.id
@@ -76,6 +80,15 @@ def edit_issue(request, id, page, objid):
         object = get_object_or_404(Finding, id=objid)
         object_id = object.id
         reverse_url = "view_finding"
+
+    if page is None:
+        raise PermissionDenied
+    if str(request.user) != note.author.username:
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, object, Permissions.Note_Edit)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
 
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -132,7 +145,6 @@ def edit_issue(request, id, page, objid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
 def note_history(request, id, page, objid):
     note = get_object_or_404(Notes, id=id)
     reverse_url = None
@@ -150,6 +162,15 @@ def note_history(request, id, page, objid):
         object = get_object_or_404(Finding, id=objid)
         object_id = object.id
         reverse_url = "view_finding"
+
+    if page is None:
+        raise PermissionDenied
+    if str(request.user) != note.author.username:
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, object, Permissions.Note_View_History)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
 
     history = note.history.all()
 

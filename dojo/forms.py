@@ -721,7 +721,8 @@ class DeleteEngagementForm(forms.ModelForm):
                    'product', 'test_strategy', 'threat_model', 'api_test', 'pen_test',
                    'check_list', 'status', 'description', 'engagement_type', 'build_id',
                    'commit_hash', 'branch_tag', 'build_server', 'source_code_management_server',
-                   'source_code_management_uri', 'orchestration_engine', 'preset', 'tracker']
+                   'source_code_management_uri', 'orchestration_engine', 'preset', 'tracker',
+                   'deduplication_on_engagement', 'tags']
 
 
 class TestForm(forms.ModelForm):
@@ -776,7 +777,10 @@ class DeleteTestForm(forms.ModelForm):
                    'engagement',
                    'percent_complete',
                    'description',
-                   'lead')
+                   'lead',
+                   'title',
+                   'tags',
+                   'version')
 
 
 class AddFindingForm(forms.ModelForm):
