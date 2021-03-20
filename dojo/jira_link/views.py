@@ -83,7 +83,7 @@ def webhook(request, secret=None):
                     resolution = resolution if resolution and resolution != "None" else None
                     resolution_id = resolution['id'] if resolution else None
                     resolution_name = resolution['name'] if resolution else None
-                    jira_now = parse_datetime(['issue']['fields']['updated'])
+                    jira_now = parse_datetime(parsed['issue']['fields']['updated'])
                     jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now)
                 elif jissue.engagement:
                     # if parsed['issue']['fields']['resolution'] != None:
