@@ -1948,8 +1948,6 @@ class Finding(models.Model):
             status += ['Duplicate']
         if self.risk_accepted:
             status += ['Risk Accepted']
-        if self.finding_group_set.all():
-            status += ['Grouped']
         if not len(status):
             status += ['Initial']
 
@@ -2031,6 +2029,10 @@ class Finding(models.Model):
     def has_jira_configured(self):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_configured(self)
+
+    @cached_property
+    def grouped(self):
+        return len(self.finding_group_set.all()) > 0
 
     def long_desc(self):
         long_desc = ''
@@ -2299,14 +2301,12 @@ class Finding_Group(TimeStampedModel):
                                 component_tuples, itemgetter(0)))
         return ','.join([key + ':' + ', '.join(value) for key, value in components.items() if key and value])
 
-    def _age(self, start_date):
-        diff = get_current_date() - start_date
-        days = diff.days
-        return days if days > 0 else 0
-
     @property
     def age(self):
-        return self._age(self.created.date())
+        if not self.findings.all():
+            return None
+
+        return max([find.age for find in self.findings.all()])
 
     @cached_property
     def sla_days_remaining_internal(self):
@@ -2328,8 +2328,23 @@ class Finding_Group(TimeStampedModel):
         return ', '.join([find.cve for find in self.findings.all() if find.cve])
 
     def status(self):
-        # TODO FINDING_GROUP
+        if not self.findings.all():
+            return None
+
+        if any([find.active for find in self.findings.all()]):
+            return 'Active'
+
+        if all([find.is_Mitigated for find in self.findings.all()]):
+            return 'Mitigated'
+
         return 'Active'
+
+    @cached_property
+    def mitigated(self):
+        return all([find.mitigated is not None for find in self.findings.all()])
+
+    def get_sla_start_date(self):
+        return min([find.sla_deadline() for find in self.findings.all()])
 
     def get_absolute_url(self):
         from django.urls import reverse

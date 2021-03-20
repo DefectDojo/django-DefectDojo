@@ -120,6 +120,9 @@ def can_be_pushed_to_jira(obj, form=None):
     elif type(obj) == Finding_Group:
         if not obj.findings.all():
             return False, '%s cannot be pushed to jira as it is empty.' % to_str_typed(obj), 'error_empty'
+        if 'Active' not in obj.status():
+            return False, '%s cannot be pushed to jira as it is not active.' % to_str_typed(obj), 'error_inactive'
+
     else:
         return False, '%s cannot be pushed to jira as it is of unsupported type.' % to_str_typed(obj), 'error_unsupported'
 
@@ -269,7 +272,7 @@ def get_jira_project_key(obj):
 def get_jira_issue_template(obj):
     jira_project = get_jira_project(obj)
     if isinstance(obj, Finding_Group):
-        return 'issue-trackers/jira-group-description.tpl'
+        return 'issue-trackers/jira_full/jira-finding-group-description.tpl'
     else:
         template = jira_project.issue_template
         if not template:
@@ -278,7 +281,7 @@ def get_jira_issue_template(obj):
 
         # fallback to default as before
         if not template:
-            return 'issue-trackers/jira-description.tpl'
+            return 'issue-trackers/jira_full/jira-description.tpl'
 
     return template
 
@@ -462,13 +465,17 @@ def jira_summary(obj):
     return None
 
 
-def jira_description(find):
-    template = get_jira_issue_template(find)
+def jira_description(obj):
+    template = get_jira_issue_template(obj)
 
     logger.debug('rendering description for jira from: %s', template)
 
     kwargs = {}
-    kwargs['finding'] = find
+    if isinstance(obj, Finding):
+        kwargs['finding'] = obj
+    elif isinstance(obj, Finding_Group):
+        kwargs['finding_group'] = obj
+
     description = render_to_string(template, kwargs)
     logger.debug('rendered description: %s', description)
     return description
@@ -725,8 +732,6 @@ def update_jira_issue(obj, *args, **kwargs):
         j_issue.jira_change = timezone.now()
         j_issue.save()
 
-        push_status_to_jira(find, jira_instance, jira, issue)
-
         logger.debug('Updated the following linked jira issue for %d:%s', find.id, find.title)
         return True
 
@@ -798,8 +803,8 @@ def issue_from_jira_is_active(issue_from_jira):
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, save=False):
-
     status_list = obj.status()
+    issue_closed = False
     # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
     if any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):

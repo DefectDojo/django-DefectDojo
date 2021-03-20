@@ -776,6 +776,15 @@ def jiraencode(value):
 
 
 @register.filter
+def jiraencode_component(value):
+    if not value:
+        return value
+    # component names can be long and won't wrap causing everything to look messy
+    # add some spaces around semicolon
+    return value.replace("|", "").replace(":", " : ").replace("@", " @ ").replace("?", " ? ").replace("#", " # ")
+
+
+@register.filter
 def jira_project(obj, use_inheritance=True):
     return jira_helper.get_jira_project(obj, use_inheritance)
 

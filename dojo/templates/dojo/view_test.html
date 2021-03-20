@@ -372,7 +372,7 @@
                         <td>{{ group.age }}</td>
                         {% if system_settings.enable_finding_sla %}
                             <td>
-                            {{ group.sla_days_remaining }}
+                            {{ group|finding_sla }}
                             </td>
                         {% endif %}
                         <td>
@@ -382,8 +382,7 @@
                                 {{ group.creator }}
                             {% endif %}
                         </td>
-                        <td class="nowrap">status
-                        </td>
+                        <td class="nowrap">{{ group.status }}</td>
                         {% if system_settings.enable_jira %}
                             {% if jira_project %}
 
@@ -572,7 +571,7 @@
             </ul>
         </div>
     {% endif %}
-     <div class="panel panel-default table-responsive">
+    <div class="panel panel-default table-responsive">
         {% if findings %}
             <table id="test_findings" class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                 <thead>
@@ -618,6 +617,7 @@
                                     <th>Jira Change</th>
                                 {% endif %}
                             {% endif %}
+                            <th>Group</th>
                         </tr>
                     </thead>
                 <tbody>
@@ -840,6 +840,10 @@
 
                             {% endif %}
                         {% endif %}
+                        <td class="centered">
+                            <a href="{% url 'view_finding_group' finding.finding_group_set.all.0.id %}">{{ finding.grouped|yesno:"Y, N" }}</a>
+                        </td>
+
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -853,7 +857,9 @@
             {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
         </div>
 
-        <div class="panel panel-default table-responsive potential-finding">
+     </div>
+
+     <div class="panel panel-default table-responsive potential-finding">
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Potential Findings</h4>
@@ -934,9 +940,6 @@
             <div class="panel-body {% if stub_findings %}show{% else %}hidden{% endif %}">
                 {% include "dojo/paging_snippet.html" with page=stub_findings %}
             </div>
-
-
-        </div>
     </div>
 
     <!--Cred Begin-->
@@ -1111,6 +1114,7 @@
                           { "data": "jira_change" },
                       {% endif %}
                   {% endif %}
+                  { "data": "grouped" }
               ];
 
             // Filter the list of items to display based on what is shown.
