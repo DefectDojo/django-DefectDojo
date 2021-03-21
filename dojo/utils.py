@@ -1789,8 +1789,8 @@ def sla_compute_and_notify(*args, **kwargs):
                 jira_issue = None
                 if finding.has_jira_issue:
                     jira_issue = finding.jira_issue
-                elif finding.finding_group_set.all().first() and finding.finding_group_set.all().first().has_jira_issue:
-                    jira_issue = finding.finding_group_set.all().first().jira_issue
+                elif finding.grouped:
+                    jira_issue = finding.finding_group.jira_issue
 
                 if jira_issue:
                     jira_count += 1

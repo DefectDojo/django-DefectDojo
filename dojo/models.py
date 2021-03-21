@@ -2025,14 +2025,26 @@ class Finding(models.Model):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_issue(self)
 
+    @cached_property
+    def finding_group(self):
+        return self.finding_group_set.all().first()
+
+    @cached_property
+    def has_jira_group_issue(self):
+        if not self.has_finding_group:
+            return False
+
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self.finding_group)
+
     @property
     def has_jira_configured(self):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_configured(self)
 
     @cached_property
-    def grouped(self):
-        return len(self.finding_group_set.all()) > 0
+    def has_finding_group(self):
+        return self.finding_group is not None
 
     def long_desc(self):
         long_desc = ''

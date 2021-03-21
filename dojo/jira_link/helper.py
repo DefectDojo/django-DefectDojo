@@ -1075,19 +1075,19 @@ def jira_get_issue(jira_project, issue_key):
 @app.task
 @dojo_model_from_id(model=Notes, parameter=1)
 @dojo_model_from_id
-def add_comment(find, note, force_push=False):
-    if not is_jira_configured_and_enabled(find):
+def add_comment(obj, note, force_push=False):
+    if not is_jira_configured_and_enabled(obj):
         return False
 
-    logger.debug('trying to add a comment to a linked jira issue for: %d:%s', find.id, find.title)
+    logger.debug('trying to add a comment to a linked jira issue for: %d:%s', obj.id, obj)
     if not note.private:
-        jira_project = get_jira_project(find)
-        jira_instance = get_jira_instance(find)
+        jira_project = get_jira_project(obj)
+        jira_instance = get_jira_instance(obj)
 
         if jira_project.push_notes or force_push is True:
             try:
                 jira = get_jira_connection(jira_instance)
-                j_issue = find.jira_issue
+                j_issue = obj.jira_issue
                 jira.add_comment(
                     j_issue.jira_id,
                     '(%s): %s' % (note.author.get_full_name() if note.author.get_full_name() else note.author.username, note.entry))

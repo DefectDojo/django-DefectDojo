@@ -310,8 +310,12 @@ def view_finding(request, fid):
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = user
             finding.save()
+
             if finding.has_jira_issue:
                 jira_helper.add_comment(finding, new_note)
+            elif finding.has_jira_group_issue:
+                jira_helper.add_comment(finding.finding_group, new_note)
+
             if note_type_activation:
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
@@ -527,7 +531,11 @@ def defect_finding_review(request, fid):
                         new_note.entry = new_note.entry + "\nJira issue re-opened."
 
             # Update Dojo and Jira with a notes
-            jira_helper.add_comment(finding, new_note, force_push=True)
+            if finding.has_jira_issue:
+                jira_helper.add_comment(finding, new_note, force_push=True)
+            elif finding.has_jira_group_issue:
+                jira_helper.add_comment(finding.finding_group, new_note, force_push=True)
+
             finding.save()
 
             messages.add_message(

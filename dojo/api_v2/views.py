@@ -476,6 +476,8 @@ class FindingViewSet(prefetch.PrefetchListMixin,
 
             if finding.has_jira_issue:
                 jira_helper.add_comment(finding, note)
+            elif finding.has_jira_group_issue:
+                jira_helper.add_comment(finding.finding_group, note)
 
             serialized_note = serializers.NoteSerializer({
                 "author": author, "entry": entry,
