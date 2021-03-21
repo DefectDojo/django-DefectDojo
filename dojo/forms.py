@@ -2172,7 +2172,7 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].disabled = True
 
         if self.instance:
-            if self.instance.has_jira_issue:
+            if hasattr(self.instance, 'has_jira_issue') and self.instance.has_jira_issue:
                 self.initial['jira_issue'] = self.instance.jira_issue.jira_key
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
 
