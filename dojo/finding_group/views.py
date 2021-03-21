@@ -20,13 +20,13 @@ logger = logging.getLogger(__name__)
 @user_must_be_authorized(Finding_Group, 'view', 'fgid')
 def view_finding_group(request, fgid):
     logger.debug('view finding group: %s', fgid)
-    pass
+    return HttpResponse('Not implemented yet')
 
 
 @user_must_be_authorized(Finding_Group, 'change', 'fgid')
 def edit_finding_group(request, fgid):
     logger.debug('edit finding group: %s', fgid)
-    pass
+    return HttpResponse('Not implemented yet')
 
 
 @user_must_be_authorized(Finding_Group, 'delete', 'fgid')

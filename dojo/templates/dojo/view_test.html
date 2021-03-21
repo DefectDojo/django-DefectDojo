@@ -362,7 +362,13 @@
                             </span>
                         </td>
                         <td><a href="{% url 'view_finding_group' group.id %}">{{ group.name|truncatechars_html:60 }}</a></td>
-                        <td><a href="{% url 'view_test' test.id %}?finding_group={{ group.id }}">{{ group.findings.all|length }}</a></td>
+                        <td>
+                            <i class="has-popover" data-trigger="hover" data-placement="right" data-html="true"
+                                data-content="{% for finding in group.findings.all %}{{ finding.title }}<br>{% endfor %}"
+                                data-container="body" data-original-title="Findings" title="">
+                                <a href="{% url 'view_test' test.id %}?finding_group={{ group.id }}">{{ group.findings.all|length }}</a>
+                            </i>
+                        </td>
                         <td>
                             {% for find in group.findings.all %}<a href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endfor %}
                         </td>
