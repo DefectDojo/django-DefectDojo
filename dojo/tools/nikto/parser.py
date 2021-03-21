@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 class NiktoParser(object):
     """Nikto web server scanner - https://cirt.net/Nikto2
 
+    XML output (old and new nxvmlversion=\"1.2\" type) or JSON output
+
     See: https://github.com/sullo/nikto
 
     To launch a simple run if you have Docker installed:
