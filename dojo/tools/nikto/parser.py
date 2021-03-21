@@ -13,6 +13,24 @@ logger = logging.getLogger(__name__)
 
 
 class NiktoParser(object):
+    """Nikto web server scanner - https://cirt.net/Nikto2
+
+    See: https://github.com/sullo/nikto
+
+    To launch a simple run if you have Docker installed:
+
+    ```shell
+    git clone https://github.com/sullo/nikto.git
+    cd nikto
+    docker build -t sullo/nikto .
+    # Call it without arguments to display the full help
+    docker run --rm sullo/nikto
+    # Basic usage
+    docker run --rm sullo/nikto -h http://www.example.com
+    # To save the report in a specific format, mount /tmp as a volume:
+    docker run --rm -v $(pwd):/tmp sullo/nikto -h http://www.example.com -o /tmp/out.json
+    ```
+    """
 
     def get_scan_types(self):
         return ["Nikto Scan"]
@@ -124,9 +142,6 @@ class NiktoParser(object):
                     f"**Description:** `{item.find('description').text}`",
                     f"**HTTP Method:** `{item.attrib['method']}`",
             ])
-            mitigation = "N/A"
-            impact = "N/A"
-            references = "N/A"
 
             url = hyperlink.parse(ip)
             endpoint = Endpoint(
@@ -147,18 +162,16 @@ class NiktoParser(object):
 
             else:
                 finding = Finding(title=titleText,
-                                            test=test,
-                                            active=False,
-                                            verified=False,
-                                            description=description,
-                                            severity=severity,
-                                            numerical_severity=Finding.get_numerical_severity(
-                                                severity),
-                                            mitigation=mitigation,
-                                            impact=impact,
-                                            references=references,
-                                            dynamic_finding=True,
-                                            nb_occurences=1,
+                                    test=test,
+                                    active=False,
+                                    verified=False,
+                                    description=description,
+                                    severity=severity,
+                                    numerical_severity=Finding.get_numerical_severity(
+                                        severity),
+                                    references="N/A",
+                                    dynamic_finding=True,
+                                    nb_occurences=1,
                                   )
                 finding.unsaved_endpoints = [endpoint]
 
