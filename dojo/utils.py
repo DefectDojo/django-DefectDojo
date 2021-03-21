@@ -1925,6 +1925,7 @@ def to_str_typed(obj):
 
 
 def get_product(obj):
+    logger.debug('getting product for %s:%s', type(obj), obj)
     if not obj:
         return None
 

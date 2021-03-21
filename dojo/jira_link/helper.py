@@ -88,8 +88,8 @@ def can_be_pushed_to_jira(obj, form=None):
     if not get_jira_project(obj):
         return False, '%s cannot be pushed to jira as there is no jira project configuration for this product.' % to_str_typed(obj), 'error_no_jira_project'
 
-    # if not hasattr(obj, 'has_jira_issue'):
-    #     return False, '%s cannot be pushed to jira as there is no jira_issue attribute.' % to_str_typed(obj), 'error_no_jira_issue_attribute'
+    if not hasattr(obj, 'has_jira_issue'):
+        return False, '%s cannot be pushed to jira as there is no jira_issue attribute.' % to_str_typed(obj), 'error_no_jira_issue_attribute'
 
     if obj.has_jira_issue:
         return True, None, None
@@ -269,7 +269,7 @@ def get_jira_project_key(obj):
     return jira_project.project_key
 
 
-def get_jira_issue_template_dir(obj):
+def get_jira_issue_template(obj):
     jira_project = get_jira_project(obj)
 
     template_dir = jira_project.issue_template_dir
@@ -467,7 +467,7 @@ def jira_summary(obj):
 
 
 def jira_description(obj):
-    template = get_jira_issue_template_dir(obj)
+    template = get_jira_issue_template(obj)
 
     logger.debug('rendering description for jira from: %s', template)
 
@@ -519,6 +519,16 @@ def push_to_jira(obj):
 
     else:
         logger.error('unsupported object passed to push_to_jira: %s %i %s', obj.__name__, obj.id, obj)
+
+
+def add_issues_to_epic(jira, obj, epic_id, issue_keys, ignore_epics=True):
+    try:
+        return jira.add_issues_to_epic(epic_id=epic_id, issue_keys=issue_keys, ignore_epics=ignore_epics)
+    except JIRAError as e:
+        logger.error('error adding issues %s to epic %s for %s', issue_keys, epic_id, obj.id)
+        logger.exception(e)
+        log_jira_alert(e.text, obj)
+        return False
 
 
 @dojo_model_to_id
@@ -624,11 +634,12 @@ def add_jira_issue(obj, *args, **kwargs):
             logger.debug('Adding to EPIC Map: %s', eng.name)
             epic = get_jira_issue(eng)
             if epic:
-                jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(new_issue.id)], ignore_epics=True)
+                add_issues_to_epic(jira, obj, epic_id=epic.jira_id, issue_keys=[str(new_issue.id)], ignore_epics=True)
             else:
                 logger.info('The following EPIC does not exist: %s', eng.name)
 
         # only link the new issue if it was succefully created, incl attachments and epic link
+        logger.debug('saving JIRA_Issue for %s finding %s', new_issue.key, obj.id)
         j_issue = JIRA_Issue(
             jira_id=new_issue.id, jira_key=new_issue.key, jira_project=jira_project)
         j_issue.set_obj(obj)
@@ -726,7 +737,7 @@ def update_jira_issue(obj, *args, **kwargs):
             logger.debug('Adding to EPIC Map: %s', eng.name)
             epic = get_jira_issue(eng)
             if epic:
-                jira.add_issues_to_epic(epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
+                add_issues_to_epic(jira, obj, epic_id=epic.jira_id, issue_keys=[str(j_issue.jira_id)], ignore_epics=True)
             else:
                 logger.info('The following EPIC does not exist: %s', eng.name)
 
