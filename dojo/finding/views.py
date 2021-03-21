@@ -1232,11 +1232,12 @@ def promote_to_finding(request, fid):
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     jform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
     if request.method == 'POST':
         form = PromoteFindingForm(request.POST)
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
+            jform = JIRAFindingForm(request.POST, instance=finding, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding))
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -1324,21 +1325,20 @@ def promote_to_finding(request, fid):
             add_field_errors_to_response(jform)
             add_field_errors_to_response(form)
     else:
+
+        form = PromoteFindingForm(
+            initial={
+                'title': finding.title,
+                'product_tab': product_tab,
+                'date': finding.date,
+                'severity': finding.severity,
+                'description': finding.description,
+                'test': finding.test,
+                'reporter': finding.reporter
+            })
+
         if use_jira:
-            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test), finding_form=form)
-
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
-
-    form = PromoteFindingForm(
-        initial={
-            'title': finding.title,
-            'product_tab': product_tab,
-            'date': finding.date,
-            'severity': finding.severity,
-            'description': finding.description,
-            'test': finding.test,
-            'reporter': finding.reporter
-        })
+            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test))
 
     return render(
         request, 'dojo/promote_to_finding.html', {

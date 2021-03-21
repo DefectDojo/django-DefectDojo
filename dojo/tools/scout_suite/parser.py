@@ -1,11 +1,9 @@
-__author__ = 'Hasan Tayyar Besik'
 
-# Cloned form aws_scout2 scanner
 import json
+import textwrap
 from datetime import datetime
 
-from django.utils.html import strip_tags
-from django.utils.text import Truncator
+from html2text import html2text
 
 from dojo.models import Finding
 
@@ -26,9 +24,10 @@ class ScoutSuiteParser(object):
         return "JS file in scoutsuite-results/scoutsuite_results_*.js."
 
     def get_findings(self, filename, test):
-        with open(filename.temporary_file_path(), "r") as fileobj:
-            raw_data = fileobj.read()
-            raw_data = raw_data.replace("scoutsuite_results =", "")
+        content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        raw_data = content.replace("scoutsuite_results =", "")
         data = json.loads(raw_data)
         find_date = datetime.now()
         dupes = {}
@@ -89,7 +88,7 @@ class ScoutSuiteParser(object):
                             scoutsuite_findings.append(mobsf_item)
 
         for scoutsuite_finding in scoutsuite_findings:
-            title = strip_tags(scoutsuite_finding["title"])
+            title = html2text(scoutsuite_finding["title"])
             sev = self.getCriticalityRating(scoutsuite_finding["severity"])
             description = scoutsuite_finding["description"]
             references = scoutsuite_finding["references"]
@@ -99,7 +98,7 @@ class ScoutSuiteParser(object):
                 if description is not None:
                     find.description += description
             else:
-                find = Finding(title=Truncator(title).words(6),
+                find = Finding(title=textwrap.shorten(title, 150),
                                 cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                                 test=test,
                                 active=False,

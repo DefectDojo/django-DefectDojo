@@ -649,7 +649,7 @@ INSTALLED_APPS = (
     'dbbackup',
     'django_celery_results',
     'social_django',
-    'drf_yasg2',
+    'drf_yasg',
     'tagulous',
     'django_jsonfield_backport',
 )

@@ -10,8 +10,8 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Finding_Group, Risk_Acceptance, Test, Engagement, Product, JIRA_Issue, JIRA_Project, \
-    System_Settings, Notes, JIRA_Instance, User
+from dojo.models import Finding, Finding_Group, Risk_Acceptance, Stub_Finding, Test, Engagement, Product, \
+    JIRA_Issue, JIRA_Project, System_Settings, Notes, JIRA_Instance, User
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 from django.contrib import messages
@@ -91,6 +91,10 @@ def can_be_pushed_to_jira(obj, form=None):
     if not hasattr(obj, 'has_jira_issue'):
         return False, '%s cannot be pushed to jira as there is no jira_issue attribute.' % to_str_typed(obj), 'error_no_jira_issue_attribute'
 
+    if isinstance(obj, Stub_Finding):
+        # stub findings don't have active/verified/etc and can always be pushed
+        return True, None, None
+
     if obj.has_jira_issue:
         return True, None, None
 
@@ -131,6 +135,7 @@ def can_be_pushed_to_jira(obj, form=None):
 
 # use_inheritance=True means get jira_project config from product if engagement itself has none
 def get_jira_project(obj, use_inheritance=True):
+    print('get jira project for: ' + str(obj.id) + ':' + str(obj))
     if not is_jira_enabled():
         return None
 
@@ -143,7 +148,7 @@ def get_jira_project(obj, use_inheritance=True):
     if isinstance(obj, JIRA_Issue):
         return obj.jira_project
 
-    if isinstance(obj, Finding):
+    if isinstance(obj, Finding) or isinstance(obj, Stub_Finding):
         finding = obj
         return get_jira_project(finding.test)
 
