@@ -108,24 +108,31 @@ def can_edit_mitigated_data(user):
     return settings.EDITABLE_MITIGATED_DATA and user.is_superuser
 
 
-def create_finding_group(finds):
+def create_finding_group(finds, finding_group_name):
     logger.debug('creating finding_group_create')
     if not finds or len(finds) == 0:
         raise ValueError('cannot create empty Finding Group')
 
+    finding_group_name_dummy = 'bulk group ' + strftime("%a, %d %b  %Y %X", timezone.now().timetuple())
+
     finding_group = Finding_Group(test=finds[0].test)
     finding_group.creator = get_current_user()
-    finding_group.name = 'bulk group ' + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
+    finding_group.name = finding_group_name + finding_group_name_dummy
     finding_group.save()
     available_findings = [find for find in finds if not find.finding_group_set.all()]
     finding_group.findings.set(available_findings)
+
+    # if user provided a name, we use that, else:
     # if we have components, we may set a nice name but catch 'name already exist' exceptions
     try:
-        if finding_group.components:
+        if finding_group_name:
+            finding_group.name = finding_group_name
+        elif finding_group.components:
             finding_group.name = finding_group.components
-            finding_group.save()
+        finding_group.save()
     except:
         pass
+
     added = len(available_findings)
     skipped = len(finds) - added
     return finding_group, added, skipped

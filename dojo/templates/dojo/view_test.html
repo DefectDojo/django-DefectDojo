@@ -538,6 +538,7 @@
                         <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label>(experimental)<br/>
                         <label style="font-size: 80%; font-weight: normal; display: block">
                             <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
+                            <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 90%;"/>
                         </label>
                         <span>
                             <label style="font-size: 80%; font-weight: normal;">
@@ -1567,12 +1568,9 @@
         });
 
         $('[id^=delete-finding-group-menu-]').on('click', function () {
-            if (confirm('Are you sure you want to delete this finding group? The findings themselves will NOT be deleted.'))
-            {
-                var form_element = "form#" + this.id + "-form";
-                $( form_element ).submit();
-            }
-          });
+            var form_element = "form#" + this.id + "-form";
+            $( form_element ).submit();
+        });
 
 
 

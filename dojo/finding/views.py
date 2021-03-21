@@ -1876,7 +1876,9 @@ def finding_bulk_update_all(request, pid=None):
 
                 if form.cleaned_data['finding_group_create']:
                     logger.debug('finding_group_create checked!')
-                    finding_group, added, skipped = finding_helper.create_finding_group(finds)
+                    finding_group_name = form.cleaned_data['finding_group_create_name']
+                    logger.debug('finding_group_create_name: %s', finding_group_name)
+                    finding_group, added, skipped = finding_helper.create_finding_group(finds, finding_group_name)
 
                     if added:
                         add_success_message_to_response('Created finding group with %s findings' % added)

@@ -1182,6 +1182,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     finding_group = forms.BooleanField(required=False)
     finding_group_create = forms.BooleanField(required=False)
+    finding_group_create_name = forms.CharField(required=False)
     finding_group_add = forms.BooleanField(required=False)
     add_to_finding_group = forms.BooleanField(required=False)
     finding_group_remove = forms.BooleanField(required=False)
