@@ -465,6 +465,7 @@
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
                 {% endif %}
+                <th>Group</th>
             </tr>
             <tr>
                 {% if finding.file_path %}
@@ -539,6 +540,13 @@
                     {% endif %}
                     </td>
                 {% endif %}
+                <td>
+                    {% if finding.finding_group %}
+                        {{ finding.finding_group.name }}
+                    {% else %}
+                        N
+                    {% endif %}
+                </td>
             </tr>
         </table>
     </div>

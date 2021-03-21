@@ -255,6 +255,8 @@
     {% endif %}
     <!--Import activity end -->
 
+    <!-- Finding Groups begin -->
+    {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
@@ -423,11 +425,13 @@
                 </tbody>
             </table>
         {% else %}
-            <div class="panel-body">
-                <p class="text-center">No Groups found.</p>
-            </div>
-        {% endif %}
+        <div class="panel-body">
+            <p class="text-center">No Groups found.</p>
         </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    <!-- Finding Groups end-->
 
     <div class="panel panel-default">
         <div class="panel-heading tight">
@@ -541,26 +545,27 @@
                             <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
                         </label>
 
-                        <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label>(experimental)<br/>
-                        <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
-                            <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 90%;"/>
-                        </label>
-                        <span>
-                            <label style="font-size: 80%; font-weight: normal;">
-                                <input id="id_bulk_finding_group_add" name="finding_group_add" class="finding_group_option" type="checkbox" disabled/> <span>Add to...</span>
+                        {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                            <label><b>Group</b><input id="id_bulk_finding_group" name="finding_group" type="checkbox" alt="Select to enable"/></label>(experimental)<br/>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_finding_group_create" name="finding_group_create" class="finding_group_option" type="checkbox" disabled/> <span>Create</span>
+                                <input id="id_bulk_finding_group_create_name" name="finding_group_create_name" style="font-size: 90%;"/>
                             </label>
-                            <select name="add_to_finding_group" id="add_to_finding_group" style="font-size: 80%">
-                                <option value="">Choose...</option>
-                                {% for group in finding_groups %}
-                                    <option value="{{ group.id }}">{{ group.name|truncatechars_html:40 }}</option>
-                                {% endfor %}
-                            </select>
-                        </span>
-                        <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_bulk_finding_group_remove" name="finding_group_remove" class="finding_group_option" type="checkbox" disabled/> <span>Remove from any group</span>
-                        </label>
-
+                            <span>
+                                <label style="font-size: 80%; font-weight: normal;">
+                                    <input id="id_bulk_finding_group_add" name="finding_group_add" class="finding_group_option" type="checkbox" disabled/> <span>Add to...</span>
+                                </label>
+                                <select name="add_to_finding_group" id="add_to_finding_group" style="font-size: 80%">
+                                    <option value="">Choose...</option>
+                                    {% for group in finding_groups %}
+                                        <option value="{{ group.id }}">{{ group.name|truncatechars_html:40 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </span>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_finding_group_remove" name="finding_group_remove" class="finding_group_option" type="checkbox" disabled/> <span>Remove from any group</span>
+                            </label>
+                        {% endif %}
 
                         {% if system_settings.enable_jira %}
                             <b>Push to JIRA</b> <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA" title="Push_To_Jira"/><br/>
