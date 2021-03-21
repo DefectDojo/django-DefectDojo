@@ -160,7 +160,6 @@ class NiktoParser(object):
                                     severity=severity,
                                     numerical_severity=Finding.get_numerical_severity(
                                         severity),
-                                    references="N/A",
                                     dynamic_finding=True,
                                     nb_occurences=1,
                                   )
