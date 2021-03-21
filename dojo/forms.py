@@ -1750,10 +1750,10 @@ class ExpressGITHUBForm(forms.ModelForm):
                     'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
 
 
-def get_jira_issue_template_choices():
-    template_dir = settings.JIRA_TEMPLATE_DIR
-    template_list = [('', '---')]
-    for base_dir, dirnames, filenames in os.walk(template_dir):
+def get_jira_issue_template_dir_choices():
+    template_root = settings.JIRA_TEMPLATE_ROOT
+    template_dir_list = [('', '---')]
+    for base_dir, dirnames, filenames in os.walk(template_root):
         # for filename in filenames:
         #     if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
         #         base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
@@ -1762,13 +1762,13 @@ def get_jira_issue_template_choices():
         for dirname in dirnames:
             if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
                 base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
-            template_list.append((os.path.join(base_dir, dirname), dirname))
+            template_dir_list.append((os.path.join(base_dir, dirname), dirname))
 
-    logger.debug('templates: %s', template_list)
-    return template_list
+    logger.debug('templates: %s', template_dir_list)
+    return template_dir_list
 
 
-JIRA_TEMPLATE_CHOICES = sorted(get_jira_issue_template_choices())
+JIRA_TEMPLATE_CHOICES = sorted(get_jira_issue_template_dir_choices())
 
 
 class JIRA_IssueForm(forms.ModelForm):
@@ -1779,7 +1779,7 @@ class JIRA_IssueForm(forms.ModelForm):
 
 
 class JIRAForm(forms.ModelForm):
-    issue_template = forms.ChoiceField(required=False,
+    issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
                                        help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
 
@@ -2108,7 +2108,7 @@ class GITHUB_Product_Form(forms.ModelForm):
 
 class JIRAProjectForm(forms.ModelForm):
     jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label='JIRA Instance', required=False)
-    issue_template = forms.ChoiceField(required=False,
+    issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
                                        help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
 

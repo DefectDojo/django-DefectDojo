@@ -56,10 +56,10 @@ class JIRAConfigProductTest(DojoTestCase):
     def test_add_jira_instance(self):
         response, jira_instance = self.add_jira_instance(self.data_jira_instance)
 
-    def test_add_jira_instance_with_issue_template(self):
+    def test_add_jira_instance_with_issue_template_dir(self):
         # make sure we get no error when specifying template
         data = self.data_jira_instance.copy()
-        data['issue_template'] = 'issue-trackers/jira-description.tpl'
+        data['issue_template_dir'] = 'issue-trackers/jira-description.tpl'
         response, jira_instance = self.add_jira_instance(data)
 
     # no mock so we can assert the exception raised

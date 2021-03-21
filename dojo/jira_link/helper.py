@@ -269,21 +269,22 @@ def get_jira_project_key(obj):
     return jira_project.project_key
 
 
-def get_jira_issue_template(obj):
+def get_jira_issue_template_dir(obj):
     jira_project = get_jira_project(obj)
+
+    template_dir = jira_project.issue_template_dir
+    if not template_dir:
+        jira_instance = get_jira_instance(obj)
+        template_dir = jira_instance.issue_template_dir
+
+    # fallback to default as before
+    if not template_dir:
+        template_dir = 'issue-trackers/jira_full/'
+
     if isinstance(obj, Finding_Group):
-        return 'issue-trackers/jira_full/jira-finding-group-description.tpl'
+        return os.path.join(template_dir, 'jira-finding-group-description.tpl')
     else:
-        template = jira_project.issue_template
-        if not template:
-            jira_instance = get_jira_instance(obj)
-            template = jira_instance.issue_template
-
-        # fallback to default as before
-        if not template:
-            return 'issue-trackers/jira_full/jira-description.tpl'
-
-    return template
+        return os.path.join(template_dir, 'jira-description.tpl')
 
 
 def get_jira_creation(obj):
@@ -466,7 +467,7 @@ def jira_summary(obj):
 
 
 def jira_description(obj):
-    template = get_jira_issue_template(obj)
+    template = get_jira_issue_template_dir(obj)
 
     logger.debug('rendering description for jira from: %s', template)
 

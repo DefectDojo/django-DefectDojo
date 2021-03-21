@@ -2676,7 +2676,7 @@ class JIRA_Instance(models.Model):
                                           choices=default_issue_type_choices,
                                           default='Bug',
                                           help_text='You can define extra issue types in settings.py')
-    issue_template = models.CharField(max_length=255,
+    issue_template_dir = models.CharField(max_length=255,
                                       null=True,
                                       blank=True,
                                       help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
@@ -2752,7 +2752,7 @@ class JIRA_Project(models.Model):
                              null=True, blank=True, on_delete=models.CASCADE)
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
-    issue_template = models.CharField(max_length=255,
+    issue_template_dir = models.CharField(max_length=255,
                                       null=True,
                                       blank=True,
                                       help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
