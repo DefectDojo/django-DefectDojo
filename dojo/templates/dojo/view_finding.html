@@ -465,7 +465,9 @@
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
                 {% endif %}
-                <th>Group</th>
+                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                    <th>Group</th>
+                {% endif %}
             </tr>
             <tr>
                 {% if finding.file_path %}
@@ -540,13 +542,15 @@
                     {% endif %}
                     </td>
                 {% endif %}
-                <td>
-                    {% if finding.finding_group %}
-                        {{ finding.finding_group.name }}
-                    {% else %}
-                        N
-                    {% endif %}
-                </td>
+                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                    <td>
+                        {% if finding.finding_group %}
+                            {{ finding.finding_group.name }}
+                        {% else %}
+                            N
+                        {% endif %}
+                    </td>
+                {% endif %}
             </tr>
         </table>
     </div>

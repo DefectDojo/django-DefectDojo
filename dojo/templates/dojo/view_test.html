@@ -630,7 +630,9 @@
                                     <th>Jira Change</th>
                                 {% endif %}
                             {% endif %}
-                            <th>Group</th>
+                            {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                                <th>Group</th>
+                            {% endif %}
                         </tr>
                     </thead>
                 <tbody>
@@ -853,14 +855,15 @@
 
                             {% endif %}
                         {% endif %}
-                        <td class="centered">
-                            {% if finding.has_finding_group %}
+                        {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                            <td class="centered">
+                                {% if finding.has_finding_group %}
                                 <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">Y</a>
-                            {% else %}
+                                {% else %}
                                 N
-                            {% endif %}
-                        </td>
-
+                                {% endif %}
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -1131,7 +1134,9 @@
                           { "data": "jira_change" },
                       {% endif %}
                   {% endif %}
-                  { "data": "grouped" }
+                  {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                    { "data": "grouped" },
+                  {% endif %}
               ];
 
             // Filter the list of items to display based on what is shown.
