@@ -29,13 +29,13 @@ def config_loggers(*args, **kwags):
     dictConfig(settings.LOGGING)
 
 
-from celery import current_app
+# from celery import current_app
 
-_ = current_app.loader.import_default_modules()
+# _ = current_app.loader.import_default_modules()
 
-tasks = list(sorted(name for name in current_app.tasks
-                            if not name.startswith('celery.')))
+# tasks = list(sorted(name for name in current_app.tasks
+#                             if not name.startswith('celery.')))
 
-logger.debug('registered celery tasks:')
-for task in tasks:
-    logger.debug(task)
+# logger.debug('registered celery tasks:')
+# for task in tasks:
+#     logger.debug(task)
