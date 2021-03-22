@@ -107,15 +107,66 @@ Findings can be pushed to Jira in a number of ways:
 3. If a finding already exist, visit the edit finding page and find the 'Push to JIRA' tick box at the bottom
 4. When viewing a list of findings, select each relevant tick boxes to the left of the finding, and click the 'Bulk Edit' button at the top. find 'Push to JIRA' at the bottom of the menu
 
-**Known Issues**
+**Status Sync**
 
 DefectDojo will try to keep the status in sync with the status in JIRA
-using the various status IDs configured for each JIRA instance. This
-will only work if your workflow in JIRA allows arbitrary transitions
-between the statuses JIRA issues can be in. The Risk Acceptance feature
+using the Close and Reopen transition IDs configured for each JIRA instance. This
+will only work if your workflow in JIRA allows the Close transition to be
+performed from every status a JIRA issue can be in.
+
+**Known Issues**
+
+The Risk Acceptance feature
 in DefectDojo will (for that reason) not (yet) try to sync statuses. A
 comment will be pushed to JIRA if a finding is risk accepted or
 unaccepted. Contributions are welcome to enhance the integration.
+
+**Status reconciliation**
+
+Sometimes JIRA is down, or Defect Dojo is down, or there was bug in a webhook. In this case
+JIRA can become out of sync with Defect Dojo. If this is the case for lots of issues, manual reconciliation
+might not be feasible. For this scenario there is the management command 'jira_status_reconciliation'.
+
+```
+usage: manage.py jira_status_reconciliation [-h] [--mode MODE] [--product PRODUCT] [--engagement ENGAGEMENT] [--dryrun] [--version] [-v {0,1,2,3}]
+
+Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results.
+Risk Accepted findings are skipped. Findings created before 1.14.0 are skipped.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --mode MODE           - reconcile: (default)reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status change
+                        timestamp in both systems to determine which one is the correct status
+                        - push_status_to_jira: update JIRA status for all JIRA issues
+                        connected to a Defect Dojo finding (will not push summary/description, only status)
+                        - import_status_from_jira: update Defect Dojo
+                        finding status from JIRA
+  --product PRODUCT     Only process findings in this product (name)
+  --engagement ENGAGEMENT
+                        Only process findings in this product (name)
+  --dryrun              Only print actions to be performed, but make no modifications.
+  -v {0,1,2,3}, --verbosity {0,1,2,3}
+                        Verbosity level; 0=minimal output, 1=normal output, 2=verbose output, 3=very verbose output
+```
+
+This can be executed from the uwsgi docker container using:
+
+``` {.sourceCode .bash}
+$ docker-compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation'
+```
+
+DEBUG output can be obtains via `-v 3`, but only after increasing the logging to DEBUG level in your settings.dist.py or local_settings.py file
+
+``` {.sourceCode .bash}
+$ docker-compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation -v 3'
+```
+
+At the end of the command a semicolon seperated CSV summary will be printed. This can be captured by redirecting stdout to a file:
+
+``` {.sourceCode .bash}
+$ docker-compose exec uwsgi /bin/bash -c 'python manage.py jira_status_reconciliation > jira_reconciliation.csv'
+```
+
 
 **Troubleshooting JIRA integration**
 

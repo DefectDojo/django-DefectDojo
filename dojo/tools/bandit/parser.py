@@ -70,7 +70,8 @@ class BanditParser(object):
                                line=item["line_number"],
                                url='N/A',
                                date=find_date,
-                               static_finding=True)
+                               static_finding=True,
+                               dynamic_finding=False)
                 logging.debug(f"Bandit parser {find}")
                 dupes[dupe_key] = find
                 findingdetail = ''

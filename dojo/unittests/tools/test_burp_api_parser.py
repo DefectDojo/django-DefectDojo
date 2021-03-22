@@ -1,6 +1,5 @@
 from django.test import TestCase
-
-from dojo.models import Test, Product, Engagement
+from dojo.models import Test
 from dojo.tools.burp_api.parser import BurpApiParser
 from dojo.tools.burp_api.parser import convert_severity, convert_confidence
 
@@ -9,13 +8,9 @@ class TestParser(TestCase):
 
     def test_example_report(self):
         testfile = "dojo/unittests/scans/burp_suite_pro/example.json"
-        test = Test()
-        test.engagement = Engagement()
-        test.engagement.product = Product()
         with open(testfile) as f:
             parser = BurpApiParser()
-            findings = parser.get_findings(f, test)
-        self.assertIsNotNone(test.title)
+            findings = parser.get_findings(f, Test())
         self.assertEqual(5, len(findings))
         with self.subTest(i=0):
             item = findings[0]
@@ -26,28 +21,12 @@ class TestParser(TestCase):
             self.assertGreater(3, item.scanner_confidence)
             self.assertIsNotNone(item.impact)
 
-    def test_validate(self):
-        testfile = "dojo/unittests/scans/burp_suite_pro/example.json"
-        with open(testfile) as f:
-            test = Test()
-            test.engagement = Engagement()
-            test.engagement.product = Product()
-            parser = BurpApiParser()
-            findings = parser.get_findings(f, test)
-            for item in findings:
-                item.clean()
-                self.assertIsNotNone(item.impact)
-
     def test_validate_more(self):
         testfile = "dojo/unittests/scans/burp_api/many_vulns.json"
         with open(testfile) as f:
-            test = Test()
-            test.engagement = Engagement()
-            test.engagement.product = Product()
             parser = BurpApiParser()
-            findings = parser.get_findings(f, test)
+            findings = parser.get_findings(f, Test())
             for item in findings:
-                item.clean()
                 self.assertIsNotNone(item.impact)
 
     def test_convert_severity(self):

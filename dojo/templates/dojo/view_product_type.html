@@ -17,7 +17,7 @@
                                       <span class="caret"></span>
                                   </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if pt|has_object_permission:Permissions.Product_Type_Edit %}
+                            {% if pt|has_object_permission:"Product_Type_Edit" or user|is_authorized_for_change:pt %}
                             <li>
                                 <a class="" href="{% url 'edit_product_type' pt.id %}">
                                 <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -32,7 +32,7 @@
                                 <a class="" href="{% url 'product_type_report' pt.id %}">
                                 <i class="fa fa-file-text-o"></i> Product Type Report</a>
                             </li>
-                            {% if pt|has_object_permission:Permissions.Product_Type_Delete %}
+                            {% if pt|has_object_permission:"Product_Type_Delete" or user|is_authorized_for_delete:pt %}
                             <li role="separator" class="divider"></li>
                             <li>
                                 <a class="" href="{% url 'delete_product_type' pt.id %}">
@@ -52,7 +52,7 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">Products</h4>
-                        {% if pt|has_object_permission:Permissions.Product_Type_Add_Product %}
+                        {% if pt|has_object_permission:"Product_Type_Add_Product" or user|is_authorized_for_staff:pt %}
                         <div class="dropdown pull-right">
                             <div class="btn-group">
                                 <button class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
@@ -122,13 +122,13 @@
                     </div>
                 {% endif %}
             </div>
-        {% feature_new_authorization as feature_new_authorization_flag %}
-            {% if feature_new_authorization_flag %}
+        {% feature_authorization_v2 as feature_authorization_v2_flag %}
+            {% if feature_authorization_v2_flag %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <div class="clearfix">
                             <h4 class="pull-left">Members</h4>
-                            {% if pt|has_object_permission:Permissions.Product_Type_Manage_Members %}
+                            {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                             <div class="dropdown pull-right">
                                 <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu1"
                                         data-toggle="dropdown" aria-expanded="true">
@@ -164,13 +164,13 @@
                                             <li class="dropdown" style="list-style:none;position:absolute">
                                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                                 <ul class="dropdown-menu">
-                                                    {% if pt|has_object_permission:Permissions.Product_Type_Manage_Members %}
+                                                    {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                                                     <li>
                                                         <a class="" href="{% url 'edit_product_type_member' member.id %}">
                                                         <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                     </li>
                                                     {% endif %}
-                                                    {% if member|has_object_permission:Permissions.Product_Type_Remove_Member %}
+                                                    {% if member|has_object_permission:"Product_Type_Remove_Member" %}
                                                     <li>
                                                         <a class="" href="{% url 'delete_product_type_member' member.id %}">
                                                         <i class="fa fa-trash"></i> Delete</a>
@@ -225,8 +225,8 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% feature_new_authorization as feature_new_authorization_flag %}
-                        {% if feature_new_authorization_flag is False %}
+                        {% feature_authorization_v2 as feature_authorization_v2_flag %}
+                        {% if feature_authorization_v2_flag is False %}
                         <tr>
                             <td style="width: 150px;"><strong>Authorized Users</strong></td>
                             <td>
