@@ -1,20 +1,11 @@
 from django.test import TestCase
-from dojo.tools.scout_suite.parser import ScoutSuiteParser
+from dojo.tools.aws_scout2.parser import AWSScout2Parser
 from django.utils import timezone
 from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
 
 
-class MockFileObject:
-    def __init__(self, filepath):
-        self.filepath = filepath
-
-    def temporary_file_path(self):
-        return self.filepath
-
-
-class TestScoutSuiteParser(TestCase):
+class TestAwsProwlerParser(TestCase):
     def setup(self, testfile):
-        file = MockFileObject(testfile)
         product_type = Product_Type(critical_product=True, key_product=False)
         product_type.save()
 
@@ -29,9 +20,9 @@ class TestScoutSuiteParser(TestCase):
         )
         engagement.save()
 
-        parser = ScoutSuiteParser()
-        return parser.get_findings(
-            file,
+        parser = AWSScout2Parser()
+        findings = parser.get_findings(
+            testfile,
             Test(
                 engagement=engagement,
                 test_type=test_type,
@@ -40,10 +31,16 @@ class TestScoutSuiteParser(TestCase):
             ),
         )
 
-    def test_scout_suite_parser_with_no_vuln_has_no_findings(self):
-        findings = self.setup("dojo/unittests/scans/scout_suite/no_vuln.js")
-        self.assertEqual(0, len(findings))
+        testfile.close()
 
-    def test_scout_suite_parser_with_two_findings(self):
-        findings = self.setup("dojo/unittests/scans/scout_suite/two_findings.js")
-        self.assertEqual(2, len(findings))
+        return findings
+
+    def test_parser_with_critical_vuln_has_one_findings(self):
+        findings = self.setup(open("dojo/unittests/scans/aws_scout2/aws_config.js"))
+        self.assertEqual(21, len(findings))
+        self.assertEqual("Global services logging disabled", findings[0].title)
+        self.assertEqual("Critical", findings[0].severity)
+        self.assertEqual(1032, findings[0].cwe)
+        self.assertEqual("Unused security groups", findings[6].title)
+        self.assertEqual("Medium", findings[6].severity)
+        self.assertEqual(1032, findings[6].cwe)

@@ -51,7 +51,7 @@ services:
           target: /app/docker/extra_settings
         - defectdojo_media:${DD_MEDIA_ROOT:-/app/media}
   celerybeat:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
       - mysql
       - rabbitmq
@@ -67,7 +67,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   celeryworker:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
       - mysql
       - rabbitmq
@@ -83,7 +83,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   initializer:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
       - mysql
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '--', '/entrypoint-initializer.sh']

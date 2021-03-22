@@ -731,7 +731,7 @@ def finding_display_status(finding):
 
 @register.filter
 def is_authorized_for_change(user, obj):
-    if not settings.FEATURE_NEW_AUTHORIZATION:
+    if not settings.FEATURE_AUTHORIZATION_V2:
         return user_is_authorized(user, 'change', obj)
     else:
         return False
@@ -739,7 +739,7 @@ def is_authorized_for_change(user, obj):
 
 @register.filter
 def is_authorized_for_delete(user, obj):
-    if not settings.FEATURE_NEW_AUTHORIZATION:
+    if not settings.FEATURE_AUTHORIZATION_V2:
         return user_is_authorized(user, 'delete', obj)
     else:
         return False
@@ -747,7 +747,7 @@ def is_authorized_for_delete(user, obj):
 
 @register.filter
 def is_authorized_for_staff(user, obj):
-    if not settings.FEATURE_NEW_AUTHORIZATION:
+    if not settings.FEATURE_AUTHORIZATION_V2:
         return user_is_authorized(user, 'staff', obj)
     else:
         return False
@@ -976,3 +976,8 @@ def import_history(finding, autoescape=True):
         list_of_status_changes += '<b>' + status_change.created.strftime('%b %d, %Y, %H:%M:%S') + '</b>: ' + status_change.get_action_display() + '<br/>'
 
     return mark_safe(html % (list_of_status_changes))
+
+
+@register.simple_tag
+def feature_reports_pdf_list():
+    return settings.FEATURE_REPORTS_PDF_LIST

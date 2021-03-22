@@ -13,19 +13,19 @@ def role_as_string(id):
 
 
 @register.simple_tag
-def feature_new_authorization():
-    return settings.FEATURE_NEW_AUTHORIZATION
+def feature_authorization_v2():
+    return settings.FEATURE_AUTHORIZATION_V2
 
 
 @register.filter
-def feature_new_authorization_or_user_is_staff(user):
-    return settings.FEATURE_NEW_AUTHORIZATION or user.is_staff
+def feature_authorization_v2_or_user_is_staff(user):
+    return settings.FEATURE_AUTHORIZATION_V2 or user.is_staff
 
 
 @register.filter
 def has_object_permission(obj, permission):
 
-    if settings.FEATURE_NEW_AUTHORIZATION:
+    if settings.FEATURE_AUTHORIZATION_V2:
         return user_has_permission(get_current_user(), obj, Permissions[permission])
     else:
         return False

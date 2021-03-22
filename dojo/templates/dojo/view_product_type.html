@@ -122,8 +122,8 @@
                     </div>
                 {% endif %}
             </div>
-        {% feature_new_authorization as feature_new_authorization_flag %}
-            {% if feature_new_authorization_flag %}
+        {% feature_authorization_v2 as feature_authorization_v2_flag %}
+            {% if feature_authorization_v2_flag %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <div class="clearfix">
@@ -225,8 +225,8 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% feature_new_authorization as feature_new_authorization_flag %}
-                        {% if feature_new_authorization_flag is False %}
+                        {% feature_authorization_v2 as feature_authorization_v2_flag %}
+                        {% if feature_authorization_v2_flag is False %}
                         <tr>
                             <td style="width: 150px;"><strong>Authorized Users</strong></td>
                             <td>

@@ -14,7 +14,7 @@ def get_authorized_product_types(permission):
     if user.is_superuser:
         return Product_Type.objects.all().order_by('name')
 
-    if settings.FEATURE_NEW_AUTHORIZATION:
+    if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Product_Type.objects.all().order_by('name')
 

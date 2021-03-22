@@ -71,6 +71,13 @@ See [Wrappers](WRAPPERS.md)
 See [Release and branch model](BRANCHING-MODEL.md)
 
 
+## Roadmap
+A magical, illusionary, non-existent, YMMV, wannabe, no guarantees list of thing we may or may not be working on:
+- New permission model
+- Push groups of findings to a single JIRA ticket
+- Reimport matching improvements
+
+
 ## Support, Bug Reports and Getting Involved
 Please come to our Slack channel first, where we can try to help you or point you in the right direction:
 
@@ -161,6 +168,8 @@ Proceeds are used for testing, infrastructure, etc.
 [![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/signal-iduna.png)](https://signal-iduna.de/)
 [![WSO2](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/wso2-logo-for-screen.png)](https://wso2.com/)
 [![CloudBees](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png)](https://cloudbees.com/)
+[![WeHackPurple](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png)](https://wehackpurple.com/)
+
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org

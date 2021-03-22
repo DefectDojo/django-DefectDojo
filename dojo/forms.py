@@ -159,7 +159,7 @@ class MonthYearWidget(Widget):
 class Product_TypeForm(forms.ModelForm):
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False)
-    if not settings.FEATURE_NEW_AUTHORIZATION:
+    if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_users = forms.ModelMultipleChoiceField(
             queryset=None,
             required=False, label="Authorized Users")
@@ -169,12 +169,12 @@ class Product_TypeForm(forms.ModelForm):
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(Product_TypeForm, self).__init__(*args, **kwargs)
 
-        if not settings.FEATURE_NEW_AUTHORIZATION:
+        if not settings.FEATURE_AUTHORIZATION_V2:
             self.fields['authorized_users'].queryset = non_staff
 
     class Meta:
         model = Product_Type
-        if settings.FEATURE_NEW_AUTHORIZATION:
+        if settings.FEATURE_AUTHORIZATION_V2:
             fields = ['name', 'description', 'critical_product', 'key_product']
         else:
             fields = ['name', 'description', 'authorized_users', 'critical_product', 'key_product']
@@ -247,7 +247,7 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
-    if not settings.FEATURE_NEW_AUTHORIZATION:
+    if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_users = forms.ModelMultipleChoiceField(
             queryset=None,
             required=False, label="Authorized Users")
@@ -264,13 +264,13 @@ class ProductForm(forms.ModelForm):
         non_staff = Dojo_User.objects.exclude(is_staff=True) \
             .exclude(is_active=False).order_by('first_name', 'last_name')
         super(ProductForm, self).__init__(*args, **kwargs)
-        if not settings.FEATURE_NEW_AUTHORIZATION:
+        if not settings.FEATURE_AUTHORIZATION_V2:
             self.fields['authorized_users'].queryset = non_staff
         self.fields['prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
 
     class Meta:
         model = Product
-        if settings.FEATURE_NEW_AUTHORIZATION:
+        if settings.FEATURE_AUTHORIZATION_V2:
             fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
                     'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                     'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
@@ -721,7 +721,8 @@ class DeleteEngagementForm(forms.ModelForm):
                    'product', 'test_strategy', 'threat_model', 'api_test', 'pen_test',
                    'check_list', 'status', 'description', 'engagement_type', 'build_id',
                    'commit_hash', 'branch_tag', 'build_server', 'source_code_management_server',
-                   'source_code_management_uri', 'orchestration_engine', 'preset', 'tracker']
+                   'source_code_management_uri', 'orchestration_engine', 'preset', 'tracker',
+                   'deduplication_on_engagement', 'tags']
 
 
 class TestForm(forms.ModelForm):
@@ -776,7 +777,10 @@ class DeleteTestForm(forms.ModelForm):
                    'engagement',
                    'percent_complete',
                    'description',
-                   'lead')
+                   'lead',
+                   'title',
+                   'tags',
+                   'version')
 
 
 class AddFindingForm(forms.ModelForm):
@@ -1644,7 +1648,10 @@ class CustomReportOptionsForm(forms.Form):
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
+    if settings.FEATURE_REPORTS_PDF_LIST:
+        report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
+    else:
+        report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
 
 class DeleteReportForm(forms.ModelForm):
@@ -2165,7 +2172,7 @@ class JIRAFindingForm(forms.Form):
             self.fields['push_to_jira'].disabled = True
 
         if self.instance:
-            if self.instance.has_jira_issue:
+            if hasattr(self.instance, 'has_jira_issue') and self.instance.has_jira_issue:
                 self.initial['jira_issue'] = self.instance.jira_issue.jira_key
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
 
@@ -2494,7 +2501,7 @@ class ChoiceQuestionForm(QuestionForm):
 
         # re save out the choices
         choice_answer.answered_survey = self.answered_survey
-        choice_answer.answer = choices
+        choice_answer.answer.set(choices)
         choice_answer.save()
 
 
