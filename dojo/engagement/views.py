@@ -38,7 +38,7 @@ from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
-from django.db.models.query import QuerySet
+from django.db.models.query import Prefetch, QuerySet
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.helper import prefetch_for_expiration
@@ -117,8 +117,13 @@ def engagements_all(request):
     products_with_engagements = get_authorized_products(Permissions.Engagement_View)
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
+    # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
     filter_qs = products_with_engagements.prefetch_related(
-        'engagement_set',
+        Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(test_count=Count('test__id')))
+    )
+
+    filter_qs = filter_qs.prefetch_related(
+        'engagement_set__tags',
         'prod_type',
         'engagement_set__lead',
         'tags',
