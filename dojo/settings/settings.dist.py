@@ -746,7 +746,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     # 'jira_status_reconciliation': {
     #     'task': 'dojo.tasks.jira_status_reconciliation_task',
-    #     'schedule': timedelta(seconds=10),
+    #     'schedule': timedelta(hours=12),
     #     'kwargs': {'mode': 'reconcile', 'dryrun': True, 'daysback': 10, 'product': None, 'engagement': None}
     # },
 
