@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from defusedxml import ElementTree
@@ -5,12 +6,6 @@ from defusedxml import ElementTree
 from dojo.models import Finding
 
 XML_NAMESPACE = {'x': 'https://www.veracode.com/schema/reports/export/1.0'}
-
-
-def truncate_str(value: str, maxlen: int):
-    if len(value) > maxlen:
-        return value[:maxlen - 12] + " (truncated)"
-    return value
 
 
 class VeracodeParser(object):
@@ -40,6 +35,7 @@ class VeracodeParser(object):
     def get_findings(self, filename, test):
         root = ElementTree.parse(filename).getroot()
 
+        app_id = root.attrib['app_id']
         report_date = datetime.strptime(root.attrib['last_update_time'], '%Y-%m-%d %H:%M:%S %Z')
 
         dupes = dict()
@@ -62,31 +58,34 @@ class VeracodeParser(object):
                 # Only process if we didn't do that before.
                 if dupe_key not in dupes:
                     # Add to list.
-                    dupes[dupe_key] = self.__xml_flaw_to_finding(flaw_node, mitigation_text, test)
+                    dupes[dupe_key] = self.__xml_flaw_to_finding(app_id, flaw_node, mitigation_text, test)
 
         # Get SCA findings
-        for vulnerable_lib_node in root.findall('x:software_composition_analysis/x:vulnerable_components'
+        for component in root.findall('x:software_composition_analysis/x:vulnerable_components'
                                              '/x:component', namespaces=XML_NAMESPACE):
-            if vulnerable_lib_node.attrib['vulnerabilities'] == '0':
-                continue
-            dupe_key = self.__xml_sca_flaw_to_dupekey(vulnerable_lib_node)
+            _library = component.attrib['library']
+            _vendor = component.attrib['vendor']
+            _version = component.attrib['version']
 
-            # Only process if we didn't do that before.
-            if dupe_key not in dupes:
-                dupes[dupe_key] = self.__xml_sca_flaw_to_finding(vulnerable_lib_node, test, report_date)
+            for vulnerability in component.findall('x:vulnerabilities/x:vulnerability', namespaces=XML_NAMESPACE):
+                dupe_key = vulnerability.attrib['cve_id']
+                # Only process if we didn't do that before.
+                if dupe_key not in dupes:
+                    dupes[dupe_key] = self.__xml_sca_flaw_to_finding(test, report_date, _vendor, _library, _version, vulnerability)
 
         return list(dupes.values())
 
     @classmethod
-    def __xml_flaw_to_unique_id(cls, xml_node):
-        return 'flaw_' + xml_node.attrib['issueid']
+    def __xml_flaw_to_unique_id(cls, app_id, xml_node):
+        issue_id = xml_node.attrib['issueid']
+        return 'app-' + app_id + '_issue-' + issue_id
 
     @classmethod
     def __xml_flaw_to_severity(cls, xml_node):
         return cls.vc_severity_mapping.get(int(xml_node.attrib['severity']), 'Info')
 
     @classmethod
-    def __xml_flaw_to_finding(cls, xml_node, mitigation_text, test):
+    def __xml_flaw_to_finding(cls, app_id, xml_node, mitigation_text, test):
         # Defaults
         finding = Finding()
         finding.test = test
@@ -95,7 +94,7 @@ class VeracodeParser(object):
         finding.active = False
         finding.static_finding = True
         finding.dynamic_finding = False
-        finding.unique_id_from_tool = cls.__xml_flaw_to_unique_id(xml_node)
+        finding.unique_id_from_tool = cls.__xml_flaw_to_unique_id(app_id, xml_node)
 
         # Report values
         finding.severity = cls.__xml_flaw_to_severity(xml_node)
@@ -150,26 +149,23 @@ class VeracodeParser(object):
         finding.false_p = _false_positive
 
         _line_number = xml_node.attrib['line']
-        finding.line = _line_number if _line_number else None
-        finding.line_number = finding.line
-        finding.sast_source_line = finding.line
+        _functionrelativelocation = xml_node.attrib['functionrelativelocation']
+        if (_line_number is not None and _line_number.isdigit() and
+             _functionrelativelocation is not None and _functionrelativelocation.isdigit()):
+            finding.line = int(_line_number) + int(_functionrelativelocation)
+            finding.line_number = finding.line
+            finding.sast_source_line = finding.line
 
         _source_file = xml_node.attrib.get('sourcefile')
-        finding.file_path = _source_file
+        _sourcefilepath = xml_node.attrib.get('sourcefilepath')
+        finding.file_path = _sourcefilepath + _source_file
         finding.sourcefile = _source_file
-        finding.sast_source_file_path = _source_file
-
-        _component = xml_node.attrib['module'] + ': ' + xml_node.attrib['scope']
-        finding.component_name = truncate_str(_component, 200) if _component != ': ' else None
+        finding.sast_source_file_path = _sourcefilepath + _source_file
 
         _sast_source_obj = xml_node.attrib.get('functionprototype')
         finding.sast_source_object = _sast_source_obj if _sast_source_obj else None
 
         return finding
-
-    @classmethod
-    def __xml_sca_flaw_to_dupekey(cls, xml_node):
-        return 'sca_' + xml_node.attrib['vendor'] + xml_node.attrib['library'] + xml_node.attrib['version']
 
     @classmethod
     def __cvss_to_severity(cls, cvss):
@@ -184,54 +180,48 @@ class VeracodeParser(object):
         else:
             return cls.vc_severity_mapping.get(1)
 
+    @staticmethod
+    def _get_cwe(val):
+        # Match only the first CWE!
+        cweSearch = re.search("CWE-(\\d+)", val, re.IGNORECASE)
+        if cweSearch:
+            return int(cweSearch.group(1))
+        else:
+            return None
+
     @classmethod
-    def __xml_sca_flaw_to_finding(cls, xml_node, test, report_date):
+    def __xml_sca_flaw_to_finding(cls, test, report_date, vendor, library, version, xml_node):
         # Defaults
         finding = Finding()
         finding.test = test
-        finding.mitigation = "Make sure to upgrade this component."
-        finding.verified = False
-        finding.active = False
         finding.static_finding = True
         finding.dynamic_finding = False
-        finding.unique_id_from_tool = cls.__xml_sca_flaw_to_dupekey(xml_node)
-
-        _library = xml_node.attrib['library']
-        _vendor = xml_node.attrib['vendor']
-        _version = xml_node.attrib['version']
-        _file = xml_node.attrib['file_name']
-        if xml_node.find('x:file_paths/x:file_path', namespaces=XML_NAMESPACE):
-            _file_path = xml_node.find('x:file_paths/x:file_path', namespaces=XML_NAMESPACE).attrib['value']
-        else:
-            _file_path = "N/A"
+        finding.unique_id_from_tool = xml_node.attrib['cve_id']
 
         # Report values
-        finding.severity = cls.__cvss_to_severity(float(xml_node.attrib['max_cvss_score']))
+        finding.severity = cls.__cvss_to_severity(float(xml_node.attrib['cvss_score']))
         finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
-        finding.cwe = 937
-        finding.title = "Vulnerable component: {0}:{1}".format(_library, _version)
-        finding.component_name = _library
-        finding.component_version = _version
-        finding.file_path = _file
+        finding.cve = xml_node.attrib['cve_id']
+        finding.cwe = cls._get_cwe(xml_node.attrib['cwe_id'])
+        finding.title = "Vulnerable component: {0}:{1}".format(library, version)
+        finding.component_name = library
+        finding.component_version = version
 
         # Use report-date, otherwise DD doesn't
         # overwrite old matching SCA findings.
         finding.date = report_date
 
         _description = 'This library has known vulnerabilities.\n'
-        _description += 'Full component path: ' + _file_path + '\n'
-        _description += 'Vulnerabilities:\n\n'
-        for vuln_node in xml_node.findall('x:vulnerabilities/x:vulnerability', namespaces=XML_NAMESPACE):
-            _description += \
+        _description += \
                 "**CVE: [{0}](https://nvd.nist.gov/vuln/detail/{0})** ({1})\n" \
                 "CVS Score: {2} ({3})\n" \
                 "Summary: \n>{4}" \
                 "\n\n-----\n\n".format(
-                    vuln_node.attrib['cve_id'],
-                    vuln_node.attrib.get('first_found_date'),
-                    vuln_node.attrib['cvss_score'],
-                    cls.vc_severity_mapping.get(int(vuln_node.attrib['severity']), 'Info'),
-                    vuln_node.attrib['cve_summary'])
+                    xml_node.attrib['cve_id'],
+                    xml_node.attrib.get('first_found_date'),
+                    xml_node.attrib['cvss_score'],
+                    cls.vc_severity_mapping.get(int(xml_node.attrib['severity']), 'Info'),
+                    xml_node.attrib['cve_summary'])
         finding.description = _description
 
         return finding
