@@ -886,8 +886,19 @@ class ImportReimportMixin(object):
                 self.assertFalse(finding['risk_accepted'])
                 self.assertFalse(finding['is_Mitigated'])
 
-    # TODO
-    def test_import_0_reimport_0_gitlab_dep_scan_component_name_and_version(self):
+    # import gitlab_dep_scan_components_filename with 6 findings
+    # findings 1, 2 and 3 have the same component_name (golang.org/x/crypto) and the same CVE (CVE-2020-29652), but different component_version
+    # findings 4 and 5 have the same component_name (golang.org/x/text) and the same CVE (CVE-2020-14040), but different component_version
+    # finding 6 is different ("unique") from the others
+    #
+    # reimport gitlab_dep_scan_components_filename and the same 6 finding must be active
+    #
+    # the previous hashcode calculation for GitLab Dependency Scanning would ignore component_name and component_version,
+    # which during the reimport would close findings 2, 3 and 5, because it would only check the finding's title and CVE
+    #
+    # since a project can have multiples versions (component_version) of the same dependency (component_name),
+    # we must consider each finding unique, otherwise we would lose valid information
+    def test_import_6_reimport_6_gitlab_dep_scan_component_name_and_version(self):
 
         import0 = self.import_scan_with_params(self.gitlab_dep_scan_components_filename,
                                                scan_type=self.scan_type_gtlab_dep_scan,
@@ -899,10 +910,10 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(6, active_findings_before)
 
         with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0):
-              reimport0 = self.reimport_scan_with_params(test_id,
-                                                         self.gitlab_dep_scan_components_filename,
-                                                         scan_type=self.scan_type_gtlab_dep_scan,
-                                                         minimum_severity='Info')
+            reimport0 = self.reimport_scan_with_params(test_id,
+                                                       self.gitlab_dep_scan_components_filename,
+                                                       scan_type=self.scan_type_gtlab_dep_scan,
+                                                       minimum_severity='Info')
 
         active_findings_after = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(6, active_findings_after)
