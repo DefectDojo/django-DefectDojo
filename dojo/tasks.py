@@ -16,6 +16,7 @@ from dojo.utils import calculate_grade
 from dojo.reports.widgets import report_widget_factory
 from dojo.utils import sla_compute_and_notify
 from dojo.notifications.helper import create_notification
+from dojo.management.commands import jira_status_reconciliation as reconciliation_command
 
 
 logger = get_task_logger(__name__)
@@ -303,3 +304,12 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
             sla_compute_and_notify(*args, **kwargs)
     except Exception as e:
         logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))
+
+
+@app.task
+def jira_status_reconciliation(*args, **kwargs):
+    logger.debug("Reconciling DefectDojo findings and JIRA issues status")
+    try:
+        reconciliation_command(*args, **kwargs)
+    except:
+        logger.exception("Could not reconcile DefectDojo findings and JIRA issues.")
