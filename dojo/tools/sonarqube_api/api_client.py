@@ -141,7 +141,7 @@ class SonarQubeAPI:
                 )
 
         return issues
-        
+
     def find_hotspots(self, project_key):
         """
         Search for hotspots.
@@ -244,7 +244,7 @@ class SonarQubeAPI:
                     rule_id, response.status_code, response.content
                 ))
         return rule
-        
+
     def get_hotspot_rule(self, rule_id):
         """
         Get detailed information about a hotspot

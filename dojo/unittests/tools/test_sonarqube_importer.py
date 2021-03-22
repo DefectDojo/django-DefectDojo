@@ -52,9 +52,9 @@ class TestSonarqubeImporter(TestCase):
         with open('dojo/unittests/scans/sonarqube_api/hotspots/rule.json') as json_file:
             data = json.load(json_file)
             return data
-            
+
     def empty_list(self, *args, **kwargs):
-    	return list()
+        return list()
 
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
@@ -64,7 +64,7 @@ class TestSonarqubeImporter(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
-        
+
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', empty_list)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
@@ -73,7 +73,7 @@ class TestSonarqubeImporter(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(0, len(findings))
-        
+
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', empty_list)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
@@ -82,7 +82,7 @@ class TestSonarqubeImporter(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(1, len(findings))
-        
+
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', empty_list)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)

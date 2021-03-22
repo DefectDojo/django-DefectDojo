@@ -40,7 +40,7 @@ class SonarQubeApiImporter(object):
             'dismissed',
             'rejected'
         ]
-        
+
     @staticmethod
     def is_reviewed(state):
         return state.lower() in [
@@ -134,7 +134,7 @@ class SonarQubeApiImporter(object):
             )
 
         return items
-        
+
     def import_hotspots(self, test):
 
         items = list()
@@ -169,7 +169,7 @@ class SonarQubeApiImporter(object):
                 component_key = hotspot['component']
                 line = hotspot.get('line')
                 rule_id = hotspot['key']
-                rule = client.get_hotspot_rule(rule_id)            
+                rule = client.get_hotspot_rule(rule_id)
                 severity = self.convert_sonar_review_priority(rule['vulnerabilityProbability'])
                 description = self.clean_rule_description_html(rule['vulnerabilityDescription'])
                 cwe = self.clean_cwe(rule['riskDescription'])
@@ -250,7 +250,7 @@ class SonarQubeApiImporter(object):
             return "Low"
         else:
             return "Info"
-            
+
     @staticmethod
     def convert_sonar_review_priority(sonar_review_priority):
         sev = sonar_review_priority.lower()
