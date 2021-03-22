@@ -10,8 +10,7 @@ import googleapiclient.discovery
 from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -36,12 +35,15 @@ from dojo.utils import add_error_message_to_response, add_field_errors_to_respon
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
-from dojo.user.helper import user_must_be_authorized
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 from django.views.decorators.vary import vary_on_cookie
 from django.core.exceptions import MultipleObjectsReturned
 from django.views.decorators.debug import sensitive_variables
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
+from dojo.test.queries import get_authorized_tests
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -49,9 +51,9 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @sensitive_variables('service_account_info', 'credentials')
-@user_must_be_authorized(Test, 'view', 'tid')
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'view')
 def view_test(request, tid):
-    tests_prefetched = Test.objects.all()
+    tests_prefetched = get_authorized_tests(Permissions.Test_View)
     tests_prefetched = tests_prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
     tests_prefetched = tests_prefetched.prefetch_related(Prefetch('test_import_set', queryset=Test_Import.objects.filter(~Q(findings_affected=None))))
     tests_prefetched = tests_prefetched.prefetch_related('test_import_set__test_import_finding_action_set')
@@ -72,7 +74,12 @@ def view_test(request, tid):
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
     system_settings = get_object_or_404(System_Settings, id=1)
-    if request.method == 'POST' and request.user.is_staff:
+    if request.method == 'POST':
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
         if note_type_activation:
             form = TypedNoteForm(request.POST, available_note_types=available_note_types)
         else:
@@ -215,8 +222,7 @@ def prefetch_for_findings(findings):
 #     return prefetch_for_test_imports
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'change', 'tid')
+@user_is_authorized(Test, Permissions.Test_Edit, 'tid', 'change')
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -243,8 +249,7 @@ def edit_test(request, tid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'delete', 'tid')
+@user_is_authorized(Test, Permissions.Test_Delete, 'tid', 'delete')
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
@@ -282,12 +287,11 @@ def delete_test(request, tid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def test_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
-        tests = Test.objects.all()
+        tests = get_authorized_tests(Permissions.Test_View)
     else:
         filters = []
         leads = request.GET.getlist('lead', '')
@@ -295,7 +299,7 @@ def test_calendar(request):
             leads.remove('-1')
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
-        tests = Test.objects.filter(reduce(operator.or_, filters))
+        tests = get_authorized_tests(Permissions.Test_View).filter(reduce(operator.or_, filters))
 
     tests = tests.prefetch_related('test_type', 'lead', 'engagement__product')
 
@@ -307,8 +311,7 @@ def test_calendar(request):
         'users': Dojo_User.objects.all()})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'staff', 'tid')
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -328,8 +331,7 @@ def test_ics(request, tid):
     return response
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'staff', 'tid')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
@@ -484,7 +486,7 @@ def add_findings(request, tid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
 def add_temp_finding(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
@@ -621,6 +623,7 @@ def add_temp_finding(request, tid, fid):
                    })
 
 
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()
@@ -639,9 +642,7 @@ def search(request, tid):
                    })
 
 
-# bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'staff', 'tid')
+@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid', 'staff')
 def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
@@ -810,18 +811,11 @@ def re_import_scan_results(request, tid):
 
                         if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                             for req_resp in item.unsaved_req_resp:
-                                if scan_type == "Arachni Scan":
-                                    burp_rr = BurpRawRequestResponse(
-                                        finding=item,
-                                        burpRequestBase64=req_resp["req"],
-                                        burpResponseBase64=req_resp["resp"],
-                                    )
-                                else:
-                                    burp_rr = BurpRawRequestResponse(
-                                        finding=item,
-                                        burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                                        burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
-                                    )
+                                burp_rr = BurpRawRequestResponse(
+                                    finding=item,
+                                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
+                                )
                                 burp_rr.clean()
                                 burp_rr.save()
 

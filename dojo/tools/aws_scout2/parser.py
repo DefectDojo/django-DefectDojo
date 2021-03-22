@@ -1,10 +1,8 @@
-__author__ = 'Aaron Weaver'
-
 import json
+import textwrap
 from datetime import datetime
 
-from django.utils.html import strip_tags
-from django.utils.text import Truncator
+from html2text import html2text
 
 from dojo.models import Finding
 
@@ -24,10 +22,10 @@ class AWSScout2Parser(object):
         return "JS file in scout2-report/inc-awsconfig/aws_config.js."
 
     def get_findings(self, filename, test):
-        # filename is instance of class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
-        with open(filename.temporary_file_path(), "r") as fileobj:
-            raw_data = fileobj.read()
-            raw_data = raw_data.replace("aws_info =", "")
+        content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        raw_data = content.replace("aws_info =", "")
         data = json.loads(raw_data)
         find_date = datetime.now()
         dupes = {}
@@ -88,7 +86,7 @@ class AWSScout2Parser(object):
                             scout2_findings.append(mobsf_item)
 
         for scout2_finding in scout2_findings:
-            title = strip_tags(scout2_finding["title"])
+            title = html2text(scout2_finding["title"])
             sev = self.getCriticalityRating(scout2_finding["severity"])
             description = scout2_finding["description"]
             dupe_key = sev + title
@@ -97,7 +95,7 @@ class AWSScout2Parser(object):
                 if description is not None:
                     find.description += description
             else:
-                find = Finding(title=Truncator(title).words(6),
+                find = Finding(title=textwrap.shorten(title, 150),
                                cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                                test=test,
                                active=False,
@@ -109,7 +107,7 @@ class AWSScout2Parser(object):
                                date=find_date,
                                dynamic_finding=True)
                 dupes[dupe_key] = find
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     def formatview(self, depth):
         if depth > 1:

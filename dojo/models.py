@@ -780,13 +780,11 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    # only used in APIv2 serializers.py, query should be aligned with findings_count
+    @cached_property
     def open_findings_list(self):
         findings = Finding.objects.filter(test__engagement__product=self,
-                                          mitigated__isnull=True,
-                                          verified=True,
-                                          false_p=False,
-                                          duplicate=False,
-                                          out_of_scope=False
+                                          active=True,
                                           )
         findings_list = []
         for i in findings:
@@ -838,6 +836,8 @@ class Tool_Configuration(models.Model):
                                                 'Username/Password'),
                                                ('SSH', 'SSH')),
                                            null=True, blank=True)
+    extras = models.CharField(max_length=255, null=True, blank=True, help_text="Additional definitions that will be "
+                                                                              "consumed by scanner")
     username = models.CharField(max_length=200, null=True, blank=True)
     password = models.CharField(max_length=600, null=True, blank=True)
     auth_title = models.CharField(max_length=200, null=True, blank=True,
@@ -2666,7 +2666,7 @@ class JIRA_Project(models.Model):
 
     def clean(self):
         if not self.jira_instance:
-            raise ValidationError('Cannot save JIRA_Project without JIRA_Instance')
+            raise ValidationError('Cannot save JIRA Project Configuration without JIRA Instance')
 
     def __str__(self):
         return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')

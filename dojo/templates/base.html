@@ -210,8 +210,10 @@
                                 </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
-                                    {% if request.user.is_staff %}
+                                    {% if request.user|feature_authorization_v2_or_user_is_staff %}
                                         <li><a href="{% url 'engagements_all' %}">All Engagements</a></li>
+                                    {% endif %}
+                                    {% if request.user.is_staff %}
                                         <li><a href="{% url 'test_type' %}">Test Types</a></li>
                                         <li><a href="{% url 'dev_env' %}">Environments</a></li>
                                     {% endif %}
@@ -280,7 +282,10 @@
                                     <span class="glyphicon arrow"></span>
                                 </a>
                                 <ul class="nav nav-second-level">
-                                    <li><a href="{% url 'reports' %}"> All Reports </a></li>
+                                    {% feature_reports_pdf_list as feature_reports_pdf_list_flag %}
+                                    {% if feature_reports_pdf_list_flag %}
+                                        <li><a href="{% url 'reports' %}"> All Reports </a></li>
+                                    {% endif %}
                                     <li><a href="{% url 'report_builder' %}"> Report Builder </a></li>
                                 </ul>
                                 <!-- /.nav-second-level -->
@@ -311,12 +316,16 @@
                                         <span>Users</span>
                                     </a>
                                 </li>
+                            {% endif %}
+                            {% if request.user|feature_authorization_v2_or_user_is_staff %}
                                 <li>
 				                    <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                         <i class="fa fa-calendar fa-fw"></i>
                                         <span>Calendar</span>
                                     </a>
                                 </li>
+                            {% endif %}
+                            {% if request.user.is_staff %}
                                 <li>
                                     <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Questionnaires</span><span
                                             class="glyphicon arrow"></span></a>
@@ -734,7 +743,8 @@
 
     });
 </script>
-
+{% block extra_javascript %}
+{% endblock %}
 {% block postscript %}
 {% endblock %}
 </body>
