@@ -15,6 +15,7 @@ from dojo.utils import add_breadcrumb, get_punchcard_data
 from dojo.models import Answered_Survey
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.finding.queries import get_authorized_findings
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -23,13 +24,7 @@ def home(request: HttpRequest) -> HttpResponse:
 
 def dashboard(request: HttpRequest) -> HttpResponse:
     engagements = get_authorized_engagements(Permissions.Engagement_View).distinct()
-    if request.user.is_staff:
-        findings = Finding.objects.all()
-    else:
-        findings = Finding.objects.filter(
-            Q(test__engagement__product__authorized_users=request.user) |
-            Q(test__engagement__product__prod_type__authorized_users=request.user)
-        ).distinct()
+    findings = get_authorized_findings(Permissions.Finding_View).distinct()
 
     findings = findings.filter(duplicate=False)
 

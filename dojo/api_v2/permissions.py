@@ -5,6 +5,25 @@ from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 
 
+class UserHasEndpointPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            product = get_object_or_404(Product, pk=request.data.get('product'))
+            return user_has_permission(request.user, product, Permissions.Endpoint_Add)
+        else:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'GET':
+            return user_has_permission(request.user, obj, Permissions.Endpoint_View)
+        elif request.method == 'PUT' or request.method == 'PATCH':
+            return user_has_permission(request.user, obj, Permissions.Endpoint_Edit)
+        elif request.method == 'DELETE':
+            return user_has_permission(request.user, obj, Permissions.Endpoint_Delete)
+        else:
+            return False
+
+
 class UserHasEngagementPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
@@ -20,6 +39,25 @@ class UserHasEngagementPermission(permissions.BasePermission):
             return user_has_permission(request.user, obj, Permissions.Engagement_Edit)
         elif request.method == 'DELETE':
             return user_has_permission(request.user, obj, Permissions.Engagement_Delete)
+        else:
+            return False
+
+
+class UserHasFindingPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            test = get_object_or_404(Product, pk=request.data.get('test'))
+            return user_has_permission(request.user, test, Permissions.Finding_Add)
+        else:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'GET':
+            return user_has_permission(request.user, obj, Permissions.Finding_View)
+        elif request.method == 'PUT' or request.method == 'PATCH':
+            return user_has_permission(request.user, obj, Permissions.Finding_Edit)
+        elif request.method == 'DELETE':
+            return user_has_permission(request.user, obj, Permissions.Finding_Delete)
         else:
             return False
 

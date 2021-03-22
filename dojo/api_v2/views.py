@@ -42,6 +42,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests
+from dojo.finding.queries import get_authorized_findings
 from dojo.authorization.roles_permissions import Permissions, Roles
 
 logger = logging.getLogger(__name__)
@@ -327,20 +328,11 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                      ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
-    queryset = Finding.objects.all().prefetch_related('endpoints',
-                                                    'reviewers',
-                                                    'images',
-                                                    'found_by',
-                                                    'notes',
-                                                    'risk_acceptance_set',
-                                                    'test',
-                                                    'test__test_type',
-                                                    'test__engagement',
-                                                    'test__environment',
-                                                    'test__engagement__product',
-                                                    'test__engagement__product__prod_type')
+    queryset = Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiFindingFilter
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
 
     _related_field_parameters = [openapi.Parameter(
                 name="related_fields",
@@ -364,13 +356,18 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(
-                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return self.queryset
+        return get_authorized_findings(Permissions.Finding_View).prefetch_related('endpoints',
+                                                    'reviewers',
+                                                    'images',
+                                                    'found_by',
+                                                    'notes',
+                                                    'risk_acceptance_set',
+                                                    'test',
+                                                    'test__test_type',
+                                                    'test__engagement',
+                                                    'test__environment',
+                                                    'test__engagement__product',
+                                                    'test__engagement__product__prod_type').distinct
 
     def get_serializer_class(self):
         if self.request.method == 'POST':

@@ -34,6 +34,7 @@ from dojo.user.helper import check_auth_users_list
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.finding.queries import get_authorized_findings
 
 logger = logging.getLogger(__name__)
 
@@ -356,14 +357,7 @@ def product_report(request, pid):
 
 
 def product_findings_report(request):
-    if request.user.is_staff:
-        findings = Finding.objects.filter().distinct()
-    else:
-        findings = Finding.objects.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-        )
-
+    findings = get_authorized_findings(Permissions.Finding_View)
     return generate_report(request, findings)
 
 
