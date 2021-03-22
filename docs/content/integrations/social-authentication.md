@@ -20,7 +20,7 @@ leverage Auth0 to authenticate users on DefectDojo.
     -   Domain
     -   Client ID
     -   Client Secret
-4.  Now, edit the dojo/settings.py file and edit/replace the following
+4.  Now, edit the `dojo/settings/settings.dist.py` file and edit/replace the following
     information:
 
 > -   DD\_SOCIAL\_AUTH\_AUTH0\_OAUTH2\_ENABLED=True
@@ -237,6 +237,8 @@ Follow along below.
 
 SAML 2.0
 --------
+
+WARNING: The SAML integration below is based on [https://github.com/fangli/django-saml2-auth](django-saml2-auth) which is no longer maintained, see #3890
 
 In a similar direction OAuth, this SAML addition provides a more secure
 perogative to SSO. For definitions of terms used and more information,

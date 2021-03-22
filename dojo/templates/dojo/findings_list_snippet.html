@@ -9,10 +9,19 @@
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
                         {{ filter_name }} Findings
-                        <div class="dropdown pull-right"></div>
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        </div>
+                        <form method="get" action="{% url 'quick_report' %}" class="pull-right">
+                            <input type="hidden" label="url" name="url" value="{{ request.get_full_path }}">
+                            <input type="hidden" label="_generate" name="_generate" value="_generate">
+                            <button class="btn btn-primary" type="submit" label="quick_report" id="quick_report" aria-expanded="true">
+                                <i class="fa fa-file-text-o"></i>
+                            </button>
+                        </form>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse">
+                <div id="the-filters" class="is-filters panel-body collapse" >
                     {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
@@ -419,7 +428,7 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="clearfix pull-right">
+                <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True%}
                 </div>
             {% else %}
@@ -509,6 +518,7 @@
                 ],
                 dom: 'Bfrtip',
                 paging: false,
+                info: false,
                 buttons: [
                     {
                         extend: 'colvis',
@@ -566,10 +576,61 @@
                 $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
             })
 
-            $('#id_bulk_risk_acceptance').on('click', function (e) {
+            $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_is_Mitigated').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_false_p').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_out_of_scope').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+            })
+            
+            $('#bulk_edit_menu #id_bulk_risk_acceptance').on('click', function (e) {
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', !checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_accept').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_unaccept').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('checked', false);
             })
 
             // Keep the dropdown menu open for selecting severity status

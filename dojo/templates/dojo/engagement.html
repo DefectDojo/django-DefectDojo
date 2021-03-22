@@ -9,11 +9,11 @@
                     <h3 class="has-filters">
                         Active Engagements
                         <div class="dropdown pull-right">
-
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
@@ -58,12 +58,12 @@
                                                     {% for tag in e.tags.all %}
                                                          <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
                                                      {% endfor %}
-                                                </sup>                                                
+                                                </sup>
                                                 {% if e.is_overdue %}
                                                 <sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
-                                                {% endif %}                                                
+                                                {% endif %}
 							                    | Lead: {{ e.lead.first_name }}
-                                                | 
+                                                |
                                                 {% for test in e.test_set.all %}
 								                    {% if test.lead %}
                                                                 <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a> |
@@ -91,7 +91,7 @@
                     {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                 </div>
             {% else %}
-                <div id="no_engagements"><h5 class="text-center"> No active engagements </h5></div>                
+                <div id="no_engagements"><h5 class="text-center"> No active engagements </h5></div>
             {% endif %}
         </div>
     </div>

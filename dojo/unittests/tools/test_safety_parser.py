@@ -31,4 +31,19 @@ class TestSafetyParser(TestCase):
         parser = SafetyParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
-        self.assertEqual("CVE-2019-12385", findings[0].cve)
+        for finding in findings:
+            if "37863" == finding.unique_id_from_tool:
+                self.assertIsNone(finding.cve)
+
+    def test_multiple2(self):
+        testfile = open("dojo/unittests/scans/safety/many_vulns.json")
+        parser = SafetyParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(5, len(findings))
+        for finding in findings:
+            if "39608" == finding.unique_id_from_tool:
+                self.assertEqual("httplib2", finding.component_name)
+                self.assertEqual("0.18.1", finding.component_version)
+                self.assertEqual("CVE-2021-21240", finding.cve)
+            elif "39525" == finding.unique_id_from_tool:
+                self.assertIsNone(finding.cve)

@@ -10,13 +10,17 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 # - cross scanner deduplication is still flaky as if some scanners don't provide severity, but another doesn, the hashcode will be different so no deduplication happens.
 #   so I couldn't create any good tests
 # - hash_code is only calculated once and never changed. should we add a feature to run dedupe when somebody modifies a finding? bulk edit action to trigger dedupe?
+#   -> this is handled by the dedupe.py script but which suffers stabiblity issues currently
 # - deduplication is using the default ordering for findings, so most of the time this means a new finding will be marked as duplicate of the most recent existing finding
-#   that matches the criteria. I thinkg it would be better to consider the oldest existing findings first? Otherwise we have the chance that an old finding becomes
+#   that matches the criteria. I think it would be better to consider the oldest existing findings first? Otherwise we have the chance that an old finding becomes
 #   marked as duplicate of a newer one at some point.
 # - legacy: if file_path and line or both empty and there are no endpoints, no dedupe will happen. Is this desirable or a BUG?
+#    -> this is just one of the many limitations of the legacy algorithm.
+#       For non standard parsers, it's advised to use the deduplication configuration to finely tune which fields should be used
 # - DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE should:
 #   - try to match on uniquer_id first before falling back to hash_Code. Currently it just takes the first finding it can find
 #     that mathces either the hash_code or unique id.
+#    -> that is an insteresting improvment to consider
 #   - If the unique_id does NOT match, the finding is still considered for dedupe if the hash_code matches. We may need to forbid as the unique_id should be leading for the same test_type
 
 # false positive history observations:
@@ -162,9 +166,8 @@ class TestDuplicationLogic(TestCase):
 
     def test_identical_ordering_legacy(self):
         finding_22 = Finding.objects.get(id=22)
-        # 23 is already a duplicate of 22, but let's reset it's status. then update 24 and see if it gets marked as duplicate of 22 or 23
-        # expect: marked as duplicate of 23 as 23 is older (date field on finding)
-        # but feature or BUG? it will get marked as duplicate of 22 as it becomes earlier in the findings list (or ordering is by date desc)
+        # 23 is already a duplicate of 22, but let's reset it's status. then create a new finding and see if it gets marked as duplicate of 22 or 23
+        # expect: marked as duplicate of 22 as lowest finding_id should be chosen as original
 
         finding_23 = Finding.objects.get(id=23)
         finding_23.duplicate = False
@@ -367,8 +370,8 @@ class TestDuplicationLogic(TestCase):
         finding_new3.endpoints.add(ep3)
         finding_new3.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, not_hash_code=finding_new.hash_code)
+        # expect: marked as duplicate as hash_code is not affected by endpoints anymore with the legacy algorithm
+        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=True, hash_code=finding_new.hash_code)
 
     def test_identical_legacy_different_endpoints_dynamic(self):
         # this test is using the pattern currently in use in the import / serializers.py.
@@ -392,8 +395,9 @@ class TestDuplicationLogic(TestCase):
         finding_new3.endpoints.add(ep2)
         finding_new3.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, not_hash_code=finding_new.hash_code)
+        # expected: hash_code is not affected by endpoints anymore in legacy algorithm
+        # but not duplicate because the legacy dedupe algo examines not only hash_code but endpoints too
+        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, hash_code=finding_new.hash_code)
 
     def test_identical_legacy_no_endpoints_dynamic(self):
         finding_new, finding_24 = self.copy_and_reset_finding_add_endpoints(id=24)
@@ -404,8 +408,9 @@ class TestDuplicationLogic(TestCase):
         finding_new3.save(dedupe_option=False)
         finding_new3.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, not_hash_code=finding_new.hash_code)
+        # expect: marked as duplicate, hash_code not affected by endpoints with the legacy algorithm
+        # but not duplicate because the legacy dedupe algo examines not only hash_code but endpoints too
+        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, hash_code=finding_new.hash_code)
 
     # hash_code based algorithm tests
 
@@ -420,9 +425,8 @@ class TestDuplicationLogic(TestCase):
 
     def test_identical_ordering_hash_code(self):
         finding_2 = Finding.objects.get(id=2)
-        # 3 is already a duplicate of 2, but let's reset it's status. then update 24 and see if it gets marked as duplicate of 22 or 23
-        # expect: marked as duplicate of 3 as 3 is older (date field on finding)
-        # but feature or BUG? it will get marked as duplicate of 2 as it becomes earlier in the findings list (or ordering is by date desc)
+        # 3 is already a duplicate of 2, but let's reset it's status. then update 24 and see if it gets marked as duplicate of 2 or 3
+        # expect: marked as duplicate of 2 as lowest finding_id should be chosen as original
 
         finding_3 = Finding.objects.get(id=3)
         finding_3.duplicate = False
@@ -526,8 +530,8 @@ class TestDuplicationLogic(TestCase):
         finding_new2.endpoints.add(ep2)
         finding_new2.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new2, not_pk=finding_new.pk, duplicate=True, duplicate_finding_id=finding_new.id, hash_code=finding_new.hash_code, not_hash_code=finding_4.hash_code)
+        # expect: marked as duplicate of original finding 2 (because finding 4 is a duplicate of finding 2 in sample data), hash_code not affected by endpoints (endpoints are not anymore in ZAP configuration for hash_code)
+        self.assert_finding(finding_new2, not_pk=finding_new.pk, duplicate=True, duplicate_finding_id=2, hash_code=finding_new.hash_code, not_hash_code=None)
 
     def test_identical_hash_code_with_different_endpoints(self):
         finding_new, finding_4 = self.copy_and_reset_finding_add_endpoints(id=4)
@@ -548,8 +552,8 @@ class TestDuplicationLogic(TestCase):
         finding_new3.endpoints.add(ep3)
         finding_new3.save()
 
-        # expect: not marked as duplicate, hash_code affected by endpoints
-        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=False, not_hash_code=finding_4.hash_code)
+        # expect: marked as duplicate, hash_code not affected by endpoints (ZAP hash_code not dependent on endpoints anymore)
+        self.assert_finding(finding_new3, not_pk=finding_new.pk, duplicate=True, hash_code=finding_4.hash_code)
 
     # # unique_id algo uses id from tool. hash_code is still calculated, according to legacy field config Checkmarx detailed scan
 
@@ -703,7 +707,7 @@ class TestDuplicationLogic(TestCase):
         finding_new.title = finding_124.title  # use title from 124 to get matching hashcode
         finding_new.save()
 
-        # it should match finding 224 as uid matches, but dd currently matches against 124 as that has the same hashcode and is earlier in the list of findings
+        # marked as duplicate of 124 as that has the same hashcode and is earlier in the list of findings ordered by id
         self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
 
     def test_different_unique_id_unique_id_or_hash_code(self):
@@ -885,10 +889,10 @@ class TestDuplicationLogic(TestCase):
         finding_new.dynamic_finding = True
         finding_new.save()
 
-        # different uid. and different endpoints, so different hash, so no duplicate
-        self.assert_finding(finding_new, not_pk=224, duplicate=False, not_hash_code=finding_224.hash_code)
+        # different uid. and different endpoints, but endpoints not used for hash anymore -> duplicate
+        self.assert_finding(finding_new, not_pk=224, duplicate=True, hash_code=finding_224.hash_code)
 
-        # same scenario, now with different uid. and different endpoints, but hash will not be affected by endpoints because dynamic_finding is set to False
+        # same scenario, now with different uid. and different endpoints
         finding_new, finding_224 = self.copy_and_reset_finding(id=224)
 
         finding_new.save(dedupe_option=False)
@@ -899,7 +903,7 @@ class TestDuplicationLogic(TestCase):
         finding_new.dynamic_finding = False
         finding_new.save()
 
-        # different uid. and different endpoints, but hash will not be affected by endpoints because dynamic_finding is set to False
+        # different uid. and different endpoints, dynamic_finding is set to False hash_code still not affected by endpoints
         self.assert_finding(finding_new, not_pk=224, duplicate=True, duplicate_finding_id=224, hash_code=finding_224.hash_code)
 
     # sync false positive history tests
@@ -1350,7 +1354,7 @@ class TestDuplicationLogic(TestCase):
             self.assertFalse(finding.duplicate_finding)  # False -> None
 
         if duplicate_finding_id:
-            logger.debug('asserting that finding %i is a duplicate of %i', finding.id, duplicate_finding_id)
+            logger.debug('asserting that finding %i is a duplicate of %i', finding.id if finding.id is not None else 'None', duplicate_finding_id if duplicate_finding_id is not None else 'None')
             self.assertTrue(finding.duplicate_finding)  # True -> not None
             self.assertEqual(finding.duplicate_finding.id, duplicate_finding_id)
 

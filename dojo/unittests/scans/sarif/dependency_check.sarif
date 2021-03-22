@@ -1,0 +1,2950 @@
+{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "dependency-check",
+          "version": "6.1.2",
+          "informationUri": "https://jeremylong.github.io/DependencyCheck/"
+        },
+        "properties": {
+          "disclaimer": "Dependency-Check is an open source tool performing a best effort analysis of 3rd party dependencies; false positives and false negatives may exist in the analysis performed by the tool. Use of the tool and the reporting provided constitutes acceptance for use in an AS IS condition, and there are NO warranties, implied or otherwise, with regard to the analysis or its use. Any use of the tool and the reporting provided is at the user’s risk. In no event shall the copyright holder or OWASP be held liable for any damages whatsoever arising out of or in connection with the use of this tool, the analysis performed, or the resulting report.",
+          "nvd": "This report contains data retrieved from the National Vulnerability Database: http://nvd.nist.gov",
+          "npm": "This report may contain data retrieved from the NPM Public Advisories: https://www.npmjs.com/advisories",
+          "retirejs": "This report may contain data retrieved from the RetireJS community: https://retirejs.github.io/retire.js/",
+          "ossindex": "This report may contain data retrieved from the Sonatype OSS Index: https://ossindex.sonatype.org",
+          "NVD CVE Checked": "2021-03-09T07:13:42",
+          "NVD CVE Modified": "2021-03-09T06:01:35",
+          "VersionCheckOn": "2021-03-09T07:13:42"
+        }
+      },
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/admin/DateTimeShortcuts.js"
+          },
+          "hashes": {
+            "md5": "efa703f6f0b38e95179f9c5454561a55",
+            "sha1": "9a2cc07be7418ab82ab4905c316872a45622c9ad",
+            "sha256": "65d42c0a36352dca7f70221b60ac1c88bed2c195ab137d30715c1550580d515c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/gis/static/gis/js/OLMapWidget.js"
+          },
+          "hashes": {
+            "md5": "fd309498192e45af29a091ab9f02d757",
+            "sha1": "d900240569a02a3117bf6715a272adf6e1676307",
+            "sha256": "3314e4bed662bb411ae79167887fb45b2aa8c9229dac136465d9a3f031687966"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/admin/RelatedObjectLookups.js"
+          },
+          "hashes": {
+            "md5": "ea0683bea064eaaec897659ad3ffe0db",
+            "sha1": "94c185b30721160ad085040b04b426f18f9d1ee3",
+            "sha256": "f4b22a672c265c6ccf91cf2c44912602c63349c08c64333fc59ae3b488ee3f21"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/SelectBox.js"
+          },
+          "hashes": {
+            "md5": "99d0cfd2e80c60cac2b7dfc1e2079710",
+            "sha1": "ac34bd6ea010cd4c7af3c41c2cdf3b8f28509a15",
+            "sha256": "fa92572e1d5c98d4283babd28c2cecdebd524915bbf4bc211d122ea9be9efa22"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/SelectFilter2.js"
+          },
+          "hashes": {
+            "md5": "32ea9335ce474d45379a3dc90dd76dc1",
+            "sha1": "8dfda13ba1cffd77562915d01f1abf14dc80348b",
+            "sha256": "b9d7764dccb79888ab8d31916019683c38ce8f54211ba130373afe0fbcab162d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/swagger-ui-dist/absolute-path.js"
+          },
+          "hashes": {
+            "md5": "7ca5ebff3b35e49ef75f96885c6ed7c2",
+            "sha1": "27e42f7871bbac388e15d373642643a9c0ce2be3",
+            "sha256": "79af12840d716032568e9893b4be14a3ab004bc54b15c750f3cb0f97dd0a4faa"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/actions.js"
+          },
+          "hashes": {
+            "md5": "8d83e3af0fbdb4dadd740d4610988aca",
+            "sha1": "76fcfd455856441fcbbe9879c8c4afec1aa7e1d8",
+            "sha256": "8e3ae73b35d7e6498016254f69a321a90dee663b3ac434753063cac97877db01"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/actions.min.js"
+          },
+          "hashes": {
+            "md5": "5fa8cb0403f1cff779aa8f71d83bb108",
+            "sha1": "f39e380267139d66c7bfcb355ad04a6071d43947",
+            "sha256": "c2abd2166dc5195f0a9c27ec0365e0c6c24cefe421053e242c03052a708132b6"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/af.js"
+          },
+          "hashes": {
+            "md5": "4f6fcd73488ce79fae1b7a90aceaecde",
+            "sha1": "bd27657d85f794a98cd823e3fabc500a6e3613f4",
+            "sha256": "229237ba8d7d7e8efb8ccb4de51de97a83f43ab88dfa741f3d8d89e1fb9f77c8"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/static/rest_framework/js/ajax-form.js"
+          },
+          "hashes": {
+            "md5": "0ea6e6052ab5256f90eb26c02913bd88",
+            "sha1": "8e6f9865e79f1fd589b9e50e4f57b5939d654d7b",
+            "sha256": "a45fecd840a653ea3a894eaf298caedd5333aa7d1eb110e00e947bb5a48c5076"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/static/rest_framework/docs/js/api.js"
+          },
+          "hashes": {
+            "md5": "c9743eab7a4f1a63ef106cbf8598a48d",
+            "sha1": "2e292b729e99c463029c21d282b6462378d3aa5b",
+            "sha256": "6294e73f3aec2b874319599c454a4cac5e2d1360e4db69df03ad0337685d065a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework_swagger/static/rest_framework_swagger/bundles/app.bundle.js"
+          },
+          "hashes": {
+            "md5": "6aad1a0bd56994ac2c7776703b577b62",
+            "sha1": "705c9144c123df4bca725423bc77dfcda9a4ba74",
+            "sha256": "51eca975d1deb37400ef73e1bbf07e2c5c159aa08bf309d4c3d3243e37f390d9"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/ar.js"
+          },
+          "hashes": {
+            "md5": "a8bb27ec698c86bde72c8a6f13a8e9b4",
+            "sha1": "c96e19c754ce318bae4c9458fadc76e1b0c7b74b",
+            "sha256": "7e0547e6a09842abed5b06bc30688ec7855228283977f06431b6a49cda27716c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ar.js"
+          },
+          "hashes": {
+            "md5": "65aa8e36bf5da57ff4e3f22a835ab035",
+            "sha1": "1bbbdd68b643a31797bbea0c1159fa83696cb6b4",
+            "sha256": "cf1437a5e4a76d521fac7d4d763c780eb1c3b266e9aaeea67deca555614ce666"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/ptvsd/_vendored/pydevd/pydevd_attach_to_process/attach_amd64.dll"
+          },
+          "hashes": {
+            "md5": "cc985009b134df8a447a40c8296c271a",
+            "sha1": "b212a547354e27efe8876156003fe2ce6b5a467f",
+            "sha256": "8605e21cccd2904a8b8635deae4e6c442d0cb1c3b2ec3e554c2d5d2569d4fcc2"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/ptvsd/_vendored/pydevd/pydevd_attach_to_process/attach_x86.dll"
+          },
+          "hashes": {
+            "md5": "87da1c5f01681b0b35f7bd90ddeb8986",
+            "sha1": "16db5db93f591e47b6de3641c24a08eb904fc326",
+            "sha256": "5248398e7417f187f65f74339d5198cc1145e4e9eeda114161c511c3a52e6bfe"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/autocomplete.js"
+          },
+          "hashes": {
+            "md5": "cfd2c4dc89817da65dc3d21d25d5bbd8",
+            "sha1": "14e946d409ddad8f775e2eeff43b05475d6f6cc0",
+            "sha256": "2e02264cfd954c46892aac41aaf24a45afa67de9d906379583b2e71deb5ac505"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/az.js"
+          },
+          "hashes": {
+            "md5": "498dc667b34eb0fddc31c4e92330d1aa",
+            "sha1": "a223e3cf106825d1c2ed0e20fa0b5bc03399b5c8",
+            "sha256": "5960b0165287c592c60c001a705d9842bd4f1bab723d783b59ee4396e16e872e"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/az.js"
+          },
+          "hashes": {
+            "md5": "270c257daf8140a0cf23ad5de6f8ed1b",
+            "sha1": "f9dd0a0cc99499d72f60ead79977af34f0ccc221",
+            "sha256": "37f294edfb688dfd8782f2519693fc2aa1ba84a21baa28183772b4607fdcb6e4"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/backbone-min.js"
+          },
+          "hashes": {
+            "md5": "9f8b43fd1df78dca0827c73e29890865",
+            "sha1": "bdbfc587072f9af9100dd28e55e22911ed359df7",
+            "sha256": "b508dd521134313cc770ecd152ea2d82732b5115886a67ddab0bf5416079eee9"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/bg.js"
+          },
+          "hashes": {
+            "md5": "39b8be30d4f06779839cfaaa415d0690",
+            "sha1": "2c052dd7b3af2c00e3beed92b7012876b3bdaeaf",
+            "sha256": "e59e889479ae93fe8875974056f7628179e58fb20e68a5ed723b88d27d059984"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/bg.js"
+          },
+          "hashes": {
+            "md5": "89cba4df3c8694fcb33098dd1646cac1",
+            "sha1": "87fbd02596f1a61b515a3486a8e31f1c6c5037b7",
+            "sha256": "2e4f7e0c4ede0ba5692d785cbaa47c82091c67f020c09106ddd2c00d3c8c6d9b"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/bn.js"
+          },
+          "hashes": {
+            "md5": "6d42b4dd5665d0fa28f06994eedb4899",
+            "sha1": "b59ea9a01f183503044ecddc8ceb1ca7c18dc566",
+            "sha256": "c1d41b81ac59e3b4f21a5c2fb28ec63a3a664d750a696cef554affa0245e9841"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/static/rest_framework/js/bootstrap.min.js"
+          },
+          "hashes": {
+            "md5": "2f34b630ffe30ba2ff2b91e3f3c322a1",
+            "sha1": "b16fd8226bd6bfb08e568f1b1d0a21d60247cefb",
+            "sha256": "9ee2fcff6709e4d0d24b09ca0fc56aade12b4961ed9c43fd13b03248bfb57afe"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/bs.js"
+          },
+          "hashes": {
+            "md5": "91624382358e95086b80f00fa0bd6955",
+            "sha1": "9f7dfbf022b5d25e8fb56b6233acb1cbbabbd2e7",
+            "sha256": "839ea4592bbd471ca1feb6ab2d20daffc9eb76a2f9d49a996a2e10431db48f04"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/ca.js"
+          },
+          "hashes": {
+            "md5": "2eaad4eb1950a0d542812c58d30c93dd",
+            "sha1": "8827bc966b3718df52658d4141a51e3fd51a8b37",
+            "sha256": "7f57fccf6698620aabe9cbfb01413fa2976353f5c850300cbf3b12bce0e46690"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ca.js"
+          },
+          "hashes": {
+            "md5": "a166b745933a48ce3d0580a74210617d",
+            "sha1": "31a8bff3894ec89ec790905d74a75dc743fb0be3",
+            "sha256": "0d2cb2017254234c13a7f4db1612cd1ab82f811b0659e57721a7f16141818203"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/calendar.js"
+          },
+          "hashes": {
+            "md5": "aae57adab5f6db96635316b9dea294fa",
+            "sha1": "ff045acb7cefb1f77bf0b3c2f474c3773a643fb0",
+            "sha256": "f1e8ff17c481b681613669a82f038da725703891dde4905650c7b59b0831a701"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/cancel.js"
+          },
+          "hashes": {
+            "md5": "a2c3149a1c5e7315f37dbba8d797b584",
+            "sha1": "a099cd60b373d624f7fab0c9c88fde1fe0a9f047",
+            "sha256": "7ee7518fe38bb6ae35586764a40b04ebe82c501a6c80c8af242ee7d84ff310fb"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/change_form.js"
+          },
+          "hashes": {
+            "md5": "9e85003a1a3897faf9648e95421c2b6f",
+            "sha1": "b521103e063804d3de4ebf5e786deabe0582dae3",
+            "sha256": "27e6de183caa47abb26f7896fce23d628d1916b7f0255a8d1450de2fbfa78ea0"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/setuptools/cli-64.exe"
+          },
+          "hashes": {
+            "md5": "d2778164ef643ba8f44cc202ec7ef157",
+            "sha1": "31eee7114eed6b0d2fb77c9f3605057639050786",
+            "sha256": "28b001bb9a72ae7a24242bfab248d767a1ac5dec981c672a3944f7a072375e9a"
+          },
+          "properties": {
+            "vid1": "cpe:2.3:a:cli_project:cli:64:*:*:*:*:*:*:*"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/setuptools/cli.exe"
+          },
+          "hashes": {
+            "md5": "a32a382b8a5a906e03a83b4f3e5b7a9b",
+            "sha1": "11e2bdd0798761f93cce363329996af6c17ed796",
+            "sha256": "75f12ea2f30d9c0d872dade345f30f562e6d93847b6a509ba53beec6d0b2c346"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/collapse.js"
+          },
+          "hashes": {
+            "md5": "c5b851e91226d86f42bb19697adbabfc",
+            "sha1": "58db4070980335637fd828e2ccb6c51ab43caa00",
+            "sha256": "811a0f583b49ab83e58e148f1882f093e62e7b39eac0c6d94118a3ff2846515b"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/collapse.min.js"
+          },
+          "hashes": {
+            "md5": "44dfdb427845a6877a63b960bd9cd421",
+            "sha1": "ed7d9f088a88aefcc26ea3cb0d2e955197942e2c",
+            "sha256": "219556005ed3f48dce172c31359d846f19920344d851217d4bfbf9d0f064edb3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/shred/content.js"
+          },
+          "hashes": {
+            "md5": "2b16382031dc9f9b0347630be384c1a8",
+            "sha1": "1ba5561d504f06d96ccb9def980cf48b5cb25b75",
+            "sha256": "af6fc049a2eb66888f276e19e68938e3e709f338094e66fc76b207a42b54b276"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/core.js"
+          },
+          "hashes": {
+            "md5": "a004ed25a257bbceee4f4682946a7f55",
+            "sha1": "75e3c5cce400cf5bb0a3871a7941ea7cba29011b",
+            "sha256": "8fa52c1c63bf549f7f3454470fc3e81787be0614f4c11d43ce5c594f21b56728"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/static/rest_framework/js/coreapi-0.1.1.js"
+          },
+          "hashes": {
+            "md5": "8851fb9336c9b9ee637787adda1895f5",
+            "sha1": "d56cdbf0cd9e4b00a528dcef85fd7e7356dc94dd",
+            "sha256": "fe0cf23e7fb6731d1681f8ef8ffb655213dfe2568a9f361b82472bfee3465ba1"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/coverage_html.js"
+          },
+          "hashes": {
+            "md5": "313d453d0fe56bcfc82004b7698fdaef",
+            "sha1": "9646557de6200cf8b2ad250dc737bfe63e16056d",
+            "sha256": "d111a9f15ba91534f57e0368e2f2f945e367abb2492e9530d8f6649b9bd35eda"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/cs.js"
+          },
+          "hashes": {
+            "md5": "a68bcd293adcd6d9ac0b8527c9b39189",
+            "sha1": "e6a3d192091b77c3a40fc7e8d2fa08c2cae88dbf",
+            "sha256": "e96659f7bb21c98de01aa7c05da935443c2d0f695590c3c0d23130c2a477d1dd"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/cs.js"
+          },
+          "hashes": {
+            "md5": "4f43e8e7d33aa1e6aadf3286c7e379e9",
+            "sha1": "8663563801779f80f8520d9de3816f01e3bded03",
+            "sha256": "b7ff0e5958ba632dbd29a6eab3f975b0cd924ab8d4020653c1b4d7fe6d0c08bf"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/static/rest_framework/js/csrf.js"
+          },
+          "hashes": {
+            "md5": "969930007329ede1d1a07866a898588b",
+            "sha1": "762ddc6ddc0b447a485c2e33a6e0d2fb90555f68",
+            "sha256": "792d1b4b87cc4512e05d062a826b1a0cbb3a476624963e4f9192c8502936bdd8"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/dojo/static/dojo/js/cvss_calculator.js"
+          },
+          "hashes": {
+            "md5": "daf8a15c4b1417b62555f299276214f4",
+            "sha1": "cdd96a773a78aee30f572f945e0bd260467db3ee",
+            "sha256": "1d382a6597c69c7057ff21a7b467d79f20a612926a3b0e6194b6bb3d41015161"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/dojo/static/dojo/js/cvsscalc30.js"
+          },
+          "hashes": {
+            "md5": "7618bd07ee31a74ef83c69f2394fff6a",
+            "sha1": "c0e33d8349d20343696d5c693f55cc0a1f7a1a58",
+            "sha256": "02c6c506dae68dbf1df476c75917753bf17a361e021b2c0b00a70a94582cd2f3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/dojo/static/dojo/js/cvsscalc30_helptext.js"
+          },
+          "hashes": {
+            "md5": "b0261a9e06b4a838f9b4e6f151e4b263",
+            "sha1": "889da4fb8b72111e97c570cf4bd0d8b6765275ab",
+            "sha256": "8ef089529e52c36ba474585e9d17c5202ac04a5af1f92951c9b911efe5655442"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/da.js"
+          },
+          "hashes": {
+            "md5": "cbf897a0ae53b0cffbbe3f50d8b1b136",
+            "sha1": "2974c4735d4d4de2fd11510730403fa90fd2663e",
+            "sha256": "43ea333b3d432f634138f232a54f2f8e80b1682899a89dab63bfc9050723ac19"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/da.js"
+          },
+          "hashes": {
+            "md5": "766346afe4dd72c003242cfb1cbe2617",
+            "sha1": "3d0805129d121b1464ff60c051214c44579089fe",
+            "sha256": "b45da6bf315849660e537624b65dc6f77a4291ff95f60a270b193b85c039275a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/de.js"
+          },
+          "hashes": {
+            "md5": "366d0aacb55f4929cc50bb977abec674",
+            "sha1": "1d4b710a1ccccc7522874a171f776b965c41f9ce",
+            "sha256": "9ad8c2229988615c3908b7fb2298c15a9e95b45cdd2a1fd8b5916da487884ad7"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/de.js"
+          },
+          "hashes": {
+            "md5": "8a1c222b0204c8faaf6d3c07c961d8aa",
+            "sha1": "34d96c160f63b2d5ec4a12d4c38b65c60761e45b",
+            "sha256": "e5bb297dc8a1329f325c3c1f72abc2fe75774136ed06e403991ddced43d0b45c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/static/rest_framework/js/default.js"
+          },
+          "hashes": {
+            "md5": "5b08897dbdc375ba9fa9088bcfc88b97",
+            "sha1": "8eecc368213c30328f3fdd83d34e042406888a0d",
+            "sha256": "98938fdc9303c909d1497eb45ff4f85a0b58cce04d0d8a6a7356613940bce623"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/dsb.js"
+          },
+          "hashes": {
+            "md5": "56372c92d2f1bcb2b8e382981dca0546",
+            "sha1": "9c49670161af95125600eeb804956639899b4b81",
+            "sha256": "2ad3f6c4da0fef9a169e86d4ad2ec4a7f04e14fcdc30d0edd30c8f9e46c817f4"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/el.js"
+          },
+          "hashes": {
+            "md5": "5629ce65500f96c62414a27c6eaed62c",
+            "sha1": "7c744e4e3e6369bae1941804eb60e04494a5e2ca",
+            "sha256": "1db8e7286d5f1a4b3a107591eb5d370b9924f2b30b139febb0f1b1f5dd63c4a6"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/el.js"
+          },
+          "hashes": {
+            "md5": "27097f071856a0f4e82298fe407d1eac",
+            "sha1": "a7a7d0e4a8f5e9d99c5c0621d48bd1852fc811db",
+            "sha256": "21dbc3f1e63f2a95fd7dd1ef95ddce32f41f62c9daa098c37959206c87a67e7f"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/en.js"
+          },
+          "hashes": {
+            "md5": "05649b26c08630d2b703bc1e9ef93c7b",
+            "sha1": "aa1c1bd98c02485864161e15138161b4e962c931",
+            "sha256": "07e38e668bac1f025af94b9fe3c0f85f37cf252282437bc7fcb89d4fef4a4f47"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/en.js"
+          },
+          "hashes": {
+            "md5": "cf932ba09a98fe11bde8e1f3dd5e2cfa",
+            "sha1": "6bb5c48e18078a5688c6f7e187cf3c44057cbc1e",
+            "sha256": "0bae803be28e5cdb97116c21c1f8d80456b7806708cec3c51d0019f6a4a1dc6a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/es.js"
+          },
+          "hashes": {
+            "md5": "dc9dbf9d65df3f69e6b6d650c97bd967",
+            "sha1": "af2d6c33a8fa0f0a7949fe1ae743a87a1dc9281c",
+            "sha256": "caa57cc8af9bcff712f570550d44266ca4b2903b171dcaa0c6529b3f2c4321dc"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/es.js"
+          },
+          "hashes": {
+            "md5": "66dbc2652fb1b769bf29058e707b43c8",
+            "sha1": "b8097715cfd7fea831f2551664585f33302f1c28",
+            "sha256": "22165a232f2e7d376e3b6faf06b8afb303028e53e4eefae4e0ff35a43e81d123"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/et.js"
+          },
+          "hashes": {
+            "md5": "2b96fd98289dc3fc5e61f21e6e1a7d52",
+            "sha1": "62b8dc201a6071d1c9ae4d0cc5cf419dce71ed89",
+            "sha256": "2e02e074e90a8dceb7b2fc4fd546bb034cded4be96aefd17ea7a7ef22443e73c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/et.js"
+          },
+          "hashes": {
+            "md5": "c3953fb90b6bb9669697f5f12e802a66",
+            "sha1": "8fb6578e72aef73faa8a91629da04515c1137ada",
+            "sha256": "99ec00cbed79cad01b8d3ab166b1198f7a7d29e6c68c132985cda6225a607801"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/eu.js"
+          },
+          "hashes": {
+            "md5": "adfe5c97b72c20bb0afbc0968b440e50",
+            "sha1": "f727bb4876f26a81d4961277f4f4d900dfb0f84f",
+            "sha256": "acb9ad3fb6c0fdab643488fcd65feb89333b7e2e425f156b1411c5c9d74ef87c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/eu.js"
+          },
+          "hashes": {
+            "md5": "11b925456433eaab07e35b8dca7046f5",
+            "sha1": "1c181dc4c0f90c6427441189ae2577837c7ad47f",
+            "sha256": "a66c929792014fa6d281c395ba0e67fb9d7c0b1aa919feb7454627c1f76afa6f"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/fa.js"
+          },
+          "hashes": {
+            "md5": "3b5bd1961cfd0a6f96ac4cd2ea16c243",
+            "sha1": "e78d4a277fa39d48c3b0ffe479315a17e8c1f62b",
+            "sha256": "7ea66413d7bcb6ddab67b3ab0c63e23ac4cd763dd2dabd028db75d55404378c0"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/fa.js"
+          },
+          "hashes": {
+            "md5": "98e52839b583e1ca66f4360a4f43f9b0",
+            "sha1": "901224b7ff4fe4f327820418443ca0321a4048d1",
+            "sha256": "e3bf859a2ae3c5e267b91ffdd20dce5380f20587435d22f4ffcaa3676ae723b5"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/fi.js"
+          },
+          "hashes": {
+            "md5": "659847deefdcfd7e4f8f2ed924d360f4",
+            "sha1": "1730a84fd5f9cdb51cd4fef299d868963f240d8e",
+            "sha256": "0aac8c0d7407b3382a8b41f3a0f334f83b4940654a007142c50abc2433bbcf16"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/fi.js"
+          },
+          "hashes": {
+            "md5": "614ec42aa9baaf687ab9ff44705dfd2e",
+            "sha1": "d9ca619500907f7fdd94e2a3eb665406719280d7",
+            "sha256": "2951a2ae118635e7bf888a4c18b5f91331ff52435ef8538f0bfd38f381be410d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/fr.js"
+          },
+          "hashes": {
+            "md5": "b06a3340de45535358a0bc33fa2b9739",
+            "sha1": "142ad98c77992bba6e0e219b327c021d0e320ec7",
+            "sha256": "a630b5af91321f779b5b05a4fc3176987d18e7cc90bce106eac9668e1fff4a84"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/fr.js"
+          },
+          "hashes": {
+            "md5": "05e0542fcfe6df5ab074a377dc1a5a9b",
+            "sha1": "bca64003d563451801651fb42ca8a1e0ca8055b4",
+            "sha256": "6a3d2adab749378ec144173d2eabec83192e3ce71601b66c5055256e0bb0758d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/selenium/webdriver/remote/getAttribute.js"
+          },
+          "hashes": {
+            "md5": "e6b3169414f3b9c47a9b826bb71a0337",
+            "sha1": "d22278a492d03863ce51569482dcfb30a0b006e9",
+            "sha256": "1198a9999dde24dd2da0d9877cc2e8f8dd70bfdaeee0b5012b24e5474b50e88c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/gl.js"
+          },
+          "hashes": {
+            "md5": "78a87f7c0a519118fbe4f583ff2a3b3f",
+            "sha1": "daa521ee58b8e1936b1fd4c64adf2598eff2f6a2",
+            "sha256": "58e6e360cdaf2b83a02ea1fc7d2e47ff6e5efc68eabc03b0b21404c098944ff9"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/gl.js"
+          },
+          "hashes": {
+            "md5": "d99b1fedaa86d011818cfbab11dd355c",
+            "sha1": "becb10526bb68f70db2867f5a2e3b79fe7117aa1",
+            "sha256": "1d225a7c8f39c8aa785b38c53d3e7fdde67ff9740360fcf37f80569aeeae5c79"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/setuptools/gui-64.exe"
+          },
+          "hashes": {
+            "md5": "2ffc9a24492c0a1af4d562f0c7608aa5",
+            "sha1": "1fd5ff6136fba36e9ee22598ecd250af3180ee53",
+            "sha256": "69828c857d4824b9f850b1e0597d2c134c91114b7a0774c41dffe33b0eb23721"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/setuptools/gui.exe"
+          },
+          "hashes": {
+            "md5": "e97c622b03fb2a2598bf019fbbe29f2c",
+            "sha1": "32698bd1d3a0ff6cf441770d1b2b816285068d19",
+            "sha256": "5c1af46c7300e87a73dacf6cf41ce397e3f05df6bd9c7e227b4ac59f85769160"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/handlebars-1.0.0.js"
+          },
+          "hashes": {
+            "md5": "6f95155fd6469590d96c9651ee156795",
+            "sha1": "db2448c8bf24ef8ab033e6712da2784f9094c27f",
+            "sha256": "0956895244959df828d613707d3469bcfce07c4cdf9234aa2869fd59eef070a9"
+          },
+          "properties": {
+            "id1": "pkg:javascript/handlebars@1.0.0"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/he.js"
+          },
+          "hashes": {
+            "md5": "e420ff6cd3ed77ab9271c9b3d441442c",
+            "sha1": "a72ac85ea6faeac10150fa6b2330521984afba73",
+            "sha256": "0c83d1287c343640ee52d2cd19d4e76197280a2377bacb4763e50c9b0df857fb"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/he.js"
+          },
+          "hashes": {
+            "md5": "222d90ee0344ee8beeb5fb1835c93c76",
+            "sha1": "0aefb223099fb3c41b9c73c820fc96b5e8aa39cd",
+            "sha256": "44772867b19a106c85e9368b8a6f9e5b81684072496643d7d5708ba71b9a9038"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/hi.js"
+          },
+          "hashes": {
+            "md5": "116a90b7111b953cd092e30a034d6913",
+            "sha1": "9818deee93fe57a5b93726ae53788a9857cd7d97",
+            "sha256": "8539030558fc652969917bfb25735604ddcd5b173c9593c18a8dc4472cb9350c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/hi.js"
+          },
+          "hashes": {
+            "md5": "70640d41628f36284af78b22ea8b283b",
+            "sha1": "e245a22c99a774992cef23c5abc825ce8811c022",
+            "sha256": "9ba66a88a67f8f3c33545802f2f9188b0cb8947e5f244315f8b4cf54ed96bb8d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/highlight.7.3.pack.js"
+          },
+          "hashes": {
+            "md5": "1faadb031ba98569ab3e854b64b2db06",
+            "sha1": "3e43686bd2b3ced379ee47f07d5c03a3a97d9827",
+            "sha256": "8ac611530446e502594abee6cedf1406f60c59b373e2482f8898211e766ca18d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/static/rest_framework/docs/js/highlight.pack.js"
+          },
+          "hashes": {
+            "md5": "479b5f21dcba4eb5cc16d2d0e0a6ae7d",
+            "sha1": "fd298d98fddb43fc7b627cedebf55c16d8e24524",
+            "sha256": "4e956cd7a60fc91c634ecd76da622c6e84d53a9a1351bd409b39419ce1e35380"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/debug_toolbar/static/debug_toolbar/js/history.js"
+          },
+          "hashes": {
+            "md5": "203571513e408d73191608745aff3eed",
+            "sha1": "9c079649ba41f3a3d6375e79b452766904ec8e82",
+            "sha256": "72079f0d420851377e3391aa8c7e5b63299e67952b2105da689a94bdaec6fc5a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/hr.js"
+          },
+          "hashes": {
+            "md5": "e1d2c70b4df50d98d2c35856804d38be",
+            "sha1": "07449df26209d38e750b07dfdeb4ff630b34470e",
+            "sha256": "f376e7a2d4f368dc199b23a14184fa52544a7e5ab6b6a4d69fb59df5235b635f"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/hr.js"
+          },
+          "hashes": {
+            "md5": "a2b092cc1147f07b978145d407c67fa1",
+            "sha1": "a1808a4f9778cb577615b601eb429b5dc88cde7a",
+            "sha256": "35c9539434e23455f5cb45b52e58f5d3e648a1751877bbc35eac9e509eefdc1e"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/hsb.js"
+          },
+          "hashes": {
+            "md5": "fa3b55265efe8f4182d5e65a1a506252",
+            "sha1": "2a263d9c688cd7aa09cafd6c31769ea0ed28529b",
+            "sha256": "1532eccdcac669e9535bae96579d2efeb4ba1d5d1267143a561a62dad9e00ba3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/hu.js"
+          },
+          "hashes": {
+            "md5": "6ec6039cb8a354e2bc6a1794f729caae",
+            "sha1": "86519e4eb4cf552a2b084bf118d6c9173658935a",
+            "sha256": "dcf7549344a91d8f87fa1eb6c289b0e00cb244cba394673afe8c56f8bd56c8eb"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/hu.js"
+          },
+          "hashes": {
+            "md5": "db45641f10b2412801d5872e40ef7c2f",
+            "sha1": "63a309a2251adb064cdb125c12fecd34204913b7",
+            "sha256": "3a20f3c108fe72e5c6b7734d0d0c35c0dda368e8e86f8b833d4936994f03e41b"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/hy.js"
+          },
+          "hashes": {
+            "md5": "c7babaeef5a625566434ea79b19d4c7e",
+            "sha1": "73d8c0aac67d5a67e0a427b9f72607500a0a0f15",
+            "sha256": "04b8747e7b6bc2dc0dc254288b02e4750395c8d5c77664692f6f29f96e45b038"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/id.js"
+          },
+          "hashes": {
+            "md5": "6ee6c9c64b945bb8a0f42d247ee0d868",
+            "sha1": "fdb3abbf30479b08d8b4e4b0e773615d3bac4da1",
+            "sha256": "e1c72eaf081e689392ce4f7b645a652768f851e3d6e3bfe6675e1f77597d9396"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/id.js"
+          },
+          "hashes": {
+            "md5": "04debded514d3962bb74f05532e793d4",
+            "sha1": "054f5612ea6f8de585cb7c3d534dd621039e32d2",
+            "sha256": "7c627ef80c3bd0fa739371202e317557f42fa83daafee7d78e740823266a6207"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/immutable.min.js"
+          },
+          "hashes": {
+            "md5": "d985bc61d85c14460879b8e98e9c3075",
+            "sha1": "7e21d495ff54f1c7ddcfde398d56759e942aef38",
+            "sha256": "fb423082717150aa4764f5c1853424baff83ab2d1e0e7a3b9b2641e8e3a33910"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/dojo/static/dojo/js/index.js"
+          },
+          "hashes": {
+            "md5": "322bd19c58385b157fafe99623241420",
+            "sha1": "6eb93580ad5b7478cd2bc11e61209e7adc451cf6",
+            "sha256": "56cdb874c261eed45afb22cadab3156b402756bbf9b2c89da566f7af0649f74a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/swagger-ui-dist/index.js"
+          },
+          "hashes": {
+            "md5": "4843f77ccf9e12e7e60efa279baaffb3",
+            "sha1": "188642650e853f572a8c7191ba21bf1d5e1b3e5b",
+            "sha256": "e27a64ec0db122a0b1009e54016d3b40a142fc9a8e0d80609837e9df9027c9df"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/inlines.js"
+          },
+          "hashes": {
+            "md5": "12d1af430335b8f97c47917e5a0c1676",
+            "sha1": "d344f7517c59c152fd9d3d43a179702255b12fd2",
+            "sha256": "4e54dc12e776f495e1f55a391e14b0161ac3a9120780bfc7b9e32ef784469d1b"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/inlines.min.js"
+          },
+          "hashes": {
+            "md5": "4d23f8660b21deb6a49943f8436f110a",
+            "sha1": "dcbef8127ee1813e9501300597c9a3f2a06c6f9b",
+            "sha256": "ee153f350297733bd2b1804d2ff0a571180ff9bf28d53ccece0a1c66e5c8f00a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/insQ.min.js"
+          },
+          "hashes": {
+            "md5": "90ab21607447d811b7920fd0fcecca11",
+            "sha1": "2b948bf336bbbcfca2b86c701837b1af47571cc1",
+            "sha256": "82839e148886063283f4e4a188f1ef400f4fae922ec2e74a76da1731e994e7b3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/is.js"
+          },
+          "hashes": {
+            "md5": "3ddd9a6a97e93e1910210c9eefc1bca1",
+            "sha1": "3f4f203545d0db2db770ccbaf5591aa2ef6000ef",
+            "sha256": "827d1d748a939c95f8c24fad582e6014e449b357648081fd30ec0b96306e40ad"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/is.js"
+          },
+          "hashes": {
+            "md5": "808c7d47acb59537728bc74fdeb0ad0d",
+            "sha1": "15ba558dacbe3d5a54b52cd30a802b63e3fc68fd",
+            "sha256": "e97045432a4a6685e2e3afdc5b9a024151676cebd5d2d99bb3296422e7f68cd2"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/selenium/webdriver/remote/isDisplayed.js"
+          },
+          "hashes": {
+            "md5": "313589fe40cbb546415aec5377da0e7d",
+            "sha1": "bc2b6e547b1da94682e379af1ea11579e26de65b",
+            "sha256": "c1a04024e5414fca8c1deedb452be77a8b9d13bb3cf67ff4230d5983537a3096"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/it.js"
+          },
+          "hashes": {
+            "md5": "bae1661dbb77c15384655faffc10a3fa",
+            "sha1": "546ae2073bfe422f2b8c9349a77e38b6d4b5e122",
+            "sha256": "d2eff6acce004397f7d6f09bf86c8cb2a466e548a2a0b95865030bd062597edd"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/it.js"
+          },
+          "hashes": {
+            "md5": "be4fe8d365b5916432504d1f98e2e0af",
+            "sha1": "d5a02fc223ea3e048dace02ae8757daf67ccf3af",
+            "sha256": "906c6d6a9c214458f7bbf22163fef359984a811e42ad99a66ac4f9c3e6a85d13"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ja.js"
+          },
+          "hashes": {
+            "md5": "170ae885d74f1634271e1eb470cb4621",
+            "sha1": "b1cfbd2dd7f578238b3d36eea42331dc0b87d73e",
+            "sha256": "b59e2ca9dc7f4847096e25b9f9ca070d5f0556612525103767cdb61051e48cb3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/ja.js"
+          },
+          "hashes": {
+            "md5": "19cf1ce8a03de84ea668e8fec99a8c80",
+            "sha1": "b4229c9e723d4b956ef5e9e3633a48502f1397e9",
+            "sha256": "89535f02358e75e2c662c3f2e78252a90ef443b2c63bb4fd06c8477a8b356284"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/jquery-1.8.0.min.js"
+          },
+          "hashes": {
+            "md5": "3a728460147fb9af7faf0e587b9fbf42",
+            "sha1": "f3a55f44fb81cf8ee908a3872841f70d6548f8c1",
+            "sha256": "8c574e0a06396dfa7064b8b460e0e4a8d5d0748c4aa66eb2e4efdfcb46da4b31"
+          },
+          "properties": {
+            "id1": "pkg:javascript/jquery@1.8.0.min"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django_extensions/static/django_extensions/js/jquery.ajaxQueue.js"
+          },
+          "hashes": {
+            "md5": "ac504621bdd8aa142a1b24fdf9fee353",
+            "sha1": "80177ae8be71c080c75eecc3bca314304fdc99fb",
+            "sha256": "2150a043630c1f1ae6ac731ce0fbb44f174469586e412a1fc68b598047df51d9"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django_extensions/static/django_extensions/js/jquery.autocomplete.js"
+          },
+          "hashes": {
+            "md5": "26e55daaf7c51bddf19c17a67447952a",
+            "sha1": "6e18c1393fcafc9c63e3a2461df1a28311535c5c",
+            "sha256": "e4357dcf137a4e05696e4b1caa592888ae6a844106766c55dafedddbae504288"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/jquery.ba-bbq.min.js"
+          },
+          "hashes": {
+            "md5": "07c72646c76932834219ef6827451df3",
+            "sha1": "42a48a21f1cfe2e38c2d7983c3120fa3c4fbad04",
+            "sha256": "4390c59a398ab1d124b5daa588728b1f05dede144555b4b29706363eaa000bef"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/jquery.ba-throttle-debounce.min.js"
+          },
+          "hashes": {
+            "md5": "d873e8105eeb2db28f24397c27ad6046",
+            "sha1": "0509688773d75b4a9bf8c33bac284c9c62848ac0",
+            "sha256": "c177a952c397d5562be40c9619b22802a96bbe3433f6e9cf6ed13233bc05067c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django_extensions/static/django_extensions/js/jquery.bgiframe.js"
+          },
+          "hashes": {
+            "md5": "a9cca145411cc25d1e1a4b26f490d99a",
+            "sha1": "1984ba36c86ba31dd440afc60a36df9268339002",
+            "sha256": "24b2f26729f50d1005af2fa2901452adfd2a7d7e8fb2a4c59309cfbbd8e3ebc9"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/jquery.hotkeys.js"
+          },
+          "hashes": {
+            "md5": "6c47593cb34e7b6aa30e87fe32f8fbf7",
+            "sha1": "eaa8e542bb47aa74c62c60fb317463e81d082e74",
+            "sha256": "555a9b4462650af0113c63095dc4a2451209c24a6079ddf01b97d0e3b822e365"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/jquery.init.js"
+          },
+          "hashes": {
+            "md5": "95b62fa19378e6f5954af0c797889fa3",
+            "sha1": "ada1f52fa0d856e690f48390e5660b15863b87b6",
+            "sha256": "1abfb211deb5c18eae04332139a56af9a99f722cfb11984cbc97da8bf5b1ac71"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/jquery.isonscreen.js"
+          },
+          "hashes": {
+            "md5": "d0dd3070e0028b25fdc988dd42c65a59",
+            "sha1": "1d878dd9205a848cc072a60fa0c8585a5b1ba952",
+            "sha256": "584c9713ac9360dcc061fcd58b092c36eec0240639cd9048f6aebe27da45d59c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/jquery/jquery.js"
+          },
+          "hashes": {
+            "md5": "23c7c5d2d1317508e807a6c7f777d6ed",
+            "sha1": "ad16c4a132ad2a03b4951185fed46d55397b5e88",
+            "sha256": "416a3b2c3bf16d64f6b5b6d0f7b079df2267614dd6847fc2f3271b4409233c37"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/static/rest_framework/docs/js/jquery.json-view.min.js"
+          },
+          "hashes": {
+            "md5": "b7c2d6981377a15eb3a4bf1f3cde5792",
+            "sha1": "4e9afa79f265bc1a3434aaba962cf532d0f4b6bf",
+            "sha256": "c5463ba4931e3c3b503e1f0aad658ff06730169355267e4084b6d7ada556bd96"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/jquery/jquery.min.js"
+          },
+          "hashes": {
+            "md5": "dc5e7f18c8d36ac1d3d4753a87c98d0a",
+            "sha1": "c8e1c8b386dc5b7a9184c763c88d19a346eb3342",
+            "sha256": "f7f6a5894f1d19ddad6fa392b2ece2c5e578cbf7da4ea805b6885eb6985b6e3d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/jquery.min.js"
+          },
+          "hashes": {
+            "md5": "3c9137d88a00b1ae0b41ff6a70571615",
+            "sha1": "1797d73e9da4287351f6fbec1b183c19be217c2a",
+            "sha256": "24262baafef17092927c3dafe764aaa52a2a371b83ed2249cca7e414df99fac1"
+          },
+          "properties": {
+            "id1": "pkg:javascript/jquery@1.11.1"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/jquery.slideto.min.js"
+          },
+          "hashes": {
+            "md5": "0860d2328e5a333731cf95de440f4356",
+            "sha1": "b849bafad46251cbced13d4b501694dd21bd7464",
+            "sha256": "4ac55a3315abf9efaddf5c91723409a73e4b3c1b070199a1cd2e1f20db687e48"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/jquery.tablesorter.min.js"
+          },
+          "hashes": {
+            "md5": "8f686d799c18844d296853333694634a",
+            "sha1": "7372d3fe21f1a21791b91fa44dbdc94e099c9687",
+            "sha256": "b7889f9f3d9e07240451a7e772849d254c03da352debc558f02ccd8c0cb0a34f"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/jquery.wiggle.min.js"
+          },
+          "hashes": {
+            "md5": "7438b3ef10b182042dfa722f99ef2574",
+            "sha1": "8fdf6f42eb6e3fad77ea4be4eb39046538ad8253",
+            "sha256": "624a5b6c44f072fc01c12a66b8daf9c0b0d191569077f6c10fa7d3d83fe0c8f3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ka.js"
+          },
+          "hashes": {
+            "md5": "2083264a54f0873f55468affa796d61e",
+            "sha1": "9126533d06719d2ae3535929b98b77c34798a0fb",
+            "sha256": "0c7e95ae755d47c497ea4b28dadcea9c9aacdf6b82a41372bcff4ac6cdecb232"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/km.js"
+          },
+          "hashes": {
+            "md5": "6074a9c5575cfaa8b3c1dccdb3133dde",
+            "sha1": "7601fa946d3bc961762a81c229935c47ff699f1d",
+            "sha256": "08477b831e5cd77d594048a6fac77016733ef11fd6e082e4decdc1e7da6a31c2"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/km.js"
+          },
+          "hashes": {
+            "md5": "c23089cb06ca871153ba9bfe8458a378",
+            "sha1": "282bb56ddafc416b655c04f9ae0f1168220cd6fc",
+            "sha256": "c7d8728de9e77358b4a1e62b1541d09d81da917a6fed60fb31217e73d01a4e38"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/ko.js"
+          },
+          "hashes": {
+            "md5": "74b17541834ff1bb8c5651d321bd2281",
+            "sha1": "236bfe9c76cd3f80708341d8ca97074c5a4f6ac8",
+            "sha256": "3d9aa76bb79a4a369dbd958e17e1305f4a10f4c0f58c746946ab2fde27995c77"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ko.js"
+          },
+          "hashes": {
+            "md5": "e7be6c20e67393698a0f05971e9720c1",
+            "sha1": "6a75b8c4cc0ea56cf7bed9cb2f9c46c1d43ccfcd",
+            "sha256": "226981f6fee0d9928498f15441e5eb2fbdb75448db8845b761e9717aa1c48077"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/lt.js"
+          },
+          "hashes": {
+            "md5": "a0783b1bd1594b7c584564cc68b6c6e5",
+            "sha1": "01410c173810f13b23362facae6fff5aa544b321",
+            "sha256": "e1a5f6112cc8c575ccff8e4f8e5a05cdb74e90406f1bc9742f36e7f5ad3b4be6"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/lt.js"
+          },
+          "hashes": {
+            "md5": "23c7ce903300fc118947994b9cdd16cb",
+            "sha1": "081c69be56387d5b25252aae96420b9f4121f3bf",
+            "sha256": "653fb8e626d5c1d5a74f2a3e4eab2a5b6363229f73c38c6ce52a3bf0a31bfecf"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/lv.js"
+          },
+          "hashes": {
+            "md5": "07fe2a580d17cba308a972fdabbcaea0",
+            "sha1": "d3972b01feb05e859d57ff65f8643f07f17d1b52",
+            "sha256": "9bff72bab17683fa0b24fa05b2b172c943a8a0e8d275ee71f632e59558186baf"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/lv.js"
+          },
+          "hashes": {
+            "md5": "08e62128eac1d0e8ac32cfaf75f2ec9f",
+            "sha1": "0ce547e78b10bf52a69c557b96edb3f30f262d59",
+            "sha256": "847a442b87984a8263fdfbc0db097c412b8996e37187e4efa7a5199be65869e1"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/mk.js"
+          },
+          "hashes": {
+            "md5": "4986d7fc3ff3ed9a5f8af646f5ca587b",
+            "sha1": "0221a0f1a102481f109d2e100fed8bfd217a881a",
+            "sha256": "033061bf4c7d4d418251e36cb9248ddd49d3d70481661b60a7d07b2e85dc707b"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/mk.js"
+          },
+          "hashes": {
+            "md5": "dabbb90871300ce3a295969bc0260420",
+            "sha1": "00078dd1f99b93f4a0b3f1d6aeb0c13d0c42f749",
+            "sha256": "3d2a71ae70692f8492b3d4dbd2a7560fbba6508c88a11d95d5fa6a450bc25dc0"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/ms.js"
+          },
+          "hashes": {
+            "md5": "23e7b436957996a10f451bc8d688764d",
+            "sha1": "e41a663cf10c869c183c836663b627f92731e9de",
+            "sha256": "fbe6ed8fb519ad705b84a1127c8fb3ffa6316095c09644f13c81176ad795439e"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ms.js"
+          },
+          "hashes": {
+            "md5": "4ba82c9a51ce975fe0e4eff5f6eece65",
+            "sha1": "5f9c625b8c1541a722736c70a943207d5ea1b26d",
+            "sha256": "342cf8467b642597fc6030c2d53141bcafa7927f83f9c18dcbbc2886aa9a403e"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/nb.js"
+          },
+          "hashes": {
+            "md5": "137e184004aaec03977a4caf1cca30f4",
+            "sha1": "cc9543315e1f6ee74b651502f7c6265a6da428f7",
+            "sha256": "810337a7f618fa18d9f68c27dced2b649607a8ae02631141253ae44ef202c8af"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/nb.js"
+          },
+          "hashes": {
+            "md5": "da2fce143f2794208e36dc8520e4c36a",
+            "sha1": "eec948ca7b449e9c8a273a9df6e4fff087e04ebb",
+            "sha256": "79db8a086efa2778883eb51e9020c2abbe35ae71b8c43ed353713b2e26fbb0f1"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ne.js"
+          },
+          "hashes": {
+            "md5": "3d79fd3f08dbfd0973cf91dd6a62bccd",
+            "sha1": "a4c0b4e89dc2615bebb57ef3f65b232f12501723",
+            "sha256": "4108c33d013a1832974b9731ab62518e4dcc183be38372337b1ef5661a276e3f"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/nl.js"
+          },
+          "hashes": {
+            "md5": "c363ace8aa0501526c17a61ab2fb854f",
+            "sha1": "96267cfbc766db409625228cf31a65cc0b0ba3f6",
+            "sha256": "e0de61b75275323542191a94f03ce8f3531984a790c40a3e7ef303a9a890a2c8"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/nl.js"
+          },
+          "hashes": {
+            "md5": "997868a37ed89062ad7b19c9a88f1bb0",
+            "sha1": "76043e76f2b01d0e76115fa1bcc7b2b7f422812a",
+            "sha256": "25cb4b7d3a4b4395055edc809a06c2bd23d4b56d1fcb5984ee835870c23dd1b2"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/dojo/unittests/scans/scout_suite/no_vuln.js"
+          },
+          "hashes": {
+            "md5": "99ca4a4bc9224d96c290537b4ec5576c",
+            "sha1": "d1f0c0504f4783e3937f28e12d672cb6110a55c0",
+            "sha256": "9bf7f3dd885b733af3c1506f89a511016c5fda71874188977cc9b855bbe18ec1"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/gis/templates/gis/admin/openlayers.js"
+          },
+          "hashes": {
+            "md5": "b70413340ede4854220b1f14fa6d60c3",
+            "sha1": "92698c8e9626bf9c4a5cd890c8459d3cce49d409",
+            "sha256": "2a84f75543007b3f7ee50a13e54e8e257ceddcc2f1953ac930cc0836343f93b3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/gis/templates/gis/admin/osm.js"
+          },
+          "hashes": {
+            "md5": "9ced60918c6ffacc69e74fe36effc147",
+            "sha1": "8e55fd4407a0d9f87e8df0e559515fb66bb382c7",
+            "sha256": "d30151257299da9969eed6f417d7e090cce9e0daca65770788c90a0c9787311c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/components/package.json"
+          },
+          "hashes": {
+            "md5": "d6c5dfa08955044c00c1d797407a618d",
+            "sha1": "e765af0ccf2b9e35cc23a120871f4428c1132005",
+            "sha256": "defbe8663a5a2e00cab354c471109aadb9ac65d62695f022dd05aa277106a020"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/pl.js"
+          },
+          "hashes": {
+            "md5": "76465b54a6b0eb6b2204143a0827d0ca",
+            "sha1": "c0fe221c7f4b9aac9d092c5834f3c19bbff2ce7a",
+            "sha256": "8abdffb4f36a850eab8be2776323a5b1926b6dd06f502de26e962c11f74cb608"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/pl.js"
+          },
+          "hashes": {
+            "md5": "6031b4f164521f58dfec7d1e46238861",
+            "sha1": "0d4cb09186007d0d7880d0c5b27e1b30637f9522",
+            "sha256": "ea012e2989c975ff1c6cf111b30fa6b5d720741c9426e2dfd50507d1a49a8cca"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/polymorphic/static/polymorphic/js/polymorphic_inlines.js"
+          },
+          "hashes": {
+            "md5": "282b2e2c0063521a2d18c9b63511c579",
+            "sha1": "e7b02a676ca5c538f161fc31a7eda7c05afa4e5a",
+            "sha256": "34d1f2ca2d9241d789eac1183f588dd16df1a4d98de5be5575e58200ed93596d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/popup_response.js"
+          },
+          "hashes": {
+            "md5": "6ce3197f8fc8b721c06243ad45889cde",
+            "sha1": "b5d4008a71398da61e2a6d0c3e54e75d3b8d5922",
+            "sha256": "ed7c877bd48362407c38cc45edf84be8de65e0ec5ffa05eacc69693caeb7b5c7"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/prepopulate.js"
+          },
+          "hashes": {
+            "md5": "2f90da7170eca70d767f41ab9a466292",
+            "sha1": "e383117ba73fb0ac69fb7947fd8be47a6539b4e3",
+            "sha256": "8c157af93f4a362f8909ccd17ff6ce900f6d8e35a92186d7c51846fef35b69d7"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/prepopulate.min.js"
+          },
+          "hashes": {
+            "md5": "85fd5e0fb70666708ec4b5f768c05129",
+            "sha1": "facd868495e18bb33145f93fd57b528e16875f55",
+            "sha256": "8f728d6e57fc8b4263a15e70e4701de2f103a20678db5c68958a86af37520bda"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/prepopulate_init.js"
+          },
+          "hashes": {
+            "md5": "0d3b53c37074e2843b0bdfd36d429be1",
+            "sha1": "57edd0195fd98284cb5af279046e56604d41b5fc",
+            "sha256": "b83dff66861f27ada671282acc77de3c0dd8e6368e063c67ed25342ee6058041"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/static/rest_framework/js/prettify-min.js"
+          },
+          "hashes": {
+            "md5": "709bfcc456c694bfe8ee86d184a1c360",
+            "sha1": "a4e5934397f97f79b8066984475c90af8a970a36",
+            "sha256": "e2e576e3bc607cd179ff511947010f645d3441a35313aec0dbd06c4437f83b77"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ps.js"
+          },
+          "hashes": {
+            "md5": "38dfa47af9e086eece5a333d711abc79",
+            "sha1": "0071e891d37a638338c90740ac1cf85df1834f2d",
+            "sha256": "e09e2c66d49abf1af5bd97719a7b9bd89d07d2aaf54bc5a736c4de85f75fab83"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/pt-BR.js"
+          },
+          "hashes": {
+            "md5": "9efbbac4fda8d23225df16dddecb2718",
+            "sha1": "89316463723fa634efb987f06d57d48ccc8f12af",
+            "sha256": "9df699429cd2ace149d1546cc449a51fa6b35657114298a533bfae1d96c3debd"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/pt-BR.js"
+          },
+          "hashes": {
+            "md5": "e1b294433e7fc3175842ce37b9f15014",
+            "sha1": "d33ef214ab79a665adec2e788fc76cf8b8c76b2e",
+            "sha256": "d0315ed47bbd7c40d25e0a633ce42b03a12ad2b19bd793516ec1a1d54e2f12bd"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/pt.js"
+          },
+          "hashes": {
+            "md5": "33b4a3b44d437614b83497e36c138ca9",
+            "sha1": "a8e2d039bd8fef1c54be4cef7013814f69777517",
+            "sha256": "2f98eacfccdce4117cba4ae1a48dafbc6acd477e17ef8f3675c917f8852e5290"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/pt.js"
+          },
+          "hashes": {
+            "md5": "5d6ccc53b347b155e1af6afb1bc5fe94",
+            "sha1": "32692718da1e0298506e3302759d8e31afe20566",
+            "sha256": "d0799be481b684f16784ccd816330ecdae4e22a244883ed696a1f2e980cdcd00"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/debug_toolbar/static/debug_toolbar/js/redirect.js"
+          },
+          "hashes": {
+            "md5": "d643ba40b49f2a492e86535d2f7cc340",
+            "sha1": "7d022891fc28275558c1923414669d7cf2b0feb7",
+            "sha256": "10001ccedce1ab38fe7380e738269f56734bfe58472c944db570dd0740b90e93"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/redoc-init.js"
+          },
+          "hashes": {
+            "md5": "f2691bea6613c411c4db3709193a4fa4",
+            "sha1": "184c41f24f7ae13011b23d27e24b977f20bb70b7",
+            "sha256": "ea2a460fb08bd088046632ccc4e4f201515cbf56604c3c7f4b3c274e61a1bf11"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/redoc/redoc.min.js"
+          },
+          "hashes": {
+            "md5": "efe140f220bc144dba0e6d545ca40416",
+            "sha1": "686362e35ba33006f6806201411b9af9fc4a1d7b",
+            "sha256": "83a36385460319de925d221892fb9091985d6edab1f21a8d29533c24abeaa72e"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/redoc-old/redoc.min.js"
+          },
+          "hashes": {
+            "md5": "2c6d72fb0ef9b7841bdb1120af5571d1",
+            "sha1": "7ae4bd36faa9d7ab610777e0597c314a09601302",
+            "sha256": "3551df71580a25386e4dae1983acf44877fa223209dc4104c1238770f0e1a426"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ro.js"
+          },
+          "hashes": {
+            "md5": "f75cb460ec3b98b4b9017e9513ca20cf",
+            "sha1": "b22601703b41b9fc18da6f8c9d051500f1107545",
+            "sha256": "01a75be8b574bb62f69823a0c97d9c619eb1239b034fd388dd5ec7c2eb9e8af3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/ro.js"
+          },
+          "hashes": {
+            "md5": "1ddc2b9980dcdd1008761149e0349a8b",
+            "sha1": "aa698704af7a0f6e255bb8545ee44805a77ab95c",
+            "sha256": "a0bb08cc8650193ec766a849f035eaa223f5244e0e9d240f44100c59786f7523"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/ru.js"
+          },
+          "hashes": {
+            "md5": "d83609abf2e0ba927b9ec472bf47e180",
+            "sha1": "f0a159cb93011f5396784bcb390295dc62fe2e7c",
+            "sha256": "60e2289785330f6046bf3dbccda6abc1d5036b0a4a4e612921cbe4c1a9260074"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/ru.js"
+          },
+          "hashes": {
+            "md5": "934aa95f5b5f32c72c80857bb2622074",
+            "sha1": "c111f056dbc8aea5b4bfdd01a4f180fb7b8df181",
+            "sha256": "6d5e9e995084f656342f36d537ced628000014b513de42aa1339fae35a49dbda"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework/templates/rest_framework/schema.js"
+          },
+          "hashes": {
+            "md5": "ed302a66a116874861a148d58b3b513e",
+            "sha1": "e2c816458b25d98992d0d66307f3a575136e5d05",
+            "sha256": "5052f5c20e00ac60f6800c837ea54d0939b557dff9771bfb9181b2479a016867"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/adaptor/select2-3.js"
+          },
+          "hashes": {
+            "md5": "bfec2a3b498600b22c17902fc5acbee8",
+            "sha1": "1b4c8ed000e2b7dca96e9b328912dfab166b142b",
+            "sha256": "9407da66b881f9157d641ea4173a733737f70c30588cff34010eb509094cebfb"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/adaptor/select2-4.js"
+          },
+          "hashes": {
+            "md5": "1b7f1c115575bdd7821bc44edada7238",
+            "sha1": "ded29fbe9789f117bd3defbd45d5d174499868f2",
+            "sha256": "44995f410dfcb4cf8705531c3b31bc7ddcf2deb192aee328b853d9bf550c6cd7"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/select2.full.js"
+          },
+          "hashes": {
+            "md5": "c2afdeda30583c460d6db9778ba92cde",
+            "sha1": "6245cdab59b33350a6833637df0941a3b2b5ab6f",
+            "sha256": "ba0664111e4e0041b30b0c1bff832f841284e46be67344b9f4c2a7f9da2865a2"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/select2.full.js"
+          },
+          "hashes": {
+            "md5": "a95323cb476000ee17d7a252786df963",
+            "sha1": "cea19389b7f789320e562311963533bc669e2ad2",
+            "sha256": "9f05aee38016eb8a4980375be3063bc1c5a47d43d37c18308c7908b27045504e"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/select2.full.min.js"
+          },
+          "hashes": {
+            "md5": "da607360bcc65284a197ada3d68d5439",
+            "sha1": "a3cf7f0ff2baef254ce214b9bb042f01a7140a35",
+            "sha256": "149b8bc61889897fb9420b347362582c8c89e62d28e1c720e8343ace08ad0986"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/select2.full.min.js"
+          },
+          "hashes": {
+            "md5": "fcd7500d8e13d2b2aae5d3956dc3e21d",
+            "sha1": "aa40e683c82dd844db73fde37048cf7fc145135e",
+            "sha256": "5c6fdab80cb86a279695dccc226a1fac50e2c922bea70242edaa28f52b7bad2d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/select2.js"
+          },
+          "hashes": {
+            "md5": "8b9e61ffc46edc5610a2020a60d331f6",
+            "sha1": "bd04d39aaf95afae66f3b9e0c01ce72feb5cf5aa",
+            "sha256": "46716cb20114cd73f37e4ab748945e68bd3d153e08af566ce3cc29371d6023da"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/select2.min.js"
+          },
+          "hashes": {
+            "md5": "86fee17cd48a321dbb33df5c823a3d95",
+            "sha1": "c51a8d16981e09b1e1fadb7fe4fd9564a8d96dc2",
+            "sha256": "c8467b98f112bb1b06a33cde66a70de85c05d22a455f91f592554c804a50a729"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-3/select2.min.js"
+          },
+          "hashes": {
+            "md5": "43ea1dd926d28fb13254881c45cd313f",
+            "sha1": "6445d0667b0c8005122d79019ac0d794dae99bb4",
+            "sha256": "1f3cd9162638b743c8bf4d939bcfd1dc256f2e97231e13b5cff600502a78a10e"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/shred.bundle.js"
+          },
+          "hashes": {
+            "md5": "f30345533db8a7f00b55849e6b232b6f",
+            "sha1": "a4447c42f0152e8169d216b7175319901479bfae",
+            "sha256": "ed718f6e9674ef3382b79d53b2365a9cfe298436c13bc064b04adaa813627e73"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/sk.js"
+          },
+          "hashes": {
+            "md5": "a0f1a818d09228a87ae105d09fdee80c",
+            "sha1": "a2353cc48cb5932eacad9e522d65da0e70e6a6a6",
+            "sha256": "4f99c25495f9d878a648bc3ccab30a4d276f2db4b2b1aa29b0ab689272283618"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/sk.js"
+          },
+          "hashes": {
+            "md5": "33d02cef8d110f358acd1624f7f79ffe",
+            "sha1": "2f595da6fed5a6a7bed7c511333c18b6063214be",
+            "sha256": "3276d470fea9227b81cd35bf2ffc265d8f203cb18239c2b2cd01ed845908999a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/sl.js"
+          },
+          "hashes": {
+            "md5": "131a78bc075237a13750ead3807683d2",
+            "sha1": "2e07269f9252a46f68965945232b966506b6666b",
+            "sha256": "2cf20ac29f60a7f59c51ce14695b7f7324a534be7f9667d996dd1b82dc279059"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/docutils/writers/s5_html/themes/default/slides.js"
+          },
+          "hashes": {
+            "md5": "b6654746ff1d6671075256f227cb15d2",
+            "sha1": "288bebcf1156f94f8d4a6164b86eeacc84afd4f7",
+            "sha256": "9faffdefb17a50a49fa58483bb944a852d60ee27a11dc9b19b58c32c3d7b304e"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/sq.js"
+          },
+          "hashes": {
+            "md5": "5636b60d29c9bdd55f18a4585746b6d1",
+            "sha1": "b649c57ed50b4efc2d19fa55f39ac62285016b49",
+            "sha256": "a08c492d82ed2b4bc6da0dece63b062e7e251ee0e04a877160058bd01c87447a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/sr-Cyrl.js"
+          },
+          "hashes": {
+            "md5": "2f3047aad49eedd75dd5dacc092a7e02",
+            "sha1": "122e0fc07f42134442f0ffa02108ee621bb7c00a",
+            "sha256": "b397ff0f453baf6b6153a50f040249f2bcca154426460cc4e58dcad3b6a685b9"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/sr-Cyrl.js"
+          },
+          "hashes": {
+            "md5": "f254bb8c4c7ce00d9d17e9e91945ad9b",
+            "sha1": "9b8799e969b2fba7274083546a471c61084baf0e",
+            "sha256": "0684f629d89c7991a0c61112473dd6d89ffb08562a5b2672a2fd9892d528ff6c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/sr.js"
+          },
+          "hashes": {
+            "md5": "157bc6eb978e9a35985bc655d09ac258",
+            "sha1": "da588bcddb5bc12f9e15f5433e015a95bd55b837",
+            "sha256": "cd13396347e9834bb457bae4478f9980710b5b6823e180c40dad2cc7fcf27b6a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/sr.js"
+          },
+          "hashes": {
+            "md5": "5ed85a48f483d17a7ad102832cb11ea1",
+            "sha1": "004b24e86f31ec0fde222cc0649fcc70a3bbc330",
+            "sha256": "ec410b617c1bd2d212b2ebcbe9ea2bc734ef88c2bea1e752bd9bc4642325a065"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/sv.js"
+          },
+          "hashes": {
+            "md5": "2b21bb3f61100fd656b41d16e25e2f80",
+            "sha1": "b50146480ea5a8caf1099ace4305b11c8667c866",
+            "sha256": "5041abe02d42b36d2cda268c0739960dec3d865560f21f59419bd5a701a7c172"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/sv.js"
+          },
+          "hashes": {
+            "md5": "7a9c2f71e7779a263b2cf3520b1aa611",
+            "sha1": "eaca7ac56a9176fa52cbd0a870bb8a00fd631cf1",
+            "sha256": "73a9ea5268ad2ace3fe809580ef8827ba1ea2f2387aa8b7622bbc94468e3d491"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/swagger-oauth.js"
+          },
+          "hashes": {
+            "md5": "9eeae2e98ee24d067e318959ef0f6b2a",
+            "sha1": "50048c81ade25cc7e4ad9a82dec8738951b3c500",
+            "sha256": "4e467ccf5e8a13044ef791d7d38ad7fb9658054bd8bdde2895cdc54583e36533"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/swagger-ui-dist/swagger-ui-bundle.js"
+          },
+          "hashes": {
+            "md5": "b75084b8f16f5a282d9880e07f30c163",
+            "sha1": "b364c311fd93d964927c3d1d6d70c9d40504d7af",
+            "sha256": "078a8fa1698ba7a2a9aac36025200d924c487f4cbf00f876ee7de4a1f3a5288e"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/swagger-ui-dist/swagger-ui-es-bundle-core.js"
+          },
+          "hashes": {
+            "md5": "4fc8ff8033fa97cbf52d573b0a4b2c81",
+            "sha1": "b7424f5628e09a7ae7f95c01d3f9f7831aa6cfa4",
+            "sha256": "6833803098d5053a4041d6b467f715fee9af243b47787dee172103ca9a46f3b3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/swagger-ui-dist/swagger-ui-es-bundle.js"
+          },
+          "hashes": {
+            "md5": "c797f3c6dcbc358c811846fa6d660c29",
+            "sha1": "f6905014feb0e8a1a3f00b35c68c7a2a2d6b4117",
+            "sha256": "3b8255fc603612a6542f40d177505d682bb8c8f4822d235c75633a4985ccb5c4"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/swagger-ui-init.js"
+          },
+          "hashes": {
+            "md5": "f73d3a48931a7bf4c021c18645b3a263",
+            "sha1": "7791eec830a73cb01ff03122851f13be038f63ce",
+            "sha256": "73a1e1ebc08375a4eb838bb246bd4093f65ea00d71b95ced5e7fe92f1e42defa"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/swagger-ui-dist/swagger-ui-standalone-preset.js"
+          },
+          "hashes": {
+            "md5": "f76577cd29dcfd05d77573be78cbe3a1",
+            "sha1": "593bbd9b12239ae95a0ccbbaf906acb642e26005",
+            "sha256": "517a4c89e2e792145db1525916bc5899f0b8b8707fafaf968186a30be2f52cd9"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/swagger-ui.js"
+          },
+          "hashes": {
+            "md5": "4e4551169663b043793890394987397a",
+            "sha1": "90db17eb7eb60c4bd6e51a23c6708ecfe17eed3c",
+            "sha256": "917de6e67e828a47ed69f196b10e65905b3b123e1126319220fcdaf5cbd7374c"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/swagger-ui.min.js"
+          },
+          "hashes": {
+            "md5": "d62472e3dc79b151a691f8a6055fae61",
+            "sha1": "81e1c9c093f3de9ee8cb28297d01845ce085cd05",
+            "sha256": "f4c53fa7ff971ee73d87f3ecaa45ab211c4abb6befb0185c0e95181fec71b689"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/swagger.js"
+          },
+          "hashes": {
+            "md5": "f1ef9558f9eac5ef6e4a68a94e5f1067",
+            "sha1": "e2c088ca4b97b901ac93730ea3e197ef724094ac",
+            "sha256": "ac64028d7d4d977c8b59a55200c3d13b83b8beafa443c6afc1b64195e00cd04b"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/pip/_vendor/distlib/t32.exe"
+          },
+          "hashes": {
+            "md5": "ec5e7403f86990ab23caeeb4955f5ffb",
+            "sha1": "c345479d6dc53a102ccb05259c0c858a1ddd7d8e",
+            "sha256": "352df104254095ddf925514d99bfb5411c95b5386e90caf06557979f82e16844"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/pip/_vendor/distlib/t64.exe"
+          },
+          "hashes": {
+            "md5": "6e5a78d1702531b72ef60b5fae57a752",
+            "sha1": "0ce7e1172989a55d9cc07e204af0b00b22d2ea7c",
+            "sha256": "a00a877acefcad45953343ad56a22152f7aaba5fcf2a10215d84169d47fbcd1d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/tagulous.js"
+          },
+          "hashes": {
+            "md5": "489171f81ba841c061d49f8d44853e0c",
+            "sha1": "288f5bf84847a9906b8732e8fe2c2032c35df8cf",
+            "sha256": "c34e635238fef8f599f438bb613cb13dd0b90cfee3f232127defdeb2bed868f3"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/th.js"
+          },
+          "hashes": {
+            "md5": "f38c20b0221b68924d6c8f0773cb252d",
+            "sha1": "7bd949693c008c6665bdf0dc4551cffea2023204",
+            "sha256": "b1a0cf2e4fb676ae5fb4a0af5b5c1d76424e83e99703e194a0f3d53a5499ac86"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/th.js"
+          },
+          "hashes": {
+            "md5": "2a4ece4c4355b7efd9e9591a53b3edc1",
+            "sha1": "6ce72ce4e8536cd6fc4b93f51220e1b67431cc9a",
+            "sha256": "4db318ec8c546f2eca8992a783e4841ef09abe892ceddf2137bef5f7694b7cc6"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/timeparse.js"
+          },
+          "hashes": {
+            "md5": "51258861a46a90acf44986e3950779ab",
+            "sha1": "fae8b032181a16d20e34bcef8070ae453ddb7e09",
+            "sha256": "a15934c691a64634b4576b0cb231ae973312343bc8af5810ebf7e98afbe1fe44"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/debug_toolbar/static/debug_toolbar/js/timer.js"
+          },
+          "hashes": {
+            "md5": "65fba0f5f6a95fea568919dcf7eb2525",
+            "sha1": "42700b28f4c999190f33f2d2e3d4bce1320e68ff",
+            "sha256": "dd42998b054f1179a5f3968647ba27fc0aff40eaa8c825b71f203a71aeb6344d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/tk.js"
+          },
+          "hashes": {
+            "md5": "7c572a68c78fb798f11f7d8c78ebb9d6",
+            "sha1": "ebb169d666967e4c2df3a99fc8896eb16aa0463f",
+            "sha256": "99410695bfbd9d01efcdc4d823ed648ec07b26c3d11a92f159b8eb27c511b615"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/debug_toolbar/static/debug_toolbar/js/toolbar.js"
+          },
+          "hashes": {
+            "md5": "d8d90f45bf321c0f7403ee556a137eb0",
+            "sha1": "913c393914d3f2d9bfaa103672571f0048eeb4ed",
+            "sha256": "16cb0cc20c89115b9f3ea179d14b5b95bd2c0d4f2bf00882358a17cc311285a7"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/debug_toolbar/static/debug_toolbar/js/toolbar.timer.js"
+          },
+          "hashes": {
+            "md5": "07bea6fcf6b48d93e44b0f82c119c268",
+            "sha1": "a6bdc64c3fd2238a560bf422ec1a08c17c9c8baf",
+            "sha256": "82870fe8d927e27c123777539134326885a0768ae5887a3c57f56e7da4874ed9"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/tr.js"
+          },
+          "hashes": {
+            "md5": "b5a0643d1545f4a3e1622e65e46ddc7c",
+            "sha1": "0d99107aacebd1f08b319410a59866c619b63f71",
+            "sha256": "743cfc892a74eef6f1f6072222acf9eb099cd932c78f9bfca3a7acef9bf39995"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/tr.js"
+          },
+          "hashes": {
+            "md5": "c1925d8817db211164145dc47b18d333",
+            "sha1": "79edf6962d3b7e01bcb4d1e916adcf039e4a7047",
+            "sha256": "caabf97befbc786a70f6e6439341807d1d27c589d8763e6a7a09c51f14808cce"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/dojo/unittests/scans/scout_suite/two_findings.js"
+          },
+          "hashes": {
+            "md5": "f2da73d058b05955d02c205656f2b377",
+            "sha1": "e5fefee369b502a2c781bfe655a6091e87e9b059",
+            "sha256": "ec480bdf0b0fd508fbb6a6ba3790d21a840c25e37f2616679faf45e7db4c639a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/uk.js"
+          },
+          "hashes": {
+            "md5": "3d56f311192daf9ce44246c52777789f",
+            "sha1": "6d3d2ea92740b59665d1881f0839b2e20f7b623c",
+            "sha256": "2ec3c1439ab9c62b2a5f181d57861ff0253c14eee68676115319bbb495cd9781"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/uk.js"
+          },
+          "hashes": {
+            "md5": "8cede7f4803c7dbd1e8261bfa1932b7c",
+            "sha1": "ccfb60dcad7faf9d1f18102f5827acddb7a8ad9b",
+            "sha256": "322c61143bdd45d6bec23f938eb374d7cb3b47b137e1a421463cf86dac6b74ac"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/underscore-min.js"
+          },
+          "hashes": {
+            "md5": "0899f764c85bbcc13206e3dd8318e678",
+            "sha1": "baa693e82387a328abccf9694c6d2db571ac8aca",
+            "sha256": "0f201fe52208471c863c292da4990ca7bb7ca5d58b3f1ea2a57095ff764c6848"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/drf_yasg2/static/drf_yasg2/url-polyfill.min.js"
+          },
+          "hashes": {
+            "md5": "5ec37fdadbc5077b9d00f72810ceb91b",
+            "sha1": "2899d0e0eb01c42268d974facf41a25d9a6a1d4f",
+            "sha256": "8668d84010881c5c65ea5ccb6955c626f44929e5910c7666028a477f69c877e0"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/urlify.js"
+          },
+          "hashes": {
+            "md5": "67bae52223e0f0b8dabc520c02b80068",
+            "sha1": "5170d7e748acda581dfa5a54e6e070778637a479",
+            "sha256": "27cc83f5ac9d676081e91e73562e0a246f3c9bbce8e65d52729910a9d4a526be"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/debug_toolbar/static/debug_toolbar/js/utils.js"
+          },
+          "hashes": {
+            "md5": "ec636419a50bb5a13cbe0fd64dcfa361",
+            "sha1": "5b9cbbdd0651d4e6dd6ff83d9eb94dcddbce2392",
+            "sha256": "c024ed80de6b7b959ecfb37b2854fd8bb9105ca1857ee3474504178ad83cc34a"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/rest_framework_swagger/static/rest_framework_swagger/bundles/vendors.bundle.js"
+          },
+          "hashes": {
+            "md5": "e2cd1531addcce32ca7609fedece1187",
+            "sha1": "bb0363aa7db03734d8cf2cb8b364858e686854bf",
+            "sha256": "67e8e84868bdbb6f99edaf091057fb07ab4436b67c7e5bc01f6db63d372e64c2"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/vi.js"
+          },
+          "hashes": {
+            "md5": "3520aa7bdea8234161b2c18f631417a0",
+            "sha1": "988686dc8234bffa8e978f13651b03b74c982b65",
+            "sha256": "656a490cf06d45b0c9dd8c90e19d362dee81467374811c5202817362a144ecdc"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/vi.js"
+          },
+          "hashes": {
+            "md5": "097a5b75b3e146e2d94ab8e1510be607",
+            "sha1": "c73feb5aeb1faa11438fadb924a8848b1743cac5",
+            "sha256": "9b04dec92b14020aaefc803a86f17333285c488335cc684d60aabc1bb5ffb693"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/pip/_vendor/distlib/w32.exe"
+          },
+          "hashes": {
+            "md5": "4a895ec6c5a9df94820219ef525cf65a",
+            "sha1": "525dd15cdeec20966d61c5f0a81667cd931349cb",
+            "sha256": "949b6765d794c53656c9afc45b90d9a2cfcae6bb30444086b29225f19242217b"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/pip/_vendor/distlib/w64.exe"
+          },
+          "hashes": {
+            "md5": "0655a0af4a2ff9bf591f614ba8f5721f",
+            "sha1": "b10d53dccec179109aff61b86ecca65be816f3c4",
+            "sha256": "d1a473a0dd813bd3565b810dcb8ff8bc7907478a994c564d55200925894e0d32"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/xregexp/xregexp.js"
+          },
+          "hashes": {
+            "md5": "1865b1cf508516647c711e85bdc620a7",
+            "sha1": "bfec204d75acaa493e5cb6f860f837d1b5946b1a",
+            "sha256": "4e3631db56d08105c315376f4aa49487b4bc4e46118d3e0be17f92956351f021"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/xregexp/xregexp.min.js"
+          },
+          "hashes": {
+            "md5": "c95393b8ca4d93ecccea2021b9c5c626",
+            "sha1": "f343005fca9448ec56ed0d9cd905f92c5a97b6c5",
+            "sha256": "13e3e5bbd1197f2b743c909262b0a41ee3eab95563f55ee0ee34249483a01835"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/zh-CN.js"
+          },
+          "hashes": {
+            "md5": "2cff662ec5f972b4613566cf5988cda2",
+            "sha1": "d401505af994d0e6d75651ce55203df702938fe1",
+            "sha256": "a2501dbcf439aac37d219bb100a80355033e6e57b15275930d35d4b62a2bca02"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/zh-CN.js"
+          },
+          "hashes": {
+            "md5": "419002d3c6c10ec9618ce6275c1057d1",
+            "sha1": "206624ae6af0617adce062a78ff726c6719f4620",
+            "sha256": "278745cdb1b9eda821043e71d4f9a45111d28b9cba032b62260725f62abedf3d"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/django/contrib/admin/static/admin/js/vendor/select2/i18n/zh-TW.js"
+          },
+          "hashes": {
+            "md5": "c021537edf2c555f149509150ff986e3",
+            "sha1": "a39c6835b6777d107e4b55c0d04e9274212cf78b",
+            "sha256": "ceacab3576f2dc1df71bb0dee35010f8e169cbe0a08b7bd35d99bff881a7b176"
+          },
+          "properties": {}
+        },
+        {
+          "location": {
+            "uri": "file:////src/.venv/lib/python3.9/site-packages/tagulous/static/tagulous/lib/select2-4/js/i18n/zh-TW.js"
+          },
+          "hashes": {
+            "md5": "04554a227c2ba0f3bb6ca3d2e01e5440",
+            "sha1": "d2ac5ee73876355c63293ef7a4c6684842062621",
+            "sha256": "0e70c11bdcb004e7f155bd955e0ef5c4147fb4408f031c3b40b859397889e1fa"
+          },
+          "properties": {}
+        }
+      ],
+      "results": [
+        {
+          "ruleId": "Disallow calling helperMissing and blockHelperMissing directly",
+          "message": {
+            "text": "Disallow calling helperMissing and blockHelperMissing directly - Disallow calling helperMissing and blockHelperMissing directly"
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/handlebars-1.0.0.js",
+                  "index": 71
+                }
+              }
+            }
+          ],
+          "properties": {
+            "unscored": "true",
+            "severity": "low",
+            "source": "RETIREJS"
+          }
+        },
+        {
+          "ruleId": "Prototype pollution",
+          "message": {
+            "text": "Prototype pollution - Prototype pollution"
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/handlebars-1.0.0.js",
+                  "index": 71
+                }
+              }
+            }
+          ],
+          "properties": {
+            "unscored": "true",
+            "severity": "medium",
+            "source": "RETIREJS"
+          }
+        },
+        {
+          "ruleId": "Quoteless attributes in templates can lead to XSS",
+          "message": {
+            "text": "Quoteless attributes in templates can lead to XSS - Quoteless attributes in templates can lead to XSS"
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/handlebars-1.0.0.js",
+                  "index": 71
+                }
+              }
+            }
+          ],
+          "properties": {
+            "unscored": "true",
+            "severity": "medium",
+            "source": "RETIREJS"
+          }
+        },
+        {
+          "ruleId": "poorly sanitized input passed to eval()",
+          "message": {
+            "text": "poorly sanitized input passed to eval() - poorly sanitized input passed to eval()"
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/handlebars-1.0.0.js",
+                  "index": 71
+                }
+              }
+            }
+          ],
+          "properties": {
+            "unscored": "true",
+            "severity": "medium",
+            "source": "RETIREJS"
+          }
+        },
+        {
+          "ruleId": "CVE-2012-6708",
+          "message": {
+            "text": "CVE-2012-6708 - jQuery before 1.9.0 is vulnerable to Cross-site Scripting (XSS) attacks. The jQuery(strInput) function does not differentiate selectors from HTML in a reliable fashion. In vulnerable versions, jQuery determined whether the input was HTML by looking for the '<' character anywhere in the string, giving attackers more flexibility when attempting to construct a malicious payload. In fixed versions, jQuery only deems the input to be HTML if it explicitly starts with the '<' character, limiting exploitability only to attackers who can control the beginning of a string, which is far less common."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/jquery-1.8.0.min.js",
+                  "index": 100
+                }
+              }
+            }
+          ],
+          "properties": {
+            "cvssv2_score": 4.3,
+            "cvssv2_accessVector": "NETWORK",
+            "cvssv2_accessComplexity": "MEDIUM",
+            "cvssv2_authenticationr": "NONE",
+            "cvssv2_confidentialImpact": "NONE",
+            "cvssv2_integrityImpact": "PARTIAL",
+            "cvssv2_availabilityImpact": "NONE",
+            "cvssv2_severity": "MEDIUM",
+            "cvssv2_version": "2.0",
+            "cvssv2_exploitabilityScore": "8.6",
+            "cvssv2_impactScore": "2.9",
+            "cvssv2_userInteractionRequired": "true",
+            "cvssv3_baseScore": 6.1,
+            "cvssv3_attackVector": "NETWORK",
+            "cvssv3_attackComplexity": "LOW",
+            "cvssv3_privilegesRequired": "NONE",
+            "cvssv3_userInteraction": "REQUIRED",
+            "cvssv3_scope": "CHANGED",
+            "cvssv3_confidentialityImpact": "LOW",
+            "cvssv3_integrityImpact": "LOW",
+            "cvssv3_availabilityImpact": "NONE",
+            "cvssv3_baseSeverity": "MEDIUM",
+            "cvssv3_exploitabilityScore": "2.8",
+            "cvssv3_impactScore": "2.7",
+            "cvssv3_version": "3.0",
+            "source": "NVD"
+          }
+        },
+        {
+          "ruleId": "CVE-2015-9251",
+          "message": {
+            "text": "CVE-2015-9251 - jQuery before 3.0.0 is vulnerable to Cross-site Scripting (XSS) attacks when a cross-domain Ajax request is performed without the dataType option, causing text/javascript responses to be executed."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/jquery-1.8.0.min.js",
+                  "index": 100
+                }
+              }
+            }
+          ],
+          "properties": {
+            "cvssv2_score": 4.3,
+            "cvssv2_accessVector": "NETWORK",
+            "cvssv2_accessComplexity": "MEDIUM",
+            "cvssv2_authenticationr": "NONE",
+            "cvssv2_confidentialImpact": "NONE",
+            "cvssv2_integrityImpact": "PARTIAL",
+            "cvssv2_availabilityImpact": "NONE",
+            "cvssv2_severity": "MEDIUM",
+            "cvssv2_version": "2.0",
+            "cvssv2_exploitabilityScore": "8.6",
+            "cvssv2_impactScore": "2.9",
+            "cvssv2_userInteractionRequired": "true",
+            "cvssv3_baseScore": 6.1,
+            "cvssv3_attackVector": "NETWORK",
+            "cvssv3_attackComplexity": "LOW",
+            "cvssv3_privilegesRequired": "NONE",
+            "cvssv3_userInteraction": "REQUIRED",
+            "cvssv3_scope": "CHANGED",
+            "cvssv3_confidentialityImpact": "LOW",
+            "cvssv3_integrityImpact": "LOW",
+            "cvssv3_availabilityImpact": "NONE",
+            "cvssv3_baseSeverity": "MEDIUM",
+            "cvssv3_exploitabilityScore": "2.8",
+            "cvssv3_impactScore": "2.7",
+            "cvssv3_version": "3.0",
+            "source": "NVD"
+          }
+        },
+        {
+          "ruleId": "CVE-2019-11358",
+          "message": {
+            "text": "CVE-2019-11358 - jQuery before 3.4.0, as used in Drupal, Backdrop CMS, and other products, mishandles jQuery.extend(true, {}, ...) because of Object.prototype pollution. If an unsanitized source object contained an enumerable __proto__ property, it could extend the native Object.prototype."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/jquery-1.8.0.min.js",
+                  "index": 100
+                }
+              }
+            }
+          ],
+          "properties": {
+            "cvssv2_score": 4.3,
+            "cvssv2_accessVector": "NETWORK",
+            "cvssv2_accessComplexity": "MEDIUM",
+            "cvssv2_authenticationr": "NONE",
+            "cvssv2_confidentialImpact": "NONE",
+            "cvssv2_integrityImpact": "PARTIAL",
+            "cvssv2_availabilityImpact": "NONE",
+            "cvssv2_severity": "MEDIUM",
+            "cvssv2_version": "2.0",
+            "cvssv2_exploitabilityScore": "8.6",
+            "cvssv2_impactScore": "2.9",
+            "cvssv2_userInteractionRequired": "true",
+            "cvssv3_baseScore": 6.1,
+            "cvssv3_attackVector": "NETWORK",
+            "cvssv3_attackComplexity": "LOW",
+            "cvssv3_privilegesRequired": "NONE",
+            "cvssv3_userInteraction": "REQUIRED",
+            "cvssv3_scope": "CHANGED",
+            "cvssv3_confidentialityImpact": "LOW",
+            "cvssv3_integrityImpact": "LOW",
+            "cvssv3_availabilityImpact": "NONE",
+            "cvssv3_baseSeverity": "MEDIUM",
+            "cvssv3_exploitabilityScore": "2.8",
+            "cvssv3_impactScore": "2.7",
+            "cvssv3_version": "3.0",
+            "source": "NVD"
+          }
+        },
+        {
+          "ruleId": "CVE-2020-11022",
+          "message": {
+            "text": "CVE-2020-11022 - In jQuery versions greater than or equal to 1.2 and before 3.5.0, passing HTML from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code. This problem is patched in jQuery 3.5.0."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/jquery-1.8.0.min.js",
+                  "index": 100
+                }
+              }
+            }
+          ],
+          "properties": {
+            "cvssv2_score": 4.3,
+            "cvssv2_accessVector": "NETWORK",
+            "cvssv2_accessComplexity": "MEDIUM",
+            "cvssv2_authenticationr": "NONE",
+            "cvssv2_confidentialImpact": "NONE",
+            "cvssv2_integrityImpact": "PARTIAL",
+            "cvssv2_availabilityImpact": "NONE",
+            "cvssv2_severity": "MEDIUM",
+            "cvssv2_version": "2.0",
+            "cvssv2_exploitabilityScore": "8.6",
+            "cvssv2_impactScore": "2.9",
+            "cvssv2_userInteractionRequired": "true",
+            "cvssv3_baseScore": 6.1,
+            "cvssv3_attackVector": "NETWORK",
+            "cvssv3_attackComplexity": "LOW",
+            "cvssv3_privilegesRequired": "NONE",
+            "cvssv3_userInteraction": "REQUIRED",
+            "cvssv3_scope": "CHANGED",
+            "cvssv3_confidentialityImpact": "LOW",
+            "cvssv3_integrityImpact": "LOW",
+            "cvssv3_availabilityImpact": "NONE",
+            "cvssv3_baseSeverity": "MEDIUM",
+            "cvssv3_exploitabilityScore": "2.8",
+            "cvssv3_impactScore": "2.7",
+            "cvssv3_version": "3.1",
+            "source": "NVD"
+          }
+        },
+        {
+          "ruleId": "CVE-2020-11023",
+          "message": {
+            "text": "CVE-2020-11023 - In jQuery versions greater than or equal to 1.0.3 and before 3.5.0, passing HTML containing <option> elements from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code. This problem is patched in jQuery 3.5.0."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/tastypie_swagger/static/tastypie_swagger/js/lib/jquery-1.8.0.min.js",
+                  "index": 100
+                }
+              }
+            }
+          ],
+          "properties": {
+            "cvssv2_score": 4.3,
+            "cvssv2_accessVector": "NETWORK",
+            "cvssv2_accessComplexity": "MEDIUM",
+            "cvssv2_authenticationr": "NONE",
+            "cvssv2_confidentialImpact": "NONE",
+            "cvssv2_integrityImpact": "PARTIAL",
+            "cvssv2_availabilityImpact": "NONE",
+            "cvssv2_severity": "MEDIUM",
+            "cvssv2_version": "2.0",
+            "cvssv2_exploitabilityScore": "8.6",
+            "cvssv2_impactScore": "2.9",
+            "cvssv2_userInteractionRequired": "true",
+            "cvssv3_baseScore": 6.1,
+            "cvssv3_attackVector": "NETWORK",
+            "cvssv3_attackComplexity": "LOW",
+            "cvssv3_privilegesRequired": "NONE",
+            "cvssv3_userInteraction": "REQUIRED",
+            "cvssv3_scope": "CHANGED",
+            "cvssv3_confidentialityImpact": "LOW",
+            "cvssv3_integrityImpact": "LOW",
+            "cvssv3_availabilityImpact": "NONE",
+            "cvssv3_baseSeverity": "MEDIUM",
+            "cvssv3_exploitabilityScore": "2.8",
+            "cvssv3_impactScore": "2.7",
+            "cvssv3_version": "3.1",
+            "source": "NVD"
+          }
+        },
+        {
+          "ruleId": "CVE-2015-9251",
+          "message": {
+            "text": "CVE-2015-9251 - jQuery before 3.0.0 is vulnerable to Cross-site Scripting (XSS) attacks when a cross-domain Ajax request is performed without the dataType option, causing text/javascript responses to be executed."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/jquery.min.js",
+                  "index": 112
+                }
+              }
+            }
+          ],
+          "properties": {
+            "cvssv2_score": 4.3,
+            "cvssv2_accessVector": "NETWORK",
+            "cvssv2_accessComplexity": "MEDIUM",
+            "cvssv2_authenticationr": "NONE",
+            "cvssv2_confidentialImpact": "NONE",
+            "cvssv2_integrityImpact": "PARTIAL",
+            "cvssv2_availabilityImpact": "NONE",
+            "cvssv2_severity": "MEDIUM",
+            "cvssv2_version": "2.0",
+            "cvssv2_exploitabilityScore": "8.6",
+            "cvssv2_impactScore": "2.9",
+            "cvssv2_userInteractionRequired": "true",
+            "cvssv3_baseScore": 6.1,
+            "cvssv3_attackVector": "NETWORK",
+            "cvssv3_attackComplexity": "LOW",
+            "cvssv3_privilegesRequired": "NONE",
+            "cvssv3_userInteraction": "REQUIRED",
+            "cvssv3_scope": "CHANGED",
+            "cvssv3_confidentialityImpact": "LOW",
+            "cvssv3_integrityImpact": "LOW",
+            "cvssv3_availabilityImpact": "NONE",
+            "cvssv3_baseSeverity": "MEDIUM",
+            "cvssv3_exploitabilityScore": "2.8",
+            "cvssv3_impactScore": "2.7",
+            "cvssv3_version": "3.0",
+            "source": "NVD"
+          }
+        },
+        {
+          "ruleId": "CVE-2019-11358",
+          "message": {
+            "text": "CVE-2019-11358 - jQuery before 3.4.0, as used in Drupal, Backdrop CMS, and other products, mishandles jQuery.extend(true, {}, ...) because of Object.prototype pollution. If an unsanitized source object contained an enumerable __proto__ property, it could extend the native Object.prototype."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/jquery.min.js",
+                  "index": 112
+                }
+              }
+            }
+          ],
+          "properties": {
+            "cvssv2_score": 4.3,
+            "cvssv2_accessVector": "NETWORK",
+            "cvssv2_accessComplexity": "MEDIUM",
+            "cvssv2_authenticationr": "NONE",
+            "cvssv2_confidentialImpact": "NONE",
+            "cvssv2_integrityImpact": "PARTIAL",
+            "cvssv2_availabilityImpact": "NONE",
+            "cvssv2_severity": "MEDIUM",
+            "cvssv2_version": "2.0",
+            "cvssv2_exploitabilityScore": "8.6",
+            "cvssv2_impactScore": "2.9",
+            "cvssv2_userInteractionRequired": "true",
+            "cvssv3_baseScore": 6.1,
+            "cvssv3_attackVector": "NETWORK",
+            "cvssv3_attackComplexity": "LOW",
+            "cvssv3_privilegesRequired": "NONE",
+            "cvssv3_userInteraction": "REQUIRED",
+            "cvssv3_scope": "CHANGED",
+            "cvssv3_confidentialityImpact": "LOW",
+            "cvssv3_integrityImpact": "LOW",
+            "cvssv3_availabilityImpact": "NONE",
+            "cvssv3_baseSeverity": "MEDIUM",
+            "cvssv3_exploitabilityScore": "2.8",
+            "cvssv3_impactScore": "2.7",
+            "cvssv3_version": "3.0",
+            "source": "NVD"
+          }
+        },
+        {
+          "ruleId": "CVE-2020-11022",
+          "message": {
+            "text": "CVE-2020-11022 - In jQuery versions greater than or equal to 1.2 and before 3.5.0, passing HTML from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code. This problem is patched in jQuery 3.5.0."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/jquery.min.js",
+                  "index": 112
+                }
+              }
+            }
+          ],
+          "properties": {
+            "cvssv2_score": 4.3,
+            "cvssv2_accessVector": "NETWORK",
+            "cvssv2_accessComplexity": "MEDIUM",
+            "cvssv2_authenticationr": "NONE",
+            "cvssv2_confidentialImpact": "NONE",
+            "cvssv2_integrityImpact": "PARTIAL",
+            "cvssv2_availabilityImpact": "NONE",
+            "cvssv2_severity": "MEDIUM",
+            "cvssv2_version": "2.0",
+            "cvssv2_exploitabilityScore": "8.6",
+            "cvssv2_impactScore": "2.9",
+            "cvssv2_userInteractionRequired": "true",
+            "cvssv3_baseScore": 6.1,
+            "cvssv3_attackVector": "NETWORK",
+            "cvssv3_attackComplexity": "LOW",
+            "cvssv3_privilegesRequired": "NONE",
+            "cvssv3_userInteraction": "REQUIRED",
+            "cvssv3_scope": "CHANGED",
+            "cvssv3_confidentialityImpact": "LOW",
+            "cvssv3_integrityImpact": "LOW",
+            "cvssv3_availabilityImpact": "NONE",
+            "cvssv3_baseSeverity": "MEDIUM",
+            "cvssv3_exploitabilityScore": "2.8",
+            "cvssv3_impactScore": "2.7",
+            "cvssv3_version": "3.1",
+            "source": "NVD"
+          }
+        },
+        {
+          "ruleId": "CVE-2020-11023",
+          "message": {
+            "text": "CVE-2020-11023 - In jQuery versions greater than or equal to 1.0.3 and before 3.5.0, passing HTML containing <option> elements from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code. This problem is patched in jQuery 3.5.0."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:////src/.venv/lib/python3.9/site-packages/coverage/htmlfiles/jquery.min.js",
+                  "index": 112
+                }
+              }
+            }
+          ],
+          "properties": {
+            "cvssv2_score": 4.3,
+            "cvssv2_accessVector": "NETWORK",
+            "cvssv2_accessComplexity": "MEDIUM",
+            "cvssv2_authenticationr": "NONE",
+            "cvssv2_confidentialImpact": "NONE",
+            "cvssv2_integrityImpact": "PARTIAL",
+            "cvssv2_availabilityImpact": "NONE",
+            "cvssv2_severity": "MEDIUM",
+            "cvssv2_version": "2.0",
+            "cvssv2_exploitabilityScore": "8.6",
+            "cvssv2_impactScore": "2.9",
+            "cvssv2_userInteractionRequired": "true",
+            "cvssv3_baseScore": 6.1,
+            "cvssv3_attackVector": "NETWORK",
+            "cvssv3_attackComplexity": "LOW",
+            "cvssv3_privilegesRequired": "NONE",
+            "cvssv3_userInteraction": "REQUIRED",
+            "cvssv3_scope": "CHANGED",
+            "cvssv3_confidentialityImpact": "LOW",
+            "cvssv3_integrityImpact": "LOW",
+            "cvssv3_availabilityImpact": "NONE",
+            "cvssv3_baseSeverity": "MEDIUM",
+            "cvssv3_exploitabilityScore": "2.8",
+            "cvssv3_impactScore": "2.7",
+            "cvssv3_version": "3.1",
+            "source": "NVD"
+          }
+        }
+      ]
+    }
+  ]
+}
