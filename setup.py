@@ -9,7 +9,7 @@ setup(
     description="Tool for managing vulnerability engagements",
     install_requires=[
         'defusedxml',
-        'Django==2.2.17',
+        'Django==2.2.18',
         'django-auditlog==0.4.7',
         'django-custom-field',
         'django-filter==2.4.0',
