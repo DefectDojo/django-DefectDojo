@@ -495,6 +495,9 @@
                     { "data": "jira_change" },
                   {% endif %}
                 {% endif %}
+                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                  { "data": "grouped" },
+                {% endif %}
                 {% if show_product_column and product_tab is None %}
                     { "data": "product" },
                 {% endif %}
