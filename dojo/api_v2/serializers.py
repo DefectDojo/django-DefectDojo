@@ -1122,6 +1122,7 @@ class ImportScanSerializer(serializers.Serializer):
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = self.context['request'].user
 
+                # Only set active/verified flags if they were NOT set by default value(True)
                 if item.active:
                     item.active = data['active']
                 if item.verified:

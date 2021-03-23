@@ -164,4 +164,3 @@ class NiktoParser(object):
                 finding.unsaved_endpoints = [endpoint]
 
                 dupes[dupe_key] = finding
-
