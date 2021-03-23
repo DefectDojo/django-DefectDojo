@@ -651,7 +651,7 @@ class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
 
 
 class FindingGroupSerializer(serializers.ModelSerializer):
-    jira_issue = JIRAIssueSerializer()
+    jira_issue = JIRAIssueSerializer(read_only=True)
 
     class Meta:
         model = Finding_Group
@@ -661,7 +661,7 @@ class FindingGroupSerializer(serializers.ModelSerializer):
 class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
-    finding_groups = FindingGroupSerializer(source='finding_group_set', many=True)
+    finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
 
     class Meta:
         model = Test
@@ -820,7 +820,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     jira_creation = serializers.SerializerMethodField(read_only=True)
     jira_change = serializers.SerializerMethodField(read_only=True)
     display_status = serializers.SerializerMethodField()
-    finding_groups = FindingGroupSerializer(source='finding_group_set', many=True)
+    finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
 
     class Meta:
         model = Finding
