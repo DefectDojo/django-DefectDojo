@@ -800,14 +800,16 @@ class OpenFindingFilter(DojoFilter):
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.none(),
         label="Engagement")
-    finding_group = ModelMultipleChoiceFilter(
-        queryset=Finding_Group.objects.none(),
-        label="Finding Group")
 
-    has_finding_group = BooleanFilter(field_name='finding_group',
-                                lookup_expr='isnull',
-                                exclude=True,
-                                label='is Grouped')
+    if settings.FEATURE_FINDING_GROUPS:
+        finding_group = ModelMultipleChoiceFilter(
+            queryset=Finding_Group.objects.none(),
+            label="Finding Group")
+
+        has_finding_group = BooleanFilter(field_name='finding_group',
+                                    lookup_expr='isnull',
+                                    exclude=True,
+                                    label='is Grouped')
 
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
@@ -819,10 +821,11 @@ class OpenFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has JIRA')
 
-    has_jira_group_issue = BooleanFilter(field_name='finding_group__jira_issue',
-                                lookup_expr='isnull',
-                                exclude=True,
-                                label='has Group JIRA')
+    if settings.FEATURE_FINDING_GROUPS:
+        has_jira_group_issue = BooleanFilter(field_name='finding_group__jira_issue',
+                                    lookup_expr='isnull',
+                                    exclude=True,
+                                    label='has Group JIRA')
 
     has_component = BooleanFilter(field_name='component_name',
                                 lookup_expr='isnull',
