@@ -917,7 +917,7 @@ class OpenFindingFilter(DojoFilter):
             self.form.fields['test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
         if self.user is not None and not self.user.is_staff:
 
-            if self.form.fields.get('finding_group'):
+            if self.form.fields.get('finding_group', None):
                 logger.debug('setting queryset for finding_group field')
                 self.form.fields['test__engagement__product'].queryset = \
                     Finding_Group.objects.filter(
@@ -928,7 +928,8 @@ class OpenFindingFilter(DojoFilter):
                 product__authorized_users__in=[self.user]).distinct()
 
         else:
-            self.form.fields['finding_group'].queryset = Finding_Group.objects.all()
+            if self.form.fields.get('finding_group', None):
+                self.form.fields['finding_group'].queryset = Finding_Group.objects.all()
 
         # Don't show the product filter on the product finding view
         if self.pid:
