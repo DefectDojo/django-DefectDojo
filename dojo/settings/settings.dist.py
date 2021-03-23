@@ -823,7 +823,6 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'DSOP Scan': True,
     'Acunetix Scan': True,
     'Trivy Scan': True,
-    'GitLab Dependency Scanning Report': True,
     'SpotBugs Scan ': False,
 }
 
