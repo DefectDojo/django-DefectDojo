@@ -184,6 +184,9 @@
                                 <th>JIRA Change</th>
                               {% endif %}
                             {% endif%}
+                            {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                                <th>Group</th>
+                            {% endif %}
                             {% if show_product_column and product_tab is None %}
                             <th class="nowrap">{% dojo_sort request 'Product' 'test__engagement__product__name'%}</th>
                             {% endif %}
@@ -404,25 +407,45 @@
                                 {% if system_settings.enable_jira %}
                                   {% if jira_project and product_tab or not product_tab %}
                                     <td class="nowrap">
-                                      {% if finding.has_jira_issue %}
+                                        {% if finding.has_jira_group_issue %}
+                                            <a href="{{ finding.finding_group | jira_issue_url }}" target="_blank"
+                                                alt="Jira Bug - {{finding.finding_group | jira_key}} (group)" data-toggle="tooltip" data-placement="bottom" title="{{finding.finding_group | jira_key}} (group)">{{finding.finding_group | jira_key}}</a>
+                                        {% elif finding.has_jira_issue %}
                                         <a href="{{ finding | jira_issue_url }}" target="_blank"
                                             alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}">{{finding | jira_key}}</a>
                                       {% endif %}
                                     </td>
                                     <td class="nowrap">
-                                      {{ finding | jira_creation | timesince }}
+                                        {% if finding.has_jira_group_issue %}
+                                            {{ finding.finding_group | jira_creation | timesince }}
+                                        {% else %}
+                                            {{ finding | jira_creation | timesince }}
+                                        {% endif %}
                                     </td>
                                     <td class="nowrap">
-                                      {{ finding | jira_change | timesince }}
+                                        {% if finding.has_jira_group_issue %}
+                                            {{ finding.finding_group | jira_change | timesince }}
+                                        {% else %}
+                                            {{ finding | jira_change | timesince }}
+                                        {% endif %}
                                     </td>
                                   {% endif %}
                                 {% endif %}
+                                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                                <td class="centered">
+                                    {% if finding.has_finding_group %}
+                                    <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">Y</a>
+                                    {% else %}
+                                    N
+                                    {% endif %}
+                                </td>
                                 {% if show_product_column and product_tab is None %}
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
                                         title="{{ finding.test.engagement }}" alt="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                 </td>
                                 {% endif %}
+                            {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -614,7 +637,7 @@
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
             })
-            
+
             $('#bulk_edit_menu #id_bulk_risk_acceptance').on('click', function (e) {
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', !checked);

@@ -372,7 +372,7 @@
                             </i>
                         </td>
                         <td>
-                            {% for find in group.findings.all %}<a href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endfor %}
+                            {% for find in group.findings.all %}{% if find.cve%}<a href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
                         </td>
                         <td>
                             {{ group.components }}
@@ -399,11 +399,11 @@
                                     {% if group.jira_issue %}
                                         <a href="{{ group | jira_issue_url }}"
                                         target="_blank" title="{{ group | jira_issue_url }}">{{ group | jira_key }}</a>
-                                        <i id="unlink_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-trash unlink_jira" title="Unlink JIRA issue from this group of findings."></i>
-                                        <i id="push_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-share-square push_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
+                                        <i id="unlink_group_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-trash unlink_group_jira" title="Unlink JIRA issue from this group of findings."></i>
+                                        <i id="push_group_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-share-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
                                     {% else %}
                                         None
-                                        <i id="push_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-share-square push_to_jira" title="Create JIRA issue for this group of findings"></i>
+                                        <i id="push_group_to_jira_{{ group.id }}" data-group-id="{{ group.id }}" class="fa fa-share-square push_group_to_jira" title="Create JIRA issue for this group of findings"></i>
                                         {% comment %} <a href="{% url 'finding_link_to_jira' group.id %}" title="Link existing JIRA issue to finding.">
                                             <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
                                         </a> {% endcomment %}
@@ -838,21 +838,29 @@
                         </td>
                         {% if system_settings.enable_jira %}
                             {% if jira_project and product_tab or not product_tab %}
-                                <td>
-                                    {% if finding.has_jira_issue %}
-                                        <a href="{{ finding | jira_issue_url }}" target="_blank"
-                                            alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}">{{finding | jira_key}}</a>
-                                    {% endif %}
-                                    </td>
-
-                                    <td class="nowrap">
-                                        {{ finding | jira_creation | timesince }}
-                                    </td>
-
-                                    <td class="nowrap">
-                                        {{ finding | jira_change | timesince }}
-                                    </td>
-
+                            <td class="nowrap">
+                                {% if finding.has_jira_group_issue %}
+                                    <a href="{{ finding.finding_group | jira_issue_url }}" target="_blank"
+                                        alt="Jira Bug - {{finding.finding_group | jira_key}} (group)" data-toggle="tooltip" data-placement="bottom" title="{{finding.finding_group | jira_key}} (group)">{{finding.finding_group | jira_key}}</a>
+                                {% elif finding.has_jira_issue %}
+                                <a href="{{ finding | jira_issue_url }}" target="_blank"
+                                    alt="Jira Bug - {{finding | jira_key}}" data-toggle="tooltip" data-placement="bottom" title="{{finding | jira_key}}">{{finding | jira_key}}</a>
+                                {% endif %}
+                            </td>
+                            <td class="nowrap">
+                                {% if finding.has_jira_group_issue %}
+                                    {{ finding.finding_group | jira_creation | timesince }}
+                                {% else %}
+                                    {{ finding | jira_creation | timesince }}
+                                {% endif %}
+                            </td>
+                            <td class="nowrap">
+                                {% if finding.has_jira_group_issue %}
+                                    {{ finding.finding_group | jira_change | timesince }}
+                                {% else %}
+                                    {{ finding | jira_change | timesince }}
+                                {% endif %}
+                            </td>
                             {% endif %}
                         {% endif %}
                         {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
@@ -1560,26 +1568,21 @@
                     jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
                 },
                 success: function (data, textStatus, jqXHR) {
-                    console.log(textStatus)
-                    console.log(data)
                 },
                 error: function (request, status, error) {
-                    console.log('error')
                     console.log(request.responseText)
                 },
                 complete: function(e) {
-                    console.log('complete')
-                    console.log(this)
-                    <!-- location.reload() -->
+                    location.reload()
                 }
             });
         }
 
-        $(".push_to_jira").on('click', function(e) {
+        $(".push_group_to_jira").on('click', function(e) {
             jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/push')
         });
 
-        $(".unlink_jira").on('click', function(e) {
+        $(".unlink_group_jira").on('click', function(e) {
             jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/unlink')
         });
 

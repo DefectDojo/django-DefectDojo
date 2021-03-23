@@ -817,6 +817,11 @@ class OpenFindingFilter(DojoFilter):
                                 exclude=True,
                                 label='has JIRA')
 
+    has_jira_group_issue = BooleanFilter(field_name='finding_group__jira_issue',
+                                lookup_expr='isnull',
+                                exclude=True,
+                                label='has Group JIRA')
+
     has_component = BooleanFilter(field_name='component_name',
                                 lookup_expr='isnull',
                                 exclude=True,

@@ -219,6 +219,7 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -762,29 +763,32 @@ def edit_finding(request, fid):
 
                 logger.debug('push_to_jira: %s', push_to_jira)
                 logger.debug('push_all_jira_issues: %s', push_all_jira_issues)
+                logger.debug('has_jira_group_issue: %s', new_finding.has_jira_group_issue)
 
                 # if the jira issue key was changed, update database
                 new_jira_issue_key = jform.cleaned_data.get('jira_issue')
-                if new_finding.has_jira_issue:
-                    jira_issue = new_finding.jira_issue
+                # we only support linking / changing if there is no group issue
+                if not new_finding.has_jira_group_issue:
+                    if new_finding.has_jira_issue:
+                        jira_issue = new_finding.jira_issue
 
-                    # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
-                    # instead of on the public jira issue key.
-                    # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
-                    # we can assume the issue exist, which is already checked in the validation of the jform
+                        # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
+                        # instead of on the public jira issue key.
+                        # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
+                        # we can assume the issue exist, which is already checked in the validation of the jform
 
-                    if not new_jira_issue_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_message = 'Link to JIRA issue removed successfully.'
+                        if not new_jira_issue_key:
+                            jira_helper.finding_unlink_jira(request, new_finding)
+                            jira_message = 'Link to JIRA issue removed successfully.'
 
-                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
-                        jira_message = 'Changed JIRA link successfully.'
-                else:
-                    if new_jira_issue_key:
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
-                        jira_message = 'Linked a JIRA issue successfully.'
+                        elif new_jira_issue_key != new_finding.jira_issue.jira_key:
+                            jira_helper.finding_unlink_jira(request, new_finding)
+                            jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
+                            jira_message = 'Changed JIRA link successfully.'
+                    else:
+                        if new_jira_issue_key:
+                            jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
+                            jira_message = 'Linked a JIRA issue successfully.'
 
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(
@@ -795,7 +799,17 @@ def edit_finding(request, fid):
                     else:
                         add_external_issue(new_finding, 'github')
 
+            # if there's a finding group, that's what we need to push
+            push_group_to_jira = push_to_jira and new_finding.finding_group
+            # any existing finding should be updated
+            push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
+
             new_finding.save(push_to_jira=push_to_jira)
+
+            # we only push the group after storing the finding to make sure
+            # the updated data of the finding is pushed as part of the group
+            if push_group_to_jira:
+                jira_helper.push_to_jira(new_finding.finding_group)
 
             messages.add_message(
                 request,
@@ -1895,6 +1909,9 @@ def finding_bulk_update_all(request, pid=None):
                     if skipped:
                         add_success_message_to_response('Skipped %s findings in group creation, findings already part of another group' % skipped)
 
+                    # refresh findings from db
+                    finds = finds.all()
+
                 if form.cleaned_data['finding_group_add']:
                     logger.debug('finding_group_add checked!')
                     fgid = form.cleaned_data['add_to_finding_group']
@@ -1908,6 +1925,9 @@ def finding_bulk_update_all(request, pid=None):
                     if skipped:
                         add_success_message_to_response('Skipped %s findings when adding to finding group %s, findings already part of another group' % (skipped, finding_group.name))
 
+                    # refresh findings from db
+                    finds = finds.all()
+
                 if form.cleaned_data['finding_group_remove']:
                     logger.debug('finding_group_remove checked!')
                     finding_groups, removed, skipped = finding_helper.remove_from_finding_group(finds)
@@ -1917,6 +1937,9 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response('Skipped %s findings when removing from any finding group, findings not part of any group' % (skipped))
+
+                    # refresh findings from db
+                    finds = finds.all()
 
                 if skipped_risk_accept_count > 0:
                     messages.add_message(request,
@@ -1953,6 +1976,34 @@ def finding_bulk_update_all(request, pid=None):
                             calculate_grade(finding.test.engagement.product)
                             prev_prod = finding.test.engagement.product.id
 
+                error_counts = defaultdict(lambda: 0)
+                success_count = 0
+                finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
+                logger.info('finding_groups: %s', finding_groups)
+                for group in finding_groups:
+                    if form.cleaned_data.get('push_to_jira'):
+                        can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)
+                        if not can_be_pushed_to_jira:
+                            error_counts[error_message] += 1
+                            jira_helper.log_jira_alert(error_message, group)
+                        else:
+                            logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+                            jira_helper.push_to_jira(group)
+                            success_count += 1
+
+                        jira_helper.push_to_jira(group)
+
+                for error_message, error_count in error_counts.items():
+                    add_error_message_to_response('%i finding groups could not be pushed to JIRA: %s' % (error_count, error_message))
+
+                if success_count > 0:
+                    add_success_message_to_response('%i finding groups pushed to JIRA succesfully' % success_count)
+
+                # refresh from db
+                finds = finds.all()
+
+                error_counts = defaultdict(lambda: 0)
+                success_count = 0
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
@@ -1967,18 +2018,26 @@ def finding_bulk_update_all(request, pid=None):
 
                     # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
-                    error_counts = defaultdict(lambda: 0)
                     if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
+
                         can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding)
-                        if not can_be_pushed_to_jira:
+                        if finding.has_jira_group_issue and not finding.has_jira_issue:
+                            error_message = 'finding already pushed as part of Finding Group'
+                            error_counts[error_message] += 1
+                            jira_helper.log_jira_alert(error_message, finding)
+                        elif not can_be_pushed_to_jira:
                             error_counts[error_message] += 1
                             jira_helper.log_jira_alert(error_message, finding)
                         else:
                             logger.debug('pushing to jira from finding.finding_bulk_update_all()')
                             jira_helper.push_to_jira(finding)
+                            success_count += 1
 
-                        for error_message, error_count in error_counts.items():
-                            add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
+                for error_message, error_count in error_counts.items():
+                    add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
+
+                if success_count > 0:
+                    add_success_message_to_response('%i findings pushed to JIRA succesfully' % success_count)
 
                 messages.add_message(request,
                                      messages.SUCCESS,

@@ -2308,7 +2308,7 @@ class Finding_Group(TimeStampedModel):
     def components(self):
         # Using defaultdict() + groupby()
         # Convert list of tuples to dictionary value lists
-        component_tuples = [(find.component_name, find.component_version) for find in self.findings.all()]
+        component_tuples = set([(find.component_name, find.component_version) for find in self.findings.all()])
         components = dict((k, [v[1] for v in itr]) for k, itr in groupby(
                                 component_tuples, itemgetter(0)))
         return ','.join([key + ':' + ', '.join(value) for key, value in components.items() if key and value])
@@ -2336,8 +2336,8 @@ class Finding_Group(TimeStampedModel):
 
         return min([find.sla_deadline() for find in self.findings.all()])
 
-    def cves(self):
-        return ', '.join([find.cve for find in self.findings.all() if find.cve])
+    # def cves(self):
+    #     return ', '.join([find.cve for find in self.findings.all() if find.cve is not None])
 
     def status(self):
         if not self.findings.all():
@@ -2349,7 +2349,7 @@ class Finding_Group(TimeStampedModel):
         if all([find.is_Mitigated for find in self.findings.all()]):
             return 'Mitigated'
 
-        return 'Active'
+        return 'Inactive'
 
     @cached_property
     def mitigated(self):
