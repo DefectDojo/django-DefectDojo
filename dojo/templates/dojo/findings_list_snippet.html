@@ -439,13 +439,13 @@
                                     N
                                     {% endif %}
                                 </td>
+                                {% endif %}
                                 {% if show_product_column and product_tab is None %}
                                 <td><a
                                         href="{% url 'view_product' finding.test.engagement.product.id %}"
                                         title="{{ finding.test.engagement }}" alt="{{ finding.test.engagement.product }}">{{ finding.test.engagement.product }}</a>
                                 </td>
                                 {% endif %}
-                            {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>
