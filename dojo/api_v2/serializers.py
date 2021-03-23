@@ -1,4 +1,4 @@
-from drf_yasg2.utils import swagger_serializer_method
+from drf_yasg.utils import swagger_serializer_method
 from dojo.models import Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -389,7 +389,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.findings_count
 
     def get_findings_list(self, obj):
-        return obj.open_findings_list()
+        return obj.open_findings_list
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):

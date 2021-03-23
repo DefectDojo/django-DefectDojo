@@ -1,6 +1,11 @@
+from datetime import datetime
+
+import pytz
 from django.test import TestCase
+
 from dojo.models import Test
-from dojo.tools.qualys_infrascan_webgui.parser import QualysInfrascanWebguiParser
+from dojo.tools.qualys_infrascan_webgui.parser import \
+    QualysInfrascanWebguiParser
 
 
 class TestQualysInfrascanWebguiParser(TestCase):
@@ -23,13 +28,10 @@ class TestQualysInfrascanWebguiParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
-        findings = findings[0]
-        self.assertEqual(
-            findings.title, "Oracle Java SE Critical Patch Update - January 2015"
-        )
-        self.assertEqual(
-            findings.severity, "Critical"
-        )  # Negligible is translated to Informational
+        finding = findings[0]
+        self.assertEqual("Oracle Java SE Critical Patch Update - January 2015", finding.title)
+        self.assertEqual("Critical", finding.severity)  # Negligible is translated to Informational
+        self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=pytz.utc), finding.date)
 
     # Sample with Multiple Test
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
@@ -39,3 +41,31 @@ class TestQualysInfrascanWebguiParser(TestCase):
         parser = QualysInfrascanWebguiParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(6, len(findings))
+        # finding 0
+        finding = findings[0]
+        self.assertEqual("UDP Constant IP Identification Field Fingerprinting Vulnerability", finding.title)
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=pytz.utc), finding.date)
+        # finding 4
+        finding = findings[4]
+        self.assertEqual("Hidden RPC Services", finding.title)
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=pytz.utc), finding.date)
+        self.assertEqual("Some impact\n\n", finding.impact)
+
+    # Sample with Multiple Test
+    def test_parse_file_with_finding_no_dns(self):
+        testfile = open(
+            "dojo/unittests/scans/qualys_infrascan_webgui/qualys_infrascan_webgui_3.xml"
+        )
+        parser = QualysInfrascanWebguiParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # finding 0
+        finding = findings[0]
+        self.assertEqual("UDP Constant IP Identification Field Fingerprinting Vulnerability", finding.title)
+        self.assertEqual("Low", finding.severity)
+        self.assertEqual(datetime(2019, 4, 2, 10, 14, 53, tzinfo=pytz.utc), finding.date)
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        unsaved_endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual('10.1.10.1', unsaved_endpoint.host)

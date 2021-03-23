@@ -177,7 +177,7 @@ def deduplicate_legacy(new_finding):
         str(len(total_findings)) + " findings with either same title or same cwe")
 
     # total_findings = total_findings.order_by('date')
-    for find in total_findings:
+    for find in total_findings.order_by('id'):
         flag_endpoints = False
         flag_line_path = False
         flag_hash = False
@@ -237,7 +237,7 @@ def deduplicate_unique_id_from_tool(new_finding):
             unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     else:
         existing_findings = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
@@ -246,7 +246,7 @@ def deduplicate_unique_id_from_tool(new_finding):
             unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
 
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same unique_id_from_tool")
@@ -270,14 +270,14 @@ def deduplicate_hash_code(new_finding):
             hash_code=new_finding.hash_code).exclude(
                 id=new_finding.id).exclude(
                     hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     else:
         existing_findings = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             hash_code=new_finding.hash_code).exclude(
                 id=new_finding.id).exclude(
                     hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
 
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same hash_code")
@@ -302,14 +302,14 @@ def deduplicate_uid_or_hash_code(new_finding):
             (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
             test__engagement=new_finding.test.engagement).exclude(
                 id=new_finding.id).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     else:
         # same without "test__engagement=new_finding.test.engagement" condition
         existing_findings = Finding.objects.filter(
             (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
             (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type))).exclude(
                 id=new_finding.id).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
     for find in existing_findings:
@@ -337,7 +337,11 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
-    for find in new_finding.original_finding.all():
+
+    # Make sure transitive duplication is flattened
+    # if A -> B and B is made a duplicate of C here, aferwards:
+    # A -> C and B -> C should be true
+    for find in new_finding.original_finding.all().order_by('-id'):
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
@@ -495,8 +499,7 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
         for f in findings:
             if f.mitigated is not None and end_of_period >= f.mitigated >= start_of_period:
                 o_count['closed'] += 1
-            elif f.mitigated is not None and f.mitigated > end_of_period and f.date <= end_of_period.date(
-            ):
+            elif f.mitigated is not None and f.mitigated > end_of_period and f.date <= end_of_period.date():
                 if f.severity == 'Critical':
                     o_count['zero'] += 1
                 elif f.severity == 'High':
@@ -508,20 +511,15 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
             elif f.mitigated is None and f.date <= end_of_period.date():
                 if f.severity == 'Critical':
                     o_count['zero'] += 1
-                elif f.severity == 'High':
-                    o_count['one'] += 1
-                elif f.severity == 'Medium':
-                    o_count['two'] += 1
-                elif f.severity == 'Low':
-                    o_count['three'] += 1
-            elif f.mitigated is None and f.date <= end_of_period.date():
-                if f.severity == 'Critical':
                     a_count['zero'] += 1
                 elif f.severity == 'High':
+                    o_count['one'] += 1
                     a_count['one'] += 1
                 elif f.severity == 'Medium':
+                    o_count['two'] += 1
                     a_count['two'] += 1
                 elif f.severity == 'Low':
+                    o_count['three'] += 1
                     a_count['three'] += 1
 
         total = sum(o_count.values()) - o_count['closed']

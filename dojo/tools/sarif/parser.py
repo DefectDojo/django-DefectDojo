@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import textwrap
 from datetime import datetime
 
 from dojo.models import Finding
@@ -27,9 +28,6 @@ class SarifParser(object):
 
     def get_findings(self, filehandle, test):
         tree = json.load(filehandle)
-
-        # by default give the test a title linked to the first tool in the report
-        test.title = f"SARIF ({tree['runs'][0]['tool']['driver']['name']})"
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
@@ -91,21 +89,37 @@ def get_severity(data):
 
 
 def get_message_from_multiformatMessageString(data, rule):
+    """Get a message from multimessage struct
+
+    See here for the specification: https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317468
+    """
     if rule is not None and 'id' in data:
-        return rule['messageStrings'][data['id']]
+        text = rule['messageStrings'][data['id']].get('text')
+        arguments = data.get('arguments', [])
+        # argument substitution
+        for i in range(6):  # the specification limit to 6
+            substitution_str = "{" + str(i) + "}"
+            if substitution_str in text:
+                text = text.replace(substitution_str, arguments[i])
+            else:
+                return text
     else:
         # TODO manage markdown
         return data.get('text')
 
 
+def cve_try(val):
+    # Match only the first CVE!
+    cveSearch = re.search("(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
+    if cveSearch:
+        return cveSearch.group(1).upper()
+    else:
+        return None
+
+
 def get_item(result, rules, artifacts, test):
     mitigation = result.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
     references = result.get('Remediation', {}).get('Recommendation', {}).get('Url')
-    verified = False
-    false_p = False
-    duplicate = False
-    out_of_scope = False
-    impact = None
 
     if result.get('Compliance', {}).get('Status', "PASSED"):
         if result.get('LastObservedAt', None):
@@ -133,7 +147,9 @@ def get_item(result, rules, artifacts, test):
     rule = rules.get(result['ruleId'])
     title = result['ruleId']
     if 'message' in result:
-        title = get_message_from_multiformatMessageString(result['message'], rule)
+        description = get_message_from_multiformatMessageString(result['message'], rule)
+        if len(description) < 150:
+            title = description
     description = ''
     severity = get_severity('warning')
     if rule is not None:
@@ -142,33 +158,28 @@ def get_item(result, rules, artifacts, test):
             severity = get_severity(rule['defaultConfiguration'].get('level', 'warning'))
 
         if 'shortDescription' in rule:
-            title = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
             description = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
         else:
-            title = result['message'].get('text', 'No text')
             description = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
 
     # we add a special 'None' case if there is no CWE
     cwes = [0]
     if rule is not None:
         cwes_extracted = get_rule_cwes(rule)
-        if len(cwes_extracted) > 1:
+        if len(cwes_extracted) > 0:
             cwes = cwes_extracted
 
     for cwe in cwes:
-        finding = Finding(title=title,
+        finding = Finding(title=textwrap.shorten(title, 150),
                         test=test,
                         severity=severity,
                         numerical_severity=Finding.get_numerical_severity(severity),
                         description=description,
                         mitigation=mitigation,
                         references=references,
-                        cve=None,  # for now CVE are not managed or it's not very clear how in the spec
+                        cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
                         cwe=cwe,
-                        verified=verified,
-                        false_p=false_p,
-                        duplicate=duplicate,
-                        out_of_scope=out_of_scope,
+                        is_Mitigated=(mitigated is not None),
                         mitigated=mitigated,
                         impact="No impact provided",
                         static_finding=True,  # by definition

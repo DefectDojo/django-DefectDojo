@@ -89,30 +89,32 @@ def check_auth_users_list(user, obj):
             products = obj.prod_type.all()
             for product in products:
                 is_authorized = is_authorized or user in product.authorized_users.all()
-    if isinstance(obj, Finding):
+    elif isinstance(obj, Finding):
         is_authorized = user in obj.test.engagement.product.authorized_users.all()
         is_authorized = user in obj.test.engagement.product.prod_type.authorized_users.all() or is_authorized
-    if isinstance(obj, Test):
+    elif isinstance(obj, Test):
         is_authorized = user in obj.engagement.product.authorized_users.all()
         is_authorized = user in obj.engagement.product.prod_type.authorized_users.all() or is_authorized
-    if isinstance(obj, Engagement):
+    elif isinstance(obj, Engagement):
         is_authorized = user in obj.product.authorized_users.all()
         is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
-    if isinstance(obj, Product):
+    elif isinstance(obj, Product):
         is_authorized = user in obj.authorized_users.all()
         is_authorized = user in obj.prod_type.authorized_users.all() or is_authorized
-    if isinstance(obj, Endpoint):
+    elif isinstance(obj, Endpoint):
         is_authorized = user in obj.product.authorized_users.all()
         is_authorized = user in obj.product.prod_type.authorized_users.all() or is_authorized
-    if isinstance(obj, Risk_Acceptance):
+    elif isinstance(obj, Risk_Acceptance):
         return user.username == obj.owner.username or check_auth_users_list(user, obj.engagement_set.all()[0])
+    else:
+        raise ValueError('invalid obj %s to check for permissions' % obj)
 
     return is_authorized
 
 
 def user_is_authorized(user, perm_type, obj):
     # print('help.user_is_authorized')
-    # print('user: ', user)
+    # print('user: ', user.id)
     # print('perm_type', perm_type)
     # print('obj: ', obj)
 

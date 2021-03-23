@@ -9,10 +9,12 @@ from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import render
 from django.utils import timezone
 
-from dojo.models import Finding, Engagement
+from dojo.models import Finding
 from django.db.models import Count, Q
 from dojo.utils import add_breadcrumb, get_punchcard_data
 from dojo.models import Answered_Survey
+from dojo.authorization.roles_permissions import Permissions
+from dojo.engagement.queries import get_authorized_engagements
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -20,14 +22,10 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def dashboard(request: HttpRequest) -> HttpResponse:
+    engagements = get_authorized_engagements(Permissions.Engagement_View).distinct()
     if request.user.is_staff:
-        engagements = Engagement.objects.all()
         findings = Finding.objects.all()
     else:
-        engagements = Engagement.objects.filter(
-            Q(product__authorized_users=request.user) |
-            Q(product__prod_type__authorized_users=request.user)
-        ).distinct()
         findings = Finding.objects.filter(
             Q(test__engagement__product__authorized_users=request.user) |
             Q(test__engagement__product__prod_type__authorized_users=request.user)
