@@ -66,13 +66,11 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("dropdownMenu1").click()
         # Click on `Edit Finding`
         driver.find_element_by_link_text("Edit Finding").click()
-        # Change: 'Severity' and 'Mitigation'
+        # Change: 'Severity' and 'cvssv3'
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("Critical")
-        # cvss
+        # cvssv3
         driver.find_element_by_id("id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
-        # finding Description
-        driver.find_element_by_id("id_cvssv3").send_keys(Keys.TAB, "This is a crucial update to finding description.")
         # "Click" the Done button to Edit the finding
         driver.find_element_by_xpath("//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
