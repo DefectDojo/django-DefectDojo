@@ -127,3 +127,4 @@ class ArachniParser(object):
         finding.unsaved_tags = item_node.get('tags')
 
         return finding
+
