@@ -65,7 +65,7 @@ def webhook(request, secret=None):
                     findings = [jissue.finding]
                 elif jissue.finding_group:
                     logging.info("Received issue update for {} for finding group {}".format(jissue.jira_key, jissue.finding_group))
-                    findings = [jissue.finding_group.findings.all()]
+                    findings = jissue.finding_group.findings.all()
                 elif jissue.engagement:
                     # if parsed['issue']['fields']['resolution'] != None:
                     #     eng.active = False
