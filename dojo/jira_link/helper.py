@@ -500,27 +500,27 @@ def jira_environment(obj):
         return ''
 
 
-def push_to_jira(obj):
+def push_to_jira(obj, *args, **kwargs):
     if isinstance(obj, Finding):
         finding = obj
         if finding.has_jira_issue:
-            return update_jira_issue(finding)
+            return update_jira_issue_for_finding(finding, *args, **kwargs)
         else:
-            return add_jira_issue(finding)
+            return add_jira_issue_for_finding(finding, *args, **kwargs)
 
     elif isinstance(obj, Engagement):
         engagement = obj
         if engagement.has_jira_issue:
-            return update_epic(engagement)
+            return update_epic(engagement, *args, **kwargs)
         else:
-            return add_epic(engagement)
+            return add_epic(engagement, *args, **kwargs)
 
     elif isinstance(obj, Finding_Group):
         group = obj
         if group.has_jira_issue:
-            return update_jira_issue(group, sync=True)
+            return update_jira_issue_for_finding_group(group, *args, **kwargs)
         else:
-            return add_jira_issue(group, sync=True)
+            return add_jira_issue_for_finding_group(group, *args, **kwargs)
 
     else:
         logger.error('unsupported object passed to push_to_jira: %s %i %s', obj.__name__, obj.id, obj)
@@ -536,10 +536,24 @@ def add_issues_to_epic(jira, obj, epic_id, issue_keys, ignore_epics=True):
         return False
 
 
+# we need two separate celery tasks due to the decorators we're using to map to/from ids
+
 @dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id
+def add_jira_issue_for_finding(finding, *args, **kwargs):
+    return add_jira_issue(finding, *args, **kwargs)
+
+
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id(model=Finding_Group)
+def add_jira_issue_for_finding_group(finding_group, *args, **kwargs):
+    return add_jira_issue(finding_group, *args, **kwargs)
+
+
 def add_jira_issue(obj, *args, **kwargs):
     logger.info('trying to create a new jira issue for %d:%s', obj.id, to_str_typed(obj))
 
@@ -663,10 +677,24 @@ def add_jira_issue(obj, *args, **kwargs):
         return False
 
 
+# we need two separate celery tasks due to the decorators we're using to map to/from ids
+
 @dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id
+def update_jira_issue_for_finding(finding, *args, **kwargs):
+    return update_jira_issue(finding, *args, **kwargs)
+
+
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id(model=Finding_Group)
+def update_jira_issue_for_finding_group(finding_group, *args, **kwargs):
+    return update_jira_issue(finding_group, *args, **kwargs)
+
+
 def update_jira_issue(obj, *args, **kwargs):
     logger.debug('trying to update a linked jira issue for %d:%s', obj.id, to_str_typed(obj))
 
