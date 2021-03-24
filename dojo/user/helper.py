@@ -3,7 +3,7 @@ import logging
 from django.core.exceptions import PermissionDenied
 import functools
 from django.shortcuts import get_object_or_404
-from dojo.models import Finding, Test, Engagement, Product, Endpoint, Product_Type, \
+from dojo.models import Finding, Finding_Group, Test, Engagement, Product, Endpoint, Product_Type, \
     Risk_Acceptance
 from crum import get_current_user
 
@@ -76,6 +76,7 @@ def user_must_be_authorized(model, perm_type, arg, lookup="pk", view_func=None):
         # print('user is authorized for: ', obj)
         # Django doesn't seem to easily support just passing on the original positional parameters
         # so we resort to explicitly putting lookup_value here (which is for example the 'fid' parameter)
+        print('view_func params', lookup_value, *args, **kwargs)
         return view_func(request, lookup_value, *args, **kwargs)
 
     return _wrapped
@@ -92,6 +93,8 @@ def check_auth_users_list(user, obj):
     elif isinstance(obj, Finding):
         is_authorized = user in obj.test.engagement.product.authorized_users.all()
         is_authorized = user in obj.test.engagement.product.prod_type.authorized_users.all() or is_authorized
+    elif isinstance(obj, Finding_Group):
+        return check_auth_users_list(obj.test)
     elif isinstance(obj, Test):
         is_authorized = user in obj.engagement.product.authorized_users.all()
         is_authorized = user in obj.engagement.product.prod_type.authorized_users.all() or is_authorized

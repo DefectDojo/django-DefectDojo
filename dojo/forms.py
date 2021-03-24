@@ -21,7 +21,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
-from dojo.models import Finding, Product_Type, Product, Note_Type, \
+from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
@@ -292,6 +292,15 @@ class DeleteProductForm(forms.ModelForm):
                    'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                    'internet_accessible', 'regulations', 'product_meta', 'members', 'tags',
                    'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
+
+
+class DeleteFindingGroupForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Finding_Group
+        fields = ['id']
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
@@ -1171,6 +1180,13 @@ class FindingBulkUpdateForm(forms.ModelForm):
     risk_accept = forms.BooleanField(required=False)
     risk_unaccept = forms.BooleanField(required=False)
 
+    finding_group = forms.BooleanField(required=False)
+    finding_group_create = forms.BooleanField(required=False)
+    finding_group_create_name = forms.CharField(required=False)
+    finding_group_add = forms.BooleanField(required=False)
+    add_to_finding_group = forms.BooleanField(required=False)
+    finding_group_remove = forms.BooleanField(required=False)
+
     push_to_jira = forms.BooleanField(required=False)
     # unlink_from_jira = forms.BooleanField(required=False)
     push_to_github = forms.BooleanField(required=False)
@@ -1735,19 +1751,25 @@ class ExpressGITHUBForm(forms.ModelForm):
                     'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
 
 
-def get_jira_issue_template_choices():
-    template_dir = settings.JIRA_TEMPLATE_DIR
-    template_list = [('', '---')]
-    for base_dir, dirnames, filenames in os.walk(template_dir):
-        for filename in filenames:
+def get_jira_issue_template_dir_choices():
+    template_root = settings.JIRA_TEMPLATE_ROOT
+    template_dir_list = [('', '---')]
+    for base_dir, dirnames, filenames in os.walk(template_root):
+        # for filename in filenames:
+        #     if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
+        #         base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
+        #     template_list.append((os.path.join(base_dir, filename), filename))
+
+        for dirname in dirnames:
             if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
                 base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
-            template_list.append((os.path.join(base_dir, filename), filename))
-    logger.debug('templates: %s', template_list)
-    return template_list
+            template_dir_list.append((os.path.join(base_dir, dirname), dirname))
+
+    logger.debug('templates: %s', template_dir_list)
+    return template_dir_list
 
 
-JIRA_TEMPLATE_CHOICES = sorted(get_jira_issue_template_choices())
+JIRA_TEMPLATE_CHOICES = sorted(get_jira_issue_template_dir_choices())
 
 
 class JIRA_IssueForm(forms.ModelForm):
@@ -1758,9 +1780,9 @@ class JIRA_IssueForm(forms.ModelForm):
 
 
 class JIRAForm(forms.ModelForm):
-    issue_template = forms.ChoiceField(required=False,
+    issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
-                                       help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
+                                       help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
 
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
@@ -2087,9 +2109,9 @@ class GITHUB_Product_Form(forms.ModelForm):
 
 class JIRAProjectForm(forms.ModelForm):
     jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label='JIRA Instance', required=False)
-    issue_template = forms.ChoiceField(required=False,
+    issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
-                                       help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
+                                       help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
 
     prefix = 'jira-project-form'
 
@@ -2178,6 +2200,12 @@ class JIRAFindingForm(forms.Form):
 
         self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
 
+        if self.instance.has_jira_group_issue:
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['jira_issue'].help_text = 'Changing the linked JIRA issue for finding groups is not (yet) supported.'
+            self.initial['jira_issue'] = self.instance.finding_group.jira_issue.jira_key
+            self.fields['jira_issue'].disabled = True
+
     def clean(self):
         logger.debug('jform clean')
         import dojo.jira_link.helper as jira_helper
@@ -2188,14 +2216,22 @@ class JIRAFindingForm(forms.Form):
 
         logger.debug('self.cleaned_data.push_to_jira: %s', self.cleaned_data.get('push_to_jira', None))
 
-        if self.cleaned_data.get('push_to_jira', None):
-            can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(self.instance, self.finding_form)
+        if self.cleaned_data.get('push_to_jira', None) and finding.has_jira_group_issue:
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(self.instance.finding_group, self.finding_form)
             if not can_be_pushed_to_jira:
                 self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
                 # for field in error_fields:
                 #     self.finding_form.add_error(field, error)
 
-        if jira_issue_key_new:
+        elif self.cleaned_data.get('push_to_jira', None):
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(self.instance, self.finding_form)
+            if not can_be_pushed_to_jira:
+                self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
+                # for field in error_fields:
+                #     self.finding_form.add_error(field, error)
+
+        if jira_issue_key_new and not finding.has_jira_group_issue:
+            # when there is a group jira issue, we skip all the linking/unlinking as this is not supported (yet)
             if finding:
                 # in theory there can multiple jira instances that have similar projects
                 # so checking by only the jira issue key can lead to false positives

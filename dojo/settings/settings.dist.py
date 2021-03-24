@@ -179,7 +179,8 @@ env = environ.Env(
     # You need to have wkhtmltopdf installed on your system to generate PDF reports
     DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
 
-    DD_JIRA_TEMPLATE_DIR=(str, 'dojo/templates/issue-trackers'),
+    DD_FEATURE_FINDING_GROUPS=(bool, False),
+    DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/')
 )
 
@@ -1050,5 +1051,6 @@ EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
 
-JIRA_TEMPLATE_DIR = env('DD_JIRA_TEMPLATE_DIR')
+FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
+JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
