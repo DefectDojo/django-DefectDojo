@@ -169,6 +169,7 @@ Proceeds are used for testing, infrastructure, etc.
 [![WSO2](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/wso2-logo-for-screen.png)](https://wso2.com/)
 [![CloudBees](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png)](https://cloudbees.com/)
 [![WeHackPurple](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png)](https://wehackpurple.com/)
+[![MaibornWolff](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png)](https://www.maibornwolff.de/en)
 
 
 Interested in becoming a sponsor and having your logo displayed? Please review
