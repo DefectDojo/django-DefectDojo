@@ -627,9 +627,8 @@ def view_engagements(request, pid, engagement_type="Interactive"):
         'lead'
     ).prefetch_related(
         'tags',
-        'test_set',
-        'test_set__test_type',
     ).annotate(
+        count_tests=Count('test', distinct=True),
         count_findings_all=Count('test__finding__id'),
         count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)),
         count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),

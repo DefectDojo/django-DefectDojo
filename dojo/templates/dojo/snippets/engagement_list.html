@@ -179,7 +179,7 @@
                           </div>
                         </sup>
                         {% endif %}
-                        {% if eng.test_set.all|length == 0 %}
+                        {% if eng.count_tests == 0 %}
                         &nbsp;<sup>
                           <div class="tag-label amber-color">
                             no tests
@@ -202,21 +202,12 @@
                     {% endif %}
                     <td class="text-center" class="nowrap">
                       <div class="align-top">
-                      {% if eng.test_set.all|length %}
+                      {% if eng.count_tests %}
                       <div class="dropdown">
-                        <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
-                        <ul class="dropdown-menu">
-                          {% for test in eng.test_set.all %}
-                               <li>
-                                 <a class="" href="{% url 'view_test' test.id %}">
-                                   <i class="fa fa-list-alt"></i> {{test}}, {{test.updated}}
-                               </li>
-                            {% endfor %}
-                        </ul>
+                        <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.count_tests }}</a>
                       </div>
                       {% else %}
-                      <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                      <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.count_tests }}</a>
                       {% endif %}
                       </div>
                     </td>
