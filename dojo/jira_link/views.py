@@ -101,7 +101,7 @@ def webhook(request, secret=None):
 
                 if findings:
                     for finding in findings:
-                        jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now)
+                        jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue)
 
             if parsed.get('webhookEvent') == 'comment_created':
                 """
