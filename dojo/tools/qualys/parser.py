@@ -3,7 +3,7 @@ import datetime
 import logging
 import html2text
 from . import utfdictcsv
-from defusedxml import ElementTree as etree
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -176,7 +176,7 @@ def issue_r(raw_row, vuln):
         finding = None
         if _temp_cve_details:
             refs = "\n".join(list(_cl.values()))
-            finding = Finding(title=_temp['vuln_name'],
+            finding = Finding(title="QID-" + _gid[4:] + " | " + _temp['vuln_name'],
                               mitigation=_temp['solution'],
                               description=_temp['vuln_description'],
                               severity=sev,
@@ -187,7 +187,7 @@ def issue_r(raw_row, vuln):
                               )
 
         else:
-            finding = Finding(title=_temp['vuln_name'],
+            finding = Finding(title="QID-" + _gid[4:] + " | " + _temp['vuln_name'],
                               mitigation=_temp['solution'],
                               description=_temp['vuln_description'],
                               severity=sev,
