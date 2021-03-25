@@ -1309,7 +1309,7 @@ def escape_for_jira(text):
     return text.replace('|', '%7D')
 
 
-def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now) -> bool:
+def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue) -> bool:
     """ Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly """
     import dojo.risk_acceptance.helper as ra_helper
     status_changed = False
@@ -1319,7 +1319,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     if finding.active is resolved:
         if finding.active:
             if jira_instance and resolution_name in jira_instance.accepted_resolutions:
-                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(finding.jira_issue.jira_key))
+                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jira_issue.jira_key))
                 finding.active = False
                 finding.mitigated = None
                 finding.is_Mitigated = False
@@ -1330,7 +1330,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 ).accepted_findings.set([finding])
                 status_changed = True
             elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
-                logger.debug("Marking related finding of {} as false-positive".format(finding.jira_issue.jira_key))
+                logger.debug("Marking related finding of {} as false-positive".format(jira_issue.jira_key))
                 finding.active = False
                 finding.verified = False
                 finding.mitigated = None
@@ -1340,7 +1340,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 status_changed = True
             else:
                 # Mitigated by default as before
-                logger.debug("Marking related finding of {} as mitigated (default)".format(finding.jira_issue.jira_key))
+                logger.debug("Marking related finding of {} as mitigated (default)".format(jira_issue.jira_key))
                 finding.active = False
                 finding.mitigated = jira_now
                 finding.is_Mitigated = True
@@ -1351,7 +1351,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 status_changed = True
         else:
             # Reopen / Open Jira issue
-            logger.debug("Re-opening related finding of {}".format(finding.jira_issue.jira_key))
+            logger.debug("Re-opening related finding of {}".format(jira_issue.jira_key))
             finding.active = True
             finding.mitigated = None
             finding.is_Mitigated = False
@@ -1360,7 +1360,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
             status_changed = True
     else:
         # Reopen / Open Jira issue
-        logger.debug("Re-opening related finding of {}".format(finding.jira_issue.jira_key))
+        logger.debug("Re-opening related finding of {}".format(jira_issue.jira_key))
         finding.active = True
         finding.mitigated = None
         finding.is_Mitigated = False
@@ -1369,8 +1369,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
         status_changed = True
 
     # for findings in a group, there is no jira_issue attached to the finding
-    if finding.has_jira_issue:
-        finding.jira_issue.jira_change = jira_now
-        finding.jira_issue.save()
+    jira_issue.jira_change = jira_now
+    jira_issue.save()
     finding.save()
     return status_changed
