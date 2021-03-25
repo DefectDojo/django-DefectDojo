@@ -1368,7 +1368,9 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
         ra_helper.remove_from_any_risk_acceptance(finding)
         status_changed = True
 
-    finding.jira_issue.jira_change = jira_now
-    finding.jira_issue.save()
+    # for findings in a group, there is no jira_issue attached to the finding
+    if finding.has_jira_issue:
+        finding.jira_issue.jira_change = jira_now
+        finding.jira_issue.save()
     finding.save()
     return status_changed
