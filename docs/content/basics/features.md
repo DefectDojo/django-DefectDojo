@@ -899,13 +899,6 @@ The available algorithms are:
             need to update the scanner code beforehand
         -   
 
-            The tools that populate the unique\_id\_from\_tool field are:
-
-            :   -   [Checkmarx Scan detailed]{.title-ref}
-                -   [SonarQube Scan detailed]{.title-ref}
-
-        -   
-
             Advantages:
 
             :   -   If your source tool has a reliable means of tracking
