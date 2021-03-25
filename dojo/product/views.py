@@ -623,25 +623,8 @@ def view_engagements(request, pid, engagement_type="Interactive"):
         engagement_type=engagement_type
     ).order_by(
         '-updated'
-    ).select_related(
-        'lead'
-    ).prefetch_related(
-        'tags',
-    ).annotate(
-        count_tests=Count('test', distinct=True),
-        count_findings_all=Count('test__finding__id'),
-        count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)),
-        count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
-        count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)),
-        count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)),
-        count_findings_accepted=Count('test__finding__id', filter=Q(test__finding__risk_accepted=True)),
     )
-
-    if System_Settings.objects.get().enable_jira:
-        base_engagements = base_engagements.prefetch_related(
-            'jira_project__jira_instance',
-            'product__jira_project_set__jira_instance',
-        )
+    base_engagements = prefetch_for_view_engagements(base_engagements)
 
     # In Progress Engagements
     engs = base_engagements.filter(active=True, status="In Progress").order_by('-updated')
@@ -679,6 +662,31 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'inactive_engs_count': result_inactive_engs.paginator.count,
                    'inactive_engs_filter': inactive_engs_filter,
                    'user': request.user})
+
+
+def prefetch_for_view_engagements(engagements):
+    engagements = engagements.select_related(
+        'lead'
+    ).prefetch_related(
+        'tags',
+    ).annotate(
+        count_tests=Count('test', distinct=True),
+        count_findings_all=Count('test__finding__id'),
+        count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)),
+        count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
+        count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)),
+        count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)),
+        count_findings_accepted=Count('test__finding__id', filter=Q(test__finding__risk_accepted=True)),
+    )
+
+    if System_Settings.objects.get().enable_jira:
+        engagements = engagements.prefetch_related(
+            'jira_project__jira_instance',
+            'product__jira_project_set__jira_instance',
+        )
+
+    return engagements
+
 
 
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
