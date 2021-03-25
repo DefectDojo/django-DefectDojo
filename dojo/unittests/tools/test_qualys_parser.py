@@ -13,7 +13,6 @@ class TestQualysParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
-
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
             "dojo/unittests/scans/qualys/Qualys_Sample_Report.xml"
