@@ -2,15 +2,6 @@ from django.test import TestCase
 from dojo.tools.clair.parser import ClairParser
 
 
-class TestFile(object):
-    def read(self):
-        return self.content
-
-    def __init__(self, name, content):
-        self.name = name
-        self.content = content
-
-
 class TestClairParser(TestCase):
 
     def test_no_findings(self):
@@ -26,3 +17,8 @@ class TestClairParser(TestCase):
         findings = parser.get_findings(my_file_handle, None)
         my_file_handle.close()
         self.assertEqual(35, len(findings))
+        finding = findings[0]
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual("http://people.ubuntu.com/~ubuntu-security/cve/CVE-2018-20839", finding.references)
+        self.assertEqual("CVE-2018-20839", finding.cve)
+        self.assertEqual("CVE-2018-20839 - (systemd, 237-3ubuntu10.29)", finding.title)

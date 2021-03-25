@@ -19,17 +19,12 @@ class ClairParser(object):
         return self.get_items(tree, test)
 
     def parse_json(self, json_output):
+        data = json_output.read()
         try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-            subtree = tree.get('vulnerabilities')
+            tree = json.loads(str(data, 'utf-8'))
         except:
-            raise Exception("Invalid format")
-
-        return subtree
+            tree = json.loads(data)
+        return tree.get('vulnerabilities')
 
     def get_items(self, tree, test):
         items = {}
