@@ -15,8 +15,21 @@ class ClairParser(object):
         return "Import JSON reports of Docker image vulnerabilities."
 
     def get_findings(self, json_output, test):
-        tree = json.load(json_output)
+        tree = self.parse_json(json_output)
         return self.get_items(tree, test)
+
+    def parse_json(self, json_output):
+        try:
+            data = json_output.read()
+            try:
+                tree = json.loads(str(data, 'utf-8'))
+            except:
+                tree = json.loads(data)
+            subtree = tree.get('vulnerabilities')
+        except:
+            raise Exception("Invalid format")
+
+        return subtree
 
     def get_items(self, tree, test):
         items = {}
