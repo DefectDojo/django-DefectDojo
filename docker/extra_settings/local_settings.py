@@ -12,7 +12,7 @@ CELERY_BEAT_SCHEDULE['auto-delete-engagements'] = {
 
 CELERY_BEAT_SCHEDULE['jira_status_reconciliation'] = { 
     'task': 'dojo.tasks.jira_status_reconciliation_task',
-    'schedule': 'schedule': timedelta(hours=24),
+    'schedule': timedelta(hours=24),
     'kwargs': {'mode': 'import_status_from_jira', 'dryrun': False, 'daysback': 2}
 }
 
