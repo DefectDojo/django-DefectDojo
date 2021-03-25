@@ -10,6 +10,12 @@ CELERY_BEAT_SCHEDULE['auto-delete-engagements'] = {
     'schedule': crontab(hour=9, minute=30)
 }
 
+CELERY_BEAT_SCHEDULE['jira_status_reconciliation'] = { 
+    'task': 'dojo.tasks.jira_status_reconciliation_task',
+    'schedule': 'schedule': timedelta(hours=24),
+    'kwargs': {'mode': 'import_status_from_jira', 'dryrun': False, 'daysback': 2}
+}
+
 # Override deduplication for certain parsers
 HASHCODE_FIELDS_PER_SCANNER['Anchore Engine Scan'] = ['title', 'severity', 'component_name', 'component_version', 'file_path']
 HASHCODE_ALLOWS_NULL_CWE['Anchore Engine Scan'] = True
