@@ -22,7 +22,7 @@ django-tastypie==0.14.2
 django-watson==1.5.5
 django-prometheus==2.1.0
 Django==2.2.18
-djangorestframework==3.12.2
+djangorestframework==3.12.3
 gunicorn==20.0.4
 html2text==2020.1.16
 humanize==3.3.0
