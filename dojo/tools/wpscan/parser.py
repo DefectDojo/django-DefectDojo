@@ -30,9 +30,7 @@ class WpscanParser(object):
         for plugin in tree.get('plugins', []):
             node = tree['plugins'][plugin]
             for vul in node.get('vulnerabilities'):
-                references = ""
-                for ref in vul['references']:
-                    references += f"* {vul['references'][ref]} ({ref})\n"
+
                 description = "\n".join([
                     '**Title:** `' + vul['title'] + "`\n",
                     '**Location:** `' + node['location'] + "`\n",
@@ -45,7 +43,7 @@ class WpscanParser(object):
                     severity='Medium',
                     numerical_severity=Finding.get_numerical_severity('Medium'),
                     cwe=1035,
-                    references=references,
+                    references=self.generate_references(vul['references']),
                     dynamic_finding=True,
                     static_finding=False,
                     unique_id_from_tool=vul['references']['wpvulndb'][0],
@@ -77,9 +75,7 @@ class WpscanParser(object):
 
         # manage interesting interesting_findings
         for interesting_finding in tree.get('interesting_findings', []):
-            references = ""
-            for ref in interesting_finding['references']:
-                references += f"* {interesting_finding['references'][ref]} ({ref})\n"
+            references = self.generate_references(interesting_finding['references'])
             description = "\n".join([
                 '**Type:** `' + interesting_finding.get('type') + "`\n",
                 '**Url:** `' + interesting_finding['url'] + "`\n",
@@ -94,16 +90,13 @@ class WpscanParser(object):
             )
             # manage endpoint
             url = hyperlink.parse(interesting_finding['url'])
-            finding.unsaved_endpoints = [
-                Endpoint(
-                    path="/".join(url.path),
-                    host=url.host,
-                    port=url.port,
-                    protocol=url.scheme,
-                    query=url.query,
-                    fragment=url.fragment,
-                )
-            ]
+            endpoint = Endpoint(
+                path="/".join(url.path),
+                host=url.host,
+                port=url.port,
+                protocol=url.scheme,
+            )
+            finding.unsaved_endpoints = [endpoint]
             # manage date of finding with report date
             if report_date:
                 finding.date = report_date
@@ -119,3 +112,15 @@ class WpscanParser(object):
                 dupes[dupe_key] = finding
 
         return list(dupes.values())
+
+    def generate_references(self, node):
+        references = ""
+        for ref in node:
+            for item in node.get(ref, []):
+                if ref == 'url':
+                    references += f"* [{item}]({item})\n"
+                elif ref == 'wpvulndb':
+                    references += f"* [WPScan WPVDB](https://wpscan.com/vulnerability/{item})\n"
+                else:
+                    references += f"* {item} - {ref}\n"
+        return references
