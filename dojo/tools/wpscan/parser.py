@@ -2,6 +2,7 @@
 import hashlib
 import json
 from datetime import datetime
+import hyperlink
 
 from dojo.models import Endpoint, Finding
 
@@ -91,7 +92,18 @@ class WpscanParser(object):
                 dynamic_finding=True,
                 static_finding=False,
             )
-            finding.unsaved_endpoints = [Endpoint()]
+            # manage endpoint
+            url = hyperlink.parse()
+            finding.unsaved_endpoints = [
+                Endpoint(
+                    path="/".join(url.path),
+                    host=url.host,
+                    port=url.port,
+                    protocol=url.scheme,
+                    query=url.query,
+                    fragment=url.fragment,
+                )
+            ]
             # manage date of finding with report date
             if report_date:
                 finding.date = report_date
