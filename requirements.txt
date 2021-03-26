@@ -22,7 +22,7 @@ django-tastypie==0.14.2
 django-watson==1.5.5
 django-prometheus==2.1.0
 Django==2.2.18
-djangorestframework==3.12.2
+djangorestframework==3.12.3
 gunicorn==20.0.4
 html2text==2020.1.16
 humanize==3.3.0
@@ -36,12 +36,12 @@ xlrd==1.2.0
 pdfkit==0.6.1
 Pillow==8.1.2  # required by django-imagekit
 psycopg2-binary==2.8.6
-cryptography==3.4.6
+cryptography==3.4.7
 python-dateutil==2.8.1
 pytz==2021.1
 redis==3.5.3
 requests==2.25.1
-sqlalchemy==1.4.2  # Required by Celery broker transport
+sqlalchemy==1.4.3  # Required by Celery broker transport
 supervisor==4.2.2
 urllib3==1.26.4
 uWSGI==2.0.19.1

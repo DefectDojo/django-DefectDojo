@@ -2,8 +2,7 @@ import json
 import logging
 import re
 import textwrap
-from datetime import datetime
-
+import dateutil.parser
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
@@ -37,10 +36,23 @@ class SarifParser(object):
             # load rules
             rules = get_rules(run)
             artifacts = get_artifacts(run)
+            # get the timestamp of the run if possible
+            run_date = self._get_last_invocation_date(run)
             for result in run.get('results', list()):
-                item = get_item(result, rules, artifacts, test)
+                item = get_item(result, rules, artifacts, run_date)
                 items.append(item)
         return items
+
+    def _get_last_invocation_date(self, data):
+        invocations = data.get('invocations', [])
+        if len(invocations) == 0:
+            return None
+        # try to get the last 'endTimeUtc'
+        raw_date = invocations[-1].get('endTimeUtc')
+        if raw_date is None:
+            return None
+        # if the data is here we try to convert it to datetime
+        return dateutil.parser.isoparse(raw_date)
 
 
 def get_rules(run):
@@ -117,20 +129,9 @@ def cve_try(val):
         return None
 
 
-def get_item(result, rules, artifacts, test):
+def get_item(result, rules, artifacts, run_date):
     mitigation = result.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
     references = result.get('Remediation', {}).get('Recommendation', {}).get('Url')
-
-    if result.get('Compliance', {}).get('Status', "PASSED"):
-        if result.get('LastObservedAt', None):
-            try:
-                mitigated = datetime.strptime(result.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
-            except:
-                mitigated = datetime.strptime(result.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
-        else:
-            mitigated = datetime.utcnow()
-    else:
-        mitigated = None
 
     # if there is a location get it
     file_path = None
@@ -159,8 +160,12 @@ def get_item(result, rules, artifacts, test):
 
         if 'shortDescription' in rule:
             description = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
-        else:
+        elif 'fullDescription' in rule:
             description = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
+        elif 'name' in rule:
+            description = rule['name']
+        else:
+            description = rule['id']
 
     # we add a special 'None' case if there is no CWE
     cwes = [0]
@@ -169,23 +174,20 @@ def get_item(result, rules, artifacts, test):
         if len(cwes_extracted) > 0:
             cwes = cwes_extracted
 
-    for cwe in cwes:
-        finding = Finding(title=textwrap.shorten(title, 150),
-                        test=test,
-                        severity=severity,
-                        numerical_severity=Finding.get_numerical_severity(severity),
-                        description=description,
-                        mitigation=mitigation,
-                        references=references,
-                        cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
-                        cwe=cwe,
-                        active=True,
-                        is_Mitigated=(mitigated is not None),
-                        mitigated=mitigated,
-                        impact="No impact provided",
-                        static_finding=True,  # by definition
-                        dynamic_finding=False,  # by definition
-                        file_path=file_path,
-                        line=line)
+    finding = Finding(title=textwrap.shorten(title, 150),
+                    severity=severity,
+                    numerical_severity=Finding.get_numerical_severity(severity),
+                    description=description,
+                    mitigation=mitigation,
+                    references=references,
+                    cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
+                    cwe=cwes[0],
+                    static_finding=True,  # by definition
+                    dynamic_finding=False,  # by definition
+                    file_path=file_path,
+                    line=line)
+
+    if run_date:
+        finding.date = run_date
 
     return finding

@@ -111,11 +111,26 @@ Upgrade Celery to the latest version:
 
 > `pip install --upgrade celery`
 
+
 Upgrading to DefectDojo Version 1.15.x
 --------------------------------------
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.13.0
 - If you have made changes to JIRA templates or the template config in the JIRA Project config for instances/products/engagements:
 The jira template settings introduced in 1.13 have been changed. You now have to select a subfolder instead of a sinlge template file. If you have chosen a non-default template here, you have to reapply that to all products / engagements. Also you have to move your custom templates into the correct subfolder in `dojo/templates/issue-trackers/`.
+
+
+
+Upgrading to DefectDojo Version 1.14.x
+--------------------------------------
+- See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.14.0
+
+Note that the below fields are now optional without default value. They will not be filled anymore with values such as "No references given" when found empty while saving the findings
+- mitigation
+- references
+- impact
+- url
+
+
 
 Upgrading to DefectDojo Version 1.13.x
 --------------------------------------
