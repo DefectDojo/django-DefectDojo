@@ -140,16 +140,21 @@ def get_jira_project(obj, use_inheritance=True):
         return None
 
     if obj is None:
-        # some old jira_issue records don't have a jira_project, so try to go via the finding instead
-        if hasattr(obj, 'finding') and obj.finding:
-            return get_jira_project(obj.finding, use_inheritance=use_inheritance)
         return None
 
     if isinstance(obj, JIRA_Project):
         return obj
 
     if isinstance(obj, JIRA_Issue):
-        return obj.jira_project
+        if obj.jira_project:
+            return obj.jira_project
+        # some old jira_issue records don't have a jira_project, so try to go via the finding instead
+        elif hasattr(obj, 'finding') and obj.finding:
+            return get_jira_project(obj.finding, use_inheritance=use_inheritance)
+        elif hasattr(obj, 'engagement') and obj.engagement:
+            return get_jira_project(obj.finding, use_inheritance=use_inheritance)
+        else:
+            return None
 
     if isinstance(obj, Finding) or isinstance(obj, Stub_Finding):
         finding = obj
@@ -193,13 +198,13 @@ def get_jira_project(obj, use_inheritance=True):
     return None
 
 
-def get_jira_instance(instance):
+def get_jira_instance(obj):
     if not is_jira_enabled():
         return None
 
-    jira_project = get_jira_project(instance)
+    jira_project = get_jira_project(obj)
     if jira_project:
-        logger.debug('found jira_instance %s for %s', jira_project.jira_instance, instance)
+        logger.debug('found jira_instance %s for %s', jira_project.jira_instance, obj)
         return jira_project.jira_instance
 
     return None
