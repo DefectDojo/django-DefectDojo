@@ -141,7 +141,7 @@ def get_jira_project(obj, use_inheritance=True):
     if obj is None:
         return None
 
-    logger.debug('get jira project for: ' + str(obj.id) + ':' + str(obj))
+    # logger.debug('get jira project for: ' + str(obj.id) + ':' + str(obj))
 
     if isinstance(obj, JIRA_Project):
         return obj
