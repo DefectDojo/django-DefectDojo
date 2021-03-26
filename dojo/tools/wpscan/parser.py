@@ -93,7 +93,7 @@ class WpscanParser(object):
                 static_finding=False,
             )
             # manage endpoint
-            url = hyperlink.parse()
+            url = hyperlink.parse(interesting_finding['url'])
             finding.unsaved_endpoints = [
                 Endpoint(
                     path="/".join(url.path),
