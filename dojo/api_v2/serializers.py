@@ -1374,6 +1374,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                 findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type)
 
+                deduplicationLogger.debug('found %i findings matching with current new finding', len(findings))
+
+                # raise ValueError('bla')
+
                 if findings:
                     # existing finding found
                     finding = findings[0]

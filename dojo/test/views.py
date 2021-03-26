@@ -741,6 +741,7 @@ def re_import_scan_results(request, tid):
 
                     from titlecase import titlecase
                     item.title = titlecase(item.title)
+
                     item.hash_code = item.compute_hash_code()
                     deduplicationLogger.debug("new finding's hash_code: %s", item.hash_code)
 

@@ -1203,10 +1203,10 @@ class TestDuplicationLogic(TestCase):
 
     def test_case_sensitiveness_hash_code_computation(self):
         # hash_code calculation is case sensitive. feature or BUG?
-        finding_new, finding_24 = self.copy_and_reset_finding(id=24)
-        finding_new.title = finding_24.title.upper()
+        finding_new, finding_22 = self.copy_and_reset_finding(id=22)
+        finding_new.title = finding_22.title.upper()
         finding_new.save(dedupe_option=True)
-        self.assert_finding(finding_new, not_pk=24, duplicate=False, not_hash_code=finding_24.hash_code)
+        self.assert_finding(finding_new, not_pk=22, duplicate=True, duplicate_finding_id=finding_22.id, hash_code=finding_22.hash_code)
 
     def test_title_case(self):
         # currentlt the finding.save method applies title casing to the title

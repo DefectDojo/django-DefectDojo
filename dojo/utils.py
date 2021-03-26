@@ -45,10 +45,6 @@ Helper functions for DefectDojo
 """
 
 
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
 def do_false_positive_history(new_finding, *args, **kwargs):
     logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
@@ -102,16 +98,7 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
 def do_dedupe_finding(new_finding, *args, **kwargs):
-    do_dedupe_finding_sync(new_finding, *args, **kwargs)
-
-
-# This function can be called directly for synchronous deduplication
-def do_dedupe_finding_sync(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -206,6 +193,11 @@ def deduplicate_legacy(new_finding):
             else:
                 deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
         else:
+            deduplicationLogger.debug('find.static/dynamic: %s/%s', find.static_finding, find.dynamic_finding)
+            deduplicationLogger.debug('new_finding.static/dynamic: %s/%s', new_finding.static_finding, new_finding.dynamic_finding)
+            deduplicationLogger.debug('find.file_path: %s', find.file_path)
+            deduplicationLogger.debug('new_finding.file_path: %s', new_finding.file_path)
+
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
 
         if find.hash_code == new_finding.hash_code:
@@ -369,10 +361,6 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
@@ -1432,6 +1420,10 @@ def get_system_setting(setting, default=None):
     return getattr(system_settings, setting, (default if default is not None else None))
 
 
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id(model=Product)
 def calculate_grade(product):
     system_settings = System_Settings.objects.get()
     if system_settings.enable_product_grade:
