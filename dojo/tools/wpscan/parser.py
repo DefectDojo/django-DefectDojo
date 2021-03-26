@@ -43,6 +43,7 @@ class WpscanParser(object):
                     description=description,
                     severity='Medium',
                     numerical_severity=Finding.get_numerical_severity('Medium'),
+                    cwe=1035,
                     references=references,
                     dynamic_finding=True,
                     static_finding=False,
