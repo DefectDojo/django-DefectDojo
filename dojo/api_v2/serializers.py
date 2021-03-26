@@ -607,6 +607,7 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_url(self, obj):
+        logger.debug('get_url for: %s ', obj)
         return jira_helper.get_jira_issue_url(obj)
 
 
