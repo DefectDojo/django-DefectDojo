@@ -46,7 +46,7 @@ class JIRAConfigProductTest(DojoTestCase):
     def add_jira_instance(self, data, jira_mock):
         response = self.client.post(reverse('add_jira'), urlencode(data), content_type='application/x-www-form-urlencoded')
         # check that storing a new config triggers a login call to JIRA
-        jira_mock.assert_called_once_with(data['url'], data['username'], data['password'])
+        jira_mock.assert_called_once_with(data['url'], data['username'], data['password'], validate=True)
         # succesful, so should redirect to list of JIRA instances
         self.assertRedirects(response, '/jira')
 
