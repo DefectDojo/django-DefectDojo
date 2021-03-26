@@ -234,7 +234,7 @@ def express_new_jira(request):
             jira_password = jform.cleaned_data.get('password')
 
             try:
-                jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+                jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password, validate=True)
             except Exception as e:
                 logger.exception(e)  # already logged in jira_helper
                 messages.add_message(request,
@@ -318,7 +318,7 @@ def new_jira(request):
             jira_password = jform.cleaned_data.get('password')
 
             logger.debug('calling get_jira_connection_raw')
-            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password, validate=True)
 
             new_j = jform.save(commit=False)
             new_j.url = jira_server
@@ -359,7 +359,7 @@ def edit_jira(request, jid):
                 # on edit the password is optional
                 jira_password = jira_password_from_db
 
-            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password, validate=True)
 
             new_j = jform.save(commit=False)
             new_j.url = jira_server
