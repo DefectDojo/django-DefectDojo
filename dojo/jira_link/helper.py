@@ -140,6 +140,9 @@ def get_jira_project(obj, use_inheritance=True):
         return None
 
     if obj is None:
+        # some old jira_issue records don't have a jira_project, so try to go via the finding instead
+        if hasattr(obj, 'finding') and obj.finding:
+            return get_jira_project(obj.finding, use_inheritance=use_inheritance)
         return None
 
     if isinstance(obj, JIRA_Project):
