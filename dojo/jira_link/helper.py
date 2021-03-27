@@ -123,7 +123,6 @@ def finding_can_be_pushed_to_jira(finding, form=None):
 
 # use_inheritance=True means get jira_project config from product if engagement itself has none
 def get_jira_project(obj, use_inheritance=True):
-    print('get jira project for: ' + str(obj.id) + ':' + str(obj))
     if not is_jira_enabled():
         return None
 
