@@ -30,9 +30,9 @@
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
             {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
-            <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
+            <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
                 {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
-                    <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                    <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Bulk Edit
                         <span class="caret"></span>
