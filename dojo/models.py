@@ -2134,7 +2134,6 @@ class Finding(models.Model):
         self.found_by.add(self.test.test_type)
 
         # postprocessing is done in a celery task
-        print('kwargs: ', kwargs)
         finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
              issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
 
