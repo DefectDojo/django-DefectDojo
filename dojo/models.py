@@ -1866,15 +1866,9 @@ class Finding(models.Model):
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
-        # get bytes to hash
-        if(isinstance(fields_to_hash, str)):
-            hash_string = fields_to_hash.encode('utf-8').strip()
-        elif(isinstance(fields_to_hash, bytes)):
-            hash_string = fields_to_hash.strip()
-        else:
-            deduplicationLogger.debug("trying to convert hash_string of type " + str(type(fields_to_hash)) + " to str and then bytes")
-            hash_string = str(fields_to_hash).encode('utf-8').strip()
-        return hashlib.sha256(hash_string).hexdigest()
+        logger.debug('fields_to_hash      : %s', fields_to_hash)
+        logger.debug('fields_to_hash lower: %s', fields_to_hash.lower())
+        return hashlib.sha256(fields_to_hash.casefold().encode('utf-8').strip()).hexdigest()
 
     def duplicate_finding_set(self):
         if self.duplicate:
