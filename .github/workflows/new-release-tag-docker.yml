@@ -75,7 +75,7 @@ jobs:
           git config --global user.email "${{ env.GIT_EMAIL }}"
           git remote update
           git fetch --all
-          git checkout gh-pages
+          git checkout helm-charts
           git pull
           if [ ! -f ./index.yaml ]; then
             helm repo index ./build --url "${{ GITHUB_SERVER_URL }}/${{ GITHUB_REPOSITORY }}/releases/download/${{ github.event.inputs.release_number }}/"
@@ -85,7 +85,7 @@ jobs:
           cp -f ./build/index.yaml ./index.yaml
           git add ./index.yaml
           git commit -m "Update index.yaml"
-          git push -u origin gh-pages
+          git push -u origin helm-charts
 
 
   job-build-and-push:
