@@ -19,10 +19,10 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwargs):
     # some code is cloning findings by setting id/pk to None, ignore those, will be handled on next save
     # if not instance.id:
-    #     logger.info('ignoring save of finding without id')
+    #     logger.debug('ignoring save of finding without id')
     #     return
 
-    logger.info('%i: changed status fields pre_save: %s', instance.id or 0, changed_fields)
+    logger.debug('%i: changed status fields pre_save: %s', instance.id or 0, changed_fields)
 
     for field, (old, new) in changed_fields.items():
         logger.debug("%i: %s changed from %s to %s" % (instance.id or 0, field, old, new))
