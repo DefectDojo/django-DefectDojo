@@ -720,6 +720,7 @@
                 $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>Clear All Alerts </strong>' +
                                            '<i class="fa fa-angle-right"></i></a></li>');
             });
+            update_alertcount()
         }
 
         $("#id_jiraform-jira_issue").on('paste', function(e) {
