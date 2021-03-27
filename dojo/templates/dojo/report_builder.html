@@ -22,8 +22,7 @@
                 </div>
                 <div class="panel-footer">
                     <div class="clearfix">
-                        {% feature_reports_pdf_list as feature_reports_pdf_list_flag %}
-                        {% if feature_reports_pdf_list_flag %}
+                        {% if 'FEATURE_REPORTS_PDF_LIST'|setting_enabled %}
                             <a class="btn btn-success disabled pull-right run_report" href="#">Save and Run</a>
                         {% else %}
                             <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
