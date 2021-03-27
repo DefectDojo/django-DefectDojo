@@ -1366,9 +1366,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 component_name = item.component_name if hasattr(item, 'component_name') else None
                 component_version = item.component_version if hasattr(item, 'component_version') else None
 
-                from titlecase import titlecase
-                item.title = titlecase(item.title)
-
                 item.hash_code = item.compute_hash_code()
                 deduplicationLogger.debug("new finding's hash_code: %s", item.hash_code)
 
