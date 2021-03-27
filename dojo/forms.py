@@ -1308,9 +1308,8 @@ class AddEndpointForm(forms.Form):
         if 'product' in kwargs:
             product = kwargs.pop('product')
         super(AddEndpointForm, self).__init__(*args, **kwargs)
-        if product is None:
-            self.fields['product'] = forms.ModelChoiceField(queryset=get_authorized_products(Permissions.Product_View))
-        else:
+        self.fields['product'] = forms.ModelChoiceField(queryset=get_authorized_products(Permissions.Endpoint_Add))
+        if product is not None:
             self.fields['product'].initial = product.id
 
         self.product = product

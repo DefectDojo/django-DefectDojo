@@ -4,7 +4,7 @@ from django.shortcuts import render
 from watson import search as watson
 from django.db.models import Q
 from dojo.forms import SimpleSearchForm
-from dojo.models import Finding, Finding_Template, Product, Test, Endpoint, Engagement, Languages, \
+from dojo.models import Finding, Finding_Template, Product, Test, Engagement, Languages, \
     App_Analysis
 from dojo.utils import add_breadcrumb, get_page_items, get_words_for_field
 import re
@@ -18,6 +18,7 @@ from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests
 from dojo.finding.queries import get_authorized_findings
+from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
@@ -90,12 +91,8 @@ def simple_search(request):
             authorized_tests = get_authorized_tests(Permissions.Test_View)
             authorized_engagements = get_authorized_engagements(Permissions.Engagement_View)
             authorized_products = get_authorized_products(Permissions.Product_View)
-            authorized_endpoints = Endpoint.objects.all()
+            authorized_endpoints = get_authorized_endpoints(Permissions.Endpoint_View)
             authorized_finding_templates = Finding_Template.objects.all()
-
-            if not request.user.is_staff:
-                authorized_endpoints = authorized_endpoints.filter(Q(product__authorized_users__in=[request.user]) | Q(product__prod_type__authorized_users__in=[request.user]))
-                # can't filter templates
 
             # TODO better get findings in their own query and match on id. that would allow filtering on additional fields such cve, prod_id, etc.
 

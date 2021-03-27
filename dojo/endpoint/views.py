@@ -1,8 +1,8 @@
 import logging
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -15,35 +15,29 @@ from django.db.models import Q, QuerySet, Count
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
-from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta, Endpoint_Status
+from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, \
     calculate_grade, redirect
 from dojo.notifications.helper import create_notification
-from dojo.user.helper import user_must_be_authorized
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.endpoint.queries import get_authorized_endpoints
 
 logger = logging.getLogger(__name__)
 
 
 def vulnerable_endpoints(request):
-    endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                        finding__duplicate=False, finding__out_of_scope=False, mitigated=False).prefetch_related('product', 'product__tags', 'tags').distinct()
-
-    # are they authorized
-    if request.user.is_staff:
-        pass
-    else:
-        endpoints = Endpoint.objects.filter(
-            Q(product__authorized_users__in=[request.user]) |
-            Q(product__prod_type__authorized_users__in=[request.user])
-        )
-        if not endpoints:
-            raise PermissionDenied
+    endpoints = get_authorized_endpoints(Permissions.Endpoint_View)
+    endpoints = endpoints.filter(finding__active=True, finding__verified=True, finding__false_p=False,
+                                 finding__duplicate=False, finding__out_of_scope=False, mitigated=False).prefetch_related('product', 'product__tags', 'tags').distinct()
 
     product = None
     if 'product' in request.GET:
         p = request.GET.getlist('product', [])
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
+            user_has_permission_or_403(request.user, product, Permissions.Product_View)
 
     ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
     endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
@@ -51,10 +45,7 @@ def vulnerable_endpoints(request):
     paged_endpoints = get_page_items(request, endpoints_query, 25)
     add_breadcrumb(title="Vulnerable Endpoints", top_level=not len(request.GET), request=request)
 
-    system_settings = System_Settings.objects.get()
-
     product_tab = None
-    view_name = "All Endpoints"
     if product:
         product_tab = Product_Tab(product.id, "Vulnerable Endpoints", tab="endpoints")
     return render(
@@ -67,24 +58,16 @@ def vulnerable_endpoints(request):
 
 
 def all_endpoints(request):
-    endpoints = Endpoint.objects.all().prefetch_related('product', 'tags', 'product__tags')
+    endpoints = get_authorized_endpoints(Permissions.Endpoint_View)
+    endpoints = endpoints.prefetch_related('product', 'tags', 'product__tags')
     show_uri = get_system_setting('display_endpoint_uri')
-    # are they authorized
-    if request.user.is_staff:
-        pass
-    else:
-        endpoints = Endpoint.objects.filter(
-            Q(product__authorized_users__in=[request.user]) |
-            Q(product__prod_type__authorized_users__in=[request.user])
-        )
-        if not endpoints:
-            raise PermissionDenied
 
     product = None
     if 'product' in request.GET:
         p = request.GET.getlist('product', [])
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
+            user_has_permission_or_403(request.user, product, Permissions.Product_View)
 
     if show_uri:
         endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
@@ -128,7 +111,7 @@ def get_endpoint_ids(endpoints):
     return ids
 
 
-@user_must_be_authorized(Endpoint, 'view', 'eid')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
 def view_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     host = endpoint.host_no_port
@@ -180,8 +163,7 @@ def view_endpoint(request, eid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Endpoint, 'change', 'eid')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'change')
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
@@ -209,8 +191,7 @@ def edit_endpoint(request, eid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Endpoint, 'delete', 'eid')
+@user_is_authorized(Endpoint, Permissions.Endpoint_Delete, 'eid', 'delete')
 def delete_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, pk=eid)
     product = endpoint.product
@@ -246,8 +227,7 @@ def delete_endpoint(request, eid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Endpoint_Add, 'pid', 'staff')
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = 'dojo/add_endpoint.html'
@@ -285,12 +265,15 @@ def add_endpoint(request, pid):
         'form': form})
 
 
-@user_passes_test(lambda u: u.is_staff)
 def add_product_endpoint(request):
+    if not settings.FEATURE_AUTHORIZATION_V2 and not request.user.is_staff:
+        raise PermissionDenied
+
     form = AddEndpointForm()
     if request.method == 'POST':
         form = AddEndpointForm(request.POST)
         if form.is_valid():
+            user_has_permission_or_403(request.user, form.product, Permissions.Endpoint_Add)
             endpoints = form.save()
             tags = request.POST.get('tags')
             for e in endpoints:
@@ -309,8 +292,7 @@ def add_product_endpoint(request):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Endpoint, 'staff', 'eid')
+@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, 'eid', 'staff')
 def add_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     if request.method == 'POST':
@@ -338,8 +320,7 @@ def add_meta_data(request, eid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Endpoint, 'change', 'eid')
+@user_is_authorized(Endpoint, Permissions.Endpoint_Edit, 'eid', 'change')
 def edit_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
 
@@ -372,20 +353,46 @@ def edit_meta_data(request, eid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# TODO
+# bulk mitigate and delete are combined, so we can't have the nice user_is_authorized decorator
 def endpoint_bulk_update_all(request, pid=None):
     if request.method == "POST":
         endpoints_to_update = request.POST.getlist('endpoints_to_update')
         if request.POST.get('delete_bulk_endpoints') and endpoints_to_update:
-            finds = Endpoint.objects.filter(id__in=endpoints_to_update)
+
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                if not request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_DELETE or settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                    raise PermissionDenied
+            else:
+                if pid is None:
+                    if not request.user.is_staff:
+                        raise PermissionDenied
+                else:
+                    product = get_object_or_404(Product, id=pid)
+                    user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
+
+            finds = get_authorized_endpoints(Permissions.Endpoint_Delete)
+            finds = finds.filter(id__in=endpoints_to_update)
             product_calc = list(Product.objects.filter(endpoint__id__in=endpoints_to_update).distinct())
             finds.delete()
             for prod in product_calc:
                 calculate_grade(prod)
         else:
             if endpoints_to_update:
-                endpoints_to_update = request.POST.getlist('endpoints_to_update')
-                finds = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
+
+                if not settings.FEATURE_AUTHORIZATION_V2:
+                    if not request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_CHANGE or settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                        raise PermissionDenied
+                else:
+                    if pid is None:
+                        if not request.user.is_staff:
+                            raise PermissionDenied
+                    else:
+                        product = get_object_or_404(Product, id=pid)
+                        user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+
+                finds = get_authorized_endpoints(Permissions.Endpoint_Edit)
+                finds = finds.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
                 for endpoint in finds:
                     endpoint.mitigated = not endpoint.mitigated
                     endpoint.save()
@@ -402,8 +409,7 @@ def endpoint_bulk_update_all(request, pid=None):
     return HttpResponseRedirect(reverse('endpoints', args=()))
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
 def endpoint_status_bulk_update(request, fid):
     if request.method == "POST":
         post = request.POST

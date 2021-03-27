@@ -1,8 +1,27 @@
-from dojo.models import Product_Type, Product
+from dojo.models import Endpoint, Engagement, Product_Type, Product, Test
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
+
+
+class UserHasAppAnalysisPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            product = get_object_or_404(Product, pk=request.data.get('product'))
+            return user_has_permission(request.user, product, Permissions.Product_Edit)
+        else:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'GET':
+            return user_has_permission(request.user, obj, Permissions.Product_View)
+        elif request.method == 'PUT' or request.method == 'PATCH':
+            return user_has_permission(request.user, obj, Permissions.Product_Edit)
+        elif request.method == 'DELETE':
+            return user_has_permission(request.user, obj, Permissions.Product_Edit)
+        else:
+            return False
 
 
 class UserHasEndpointPermission(permissions.BasePermission):
@@ -10,6 +29,25 @@ class UserHasEndpointPermission(permissions.BasePermission):
         if request.method == 'POST':
             product = get_object_or_404(Product, pk=request.data.get('product'))
             return user_has_permission(request.user, product, Permissions.Endpoint_Add)
+        else:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'GET':
+            return user_has_permission(request.user, obj, Permissions.Endpoint_View)
+        elif request.method == 'PUT' or request.method == 'PATCH':
+            return user_has_permission(request.user, obj, Permissions.Endpoint_Edit)
+        elif request.method == 'DELETE':
+            return user_has_permission(request.user, obj, Permissions.Endpoint_Delete)
+        else:
+            return False
+
+
+class UserHasEndpointStatusPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            endpoint = get_object_or_404(Endpoint, pk=request.data.get('endpoint'))
+            return user_has_permission(request.user, endpoint, Permissions.Endpoint_Add)
         else:
             return True
 
@@ -46,7 +84,7 @@ class UserHasEngagementPermission(permissions.BasePermission):
 class UserHasFindingPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
-            test = get_object_or_404(Product, pk=request.data.get('test'))
+            test = get_object_or_404(Test, pk=request.data.get('test'))
             return user_has_permission(request.user, test, Permissions.Finding_Add)
         else:
             return True
@@ -102,7 +140,7 @@ class UserHasProductTypePermission(permissions.BasePermission):
 class UserHasTestPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
-            engagement = get_object_or_404(Product, pk=request.data.get('engagement'))
+            engagement = get_object_or_404(Engagement, pk=request.data.get('engagement'))
             return user_has_permission(request.user, engagement, Permissions.Test_Add)
         else:
             return True
@@ -114,6 +152,25 @@ class UserHasTestPermission(permissions.BasePermission):
             return user_has_permission(request.user, obj, Permissions.Test_Edit)
         elif request.method == 'DELETE':
             return user_has_permission(request.user, obj, Permissions.Test_Delete)
+        else:
+            return False
+
+
+class UserHasTestImportPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            test = get_object_or_404(Test, pk=request.data.get('test'))
+            return user_has_permission(request.user, test, Permissions.Test_Edit)
+        else:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'GET':
+            return user_has_permission(request.user, obj, Permissions.Test_View)
+        elif request.method == 'PUT' or request.method == 'PATCH':
+            return user_has_permission(request.user, obj, Permissions.Test_Edit)
+        elif request.method == 'DELETE':
+            return user_has_permission(request.user, obj, Permissions.Test_Edit)
         else:
             return False
 
