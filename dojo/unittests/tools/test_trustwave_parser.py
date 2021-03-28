@@ -31,3 +31,10 @@ class TestTrivyParser(TestCase):
         finding = findings[3]
         self.assertEqual("Critical", finding.severity)
         self.assertEqual("CVE-3011-32", finding.cve)
+        self.assertEqual("Tom and Jerry versions 4 and 5 is vulnerable to Denial of Service (DoS) remote attack via the ever so long running series the simpsons", finding.description)
+        self.assertEqual("This vulnerability was addressed in Tom and Jerry Reboot 12.0 Affected users should upgrade to the latest stable version of Tom and Jerry.", finding.mitigation)
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual("www.example43.com", endpoint.host)
+        self.assertEqual("tcp", endpoint.protocol)
+        self.assertEqual(443, endpoint.port)
