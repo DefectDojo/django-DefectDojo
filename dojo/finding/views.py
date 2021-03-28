@@ -1797,14 +1797,15 @@ def merge_finding_product(request, pid):
 
 
 # bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
-@user_passes_test(lambda u: u.is_staff)
-# @user_must_be_authorized(Product, 'staff', 'pid')
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     now = timezone.now()
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
+        total_find_count = finds.count()
+        skipped_find_count = 0
+
         prods = set([find.test.engagement.product for find in finds])
         if request.POST.get('delete_bulk_findings'):
             if form.is_valid() and finding_to_update:
@@ -1816,24 +1817,34 @@ def finding_bulk_update_all(request, pid=None):
                     finds = finds.filter(
                         Q(test__engagement__product__authorized_users__in=[request.user]) |
                         Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                    )
+                    ).distinct()
+
+                skipped_find_count = total_find_count - finds.count()
 
                 finds.delete()
                 for prod in prods:
                     calculate_grade(prod)
+
+                if skipped_find_count > 0:
+                    add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
+
         else:
             if form.is_valid() and finding_to_update:
-                finding_to_update = request.POST.getlist('finding_to_update')
 
                 # make sure users are not deleting stuff they are not authorized for
                 if not request.user.is_staff and not request.user.is_superuser:
-                    if not settings.AUTHORIZED_USERS_ALLOW_CHANGE:
+                    if not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
                         raise PermissionDenied()
 
                     finds = finds.filter(
                         Q(test__engagement__product__authorized_users__in=[request.user]) |
                         Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                    )
+                    ).distinct()
+
+                    skipped_find_count = total_find_count - finds.count()
+
+                if skipped_find_count > 0:
+                    add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
 
                 finds = prefetch_for_findings(finds)
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
@@ -1856,9 +1867,7 @@ def finding_bulk_update_all(request, pid=None):
 
                         # use super to avoid all custom logic in our overriden save method
                         # it will trigger the pre_save signal
-                        logger.debug('bulk update save')
                         find.save_no_options()
-                        logger.debug('bulk update save done')
 
                     for prod in prods:
                         calculate_grade(prod)
