@@ -35,11 +35,13 @@ class WapitiParser(object):
             raise ValueError("This doesn't seem to be a valid Wapiti XML file.")
 
         severity_mapping = {
-            '4': 'Info',
-            '3': 'Low',
+            '4': 'Critical',
+            '3': 'High',
             '2': 'Medium',
-            '1': 'High',
+            '1': 'Low',
+            '0': 'Info',
         }
+
         host = root.findtext('report_infos/info[@name="target"]')
         if host.endswith("/"):
             host = host[:-1]
