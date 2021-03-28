@@ -19,15 +19,25 @@ class TestTrivyParser(TestCase):
         parser = TrustwaveParser()
         findings = parser.get_findings(test_file, test)
         self.assertEqual(len(findings), 4)
+        # finding 0
         finding = findings[0]
         self.assertEqual("High", finding.severity)
         self.assertEqual("CVE-3011-123", finding.cve)
+        # finding 1
         finding = findings[1]
+        self.assertEqual("Tom and Jerry  vulnerable to Mouse Traps", finding.title)
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("CVE-3011-321", finding.cve)
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual("192.168.0.58", endpoint.host)
+        self.assertEqual("tcp", endpoint.protocol)
+        self.assertEqual(80, endpoint.port)
+        # finding 2
         finding = findings[2]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("CVE-3011-313", finding.cve)
+        # finding 3
         finding = findings[3]
         self.assertEqual("Critical", finding.severity)
         self.assertEqual("CVE-3011-32", finding.cve)

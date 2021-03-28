@@ -38,8 +38,10 @@ class TrustwaveParser(object):
                 test=test,
                 nb_occurences=1,
             )
-
-            finding.unsaved_endpoints = [Endpoint(host=row['Domain'])]
+            host = row.get('Domain')
+            if host is None or host == '':
+                host = row.get('IP')
+            finding.unsaved_endpoints = [Endpoint(host=host)]
             if row.get('Port') is not None and not "" == row.get('Port'):
                 finding.unsaved_endpoints[0].port = int(row['Port'])
             if row.get('Protocol') is not None and not "" == row.get('Protocol'):
