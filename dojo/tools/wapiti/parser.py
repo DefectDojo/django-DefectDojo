@@ -41,6 +41,8 @@ class WapitiParser(object):
             '1': 'High',
         }
         host = root.findtext('report_infos/info[@name="target"]')
+        if host.endswith("/"):
+            host = host[:-1]
 
         dupes = dict()
         for vulnerability in root.findall('vulnerabilities/vulnerability'):
@@ -79,18 +81,14 @@ class WapitiParser(object):
                 )
                 if cwe:
                     finding.cwe = cwe
-                url = urlparse(host + entry.findtext('path'))
+                url = urlparse(host)
                 finding.unsaved_endpoints = [Endpoint(host=url.netloc)]
                 if url.scheme:
                     finding.unsaved_endpoints[0].protocol = url.scheme
                 if url.port:
                     finding.unsaved_endpoints[0].port = url.port
-                if url.path:
-                    finding.unsaved_endpoints[0].path = url.path
-                if url.query:
-                    finding.unsaved_endpoints[0].query = url.query
-                if url.fragment:
-                    finding.unsaved_endpoints[0].fragment = url.fragment
+                if entry.findtext('path'):
+                    finding.unsaved_endpoints[0].path = entry.findtext('path')
 
                 finding.unsaved_req_resp = [{"req": entry.findtext('http_request'), "resp": ""}]
 
@@ -99,6 +97,8 @@ class WapitiParser(object):
                 # check if dupes are present.
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    find.unsaved_req_resp.extend(finding.unsaved_req_resp)
                     find.nb_occurences += finding.nb_occurences
                 else:
                     dupes[dupe_key] = finding
