@@ -9,8 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import render
 from django.utils import timezone
 
-from dojo.models import Finding
-from django.db.models import Count, Q
+from django.db.models import Count
 from dojo.utils import add_breadcrumb, get_punchcard_data
 from dojo.models import Answered_Survey
 from dojo.authorization.roles_permissions import Permissions
