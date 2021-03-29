@@ -698,7 +698,6 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
     return engagements
 
 
-
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
 def view_engagements_cicd(request, pid):
     return view_engagements(request, pid=pid, engagement_type="CI/CD")
