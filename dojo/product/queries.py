@@ -1,7 +1,7 @@
 from crum import get_current_user
 from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
-from dojo.models import Product, Product_Member, Product_Type_Member, App_Analysis
+from dojo.models import Product, Product_Member, Product_Type_Member, App_Analysis, DojoMeta
 from dojo.authorization.authorization import get_roles_for_permission, user_has_permission
 
 
@@ -88,3 +88,71 @@ def get_authorized_app_analysis(permission):
                 Q(product__authorized_users__in=[user]) |
                 Q(product__prod_type__authorized_users__in=[user])).order_by('name')
     return app_analysis
+
+
+def get_authorized_dojo_meta(permission):
+    user = get_current_user()
+
+    if user is None:
+        return DojoMeta.objects.none()
+
+    if user.is_superuser:
+        return DojoMeta.objects.all().order_by('name')
+
+    if settings.FEATURE_AUTHORIZATION_V2:
+        if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+            return DojoMeta.objects.all().order_by('name')
+
+        roles = get_roles_for_permission(permission)
+        product_authorized_product_type_roles = Product_Type_Member.objects.filter(
+            product_type=OuterRef('product__prod_type_id'),
+            user=user,
+            role__in=roles)
+        product_authorized_product_roles = Product_Member.objects.filter(
+            product=OuterRef('product_id'),
+            user=user,
+            role__in=roles)
+        endpoint_authorized_product_type_roles = Product_Type_Member.objects.filter(
+            product_type=OuterRef('endpoint__product__prod_type_id'),
+            user=user,
+            role__in=roles)
+        endpoint_authorized_product_roles = Product_Member.objects.filter(
+            product=OuterRef('endpoint__product_id'),
+            user=user,
+            role__in=roles)
+        finding_authorized_product_type_roles = Product_Type_Member.objects.filter(
+            product_type=OuterRef('finding__test__engagement__product__prod_type_id'),
+            user=user,
+            role__in=roles)
+        finding_authorized_product_roles = Product_Member.objects.filter(
+            product=OuterRef('finding__test__engagement__product_id'),
+            user=user,
+            role__in=roles)
+        dojo_meta = DojoMeta.objects.annotate(
+            product__prod_type__member=Exists(product_authorized_product_type_roles),
+            product__member=Exists(product_authorized_product_roles),
+            endpoint_product__prod_type__member=Exists(endpoint_authorized_product_type_roles),
+            endpoint_product__member=Exists(endpoint_authorized_product_roles),
+            finding__test__engagement__product__prod_type__member=Exists(finding_authorized_product_type_roles),
+            finding__test__engagement__product__member=Exists(finding_authorized_product_roles)
+        ).order_by('name')
+        dojo_meta = dojo_meta.filter(
+            Q(product__prod_type__member=True) |
+            Q(product__member=True) |
+            Q(endpoint_product__prod_type__member=True) |
+            Q(endpoint_product__member=True) |
+            Q(finding__test__engagement__product__prod_type__member=True) |
+            Q(finding__test__engagement__product__member=True))
+    else:
+        if user.is_staff:
+            dojo_meta = DojoMeta.objects.all().order_by('name')
+        else:
+            dojo_meta = DojoMeta.objects.filter(
+                Q(product__authorized_users__in=[user]) |
+                Q(product__prod_type__authorized_users__in=[user]) |
+                Q(endpoint__product__authorized_users__in=[user]) |
+                Q(endpoint__product__prod_type__authorized_users__in=[user]) |
+                Q(finding__test__engagement__product__authorized_users__in=[user]) |
+                Q(finding__test__engagement__product__prod_type__authorized_users__in=[user])
+            ).order_by('name')
+    return dojo_meta

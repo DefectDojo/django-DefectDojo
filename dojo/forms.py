@@ -43,6 +43,7 @@ from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
+from dojo.finding.queries import get_authorized_findings
 
 logger = logging.getLogger(__name__)
 
@@ -565,7 +566,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
     # path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
     # expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={'class': 'datepicker'}))
     accepted_findings = forms.ModelMultipleChoiceField(
-        queryset=Finding.objects.all(), required=True,
+        queryset=Finding.objects.none(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
         help_text=('Active, verified findings listed, please select to add findings.'))
     notes = forms.CharField(required=False, max_length=2400,
@@ -585,6 +586,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
             # logger.debug('setting default expiration_date: %s', expiration_date)
             self.fields['expiration_date'].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
+        self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Finding_Edit)
 
 
 class UploadFileForm(forms.ModelForm):
@@ -607,7 +609,7 @@ class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
 
 class AddFindingsRiskAcceptanceForm(forms.ModelForm):
     accepted_findings = forms.ModelMultipleChoiceField(
-        queryset=Finding.objects.all(), required=True,
+        queryset=Finding.objects.none(), required=True,
         widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
         help_text=('Select to add findings.'), label="Add findings as accepted:")
 
@@ -615,6 +617,10 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
         model = Risk_Acceptance
         fields = ['accepted_findings']
         # exclude = ('name', 'owner', 'path', 'notes', 'accepted_by', 'expiration_date', 'compensating_control')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Finding_Edit)
 
 
 class CheckForm(forms.ModelForm):
@@ -825,7 +831,6 @@ class AddFindingForm(forms.ModelForm):
             self.fields['response'].initial = req_resp[1]
 
     def clean(self):
-        # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super(AddFindingForm, self).clean()
         if ((cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']):
             raise forms.ValidationError('Duplicate findings cannot be'
@@ -883,7 +888,6 @@ class AdHocFindingForm(forms.ModelForm):
             self.fields['response'].initial = req_resp[1]
 
     def clean(self):
-        # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super(AdHocFindingForm, self).clean()
         if ((cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']):
             raise forms.ValidationError('Duplicate findings cannot be'

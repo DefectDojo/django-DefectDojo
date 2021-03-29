@@ -5,18 +5,25 @@ from dojo.models import Endpoint, Endpoint_Status, Product_Member, Product_Type_
 from dojo.authorization.authorization import get_roles_for_permission
 
 
-def get_authorized_endpoints(permission):
-    user = get_current_user()
+def get_authorized_endpoints(permission, queryset=None, user=None):
+
+    if not user:
+        user = get_current_user()
 
     if user is None:
         return Endpoint.objects.none()
 
+    if queryset:
+        endpoints = queryset
+    else:
+        endpoints = Endpoint.objects.all()
+
     if user.is_superuser:
-        return Endpoint.objects.all()
+        return endpoints
 
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-            return Endpoint.objects.all()
+            return endpoints
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -27,17 +34,15 @@ def get_authorized_endpoints(permission):
             product=OuterRef('product_id'),
             user=user,
             role__in=roles)
-        endpoints = Endpoint.objects.annotate(
+        endpoints = endpoints.annotate(
             product__prod_type__member=Exists(authorized_product_type_roles),
             product__member=Exists(authorized_product_roles))
         endpoints = endpoints.filter(
             Q(product__prod_type__member=True) |
             Q(product__member=True))
     else:
-        if user.is_staff:
-            endpoints = Endpoint.objects.all()
-        else:
-            endpoints = Endpoint.objects.filter(
+        if not user.is_staff:
+            endpoints = endpoints.filter(
                 Q(product__authorized_users__in=[user]) |
                 Q(product__prod_type__authorized_users__in=[user]))
     return endpoints

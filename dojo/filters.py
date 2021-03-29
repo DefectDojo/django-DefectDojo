@@ -24,7 +24,6 @@ from django.contrib.contenttypes.models import ContentType
 import tagulous
 # from tagulous.forms import TagWidget
 # import tagulous
-from crum import get_current_user
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
@@ -1416,8 +1415,7 @@ class SimilarFindingFilter(DojoFilter):
 
     def filter_queryset(self, *args, **kwargs):
         queryset = super().filter_queryset(*args, **kwargs)
-        if not self.user.is_staff:
-            queryset = queryset.filter(Q(test__engagement__product__authorized_users__in=[self.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[self.user]))
+        queryset = get_authorized_findings(Permissions.Finding_View, queryset, self.user)
         queryset = queryset.exclude(pk=self.finding.pk)
         return queryset
 
@@ -1844,13 +1842,7 @@ class EndpointFilter(DojoFilter):
     @property
     def qs(self):
         parent = super(EndpointFilter, self).qs
-        if get_current_user() and not get_current_user().is_staff:
-            return parent.filter(
-                Q(product__authorized_users__in=[get_current_user()]) |
-                Q(product__prod_type__authorized_users__in=[get_current_user()])
-            )
-        else:
-            return parent
+        return get_authorized_endpoints(Permissions.Endpoint_View, parent)
 
     class Meta:
         model = Endpoint
@@ -2055,10 +2047,7 @@ class ReportFindingFilter(DojoFilter):
         # duplicate_finding queryset needs to restricted in line with permissions
         # and inline with report scope to avoid a dropdown with 100K entries
         duplicate_finding_query_set = self.form.fields['duplicate_finding'].queryset
-        if get_current_user() is not None and not get_current_user().is_staff:
-            duplicate_finding_query_set = duplicate_finding_query_set.filter(
-                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()]))
+        duplicate_finding_query_set = get_authorized_findings(Permissions.Finding_View, duplicate_finding_query_set)
 
         if self.test:
             duplicate_finding_query_set = duplicate_finding_query_set.filter(test=self.test)
@@ -2138,13 +2127,7 @@ class ReportAuthedFindingFilter(DojoFilter):
     @property
     def qs(self):
         parent = super(ReportAuthedFindingFilter, self).qs
-        if get_current_user() and not get_current_user().is_staff:
-            return parent.filter(
-                Q(test__engagement__product__authorized_users__in=[get_current_user()]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[get_current_user()])
-            )
-        else:
-            return parent
+        return get_authorized_findings(Permissions.Finding_View, parent)
 
     class Meta:
         model = Finding

@@ -34,12 +34,11 @@ from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions, prefetch, schema
-from django.db.models import Q
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
 from dojo.product_type.queries import get_authorized_product_types
-from dojo.product.queries import get_authorized_products, get_authorized_app_analysis
+from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
@@ -856,22 +855,14 @@ class DojoMetaViewSet(mixins.ListModelMixin,
                      mixins.UpdateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.MetaSerializer
-    queryset = DojoMeta.objects.all()
+    queryset = DojoMeta.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasDojoMetaPermission)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(
-                Q(product__authorized_users__in=[self.request.user]) |
-                Q(product__prod_type__authorized_users__in=[self.request.user]) |
-                Q(endpoint__product__authorized_users__in=[self.request.user]) |
-                Q(endpoint__product__prod_type__authorized_users__in=[self.request.user]) |
-                Q(finding__test__engagement__product__authorized_users__in=[self.request.user]) |
-                Q(finding__test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return self.queryset
+        return get_authorized_dojo_meta(Permissions.Product_View)
 
 
 # Authorization: object-based

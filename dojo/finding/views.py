@@ -347,7 +347,7 @@ def view_finding(request, fid):
     if finding.duplicate_finding:
         finding.duplicate_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, finding.duplicate_finding)
 
-    similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
+    similar_findings_filter = SimilarFindingFilter(request.GET, queryset=get_authorized_findings(Permissions.Finding_View), user=request.user, finding=finding)
     logger.debug('similar query: %s', similar_findings_filter.qs.query)
 
     similar_findings = get_page_items(request, similar_findings_filter.qs, settings.SIMILAR_FINDINGS_MAX_RESULTS, prefix='similar')

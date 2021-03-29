@@ -5,18 +5,25 @@ from dojo.models import Finding, Product_Member, Product_Type_Member, Stub_Findi
 from dojo.authorization.authorization import get_roles_for_permission
 
 
-def get_authorized_findings(permission):
-    user = get_current_user()
+def get_authorized_findings(permission, queryset=None, user=None):
+
+    if not user:
+        user = get_current_user()
 
     if user is None:
         return Finding.objects.none()
 
+    if queryset:
+        findings = queryset
+    else:
+        findings = Finding.objects.all()
+
     if user.is_superuser:
-        return Finding.objects.all()
+        return findings
 
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-            return Finding.objects.all()
+            return findings
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -27,17 +34,15 @@ def get_authorized_findings(permission):
             product=OuterRef('test__engagement__product_id'),
             user=user,
             role__in=roles)
-        findings = Finding.objects.annotate(
+        findings = findings.annotate(
             test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
             test__engagement__product__member=Exists(authorized_product_roles))
         findings = findings.filter(
             Q(test__engagement__product__prod_type__member=True) |
             Q(test__engagement__product__member=True))
     else:
-        if user.is_staff:
-            findings = Finding.objects.all()
-        else:
-            findings = Finding.objects.filter(
+        if not user.is_staff:
+            findings = findings.filter(
                 Q(test__engagement__product__authorized_users__in=[user]) |
                 Q(test__engagement__product__prod_type__authorized_users__in=[user]))
     return findings

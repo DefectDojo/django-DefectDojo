@@ -1,4 +1,4 @@
-from dojo.models import Endpoint, Engagement, Product_Type, Product, Test
+from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from dojo.authorization.authorization import user_has_permission
@@ -29,7 +29,47 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
         return check_post_permission(request, Product, 'product', Permissions.Product_Edit)
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit)
+        return check_object_permission(request, obj.product, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit)
+
+
+class UserHasDojoMetaPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            has_permission_result = True
+            product_id = request.data.get('product', None)
+            if product_id:
+                object = get_object_or_404(Product, pk=product_id)
+                has_permission_result = has_permission_result and \
+                    user_has_permission(request.user, object, Permissions.Product_Edit)
+            finding_id = request.data.get('finding', None)
+            if finding_id:
+                object = get_object_or_404(Finding, pk=finding_id)
+                has_permission_result = has_permission_result and \
+                    user_has_permission(request.user, object, Permissions.Finding_Edit)
+            endpoint_id = request.data.get('endpoint', None)
+            if endpoint_id:
+                object = get_object_or_404(Endpoint, pk=endpoint_id)
+                has_permission_result = has_permission_result and \
+                    user_has_permission(request.user, object, Permissions.Endpoint_Edit)
+            return has_permission_result
+        else:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        has_permission_result = True
+        product = obj.product
+        if product:
+            has_permission_result = has_permission_result and \
+                check_object_permission(request, product, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit)
+        finding = obj.finding
+        if finding:
+            has_permission_result = has_permission_result and \
+                check_object_permission(request, finding, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Edit)
+        endpoint = obj.endpoint
+        if endpoint:
+            has_permission_result = has_permission_result and \
+                check_object_permission(request, endpoint, Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Edit)
+        return has_permission_result
 
 
 class UserHasEndpointPermission(permissions.BasePermission):
@@ -42,10 +82,10 @@ class UserHasEndpointPermission(permissions.BasePermission):
 
 class UserHasEndpointStatusPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(request, Endpoint, 'endpoint', Permissions.Endpoint_Add)
+        return check_post_permission(request, Endpoint, 'endpoint', Permissions.Endpoint_Edit)
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Delete)
+        return check_object_permission(request, obj.endpoint, Permissions.Endpoint_View, Permissions.Endpoint_Edit, Permissions.Endpoint_Edit)
 
 
 class UserHasEngagementPermission(permissions.BasePermission):
@@ -96,7 +136,7 @@ class UserHasTestImportPermission(permissions.BasePermission):
         return check_post_permission(request, Test, 'test', Permissions.Test_Edit)
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete)
+        return check_object_permission(request, obj.test, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete)
 
 
 class IsSuperUser(permissions.BasePermission):
