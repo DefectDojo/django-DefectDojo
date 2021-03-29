@@ -31,35 +31,38 @@ class TestMobSFParser(TestCase):
         self.assertEquals('Info', item.severity)
         self.assertEquals(1, item.nb_occurences)
 
-    # def test_parse_file2(self):
-    #     test = Test()
-    #     engagement = Engagement()
-    #     engagement.product = Product()
-    #     test.engagement = engagement
-    #     testfile = open("dojo/unittests/scans/mobsf/report2.json")
-    #     parser = MobSFParser()
-    #     findings = parser.get_findings(testfile, test)
-    #     testfile.close()
-    #     # TODO add more checks dedicated to this file
+    def test_parse_file2(self):
+        test = Test()
+        engagement = Engagement()
+        engagement.product = Product()
+        test.engagement = engagement
+        testfile = open("dojo/unittests/scans/mobsf/report2.json")
+        parser = MobSFParser()
+        findings = parser.get_findings(testfile, test)
+        testfile.close()
+        self.assertEqual(0, len(findings))
+        # TODO add more checks dedicated to this file
 
-    # def test_parse_file_3_1_9_android(self):
-    #     test = Test()
-    #     engagement = Engagement()
-    #     engagement.product = Product()
-    #     test.engagement = engagement
-    #     testfile = open("dojo/unittests/scans/mobsf/android.json")
-    #     parser = MobSFParser()
-    #     findings = parser.get_findings(testfile, test)
-    #     testfile.close()
-    #     # TODO add more checks dedicated to this file
+    def test_parse_file_3_1_9_android(self):
+        test = Test()
+        engagement = Engagement()
+        engagement.product = Product()
+        test.engagement = engagement
+        testfile = open("dojo/unittests/scans/mobsf/android.json")
+        parser = MobSFParser()
+        findings = parser.get_findings(testfile, test)
+        testfile.close()
+        self.assertEqual(61, len(findings))
+        # TODO add more checks dedicated to this file
 
-    # def test_parse_file_3_1_9_ios(self):
-    #     test = Test()
-    #     engagement = Engagement()
-    #     engagement.product = Product()
-    #     test.engagement = engagement
-    #     testfile = open("dojo/unittests/scans/mobsf/ios.json")
-    #     parser = MobSFParser()
-    #     findings = parser.get_findings(testfile, test)
-    #     testfile.close()
-    #     # TODO add more checks dedicated to this file
+    def test_parse_file_3_1_9_ios(self):
+        test = Test()
+        engagement = Engagement()
+        engagement.product = Product()
+        test.engagement = engagement
+        testfile = open("dojo/unittests/scans/mobsf/ios.json")
+        parser = MobSFParser()
+        findings = parser.get_findings(testfile, test)
+        testfile.close()
+        self.assertEqual(11, len(findings))
+        # TODO add more checks dedicated to this file
