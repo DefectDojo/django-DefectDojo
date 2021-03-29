@@ -1,7 +1,7 @@
 import html2text
 from defusedxml import ElementTree
 
-from dojo.models import Finding, Endpoint
+from dojo.models import Finding, Endpoint, Tool_Configuration, Tool_Type
 
 
 class NexposeParser(object):
@@ -23,6 +23,23 @@ class NexposeParser(object):
 
     def get_description_for_scan_types(self, scan_type):
         return "Use the full XML export template from Nexpose."
+
+    def get_nexpose_filers(self):
+        """
+        Reads configuration for the scanner, looking for the type 'Nexpose Scan'
+        """
+        tool_type = Tool_Type.objects.get(name=self.get_scan_types()[0])
+
+        if tool_type:
+            try:
+                tool_config = Tool_Configuration.objects.get(tool_type=tool_type)
+                extras = tool_config.extras
+                if extras:
+                    return extras.lower().split(",")
+            except Tool_Configuration.MultipleObjectsReturned:
+                raise Exception(
+                    'It has configured more than one Nexpose tool. \n'
+                )
 
     def get_findings(self, xml_output, test):
         tree = ElementTree.parse(xml_output)
@@ -99,10 +116,14 @@ class NexposeParser(object):
         """
         vulns = list()
 
+        filters = self.get_nexpose_filers()
+        if not filters:
+            filters = ['vulnerable-exploited', 'vulnerable-version', 'vulnerable-potential']
+
         for tests in node.findall('tests'):
             for test in tests.findall('test'):
                 if test.get('id') in vulnsDefinitions and (
-                        test.get('status') in ['vulnerable-exploited', 'vulnerable-version', 'vulnerable-potential']):
+                        test.get('status') in filters):
                     vuln = vulnsDefinitions[test.get('id').lower()]
                     for desc in test.getchildren():
                         if 'pluginOutput' in vuln:
