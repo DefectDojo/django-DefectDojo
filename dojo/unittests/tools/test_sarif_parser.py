@@ -1,3 +1,4 @@
+import datetime
 from django.test import TestCase
 
 from dojo.models import Test, Finding
@@ -22,6 +23,7 @@ class TestSarifParser(TestCase):
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(510, len(findings))
+        item = findings[0]
         for finding in findings:
             self.common_checks(finding)
 
@@ -37,6 +39,7 @@ class TestSarifParser(TestCase):
         self.assertEqual(
             "A variable was used without being initialized.", item.description
         )
+        self.assertEqual(datetime.datetime(2016, 7, 16, 14, 19, 1, tzinfo=datetime.timezone.utc), item.date)
         for finding in findings:
             self.common_checks(finding)
 
@@ -45,8 +48,6 @@ class TestSarifParser(TestCase):
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
-        for finding in findings:
-            self.common_checks(finding)
 
     def test_example_k2_report(self):
         testfile = open("dojo/unittests/scans/sarif/appendix_k2.sarif")
@@ -103,9 +104,7 @@ class TestSarifParser(TestCase):
             item.file_path,
         )
         for finding in findings:
-            if len(finding.title) > 250:
-                print(finding)
-                self.common_checks(finding)
+            self.common_checks(finding)
 
     def test_example_report_scanlift_dependency_check(self):
         testfile = open("dojo/unittests/scans/sarif/dependency_check.sarif")
@@ -138,6 +137,7 @@ class TestSarifParser(TestCase):
             item.file_path,
         )
         self.assertIsNone(item.cve)
+        self.assertEqual(datetime.datetime(2021, 3, 8, 15, 39, 40, tzinfo=datetime.timezone.utc), item.date)
         # finding 6
         item = findings[6]
         self.assertEqual(
@@ -161,6 +161,7 @@ class TestSarifParser(TestCase):
             item.file_path,
         )
         self.assertIsNone(item.cve)
+        self.assertEqual(datetime.datetime(2021, 3, 8, 15, 46, 16, tzinfo=datetime.timezone.utc), item.date)
         # finding 2
         item = findings[2]
         self.assertEqual(
@@ -176,5 +177,30 @@ class TestSarifParser(TestCase):
         )
         self.assertEqual("Critical", item.severity)
         self.assertIsNone(item.cve)
+        for finding in findings:
+            self.common_checks(finding)
+
+    def test_njsscan(self):
+        """Generated with opensecurity/njsscan (https://github.com/ajinabraham/njsscan)"""
+        testfile = open("dojo/unittests/scans/sarif/njsscan.sarif")
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(2, len(findings))
+        # finding 0
+        finding = findings[0]
+        self.assertEqual(
+            "file:///src/index.js",
+            finding.file_path,
+        )
+        self.assertIsNone(finding.cve)
+        self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.timezone.utc), finding.date)
+        # finding 1
+        finding = findings[1]
+        self.assertEqual(
+            "file:///src/index.js",
+            finding.file_path,
+        )
+        self.assertEqual(235, finding.line)
+        self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.timezone.utc), finding.date)
         for finding in findings:
             self.common_checks(finding)

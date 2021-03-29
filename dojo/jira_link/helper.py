@@ -123,7 +123,6 @@ def finding_can_be_pushed_to_jira(finding, form=None):
 
 # use_inheritance=True means get jira_project config from product if engagement itself has none
 def get_jira_project(obj, use_inheritance=True):
-    print('get jira project for: ' + str(obj.id) + ':' + str(obj))
     if not is_jira_enabled():
         return None
 
@@ -312,12 +311,12 @@ def has_jira_configured(obj):
     return get_jira_project(obj) is not None
 
 
-def get_jira_connection_raw(jira_server, jira_username, jira_password):
+def get_jira_connection_raw(jira_server, jira_username, jira_password, validate=False):
     try:
         jira = JIRA(server=jira_server,
                 basic_auth=(jira_username, jira_password),
                 options={"verify": settings.JIRA_SSL_VERIFY},
-                max_retries=0)
+                max_retries=0, validate=validate)
 
         logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
 
