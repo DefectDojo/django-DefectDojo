@@ -1824,10 +1824,7 @@ def finding_bulk_update_all(request, pid=None):
                         product = get_object_or_404(Product, id=pid)
                         user_has_permission_or_403(request.user, product, Permissions.Finding_Delete)
 
-                finds = finds.filter(
-                    Q(test__engagement__product__authorized_users__in=[request.user]) |
-                    Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                ).distinct()
+                finds = get_authorized_findings(Permissions.Finding_Delete, finds).distinct()
 
                 skipped_find_count = total_find_count - finds.count()
 
@@ -1841,17 +1838,21 @@ def finding_bulk_update_all(request, pid=None):
         else:
             if form.is_valid() and finding_to_update:
 
-                # make sure users are not deleting stuff they are not authorized for
-                if not request.user.is_staff and not request.user.is_superuser:
-                    if not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
-                        raise PermissionDenied()
+                if not settings.FEATURE_AUTHORIZATION_V2:
+                    if not request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_CHANGE or settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                        raise PermissionDenied
+                else:
+                    if pid is None:
+                        if not request.user.is_staff:
+                            raise PermissionDenied
+                    else:
+                        product = get_object_or_404(Product, id=pid)
+                        user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
-                    finds = finds.filter(
-                        Q(test__engagement__product__authorized_users__in=[request.user]) |
-                        Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                    ).distinct()
+                # make sure users are not editing stuff they are not authorized for
+                finds = get_authorized_findings(Permissions.Finding_Edit, finds).distinct()
 
-                    skipped_find_count = total_find_count - finds.count()
+                skipped_find_count = total_find_count - finds.count()
 
                 if skipped_find_count > 0:
                     add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
