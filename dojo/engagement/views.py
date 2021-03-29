@@ -84,8 +84,9 @@ def engagement_calendar(request):
 
 
 def engagement(request):
+    products = get_authorized_products(Permissions.Engagement_View).distinct()
     engagements = Engagement.objects.filter(
-        product__in=get_authorized_products(Permissions.Engagement_View).distinct()
+        product__in=products
     ).select_related(
         'product',
         'product__prod_type',
@@ -118,15 +119,10 @@ def engagement(request):
         request.GET,
         queryset=engagements
     )
+
     engs = get_page_items(request, filtered_engagements.qs, 25)
-    product_name_words = sorted(set(
-        engagement.product.name
-        for engagement in engs.object_list
-    ))
-    engagement_name_words = sorted(set(
-        engagement.name
-        for engagement in engs.object_list
-    ))
+    product_name_words = sorted(products.values_list('name', flat=True))
+    engagement_name_words = sorted(engagements.values_list('name', flat=True).distinct())
 
     add_breadcrumb(
         title="Active Engagements",
