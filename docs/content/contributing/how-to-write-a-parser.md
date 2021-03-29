@@ -34,8 +34,23 @@ You'd want to build your docker images locally, and eventually pass in your loca
 |`dojo/tools/<parser_dir>/__init__.py`          | Empty file for class initialization
 |`dojo/tools/<parser_dir>/parser.py`            | The meat. This is where you write your actual parser
 |`dojo/unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
-|`dojo/unittests/tools/test_<parser_dir>_parser.py`   | The unittest class, holding unit tests definitions
 
+
+## Template Generator
+
+Utilze the [template](https://github.com/DefectDojo/cookiecutter-scanner-parser)  parser to quickly generate the files required. To get started you will need to install [cookiecutter](https://github.com/cookiecutter/cookiecutter).
+
+```bash
+$ pip install cookiecutter
+```
+
+Then generate your scanner parser from the root of django-DefectDojo:
+
+```bash
+$ cookiecutter https://github.com/DefectDojo/cookiecutter-scanner-parser
+```
+
+Read [more](https://github.com/DefectDojo/cookiecutter-scanner-parser) on the template configuration variables.
 
 ## Things to pay attention to
 
