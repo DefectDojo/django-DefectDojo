@@ -28,7 +28,7 @@ from dojo.utils import add_external_issue, add_error_message_to_response, add_fi
                        get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 
 from dojo.notifications.helper import create_notification
-from django.db.models import Prefetch, F
+from django.db.models import Prefetch, F, OuterRef, Subquery
 from django.db.models.query import QuerySet
 from github import Github
 from django.contrib.postgres.aggregates import StringAgg
@@ -624,7 +624,8 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     ).order_by(
         '-updated'
     )
-    base_engagements = prefetch_for_view_engagements(base_engagements)
+    recent_test_day_count = 7
+    base_engagements = prefetch_for_view_engagements(base_engagements, recent_test_day_count)
 
     # In Progress Engagements
     engs = base_engagements.filter(active=True, status="In Progress").order_by('-updated')
@@ -661,14 +662,23 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'inactive_engs': result_inactive_engs,
                    'inactive_engs_count': result_inactive_engs.paginator.count,
                    'inactive_engs_filter': inactive_engs_filter,
+                   'recent_test_day_count': recent_test_day_count,
                    'user': request.user})
 
 
-def prefetch_for_view_engagements(engagements):
+def prefetch_for_view_engagements(engagements, recent_test_day_count):
     engagements = engagements.select_related(
         'lead'
     ).prefetch_related(
-        'tags',
+        Prefetch('test_set', queryset=Test.objects.filter(
+            id__in=Subquery(
+                Test.objects.filter(
+                    engagement_id=OuterRef('engagement_id'),
+                    updated__gte=timezone.now() - timedelta(days=recent_test_day_count)
+                ).values_list('id', flat=True)
+            ))
+        ),
+        'test_set__test_type',
     ).annotate(
         count_tests=Count('test', distinct=True),
         count_findings_all=Count('test__finding__id'),
