@@ -1586,7 +1586,7 @@ class ReImportScanResource(MultipartResource, Resource):
 
                 from titlecase import titlecase
                 item.title = titlecase(item.title)
-                if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
+                if scan_type == 'Veracode Scan':
                     find = Finding.objects.filter(title=item.title,
                                                   test__id=test.id,
                                                   severity=sev,

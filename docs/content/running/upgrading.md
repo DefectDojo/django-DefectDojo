@@ -111,6 +111,18 @@ Upgrade Celery to the latest version:
 
 > `pip install --upgrade celery`
 
+Upgrading to DefectDojo Version 1.14.x
+--------------------------------------
+- See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.14.0
+
+Note that the below fields are now optional without default value. They will not be filled anymore with values such as "No references given" when found empty while saving the findings
+- mitigation
+- references
+- impact
+- url
+
+
+
 Upgrading to DefectDojo Version 1.13.x
 --------------------------------------
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.13.0

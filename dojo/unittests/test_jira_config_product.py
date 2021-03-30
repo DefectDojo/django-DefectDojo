@@ -2,8 +2,10 @@ from django.urls import reverse
 from .dojo_test_case import DojoTestCase
 from dojo.models import JIRA_Instance, Product
 from django.utils.http import urlencode
-from unittest.mock import patch
+from unittest.mock import patch, call
+from jira.exceptions import JIRAError
 import requests
+import dojo.jira_link.helper as jira_helper
 # from unittest import skip
 import logging
 
@@ -46,7 +48,10 @@ class JIRAConfigProductTest(DojoTestCase):
     def add_jira_instance(self, data, jira_mock):
         response = self.client.post(reverse('add_jira'), urlencode(data), content_type='application/x-www-form-urlencoded')
         # check that storing a new config triggers a login call to JIRA
-        jira_mock.assert_called_once_with(data['url'], data['username'], data['password'])
+        call_1 = call(data['url'], data['username'], data['password'], validate=True)
+        call_2 = call(data['url'], data['username'], data['password'], validate=True)
+        # jira_mock.assert_called_once_with(data['url'], data['username'], data['password'], validate=True)
+        jira_mock.assert_has_calls([call_1, call_2])
         # succesful, so should redirect to list of JIRA instances
         self.assertRedirects(response, '/jira')
 
@@ -67,10 +72,37 @@ class JIRAConfigProductTest(DojoTestCase):
         data = self.data_jira_instance
         data['url'] = 'https://jira.hj23412341hj234123421341234ljl.nl'
 
+        # test UI validation error
+
         # self.client.force_login('admin', backend='django.contrib.auth.backends.ModelBackend')
         # Client.raise_request_exception = False  # needs Django 3.0
+        # can't use helper method which has patched connection raw method
+        response = self.client.post(reverse('add_jira'), urlencode(data), content_type='application/x-www-form-urlencoded')
+
+        self.assertEqual(200, response.status_code)
+        content = response.content.decode('utf-8')
+        self.assertTrue('Name or service not known' in content)
+
+        # test raw connection error
         with self.assertRaises(requests.exceptions.RequestException):
-            response = self.client.post(reverse('add_jira'), urlencode(data), content_type='application/x-www-form-urlencoded')
+            jira = jira_helper.get_jira_connection_raw(data['url'], data['username'], data['password'], validate=True)
+
+    @patch('dojo.jira_link.views.jira_helper.get_jira_connection_raw')
+    def test_add_jira_instance_invalid_credentials(self, jira_mock):
+        jira_mock.side_effect = JIRAError(status_code=401, text='Login failed')
+        data = self.data_jira_instance
+
+        # test UI validation error
+
+        # self.client.force_login('admin', backend='django.contrib.auth.backends.ModelBackend')
+        # Client.raise_request_exception = False  # needs Django 3.0
+        # can't use helper method which has patched connection raw method
+        response = self.client.post(reverse('add_jira'), urlencode(data), content_type='application/x-www-form-urlencoded')
+
+        self.assertEqual(200, response.status_code)
+        content = response.content.decode('utf-8')
+        self.assertTrue('Login failed' in content)
+        self.assertTrue('Unable to authenticate to JIRA' in content)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_jira_project_to_product_without_jira_project(self, jira_mock):

@@ -78,6 +78,14 @@ A magical, illusionary, non-existent, YMMV, wannabe, no guarantees list of thing
 - Reimport matching improvements
 
 
+## Wishlist
+To manage expectations, we call this the wishlist. These are items we want to do, are discussing or pondering our minds:
+- New modern UI / SPA
+- New dashboarding / statistics
+- New search engine
+- Adopt a plugin framework to allow plugins for issue trackers, parsers, reports, etc
+
+
 ## Support, Bug Reports and Getting Involved
 Please come to our Slack channel first, where we can try to help you or point you in the right direction:
 
@@ -168,6 +176,9 @@ Proceeds are used for testing, infrastructure, etc.
 [![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/signal-iduna.png)](https://signal-iduna.de/)
 [![WSO2](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/wso2-logo-for-screen.png)](https://wso2.com/)
 [![CloudBees](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png)](https://cloudbees.com/)
+[![WeHackPurple](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png)](https://wehackpurple.com/)
+[![MaibornWolff](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png)](https://www.maibornwolff.de/en)
+
 
 Interested in becoming a sponsor and having your logo displayed? Please review
 our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org

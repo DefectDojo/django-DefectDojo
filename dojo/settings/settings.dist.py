@@ -175,6 +175,10 @@ env = environ.Env(
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
+    # Feature toggle to show legacy list of PDF reports
+    # You need to have wkhtmltopdf installed on your system to generate PDF reports
+    DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
+
     DD_JIRA_TEMPLATE_DIR=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/')
 )
@@ -644,7 +648,7 @@ INSTALLED_APPS = (
     'dbbackup',
     'django_celery_results',
     'social_django',
-    'drf_yasg2',
+    'drf_yasg',
     'tagulous',
     'django_jsonfield_backport',
 )
@@ -740,6 +744,12 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'dojo.risk_acceptance.helper.expiration_handler',
         'schedule': crontab(minute=0, hour='*/3'),  # every 3 hours
     },
+    # 'jira_status_reconciliation': {
+    #     'task': 'dojo.tasks.jira_status_reconciliation_task',
+    #     'schedule': timedelta(hours=12),
+    #     'kwargs': {'mode': 'reconcile', 'dryrun': True, 'daysback': 10, 'product': None, 'engagement': None}
+    # },
+
 }
 
 # ------------------------------------
@@ -775,15 +785,17 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
+    'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'vuln_id_from_tool'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'severity'],
     'Qualys Scan': ['title', 'severity'],
@@ -796,8 +808,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Acunetix Scan': ['title', 'description'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
+    'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path'],
-
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -806,9 +818,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
     'Checkmarx Scan': False,
+    'Checkmarx OSA': True,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
     'Nessus Scan': True,
+    'Nexpose Scan': True,
     'NPM Audit Scan': True,
     'Yarn Audit Scan': True,
     'Whitesource Scan': True,
@@ -845,13 +859,16 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
     'anchore_grype': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
+    'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
@@ -868,6 +885,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
+    'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
     'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1026,6 +1044,10 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
 # When enabled, staff users have full access to all product types and products
 AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
+
+# Feature toggle to show legacy list of PDF reports
+# You need to have wkhtmltopdf installed on your system to generate PDF reports
+FEATURE_REPORTS_PDF_LIST = env('DD_FEATURE_REPORTS_PDF_LIST')
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 

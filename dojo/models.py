@@ -31,6 +31,7 @@ from tagulous.models import TagField
 import tagulous.admin
 from django_jsonfield_backport.models import JSONField
 import hyperlink
+from cvss import CVSS3
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -780,13 +781,11 @@ class Product(models.Model):
     def get_product_type(self):
         return self.prod_type if self.prod_type is not None else 'unknown'
 
+    # only used in APIv2 serializers.py, query should be aligned with findings_count
+    @cached_property
     def open_findings_list(self):
         findings = Finding.objects.filter(test__engagement__product=self,
-                                          mitigated__isnull=True,
-                                          verified=True,
-                                          false_p=False,
-                                          duplicate=False,
-                                          out_of_scope=False
+                                          active=True,
                                           )
         findings_list = []
         for i in findings:
@@ -838,6 +837,8 @@ class Tool_Configuration(models.Model):
                                                 'Username/Password'),
                                                ('SSH', 'SSH')),
                                            null=True, blank=True)
+    extras = models.CharField(max_length=255, null=True, blank=True, help_text="Additional definitions that will be "
+                                                                              "consumed by scanner")
     username = models.CharField(max_length=200, null=True, blank=True)
     password = models.CharField(max_length=600, null=True, blank=True)
     auth_title = models.CharField(max_length=200, null=True, blank=True,
@@ -1422,20 +1423,29 @@ class Finding(models.Model):
                               null=True,
                               verbose_name="CVSS v3",
                               help_text="Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw.")
+    cvssv3_score = models.FloatField(null=True,
+                                        blank=True,
+                                        verbose_name="CVSSv3 score",
+                                        help_text="Numerical CVSSv3 score for the vulnerability. If the vector is given, the score is updated while saving the finding")
+
     url = models.TextField(null=True,
                            blank=True,
                            editable=False,
                            verbose_name="URL",
-                           help_text="External reference that provides more information about this flaw.")
+                           help_text="External reference that provides more information about this flaw.")  # not displayed and pretty much the same as references. To remove?
     severity = models.CharField(max_length=200,
                                 verbose_name="Severity",
                                 help_text="The severity level of this flaw (Critical, High, Medium, Low, Informational).")
     description = models.TextField(verbose_name="Description",
-                                   help_text="Longer more descriptive information about the flaw.")
+                                help_text="Longer more descriptive information about the flaw.")
     mitigation = models.TextField(verbose_name="Mitigation",
-                                  help_text="Text describing how to best fix the flaw.")
+                                null=True,
+                                blank=True,
+                                help_text="Text describing how to best fix the flaw.")
     impact = models.TextField(verbose_name="Impact",
-                              help_text="Text describing the impact this flaw has on systems, products, enterprise, etc.")
+                                null=True,
+                                blank=True,
+                                help_text="Text describing the impact this flaw has on systems, products, enterprise, etc.")
     steps_to_reproduce = models.TextField(null=True,
                                           blank=True,
                                           verbose_name="Steps to Reproduce",
@@ -1474,6 +1484,8 @@ class Finding(models.Model):
     active = models.BooleanField(default=True,
                                  verbose_name="Active",
                                  help_text="Denotes if this flaw is active or not.")
+    # note that false positive findings cannot be verified
+    # in defectdojo verified means: "we have verified the finding and it turns out that it's not a false positive"
     verified = models.BooleanField(default=True,
                                    verbose_name="Verified",
                                    help_text="Denotes if this flaw has been manually verified by the tester.")
@@ -1693,6 +1705,12 @@ class Finding(models.Model):
                                         blank=True,
                                         verbose_name="Number of occurences",
                                         help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
+
+    # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?"
+    publish_date = models.DateTimeField(null=True,
+                                         blank=True,
+                                         verbose_name="Publish date",
+                                         help_text="Date when this vulnerability was made publicly available.")
 
     tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.")
@@ -2097,6 +2115,15 @@ class Finding(models.Model):
 
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
+
+        # Synchronize cvssv3 score using cvssv3 vector
+        if self.cvssv3:
+            try:
+                cvss_object = CVSS3(self.cvssv3)
+                # use the environmental score, which is the most refined score
+                self.cvssv3_score = cvss_object.scores()[2]
+            except Exception as ex:
+                logger.error("Can't compute cvssv3 score for finding id %i. Invalid cvssv3 vector found: '%s'. Exception: %s", self.id, self.cvssv3, ex)
         super(Finding, self).save()
         system_settings = System_Settings.objects.get()
 
@@ -2134,10 +2161,10 @@ class Finding(models.Model):
         from dojo.utils import calculate_grade
         calculate_grade(self.test.engagement.product)
 
+    # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
         no_check = ["test", "reporter"]
-        bigfields = ["description", "mitigation", "references", "impact",
-                     "url"]
+        bigfields = ["description"]
         for field_obj in self._meta.fields:
             field = field_obj.name
             if field not in no_check:
@@ -2666,7 +2693,7 @@ class JIRA_Project(models.Model):
 
     def clean(self):
         if not self.jira_instance:
-            raise ValidationError('Cannot save JIRA_Project without JIRA_Instance')
+            raise ValidationError('Cannot save JIRA Project Configuration without JIRA Instance')
 
     def __str__(self):
         return ('%s: ' + self.project_key + '(%s)') % (str(self.id), str(self.jira_instance.url) if self.jira_instance else 'None')
