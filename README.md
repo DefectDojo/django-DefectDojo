@@ -77,6 +77,12 @@ A magical, illusionary, non-existent, YMMV, wannabe, no guarantees list of thing
 - Push groups of findings to a single JIRA ticket
 - Reimport matching improvements
 
+## Wishlist
+To manage expectations, we call this the wishlist. These are items we want to do, are discussing or pondering our minds:
+- New modern UI / SPA
+- New dashboarding / statistics
+- New search engine
+- Adopt a plugin framework to allow plugins for issue trackers, parsers, reports, etc
 
 ## Support, Bug Reports and Getting Involved
 Please come to our Slack channel first, where we can try to help you or point you in the right direction:
