@@ -128,7 +128,7 @@
                         <!-- /input-group -->
                     </li>
                     <li class="dropdown">
-                        <a class="dropdown-toggle dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
+                        <a class="dropdown-toggle dropdown-toggle-alerts dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
                             <i class="fa fa-bell fa-fw"></i>
                             <span id="alert_count" class="badge badge-count badge-count{{ alert_count }}">{{ alert_count }}</span>
                             <i class="fa fa-caret-down"></i>
@@ -468,8 +468,8 @@
                     </ul>
                   </li>
                   <!-- Benchmarks Tab -->
-                  {% if system_settings.enable_benchmark %}                  
-                  {% if product_tab.product|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:product_tab.product %}                  
+                  {% if system_settings.enable_benchmark %}
+                  {% if product_tab.product|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:product_tab.product %}
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'benchmarks' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-balance-scale" aria-hidden="true"></span>
                     <span class="hidden-xs"> Benchmarks</span>
@@ -665,10 +665,8 @@
 
         $('.has-popover').popover({'trigger':'hover'});
         {% if request.user.is_authenticated %}
-            $('.dropdown-toggle').click(function() {
-                if (disable_count == "False" || refresh == 'True') {
-                    get_alerts();
-                }
+            $('.dropdown-toggle-alerts').click(function() {
+                get_alerts();
             });
 
             if (disable_count == "False") {
@@ -722,6 +720,7 @@
                 $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>Clear All Alerts </strong>' +
                                            '<i class="fa fa-angle-right"></i></a></li>');
             });
+            update_alertcount()
         }
 
         $("#id_jiraform-jira_issue").on('paste', function(e) {
