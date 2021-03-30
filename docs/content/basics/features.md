@@ -705,33 +705,6 @@ The calendar view provides a look at all the engagements occurring
 during the month displayed. Each entry is a direct link to the
 Engagement view page.
 
-Port Scans
-----------
-
-DefectDojo has the ability to run a port scan using nmap. Scan can be
-configured for TCP or UDP ports as well as for a Weekly, Monthly or
-Quarterly frequency.
-
-![Port Scan Form](../../images/scan_1.png)
-
-In order for the scans to kick off the
-[dojo.management.commands.run\_scan.py]{.title-ref} must run. It is easy
-to set up a cron job in order to kick these off at the appropriate
-frequency. Below is an example cron entry: :
-
-    0 0 * * 0 /root/.virtualenvs/dojo/bin/python /root/defect-dojo/manage.py run_scan Weekly
-    0 0 1 * * /root/.virtualenvs/dojo/bin/python /root/defect-dojo/manage.py run_scan Monthly
-    0 0 1 3,6,9,12 * /root/.virtualenvs/dojo/bin/python /root/defect-dojo/manage.py run_scan Quarterly
-
-![Port Scan Form](../../images/scan_2.png)
-
-The scan process will email the configured recipients with the results.
-
-These scans call also be kicked off on demand by selecting the Launch
-Scan Now option in the view scan screen.
-
-![Port Scan Form](../../images/scan_3.png)
-
 Notifications
 -------------
 
@@ -751,6 +724,10 @@ administrator might want notifications of all upcoming engagements sent
 to a certain Slack channel, whereas an individual user wants email
 notifications to be sent to the user\'s specified email address when a
 report has finished generating.
+
+Microsoft Teams does not provide an easy way to send messages to a personal
+channel. Therefore, DefectDojo can only send system scope notifications
+to Microsoft Teams.
 
 In order to identify and notify you about things like upcoming
 engagements, DefectDojo runs scheduled tasks for this purpose. These
@@ -795,126 +772,30 @@ Reports
 
 ![Report Listing](../../images/report_1.png)
 
-DefectDojo\'s reports can be generated in AsciiDoc and PDF. AsciiDoc is
-recommended for reports with a large number of findings.
-
-The PDF report is generated using [wkhtmltopdf](http://wkhtmltopdf.org/)
-via [Celery](http://docs.celeryproject.org/en/latest/index.html) and
-sane defaults are included in the [settings.py]{.title-ref} file. This
-allows report generation to be asynchronous and improves the user
-experience.
-
-If you are updating from an older version of DefectDojo, you will need
-to install [wkhtmltopdf]{.title-ref} on your own. Please follow the
-directions for your specific OS in the [wkhtmltopdf
-documentation](https://github.com/pdfkit/pdfkit/wiki/Installing-WKHTMLTOPDF).
-
-Some operating systems are capable of installing
-[wkhtmltopdf]{.title-ref} from their package managers:
-
-{{% notice note %}}
-To get report email notifications, make sure you have a working email
-configuration in the system settings, and enable notifications for
-generated reports in the notification settings.
-{{% /notice %}}
-
-
-Mac: :
-
-    brew install Caskroom/cask/wkhtmltopdf
-
-Debian/Ubuntu: :
-
-    sudo apt-get install wkhtmltopdf
-
-Fedora/Centos: :
-
-    sudo yum install wkhtmltopdf
-
-{{% notice warning %}}
-Version in debian/ubuntu repos has reduced functionality (because it\'s
-compiled without the wkhtmltopdf QT patches), such as adding outlines,
-headers, footers, TOC etc. To use these options you should install a
-static binary from [wkhtmltopdf](http://wkhtmltopdf.org/) site.
-{{% /notice %}}
-
-
-
-Additionally, DefectDojo takes advantage of
-[python-PDFKit](https://github.com/JazzCore/python-pdfkit) to interact
-with the [wkhtmltopdf]{.title-ref} commandline interface. It is easily
-installed by running: :
-
-    pip install pdfkit
-
-It will also be necessary to add the path of [wkhtmltopdf]{.title-ref}
-to your [settings.py]{.title-ref} file. By default the following entry
-ships with DefectDojp: :
-
-    WKHTMLTOPDF_PATH = '/usr/local/bin/wkhtmltopdf'
-
-However, you may have to update that entry to suit your installation.
-
-Celery is included with DefectDojo and needs to be kicked off in order
-for reports to generate/work. In development you can run the celery
-process like: :
-
-    celery -A dojo worker -l info --concurrency 3
-
-In production it is recommended that the celery process be daemonized.
-Supervisor is also included with DefectDojo and can be set up by
-following the [Celery
-documentation](http://docs.celeryproject.org/en/latest/tutorials/daemonizing.html).
-A sample [celeryd.conf]{.title-ref} [can be found
-at](https://github.com/celery/celery/blob/3.1/extra/supervisord/celeryd.conf).
-
-Celery beat should also be running, this will enable defectDojo to
-perform periodic checks of things like upcoming and stale engagements as
-well as allowing for celery to clean up after itself and keep your task
-database from getting too large. In development you can run the process
-like: :
-
-    celery beat -A dojo -l info
-
-In production it is recommended that the celery beat process also be
-daemonized. A sample [celerybeatd.conf]{.title-ref} [can be found
-here](https://github.com/celery/celery/blob/3.1/extra/supervisord/celerybeat.conf).
-
-If you are upgrading from an older version of DefectDojo, you will have
-to install Celery on your own. To do this you you can run: :
-
-    pip install celery
-
-If you are using virtual environments make sure your environment is
-activated. You can also follow the [installation
-instructions](http://docs.celeryproject.org/en/latest/getting-started/introduction.html#installation)
-from the Celery documentation.
-
 Reports can be generated for:
 
-1.  Groups of Products
-2.  Individual Products
-3.  Endpoints
-4.  Product Types
-5.  Custom Reports
+1.  Product types
+2.  Products
+3.  Engagements
+4.  Tests
+5.  List of Findings
+6.  Endpoints
+7.  Custom reports
 
 ![Report Generation](../../images/report_2.png)
 
-Filtering is available on all Report Generation views to aid in focusing
-the report for the appropriate need.
+Filtering is available on all report generation views to aid in focusing the report for the appropriate need.
 
-Custom reports allow you to select specific components to be added to
-the report. These include:
+Custom reports, generated with the Report Builder, allow you to select specific components to be added to the report. These include:
 
 1.  Cover Page
 2.  Table of Contents
 3.  WYSIWYG Content
-4.  Findings List
-5.  Endpoint List
+4.  Findings 
+5.  Vulnerable Endpoints
 6.  Page Breaks
 
-The custom report workflow takes advantage of the same asynchronous
-process described above.
+DefectDojo's reports can be generated in HTML and AsciiDoc.
 
 Issue Consolidation
 -------------------
@@ -1016,13 +897,6 @@ The available algorithms are:
             id existing in the source tool. Few scanners populate this
             field currently. If you want to use this algorithm, you may
             need to update the scanner code beforehand
-        -   
-
-            The tools that populate the unique\_id\_from\_tool field are:
-
-            :   -   [Checkmarx Scan detailed]{.title-ref}
-                -   [SonarQube Scan detailed]{.title-ref}
-
         -   
 
             Advantages:

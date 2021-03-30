@@ -23,6 +23,8 @@ env = environ.Env(
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
+    DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
+    DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
@@ -31,10 +33,6 @@ env = environ.Env(
     DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
-    DD_PORT_SCAN_CONTACT_EMAIL=(str, 'email@localhost'),
-    DD_PORT_SCAN_RESULT_EMAIL_FROM=(str, 'email@localhost'),
-    DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=(str, ['email@localhost']),
-    DD_PORT_SCAN_SOURCE_IP=(str, '127.0.0.1'),
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, False),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
@@ -173,7 +171,16 @@ env = environ.Env(
 
     # Feature toggle for new authorization, which is incomplete at the moment.
     # Don't set it to True for productive environments!
-    DD_FEATURE_NEW_AUTHORIZATION=(bool, False)
+    DD_FEATURE_AUTHORIZATION_V2=(bool, False),
+    # When enabled, staff users have full access to all product types and products
+    DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
+
+    # Feature toggle to show legacy list of PDF reports
+    # You need to have wkhtmltopdf installed on your system to generate PDF reports
+    DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
+
+    DD_JIRA_TEMPLATE_DIR=(str, 'dojo/templates/issue-trackers'),
+    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/')
 )
 
 
@@ -517,6 +524,9 @@ if env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS'):
     SECURE_HSTS_SECONDS = env('DD_SECURE_HSTS_SECONDS')
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS')
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = env('DD_SESSION_EXPIRE_AT_BROWSER_CLOSE')
+SESSION_COOKIE_AGE = env('DD_SESSION_COOKIE_AGE')
+
 # ------------------------------------------------------------------------------
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
@@ -527,11 +537,6 @@ DB_KEY = env('DD_CREDENTIAL_AES_256_KEY')
 
 # wkhtmltopdf settings
 WKHTMLTOPDF_PATH = env('DD_WKHTMLTOPDF')
-
-PORT_SCAN_CONTACT_EMAIL = env('DD_PORT_SCAN_CONTACT_EMAIL')
-PORT_SCAN_RESULT_EMAIL_FROM = env('DD_PORT_SCAN_RESULT_EMAIL_FROM')
-PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
-PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
@@ -643,7 +648,7 @@ INSTALLED_APPS = (
     'dbbackup',
     'django_celery_results',
     'social_django',
-    'drf_yasg2',
+    'drf_yasg',
     'tagulous',
     'django_jsonfield_backport',
 )
@@ -739,6 +744,12 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'dojo.risk_acceptance.helper.expiration_handler',
         'schedule': crontab(minute=0, hour='*/3'),  # every 3 hours
     },
+    # 'jira_status_reconciliation': {
+    #     'task': 'dojo.tasks.jira_status_reconciliation_task',
+    #     'schedule': timedelta(hours=12),
+    #     'kwargs': {'mode': 'reconcile', 'dryrun': True, 'daysback': 10, 'product': None, 'engagement': None}
+    # },
+
 }
 
 # ------------------------------------
@@ -768,24 +779,26 @@ if env('DD_DJANGO_METRICS_ENABLED'):
 # If not present, default is the legacy behavior: see models.py, compute_hash_code_legacy function
 # legacy is:
 #   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
-#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
+#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description']
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
+    'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'file_path'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'vuln_id_from_tool'],
-    'Nessus Scan': ['title', 'severity', 'cve', 'cwe', 'endpoints'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
+    'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
+    'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
-    'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
-    'Qualys Scan': ['title', 'endpoints', 'severity'],
+    'ZAP Scan': ['title', 'cwe', 'severity'],
+    'Qualys Scan': ['title', 'severity'],
     'PHP Symfony Security Check': ['title', 'cve'],
     'Clair Scan': ['title', 'cve', 'description', 'severity'],
     'Clair Klar Scan': ['title', 'description', 'severity'],
@@ -795,6 +808,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Acunetix Scan': ['title', 'description'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
+    'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
+    'SpotBugs Scan': ['cwe', 'severity', 'file_path'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -803,9 +818,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
     'Checkmarx Scan': False,
+    'Checkmarx OSA': True,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
     'Nessus Scan': True,
+    'Nexpose Scan': True,
     'NPM Audit Scan': True,
     'Yarn Audit Scan': True,
     'Whitesource Scan': True,
@@ -814,6 +831,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'DSOP Scan': True,
     'Acunetix Scan': True,
     'Trivy Scan': True,
+    'SpotBugs Scan ': False,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -840,13 +858,17 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
+    'anchore_grype': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
+    'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
@@ -863,7 +885,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
+    'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
     'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
+    'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1016,8 +1041,17 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 
 # Feature toggle for new authorization, which is incomplete at the moment.
 # Don't set it to True for productive environments!
-FEATURE_NEW_AUTHORIZATION = env('DD_FEATURE_NEW_AUTHORIZATION')
+FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
+# When enabled, staff users have full access to all product types and products
+AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
+
+# Feature toggle to show legacy list of PDF reports
+# You need to have wkhtmltopdf installed on your system to generate PDF reports
+FEATURE_REPORTS_PDF_LIST = env('DD_FEATURE_REPORTS_PDF_LIST')
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
+
+JIRA_TEMPLATE_DIR = env('DD_JIRA_TEMPLATE_DIR')
+TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')

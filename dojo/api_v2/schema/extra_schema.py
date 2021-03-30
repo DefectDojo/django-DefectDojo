@@ -1,11 +1,11 @@
-from drf_yasg2.inspectors.view import SwaggerAutoSchema
-from drf_yasg2.openapi import resolve_ref, Schema
+from drf_yasg.inspectors.view import SwaggerAutoSchema
+from drf_yasg.openapi import resolve_ref, Schema
 from .utils import resolve_lazy_ref
 import copy
 
 
 class ComposableSchema:
-    """A composable schema defines a transformation on drf_yasg2 Operation. These
+    """A composable schema defines a transformation on drf_yasg Operation. These
     schema can then be composed with another composable schema using the composeWith method
     yielding a new composable schema whose transformation is defined as the function composition
     of the transformation of the two source schema.

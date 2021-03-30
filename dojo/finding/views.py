@@ -516,14 +516,14 @@ def defect_finding_review(request, fid):
                     if resolution_id is None:
                         resolution_id = jira_helper.jira_get_resolution_id(
                             jira, issue, "Resolve Issue")
-                        jira_helper.jira_change_resolution_id(jira, issue, resolution_id)
+                        jira_helper.jira_transition(jira, issue, resolution_id)
                         new_note.entry = new_note.entry + "\nJira issue set to resolved."
                 else:
                     # Re-open finding with notes stating why re-open
                     resolution_id = jira_helper.jira_get_resolution_id(jira, issue,
                                                         "Resolve Issue")
                     if resolution_id is not None:
-                        jira_helper.jira_change_resolution_id(jira, issue, resolution_id)
+                        jira_helper.jira_transition(jira, issue, resolution_id)
                         new_note.entry = new_note.entry + "\nJira issue re-opened."
 
             # Update Dojo and Jira with a notes
@@ -712,7 +712,6 @@ def edit_finding(request, fid):
             new_finding.test = finding.test
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            finding_helper.update_finding_status(new_finding, request.user, old_state_finding=old_finding)
 
             if 'risk_accepted' in form.cleaned_data and form['risk_accepted'].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
@@ -1225,11 +1224,12 @@ def promote_to_finding(request, fid):
     push_all_jira_issues = jira_helper.is_push_all_issues(finding)
     jform = None
     use_jira = jira_helper.get_jira_project(finding) is not None
+    product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
 
     if request.method == 'POST':
         form = PromoteFindingForm(request.POST)
         if use_jira:
-            jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding), finding_form=form)
+            jform = JIRAFindingForm(request.POST, instance=finding, prefix='jiraform', push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(finding))
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             if jform:
@@ -1317,21 +1317,20 @@ def promote_to_finding(request, fid):
             add_field_errors_to_response(jform)
             add_field_errors_to_response(form)
     else:
+
+        form = PromoteFindingForm(
+            initial={
+                'title': finding.title,
+                'product_tab': product_tab,
+                'date': finding.date,
+                'severity': finding.severity,
+                'description': finding.description,
+                'test': finding.test,
+                'reporter': finding.reporter
+            })
+
         if use_jira:
-            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test), finding_form=form)
-
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Promote Finding", tab="findings")
-
-    form = PromoteFindingForm(
-        initial={
-            'title': finding.title,
-            'product_tab': product_tab,
-            'date': finding.date,
-            'severity': finding.severity,
-            'description': finding.description,
-            'test': finding.test,
-            'reporter': finding.reporter
-        })
+            jform = JIRAFindingForm(prefix='jiraform', push_all=jira_helper.is_push_all_issues(test), jira_project=jira_helper.get_jira_project(test))
 
     return render(
         request, 'dojo/promote_to_finding.html', {
@@ -1529,7 +1528,7 @@ def manage_images(request, fid):
     messages.add_message(
                 request,
                 messages.INFO,
-                'Finding Images will be removed as of 06/31/2020. Please use the File Uploads instead.',
+                'Finding Images will be removed as of 06/31/2021. Please use the File Uploads instead.',
                 extra_tags='alert-danger')
 
     if request.method == 'POST':
@@ -1798,14 +1797,16 @@ def merge_finding_product(request, pid):
 
 
 # bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
-@user_passes_test(lambda u: u.is_staff)
-# @user_must_be_authorized(Product, 'staff', 'pid')
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
+    now = timezone.now()
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
+
         if request.POST.get('delete_bulk_findings') and finding_to_update:
             finds = Finding.objects.filter(id__in=finding_to_update)
+            total_find_count = finds.count()
+            skipped_find_count = 0
 
             # make sure users are not deleting stuff they are not authorized for
             if not request.user.is_staff and not request.user.is_superuser:
@@ -1815,42 +1816,62 @@ def finding_bulk_update_all(request, pid=None):
                 finds = finds.filter(
                     Q(test__engagement__product__authorized_users__in=[request.user]) |
                     Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                )
+                ).distinct()
+
+                skipped_find_count = total_find_count - finds.count()
 
             product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
             finds.delete()
             for prod in product_calc:
                 calculate_grade(prod)
+
+            if skipped_find_count > 0:
+                add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
+
         else:
             if form.is_valid() and finding_to_update:
                 finding_to_update = request.POST.getlist('finding_to_update')
                 finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
+                total_find_count = finds.count()
+                skipped_find_count = 0
 
                 # make sure users are not deleting stuff they are not authorized for
                 if not request.user.is_staff and not request.user.is_superuser:
-                    if not settings.AUTHORIZED_USERS_ALLOW_CHANGE:
+                    if not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
                         raise PermissionDenied()
 
                     finds = finds.filter(
                         Q(test__engagement__product__authorized_users__in=[request.user]) |
                         Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                    )
+                    ).distinct()
+
+                    skipped_find_count = total_find_count - finds.count()
+
+                if skipped_find_count > 0:
+                    add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
 
                 finds = prefetch_for_findings(finds)
+                if form.cleaned_data['severity'] or form.cleaned_data['status']:
+                    for find in finds:
+                        if form.cleaned_data['severity']:
+                            find.severity = form.cleaned_data['severity']
+                            find.numerical_severity = Finding.get_numerical_severity(form.cleaned_data['severity'])
+                            find.last_reviewed = now
+                            find.last_reviewed_by = request.user
 
-                if form.cleaned_data['severity']:
-                    finds.update(severity=form.cleaned_data['severity'],
-                                 numerical_severity=Finding.get_numerical_severity(form.cleaned_data['severity']),
-                                 last_reviewed=timezone.now(),
-                                 last_reviewed_by=request.user)
-                if form.cleaned_data['status']:
-                    finds.update(active=form.cleaned_data['active'],
-                                 verified=form.cleaned_data['verified'],
-                                 false_p=form.cleaned_data['false_p'],
-                                 out_of_scope=form.cleaned_data['out_of_scope'],
-                                 is_Mitigated=form.cleaned_data['is_Mitigated'],
-                                 last_reviewed=timezone.now(),
-                                 last_reviewed_by=request.user)
+                        if form.cleaned_data['status']:
+                            # logger.debug('setting status from bulk edit form: %s', form)
+                            find.active = form.cleaned_data['active']
+                            find.verified = form.cleaned_data['verified']
+                            find.false_p = form.cleaned_data['false_p']
+                            find.out_of_scope = form.cleaned_data['out_of_scope']
+                            find.is_Mitigated = form.cleaned_data['is_Mitigated']
+                            find.last_reviewed = timezone.now()
+                            find.last_reviewed_by = request.user
+
+                        # use super to avoid all custom logic in our overriden save method
+                        # it will trigger the pre_save signal
+                        find.save_no_options()
 
                 skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
@@ -1901,9 +1922,6 @@ def finding_bulk_update_all(request, pid=None):
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
-                    if finding.is_Mitigated:
-                        finding.mitigated = timezone.now()
-                        finding.save()
 
                     # not sure yet if we want to support bulk unlink, so leave as commented out for now
                     # if form.cleaned_data['unlink_from_jira']:

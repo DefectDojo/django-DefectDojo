@@ -12,6 +12,13 @@
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
+                        <form method="get" action="{% url 'quick_report' %}" class="pull-right">
+                            <input type="hidden" label="url" name="url" value="{{ request.get_full_path }}">
+                            <input type="hidden" label="_generate" name="_generate" value="_generate">
+                            <button class="btn btn-primary" type="submit" label="quick_report" id="quick_report" aria-expanded="true">
+                                <i class="fa fa-file-text-o"></i>
+                            </button>
+                        </form>
                     </h3>
                 </div>
                 <div id="the-filters" class="is-filters panel-body collapse" >
@@ -22,93 +29,16 @@
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
-            {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled%}
-            <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-                <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-                  <div class="btn-group mr-2" role="group" aria-label="Second group">
-                    <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
+            {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+            <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
+                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+                    <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Bulk Edit
                         <span class="caret"></span>
                     </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
-                        <li class="dropdown-header">Choose wisely...</li>
-                        <li style="padding-left: 8px;">
-                          {% if product_tab %}
-                            <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
-                          {% else %}
-                            <form action="{% url 'finding_bulk_update_all' %}" method="post" id="bulk_change_form">
-                          {% endif %}
-                                {% csrf_token %}
-                                <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                                <label style="display: block" for="severity">Severity</label>
-                                <select name="severity" id="severity" style="font-size: 80%">
-                                    <option value="">Choose...</option>
-                                    <option value="Info">Info</option>
-                                    <option value="Low">Low</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="High">High</option>
-                                    <option value="Critical">Critical</option>
-                                </select><br/><br/>
-
-                                <label><b>Status</b><input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable"/></label><br/>
-
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
-                                    <span>Out of scope</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
-                                    <span>Mitigated</span>
-                                </label>
-                                <br/>
-
-                                <label><b>Risk Acceptance</b><input id="id_bulk_risk_acceptance" name="risk_acceptance" type="checkbox" alt="Select to enable"/></label><br/>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_risk_accept" name="risk_accept" type="checkbox" disabled/> <span>Accept</span>
-                                </label>
-                                <label style="font-size: 80%; font-weight: normal; display: block">
-                                    <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
-                                </label>
-
-                                <br>
-                                {% if system_settings.enable_jira %}
-                                <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
-                                  <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/>
-                                </label>
-                                {% comment %} <label style="font-size: 80%; font-weight: bold; display: block">Unlink JIRA issues
-                                  <input id="unlink_from_jira" name="unlink_from_jira" type="checkbox" alt="Select to unlink JIRA issues from Defect Dojo findings"/>
-                                </label> {% endcomment %}
-                                {% endif %}
-                                {% if system_settings.enable_github %}
-                                <label style="font-size: 80%; font-weight: bold; display: block">Push to GitHub
-                                  <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to GitHub"/>
-                                </label>
-                                <br/>
-                                {% endif %}
-                                <label style="display: block">Tags</label>
-                                {% comment %}
-                                    Quick hack to make bulk edit work without refactoring the whole bulk edit form
-                                    {{ bulk_edit_form.media.css }}
-                                    {{ bulk_edit_form.media.js }}
-                                {% endcomment %}
-                                {{ bulk_edit_form.tags }}
-                                <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
-                            </form>
-                        </li>
-                    </ul>
-                  </div>
-                  {% endif %}
-                  <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
+                {% endif %}
+                <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
                     {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
                     <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                       <a class="white-color merge" href="#" alt="Merge Findings">
@@ -123,9 +53,85 @@
                       </a>
                     </button>
                     {% endif %}
-                  </div>
                 </div>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+                    <li class="dropdown-header">Choose wisely...</li>
+                    <li style="padding-left: 8px;">
+                        {% if product_tab %}
+                        <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
+                        {% else %}
+                        <form action="{% url 'finding_bulk_update_all' %}" method="post" id="bulk_change_form">
+                        {% endif %}
+                            {% csrf_token %}
+                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                            <label style="display: block" for="severity">Severity</label>
+                            <select name="severity" id="severity" style="font-size: 80%">
+                                <option value="">Choose...</option>
+                                <option value="Info">Info</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select><br/><br/>
+
+                            <label><b>Status</b><input id="id_bulk_status" name="status" type="checkbox" alt="Select to enable"/></label><br/>
+
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_active" name="active" type="checkbox" disabled/> <span>Active</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_verified" name="verified" type="checkbox" disabled/> <span>Verified</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_false_p" name="false_p" type="checkbox" disabled/> <span>False Positive</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_out_of_scope" name="out_of_scope" type="checkbox" disabled/>
+                                <span>Out of scope</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
+                                <span>Mitigated</span>
+                            </label>
+                            <br/>
+
+                            <label><b>Risk Acceptance</b><input id="id_bulk_risk_acceptance" name="risk_acceptance" type="checkbox" alt="Select to enable"/></label><br/>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_risk_accept" name="risk_accept" type="checkbox" disabled/> <span>Accept</span>
+                            </label>
+                            <label style="font-size: 80%; font-weight: normal; display: block">
+                                <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
+                            </label>
+
+                            <br>
+                            {% if system_settings.enable_jira %}
+                            <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
+                                <input id="id_push_tojira" name="push_to_jira" type="checkbox" alt="Select to push to JIRA"/>
+                            </label>
+                            {% comment %} <label style="font-size: 80%; font-weight: bold; display: block">Unlink JIRA issues
+                                <input id="unlink_from_jira" name="unlink_from_jira" type="checkbox" alt="Select to unlink JIRA issues from Defect Dojo findings"/>
+                            </label> {% endcomment %}
+                            {% endif %}
+                            {% if system_settings.enable_github %}
+                            <label style="font-size: 80%; font-weight: bold; display: block">Push to GitHub
+                                <input id="id_push_togithub" name="push_to_github" type="checkbox" alt="Select to push to GitHub"/>
+                            </label>
+                            <br/>
+                            {% endif %}
+                            <label style="display: block">Tags</label>
+                            {% comment %}
+                                Quick hack to make bulk edit work without refactoring the whole bulk edit form
+                                {{ bulk_edit_form.media.css }}
+                                {{ bulk_edit_form.media.js }}
+                            {% endcomment %}
+                            {{ bulk_edit_form.tags }}
+                            <input type="submit" class="btn btn-sm btn-primary" value="Submit"/>
+                        </form>
+                    </li>
+                </ul>
             </div>
+            {% endif %}
+
                 <div class="panel panel-default table-responsive">
                     <table id="open_findings"
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
@@ -185,7 +191,7 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                                {% if user|is_authorized_for_staff:finding %}
+                                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
                                   <td class="hidden-sm centered">
                                     <form action="#">
                                         <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
@@ -569,10 +575,61 @@
                 $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
             })
 
-            $('#id_bulk_risk_acceptance').on('click', function (e) {
+            $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_is_Mitigated').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_false_p').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_out_of_scope').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_acceptance').on('click', function (e) {
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', !checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_accept').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_unaccept').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('checked', false);
             })
 
             // Keep the dropdown menu open for selecting severity status

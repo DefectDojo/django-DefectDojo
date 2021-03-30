@@ -47,8 +47,6 @@ Currently the following endpoints are available:
 -   Engagements
 -   Findings
 -   Products
--   Scan Settings
--   Scans
 -   Tests
 -   Users
 

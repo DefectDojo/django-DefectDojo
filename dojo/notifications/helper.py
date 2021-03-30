@@ -1,7 +1,7 @@
 import requests
 import logging
 from django.core.mail import EmailMessage
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo
+from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 def create_notification(event=None, **kwargs):
+    system_settings = System_Settings.objects.get()
+    kwargs["system_settings"] = system_settings
+
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients')
@@ -130,15 +133,19 @@ def process_notifications(event, notifications=None, **kwargs):
     mail_enabled = get_system_setting('enable_mail_notifications')
 
     if slack_enabled and 'slack' in getattr(notifications, event):
+        logger.debug('Sending Slack Notification')
         send_slack_notification(event, notifications.user, **kwargs)
 
     if msteams_enabled and 'msteams' in getattr(notifications, event):
+        logger.debug('Sending MSTeams Notification')
         send_msteams_notification(event, notifications.user, **kwargs)
 
     if mail_enabled and 'mail' in getattr(notifications, event):
+        logger.debug('Sending Mail Notification')
         send_mail_notification(event, notifications.user, **kwargs)
 
     if 'alert' in getattr(notifications, event, None):
+        logger.debug('Sending Alert')
         send_alert_notification(event, notifications.user, **kwargs)
 
 
@@ -199,7 +206,7 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
     except Exception as e:
         logger.exception(e)
-        log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs['url'])
+        log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs.get('url', None))
 
 
 # notifications are made synchronous again due to serialization bug in django-tagulous
@@ -213,6 +220,7 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         # Microsoft Teams doesn't offer direct message functionality, so no MS Teams PM functionality here...
         if user is None:
             if get_system_setting('msteams_url') is not None:
+                logger.debug('sending MSTeams message')
                 res = requests.request(
                     method='POST',
                     url=get_system_setting('msteams_url'),

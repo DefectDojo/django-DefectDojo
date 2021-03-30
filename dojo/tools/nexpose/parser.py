@@ -99,13 +99,12 @@ class NexposeParser(object):
         """
         vulns = list()
 
-        for tests in node.iter('tests'):
-            for test in tests.iter('test'):
-                vuln = dict()
+        for tests in node.findall('tests'):
+            for test in tests.findall('test'):
                 if test.get('id') in vulnsDefinitions and (
                         test.get('status') in ['vulnerable-exploited', 'vulnerable-version', 'vulnerable-potential']):
                     vuln = vulnsDefinitions[test.get('id').lower()]
-                    for desc in list(test):
+                    for desc in test.getchildren():
                         if 'pluginOutput' in vuln:
                             vuln['pluginOutput'] += "\n\n" + \
                                 self.parse_html_type(desc)
@@ -121,8 +120,8 @@ class NexposeParser(object):
         """
         vulns = dict()
         url_index = 0
-        for vulnsDef in tree.iter('VulnerabilityDefinitions'):
-            for vulnDef in vulnsDef.iter('vulnerability'):
+        for vulnsDef in tree.findall('VulnerabilityDefinitions'):
+            for vulnDef in vulnsDef.findall('vulnerability'):
                 vid = vulnDef.get('id').lower()
                 severity_chk = int(vulnDef.get('severity'))
                 if severity_chk >= 9:
@@ -131,7 +130,7 @@ class NexposeParser(object):
                     sev = 'High'
                 elif severity_chk >= 4:
                     sev = 'Medium'
-                elif severity_chk < 4 and severity_chk > 0:
+                elif 0 < severity_chk < 4:
                     sev = 'Low'
                 else:
                     sev = 'Info'
@@ -144,38 +143,40 @@ class NexposeParser(object):
                     'severity': sev,
                     'tags': list()
                 }
-                for item in list(vulnDef):
+                for item in vulnDef.getchildren():
                     if item.tag == 'description':
-                        for htmlType in list(item):
+                        for htmlType in item.getchildren():
                             vuln['desc'] += self.parse_html_type(htmlType)
 
-                    if item.tag == 'exploits':
-                        for exploit in list(item):
+                    elif item.tag == 'exploits':
+                        for exploit in item.getchildren():
                             vuln['refs'][exploit.get('title')] = str(exploit.get('title')).strip() + ' ' + \
                                                                  str(exploit.get('link')).strip()
-                    if item.tag == 'references':
-                        for ref in list(item):
+
+                    elif item.tag == 'references':
+                        for ref in item.getchildren():
                             if 'URL' in ref.get('source'):
                                 vuln['refs'][ref.get('source') + str(url_index)] = str(ref.text).strip()
                                 url_index += 1
                             else:
                                 vuln['refs'][ref.get('source')] = str(ref.text).strip()
-                    if item.tag == 'solution':
-                        for htmlType in list(item):
+
+                    elif item.tag == 'solution':
+                        for htmlType in item.getchildren():
                             vuln['resolution'] += self.parse_html_type(htmlType)
 
                     # there is currently no method to register tags in vulns
-                    if item.tag == 'tags':
-                        for tag in list(item):
+                    elif item.tag == 'tags':
+                        for tag in item.getchildren():
                             vuln['tags'].append(tag.text.lower())
 
                 vulns[vid] = vuln
         return vulns
 
     def get_items(self, tree, vulns, test):
-        x = list()
-        for nodes in tree.iter('nodes'):
-            for node in nodes.iter('node'):
+        hosts = list()
+        for nodes in tree.findall('nodes'):
+            for node in nodes.findall('node'):
                 host = dict()
                 host['name'] = node.get('address')
                 host['hostnames'] = set()
@@ -183,55 +184,54 @@ class NexposeParser(object):
                 host['services'] = list()
                 host['vulns'] = self.parse_tests_type(node, vulns)
 
-                for names in node.iter('names'):
-                    for name in list(names):
+                for names in node.findall('names'):
+                    for name in names.findall('name'):
                         host['hostnames'].add(name.text)
 
-                for endpoints in node.iter('endpoints'):
-                    for endpoint in list(endpoints):
+                for endpoints in node.findall('endpoints'):
+                    for endpoint in endpoints.findall('endpoint'):
                         svc = {
                             'protocol': endpoint.get('protocol'),
-                            'port': endpoint.get('port'),
+                            'port': int(endpoint.get('port')),
                             'status': endpoint.get('status'),
                         }
-                        for services in endpoint.iter('services'):
-                            for service in list(services):
+                        for services in endpoint.findall('services'):
+                            for service in services.findall('service'):
                                 svc['name'] = service.get('name')
                                 svc['vulns'] = self.parse_tests_type(service, vulns)
 
-                                for configs in service.iter('configurations'):
-                                    for config in list(configs):
+                                for configs in service.findall('configurations'):
+                                    for config in configs.findall('config'):
                                         if "banner" in config.get('name'):
                                             svc['version'] = config.get('name')
 
                         host['services'].append(svc)
 
-                x.append(host)
+                hosts.append(host)
 
         dupes = {}
 
-        for item in x:
-            for service in item['services']:
+        for host in hosts:
+            # manage findings by node only
+            for vuln in host['vulns']:
+                dupe_key = vuln['severity'] + vuln['name']
+
+                find = self.findings(dupe_key, dupes, test, vuln)
+
+                endpoint = Endpoint(host=host['name'])
+                find.unsaved_endpoints.append(endpoint)
+                find.unsaved_tags = vuln['tags']
+
+            # manage findings by service
+            for service in host['services']:
                 for vuln in service['vulns']:
                     dupe_key = vuln['severity'] + vuln['name']
 
                     find = self.findings(dupe_key, dupes, test, vuln)
 
-                    endpoint = Endpoint(host=item['name'])
-                    if 'port' in service:
-                        endpoint.port = int(service['port'])
+                    endpoint = Endpoint(host=host['name'], port=service['port'], protocol=service['name'].lower())
                     find.unsaved_endpoints.append(endpoint)
-                    find.unsaved_tags = list()
                     find.unsaved_tags = vuln['tags']
-
-        # manage findings by node only
-        for vuln in host['vulns']:
-            dupe_key = vuln['severity'] + vuln['name']
-
-            find = self.findings(dupe_key, dupes, test, vuln)
-
-            find.unsaved_tags = list()
-            find.unsaved_tags = vuln['tags']
 
         return list(dupes.values())
 
@@ -265,10 +265,18 @@ class NexposeParser(object):
             # build references
             refs = ''
             for ref in vuln['refs']:
-                if ref.startswith('CA'):
+                if ref.startswith('BID'):
+                    refs += f" * [{vuln['refs'][ref]}](https://www.securityfocus.com/bid/{vuln['refs'][ref]})"
+                elif ref.startswith('CA'):
                     refs += f" * [{vuln['refs'][ref]}](https://www.cert.org/advisories/{vuln['refs'][ref]}.html)"
+                elif ref.startswith('CERT-VN'):
+                    refs += f" * [{vuln['refs'][ref]}](https://www.kb.cert.org/vuls/id/{vuln['refs'][ref]}.html)"
                 elif ref.startswith('CVE'):
                     refs += f" * [{vuln['refs'][ref]}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={vuln['refs'][ref]})"
+                elif ref.startswith('DEBIAN'):
+                    refs += f" * [{vuln['refs'][ref]}](https://security-tracker.debian.org/tracker/{vuln['refs'][ref]})"
+                elif ref.startswith('XF'):
+                    refs += f" * [{vuln['refs'][ref]}](https://exchange.xforce.ibmcloud.com/vulnerabilities/{vuln['refs'][ref]})"
                 elif ref.startswith('URL'):
                     refs += f" * URL: {vuln['refs'][ref]}"
                 else:

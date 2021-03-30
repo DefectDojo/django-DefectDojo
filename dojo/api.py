@@ -23,14 +23,14 @@ from django.conf import settings
 from django.utils.cache import patch_cache_control, patch_vary_headers
 from django.views.decorators.csrf import csrf_exempt
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
+    User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, \
     BurpRawRequestResponse, Endpoint, Notes, JIRA_Project, JIRA_Instance, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Languages, Language_Type, App_Analysis, Product_Type, Note_Type, \
     Endpoint_Status, SEVERITY_CHOICES
 from dojo.forms import ProductForm, EngForm, TestForm, \
-    ScanSettingsForm, FindingForm, StubFindingForm, FindingTemplateForm, \
+    FindingForm, StubFindingForm, FindingTemplateForm, \
     ImportScanForm, JIRAForm, JIRAProjectForm, EditEndpointForm, \
     JIRA_IssueForm, ToolConfigForm, ToolProductSettingsForm, \
     ToolTypeForm, LanguagesTypeForm, Languages_TypeTypeForm, App_AnalysisTypeForm, \
@@ -267,117 +267,6 @@ class UserProductsOnlyAuthorization(Authorization):
 
     def delete_detail(self, object_list, bundle):
         raise Unauthorized("Sorry, no deletes.")
-
-
-# Authorization class for Scan Settings
-class UserScanSettingsAuthorization(Authorization):
-    def read_list(self, object_list, bundle):
-        # This assumes a ``QuerySet`` from ``ModelResource``.
-        if bundle.request.user.is_staff:
-            return object_list
-
-        return object_list.filter(product__authorized_users__in=[
-            bundle.request.user])
-
-    def read_detail(self, object_list, bundle):
-        # Is the requested object owned by the user?
-        return (bundle.request.user.is_staff or
-                bundle.request.user in bundle.obj.product.authorized_users)
-
-    def create_list(self, object_list, bundle):
-        # Assuming they're auto-assigned to ``user``.
-        if bundle.request.user.is_staff:
-            return object_list
-        else:
-            return object_list.filter(
-                product__authorized_users__in=[bundle.request.user])
-
-    def create_detail(self, object_list, bundle):
-        return (bundle.request.user.is_staff or
-                bundle.request.user in bundle.obj.product.authorized_users)
-
-    def update_list(self, object_list, bundle):
-        allowed = []
-
-        # Since they may not all be saved, iterate over them.
-        for obj in object_list:
-            if (bundle.request.user.is_staff or
-                        bundle.request.user in
-                        bundle.obj.product.authorized_users):
-                allowed.append(obj)
-
-        return allowed
-
-    def update_detail(self, object_list, bundle):
-        return (bundle.request.user.is_staff or
-                bundle.request.user in bundle.obj.product.authorized_users)
-
-    def delete_list(self, object_list, bundle):
-        return (bundle.request.user.is_staff or
-                bundle.request.user in bundle.obj.product.authorized_users)
-
-    def delete_detail(self, object_list, bundle):
-        return (bundle.request.user.is_staff or
-                bundle.request.user in bundle.obj.product.authorized_users)
-
-
-# Authorization class for Scan Settings
-class UserScanAuthorization(Authorization):
-    def read_list(self, object_list, bundle):
-        # This assumes a ``QuerySet`` from ``ModelResource``.
-        if bundle.request.user.is_staff:
-            return object_list
-
-        return object_list.filter(
-            scan_settings__product__authorized_users__in=[
-                bundle.request.user])
-
-    def read_detail(self, object_list, bundle):
-        # Is the requested object owned by the user?
-        return (bundle.request.user.is_staff or
-                bundle.request.user in
-                bundle.obj.scan_settings.product.authorized_users)
-
-    def create_list(self, object_list, bundle):
-        # Assuming they're auto-assigned to ``user``.
-        if bundle.request.user.is_staff:
-            return object_list
-        else:
-            return object_list.filter(
-                scan_settings__product__authorized_users__in=[
-                    bundle.request.user])
-
-    def create_detail(self, object_list, bundle):
-        return (bundle.request.user.is_staff or
-                bundle.request.user in
-                bundle.obj.scan_settings.product.authorized_users)
-
-    def update_list(self, object_list, bundle):
-        allowed = []
-
-        # Since they may not all be saved, iterate over them.
-        for obj in object_list:
-            if (bundle.request.user.is_staff or
-                        bundle.request.user in
-                        bundle.obj.scan_settings.product.authorized_users):
-                allowed.append(obj)
-
-        return allowed
-
-    def update_detail(self, object_list, bundle):
-        return (bundle.request.user.is_staff or
-                bundle.request.user in
-                bundle.obj.scan_settings.product.authorized_users)
-
-    def delete_list(self, object_list, bundle):
-        return (bundle.request.user.is_staff or
-                bundle.request.user in
-                bundle.obj.scan_settings.product.authorized_users)
-
-    def delete_detail(self, object_list, bundle):
-        return (bundle.request.user.is_staff or
-                bundle.request.user in
-                bundle.obj.scan_settings.product.authorized_users)
 
 
 """
@@ -1264,110 +1153,6 @@ class StubFindingResource(BaseModelResource):
         return bundle
 
 
-'''
-    /api/v1/scansettings/
-    GET [/id/], DELETE [/id/]
-    Expects: no params or product_id
-    Returns test: ALL or by product_id
-
-    POST, PUT [/id/]
-    Expects *addresses, *user, *date, *frequency, *email, *product
-'''
-
-
-class ScanSettingsResource(BaseModelResource):
-    user = fields.ForeignKey(UserResource, 'user', null=False)
-    product = fields.ForeignKey(ProductResource, 'product', null=False)
-
-    class Meta:
-        resource_name = 'scan_settings'
-        queryset = ScanSettings.objects.all()
-
-        list_allowed_methods = ['get', 'post']
-        detail_allowed_methods = ['get', 'put', 'post', 'delete']
-        include_resource_uri = True
-        filtering = {
-            'id': ALL,
-            'date': ALL,
-            'user': ALL,
-            'frequency': ALL,
-            'product': ALL,
-            'addresses': ALL
-        }
-
-        authentication = DojoApiKeyAuthentication()
-        authorization = UserScanSettingsAuthorization()
-        serializer = Serializer(formats=['json'])
-
-        @property
-        def validation(self):
-            return ModelFormValidation(form_class=ScanSettingsForm, resource=ScanSettingsResource)
-
-
-"""
-    /api/v1/ipscans/
-    Not exposed via API - but used as part of
-    ScanResource return values
-"""
-
-
-class IPScanResource(BaseModelResource):
-    class Meta:
-        resource_name = 'ipscans'
-        queryset = IPScan.objects.all()
-
-        list_allowed_methods = ['get']
-        detail_allowed_methods = ['get']
-        include_resource_uri = True
-        filtering = {
-            'id': ALL,
-            'address': ALL,
-            'services': ALL,
-            'scan': ALL
-        }
-
-        authentication = DojoApiKeyAuthentication()
-        authorization = DjangoAuthorization()
-        serializer = Serializer(formats=['json'])
-
-
-"""
-    /api/v1/scans/
-    GET [/id/], DELETE [/id/]
-    Expects: no params
-    Returns scans: ALL
-    Relevant filters: ?scan_setting=?
-"""
-
-
-class ScanResource(BaseModelResource):
-    scan_settings = fields.ForeignKey(ScanSettingsResource,
-                                      'scan_settings',
-                                      null=False)
-    ipscans = fields.ToManyField(
-        IPScanResource,
-        attribute=lambda bundle: IPScan.objects.filter(
-            scan__id=bundle.obj.id) if IPScan.objects.filter(
-            scan__id=bundle.obj.id) != [] else [], full=True, null=True)
-
-    class Meta:
-        resource_name = 'scans'
-        queryset = Scan.objects.all()
-
-        list_allowed_methods = ['get']
-        detail_allowed_methods = ['get']
-        include_resource_uri = True
-        filtering = {
-            'id': ALL,
-            'date': ALL,
-            'scan_settings': ALL
-        }
-
-        authentication = DojoApiKeyAuthentication()
-        authorization = UserScanAuthorization()
-        serializer = Serializer(formats=['json'])
-
-
 # Method used to get Private Key from uri, Used in the ImportScan and ReImportScan resources
 def get_pk_from_uri(uri):
     prefix = get_script_prefix()
@@ -1801,7 +1586,7 @@ class ReImportScanResource(MultipartResource, Resource):
 
                 from titlecase import titlecase
                 item.title = titlecase(item.title)
-                if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
+                if scan_type == 'Veracode Scan':
                     find = Finding.objects.filter(title=item.title,
                                                   test__id=test.id,
                                                   severity=sev,

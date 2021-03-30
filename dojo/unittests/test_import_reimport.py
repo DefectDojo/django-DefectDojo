@@ -53,6 +53,19 @@ class ImportReimportMixin(object):
         self.anchore_file_name = self.scans_path + 'anchore/one_vuln_many_files.json'
         self.scan_type_anchore = 'Anchore Engine Scan'
 
+        self.gitlab_dep_scan_components_filename = self.scans_path + 'gitlab_dep_scan/gl-dependency-scanning-report-many-vuln.json'
+        self.scan_type_gtlab_dep_scan = 'GitLab Dependency Scanning Report'
+
+        self.sonarqube_file_name1 = self.scans_path + 'sonarqube/sonar-6-findings.html'
+        self.sonarqube_file_name2 = self.scans_path + 'sonarqube/sonar-6-findings-1-unique_id_changed.html'
+        self.scan_type_sonarqube_detailed = 'SonarQube Scan detailed'
+
+        self.veracode_many_findings = self.scans_path + 'veracode/many_findings.xml'
+        self.veracode_same_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_same_hash_code_different_unique_id.xml'
+        self.veracode_same_unique_id_different_hash_code = self.scans_path + 'veracode/many_findings_same_unique_id_different_hash_code.xml'
+        self.veracode_different_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_different_hash_code_different_unique_id.xml'
+        self.scan_type_veracode = 'Veracode Scan'
+
     # import zap scan, testing:
     # - import
     # - active/verifed = True
@@ -85,6 +98,52 @@ class ImportReimportMixin(object):
         # 4 findings, total 11 endpoint statuses
         self.assertEqual(endpoint_status_count_before_active + 11, self.db_endpoint_status_count(mitigated=False))
         self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
+
+        # no notes expected
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+        return test_id
+
+    # Test re-import with unique_id_from_tool algorithm
+    # import sonar scan with detailed parser, testing:
+    # - import
+    # - active/verifed = True
+    def test_sonar_detailed_scan_base_active_verified(self):
+        logger.debug('importing original sonar report')
+        notes_count_before = self.db_notes_count()
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=6, created=6):
+            import0 = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed)
+
+        test_id = import0['test']
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # imported count must match count in the report
+        self.assert_finding_count_json(6, findings)
+
+        # no notes expected
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+        return test_id
+
+    # Test re-import with unique_id_from_tool_or_hash_code algorithm
+    # import veracode scan, testing:
+    # - import
+    # - active/verifed = True
+    def test_veracode_scan_base_active_verified(self):
+        logger.debug('importing original veracode report')
+        notes_count_before = self.db_notes_count()
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=3, created=3):
+            import0 = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
+
+        test_id = import0['test']
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # imported count must match count in the report
+        self.assert_finding_count_json(3, findings)
 
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -171,6 +230,220 @@ class ImportReimportMixin(object):
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
+
+    # Test re-import with unique_id_from_tool algorithm
+    # import sonar1 and then reimport sonar1 again with verified is false
+    # - reimport, findings stay the same, stay active
+    # - active = True, verified = False
+    # - existing findings with verified is true should stay verified
+    def test_import_sonar1_reimport_sonar1_active_not_verified(self):
+        logger.debug('reimporting exact same original sonar report again, verified=False')
+
+        importsonar1 = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed)
+
+        test_id = importsonar1['test']
+
+        notes_count_before = self.db_notes_count()
+
+        # reimport exact same report
+        with assertTestImportModelsCreated(self, reimports=1):
+            reimportsonar1 = self.reimport_scan_with_params(test_id, self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed, verified=False)
+
+        test_id = reimportsonar1['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # reimported count must match count in sonar report
+        # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(6, findings)
+
+        # inversely, we should see no findings with verified=False
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+    # Test re-import with unique_id_from_tool_or_hash_code algorithm
+    # import veracode_many_findings and then reimport veracode_many_findings again with verified is false
+    # - reimport, findings stay the same, stay active
+    # - existing findings with verified is true should stay verified
+    def test_import_veracode_reimport_veracode_active_not_verified(self):
+        logger.debug('reimporting exact same original veracode report again, verified=False')
+
+        import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
+
+        test_id = import_veracode_many_findings['test']
+
+        notes_count_before = self.db_notes_count()
+
+        # reimport exact same report
+        with assertTestImportModelsCreated(self, reimports=1):
+            reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_many_findings, scan_type=self.scan_type_veracode, verified=False)
+
+        test_id = reimport_veracode_many_findings['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # reimported count must match count in sonar report
+        # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(3, findings)
+
+        # inversely, we should see no findings with verified=False
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+    # import sonar1 and then reimport sonar2 which has 1 different unique_id_from_tool
+    # - 5 findings stay the same and active
+    # - 1 finding is mitigated
+    # - 1 finding is added
+    def test_import_sonar1_reimport_sonar2(self):
+        logger.debug('reimporting same findings except one with a different unique_id_from_tool')
+
+        importsonar1 = self.import_scan_with_params(self.sonarqube_file_name1, scan_type=self.scan_type_sonarqube_detailed)
+
+        test_id = importsonar1['test']
+
+        notes_count_before = self.db_notes_count()
+
+        # reimport other report
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1):
+            reimportsonar1 = self.reimport_scan_with_params(test_id, self.sonarqube_file_name2, scan_type=self.scan_type_sonarqube_detailed, verified=False)
+
+        test_id = reimportsonar1['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # reimported count must match count in sonar report
+        # (reimport doesn't unverify findings that ware previously verified)
+        # (the mitigated finding stays verified)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(6, findings)
+
+        # one mitigated (the one previously imported which has changed unique_id_from_tool)
+        findings = self.get_test_findings_api(test_id, is_Mitigated=True)
+        self.assert_finding_count_json(1, findings)
+
+        # one verified False (the new one, as reimport was done with verified false)
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(1, findings)
+
+        # one added note for mitigated finding
+        self.assertEqual(notes_count_before + 1, self.db_notes_count())
+
+    # Test re-import with unique_id_from_tool_or_hash_code algorithm
+    # import veracode_many_findings and then reimport veracode_same_hash_code_different_unique_id with verified is false
+    # - reimport, all findings stay the same, stay active
+    # - existing findings with verified is true should stay verified
+    def test_import_veracode_reimport_veracode_same_hash_code_different_unique_id(self):
+        logger.debug('reimporting report with one finding having same hash_code but different unique_id_from_tool, verified=False')
+
+        import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
+
+        test_id = import_veracode_many_findings['test']
+
+        notes_count_before = self.db_notes_count()
+
+        # reimport
+        with assertTestImportModelsCreated(self, reimports=1):
+            reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_same_hash_code_different_unique_id, scan_type=self.scan_type_veracode, verified=False)
+
+        test_id = reimport_veracode_many_findings['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(3, findings)
+
+        # inversely, we should see no findings with verified=False
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+    # Test re-import with unique_id_from_tool_or_hash_code algorithm
+    # import veracode_many_findings and then reimport veracode_same_unique_id_different_hash_code with verified is false
+    # - reimport, all findings stay the same, stay active
+    # - existing findings with verified is true should stay verified
+    def test_import_veracode_reimport_veracode_same_unique_id_different_hash_code(self):
+        logger.debug('reimporting report with one finding having same unique_id_from_tool but different hash_code, verified=False')
+
+        import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
+
+        test_id = import_veracode_many_findings['test']
+
+        notes_count_before = self.db_notes_count()
+
+        # reimport
+        with assertTestImportModelsCreated(self, reimports=1):
+            reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_same_unique_id_different_hash_code, scan_type=self.scan_type_veracode, verified=False)
+
+        test_id = reimport_veracode_many_findings['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(3, findings)
+
+        # inversely, we should see no findings with verified=False
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(0, findings)
+
+        # reimporting the exact same scan shouldn't create any notes
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+    # Test re-import with unique_id_from_tool_or_hash_code algorithm
+    # import veracode_many_findings and then reimport veracode_different_hash_code_different_unique_id with verified is false
+    # - reimport, existing findings stay active and the same
+    # - 1 added finding, 1 mitigated finding
+    # - existing findings with verified is true should stay verified
+    def test_import_veracode_reimport_veracode_different_hash_code_different_unique_id(self):
+        logger.debug('reimporting report with one finding having different hash_code and different unique_id_from_tool, verified=False')
+
+        import_veracode_many_findings = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
+
+        test_id = import_veracode_many_findings['test']
+
+        notes_count_before = self.db_notes_count()
+
+        # reimport
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=2, created=1, closed=1):
+            reimport_veracode_many_findings = self.reimport_scan_with_params(test_id, self.veracode_different_hash_code_different_unique_id, scan_type=self.scan_type_veracode, verified=False)
+
+        test_id = reimport_veracode_many_findings['test']
+        self.assertEqual(test_id, test_id)
+
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
+        findings = self.get_test_findings_api(test_id, verified=True)
+        self.assert_finding_count_json(3, findings)
+
+        # The new finding has verified=false
+        findings = self.get_test_findings_api(test_id, verified=False)
+        self.assert_finding_count_json(1, findings)
+
+        # 1 added note for the migitated finding
+        self.assertEqual(notes_count_before + 1, self.db_notes_count())
 
     # import 0 and then reimport 1 with zap4 as extra finding, zap1 closed.
     # - active findings count should be 4
@@ -378,10 +651,10 @@ class ImportReimportMixin(object):
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(4, findings)
 
-        # existing BUG: endpoint that is no longer in last scan should be removed or marked as mitigated
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
-        self.assertEqual(endpoint_status_count_before_active, self.db_endpoint_status_count(mitigated=False))
-        self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
+        # 1 endpoint was marked as mitigated
+        self.assertEqual(endpoint_status_count_before_active - 1, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated + 1, self.db_endpoint_status_count(mitigated=True))
 
         # reimporting the exact same scan shouldn't create any notes
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -613,6 +886,68 @@ class ImportReimportMixin(object):
                 self.assertFalse(finding['risk_accepted'])
                 self.assertFalse(finding['is_Mitigated'])
 
+    # import gitlab_dep_scan_components_filename with 6 findings
+    # findings 1, 2 and 3 have the same component_name (golang.org/x/crypto) and the same CVE (CVE-2020-29652), but different component_version
+    # findings 4 and 5 have the same component_name (golang.org/x/text) and the same CVE (CVE-2020-14040), but different component_version
+    # finding 6 is different ("unique") from the others
+    #
+    # reimport gitlab_dep_scan_components_filename and the same 6 finding must be active
+    #
+    # the previous hashcode calculation for GitLab Dependency Scanning would ignore component_name and component_version,
+    # which during the reimport would close findings 2, 3 and 5, because it would only check the finding's title and CVE
+    #
+    # since a project can have multiples versions (component_version) of the same dependency (component_name),
+    # we must consider each finding unique, otherwise we would lose valid information
+    def test_import_6_reimport_6_gitlab_dep_scan_component_name_and_version(self):
+
+        import0 = self.import_scan_with_params(self.gitlab_dep_scan_components_filename,
+                                               scan_type=self.scan_type_gtlab_dep_scan,
+                                               minimum_severity='Info')
+
+        test_id = import0['test']
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(6, active_findings_before)
+
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0):
+            reimport0 = self.reimport_scan_with_params(test_id,
+                                                       self.gitlab_dep_scan_components_filename,
+                                                       scan_type=self.scan_type_gtlab_dep_scan,
+                                                       minimum_severity='Info')
+
+        active_findings_after = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(6, active_findings_after)
+
+        count = 0
+        for finding in active_findings_after['results']:
+            if 'v0.0.0-20190219172222-a4c6cb3142f2' == finding['component_version']:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
+                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+                count = count + 1
+            elif 'v0.0.0-20190308221718-c2843e01d9a2' == finding['component_version']:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
+                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+                count = count + 1
+            elif 'v0.0.0-20200302210943-78000ba7a073' == finding['component_version']:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
+                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+                count = count + 1
+            elif 'v0.3.0' == finding['component_version']:
+                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
+                self.assertEqual("CVE-2020-14040", finding['cve'])
+                self.assertEqual("golang.org/x/text", finding['component_name'])
+                count = count + 1
+            elif 'v0.3.2' == finding['component_version']:
+                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
+                self.assertEqual("CVE-2020-14040", finding['cve'])
+                self.assertEqual("golang.org/x/text", finding['component_name'])
+                count = count + 1
+
+        self.assertEqual(5, count)
+
 
 @override_settings(TRACK_IMPORT_HISTORY=True)
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
@@ -668,7 +1003,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
         response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), payload)
         # print(vars(response))
-        print('url: ' + response.url)
+        # print('url: ' + response.url)
         test = Test.objects.get(id=response.url.split('/')[-1])
         # f = open('response.html', 'w+')
         # f.write(str(response.content, 'utf-8'))

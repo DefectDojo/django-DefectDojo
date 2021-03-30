@@ -1,6 +1,5 @@
 import logging
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -9,6 +8,8 @@ from django.db.models import Count, Q
 from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
 from dojo.models import Benchmark_Type, Benchmark_Category, Benchmark_Requirement, Benchmark_Product, Product, Benchmark_Product_Summary
 from dojo.utils import add_breadcrumb, Product_Tab
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +63,7 @@ def score_asvs(product, benchmark_type):
     benchmark_product_summary.save()
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Benchmark_Edit, 'pid', 'staff')
 def benchmark_view(request, pid, type, cat=None):
     product = get_object_or_404(Product, id=pid)
     benchmark_type = get_object_or_404(Benchmark_Type, id=type)
@@ -133,7 +134,7 @@ def benchmark_view(request, pid, type, cat=None):
                    'benchmark_category': benchmark_category})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Benchmark_Delete, 'pid', 'staff')
 def delete(request, pid, type):
     product = get_object_or_404(Product, id=pid)
     benchmark_type = get_object_or_404(Benchmark_Type, id=type)
