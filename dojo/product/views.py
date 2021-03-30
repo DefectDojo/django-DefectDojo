@@ -82,7 +82,8 @@ def prefetch_for_product(prods):
     if isinstance(prods,
                   QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         prefetched_prods = prefetched_prods.select_related('technical_contact').select_related(
-            'product_manager').select_related('prod_type').select_related('team_manager')
+            'product_manager').select_related('team_manager')
+        prefetched_prods = prefetched_prods.prefetch_related('prod_type')
         prefetched_prods = prefetched_prods.annotate(
             active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
         prefetched_prods = prefetched_prods.annotate(
