@@ -165,7 +165,7 @@ class DojoTestUtilsMixin(object):
     def add_product_jira(self, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse('new_product'))
 
-        logger.debug('before: JIRA_Project last')
+        # logger.debug('before: JIRA_Project last')
         self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
@@ -173,7 +173,7 @@ class DojoTestUtilsMixin(object):
 
         response = self.client.post(reverse('new_product'), urlencode(data), content_type='application/x-www-form-urlencoded')
 
-        logger.debug('after: JIRA_Project last')
+        # logger.debug('after: JIRA_Project last')
         self.log_model_instance(JIRA_Project.objects.last())
 
         product = None
