@@ -616,32 +616,29 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     prod = get_object_or_404(Product, id=pid)
 
     default_page_num = 10
-
-    base_engagements = Engagement.objects.filter(
-        product=prod,
-        active=True,
-        engagement_type=engagement_type
-    ).order_by(
-        '-updated'
-    )
     recent_test_day_count = 7
-    base_engagements = prefetch_for_view_engagements(base_engagements, recent_test_day_count)
 
     # In Progress Engagements
-    engs = base_engagements.filter(active=True, status="In Progress").order_by('-updated')
+    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress",
+                                     engagement_type=engagement_type).order_by('-updated')
     active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
     result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
+    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list, recent_test_day_count)
 
     # Engagements that are queued because they haven't started or paused
-    engs = base_engagements.filter(~Q(status="In Progress"), active=True).order_by('-updated')
+    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True,
+                                     engagement_type=engagement_type).order_by('-updated')
     queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
     result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
+    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list, recent_test_day_count)
 
     # Cancelled or Completed Engagements
-    engs = base_engagements.filter(active=False).order_by('-target_end')
+    engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by(
+        '-target_end')
     inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
     result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
+    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list, recent_test_day_count)
 
     title = "All Engagements"
     if engagement_type == "CI/CD":
