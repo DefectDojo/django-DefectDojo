@@ -44,6 +44,7 @@ from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 
+
 logger = logging.getLogger(__name__)
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
@@ -1777,6 +1778,21 @@ class JIRAForm(forms.ModelForm):
         model = JIRA_Instance
         exclude = ['']
 
+    def clean(self):
+        import dojo.jira_link.helper as jira_helper
+        form_data = self.cleaned_data
+
+        try:
+            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'], validate=True)
+            logger.debug('valid JIRA config!')
+        except Exception as e:
+            # form only used by admins, so we can show full error message using str(e) which can help debug any problems
+            message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
+            self.add_error('username', message)
+            self.add_error('password', message)
+
+        return form_data
+
 
 class ExpressJIRAForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
@@ -1788,6 +1804,21 @@ class ExpressJIRAForm(forms.ModelForm):
                     'close_status_key', 'info_mapping_severity',
                     'low_mapping_severity', 'medium_mapping_severity',
                     'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
+
+    def clean(self):
+        import dojo.jira_link.helper as jira_helper
+        form_data = self.cleaned_data
+
+        try:
+            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'], validate=True)
+            logger.debug('valid JIRA config!')
+        except Exception as e:
+            # form only used by admins, so we can show full error message using str(e) which can help debug any problems
+            message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
+            self.add_error('username', message)
+            self.add_error('password', message)
+
+        return form_data
 
 
 class Benchmark_Product_SummaryForm(forms.ModelForm):
