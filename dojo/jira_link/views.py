@@ -11,17 +11,16 @@ from django.db import DEFAULT_DB_ALIAS
 from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
-from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes, Risk_Acceptance
+from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes
 from dojo.utils import add_breadcrumb, get_system_setting
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
 import dojo.jira_link.helper as jira_helper
-import dojo.risk_acceptance.helper as ra_helper
-
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +61,10 @@ def webhook(request, secret=None):
                 logging.info("Received issue update for {}".format(jissue.jira_key))
                 if jissue.finding:
                     finding = jissue.finding
-                    jira_instance = jira_helper.get_jira_instance(finding)
-                    resolved = True
+
+                    assignee = parsed['issue']['fields'].get('assignee')
+                    assignee_name = assignee['name'] if assignee else None
+
                     resolution = parsed['issue']['fields']['resolution']
 
                     #         "resolution":{
@@ -76,61 +77,14 @@ def webhook(request, secret=None):
                     # or
                     #         "resolution": null
 
-                    if resolution is None:
-                        resolved = False
-                        logger.debug("JIRA resolution is None, therefore resolved is now False")
-                    if finding.active is resolved:
-                        if finding.active:
-                            if jira_instance and resolution['name'] in jira_instance.accepted_resolutions:
-                                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jissue.jira_key))
-                                finding.active = False
-                                finding.mitigated = None
-                                finding.is_Mitigated = False
-                                finding.false_p = False
-                                assignee = parsed['issue']['fields'].get('assignee')
-                                assignee_name = assignee['name'] if assignee else None
-                                Risk_Acceptance.objects.create(
-                                    accepted_by=assignee_name,
-                                    owner=finding.reporter,
-                                ).accepted_findings.set([finding])
-                            elif jira_instance and resolution['name'] in jira_instance.false_positive_resolutions:
-                                logger.debug("Marking related finding of {} as false-positive".format(jissue.jira_key))
-                                finding.active = False
-                                finding.verified = False
-                                finding.mitigated = None
-                                finding.is_Mitigated = False
-                                finding.false_p = True
-                                ra_helper.remove_from_any_risk_acceptance(finding)
-                            else:
-                                # Mitigated by default as before
-                                logger.debug("Marking related finding of {} as mitigated (default)".format(jissue.jira_key))
-                                now = timezone.now()
-                                finding.active = False
-                                finding.mitigated = now
-                                finding.is_Mitigated = True
-                                finding.endpoints.clear()
-                                finding.false_p = False
-                                ra_helper.remove_from_any_risk_acceptance(finding)
-                        else:
-                            # Reopen / Open Jira issue
-                            logger.debug("Re-opening related finding of {}".format(jissue.jira_key))
-                            finding.active = True
-                            finding.mitigated = None
-                            finding.is_Mitigated = False
-                            finding.false_p = False
-                            ra_helper.remove_from_any_risk_acceptance(finding)
-                    else:
-                        # Reopen / Open Jira issue
-                        finding.active = True
-                        finding.mitigated = None
-                        finding.is_Mitigated = False
-                        finding.false_p = False
-                        ra_helper.remove_from_any_risk_acceptance(finding)
+                    # or
+                    #         "resolution": "None"
 
-                    finding.jira_issue.jira_change = timezone.now()
-                    finding.jira_issue.save()
-                    finding.save()
-
+                    resolution = resolution if resolution and resolution != "None" else None
+                    resolution_id = resolution['id'] if resolution else None
+                    resolution_name = resolution['name'] if resolution else None
+                    jira_now = parse_datetime(parsed['issue']['fields']['updated'])
+                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now)
                 elif jissue.engagement:
                     # if parsed['issue']['fields']['resolution'] != None:
                     #     eng.active = False
@@ -263,7 +217,7 @@ def express_new_jira(request):
             jira_password = jform.cleaned_data.get('password')
 
             try:
-                jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+                jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password, validate=True)
             except Exception as e:
                 logger.exception(e)  # already logged in jira_helper
                 messages.add_message(request,
@@ -347,7 +301,7 @@ def new_jira(request):
             jira_password = jform.cleaned_data.get('password')
 
             logger.debug('calling get_jira_connection_raw')
-            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password, validate=True)
 
             new_j = jform.save(commit=False)
             new_j.url = jira_server
@@ -363,6 +317,8 @@ def new_jira(request):
                                 url=request.build_absolute_uri(reverse('jira')),
                                 )
             return HttpResponseRedirect(reverse('jira', ))
+        else:
+            logger.error('jform.errors: %s', jform.errors)
     else:
         jform = JIRAForm()
         add_breadcrumb(title="New Jira Configuration", top_level=False, request=request)
@@ -386,7 +342,7 @@ def edit_jira(request, jid):
                 # on edit the password is optional
                 jira_password = jira_password_from_db
 
-            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password)
+            jira = jira_helper.get_jira_connection_raw(jira_server, jira_username, jira_password, validate=True)
 
             new_j = jform.save(commit=False)
             new_j.url = jira_server

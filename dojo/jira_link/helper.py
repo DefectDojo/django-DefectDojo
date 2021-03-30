@@ -10,8 +10,8 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from jira import JIRA
 from jira.exceptions import JIRAError
-from dojo.models import Finding, Test, Engagement, Product, JIRA_Issue, JIRA_Project, \
-    System_Settings, Notes, JIRA_Instance
+from dojo.models import Finding, Risk_Acceptance, Stub_Finding, Test, Engagement, Product, JIRA_Issue, JIRA_Project, \
+    System_Settings, Notes, JIRA_Instance, User
 from requests.auth import HTTPBasicAuth
 from dojo.notifications.helper import create_notification
 from django.contrib import messages
@@ -88,6 +88,10 @@ def finding_can_be_pushed_to_jira(finding, form=None):
     if not get_jira_project(finding):
         return False, 'Finding cannot be pushed to jira as there is no jira project configuration for this product.', 'error_no_jira_project'
 
+    if isinstance(finding, Stub_Finding):
+        # stub findings don't have active/verified/etc and can always be pushed
+        return True, None, None
+
     if finding.has_jira_issue:
         return True, None, None
 
@@ -131,7 +135,7 @@ def get_jira_project(obj, use_inheritance=True):
     if isinstance(obj, JIRA_Issue):
         return obj.jira_project
 
-    if isinstance(obj, Finding):
+    if isinstance(obj, Finding) or isinstance(obj, Stub_Finding):
         finding = obj
         return get_jira_project(finding.test)
 
@@ -254,6 +258,20 @@ def get_jira_project_key(obj):
     return jira_project.project_key
 
 
+def get_jira_issue_template(obj):
+    jira_project = get_jira_project(obj)
+    template = jira_project.issue_template
+    if not template:
+        jira_instance = get_jira_instance(obj)
+        template = jira_instance.issue_template
+
+    # fallback to default as before
+    if not template:
+        return 'issue-trackers/jira-description.tpl'
+
+    return template
+
+
 def get_jira_creation(obj):
     if isinstance(obj, Finding) or isinstance(obj, Engagement):
         if obj.has_jira_issue:
@@ -293,12 +311,12 @@ def has_jira_configured(obj):
     return get_jira_project(obj) is not None
 
 
-def get_jira_connection_raw(jira_server, jira_username, jira_password):
+def get_jira_connection_raw(jira_server, jira_username, jira_password, validate=False):
     try:
         jira = JIRA(server=jira_server,
                 basic_auth=(jira_username, jira_password),
                 options={"verify": settings.JIRA_SSL_VERIFY},
-                max_retries=0)
+                max_retries=0, validate=validate)
 
         logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
 
@@ -306,19 +324,22 @@ def get_jira_connection_raw(jira_server, jira_username, jira_password):
     except JIRAError as e:
         logger.exception(e)
 
-        if e.status_code in [401, 403]:
-            log_jira_generic_alert('JIRA Authentication Error', e)
-        else:
-            log_jira_generic_alert('Unknown JIRA Connection Error', e)
+        error_message = e.text if hasattr(e, 'text') else e.message if hasattr(e, 'message') else e.args[0]
 
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e))
+        if e.status_code in [401, 403]:
+            log_jira_generic_alert('JIRA Authentication Error', error_message)
+        else:
+            log_jira_generic_alert('Unknown JIRA Connection Error', error_message)
+
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
         raise e
 
     except requests.exceptions.RequestException as re:
         logger.exception(re)
+        error_message = re.text if hasattr(re, 'text') else re.message if hasattr(re, 'message') else re.args[0]
         log_jira_generic_alert('Unknown JIRA Connection Error', re)
 
-        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(re))
+        add_error_message_to_response('Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(error_message))
 
         raise re
 
@@ -352,10 +373,11 @@ def jira_get_resolution_id(jira, issue, status):
     return resolution_id
 
 
-def jira_change_resolution_id(jira, issue, jid):
+def jira_transition(jira, issue, transition_id):
     try:
-        if issue and jid:
-            jira.transition_issue(issue, jid)
+        if issue and transition_id:
+            jira.transition_issue(issue, transition_id)
+            return True
     except JIRAError as jira_error:
         logger.debug('error transisioning jira issue ' + issue.key + ' ' + str(jira_error))
         logger.exception(jira_error)
@@ -426,11 +448,15 @@ def get_labels(find):
 
 
 def jira_description(find):
-    template = 'issue-trackers/jira-description.tpl'
+    template = get_jira_issue_template(find)
+
+    logger.debug('rendering description for jira from: %s', template)
+
     kwargs = {}
     kwargs['finding'] = find
-    kwargs['jira_instance'] = get_jira_instance(find)
-    return render_to_string(template, kwargs)
+    description = render_to_string(template, kwargs)
+    logger.debug('rendered description: %s', description)
+    return description
 
 
 def push_to_jira(obj):
@@ -547,8 +573,6 @@ def add_jira_issue(find):
         j_issue.save()
         issue = jira.issue(new_issue.id)
 
-        find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
-
         # Upload dojo finding screenshots to Jira
         for pic in find.images.all():
             jira_attachment(
@@ -640,18 +664,10 @@ def update_jira_issue(find):
             priority={'name': jira_instance.get_priority(find.severity)},
             fields=fields)
 
-        status_list = find.status()
-        if any(item in status_list for item in OPEN_STATUS):
-            logger.debug('Transitioning Jira issue to Active')
-            jira_change_resolution_id(jira, issue, jira_instance.open_status_key)
-
-        if any(item in status_list for item in RESOLVED_STATUS):
-            logger.debug('Transitioning Jira issue to Resolved')
-            jira_change_resolution_id(jira, issue, jira_instance.close_status_key)
+        push_status_to_jira(find, jira_instance, jira, issue)
 
         find.jira_issue.jira_change = timezone.now()
         find.jira_issue.save()
-        find.save(push_to_jira=False, dedupe_option=False, issue_updater_option=False)
 
         if jira_project.enable_engagement_epic_mapping:
             eng = find.test.engagement
@@ -670,6 +686,93 @@ def update_jira_issue(find):
         logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
         log_jira_alert(e.text, find)
         return False
+
+
+def get_jira_issue_from_jira(find):
+    logger.debug('getting jira issue from JIRA for %d:%s', find.id, find)
+
+    if not is_jira_enabled():
+        return False
+
+    jira_project = get_jira_project(find)
+    jira_instance = get_jira_instance(find)
+
+    j_issue = find.jira_issue
+    if not jira_project:
+        logger.error("Unable to retrieve latest status change from JIRA %s for finding %s as there is no JIRA_Project configured for this finding.", j_issue.jira_key, format(find.id))
+        log_jira_alert("Unable to retrieve latest status change from JIRA %s for finding %s as there is no JIRA_Project configured for this finding." % (j_issue.jira_key, find), find)
+        return False
+
+    meta = None
+    try:
+        JIRAError.log_to_tempfile = False
+        jira = get_jira_connection(jira_instance)
+
+        logger.debug('getting issue from JIRA')
+        issue_from_jira = jira.issue(j_issue.jira_id)
+
+        return issue_from_jira
+
+    except JIRAError as e:
+        logger.exception(e)
+        logger.error("jira_meta for project: %s and url: %s meta: %s", jira_project.project_key, jira_project.jira_instance.url, json.dumps(meta, indent=4))  # this is None safe
+        log_jira_alert(e.text, find)
+        return None
+
+
+def issue_from_jira_is_active(issue_from_jira):
+    #         "resolution":{
+    #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
+    #             "id":"11",
+    #             "description":"Cancelled by the customer.",
+    #             "name":"Cancelled"
+    #         },
+
+    # or
+    #         "resolution": null
+
+    # or
+    #         "resolution": "None"
+
+    if not hasattr(issue_from_jira.fields, 'resolution'):
+        print(vars(issue_from_jira))
+        return True
+
+    if not issue_from_jira.fields.resolution:
+        return True
+
+    if issue_from_jira.fields.resolution == "None":
+        return True
+
+    # some kind of resolution is present that is not null or None
+    return False
+
+
+def push_status_to_jira(find, jira_instance, jira, issue, save=False):
+
+    status_list = find.status()
+    issue_closed = False
+    # check RESOLVED_STATUS first to avoid corner cases with findings that are Inactive, but verified
+    if any(item in status_list for item in RESOLVED_STATUS):
+        if issue_from_jira_is_active(issue):
+            logger.debug('Transitioning Jira issue to Resolved')
+            updated = jira_transition(jira, issue, jira_instance.close_status_key)
+        else:
+            logger.debug('Jira issue already Resolved')
+            updated = False
+        issue_closed = True
+
+    if not issue_closed and any(item in status_list for item in OPEN_STATUS):
+        if not issue_from_jira_is_active(issue):
+            logger.debug('Transitioning Jira issue to Active (Reopen)')
+            updated = jira_transition(jira, issue, jira_instance.open_status_key)
+        else:
+            logger.debug('Jira issue already Active')
+            updated = False
+
+    if updated and save:
+        find.jira_issue.jira_change = timezone.now()
+        find.jira_issue.save()
 
 
 # gets the metadata for the default issue type in this jira project
@@ -1104,3 +1207,68 @@ def process_jira_epic_form(request, engagement=None):
 # so [%s|%s] % (escape_for_jira(name), url)
 def escape_for_jira(text):
     return text.replace('|', '%7D')
+
+
+def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now) -> bool:
+    """ Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly """
+    import dojo.risk_acceptance.helper as ra_helper
+    status_changed = False
+    resolved = resolution_id is not None
+    jira_instance = get_jira_instance(finding)
+
+    if finding.active is resolved:
+        if finding.active:
+            if jira_instance and resolution_name in jira_instance.accepted_resolutions:
+                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(finding.jira_issue.jira_key))
+                finding.active = False
+                finding.mitigated = None
+                finding.is_Mitigated = False
+                finding.false_p = False
+                Risk_Acceptance.objects.create(
+                    accepted_by=assignee_name,
+                    owner=finding.reporter,
+                ).accepted_findings.set([finding])
+                status_changed = True
+            elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
+                logger.debug("Marking related finding of {} as false-positive".format(finding.jira_issue.jira_key))
+                finding.active = False
+                finding.verified = False
+                finding.mitigated = None
+                finding.is_Mitigated = False
+                finding.false_p = True
+                ra_helper.remove_from_any_risk_acceptance(finding)
+                status_changed = True
+            else:
+                # Mitigated by default as before
+                logger.debug("Marking related finding of {} as mitigated (default)".format(finding.jira_issue.jira_key))
+                finding.active = False
+                finding.mitigated = jira_now
+                finding.is_Mitigated = True
+                finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
+                finding.endpoints.clear()
+                finding.false_p = False
+                ra_helper.remove_from_any_risk_acceptance(finding)
+                status_changed = True
+        else:
+            # Reopen / Open Jira issue
+            logger.debug("Re-opening related finding of {}".format(finding.jira_issue.jira_key))
+            finding.active = True
+            finding.mitigated = None
+            finding.is_Mitigated = False
+            finding.false_p = False
+            ra_helper.remove_from_any_risk_acceptance(finding)
+            status_changed = True
+    else:
+        # Reopen / Open Jira issue
+        logger.debug("Re-opening related finding of {}".format(finding.jira_issue.jira_key))
+        finding.active = True
+        finding.mitigated = None
+        finding.is_Mitigated = False
+        finding.false_p = False
+        ra_helper.remove_from_any_risk_acceptance(finding)
+        status_changed = True
+
+    finding.jira_issue.jira_change = jira_now
+    finding.jira_issue.save()
+    finding.save()
+    return status_changed

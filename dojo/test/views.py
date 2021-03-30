@@ -10,8 +10,7 @@ import googleapiclient.discovery
 from google.oauth2 import service_account
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, QuerySet, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -36,12 +35,15 @@ from dojo.utils import add_error_message_to_response, add_field_errors_to_respon
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
-from dojo.user.helper import user_must_be_authorized
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 from django.views.decorators.vary import vary_on_cookie
 from django.core.exceptions import MultipleObjectsReturned
 from django.views.decorators.debug import sensitive_variables
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
+from dojo.test.queries import get_authorized_tests
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -49,9 +51,9 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @sensitive_variables('service_account_info', 'credentials')
-@user_must_be_authorized(Test, 'view', 'tid')
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'view')
 def view_test(request, tid):
-    tests_prefetched = Test.objects.all()
+    tests_prefetched = get_authorized_tests(Permissions.Test_View)
     tests_prefetched = tests_prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
     tests_prefetched = tests_prefetched.prefetch_related(Prefetch('test_import_set', queryset=Test_Import.objects.filter(~Q(findings_affected=None))))
     tests_prefetched = tests_prefetched.prefetch_related('test_import_set__test_import_finding_action_set')
@@ -72,7 +74,12 @@ def view_test(request, tid):
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
     system_settings = get_object_or_404(System_Settings, id=1)
-    if request.method == 'POST' and request.user.is_staff:
+    if request.method == 'POST':
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
         if note_type_activation:
             form = TypedNoteForm(request.POST, available_note_types=available_note_types)
         else:
@@ -215,8 +222,7 @@ def prefetch_for_findings(findings):
 #     return prefetch_for_test_imports
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'change', 'tid')
+@user_is_authorized(Test, Permissions.Test_Edit, 'tid', 'change')
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -243,8 +249,7 @@ def edit_test(request, tid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'delete', 'tid')
+@user_is_authorized(Test, Permissions.Test_Delete, 'tid', 'delete')
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
@@ -282,12 +287,11 @@ def delete_test(request, tid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def test_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
-        tests = Test.objects.all()
+        tests = get_authorized_tests(Permissions.Test_View)
     else:
         filters = []
         leads = request.GET.getlist('lead', '')
@@ -295,7 +299,7 @@ def test_calendar(request):
             leads.remove('-1')
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
-        tests = Test.objects.filter(reduce(operator.or_, filters))
+        tests = get_authorized_tests(Permissions.Test_View).filter(reduce(operator.or_, filters))
 
     tests = tests.prefetch_related('test_type', 'lead', 'engagement__product')
 
@@ -307,8 +311,7 @@ def test_calendar(request):
         'users': Dojo_User.objects.all()})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'staff', 'tid')
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -328,8 +331,7 @@ def test_ics(request, tid):
     return response
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'staff', 'tid')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
 def add_findings(request, tid):
     test = Test.objects.get(id=tid)
     form_error = False
@@ -368,7 +370,6 @@ def add_findings(request, tid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            finding_helper.update_finding_status(new_finding, request.user)
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
@@ -485,7 +486,7 @@ def add_findings(request, tid):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
 def add_temp_finding(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
@@ -622,6 +623,7 @@ def add_temp_finding(request, tid, fid):
                    })
 
 
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()
@@ -640,9 +642,7 @@ def search(request, tid):
                    })
 
 
-# bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Test, 'staff', 'tid')
+@user_is_authorized(Test, Permissions.Import_Scan_Result, 'tid', 'staff')
 def re_import_scan_results(request, tid):
     additional_message = "When re-uploading a scan, any findings not found in original scan will be updated as " \
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
@@ -719,7 +719,12 @@ def re_import_scan_results(request, tid):
                 push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
 
                 logger.debug('starting reimport of %i items.', len(items))
+                from dojo.reimport_utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
+                deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
+
                 i = 0
+                logger.debug('STEP 1: looping over findings from the reimported report and trying to match them to existing findings')
+                deduplicationLogger.debug('Algorithm used for matching new findings to existing findings: ' + deduplication_algorithm)
                 for item in items:
                     sev = item.severity
                     if sev == 'Information' or sev == 'Informational':
@@ -734,41 +739,12 @@ def re_import_scan_results(request, tid):
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
 
-                    # Try to find the existing finding
-                    # If it's Veracode or Arachni, then we consider the description for some
-                    # reason...
                     from titlecase import titlecase
                     item.title = titlecase(item.title)
-                    if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
-                        findings = Finding.objects.filter(title=item.title,
-                                                        test__id=test.id,
-                                                        severity=sev,
-                                                        numerical_severity=Finding.get_numerical_severity(sev),
-                                                        description=item.description)
+                    item.hash_code = item.compute_hash_code()
+                    deduplicationLogger.debug("new finding's hash_code: %s", item.hash_code)
 
-                    else:
-                        findings = Finding.objects.filter(title=item.title,
-                                                      test__id=test.id,
-                                                      severity=sev,
-                                                      numerical_severity=Finding.get_numerical_severity(sev))
-
-                    # some parsers generate 1 finding for each vulnerable file for each vulnerability
-                    # i.e
-                    # #: title                     : sev : file_path
-                    # 1: CVE-2020-1234 jquery      : 1   : /file1.jar
-                    # 2: CVE-2020-1234 jquery      : 1   : /file2.jar
-                    #
-                    # if we don't filter on file_path, we would find 2 existing findings
-                    # and the logic below will get confused and map all incoming findings
-                    # from the reimport on the first finding
-                    #
-                    # for Anchore we fix this here, we may need a broader fix (and testcases)
-                    # or we may need to change the matching logic here to use the same logic
-                    # as the deduplication logic (hashcode fields)
-
-                    if scan_type == 'Anchore Engine Scan':
-                        if item.file_path:
-                            findings = findings.filter(file_path=item.file_path)
+                    findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type)
 
                     if findings:
                         finding = findings[0]
@@ -814,7 +790,9 @@ def re_import_scan_results(request, tid):
                                 finding.save(dedupe_option=False)
                             unchanged_items.append(finding)
                             unchanged_count += 1
-
+                        if finding.dynamic_finding:
+                            logger.debug("Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints")
+                            update_endpoint_status(finding, item, request.user)
                     else:
                         item.test = test
                         item.reporter = request.user
@@ -825,8 +803,7 @@ def re_import_scan_results(request, tid):
 
                         # Save it. Don't dedupe before endpoints are added.
                         item.save(dedupe_option=False)
-                        logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
-                        deduplicationLogger.debug('reimport found multiple identical existing findings for %i, a non-exact match. these are ignored and a new finding has been created', item.id)
+                        logger.debug('%i: reimport creating new finding as no existing finding match: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
                         finding_added_count += 1
                         # Add it to the new items
                         new_items.append(item)
@@ -834,18 +811,11 @@ def re_import_scan_results(request, tid):
 
                         if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
                             for req_resp in item.unsaved_req_resp:
-                                if scan_type == "Arachni Scan":
-                                    burp_rr = BurpRawRequestResponse(
-                                        finding=item,
-                                        burpRequestBase64=req_resp["req"],
-                                        burpResponseBase64=req_resp["resp"],
-                                    )
-                                else:
-                                    burp_rr = BurpRawRequestResponse(
-                                        finding=item,
-                                        burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                                        burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
-                                    )
+                                burp_rr = BurpRawRequestResponse(
+                                    finding=item,
+                                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
+                                )
                                 burp_rr.clean()
                                 burp_rr.save()
 
@@ -911,6 +881,7 @@ def re_import_scan_results(request, tid):
                 to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
                 mitigated_findings = []
                 if close_old_findings:
+                    logger.debug('STEP 2: Mitigating existing findings that are not present anymore in the report')
                     for finding in to_mitigate:
                         # finding = Finding.objects.get(id=finding_id)
                         if not finding.mitigated or not finding.is_Mitigated:

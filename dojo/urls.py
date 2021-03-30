@@ -7,15 +7,15 @@ from tastypie_swagger.views import SwaggerView, ResourcesView, SchemaView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views as tokenviews
 from rest_framework import permissions
-from drf_yasg2.views import get_schema_view
-from drf_yasg2 import openapi
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 from django.http import HttpResponse
 import django_saml2_auth.views
 
 
 from dojo import views
 from dojo.api import UserResource, ProductResource, EngagementResource, \
-    TestResource, FindingResource, ScanSettingsResource, ScanResource, \
+    TestResource, FindingResource, \
     StubFindingResource, FindingTemplateResource, ImportScanResource, \
     ReImportScanResource, JiraResource, JIRA_ConfResource, EndpointResource, \
     JIRA_IssueResource, ToolProductSettingsResource, Tool_ConfigurationResource, \
@@ -24,8 +24,8 @@ from dojo.api import UserResource, ProductResource, EngagementResource, \
     Note_TypeResource
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
-    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
-    ScansViewSet, StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
+    StubFindingsViewSet, TestImportViewSet, TestsViewSet, TestTypesViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
@@ -42,7 +42,6 @@ from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.product.urls import urlpatterns as prod_urls
 from dojo.product_type.urls import urlpatterns as pt_urls
 from dojo.reports.urls import urlpatterns as reports_urls
-from dojo.scan.urls import urlpatterns as scan_urls
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
@@ -81,8 +80,6 @@ v1_api.register(TestTypeResource())
 v1_api.register(TestResource())
 v1_api.register(FindingResource())
 v1_api.register(FindingTemplateResource())
-v1_api.register(ScanSettingsResource())
-v1_api.register(ScanResource())
 v1_api.register(StubFindingResource())
 v1_api.register(ImportScanResource())
 v1_api.register(ReImportScanResource())
@@ -98,7 +95,6 @@ v1_api.register(LanguagesResource())
 v1_api.register(LanguageTypeResource())
 v1_api.register(App_AnalysisResource())
 v1_api.register(BuildDetails())
-# v1_api.register(IPScanResource())
 
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
@@ -116,8 +112,6 @@ v2_api.register(r'jira_product_configurations', JiraProjectViewSet)  # backwards
 v2_api.register(r'jira_projects', JiraProjectViewSet)
 v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
-v2_api.register(r'scan_settings', ScanSettingsViewSet)
-v2_api.register(r'scans', ScansViewSet)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
 v2_api.register(r'sonarqube_product_configurations', SonarqubeProductViewSet)
@@ -147,7 +141,6 @@ ur += metrics_urls
 ur += prod_urls
 ur += pt_urls
 ur += reports_urls
-ur += scan_urls
 ur += search_urls
 ur += test_type_urls
 ur += test_urls

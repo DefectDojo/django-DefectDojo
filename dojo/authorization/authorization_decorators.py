@@ -2,16 +2,16 @@ import functools
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.user.helper import user_is_authorized as legacy_check
 
 
-def user_is_authorized(model, permission, arg, lookup="pk", func=None):
+def user_is_authorized(model, permission, arg, legacy_permission=None, lookup="pk", func=None):
     """Decorator for functions that ensures the user has permission on an object.
     """
 
     if func is None:
-        return functools.partial(user_is_authorized, model, permission, arg, lookup)
+        return functools.partial(user_is_authorized, model, permission, arg, legacy_permission, lookup)
 
     @functools.wraps(func)
     def _wrapped(request, *args, **kwargs):
@@ -27,12 +27,11 @@ def user_is_authorized(model, permission, arg, lookup="pk", func=None):
         # object must exist
         obj = get_object_or_404(model.objects.filter(**{lookup: lookup_value}))
 
-        if settings.FEATURE_NEW_AUTHORIZATION:
-            if not user_has_permission(request.user, obj, permission) and not request.user.is_superuser:
-                raise PermissionDenied()
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, obj, permission)
         else:
-            if permission.name.endswith("View"):
-                if not legacy_check(request.user, 'view', obj):
+            if legacy_permission:
+                if not legacy_check(request.user, legacy_permission, obj):
                     raise PermissionDenied()
             elif not request.user.is_staff:
                 raise PermissionDenied()

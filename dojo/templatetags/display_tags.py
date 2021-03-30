@@ -15,7 +15,6 @@ from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 import dateutil.relativedelta
 import datetime
-from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 import git
@@ -80,14 +79,6 @@ def markdown_render(value):
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
         return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
-
-
-@register.filter(name='ports_open')
-def ports_open(value):
-    count = 0
-    for ipscan in value.ipscan_set.all():
-        count += len(literal_eval(ipscan.services))
-    return count
 
 
 @register.filter(name='url_shortner')
@@ -740,18 +731,26 @@ def finding_display_status(finding):
 
 @register.filter
 def is_authorized_for_change(user, obj):
-    return user_is_authorized(user, 'change', obj)
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        return user_is_authorized(user, 'change', obj)
+    else:
+        return False
 
 
 @register.filter
 def is_authorized_for_delete(user, obj):
-    return user_is_authorized(user, 'delete', obj)
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        return user_is_authorized(user, 'delete', obj)
+    else:
+        return False
 
 
 @register.filter
 def is_authorized_for_staff(user, obj):
-    result = user_is_authorized(user, 'staff', obj)
-    return result
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        return user_is_authorized(user, 'staff', obj)
+    else:
+        return False
 
 
 @register.filter
@@ -977,3 +976,8 @@ def import_history(finding, autoescape=True):
         list_of_status_changes += '<b>' + status_change.created.strftime('%b %d, %Y, %H:%M:%S') + '</b>: ' + status_change.get_action_display() + '<br/>'
 
     return mark_safe(html % (list_of_status_changes))
+
+
+@register.simple_tag
+def feature_reports_pdf_list():
+    return settings.FEATURE_REPORTS_PDF_LIST

@@ -27,10 +27,13 @@
                         </sup>
                     {% endif %}
                     {% if finding.last_reviewed %}
-                        <small>Last Reviewed {{ finding.last_reviewed | naturalday }},
-                            by {{ finding.last_reviewed_by }}</small>
+                        <small>Last Reviewed {{ finding.last_reviewed | naturalday }}
+                            by {{ finding.last_reviewed_by }}, </small>
                     {% else %}
                         <small>Last Reviewed {{ finding.date | naturalday }} by {{ finding.reporter }}, </small>
+                    {% endif %}
+                    {% if finding.last_status_update %}
+                        <small>Last Status Update {{ finding.last_status_update | naturalday }}, </small>
                     {% endif %}
                     <small>Created
                     {% if finding.last_reviewed > finding.created %}
@@ -232,6 +235,9 @@
                     <th>Type</th>
                     <th>Date discovered</th>
                     <th>Age</th>
+                    {% if finding.publish_date %}
+                        <th>Vuln Publish date</th>
+                    {% endif %}
                     <th>Reporter</th>
                     {% if finding.mitigated %}
                         <th>Date Mitigated</th>
@@ -248,9 +254,14 @@
                             {% if finding.severity %}
                                 {% if finding.cvssv3 %}
                                     <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
-                                        data-content="{{ finding.cvssv3 }}">{{ finding.severity_display }}</i>
-                                {% else %}
-                                    {{ finding.severity_display }}
+                                        data-content="{{ finding.cvssv3 }}">
+                                {% endif %}        
+                                {{ finding.severity_display }}
+                                {% if finding.cvssv3_score %}
+                                    ({{ finding.cvssv3_score }})
+                                {% endif %}
+                                {% if finding.cvssv3 %}
+                                    </i>
                                 {% endif %}
                             {% else %}
                                 Unknown
@@ -347,6 +358,9 @@
                     </td>
                     <td>{{ finding.date }}</td>
                     <td>{{ finding.age }} days</td>
+                    {% if finding.publish_date %}
+                        <td>{{ finding.publish_date }}</td>
+                    {% endif %}
                     <td>{{ finding.reporter }}</td>
                     {% if finding.mitigated %}
                         <td>{{ finding.mitigated }}</td>
@@ -457,6 +471,7 @@
                 {% endif %}
                 {% if finding.has_jira_configured or finding.jira_issue %}
                 <th>JIRA</th>
+                <th>JIRA Change</th>
                 {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
@@ -521,6 +536,11 @@
                              </i>
                         {% endif %}
                     {% endif %}
+                    </td>
+                    <td>
+                        {% if finding.jira_issue %}
+                            <div title="{{ finding.jira_issue.jira_change|date:"DATETIME_FORMAT" }}">{{ finding.jira_issue.jira_change|naturalday }}</div>
+                        {% endif %}
                     </td>
                 {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}

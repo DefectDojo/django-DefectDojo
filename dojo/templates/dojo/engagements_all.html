@@ -13,8 +13,8 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                <div id="the-filters" class="is-filters panel-body collapse {% if filter_form.has_changed %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filter_form %}
                 </div>
             </div>
             {% if products %}
@@ -83,14 +83,11 @@
                                         {% endif %}
                                     </td>
                                     <td> {{ e.lead.first_name }}</td>
-                                    <td> {% for test in e.test_set.all %}
-                                        {% if test.lead %}
-                                            <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a>
-                                        {% else %}
-                                            <a href="{% url 'view_test' test.id %}"> {{ test }} ({{ test.updated|date}})</a>
-                                        {% endif %}
-                                        <br>
-                                    {% endfor %}
+                                    <td>
+                                        <a style="display: inline" class="eng_link"
+                                           href="{% url 'view_engagement' e.id %}#tests">
+                                            {{ e.test_count }}
+                                        </a>
                                     </td>
                                     {% if user.is_staff %}
                                         <td>

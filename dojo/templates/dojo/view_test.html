@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load get_endpoint_status %}
 {% load static %}
 {% load humanize %}
@@ -38,23 +39,29 @@
                         <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        {% if test|has_object_permission:"Test_Edit" or user|is_authorized_for_change:test %}
                         <li role="presentation">
                             <a href="{% url 'edit_test' test.id %}">
                                 <i class="fa fa-pencil-square-o"></i> Edit Test
                             </a>
                         </li>
+                        {% endif %}
                         {% if show_re_upload %}
+                        {% if test|has_object_permission:"Import_Scan_Result" or user|is_authorized_for_staff:test %}
                             <li role="presentation">
                                 <a href="{% url 're_import_scan_results' test.id %}">
                                     <i class="fa fa-upload"></i> Re-Upload Scan
                                 </a>
                             </li>
                         {% endif %}
+                        {% endif %}
+                        {% if test|has_object_permission:"Notes_Add" or user|is_authorized_for_staff:test %}
                         <li role="presentation">
                             <a id="add_notes_link" href="#add_notes">
                                 <i class="fa fa-comments"></i> Add Notes
                             </a>
                         </li>
+                        {% endif %}
                         <li role="presentation">
                             <a href="{% url 'test_report' test.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
                                 <i class="fa fa-file-text-o"></i> Report
@@ -90,13 +97,14 @@
                                 <i class="fa fa-history"></i> View History
                             </a>
                         </li>
+                        {% if test|has_object_permission:"Test_Delete" or user|is_authorized_for_delete:test %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
                             <a class="text-danger" href="{% url 'delete_test' test.id %}">
                                 <i class="fa fa-trash"></i> Delete Test
                             </a>
                         </li>
-
+                        {% endif %}
                     </ul>
                 </div>
             </div>
@@ -255,6 +263,7 @@
                     <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
                         <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        {% if test|has_object_permission:"Finding_Add" or user|is_authorized_for_change:test %}
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
                             <span class="fa fa-plus"></span>
@@ -272,7 +281,15 @@
                                 </a>
                             </li>
                         </ul>
+                        {% endif %}
                     </div>
+                    <form method="get" action="{% url 'quick_report' %}" class="pull-right">
+                        <input type="hidden" label="url" name="url" value="{{ request.get_full_path }}">
+                        <input type="hidden" label="_generate" name="_generate" value="_generate">
+                        <button class="btn btn-primary" type="submit" label="quick_report" id="quick_report" aria-expanded="true">
+                            <i class="fa fa-file-text-o"></i>
+                        </button>
+                    </form>
                 </h4>
             </div>
         </div>
@@ -285,8 +302,9 @@
             {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
         </div>
 
+        {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
         <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-            {% if user|is_authorized_for_change:test %}
+            {% if test|has_object_permission:"Test_Edit" or user|is_authorized_for_change:test %}
                 <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     Bulk Edit
@@ -295,14 +313,14 @@
             {% endif %}
             <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
                 {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
-                    <button type="button" class="btn btn-info btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
+                    <button type="button" class="btn btn-info btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                         <a class="white-color merge" href="#" alt="Merge Findings">
                             <i class="fa fa-compress"></i>
                         </a>
                     </button>
                 {% endif %}
-                {% if user|is_authorized_for_delete:test %}
-                    <button type="button" class="btn btn-info btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
+                {% if test|has_object_permission:"Test_Delete" or user|is_authorized_for_delete:test %}
+                    <button type="button" class="btn btn-info btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                         <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                             <i class="fa fa-trash"></i>
                         </a>
@@ -367,13 +385,14 @@
                 </li>
             </ul>
         </div>
+        {% endif %}
     {% endif %}
      <div class="panel panel-default table-responsive">
         {% if findings %}
             <table id="test_findings" class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                 <thead>
                         <tr>
-                            {% if user|is_authorized_for_change:test or user|is_authorized_for_delete:test %}
+                            {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" or user|is_authorized_for_change:test or user|is_authorized_for_delete:test %}
                                 <th class="hidden-sm centered" title="Select all visible findings.">
                                     <div class="dropdown">
                                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -419,7 +438,7 @@
                 <tbody>
                 {% for finding in findings %}
                     <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                        {% if user|is_authorized_for_change:finding or user|is_authorized_for_delete:finding %}
+                        {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" or user|is_authorized_for_change:finding or user|is_authorized_for_delete:finding %}
                             <td class="hidden-sm centered">
                                 <form action="#">
                                     <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
@@ -437,20 +456,22 @@
                                         <i class="fa fa-arrow-circle-right"></i> View
                                         </a>
                                     </li>
-                                    {% if user|is_authorized_for_change:finding %}
+                                    {% if finding|has_object_permission:"Finding_Edit" or user|is_authorized_for_change:finding %}
                                         <li>
                                             <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                             <i class="fa fa-pencil-square-o"></i> Edit
                                             </a>
                                         </li>
-                                    {% endif %}
-                                    <li class="divider"></li>
-                                    {% if user|is_authorized_for_staff:finding %}
+                                        <li class="divider"></li>
+                                        {% endif %}
+                                    {% if finding|has_object_permission:"Finding_Edit" or user|is_authorized_for_staff:finding %}
                                         <li role="presentation">
                                             <a href="{% url 'manage_images' finding.id %}">
                                                 <i class="fa fa-file-image-o"></i> Manage Images
                                             </a>
                                         </li>
+                                    {% endif %}
+                                    {% if finding|has_object_permission:"Finding_Edit" or user|is_authorized_for_change:finding %}
                                         {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
                                             <li role="presentation">
                                                 <a href="{% url 'clear_finding_review' finding.id %}">
@@ -464,8 +485,6 @@
                                                 </a>
                                             </li>
                                         {% endif %}
-                                    {% endif %}
-                                    {% if user|is_authorized_for_change:finding %}
                                         <li role="presentation">
                                             <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                 <i class="fa fa-clock-o"></i> Touch Finding
@@ -478,13 +497,13 @@
                                                 <i class="fa fa-copy"></i> Make Finding a Template
                                             </a>
                                         </li>
+                                    {% endif %}
+                                    {% if finding|has_object_permission:"Finding_Edit" or user|is_authorized_for_change:finding %}
                                         <li role="presentation">
                                             <a href="{% url 'find_template_to_apply' finding.id %}">
                                                 <i class="fa fa-copy"></i> Apply Template to Finding
                                             </a>
                                         </li>
-                                    {% endif %}
-                                    {% if user|is_authorized_for_change:finding %}
                                         {% if finding.active %}
                                             <li role="presentation">
                                                 <a href="{% url 'close_finding' finding.id %}">
@@ -499,7 +518,7 @@
                                             </li>
                                         {% endif %}
                                     {% endif %}
-                                    {% if user|is_authorized_for_staff:finding %}
+                                    {% if finding|has_object_permission:"Risk_Acceptance" or user|is_authorized_for_staff:finding %}
                                         {% if finding.risk_accepted %}
                                             <li role="presentation">
                                             <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
@@ -529,8 +548,9 @@
                                             <i class="fa fa-history"></i> View History
                                         </a>
                                     </li>
-                                    {% if user|is_authorized_for_delete:finding %}
-                                        <li>
+                                    {% if finding|has_object_permission:"Finding_Delete" or user|is_authorized_for_delete:finding %}
+                                    <li class="divider"></li>
+                                            <li>
                                             <form method="post" action="{% url 'delete_finding' finding.id %}"
                                                 style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
                                             {% csrf_token %}
@@ -652,7 +672,7 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Potential Findings</h4>
-
+                    {% if test|has_object_permission:"Finding_Add" or user|is_authorized_for_change:test %}
                     <form id="quick-add-form" method="post" class="pull-right">
                         {% csrf_token %}
 
@@ -670,6 +690,7 @@
                                 </span>
                         </div>
                     </form>
+                    {% endif %}
                 </div>
             </div>
 
@@ -688,7 +709,12 @@
                 <tbody>
                 {% for finding in stub_findings %}
                     <tr>
-                        <td><a href="{% url 'promote_to_finding' finding.id %}">{{ finding.title }}</a></td>
+                        <td>
+                            {% if test|has_object_permission:"Finding_Add" or user|is_authorized_for_change:test %}
+                            <a href="{% url 'promote_to_finding' finding.id %}">{{ finding.title }}</a></td>
+                            {% else %}
+                            {{ finding.title }}
+                            {% endif %}
                         <td>{% if finding.severity == "Critical" or finding.severity == "High" %}
                             <span class="text-error">
                         {% else %}<span>{% endif %}{{ finding.severity }}</span></td>
@@ -701,10 +727,11 @@
                         </td>
                         <td>{{ finding.date }}</td>
                         <td>
+                            {% if test|has_object_permission:"Finding_Edit" or user|is_authorized_for_change:test %}
                             <div class="btn-group">
                                 <a class="btn btn-sm btn-warning"
                                    href="{% url 'promote_to_finding' finding.id %}">Promote To Finding</a>
-                                 <form method="post" action="{% url 'delete_stub_finding' finding.id %}"
+                                   <form method="post" action="{% url 'delete_stub_finding' finding.id %}"
                                       style="display: inline" class="form-inline form">
                                     {% csrf_token %}
                                     <input type="hidden" name="id" value="{{ finding.id }}"/>
@@ -713,6 +740,7 @@
                                     </button>
                                 </form>
                             </div>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
@@ -830,9 +858,11 @@
                 <h4>Files<span class="pull-right">
                 <a data-toggle="collapse" href="#add_feat_files">
                     <i class="glyphicon glyphicon-chevron-down"></i></a></span>
-                <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"
+                    {% if test|has_object_permission:"Test_Edit" or user|is_authorized_for_staff:test %}
+                    <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"
                     href="{% url 'manage_files' oid=test.id obj_type='Test' %}">
                     <span class="fa fa-edit"></span></a>
+                    {% endif %}
                 </h4>
             </div>
 
@@ -1013,6 +1043,7 @@
 
         $(function () {
             check_checked_finding();
+
             $('#id_bulk_status').on('click', function (e) {
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_active').prop('disabled', !checked);
@@ -1022,10 +1053,61 @@
                 $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
             })
 
-            $('#id_bulk_risk_acceptance').on('click', function (e) {
+            $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_is_Mitigated').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_false_p').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_out_of_scope').on("click", function (e){
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_acceptance').on('click', function (e) {
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', !checked);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_accept').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_unaccept').prop('checked', false);
+            })
+
+            $('#bulk_edit_menu #id_bulk_risk_unaccept').on('click', function (e) {
+                var checked = this.checked;
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_risk_accept').prop('checked', false);
             })
 
             //Ensures dropdown has proper zindex

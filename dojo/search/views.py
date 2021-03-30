@@ -14,6 +14,10 @@ from dojo.filters import OpenFindingFilter
 from django.conf import settings
 import shlex
 import itertools
+from dojo.product.queries import get_authorized_products
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.test.queries import get_authorized_tests
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
@@ -82,17 +86,14 @@ def simple_search(request):
             search_technologies = "technology" in operators or search_tags or not (operators or search_finding_id or search_cve)
 
             authorized_findings = Finding.objects.all()
-            authorized_tests = Test.objects.all()
-            authorized_engagements = Engagement.objects.all()
-            authorized_products = Product.objects.all()
+            authorized_tests = get_authorized_tests(Permissions.Test_View)
+            authorized_engagements = get_authorized_engagements(Permissions.Engagement_View)
+            authorized_products = get_authorized_products(Permissions.Product_View)
             authorized_endpoints = Endpoint.objects.all()
             authorized_finding_templates = Finding_Template.objects.all()
 
             if not request.user.is_staff:
                 authorized_findings = authorized_findings.filter(Q(test__engagement__product__authorized_users__in=[request.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
-                authorized_tests = authorized_tests.filter(Q(engagement__product__authorized_users__in=[request.user]) | Q(engagement__product__prod_type__authorized_users__in=[request.user]))
-                authorized_engagements = authorized_engagements.filter(Q(product__authorized_users__in=[request.user]) | Q(product__prod_type__authorized_users__in=[request.user]))
-                authorized_products = authorized_products.filter(Q(authorized_users__in=[request.user]) | Q(prod_type__authorized_users__in=[request.user]))
                 authorized_endpoints = authorized_endpoints.filter(Q(product__authorized_users__in=[request.user]) | Q(product__prod_type__authorized_users__in=[request.user]))
                 # can't filter templates
 

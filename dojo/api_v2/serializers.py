@@ -1,6 +1,6 @@
-from drf_yasg2.utils import swagger_serializer_method
+from drf_yasg.utils import swagger_serializer_method
 from dojo.models import Product, Engagement, Test, Finding, \
-    User, ScanSettings, IPScan, Scan, Stub_Finding, Risk_Acceptance, \
+    User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
@@ -30,7 +30,6 @@ import json
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
-import dojo.finding.helper as finding_helper
 
 
 logger = logging.getLogger(__name__)
@@ -390,7 +389,7 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
         return obj.findings_count
 
     def get_findings_list(self, obj):
-        return obj.open_findings_list()
+        return obj.open_findings_list
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
@@ -402,13 +401,13 @@ class ProductTypeMemberSerializer(serializers.ModelSerializer):
 
 
 class ProductTypeSerializer(serializers.ModelSerializer):
-    if settings.FEATURE_NEW_AUTHORIZATION:
+    if settings.FEATURE_AUTHORIZATION_V2:
         members = ProductTypeMemberSerializer(source='product_type_member_set', read_only=True, many=True)
 
     class Meta:
         model = Product_Type
 
-        if not settings.FEATURE_NEW_AUTHORIZATION:
+        if not settings.FEATURE_AUTHORIZATION_V2:
             exclude = ['members']
             extra_kwargs = {
                 'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
@@ -852,12 +851,10 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
         instance = super(TaggitSerializer, self).update(instance, validated_data)
 
-        mitigation_change = finding_helper.update_finding_status(instance, self.context['request'].user)
-
         # If we need to push to JIRA, an extra save call is needed.
         # Also if we need to update the mitigation date of the finding.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
-        if push_to_jira or mitigation_change:
+        if push_to_jira:
             instance.save(push_to_jira=push_to_jira)
 
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
@@ -951,16 +948,9 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         # TODO: JIRA can we remove this is_push_all_issues, already checked in apiv2 viewset?
         push_to_jira = push_to_jira or jira_helper.is_push_all_issues(new_finding)
 
-        # Allow setting the mitigation date based upon the state of is_Mitigated.
-        if new_finding.is_Mitigated:
-            new_finding.mitigated = datetime.datetime.now()
-            new_finding.mitigated_by = self.context['request'].user
-            if settings.USE_TZ:
-                new_finding.mitigated = timezone.make_aware(new_finding.mitigated, timezone.get_default_timezone())
-
         # If we need to push to JIRA, an extra save call is needed.
         # TODO try to combine create and save, but for now I'm just fixing a bug and don't want to change to much
-        if push_to_jira or new_finding.is_Mitigated:
+        if push_to_jira or new_finding:
             new_finding.save(push_to_jira=push_to_jira)
 
         # not sure why we are returning a tag_object, but don't want to change too much now as we're just fixing a bug
@@ -1012,48 +1002,6 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
-
-
-class ScanSettingsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ScanSettings
-        fields = '__all__'
-
-
-class ScanSettingsCreateSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all())
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all())
-    data = serializers.DateTimeField(required=False)
-
-    class Meta:
-        model = ScanSettings
-        fields = '__all__'
-
-
-class IPScanSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IPScan
-        fields = '__all__'
-
-
-class ScanSerializer(serializers.ModelSerializer):
-    # scan_settings_link = serializers.PrimaryKeyRelatedField(
-    #     read_only=True,
-    #     source='scan_settings')
-    # scan_settings = serializers.PrimaryKeyRelatedField(
-    #     queryset=ScanSettings.objects.all(),
-    #     write_only=True,
-    #     )
-    # ipscan_links = serializers.PrimaryKeyRelatedField(
-    #     read_only=True,
-    #     many=True,
-    #     source='ipscan_set')
-
-    class Meta:
-        model = Scan
-        fields = '__all__'
 
 
 class ImportScanSerializer(serializers.Serializer):
@@ -1262,14 +1210,7 @@ class ImportScanSerializer(serializers.Serializer):
 
             for old_finding in old_findings:
                 old_finding.active = False
-                old_finding.mitigated = datetime.datetime.combine(
-                    test.target_start,
-                    timezone.now().time())
-                if settings.USE_TZ:
-                    old_finding.mitigated = timezone.make_aware(
-                        old_finding.mitigated,
-                        timezone.get_default_timezone())
-                old_finding.mitigated_by = self.context['request'].user
+                old_finding.is_Mitigated = True
                 old_finding.notes.create(author=self.context['request'].user,
                                          entry="This finding has been automatically closed"
                                          " as it is not present anymore in recent scans.")
@@ -1403,15 +1344,22 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             unchanged_items = []
 
             logger.debug('starting reimport of %i items.', len(items))
+            from dojo.reimport_utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
+            deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
+
             i = 0
+            logger.debug('STEP 1: looping over findings from the reimported report and trying to match them to existing findings')
+            deduplicationLogger.debug('Algorithm used for matching new findings to existing findings: %s', deduplication_algorithm)
             for item in items:
                 sev = item.severity
 
                 if sev == 'Information' or sev == 'Informational':
                     sev = 'Info'
+                    item.severity = sev
 
                 if (Finding.SEVERITIES[sev] >
                         Finding.SEVERITIES[min_sev]):
+                    # finding's severity is below the configured threshold : ignoring the finding
                     continue
 
                 # existing findings may be from before we had component_name/version fields
@@ -1420,37 +1368,11 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                 from titlecase import titlecase
                 item.title = titlecase(item.title)
-                if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
-                    findings = Finding.objects.filter(
-                        title=item.title,
-                        test=test,
-                        severity=sev,
-                        numerical_severity=Finding.get_numerical_severity(sev),
-                        description=item.description).all()
-                else:
-                    findings = Finding.objects.filter(
-                        title=item.title,
-                        test=test,
-                        severity=sev,
-                        numerical_severity=Finding.get_numerical_severity(sev)).all()
 
-                # some parsers generate 1 finding for each vulnerable file for each vulnerability
-                # i.e
-                # #: title                     : sev : file_path
-                # 1: CVE-2020-1234 jquery      : 1   : /file1.jar
-                # 2: CVE-2020-1234 jquery      : 1   : /file2.jar
-                #
-                # if we don't filter on file_path, we would find 2 existing findings
-                # and the logic below will get confused and map all incoming findings
-                # from the reimport on the first finding
-                #
-                # for Anchore we fix this here, we may need a broader fix (and testcases)
-                # or we may need to change the matching logic here to use the same logic
-                # as the deduplication logic (hashcode fields)
+                item.hash_code = item.compute_hash_code()
+                deduplicationLogger.debug("new finding's hash_code: %s", item.hash_code)
 
-                if scan_type == 'Anchore Engine Scan':
-                    if item.file_path:
-                        findings = findings.filter(file_path=item.file_path)
+                findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type)
 
                 if findings:
                     # existing finding found
@@ -1495,6 +1417,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
                         unchanged_items.append(finding)
                         unchanged_count += 1
+                    if finding.dynamic_finding:
+                        logger.debug("Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints")
+                        update_endpoint_status(finding, item, self.context['request'].user)
                 else:
                     # no existing finding found
                     item.test = test
@@ -1505,8 +1430,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                     item.active = active
                     # Save it. Don't dedupe before endpoints are added.
                     item.save(dedupe_option=False)
-                    logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
-                    deduplicationLogger.debug('reimport found multiple identical existing findings for %i, a non-exact match. these are ignored and a new finding has been created', item.id)
+                    logger.debug('%i: reimport creating new finding as no existing finding match: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
                     finding_added_count += 1
                     new_items.append(item)
                     finding = item
@@ -1575,6 +1499,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
             mitigated_findings = []
             if close_old_findings:
+                logger.debug('STEP 2: Mitigating existing findings that are not present anymore in the report')
                 for finding in to_mitigate:
                     if not finding.mitigated or not finding.is_Mitigated:
                         logger.debug('mitigating finding: %i:%s', finding.id, finding)

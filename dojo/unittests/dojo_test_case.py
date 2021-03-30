@@ -1,5 +1,5 @@
 from vcr_unittest import VCRTestCase
-from dojo.models import User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
+from dojo.models import Product_Type, User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
                         Product
 from dojo.models import System_Settings, Engagement
 from django.urls import reverse
@@ -165,7 +165,7 @@ class DojoTestUtilsMixin(object):
     def add_product_jira(self, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse('new_product'))
 
-        logger.debug('before: JIRA_Project last')
+        # logger.debug('before: JIRA_Project last')
         self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
@@ -173,7 +173,7 @@ class DojoTestUtilsMixin(object):
 
         response = self.client.post(reverse('new_product'), urlencode(data), content_type='application/x-www-form-urlencoded')
 
-        logger.debug('after: JIRA_Project last')
+        # logger.debug('after: JIRA_Project last')
         self.log_model_instance(JIRA_Project.objects.last())
 
         product = None
@@ -433,12 +433,14 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_Mitigated=None):
         payload = {'test': test_id}
         if active is not None:
             payload['active'] = active
         if verified is not None:
             payload['verified'] = verified
+        if is_Mitigated is not None:
+            payload['is_Mitigated'] = is_Mitigated
 
         response = self.client.get(reverse('finding-list'), payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
