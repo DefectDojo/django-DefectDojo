@@ -29,6 +29,7 @@ class GenericParser(object):
         dupes = dict()
         for row in reader:
             finding = Finding(
+                test=test,
                 title=row['Title'],
                 description=row['Description'],
                 date=parse(row['Date']).date(),
