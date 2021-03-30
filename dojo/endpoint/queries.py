@@ -48,18 +48,25 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
     return endpoints
 
 
-def get_authorized_endpoint_status(permission):
-    user = get_current_user()
+def get_authorized_endpoint_status(permission, queryset=None, user=None):
+
+    if not user:
+        user = get_current_user()
 
     if user is None:
         return Endpoint_Status.objects.none()
 
+    if queryset:
+        endpoint_status = queryset
+    else:
+        endpoint_status = Endpoint_Status.objects.all()
+
     if user.is_superuser:
-        return Endpoint_Status.objects.all()
+        return endpoint_status
 
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-            return Endpoint_Status.objects.all()
+            return endpoint_status
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -70,17 +77,15 @@ def get_authorized_endpoint_status(permission):
             product=OuterRef('endpoint__product_id'),
             user=user,
             role__in=roles)
-        endpoints = Endpoint_Status.objects.annotate(
+        endpoint_status = endpoint_status.annotate(
             endpoint__product__prod_type__member=Exists(authorized_product_type_roles),
             endpoint__product__member=Exists(authorized_product_roles))
-        endpoints = endpoints.filter(
+        endpoint_status = endpoint_status.filter(
             Q(endpoint__product__prod_type__member=True) |
             Q(endpoint__product__member=True))
     else:
-        if user.is_staff:
-            endpoints = Endpoint_Status.objects.all()
-        else:
-            endpoints = Endpoint_Status.objects.filter(
+        if not user.is_staff:
+            endpoint_status = endpoint_status.filter(
                 Q(endpoint__product__authorized_users__in=[user]) |
                 Q(endpoint__product__prod_type__authorized_users__in=[user]))
-    return endpoints
+    return endpoint_status
