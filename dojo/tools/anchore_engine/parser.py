@@ -38,6 +38,19 @@ class AnchoreEngineParser(object):
             mitigation = "Upgrade to " + item['package_name'] + ' ' + item['fix'] + '\n'
             mitigation += "URL: " + item['url'] + '\n'
 
+            if item['feed'] == 'nvdv2' or item['feed'] == 'vulnerabilities':
+                if item['nvd_data']:
+                    cvssv3_base_score = item['nvd_data'][0]['cvss_v3']['base_score']
+            else:
+                # there may be other keys, but taking a best guess here
+                if item['vendor_data']:
+                    # sometimes cvssv3 in 1st element will have -1 for "not set", but have data in the 2nd array item
+                    if item['vendor_data'][0]['cvss_v3']['base_score'] != -1:
+                        cvssv3_base_score = item['vendor_data'][0]['cvss_v3']['base_score']
+                    elif len(item['vendor_data']) > 1:
+                        if item['vendor_data'][1]['cvss_v3']['base_score'] != -1:
+                            cvssv3_base_score = item['vendor_data'][1]['cvss_v3']['base_score']
+
             references = item['url']
 
             dupe_key = '|'.join([
@@ -59,6 +72,7 @@ class AnchoreEngineParser(object):
                     title=title,
                     test=test,
                     cve=cve,
+                    cvssv3_score=cvssv3_base_score,
                     description=findingdetail,
                     severity=sev,
                     numerical_severity=Finding.get_numerical_severity(sev),
