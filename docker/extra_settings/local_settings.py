@@ -10,6 +10,13 @@ CELERY_BEAT_SCHEDULE['auto-delete-engagements'] = {
     'schedule': crontab(hour=9, minute=30)
 }
 
+# Temp fix - fix possible circular dups
+CELERY_BEAT_SCHEDULE['fix_loop_duplicates'] = { 
+    'task': 'dojo.tasks.jira_status_reconciliation_task',
+    'schedule': crontab(hour=9, minute=00)
+}
+
+# ensure jira status reflect on defectdojo findings
 CELERY_BEAT_SCHEDULE['jira_status_reconciliation'] = { 
     'task': 'dojo.tasks.jira_status_reconciliation_task',
     'schedule': timedelta(hours=24),
