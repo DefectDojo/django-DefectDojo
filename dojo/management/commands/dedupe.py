@@ -59,8 +59,8 @@ class Command(BaseCommand):
         if not hash_code_only:
             if get_system_setting('enable_deduplication'):
                 for finding in findings:
-                    from dojo.utils import do_dedupe_finding_sync
-                    do_dedupe_finding_sync(finding)
+                    from dojo.utils import do_dedupe_finding
+                    do_dedupe_finding(finding)
                 logger.info("######## Done deduplicating########")
             else:
                 logger.debug("skipping dedupe because it's disabled in system settings")
