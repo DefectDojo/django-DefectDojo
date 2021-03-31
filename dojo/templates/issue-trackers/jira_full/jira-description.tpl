@@ -4,9 +4,12 @@
 {% url 'view_engagement' finding.test.engagement.id as engagement_url %}
 {% url 'view_test' finding.test.id as test_url %}
 {% url 'view_finding' finding.id as finding_url %}
-*Title*: [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 
 *Defect Dojo link:* {{ finding_url|full_url }}
+*Defect Dojo ID:* {{ finding.id }}
+
+Please refer to https://cloudbees.atlassian.net/wiki/spaces/ENG/pages/999326760/Security+bug+fix+policy for SLA information.
+JIRA Due Date field was automatically calculated based on it, if configured in your JIRA screen.
 
 *Severity:* {{ finding.severity }}
 {% if finding.cwe > 0 %}
@@ -29,12 +32,14 @@
 
 *Commit hash:* {{ finding.test.engagement.commit_hash }}
 
+{% if finding.endpoints.all %}
 *Systems/Endpoints*:
 {% for endpoint in finding.endpoints.all %}
 * {{ endpoint }}{% endfor %}
 {% comment %}
     we leave the endfor at the same line to avoid double line breaks i.e. too many blank lines
 {% endcomment %}
+{%endif%}
 
 
 {% if finding.component_name %}
@@ -62,7 +67,5 @@ Sink Object: {{ finding.sast_sink_object }}
 
 *References*:
 {{ finding.references }}
-
-*Defect Dojo ID:* {{ finding.id }}
 
 *Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]

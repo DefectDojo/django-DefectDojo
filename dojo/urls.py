@@ -37,6 +37,7 @@ from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
+from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.home.urls import urlpatterns as home_urls
 from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.product.urls import urlpatterns as prod_urls
@@ -136,6 +137,7 @@ ur += dev_env_urls
 ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls
+ur += finding_group_urls
 ur += home_urls
 ur += metrics_urls
 ur += prod_urls

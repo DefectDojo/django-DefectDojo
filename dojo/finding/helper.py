@@ -1,9 +1,11 @@
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 import logging
+from time import strftime
 from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
+from dojo.models import Finding, Finding_Group
 from dojo.utils import get_current_user
 from dojo.models import Finding, System_Settings
 
@@ -110,6 +112,7 @@ def can_edit_mitigated_data(user):
     return settings.EDITABLE_MITIGATED_DATA and user.is_superuser
 
 
+
 @dojo_model_to_id
 @dojo_async_task
 @app.task
@@ -154,3 +157,67 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
         logger.debug('pushing finding %s to jira from finding.save()', finding.pk)
         import dojo.jira_link.helper as jira_helper
         jira_helper.push_to_jira(finding)
+
+        
+def create_finding_group(finds, finding_group_name):
+    logger.debug('creating finding_group_create')
+    if not finds or len(finds) == 0:
+        raise ValueError('cannot create empty Finding Group')
+
+    finding_group_name_dummy = 'bulk group ' + strftime("%a, %d %b  %Y %X", timezone.now().timetuple())
+
+    finding_group = Finding_Group(test=finds[0].test)
+    finding_group.creator = get_current_user()
+    finding_group.name = finding_group_name + finding_group_name_dummy
+    finding_group.save()
+    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    finding_group.findings.set(available_findings)
+
+    # if user provided a name, we use that, else:
+    # if we have components, we may set a nice name but catch 'name already exist' exceptions
+    try:
+        if finding_group_name:
+            finding_group.name = finding_group_name
+        elif finding_group.components:
+            finding_group.name = finding_group.components
+        finding_group.save()
+    except:
+        pass
+
+    added = len(available_findings)
+    skipped = len(finds) - added
+    return finding_group, added, skipped
+
+
+def add_to_finding_group(finding_group, finds):
+    added = 0
+    skipped = 0
+    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    finding_group.findings.add(*available_findings)
+
+    added = len(available_findings)
+    skipped = len(finds) - added
+    return finding_group, added, skipped
+
+
+def remove_from_finding_group(finds):
+    removed = 0
+    skipped = 0
+    affected_groups = []
+    for find in finds:
+        groups = find.finding_group_set.all()
+        if not groups:
+            skipped += 1
+            continue
+
+        for group in find.finding_group_set.all():
+            group.findings.remove(find)
+            affected_groups.append(group)
+
+        removed += 1
+
+    return affected_groups, removed, skipped
+
+# def delete_finding_group(finding_group):
+#     pass
+
