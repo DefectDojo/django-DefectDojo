@@ -7,16 +7,16 @@ from dojo.authorization.authorization import get_roles_for_permission
 
 def get_authorized_findings(permission, queryset=None, user=None):
 
-    if not user:
+    if user is None:
         user = get_current_user()
 
     if user is None:
         return Finding.objects.none()
 
-    if queryset:
-        findings = queryset
-    else:
+    if queryset is None:
         findings = Finding.objects.all()
+    else:
+        findings = queryset
 
     if user.is_superuser:
         return findings

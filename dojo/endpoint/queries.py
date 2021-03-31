@@ -7,16 +7,16 @@ from dojo.authorization.authorization import get_roles_for_permission
 
 def get_authorized_endpoints(permission, queryset=None, user=None):
 
-    if not user:
+    if user is None:
         user = get_current_user()
 
     if user is None:
         return Endpoint.objects.none()
 
-    if queryset:
-        endpoints = queryset
-    else:
+    if queryset is None:
         endpoints = Endpoint.objects.all()
+    else:
+        endpoints = queryset
 
     if user.is_superuser:
         return endpoints
@@ -50,16 +50,16 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
 
 def get_authorized_endpoint_status(permission, queryset=None, user=None):
 
-    if not user:
+    if user is None:
         user = get_current_user()
 
     if user is None:
         return Endpoint_Status.objects.none()
 
-    if queryset:
-        endpoint_status = queryset
-    else:
+    if queryset is None:
         endpoint_status = Endpoint_Status.objects.all()
+    else:
+        endpoint_status = queryset
 
     if user.is_superuser:
         return endpoint_status
