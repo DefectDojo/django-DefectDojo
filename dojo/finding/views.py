@@ -1,6 +1,5 @@
 # #  findings
 import base64
-from dojo.authorization.authorization import user_has_permission_or_403
 import json
 import logging
 import mimetypes
@@ -48,6 +47,7 @@ from django.db.models import Q, QuerySet, Count
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.finding.helper as finding_helper
+from dojo.authorization.authorization import user_has_permission_or_403, user_has_permission
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
@@ -120,9 +120,19 @@ django_filter=open_findings_filter, prefetch_type='all'):
     jira_project = None
     github_config = None
 
+    tags = Finding.tags.tag_model.objects.all()
+
+    findings = get_authorized_findings(Permissions.Finding_View)
+    if view == "All":
+        filter_name = "All"
+    else:
+        findings = findings.filter(query_filter)
+
+    findings = findings.order_by(order_by)
+
     if pid:
         product = get_object_or_404(Product, id=pid)
-        findings = Finding.objects.filter(test__engagement__product__id=pid)
+        findings = findings.filter(test__engagement__product__id=pid)
 
         show_product_column = False
         product_tab = Product_Tab(pid, title="Findings", tab="findings")
@@ -138,15 +148,7 @@ django_filter=open_findings_filter, prefetch_type='all'):
         jira_project = jira_helper.get_jira_project(engagement)
         github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
     else:
-        findings = get_authorized_findings(Permissions.Finding_View)
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
-
-    if view == "All":
-        filter_name = "All"
-    else:
-        findings = findings.filter(query_filter)
-
-    findings = findings.order_by(order_by)
 
     findings_filter = django_filter(request, findings, request.user, pid)
 
@@ -215,6 +217,8 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__members')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__members')
     else:
         logger.debug('unable to prefetch because query was already executed')
 

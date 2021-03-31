@@ -1,3 +1,6 @@
+from functools import lru_cache
+from django.db.models.signals import post_save, post_delete
+from django.dispatch.dispatcher import receiver
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
@@ -14,9 +17,8 @@ def user_has_permission(user, obj, permission):
         return True
 
     if isinstance(obj, Product_Type):
-        try:
-            member = Product_Type_Member.objects.get(user=user, product_type=obj)
-        except Product_Type_Member.DoesNotExist:
+        member = get_product_type_member(user, obj)
+        if member is None:
             return False
         return role_has_permission(member.role, permission)
     elif (isinstance(obj, Product) and
@@ -26,9 +28,8 @@ def user_has_permission(user, obj, permission):
             return True
 
         # Maybe the user has a role for the product with the requested permissions
-        try:
-            member = Product_Member.objects.get(user=user, product=obj)
-        except Product_Member.DoesNotExist:
+        member = get_product_member(user, obj)
+        if member is None:
             return False
         return role_has_permission(member.role, permission)
     elif isinstance(obj, Engagement) and permission in Permissions.get_engagement_permissions():
@@ -86,3 +87,31 @@ class PermissionDoesNotExistError(Exception):
 class RoleDoesNotExistError(Exception):
     def __init__(self, message):
         self.message = message
+
+
+@lru_cache()
+def get_product_member(user, product):
+    try:
+        return Product_Member.objects.get(user=user, product=product)
+    except Product_Member.DoesNotExist:
+        return None
+
+
+@lru_cache()
+def get_product_type_member(user, product_type):
+    try:
+        return Product_Type_Member.objects.get(user=user, product_type=product_type)
+    except Product_Type_Member.DoesNotExist:
+        return None
+
+
+@receiver(post_save, sender=Product_Member)
+@receiver(post_delete, sender=Product_Member)
+def clear_product_member_cache(sender, **kwargs):
+    get_product_member.cache_clear()
+
+
+@receiver(post_save, sender=Product_Type_Member)
+@receiver(post_delete, sender=Product_Type_Member)
+def clear_product_type_member_cache(sender, **kwargs):
+    get_product_type_member.cache_clear()

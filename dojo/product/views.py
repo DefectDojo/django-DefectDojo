@@ -101,6 +101,8 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
         prefetched_prods = prefetched_prods.prefetch_related('authorized_users')
         prefetched_prods = prefetched_prods.prefetch_related('prod_type__authorized_users')
+        prefetched_prods = prefetched_prods.prefetch_related('members')
+        prefetched_prods = prefetched_prods.prefetch_related('prod_type__members')
         active_endpoint_query = Endpoint.objects.filter(
             finding__active=True,
             finding__mitigated__isnull=True)
@@ -127,8 +129,10 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 @user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_product(request, pid):
-    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact',
-                                                      'team_manager').prefetch_related('authorized_users')
+    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager') \
+                                      .prefetch_related('authorized_users') \
+                                      .prefetch_related('members') \
+                                      .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
     product_members = get_authorized_product_members(prod, Permissions.Product_View)
     product_type_members = get_authorized_members(prod.prod_type, Permissions.Product_Type_View)
