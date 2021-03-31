@@ -21,6 +21,7 @@ class TestUpdateFindingStatusSignal(TestCase):
         self.user_2 = User.objects.get(id='2')
 
     def get_status_fields(self, finding):
+        logger.debug('%s, %s, %s, %s, %s, %s, %s, %s', finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_Mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update)
         return finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_Mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update
 
     @mock.patch('dojo.finding.helper.timezone.now')
@@ -36,7 +37,9 @@ class TestUpdateFindingStatusSignal(TestCase):
                 (True, True, False, False, False, None, None, frozen_datetime)
             )
 
-    def test_no_status_change(self):
+    @mock.patch('dojo.finding.helper.timezone.now')
+    def test_no_status_change(self, mock_tz):
+        mock_tz.return_value = frozen_datetime
         with impersonate(self.user_1):
             test = Test.objects.last()
             finding = Finding(test=test)
@@ -59,7 +62,6 @@ class TestUpdateFindingStatusSignal(TestCase):
             test = Test.objects.last()
             finding = Finding(test=test, is_Mitigated=True, active=False)
             finding.save()
-
             self.assertEqual(
                 self.get_status_fields(finding),
                 (False, True, False, False, True, frozen_datetime, self.user_1, frozen_datetime)
