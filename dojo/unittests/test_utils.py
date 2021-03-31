@@ -42,8 +42,8 @@ class assertNumOfModelsCreated():
         created_count = self.final_model_count - self.initial_model_count
         self.test_case.assertEqual(
             created_count, self.num,
-            "%i objects created, %i expected. query: %s, first 100 objects: %s" % (
-                created_count, self.num, self.queryset.query, self.queryset.all().order_by('-id')[:100]
+            "%i %s objects created, %i expected. query: %s, first 100 objects: %s" % (
+                created_count, self.queryset.model, self.num, self.queryset.query, self.queryset.all().order_by('-id')[:100]
             )
         )
 

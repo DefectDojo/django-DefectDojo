@@ -1802,38 +1802,34 @@ def finding_bulk_update_all(request, pid=None):
     now = timezone.now()
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
+        finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
+        total_find_count = finds.count()
+        skipped_find_count = 0
 
-        if request.POST.get('delete_bulk_findings') and finding_to_update:
-            finds = Finding.objects.filter(id__in=finding_to_update)
-            total_find_count = finds.count()
-            skipped_find_count = 0
+        prods = set([find.test.engagement.product for find in finds])
+        if request.POST.get('delete_bulk_findings'):
+            if form.is_valid() and finding_to_update:
+                # make sure users are not deleting stuff they are not authorized for
+                if not request.user.is_staff and not request.user.is_superuser:
+                    if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
+                        raise PermissionDenied()
 
-            # make sure users are not deleting stuff they are not authorized for
-            if not request.user.is_staff and not request.user.is_superuser:
-                if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
-                    raise PermissionDenied()
-
-                finds = finds.filter(
-                    Q(test__engagement__product__authorized_users__in=[request.user]) |
-                    Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                ).distinct()
+                    finds = finds.filter(
+                        Q(test__engagement__product__authorized_users__in=[request.user]) |
+                        Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
+                    ).distinct()
 
                 skipped_find_count = total_find_count - finds.count()
 
-            product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
-            finds.delete()
-            for prod in product_calc:
-                calculate_grade(prod)
+                finds.delete()
+                for prod in prods:
+                    calculate_grade(prod)
 
-            if skipped_find_count > 0:
-                add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
+                if skipped_find_count > 0:
+                    add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
 
         else:
             if form.is_valid() and finding_to_update:
-                finding_to_update = request.POST.getlist('finding_to_update')
-                finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
-                total_find_count = finds.count()
-                skipped_find_count = 0
 
                 # make sure users are not deleting stuff they are not authorized for
                 if not request.user.is_staff and not request.user.is_superuser:
@@ -1873,6 +1869,9 @@ def finding_bulk_update_all(request, pid=None):
                         # it will trigger the pre_save signal
                         find.save_no_options()
 
+                    for prod in prods:
+                        calculate_grade(prod)
+
                 skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
                     for finding in finds:
@@ -1883,6 +1882,9 @@ def finding_bulk_update_all(request, pid=None):
                                 ra_helper.simple_risk_accept(finding)
                         elif form.cleaned_data['risk_unaccept']:
                             ra_helper.risk_unaccept(finding)
+
+                    for prod in prods:
+                        calculate_grade(prod)
 
                 if skipped_risk_accept_count > 0:
                     messages.add_message(request,
@@ -1909,15 +1911,6 @@ def finding_bulk_update_all(request, pid=None):
                         # currently bulk edit overwrites existing tags
                         finding.tags = tags
                         finding.save()
-
-                if form.cleaned_data['severity'] or form.cleaned_data['status']:
-                    prev_prod = None
-                    for finding in finds:
-                        # findings are ordered by product_id
-                        if prev_prod != finding.test.engagement.product.id:
-                            # TODO this can be inefficient as most findings usually have the same product
-                            calculate_grade(finding.test.engagement.product)
-                            prev_prod = finding.test.engagement.product.id
 
                 for finding in finds:
                     from dojo.tools import tool_issue_updater

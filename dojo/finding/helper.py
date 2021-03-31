@@ -1,11 +1,14 @@
+from dojo.celery import app
+from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 import logging
 from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
-from dojo.models import Finding
 from dojo.utils import get_current_user
+from dojo.models import Finding, System_Settings
 
 logger = logging.getLogger(__name__)
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 # this signal is triggered just before a finding is getting saved
@@ -15,9 +18,9 @@ logger = logging.getLogger(__name__)
 # - update any audit log / status history
 def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwargs):
     # some code is cloning findings by setting id/pk to None, ignore those, will be handled on next save
-    if not instance.id:
-        logger.debug('ignoring save of finding without id')
-        return
+    # if not instance.id:
+    #     logger.debug('ignoring save of finding without id')
+    #     return
 
     logger.debug('%i: changed status fields pre_save: %s', instance.id or 0, changed_fields)
 
@@ -105,3 +108,49 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
 
 def can_edit_mitigated_data(user):
     return settings.EDITABLE_MITIGATED_DATA and user.is_superuser
+
+
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id
+def post_process_finding_save(finding, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
+
+    system_settings = System_Settings.objects.get()
+
+    # STEP 1 run all status changing tasks sequentially to avoid race conditions
+    if dedupe_option:
+        if finding.hash_code is not None:
+            if system_settings.enable_deduplication:
+                from dojo.utils import do_dedupe_finding
+                do_dedupe_finding(finding, *args, **kwargs)
+            else:
+                deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
+        else:
+            deduplicationLogger.warning("skipping dedupe because hash_code is None")
+
+    if false_history:
+        if system_settings.false_positive_history:
+            from dojo.utils import do_false_positive_history
+            do_false_positive_history(finding, *args, **kwargs)
+        else:
+            deduplicationLogger.debug("skipping false positive history because it's disabled in system settings")
+
+    # STEP 2 run all non-status changing tasks as celery tasks in the background
+    if issue_updater_option:
+        from dojo.tools import tool_issue_updater
+        tool_issue_updater.async_tool_issue_update(finding)
+
+    if product_grading_option:
+        if system_settings.enable_product_grade:
+            from dojo.utils import calculate_grade
+            calculate_grade(finding.test.engagement.product)
+        else:
+            deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
+
+    # Adding a snippet here for push to JIRA so that it's in one place
+    if push_to_jira:
+        logger.debug('pushing finding %s to jira from finding.save()', finding.pk)
+        import dojo.jira_link.helper as jira_helper
+        jira_helper.push_to_jira(finding)
