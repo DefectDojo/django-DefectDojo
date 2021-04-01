@@ -547,7 +547,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
             product = data.get('product', self.instance.product)
 
         try:
-            Endpoint(  #  Endpoint constructor validate formats
+            Endpoint(  # Endpoint constructor validate formats
                 protocol=protocol,
                 userinfo=userinfo,
                 host=host,
@@ -558,7 +558,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
                 fragment=fragment
             )
         except ValidationError as e:
-            raise serializers.ValidationError( '; '.join(e), code='invalid')
+            raise serializers.ValidationError('; '.join(e), code='invalid')
 
         endpoint = Endpoint.objects.filter(protocol=protocol,
                                            userinfo=userinfo,

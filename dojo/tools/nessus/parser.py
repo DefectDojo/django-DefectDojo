@@ -116,9 +116,9 @@ class NessusCSVParser(object):
                 dupes[dupe_key] = find
             # manage endpoints
             endpoint = Endpoint(
-                          protocol = row.get('Protocol').lower() if 'Protocol' in row else None,
-                          host = row.get('Host', row.get('IP Address', 'localhost')),
-                          port = row.get('Port')
+                          protocol=row.get('Protocol').lower() if 'Protocol' in row else None,
+                          host=row.get('Host', row.get('IP Address', 'localhost')),
+                          port=row.get('Port')
                         )
             find.unsaved_endpoints.append(endpoint)
         return list(dupes.values())

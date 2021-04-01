@@ -2,7 +2,6 @@
 import hashlib
 import json
 from datetime import datetime
-import hyperlink
 
 from dojo.models import Endpoint, Finding
 

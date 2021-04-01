@@ -1116,13 +1116,13 @@ class Endpoint(models.Model):
 
     def __init__(self, *args, **kwargs):
         if kwargs.get('protocol'):
-            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['protocol']): #  https://tools.ietf.org/html/rfc3986#section-3.1
+            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['protocol']):  # https://tools.ietf.org/html/rfc3986#section-3.1
                 raise ValidationError('Protocol "{}" has invalid format'.format(kwargs['protocol']))
         if kwargs.get('userinfo'):
-            if not re.match(r'^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$', kwargs['userinfo']): #  https://tools.ietf.org/html/rfc3986#section-3.2.1
+            if not re.match(r'^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$', kwargs['userinfo']):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
                 raise ValidationError('Userinfo "{}" has invalid format'.format(kwargs['userinfo']))
         if kwargs.get('host'):
-            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['host']): #  https://tools.ietf.org/html/rfc3986#section-3.2.2
+            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['host']):  # https://tools.ietf.org/html/rfc3986#section-3.2.2
                 try:
                     validate_ipv46_address(kwargs['host'])
                 except ValidationError:
@@ -1130,7 +1130,7 @@ class Endpoint(models.Model):
         if kwargs.get('port'):
             try:
                 int_port = int(kwargs['port'])
-                if not ( 0 <= int_port < 65536 ):
+                if not (0 <= int_port < 65536):
                     raise ValidationError('Port "{}" has invalid format - out of range'.format(kwargs['port']))
                 kwargs['port'] = int_port
             except ValueError:
@@ -1142,25 +1142,25 @@ class Endpoint(models.Model):
         if self.host:
             if self.protocol:
                 url = hyperlink.URL(
-                    scheme = self.protocol,
-                    userinfo = self.userinfo or '',
-                    host = self.host,
-                    port = self.port,
-                    path = tuple( self.path.split('/') ) if self.path else (),
-                    query = tuple(
+                    scheme=self.protocol,
+                    userinfo=self.userinfo or '',
+                    host=self.host,
+                    port=self.port,
+                    path=tuple(self.path.split('/')) if self.path else (),
+                    query=tuple(
                         (
                             qe.split(u"=", 1)
                             if u"=" in qe
                             else (qe, None)
                         )
                         for qe in self.query.split(u"&")
-                    ) if self.query else (), #  inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
-                    fragment = self.fragment or ''
+                    ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
+                    fragment=self.fragment or ''
                 )
                 # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
                 # Example: https://google.com and https://google.com:443
                 return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_text()
-            else: #  we need this because of https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988 - endpoint without scheme is not automaticly http endpoint
+            else:  # we need this because of https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988 - endpoint without scheme is not automaticly http endpoint
                 url = self.host
                 if self.port:
                     url += ':' + str(self.port)
@@ -1226,28 +1226,28 @@ class Endpoint(models.Model):
                 'url': reverse('view_endpoint', args=(self.id,))}]
         return bc
 
-    def from_uri(uri): #  This is usualy used as Endpoint.from_uri('http://foo.bar/path'), so it doesn't need 'self'
+    def from_uri(uri):  # This is usually used as Endpoint.from_uri('http://foo.bar/path'), so it doesn't need 'self'
         try:
             url = hyperlink.parse(url=uri)
         except hyperlink.URLParseError as e:
             raise ValidationError('Invalid URL format: {}'.format(e))
 
-        query_parts = [] #  inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1768
+        query_parts = []  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1768
         for k, v in url.query:
             if v is None:
                 query_parts.append(k)
             else:
-                query_parts.append(u"=".join([k,v]))
+                query_parts.append(u"=".join([k, v]))
         query_string = u"&".join(query_parts)
 
         return Endpoint(
-            protocol = url.scheme if url.scheme != '' else None,
-            userinfo = ':'.join( url.userinfo ) if url.userinfo != ('',) else None,
-            host = url.host if url.host != '' else None,
-            port = url.port,
-            path = '/'.join(url.path) if url.path != () else None,
-            query = query_string,
-            fragment = url.fragment if url.fragment != '' else None
+            protocol=url.scheme if url.scheme != '' else None,
+            userinfo=':'.join(url.userinfo) if url.userinfo != ('',) else None,
+            host=url.host if url.host != '' else None,
+            port=url.port,
+            path='/'.join(url.path) if url.path != () else None,
+            query=query_string,
+            fragment=url.fragment if url.fragment != '' else None
         )
 
     def get_absolute_url(self):

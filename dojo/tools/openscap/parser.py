@@ -94,7 +94,7 @@ class OpenscapParser(object):
                 for ip in ips:
                     try:
                         validate_ipv46_address(ip)
-                        endpoint = Endpoint( host=ip )
+                        endpoint = Endpoint(host=ip)
                     except ValidationError:
                         if '://' in host:
                             endpoint = Endpoint.from_uri(ip)

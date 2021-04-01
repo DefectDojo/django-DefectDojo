@@ -2,16 +2,17 @@
 
 from django.db import migrations, models
 
+
 def clean_hosts(apps, schema_editor):
     Endpoint = apps.get_model('dojo', 'Endpoint')
     for endpoint in Endpoint.objects.filter(host__contains=':'):
         parts = endpoint.split(':')
-        endpoint.host=parts[0]
-        endpoint.port=parts[1]
+        endpoint.host = parts[0]
+        endpoint.port = parts[1]
         endpoint.save()
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
         ('dojo', '0085_add_publish_date_cvssv3_score'),
     ]
@@ -24,17 +25,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='endpoint',
             name='userinfo',
-            field=models.CharField(blank=True, help_text="User info as 'alice', 'bob', etc.", max_length=500, null=True),
+            field=models.CharField(blank=True, help_text="User info as 'alice', 'bob', etc.", max_length=500,
+                                   null=True),
         ),
         migrations.AlterField(
             model_name='endpoint',
             name='host',
-            field=models.CharField(blank=True, help_text="The host name or IP address. It can not include the port number. For example'127.0.0.1', 'localhost', 'yourdomain.com'.", max_length=500, null=True),
+            field=models.CharField(blank=True,
+                                   help_text="The host name or IP address. It can not include the port number. For example'127.0.0.1', 'localhost', 'yourdomain.com'.",
+                                   max_length=500, null=True),
         ),
         migrations.AlterField(
             model_name='endpoint',
             name='protocol',
-            field=models.CharField(blank=True, help_text="The communication protocol/scheme such as 'http', 'ftp', 'dns', etc.", max_length=10, null=True),
+            field=models.CharField(blank=True,
+                                   help_text="The communication protocol/scheme such as 'http', 'ftp', 'dns', etc.",
+                                   max_length=10, null=True),
         ),
         migrations.RunPython(clean_hosts)
     ]

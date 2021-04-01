@@ -2,7 +2,6 @@
 import hashlib
 import logging
 import re
-import hyperlink
 import json
 
 from defusedxml import ElementTree as ET

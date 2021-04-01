@@ -84,6 +84,7 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
         if endpoint not in finding.unsaved_endpoints:
             finding.unsaved_endpoints.append(endpoint)
 
+
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
 
     @staticmethod

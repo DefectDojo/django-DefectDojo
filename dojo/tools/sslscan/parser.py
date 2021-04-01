@@ -71,5 +71,5 @@ class SslscanParser(object):
                             finding.unsaved_endpoints.append(Endpoint(
                                 host=host,
                                 port=port,
-                                protocol='https' if port == 443 else None ))
+                                protocol='https' if port == 443 else None))
         return dupes.values()

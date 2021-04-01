@@ -1202,7 +1202,6 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
 
 class EditEndpointForm(forms.ModelForm):
-
     class Meta:
         model = Endpoint
         exclude = ['product']
@@ -1234,7 +1233,7 @@ class EditEndpointForm(forms.ModelForm):
         fragment = cleaned_data['fragment']
 
         try:
-            Endpoint(  #  Endpoint constructor validate formats
+            Endpoint(  # Endpoint constructor validate formats
                 protocol=protocol,
                 userinfo=userinfo,
                 fqdn=fqdn,
@@ -1244,7 +1243,7 @@ class EditEndpointForm(forms.ModelForm):
                 fragment=fragment
             )
         except ValidationError as e:
-                raise forms.ValidationError( '; '.join(e), code='invalid')
+            raise forms.ValidationError('; '.join(e), code='invalid')
 
         endpoint = Endpoint.objects.filter(protocol=protocol,
                                            userinfo=userinfo,
@@ -1323,31 +1322,22 @@ class AddEndpointForm(forms.Form):
             try:
                 if '://' in endpoint:  # is it full uri?
                     endpoint = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
-                    self.endpoints_to_process.append([
-                        endpoint.protocol,
-                        endpoint.userinfo,
-                        endpoint.host,
-                        endpoint.port,
-                        endpoint.path,
-                        endpoint.query,
-                        endpoint.fragment
-                    ])
                 else:
-                    endpoint = Endpoint.from_uri('//' + endpoint) # from_uri parse any '//localhost', '//127.0.0.1:80',
-                                                                  # '//foo.bar/path' correctly
-                                                                  # tihs format doesn't follow RFC 3986 but users use it
-                    self.endpoints_to_process.append([
-                        endpoint.protocol,
-                        endpoint.userinfo,
-                        endpoint.host,
-                        endpoint.port,
-                        endpoint.path,
-                        endpoint.query,
-                        endpoint.fragment
-                    ])
+                    # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
+                    # format doesn't follow RFC 3986 but users use it
+                    endpoint = Endpoint.from_uri('//' + endpoint)
+                self.endpoints_to_process.append([
+                    endpoint.protocol,
+                    endpoint.userinfo,
+                    endpoint.host,
+                    endpoint.port,
+                    endpoint.path,
+                    endpoint.query,
+                    endpoint.fragment
+                ])
             except ValidationError:
-                raise forms.ValidationError( 'Please check items entered, one or more do not appear to be a valid URL, '
-                                             'IP address or domain (you can add also port).', code='invalid')
+                raise forms.ValidationError('Please check items entered, one or more do not appear to be a valid URL, '
+                                            'IP address or domain (you can add also port).', code='invalid')
         return cleaned_data
 
 

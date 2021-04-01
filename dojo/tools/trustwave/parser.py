@@ -18,6 +18,7 @@ MAPPINGS = {"title": "Vulnerability Name",
             'ip': 'IP'
             }
 
+
 class Severityfilter():
     def __init__(self):
         self.severity_mapping = {'I': 'Info',
