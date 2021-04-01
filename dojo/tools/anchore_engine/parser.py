@@ -38,17 +38,18 @@ class AnchoreEngineParser(object):
             mitigation = "Upgrade to " + item['package_name'] + ' ' + item['fix'] + '\n'
             mitigation += "URL: " + item['url'] + '\n'
 
+            cvssv3_base_score = None
             if item['feed'] == 'nvdv2' or item['feed'] == 'vulnerabilities':
-                if item['nvd_data']:
+                if 'nvd_data' in item and len(item['nvd_data']) > 0:
                     cvssv3_base_score = item['nvd_data'][0]['cvss_v3']['base_score']
             else:
                 # there may be other keys, but taking a best guess here
-                if item['vendor_data']:
+                if 'vendor_data' in item and len(item['vendor_data']) > 0:
                     # sometimes cvssv3 in 1st element will have -1 for "not set", but have data in the 2nd array item
-                    if item['vendor_data'][0]['cvss_v3']['base_score'] != -1:
+                    if 'cvss_v3' in item['vendor_data'][0] and item['vendor_data'][0]['cvss_v3']['base_score'] != -1:
                         cvssv3_base_score = item['vendor_data'][0]['cvss_v3']['base_score']
                     elif len(item['vendor_data']) > 1:
-                        if item['vendor_data'][1]['cvss_v3']['base_score'] != -1:
+                        if 'cvss_v3' in item['vendor_data'][1] and item['vendor_data'][1]['cvss_v3']['base_score'] != -1:
                             cvssv3_base_score = item['vendor_data'][1]['cvss_v3']['base_score']
 
             references = item['url']

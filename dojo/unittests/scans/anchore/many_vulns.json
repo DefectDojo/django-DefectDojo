@@ -57,7 +57,7 @@
             "url": "https://security-tracker.debian.org/tracker/CVE-2018-15686",
             "vuln": "CVE-2018-15686"
         },
-        
+
         {
             "feed": "vulnerabilities",
             "feed_group": "debian:9",
@@ -317,7 +317,21 @@
             "feed": "vulndb",
             "feed_group": "vulndb:vulnerabilities",
             "fix": "1.18",
-            "nvd_data": [],
+            "nvd_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 7.5,
+                        "exploitability_score": 10.0,
+                        "impact_score": 6.4
+                    },
+                    "cvss_v3": {
+                        "base_score": 9.8,
+                        "exploitability_score": 3.9,
+                        "impact_score": 6.0
+                    },
+                    "id": "CVE-2019-99999"
+                }
+            ],
             "package": "jersey-1.13",
             "package_cpe": "cpe:/a:-:jersey:1.13:-:-",
             "package_cpe23": "cpe:2.3:a:-:jersey:1.13:-:-:-:-:-:-:-",
@@ -369,6 +383,106 @@
                         "base_score": -1.0,
                         "exploitability_score": -1.0,
                         "impact_score": -1.0
+                    },
+                    "id": "VULNDB-103881"
+                }
+            ],
+            "vuln": "VULNDB-103881"
+        },
+        {
+            "feed": "vulndb",
+            "feed_group": "vulndb:vulnerabilities",
+            "fix": "1.18",
+            "nvd_data": [],
+            "package": "jersey-1.13",
+            "package_cpe": "cpe:/a:-:jersey:1.13:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jersey:1.13:-:-:-:-:-:-:-",
+            "package_name": "jersey",
+            "package_path": "/usr/share/myapp/myapp.war:sources/jersey-core-1.13-sources-jar/jersey-core-1.13-sources.jar",
+            "package_type": "java",
+            "package_version": "1.13",
+            "severity": "Medium",
+            "url": "http://dev-anchore-engine-api:8228/v1/query/vulnerabilities?id=VULNDB-103881",
+            "vendor_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 5.0,
+                        "exploitability_score": 10.0,
+                        "impact_score": 2.9
+                    },
+                    "cvss_v3": {
+                        "base_score": 5.0,
+                        "exploitability_score": 7.0,
+                        "impact_score": 6.6
+                    },
+                    "id": "VULNDB-103881"
+                }
+            ],
+            "vuln": "VULNDB-103881"
+        },
+        {
+            "feed": "vulndb",
+            "feed_group": "vulndb:vulnerabilities",
+            "fix": "1.18",
+            "nvd_data": [],
+            "package": "jersey-1.13",
+            "package_cpe": "cpe:/a:-:jersey:1.13:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jersey:1.13:-:-:-:-:-:-:-",
+            "package_name": "jersey",
+            "package_path": "/usr/share/myapp/myapp.war:sources/jersey-core-1.13-sources-jar/jersey-core-1.13-sources.jar",
+            "package_type": "java",
+            "package_version": "1.13",
+            "severity": "Medium",
+            "url": "http://dev-anchore-engine-api:8228/v1/query/vulnerabilities?id=VULNDB-103881",
+            "vendor_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 5.0,
+                        "exploitability_score": 10.0,
+                        "impact_score": 2.9
+                    },
+                    "id": "VULNDB-103881"
+                }
+            ],
+            "vuln": "VULNDB-103881"
+        },
+        {
+            "feed": "vulndb",
+            "feed_group": "vulndb:vulnerabilities",
+            "fix": "1.18",
+            "nvd_data": [],
+            "package": "jersey-1.13",
+            "package_cpe": "cpe:/a:-:jersey:1.13:-:-",
+            "package_cpe23": "cpe:2.3:a:-:jersey:1.13:-:-:-:-:-:-:-",
+            "package_name": "jersey",
+            "package_path": "/usr/share/myapp/myapp.war:sources/jersey-core-1.13-sources-jar/jersey-core-1.13-sources.jar",
+            "package_type": "java",
+            "package_version": "1.13",
+            "severity": "Medium",
+            "url": "http://dev-anchore-engine-api:8228/v1/query/vulnerabilities?id=VULNDB-103881",
+            "vendor_data": [
+                {
+                    "cvss_v2": {
+                        "base_score": 5.0,
+                        "exploitability_score": 10.0,
+                        "impact_score": 2.9
+                    },
+                    "cvss_v3": {
+                        "base_score": -1,
+                        "exploitability_score": -1,
+                        "impact_score": -1
+                    },
+                    "id": "VULNDB-103881"
+                },
+                {   "cvss_v2": {
+                        "base_score": -1,
+                        "exploitability_score": -1,
+                        "impact_score": -1
+                    },
+                    "cvss_v3": {
+                        "base_score": 5.0,
+                        "exploitability_score": 7.0,
+                        "impact_score": 6.6
                     },
                     "id": "VULNDB-103881"
                 }
