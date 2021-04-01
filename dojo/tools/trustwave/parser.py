@@ -1,39 +1,8 @@
-# Based on CSV, but rewrote because
-# values in different columns required concatinaton
-
 import csv
 import hashlib
 import io
 
 from dojo.models import Endpoint, Finding
-
-MAPPINGS = {"title": "Vulnerability Name",
-            'description': 'Description',
-            'port': 'Port',
-            'references': 'Evidence',
-            'mitigation': 'Remediation',
-            'cve': 'CVE',
-            'fqdn': 'Domain',
-            'severity': 'Severity',
-            'ip': 'IP'
-            }
-
-
-class Severityfilter():
-    def __init__(self):
-        self.severity_mapping = {'I': 'Info',
-                                 'L': 'Low',
-                                 'M': 'Medium',
-                                 'H': 'High',
-                                 'C': 'Critical'
-                                 }
-        self.severity = None
-
-    def eval_column(self, column_value):
-        if column_value in list(self.severity_mapping.keys()):
-            self.severity = self.severity_mapping[column_value]
-        else:
-            self.severity = 'Info'
 
 
 class TrustwaveParser(object):
@@ -48,74 +17,55 @@ class TrustwaveParser(object):
         return "CSV output of Trustwave vulnerability scan."
 
     def get_findings(self, filename, test):
-        self.dupes = dict()
-        self.items = ()
-
-        if filename is None:
-            self.items = ()
-            return
 
         content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
         reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
-        csvarray = []
 
+        severity_mapping = {
+            'I': 'Info',
+            'L': 'Low',
+            'M': 'Medium',
+            'H': 'High',
+            'C': 'Critical',
+        }
+
+        dupes = {}
         for row in reader:
-            csvarray.append(row)
+            finding = Finding(
+                test=test,
+                nb_occurences=1,
+            )
+            host = row.get('Domain')
+            if host is None or host == '':
+                host = row.get('IP')
+            finding.unsaved_endpoints = [Endpoint(host=host)]
+            if row.get('Port') is not None and not "" == row.get('Port'):
+                finding.unsaved_endpoints[0].port = int(row['Port'])
+            if row.get('Protocol') is not None and not "" == row.get('Protocol'):
+                finding.unsaved_endpoints[0].protocol = row['Protocol']
+            finding.title = row['Vulnerability Name']
+            finding.description = row['Description']
+            finding.references = row.get('Evidence')
+            finding.mitigation = row.get('Remediation')
 
-        for row in csvarray:
-            finding = Finding(test=test)
-            findingdict = {}
-            endpointdict = {}
-            referencesarray = []
+            # manage severity
+            if row['Severity'] in severity_mapping:
+                finding.severity = severity_mapping[row['Severity']]
+            else:
+                finding.severity = 'Low'
+            finding.cve = row.get('CVE')
 
-            for field, column_name in list(MAPPINGS.items()):
-                if column_name == 'IP':
-                    endpointdict['host'] = row[column_name]
-                    findingdict['url'] = row[column_name]
-                elif column_name == 'Severity':
-                    severityfilter = Severityfilter()
-                    severityfilter.eval_column(row[column_name])
-                    findingdict['severity'] = severityfilter.severity
-                elif column_name == 'Port':
-                    endpointdict[field] = int(row[column_name])
-                elif column_name == 'CVE':
-                    findingdict[field] = row[column_name]
-                    referencesarray.append(row[column_name])
-                elif column_name in ['Evidence']:
-                    referencesarray.append(row[column_name])
-                else:
-                    if column_name in list(row.keys()):
-                        findingdict[field] = row[column_name]
+            dupes_key = hashlib.sha256("|".join([
+                finding.severity,
+                finding.title,
+                finding.description
+            ]).encode()).hexdigest()
 
-            finding.unsaved_endpoints = [Endpoint(
-                host=endpointdict['host'],
-                port=endpointdict['port']
-            )]
-            finding.title = findingdict['title']
-            finding.description = findingdict['description']
-            finding.references = "\n".join(referencesarray)
-            finding.mitigation = findingdict['mitigation']
-            finding.fqdn = findingdict['fqdn']
-            finding.severity = findingdict['severity']
-            finding.url = findingdict['url']
-            finding.cve = findingdict.get('cve')
+            if dupes_key in dupes:
+                dupes[dupes_key].nb_occurences += 1
+            else:
+                dupes[dupes_key] = finding
 
-            if finding is not None:
-                if finding.url is None:
-                    finding.url = ""
-                if finding.title is None:
-                    finding.title = ""
-                if finding.description is None:
-                    finding.description = ""
-
-                key = hashlib.sha256("|".join([
-                    finding.url,
-                    finding.severity,
-                    finding.title,
-                    finding.description
-                ]).encode()).hexdigest()
-
-                if key not in self.dupes:
-                    self.dupes[key] = finding
-
-        return list(self.dupes.values())
+        return list(dupes.values())
