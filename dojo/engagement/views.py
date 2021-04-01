@@ -29,7 +29,7 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, IMPORT_CREATED_FINDING, Product, Engagement, Test, \
     Check_List, Test_Import, Test_Import_Finding_Action, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status, Tool_Type, Tool_Configuration
 from dojo.tools.factory import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory, get_choices
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
@@ -621,9 +621,23 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
+            tool_type = Tool_Type.objects.get(name=scan_type)
+            filter = None
+            if tool_type:
+                 try:
+                   tool_config = Tool_Configuration.objects.get(tool_type=tool_type)
+                   filter = tool_config.extras
+                 except Tool_Configuration.MultipleObjectsReturned:
+                    raise Exception(
+                        'It has configured more than one Nexpose tool. \n'
+                         )
+
             try:
                 parser = import_parser_factory(file, t, active, verified, scan_type)
-                parser_findings = parser.get_findings(file, t)
+                if filter:
+                   parser_findings = parser.get_findings(file, t, filter = filter)
+                else:
+                    parser_findings = parser.get_findings(file, t)
             except Exception as e:
                 messages.add_message(request,
                                      messages.ERROR,
