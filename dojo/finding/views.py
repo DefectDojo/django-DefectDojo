@@ -1652,7 +1652,7 @@ def download_finding_pic(request, token):
     return response
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
+@user_is_authorized(Product, Permissions.Finding_Edit, 'pid', 'staff')
 def merge_finding_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     finding_to_update = request.GET.getlist('finding_to_update')

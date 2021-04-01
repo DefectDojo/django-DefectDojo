@@ -28,9 +28,9 @@ logger = logging.getLogger(__name__)
 
 
 def vulnerable_endpoints(request):
-    endpoints = get_authorized_endpoints(Permissions.Endpoint_View)
-    endpoints = endpoints.filter(finding__active=True, finding__verified=True, finding__false_p=False,
+    endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
                                  finding__duplicate=False, finding__out_of_scope=False, mitigated=False).prefetch_related('product', 'product__tags', 'tags').distinct()
+    endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
 
     product = None
     if 'product' in request.GET:
@@ -62,8 +62,8 @@ def vulnerable_endpoints(request):
 
 
 def all_endpoints(request):
-    endpoints = get_authorized_endpoints(Permissions.Endpoint_View)
-    endpoints = endpoints.prefetch_related('product', 'tags', 'product__tags')
+    endpoints = Endpoint.objects.prefetch_related('product', 'tags', 'product__tags')
+    endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
     show_uri = get_system_setting('display_endpoint_uri')
 
     product = None
@@ -365,7 +365,6 @@ def edit_meta_data(request, eid):
                    })
 
 
-# TODO
 # bulk mitigate and delete are combined, so we can't have the nice user_is_authorized decorator
 def endpoint_bulk_update_all(request, pid=None):
     if request.method == "POST":
@@ -383,8 +382,8 @@ def endpoint_bulk_update_all(request, pid=None):
                     product = get_object_or_404(Product, id=pid)
                     user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
 
-            finds = get_authorized_endpoints(Permissions.Endpoint_Delete)
-            finds = finds.filter(id__in=endpoints_to_update)
+            finds = Endpoint.objects.filter(id__in=endpoints_to_update)
+            finds = get_authorized_endpoints(Permissions.Endpoint_Delete, finds, request.user)
             product_calc = list(Product.objects.filter(endpoint__id__in=endpoints_to_update).distinct())
             finds.delete()
             for prod in product_calc:
@@ -403,8 +402,8 @@ def endpoint_bulk_update_all(request, pid=None):
                         product = get_object_or_404(Product, id=pid)
                         user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
-                finds = get_authorized_endpoints(Permissions.Endpoint_Edit)
-                finds = finds.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
+                finds = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
+                finds = get_authorized_endpoints(Permissions.Endpoint_Edit, finds, request.user)
                 for endpoint in finds:
                     endpoint.mitigated = not endpoint.mitigated
                     endpoint.save()

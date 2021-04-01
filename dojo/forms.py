@@ -586,7 +586,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
             # logger.debug('setting default expiration_date: %s', expiration_date)
             self.fields['expiration_date'].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
-        self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Finding_Edit)
+        self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
 
 
 class UploadFileForm(forms.ModelForm):
@@ -620,7 +620,7 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Finding_Edit)
+        self.fields['accepted_findings'].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
 
 
 class CheckForm(forms.ModelForm):

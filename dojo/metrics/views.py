@@ -186,28 +186,25 @@ def finding_querys(prod_type, request):
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                  test__engagement__product__prod_type__in=prod_type).prefetch_related(
             'test__engagement__product')
-        findings_closed = get_authorized_findings(Permissions.Finding_View, findings_closed, request.user)
         # capture the accepted findings in period
         accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date],
                                                    test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
-        accepted_findings = get_authorized_findings(Permissions.Finding_View, accepted_findings, request.user)
         accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date],
                                                           test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = get_authorized_findings(Permissions.Finding_View, accepted_findings_counts, request.user)
-        accepted_findings_counts = severity_count(accepted_findings_counts, 'aggregate', 'severity')
     else:
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
             'test__engagement__product')
-        findings_closed = get_authorized_findings(Permissions.Finding_View, findings_closed, request.user)
         accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]). \
             prefetch_related('test__engagement__product')
-        accepted_findings = get_authorized_findings(Permissions.Finding_View, accepted_findings, request.user)
         accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = get_authorized_findings(Permissions.Finding_View, accepted_findings_counts, request.user)
-        accepted_findings_counts = severity_count(accepted_findings_counts, 'aggregate', 'severity')
+
+    findings_closed = get_authorized_findings(Permissions.Finding_View, findings_closed, request.user)
+    accepted_findings = get_authorized_findings(Permissions.Finding_View, accepted_findings, request.user)
+    accepted_findings_counts = get_authorized_findings(Permissions.Finding_View, accepted_findings_counts, request.user)
+    accepted_findings_counts = severity_count(accepted_findings_counts, 'aggregate', 'severity')
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
@@ -249,7 +246,6 @@ def finding_querys(prod_type, request):
 
 
 def endpoint_querys(prod_type, request):
-
     endpoints_query = Endpoint_Status.objects.filter(mitigated=False,
                                       finding__severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')).prefetch_related(
         'finding__test__engagement__product',
@@ -303,28 +299,25 @@ def endpoint_querys(prod_type, request):
         endpoints_closed = Endpoint_Status.objects.filter(mitigated_time__range=[start_date, end_date],
                                                  finding__test__engagement__product__prod_type__in=prod_type).prefetch_related(
             'finding__test__engagement__product')
-        endpoints_closed = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_closed, request.user)
         # capture the accepted findings in period
         accepted_endpoints = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True,
                                                    finding__test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('finding__test__engagement__product')
-        accepted_endpoints = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints, request.user)
         accepted_endpoints_counts = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True,
                                                           finding__test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('finding__test__engagement__product')
-        accepted_endpoints_counts = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints_counts, request.user)
-        accepted_endpoints_counts = severity_count(accepted_endpoints_counts, 'aggregate', 'finding__severity')
     else:
         endpoints_closed = Endpoint_Status.objects.filter(mitigated_time__range=[start_date, end_date]).prefetch_related(
             'finding__test__engagement__product')
-        endpoints_closed = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_closed, request.user)
         accepted_endpoints = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True). \
             prefetch_related('finding__test__engagement__product')
-        accepted_endpoints = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints, request.user)
         accepted_endpoints_counts = Endpoint_Status.objects.filter(date__range=[start_date, end_date], risk_accepted=True). \
             prefetch_related('finding__test__engagement__product')
-        accepted_endpoints_counts = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints_counts, request.user)
-        accepted_endpoints_counts = severity_count(accepted_endpoints_counts, 'aggregate', 'finding__severity')
+
+    endpoints_closed = get_authorized_endpoint_status(Permissions.Endpoint_View, endpoints_closed, request.user)
+    accepted_endpoints = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints, request.user)
+    accepted_endpoints_counts = get_authorized_endpoint_status(Permissions.Endpoint_View, accepted_endpoints_counts, request.user)
+    accepted_endpoints_counts = severity_count(accepted_endpoints_counts, 'aggregate', 'finding__severity')
 
     r = relativedelta(end_date, start_date)
     months_between = (r.years * 12) + r.months
