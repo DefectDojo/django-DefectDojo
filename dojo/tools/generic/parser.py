@@ -74,7 +74,6 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
     def map_column_value(self, finding, column_value):
         url = column_value
         if url != '':
-            finding.url = url
             endpoint = Endpoint.from_uri(url)
             if endpoint not in finding.unsaved_endpoints:
                 finding.unsaved_endpoints.append(endpoint)
