@@ -37,7 +37,11 @@ def vulnerable_endpoints(request):
         p = request.GET.getlist('product', [])
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
-            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                if not user_is_authorized(request.user, 'view', product):
+                    raise PermissionDenied
+            else:
+                user_has_permission_or_403(request.user, product, Permissions.Product_View)
 
     ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
     endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
@@ -67,7 +71,11 @@ def all_endpoints(request):
         p = request.GET.getlist('product', [])
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
-            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                if not user_is_authorized(request.user, 'view', product):
+                    raise PermissionDenied
+            else:
+                user_has_permission_or_403(request.user, product, Permissions.Product_View)
 
     if show_uri:
         endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
@@ -273,7 +281,11 @@ def add_product_endpoint(request):
     if request.method == 'POST':
         form = AddEndpointForm(request.POST)
         if form.is_valid():
-            user_has_permission_or_403(request.user, form.product, Permissions.Endpoint_Add)
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                if not user_is_authorized(request.user, 'change', form.product):
+                    raise PermissionDenied
+            else:
+                user_has_permission_or_403(request.user, form.product, Permissions.Endpoint_Add)
             endpoints = form.save()
             tags = request.POST.get('tags')
             for e in endpoints:
