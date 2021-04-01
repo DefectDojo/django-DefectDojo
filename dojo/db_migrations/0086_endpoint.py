@@ -32,7 +32,8 @@ class Migration(migrations.Migration):
             model_name='endpoint',
             name='host',
             field=models.CharField(blank=True,
-                                   help_text="The host name or IP address. It can not include the port number. For example'127.0.0.1', 'localhost', 'yourdomain.com'.",
+                                   help_text="The host name or IP address. It must not include the port number. "
+                                             "For example '127.0.0.1', 'localhost', 'yourdomain.com'.",
                                    max_length=500, null=True),
         ),
         migrations.AlterField(

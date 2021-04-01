@@ -1082,8 +1082,8 @@ class Endpoint(models.Model):
     userinfo = models.CharField(null=True, blank=True, max_length=500,
                               help_text="User info as 'alice', 'bob', etc.")
     host = models.CharField(null=True, blank=True, max_length=500,
-                            help_text="The host name or IP address. It can not include the port number. For example"
-                                      "'127.0.0.1', 'localhost', 'yourdomain.com'.")
+                            help_text="The host name or IP address. It must not include the port number. "
+                                      "For example '127.0.0.1', 'localhost', 'yourdomain.com'.")
     fqdn = models.CharField(null=True, blank=True, max_length=500)
     port = models.IntegerField(null=True, blank=True,
                                help_text="The network port associated with the endpoint.")
