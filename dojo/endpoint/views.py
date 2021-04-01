@@ -115,11 +115,7 @@ def get_endpoint_ids(endpoints):
     hosts = []
     ids = []
     for e in endpoints:
-        if ":" in e.host:
-            host_no_port = e.host[:e.host.index(':')]
-        else:
-            host_no_port = e.host
-        key = host_no_port + '-' + str(e.product.id)
+        key = e.host + '-' + str(e.product.id)
         if key in hosts:
             continue
         else:
@@ -131,8 +127,7 @@ def get_endpoint_ids(endpoints):
 @user_must_be_authorized(Endpoint, 'view', 'eid')
 def view_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
-    host = endpoint.host_no_port
-    endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+    endpoints = Endpoint.objects.filter(host=endpoint.host,
                                         product=endpoint.product).distinct()
 
     endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))

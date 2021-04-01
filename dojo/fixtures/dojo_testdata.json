@@ -627,7 +627,7 @@
       "protocol": "ssh",
       "fragment": null,
       "fqdn": "www.example.com",
-      "host": "127.0.1",
+      "host": "127.0.0.1",
       "query": null,
       "path": null,
       "port": 22

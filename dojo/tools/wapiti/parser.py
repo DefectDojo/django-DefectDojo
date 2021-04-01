@@ -1,6 +1,4 @@
 import hashlib
-import re
-from urllib.parse import urlparse
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree as ET
@@ -56,6 +54,7 @@ class WapitiParser(object):
             if "vulnerability" in family:
                 # get host
                 host = result.find('host').text
+                port = int(result.find('port').text)
                 # get title
                 title = result.find('nvt/name').text
                 # get cve
@@ -78,7 +77,7 @@ class WapitiParser(object):
                     finding = dupes[dupe_key]
                     if finding.description:
                         finding.description = finding.description
-                    self.process_endpoints(finding, host)
+                    self.process_endpoints(finding, host, port)
                     dupes[dupe_key] = finding
                 else:
                     dupes[dupe_key] = True
@@ -98,54 +97,14 @@ class WapitiParser(object):
                                     dynamic_finding=True)
 
                     dupes[dupe_key] = finding
-                    self.process_endpoints(finding, host)
+                    self.process_endpoints(finding, host, port)
 
         return list(dupes.values())
 
-    # FIXME remove custom endpoint management
-    def process_endpoints(self, finding, host):
-        protocol = "http"
-        query = ""
-        fragment = ""
-        path = ""
-        url = urlparse(host)
-
-        if url:
-            path = url.path
-            if path == host:
-                path = ""
-
-        rhost = re.match(
-            r"(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-            host)
-        try:
-            protocol = rhost[1]
-            host = rhost[4]
-        except:
-            pass
-        try:
-            dupe_endpoint = Endpoint.objects.get(protocol=protocol,
-                                                 host=host,
-                                                 query=query,
-                                                 fragment=fragment,
-                                                 path=path
-                                                 )
-        except Endpoint.DoesNotExist:
-            dupe_endpoint = None
-
-        if not dupe_endpoint:
-            endpoint = Endpoint(protocol=protocol,
-                                host=host,
-                                query=query,
-                                fragment=fragment,
-                                path=path
-                                )
-        else:
-            endpoint = dupe_endpoint
-
-        if not dupe_endpoint:
-            endpoints = [endpoint]
-        else:
-            endpoints = [endpoint, dupe_endpoint]
-
-        finding.unsaved_endpoints = finding.unsaved_endpoints + endpoints
+    def process_endpoints(self, finding, host, port):
+        endpoint = Endpoint.objects.get_or_create(
+            host=host,
+            port=port
+        )
+        if endpoint not in finding.unsaved_endpoints:
+            finding.unsaved_endpoints.append(endpoint)

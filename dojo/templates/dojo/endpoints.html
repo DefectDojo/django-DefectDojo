@@ -63,7 +63,7 @@
                                     <input type="checkbox" title="Select All" name="select_all" id="select_all"></input>
                                 </form>
                             </th>
-                            <th>{% dojo_sort request 'Endpoint' 'host' %}</th>
+                            <th>{% dojo_sort request 'Host' 'host' %}</th>
                             <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
 							<th nowrap="nowrap">Open Findings</th>
 							<th>Status</th>
@@ -80,7 +80,7 @@
                                 {% if show_uri %}
                                 <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}</a>
                                 {% else %}
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e.host_no_port }}</a>
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e.host }}</a>
                                 {% endif %}
                                   {% if e.tags %}
                                       <sup>

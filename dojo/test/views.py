@@ -830,7 +830,10 @@ def re_import_scan_results(request, tid):
                         for endpoint in item.unsaved_endpoints:
                             try:
                                 ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                            userinfo=endpoint.userinfo,
                                                                             host=endpoint.host,
+                                                                            fqdn=endpoint.fqdn,
+                                                                            port=endpoint.port,
                                                                             path=endpoint.path,
                                                                             query=endpoint.query,
                                                                             fragment=endpoint.fragment,
@@ -851,7 +854,10 @@ def re_import_scan_results(request, tid):
                         for endpoint in form.cleaned_data['endpoints']:
                             try:
                                 ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                                                                            userinfo=endpoint.userinfo,
                                                                             host=endpoint.host,
+                                                                            fqdn=endpoint.fqdn,
+                                                                            port=endpoint.port,
                                                                             path=endpoint.path,
                                                                             query=endpoint.query,
                                                                             fragment=endpoint.fragment,

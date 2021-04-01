@@ -4,15 +4,12 @@
 import csv
 import hashlib
 import io
-import re
-import socket
-from urllib.parse import urlparse
 
 from dojo.models import Endpoint, Finding
 
 MAPPINGS = {"title": "Vulnerability Name",
             'description': 'Description',
-            'protocol': 'Port',
+            'port': 'Port',
             'references': 'Evidence',
             'mitigation': 'Remediation',
             'cve': 'CVE',
@@ -20,58 +17,6 @@ MAPPINGS = {"title": "Vulnerability Name",
             'severity': 'Severity',
             'ip': 'IP'
             }
-
-
-class Urlfilter():
-
-    def __init__(self):
-        self.host = ''
-        self.path = ''
-        self.query = ''
-        self.fragment = ''
-        self.url = ''
-        self.validip = False
-
-    def is_valid_ipv4_address(self, address):
-        valid = True
-        try:
-            socket.inet_aton(address.strip())
-        except:
-            valid = False
-
-        return valid
-
-    def eval_column(self, column_value):
-        url = column_value
-        self.url = url
-        o = urlparse(url)
-
-        """
-        Todo: Replace this with a centralized parsing function as many of the parsers
-        use the same method for parsing urls.
-
-        ParseResult(scheme='http', netloc='www.cwi.nl:80', path='/%7Eguido/Python.html',
-                    params='', query='', fragment='')
-        """
-        if self.is_valid_ipv4_address(url) is False:
-            rhost = re.search(
-                r'(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$',
-                url)
-            if rhost:
-                self.host = o.netloc
-                self.path = o.path
-                self.query = o.query
-                self.fragment = o.fragment
-                self.validip = False
-
-        # URL is an IP so save as an IP endpoint
-        elif self.is_valid_ipv4_address(url) is True:
-            self.host = url
-            self.path = None
-            self.query = None
-            self.fragment = None
-            self.validip = True
-
 
 class Severityfilter():
     def __init__(self):
@@ -124,19 +69,14 @@ class TrustwaveParser(object):
 
             for field, column_name in list(MAPPINGS.items()):
                 if column_name == 'IP':
-                    urlfilter = Urlfilter()
-                    urlfilter.eval_column(row[column_name])
-                    endpointdict['host'] = urlfilter.host
-                    endpointdict['path'] = urlfilter.path
-                    endpointdict['query'] = urlfilter.query
-                    endpointdict['fragment'] = urlfilter.fragment
-                    findingdict['url'] = urlfilter.url
+                    endpointdict['host'] = row[column_name]
+                    findingdict['url'] = row[column_name]
                 elif column_name == 'Severity':
                     severityfilter = Severityfilter()
                     severityfilter.eval_column(row[column_name])
                     findingdict['severity'] = severityfilter.severity
                 elif column_name == 'Port':
-                    endpointdict[field] = row[column_name]
+                    endpointdict[field] = int(row[column_name])
                 elif column_name == 'CVE':
                     findingdict[field] = row[column_name]
                     referencesarray.append(row[column_name])
@@ -146,32 +86,10 @@ class TrustwaveParser(object):
                     if column_name in list(row.keys()):
                         findingdict[field] = row[column_name]
 
-            try:
-                dupe_endpoint = Endpoint.objects.get(protocol=endpointdict['protocol'],
-                                                     host=endpointdict['host'],
-                                                     query=endpointdict['query'],
-                                                     fragment=endpointdict['fragment'],
-                                                     path=endpointdict['path'],
-                                                     product=finding.test.engagement.product)
-            except:
-                dupe_endpoint = None
-
-            if not dupe_endpoint:
-                endpoint = Endpoint(protocol=endpointdict['protocol'],
-                                    host=endpointdict['host'],
-                                    query=endpointdict['query'],
-                                    fragment=endpointdict['fragment'],
-                                    path=endpointdict['path'],
-                                    product=finding.test.engagement.product)
-            else:
-                endpoint = dupe_endpoint
-
-            if not dupe_endpoint:
-                endpoints = [endpoint]
-            else:
-                endpoints = [endpoint, dupe_endpoint]
-
-            finding.unsaved_endpoints = endpoints
+            finding.unsaved_endpoints = [Endpoint(
+                host=endpointdict['host'],
+                port=endpointdict['port']
+            )]
             finding.title = findingdict['title']
             finding.description = findingdict['description']
             finding.references = "\n".join(referencesarray)

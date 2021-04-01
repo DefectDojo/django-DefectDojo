@@ -1173,7 +1173,10 @@ def ad_hoc_finding(request, pid):
             for endpoint in new_finding.unsaved_endpoints:
                 ep, created = Endpoint.objects.get_or_create(
                     protocol=endpoint.protocol,
+                    userinfo=endpoint.userinfo,
                     host=endpoint.host,
+                    fqdn=endpoint.fqdn,
+                    port=endpoint.port,
                     path=endpoint.path,
                     query=endpoint.query,
                     fragment=endpoint.fragment,
@@ -1188,7 +1191,10 @@ def ad_hoc_finding(request, pid):
             for endpoint in form.cleaned_data['endpoints']:
                 ep, created = Endpoint.objects.get_or_create(
                     protocol=endpoint.protocol,
+                    userinfo=endpoint.userinfo,
                     host=endpoint.host,
+                    fqdn=endpoint.fqdn,
+                    port=endpoint.port,
                     path=endpoint.path,
                     query=endpoint.query,
                     fragment=endpoint.fragment,

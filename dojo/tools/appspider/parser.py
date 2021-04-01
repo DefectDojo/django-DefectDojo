@@ -1,4 +1,3 @@
-import urllib.parse
 from xml.dom import NamespaceErr
 
 import html2text
@@ -39,8 +38,6 @@ class AppSpiderParser(object):
             description = finding.find("Description").text
             mitigation = finding.find("Recommendation").text
             vuln_url = finding.find("VulnUrl").text
-
-            parts = urllib.parse.urlparse(vuln_url)
 
             cwe = int(finding.find("CweId").text)
 
@@ -83,12 +80,9 @@ class AppSpiderParser(object):
 
                     find.unsaved_req_resp.append({"req": req, "resp": resp})
 
-                find.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
-                                                       host=parts.netloc,
-                                                       path=parts.path,
-                                                       query=parts.query,
-                                                       fragment=parts.fragment,
-                                                       product=test.engagement.product))
+                endpoint = Endpoint.from_uri(vuln_url)
+                endpoint.product=test.engagement.product
+                find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())
 

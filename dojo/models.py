@@ -10,7 +10,7 @@ from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, Count
@@ -711,18 +711,11 @@ class Product(models.Model):
         endpoints = self.active_endpoints
 
         hosts = []
-        ids = []
         for e in endpoints:
-            if ":" in e.host:
-                host_no_port = e.host[:e.host.index(':')]
-            else:
-                host_no_port = e.host
-
-            if host_no_port in hosts:
+            if e.host in hosts:
                 continue
             else:
-                hosts.append(host_no_port)
-                ids.append(e.id)
+                hosts.append(e.host)
 
         return len(hosts)
 
@@ -1085,10 +1078,12 @@ class Endpoint_Status(models.Model):
 
 class Endpoint(models.Model):
     protocol = models.CharField(null=True, blank=True, max_length=10,
-                                help_text="The communication protocol such as 'http', 'ftp', etc.")
+                                 help_text="The communication protocol/scheme such as 'http', 'ftp', 'dns', etc.")
+    userinfo = models.CharField(null=True, blank=True, max_length=500,
+                              help_text="User info as 'alice', 'bob', etc.")
     host = models.CharField(null=True, blank=True, max_length=500,
-                            help_text="The host name or IP address, you can also include the port number. For example"
-                                      "'127.0.0.1', '127.0.0.1:8080', 'localhost', 'yourdomain.com'.")
+                            help_text="The host name or IP address. It can not include the port number. For example"
+                                      "'127.0.0.1', 'localhost', 'yourdomain.com'.")
     fqdn = models.CharField(null=True, blank=True, max_length=500)
     port = models.IntegerField(null=True, blank=True,
                                help_text="The network port associated with the endpoint.")
@@ -1106,50 +1101,82 @@ class Endpoint(models.Model):
     mitigated = models.BooleanField(default=False, blank=True)
     endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.")
+    tags_from_django_tagging = models.TextField(editable=False, blank=True,
+                                                help_text=_('Temporary archive with tags from the previous tagging '
+                                                            'library we used'))
+    tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this endpoint. Choose "
+                                                                "from the list or add new tags. Press Enter key to "
+                                                                "add.")
 
     class Meta:
-        ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
+        ordering = ['product', 'host', 'protocol', 'port', 'userinfo', 'path', 'query', 'fragment']
         indexes = [
             models.Index(fields=['product', 'mitigated']),
         ]
 
+    def __init__(self, *args, **kwargs):
+        if kwargs.get('protocol'):
+            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['protocol']): #  https://tools.ietf.org/html/rfc3986#section-3.1
+                raise ValidationError('Protocol "{}" has invalid format'.format(kwargs['protocol']))
+        if kwargs.get('userinfo'):
+            if not re.match(r'^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$', kwargs['userinfo']): #  https://tools.ietf.org/html/rfc3986#section-3.2.1
+                raise ValidationError('Userinfo "{}" has invalid format'.format(kwargs['userinfo']))
+        if kwargs.get('host'):
+            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['host']): #  https://tools.ietf.org/html/rfc3986#section-3.2.2
+                try:
+                    validate_ipv46_address(kwargs['host'])
+                except ValidationError:
+                    raise ValidationError('Host "{}" has invalid format'.format(kwargs['host']))
+        if kwargs.get('port'):
+            try:
+                int_port = int(kwargs['port'])
+                if not ( 0 <= int_port < 65536 ):
+                    raise ValidationError('Port "{}" has invalid format - out of range'.format(kwargs['port']))
+                kwargs['port'] = int_port
+            except ValueError:
+                raise ValidationError('Port "{}" has invalid format - it is not a number'.format(kwargs['port']))
+        # we are not checking path, query and fragment because we assume they have been already decoded (for example by Endpoint.from_uri())
+        super(Endpoint, self).__init__(*args, **kwargs)
+
     def __str__(self):
-        from urllib.parse import uses_netloc
-
-        netloc = self.host
-        port = self.port
-        scheme = self.protocol
-        url = self.path if self.path else ''
-        query = self.query
-        fragment = self.fragment
-
-        if port:
-            # If http or https on standard ports then don't tack on the port number
-            if (port != 443 and scheme == "https") or (port != 80 and scheme == "http"):
-                netloc += ':%s' % port
-
-        if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
-            if url and url[:1] != '/':
-                url = '/' + url
-            if scheme and scheme in uses_netloc and url[:2] != '//':
-                url = '//' + (netloc or '') + url
-            else:
-                url = (netloc or '') + url
-        if scheme:
-            url = scheme + ':' + url
-        if query:
-            url = url + '?' + query
-        if fragment:
-            url = url + '#' + fragment
-        return url
-
-    # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
-    # Example: https://google.com and https://google.com:443
-    def get_normalized_url(self):
-        url = hyperlink.parse(str(self))
-        return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_text()
+        if self.host:
+            if self.protocol:
+                url = hyperlink.URL(
+                    scheme = self.protocol,
+                    userinfo = self.userinfo or '',
+                    host = self.host,
+                    port = self.port,
+                    path = tuple( self.path.split('/') ) if self.path else (),
+                    query = tuple(
+                        (
+                            qe.split(u"=", 1)
+                            if u"=" in qe
+                            else (qe, None)
+                        )
+                        for qe in self.query.split(u"&")
+                    ) if self.query else (), #  inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
+                    fragment = self.fragment or ''
+                )
+                # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
+                # Example: https://google.com and https://google.com:443
+                return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_text()
+            else: #  we need this because of https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988 - endpoint without scheme is not automaticly http endpoint
+                url = self.host
+                if self.port:
+                    url += ':' + str(self.port)
+                if self.path:
+                    url += self.path
+                if self.query:
+                    if not self.path:
+                        url += '/'
+                    url += '?' + self.query
+                if self.fragment:
+                    if not self.path and not self.query:
+                        url += '/'
+                    url += '#' + self.fragment
+                return url
+        else:
+            return ''
 
     def __hash__(self):
         return self.__str__().__hash__()
@@ -1162,9 +1189,7 @@ class Endpoint(models.Model):
 
     @cached_property
     def finding_count(self):
-        host = self.host_no_port
-
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+        endpoints = Endpoint.objects.filter(host=self.host,
                                             product=self.product).distinct()
 
         findings = Finding.objects.filter(endpoints__in=endpoints,
@@ -1175,9 +1200,7 @@ class Endpoint(models.Model):
         return findings.count()
 
     def active_findings(self):
-        host = self.host_no_port
-
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+        endpoints = Endpoint.objects.filter(host=self.host,
                                             product=self.product).distinct()
         return Finding.objects.filter(endpoints__in=endpoints,
                                       active=True,
@@ -1199,34 +1222,33 @@ class Endpoint(models.Model):
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
-        bc += [{'title': self.host_no_port,
+        bc += [{'title': self.host,
                 'url': reverse('view_endpoint', args=(self.id,))}]
         return bc
 
-    @staticmethod
-    def from_uri(uri):
-        return Endpoint()
+    def from_uri(uri): #  This is usualy used as Endpoint.from_uri('http://foo.bar/path'), so it doesn't need 'self'
+        try:
+            url = hyperlink.parse(url=uri)
+        except hyperlink.URLParseError as e:
+            raise ValidationError('Invalid URL format: {}'.format(e))
 
-    @property
-    def host_no_port(self):
-        if ":" in self.host:
-            return self.host[:self.host.index(":")]
-        else:
-            return self.host
+        query_parts = [] #  inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1768
+        for k, v in url.query:
+            if v is None:
+                query_parts.append(k)
+            else:
+                query_parts.append(u"=".join([k,v]))
+        query_string = u"&".join(query_parts)
 
-    @property
-    def host_with_port(self):
-        host = self.host
-        port = self.port
-        scheme = self.protocol
-        if ":" in host:
-            return host
-        elif (port is None) and (scheme == "https"):
-            return host + ':443'
-        elif (port is None) and (scheme == "http"):
-            return host + ':80'
-        else:
-            return str(self)
+        return Endpoint(
+            protocol = url.scheme if url.scheme != '' else None,
+            userinfo = ':'.join( url.userinfo ) if url.userinfo != ('',) else None,
+            host = url.host if url.host != '' else None,
+            port = url.port,
+            path = '/'.join(url.path) if url.path != () else None,
+            query = query_string,
+            fragment = url.fragment if url.fragment != '' else None
+        )
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1463,10 +1485,6 @@ class Finding(models.Model):
                                              related_name="finding_endpoint_status",
                                              verbose_name="Endpoint Status",
                                              help_text="The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...).")
-    unsaved_endpoints = []
-    unsaved_request = None
-    unsaved_response = None
-    unsaved_tags = None
     references = models.TextField(null=True,
                                   blank=True,
                                   db_column="refs",
@@ -1752,6 +1770,14 @@ class Finding(models.Model):
             models.Index(fields=['is_Mitigated']),
         ]
 
+    def __init__(self, *args, **kwargs):
+        super(Finding, self).__init__(*args, **kwargs)
+
+        self.unsaved_endpoints = []
+        self.unsaved_request = None
+        self.unsaved_response = None
+        self.unsaved_tags = None
+
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_finding', args=[str(self.id)])
@@ -1835,7 +1861,7 @@ class Finding(models.Model):
                 # convert list of unsaved endpoints to the list of their canonical representation
                 endpoint_str_list = list(
                     map(
-                        lambda endpoint: endpoint.get_normalized_url(),
+                        lambda endpoint: str(endpoint),
                         self.unsaved_endpoints
                     ))
                 # deduplicate (usually done upon saving finding) and sort endpoints
@@ -1854,7 +1880,7 @@ class Finding(models.Model):
             # convert list of endpoints to the list of their canonical representation
             endpoint_str_list = list(
                 map(
-                    lambda endpoint: endpoint.get_normalized_url(),
+                    lambda endpoint: str(endpoint),
                     self.endpoints.all()
                 ))
             # sort endpoints strings
@@ -2234,7 +2260,7 @@ class FindingAdmin(admin.ModelAdmin):
 
 
 Finding.endpoints.through.__str__ = lambda \
-    x: "Endpoint: " + x.endpoint.host
+    x: "Endpoint: " + str(x.endpoint)
 
 
 class Stub_Finding(models.Model):

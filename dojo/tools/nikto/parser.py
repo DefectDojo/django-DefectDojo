@@ -134,14 +134,7 @@ class NiktoParser(object):
                     f"**HTTP Method:** `{item.attrib['method']}`",
             ])
 
-            url = hyperlink.parse(ip)
-            endpoint = Endpoint(
-                protocol=url.scheme,
-                host=url.host,
-                port=url.port,
-                path="/".join(url.path),
-            )
-
+            endpoint = Endpoint.from_uri(ip)
             dupe_key = hashlib.sha256(description.encode("utf-8")).hexdigest()
 
             if dupe_key in dupes:

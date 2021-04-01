@@ -1,6 +1,5 @@
 import hashlib
 import json
-from urllib.parse import urlparse
 
 from dojo.models import Endpoint, Finding
 
@@ -37,20 +36,7 @@ class MozillaObservatoryParser(object):
                 impact = "N/A"
                 references = "N/A"
                 output = node['output']
-                try:
-                    url = output['destination']
-                    parsedUrl = urlparse(url)
-                    protocol = parsedUrl.scheme
-                    query = parsedUrl.query
-                    fragment = parsedUrl.fragment
-                    path = parsedUrl.path
-                    port = ""
-                    try:
-                        host, port = parsedUrl.netloc.split(':')
-                    except:
-                        host = parsedUrl.netloc
-                except:
-                    url = None
+                url = output.get('destination')
 
                 dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
 
@@ -78,11 +64,7 @@ class MozillaObservatoryParser(object):
                     dupes[dupe_key] = finding
 
                     if url is not None:
-                        finding.unsaved_endpoints.append(Endpoint(
-                                host=host, port=port,
-                                path=path,
-                                protocol=protocol,
-                                query=query, fragment=fragment))
+                        finding.unsaved_endpoints.append(Endpoint.from_uri(url))
         return dupes.values()
 
     def get_severity(self, num_severity):

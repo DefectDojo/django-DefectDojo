@@ -317,11 +317,11 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
     def test_column_order_is_flexible(self):
         content1 = """\
 Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
-11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,True,True
+11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,References,True,True
 """
         content2 = """\
 Verified,Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active
-True,11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,True
+True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,References,True
 """
         file1 = TestFile("findings.csv", content1)
         file2 = TestFile("findings.csv", content2)

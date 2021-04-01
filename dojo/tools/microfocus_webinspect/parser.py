@@ -1,6 +1,5 @@
 import hashlib
 import re
-from urllib.parse import urlparse
 from xml.dom import NamespaceErr
 
 import html2text
@@ -32,13 +31,8 @@ class MicrofocusWebinspectParser(object):
         dupes = dict()
         for session in root:
             url = session.find('URL').text
-            parts = urlparse(url)
-            endpoint = Endpoint(protocol=parts.scheme,
-                                host=parts.netloc,
-                                path=parts.path,
-                                query=parts.query,
-                                fragment=parts.fragment,
-                                product=test.engagement.product)
+            endpoint = Endpoint.from_uri(url)
+            endpoint.product=test.engagement.product
             issues = session.find('Issues')
             for issue in issues.findall('Issue'):
                 unique_id_from_tool = issue.attrib.get("id", None)

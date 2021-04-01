@@ -1,5 +1,4 @@
 import re
-from urllib.parse import urlparse
 import base64
 import html2text
 import logging
@@ -219,22 +218,7 @@ def get_item(item_node, test):
         vuln_id_from_tool=vuln_id_from_tool)
     finding.unsaved_req_resp = unsaved_req_resp
     # manage endpoint
-    protocol = urlparse(url_host).scheme
-    host = urlparse(url_host).netloc
-
-    port = 80
-    if protocol == 'https':
-        port = 443
-    if urlparse(url_host).port is not None:
-        port = urlparse(url_host).port
-    finding.unsaved_endpoints = [Endpoint(
-            protocol=protocol,
-            host=host,
-            port=port,
-            path=path,
-            query=None,
-            fragment=None)
-    ]
+    finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
     # manage cwes
     cwes = do_clean_cwe(item_node.findall('vulnerabilityClassifications'))
     if len(cwes) > 1:

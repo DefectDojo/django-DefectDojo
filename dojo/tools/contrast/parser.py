@@ -91,39 +91,15 @@ class ContrastParser(object):
         return int(filename)
 
     def process_endpoints(self, finding, row):
-        protocol = "http"
-        host = "0.0.0.0"
-        query = ""
-        fragment = ""
-        path = row.get('Request URI')
-
-        if path:
-            try:
-                dupe_endpoint = Endpoint.objects.get(protocol="protocol",
-                                                     host=host,
-                                                     query=query,
-                                                     fragment=fragment,
-                                                     path=path,
-                                                     product=finding.test.engagement.product)
-            except Endpoint.DoesNotExist:
-                dupe_endpoint = None
-
-            if not dupe_endpoint:
-                endpoint = Endpoint(protocol=protocol,
-                                    host=host,
-                                    query=query,
-                                    fragment=fragment,
-                                    path=path,
-                                    product=finding.test.engagement.product)
-            else:
-                endpoint = dupe_endpoint
-
-            if not dupe_endpoint:
-                endpoints = [endpoint]
-            else:
-                endpoints = [endpoint, dupe_endpoint]
-
-            finding.unsaved_endpoints = finding.unsaved_endpoints + endpoints
+        if row.get('Request URI'):
+            endpoint = Endpoint(
+                protocol="http",
+                host="0.0.0.0",
+                path=row.get('Request URI'),
+                product=finding.test.engagement.product
+            )
+            if endpoint not in finding.unsaved_endpoints:
+                finding.unsaved_endpoints.append(endpoint)
 
         if row.get('Request Qs', '') != '' and row.get('Request Body', '') != '':
             finding.unsaved_req_resp = []

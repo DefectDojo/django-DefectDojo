@@ -16,7 +16,6 @@ from dojo.utils import max_safe, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
 
-from django.core.validators import URLValidator, validate_ipv46_address
 from django.core.exceptions import MultipleObjectsReturned
 from django.conf import settings
 from rest_framework import serializers
@@ -521,71 +520,51 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def validate(self, data):
         # print('EndpointSerialize.validate')
-        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}" \
-                  "|655[0-2][0-9]|6553[0-5])"
 
         if not self.context['request'].method == 'PATCH':
-            if ('host' not in data or
-                    'protocol' not in data or
-                    'path' not in data or
-                    'query' not in data or
-                    'fragment' not in data):
-                raise serializers.ValidationError(
-                    'Please provide valid host, protocol, path, query and '
-                    'fragment')
-            protocol = data['protocol']
-            path = data['path']
-            query = data['query']
-            fragment = data['fragment']
-            host = data['host']
+            if 'host' not in data:
+                raise serializers.ValidationError('Host is required')
+            if 'product' not in data:
+                raise serializers.ValidationError('Product is required')
+            protocol = data.get('protocol')
+            userinfo = data.get('userinfo')
+            host = data.get('host')
+            fqdn = data.get('fqdn')
+            port = data.get('port')
+            path = data.get('path')
+            query = data.get('query')
+            fragment = data.get('fragment')
+            product = data.get('product')
         else:
             protocol = data.get('protocol', self.instance.protocol)
+            userinfo = data.get('userinfo', self.instance.userinfo)
+            host = data.get('host', self.instance.host)
+            fqdn = data.get('fqdn', self.instance.fqdn)
+            port = data.get('port', self.instance.port)
             path = data.get('path', self.instance.path)
             query = data.get('query', self.instance.query)
             fragment = data.get('fragment', self.instance.fragment)
-            host = data.get('host', self.instance.host)
-        product = data.get('product', None)
+            product = data.get('product', self.instance.product)
 
-        from urllib.parse import urlunsplit
-        if protocol:
-            endpoint = urlunsplit((protocol, host, path, query, fragment))
-        else:
-            endpoint = host
-
-        from django.core import exceptions
-        from django.core.validators import RegexValidator
-        import re
         try:
-            url_validator = URLValidator()
-            url_validator(endpoint)
-        except exceptions.ValidationError:
-            try:
-                # do we have a port number?
-                regex = re.compile(port_re)
-                host = endpoint
-                if regex.findall(endpoint):
-                    for g in regex.findall(endpoint):
-                        host = re.sub(port_re, '', host)
-                validate_ipv46_address(host)
-            except exceptions.ValidationError:
-                try:
-                    validate_hostname = RegexValidator(
-                        regex=r'[a-zA-Z0-9-_]*\.[a-zA-Z]{2,6}')
-                    # do we have a port number?
-                    regex = re.compile(port_re)
-                    host = endpoint
-                    if regex.findall(endpoint):
-                        for g in regex.findall(endpoint):
-                            host = re.sub(port_re, '', host)
-                    validate_hostname(host)
-                except:  # noqa
-                    raise serializers.ValidationError(
-                        'It does not appear as though this endpoint is a '
-                        'valid URL or IP address.',
-                        code='invalid')
+            Endpoint(  #  Endpoint constructor validate formats
+                protocol=protocol,
+                userinfo=userinfo,
+                host=host,
+                fqdn=fqdn,
+                port=port,
+                path=path,
+                query=query,
+                fragment=fragment
+            )
+        except ValidationError as e:
+            raise serializers.ValidationError( '; '.join(e), code='invalid')
 
         endpoint = Endpoint.objects.filter(protocol=protocol,
+                                           userinfo=userinfo,
                                            host=host,
+                                           fqdn=fqdn,
+                                           port=port,
                                            path=path,
                                            query=query,
                                            fragment=fragment,
@@ -1149,7 +1128,10 @@ class ImportScanSerializer(serializers.Serializer):
                     try:
                         ep, created = Endpoint.objects.get_or_create(
                             protocol=endpoint.protocol,
+                            userinfo=endpoint.userinfo,
                             host=endpoint.host,
+                            fqdn=endpoint.fqdn,
+                            port=endpoint.port,
                             path=endpoint.path,
                             query=endpoint.query,
                             fragment=endpoint.fragment,
@@ -1458,7 +1440,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                         try:
                             ep, created = Endpoint.objects.get_or_create(
                                 protocol=endpoint.protocol,
+                                userinfo=endpoint.userinfo,
                                 host=endpoint.host,
+                                fqdn=endpoint.fqdn,
+                                port=endpoint.port,
                                 path=endpoint.path,
                                 query=endpoint.query,
                                 fragment=endpoint.fragment,

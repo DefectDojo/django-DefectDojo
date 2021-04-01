@@ -777,10 +777,9 @@ def generate_report(request, obj):
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
-        host = endpoint.host_no_port
-        report_name = "Endpoint Report: " + host
+        report_name = "Endpoint Report: " + endpoint.host
         report_type = "Endpoint"
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+        endpoints = Endpoint.objects.filter(host=endpoint.host,
                                             product=endpoint.product).distinct()
         filename = "endpoint_finding_report.pdf"
         template = 'dojo/endpoint_pdf_report.html'

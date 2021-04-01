@@ -2,7 +2,6 @@ import csv
 import hashlib
 import io
 import re
-from urllib.parse import urlparse
 
 from dojo.models import Endpoint, Finding
 
@@ -34,7 +33,8 @@ class TestsslParser(object):
         dupes = dict()
         for row in csvarray:
             if row['severity'] in SEV:
-                url = row['fqdn/ip'].split('/')[0]
+                host = row['fqdn/ip'].split('/')[0]
+                port = int(row['port'])
                 title = row['id']
                 severity = row['severity'].lower().capitalize()
                 if severity == 'Warn':
@@ -61,7 +61,7 @@ class TestsslParser(object):
                     dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]
-                        self.process_endpoints(finding, url)
+                        self.process_endpoints(finding, host, port)
                         dupes[dupe_key] = finding
                     else:
                         dupes[dupe_key] = True
@@ -78,53 +78,13 @@ class TestsslParser(object):
                             numerical_severity=Finding.get_numerical_severity(severity))
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding
-                        self.process_endpoints(finding, url)
+                        self.process_endpoints(finding, host, port)
         return dupes.values()
 
-    # FIXME remove special endpoint management
-    def process_endpoints(self, finding, host):
-        protocol = "http"
-        query = ""
-        fragment = ""
-        path = ""
-        url = urlparse(host)
-
-        if url:
-            path = url.path
-            if path == host:
-                path = ""
-
-        rhost = re.search(
-            r"(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-            host)
-        try:
-            protocol = rhost.group(1)
-            host = rhost.group(4)
-        except:
-            pass
-        try:
-            dupe_endpoint = Endpoint.objects.get(protocol=protocol,
-                                                 host=host,
-                                                 query=query,
-                                                 fragment=fragment,
-                                                 path=path
-                                                 )
-        except Endpoint.DoesNotExist:
-            dupe_endpoint = None
-
-        if not dupe_endpoint:
-            endpoint = Endpoint(protocol=protocol,
-                                host=host,
-                                query=query,
-                                fragment=fragment,
-                                path=path
-                                )
-        else:
-            endpoint = dupe_endpoint
-
-        if not dupe_endpoint:
-            endpoints = [endpoint]
-        else:
-            endpoints = [endpoint, dupe_endpoint]
-
-        finding.unsaved_endpoints = finding.unsaved_endpoints + endpoints
+    def process_endpoints(self, finding, host, port):
+        endpoint = Endpoint.objects.get_or_create(
+            host=host,
+            port=port
+        )
+        if endpoint not in finding.unsaved_endpoints:
+            finding.unsaved_endpoints.append(endpoint)
