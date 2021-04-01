@@ -95,8 +95,7 @@ class ContrastParser(object):
             endpoint = Endpoint(
                 protocol="http",
                 host="0.0.0.0",
-                path=row.get('Request URI'),
-                product=finding.test.engagement.product
+                path=row.get('Request URI')
             )
             if endpoint not in finding.unsaved_endpoints:
                 finding.unsaved_endpoints.append(endpoint)

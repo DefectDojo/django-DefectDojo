@@ -76,7 +76,6 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
         if url != '':
             finding.url = url
             endpoint = Endpoint.from_uri(url)
-            endpoint.product = finding.test.engagement.product
             if endpoint not in finding.unsaved_endpoints:
                 finding.unsaved_endpoints.append(endpoint)
 

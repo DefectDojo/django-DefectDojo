@@ -81,7 +81,6 @@ class AppSpiderParser(object):
                     find.unsaved_req_resp.append({"req": req, "resp": resp})
 
                 endpoint = Endpoint.from_uri(vuln_url)
-                endpoint.product = test.engagement.product
                 find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())

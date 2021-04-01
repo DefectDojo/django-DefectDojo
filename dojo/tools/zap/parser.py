@@ -91,7 +91,6 @@ class ZapParser(object):
                 find.unsaved_endpoints = [main_host]
                 for i in item.items:
                     endpoint = Endpoint.from_uri(i['uri'])
-                    endpoint.product = test.engagement.product
                     find.unsaved_endpoints.append(endpoint)
                 items.append(find)
         return items

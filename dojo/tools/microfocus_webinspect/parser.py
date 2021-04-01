@@ -30,7 +30,6 @@ class MicrofocusWebinspectParser(object):
         for session in root:
             url = session.find('URL').text
             endpoint = Endpoint.from_uri(url)
-            endpoint.product = test.engagement.product
             issues = session.find('Issues')
             for issue in issues.findall('Issue'):
                 mitigation = None
