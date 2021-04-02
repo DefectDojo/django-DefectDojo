@@ -1,0 +1,858 @@
+[
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 1,
+    "fields": {
+      "name": "Acunetix Scan",
+      "description": "XML format"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 2,
+    "fields": {
+      "name": "Anchore Engine Scan",
+      "description": "Anchore-CLI JSON vulnerability report format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 3,
+    "fields": {
+      "name": "Anchore Enterprise Policy Check",
+      "description": "Anchore-CLI JSON policy check report format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 4,
+    "fields": {
+      "name": "anchore_grype",
+      "description": "A vulnerability scanner for container images and filesystems. JSON report generated with '-o json' format"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 5,
+    "fields": {
+      "name": "AppSpider Scan",
+      "description": "AppSpider (Rapid7) - Use the VulnerabilitiesSummary.xml file found in the zipped report download."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 6,
+    "fields": {
+      "name": "Aqua Scan",
+      "description": ""
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 7,
+    "fields": {
+      "name": "Arachni Scan",
+      "description": "Arachni JSON report format (generated with `arachni_reporter --reporter 'json'`)."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 8,
+    "fields": {
+      "name": "AWS Prowler Scan",
+      "description": "AWS Security Hub exports in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 9,
+    "fields": {
+      "name": "AWS Scout2 Scan",
+      "description": "JS file in scout2-report/inc-awsconfig/aws_config.js."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 10,
+    "fields": {
+      "name": "AWS Security Hub Scan",
+      "description": "AWS Security Hub exports in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 11,
+    "fields": {
+      "name": "Bandit Scan",
+      "description": "JSON report format"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 12,
+    "fields": {
+      "name": "Blackduck Hub Scan",
+      "description": "Upload the zip file containing the security.csv and components.csv for Security and License risks."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 13,
+    "fields": {
+      "name": "Blackduck Component Risk",
+      "description": "Upload the zip file containing the security.csv and files.csv."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 14,
+    "fields": {
+      "name": "Brakeman Scan",
+      "description": "Import Brakeman Scanner findings in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 15,
+    "fields": {
+      "name": "BugCrowd Scan",
+      "description": "BugCrowd CSV report format"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 16,
+    "fields": {
+      "name": "Bundler-Audit Scan",
+      "description": "'bundler-audit check' output (in plain text)"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 17,
+    "fields": {
+      "name": "Burp Scan",
+      "description": "When the Burp report is generated, the recommended option is Base64 encoding both the request and response fields. These fields will be processed and made available in the 'Finding View' page."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 18,
+    "fields": {
+      "name": "Burp REST API",
+      "description": "Import Burp REST API scan data in JSON format (/scan/[task_id] endpoint)."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 19,
+    "fields": {
+      "name": "Burp Enterprise Scan",
+      "description": "Import Burp Enterprise Edition findings in HTML format"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 20,
+    "fields": {
+      "name": "CCVS Report",
+      "description": "Import CCVS Report vulnerabilities in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 21,
+    "fields": {
+      "name": "Checkmarx Scan",
+      "description": "Detailed XML Report. Import all vulnerabilities from checkmarx without aggregation"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 22,
+    "fields": {
+      "name": "Checkmarx Scan",
+      "description": "Detailed XML Report. Import all vulnerabilities from checkmarx without aggregation"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 23,
+    "fields": {
+      "name": "Checkmarx OSA",
+      "description": "Checkmarx Open Source Analysis for dependencies (json). Generate with `jq -s . CxOSAVulnerabilities.json CxOSALibraries.json`"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 24,
+    "fields": {
+      "name": "Checkov Scan",
+      "description": "Import JSON reports of Infrastructure as Code vulnerabilities."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 25,
+    "fields": {
+      "name": "Choctaw Hog Scan",
+      "description": "Choctaw Hog Scan - JSON Report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 26,
+    "fields": {
+      "name": "Clair Scan",
+      "description": "Import JSON reports of Docker image vulnerabilities."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 27,
+    "fields": {
+      "name": "Clair Klar Scan",
+      "description": "Import JSON reports of Docker image vulnerabilities from clair klar client."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 28,
+    "fields": {
+      "name": "Cobalt.io Scan",
+      "description": "CSV Report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 29,
+    "fields": {
+      "name": "Contrast Scan",
+      "description": "CSV Report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 30,
+    "fields": {
+      "name": "Crashtest Security JSON File",
+      "description": "XML Report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 31,
+    "fields": {
+      "name": "Crashtest Security JSON File",
+      "description": "XML Report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 32,
+    "fields": {
+      "name": "DawnScanner Scan",
+      "description": "Dawnscanner (-j) output file can be imported in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 33,
+    "fields": {
+      "name": "Dependency Check Scan",
+      "description": "OWASP Dependency Check output can be imported in Xml format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 34,
+    "fields": {
+      "name": "Dependency Track Finding Packaging Format (FPF) Export",
+      "description": "The Finding Packaging Format (FPF) from OWASP Dependency Track can be imported in JSON format. See here for more info on this JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 35,
+    "fields": {
+      "name": "DrHeader JSON Importer",
+      "description": "Import result of DrHeader JSON output."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 36,
+    "fields": {
+      "name": "DSOP Scan",
+      "description": "Import XLSX findings from DSOP vulnerability scan pipelines."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 37,
+    "fields": {
+      "name": "ESLint Scan",
+      "description": "JSON report format"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 38,
+    "fields": {
+      "name": "Fortify Scan",
+      "description": "Import Findings from XML file format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 39,
+    "fields": {
+      "name": "Generic Findings Import",
+      "description": "Import Generic findings in CSV format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 40,
+    "fields": {
+      "name": "Github Vulnerability Scan",
+      "description": "Import vulnerabilities from Github API."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 41,
+    "fields": {
+      "name": "GitLab Dependency Scanning Report",
+      "description": "Import GitLab SAST Report vulnerabilities in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 42,
+    "fields": {
+      "name": "GitLab SAST Report",
+      "description": "Import GitLab SAST Report vulnerabilities in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 43,
+    "fields": {
+      "name": "Gitleaks Scan",
+      "description": "Import Gitleaks Scan findings in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 44,
+    "fields": {
+      "name": "Gosec Scanner",
+      "description": "Import Gosec Scanner findings in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 45,
+    "fields": {
+      "name": "HackerOne Cases",
+      "description": "Import HackerOne cases findings in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 46,
+    "fields": {
+      "name": "Hadolint Dockerfile check",
+      "description": "Import Hadolint Dockerfile check findings in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 47,
+    "fields": {
+      "name": "Harbor Vulnerability Scan",
+      "description": "Import vulnerabilities from Harbor API."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 48,
+    "fields": {
+      "name": "HuskyCI Report",
+      "description": "Import HuskyCI Report vulnerabilities in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 49,
+    "fields": {
+      "name": "IBM AppScan DAST",
+      "description": "XML file from IBM App Scanner."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 50,
+    "fields": {
+      "name": "Immuniweb Scan",
+      "description": "XML Scan Result File from Imuniweb Scan."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 51,
+    "fields": {
+      "name": "JFrog Xray Scan",
+      "description": "Import Xray findings in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 52,
+    "fields": {
+      "name": "Kiuwan Scan",
+      "description": "Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 53,
+    "fields": {
+      "name": "kube-bench Scan",
+      "description": "Import JSON reports of Kubernetes CIS benchmark scans."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 54,
+    "fields": {
+      "name": "Microfocus Webinspect Scan",
+      "description": "Import XML report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 55,
+    "fields": {
+      "name": "MobSF Scan",
+      "description": "Export a JSON file using the API, api/v1/report_json."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 56,
+    "fields": {
+      "name": "Mozilla Observatory Scan",
+      "description": "Import JSON report."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 57,
+    "fields": {
+      "name": "Nessus Scan",
+      "description": "Reports can be imported as CSV or .nessus (XML) report formats."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 58,
+    "fields": {
+      "name": "Netsparker Scan",
+      "description": "Netsparker JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 59,
+    "fields": {
+      "name": "Nexpose Scan",
+      "description": "Use the full XML export template from Nexpose."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 60,
+    "fields": {
+      "name": "Nikto Scan",
+      "description": "XML output (old and new nxvmlversion=\"1.2\" type) or JSON output"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 61,
+    "fields": {
+      "name": "Nmap Scan",
+      "description": "XML output (use -oX)"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 62,
+    "fields": {
+      "name": "NPM Audit Scan",
+      "description": "NPM Audit Scan output file can be imported in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 63,
+    "fields": {
+      "name": "Node Security Platform Scan",
+      "description": "Node Security Platform (NSP) output file can be imported in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 64,
+    "fields": {
+      "name": "Openscap Vulnerability Scan",
+      "description": "Import Openscap Vulnerability Scan in XML formats."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 65,
+    "fields": {
+      "name": "OpenVAS CSV",
+      "description": "Import OpenVAS Scan in CSV format. Export as CSV Results on OpenVAS."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 66,
+    "fields": {
+      "name": "ORT evaluated model Importer",
+      "description": "Import Outpost24 endpoint vulnerability scan in XML format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 67,
+    "fields": {
+      "name": "OssIndex Devaudit SCA Scan Importer",
+      "description": "Import OssIndex Devaudit SCA Scan in json format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 68,
+    "fields": {
+      "name": "Outpost24 Scan",
+      "description": "Import Outpost24 endpoint vulnerability scan in XML format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 69,
+    "fields": {
+      "name": "PHP Security Audit v2",
+      "description": "Import PHP Security Audit v2 Scan in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 70,
+    "fields": {
+      "name": "PHP Symfony Security Check",
+      "description": "Import results from the PHP Symfony Security Checker by Sensioslabs."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 71,
+    "fields": {
+      "name": "PMD Scan",
+      "description": "CSV Report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 72,
+    "fields": {
+      "name": "Qualys Scan",
+      "description": "Qualys WebGUI output files can be imported in XML format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 73,
+    "fields": {
+      "name": "Qualys Infrastructure Scan (WebGUI XML)",
+      "description": "Qualys WebGUI output files can be imported in XML format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 74,
+    "fields": {
+      "name": "Qualys Webapp Scan",
+      "description": "Qualys WebScan output files can be imported in XML format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 75,
+    "fields": {
+      "name": "Retire.js Scan",
+      "description": "Retire.js JavaScript scan (--js) output file can be imported in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 76,
+    "fields": {
+      "name": "Risk Recon API Importer",
+      "description": "Risk Recon ApI will be accessed to gather finding information. Report format here."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 77,
+    "fields": {
+      "name": "Safety Scan",
+      "description": "Safety scan (--json) output file can be imported in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 78,
+    "fields": {
+      "name": "SARIF",
+      "description": "SARIF report file can be imported in SARIF format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 79,
+    "fields": {
+      "name": "Scantist Scan",
+      "description": "Import Scantist Dependency Scanning Report vulnerabilities in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 80,
+    "fields": {
+      "name": "Scout Suite Scan",
+      "description": "JS file in scoutsuite-results/scoutsuite_results_*.js."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 81,
+    "fields": {
+      "name": "Semgrep JSON Report",
+      "description": "Import Semgrep output (--json)"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 82,
+    "fields": {
+      "name": "SKF Scan",
+      "description": "Output of SKF Sprint summary export."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 83,
+    "fields": {
+      "name": "Snyk Scan",
+      "description": "Snyk output file (snyk test --json > snyk.json) can be imported in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 84,
+    "fields": {
+      "name": "SonarQube Scan",
+      "description": "Import all findings from sonarqube html report. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 85,
+    "fields": {
+      "name": "SonarQube Scan",
+      "description": "Import all findings from sonarqube html report. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 86,
+    "fields": {
+      "name": "SonarQube API Import",
+      "description": "Aggregates findings per cwe, title, description, file_path. SonarQube output file can be imported in HTML format. Generate with https://github.com/soprasteria/sonar-report version >= 1.1.0"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 87,
+    "fields": {
+      "name": "Sonatype Application Scan",
+      "description": "Can be imported in JSON format"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 88,
+    "fields": {
+      "name": "SpotBugs Scan",
+      "description": "XML report of textui cli."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 89,
+    "fields": {
+      "name": "SSL Labs Scan",
+      "description": "JSON Output of ssllabs-scan cli."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 90,
+    "fields": {
+      "name": "Sslscan",
+      "description": "Import XML output of sslscan report."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 91,
+    "fields": {
+      "name": "SSLyze 3 Scan (JSON)",
+      "description": "Import XML report of SSLyze version 2 scan."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 92,
+    "fields": {
+      "name": "SSLyze 3 Scan (JSON)",
+      "description": "Import XML report of SSLyze version 2 scan."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 93,
+    "fields": {
+      "name": "Testssl Scan",
+      "description": "Import CSV output of testssl scan report."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 94,
+    "fields": {
+      "name": "Trivy Scan",
+      "description": "Import trivy JSON scan report."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 95,
+    "fields": {
+      "name": "Trufflehog Scan",
+      "description": "JSON Output of Trufflehog."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 96,
+    "fields": {
+      "name": "Trufflehog3 Scan",
+      "description": "JSON Output of Trufflehog."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 97,
+    "fields": {
+      "name": "Trustwave Scan (CSV)",
+      "description": "CSV output of Trustwave vulnerability scan."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 98,
+    "fields": {
+      "name": "Twistlock Image Scan",
+      "description": "JSON output of twistcli image scan or CSV."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 99,
+    "fields": {
+      "name": "VCG Scan",
+      "description": "VCG output can be imported in CSV or Xml formats."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 100,
+    "fields": {
+      "name": "Veracode Scan",
+      "description": "Detailed XML Report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 101,
+    "fields": {
+      "name": "Wapiti Scan",
+      "description": "Import XML report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 102,
+    "fields": {
+      "name": "WFuzz JSON report",
+      "description": "Import WFuzz findings in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 103,
+    "fields": {
+      "name": "Whitesource Scan",
+      "description": "Import JSON report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 104,
+    "fields": {
+      "name": "Wpscan",
+      "description": "Import JSON report"
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 105,
+    "fields": {
+      "name": "Xanitizer Scan",
+      "description": "Import XML findings list report, preferably with parameter 'generateDetailsInFindingsListReport=true'."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 106,
+    "fields": {
+      "name": "Yarn Audit Scan",
+      "description": "Yarn Audit Scan output file can be imported in JSON format."
+    }
+  },
+  {
+    "model": "dojo.Tool_Type",
+    "pk": 107,
+    "fields": {
+      "name": "ZAP Scan",
+      "description": "ZAP XML report format."
+    }
+  }
+]
