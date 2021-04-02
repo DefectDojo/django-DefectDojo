@@ -1161,8 +1161,8 @@ class Endpoint(models.Model):
             # Example: https://google.com and https://google.com:443
             clean_url = url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
             if not self.protocol:
-                if clean_url[:len(dummy_scheme)+3] == (dummy_scheme + '://'):
-                    clean_url = clean_url[len(dummy_scheme)+3:]
+                if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
+                    clean_url = clean_url[len(dummy_scheme) + 3:]
                 else:
                     raise ValueError('hyperlink lib did not create URL as was expected')
             return clean_url
