@@ -38,7 +38,6 @@
                         <tr>
                             <th>Tool Type Category</th>
                             <th>Description</th>
-                            <th>Status</th>
                             <th>Details</th>
 
                         </tr>
@@ -49,15 +48,16 @@
                                 <td>
                                     <a href="{% url 'edit_tool_type' conf.id %}"><b>{{ conf.name }}</b></a>
                                 </td>
-                                <td >
+                                <td>
                                         {{ conf.description }}
                                 </td>
-                                <td style="width:15%">{% if conf.enabled %} <b>Enabled</b> {% else %}<b>Disabled</b>{% endif %}</td>
-                                <td style="width:10%">    <div class="btn-group">
+                                <td>    <div class="btn-group">
+                                        <a class="btn btn-sm btn-primary"
+                                           href="www.ndnd">View</a>
                                         <a class="btn btn-sm btn-warning"
-                                           href="{% url 'edit_tool_type' conf.id %}">Edit</a>
+                                           href=""www.ndnd"">Edit</a>
                                         <a class="btn btn-sm btn-danger delete-finding"
-                                           href="{% url 'delete_tool_type' conf.id %}">Delete</a>
+                                           href=""www.ndnd"">Delete</a>
                                     </div>
                                 </td>
                             </tr>
