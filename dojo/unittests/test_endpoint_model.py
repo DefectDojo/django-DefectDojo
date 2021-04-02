@@ -67,8 +67,7 @@ class TestEndpointModel(TestCase):
         self.assertEqual(str(endpoint), 'http://foo.bar/beforeSpace%20afterSpace')
         endpoint = Endpoint.from_uri('//' + 'foo.bar/beforeSpace%20afterSpace')
         self.assertEqual(endpoint.path, 'beforeSpace afterSpace')
-        # TODO known issue
-        # self.assertEqual(str(endpoint), 'foo.bar/beforeSpace%20afterSpace')
+        self.assertEqual(str(endpoint), 'foo.bar/beforeSpace%20afterSpace')
 
     def test_url_normalize(self):
         endpoint1 = Endpoint.from_uri('HTTP://FOO.BAR/')

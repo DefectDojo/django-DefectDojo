@@ -1140,41 +1140,32 @@ class Endpoint(models.Model):
 
     def __str__(self):
         if self.host:
-            if self.protocol:
-                url = hyperlink.EncodedURL(
-                    scheme=self.protocol,
-                    userinfo=self.userinfo or '',
-                    host=self.host,
-                    port=self.port,
-                    path=tuple(self.path.split('/')) if self.path else (),
-                    query=tuple(
-                        (
-                            qe.split(u"=", 1)
-                            if u"=" in qe
-                            else (qe, None)
-                        )
-                        for qe in self.query.split(u"&")
-                    ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
-                    fragment=self.fragment or ''
-                )
-                # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
-                # Example: https://google.com and https://google.com:443
-                return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
-            else:  # we need this because of https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988 - endpoint without scheme is not automaticly http endpoint
-                url = self.host
-                if self.port:
-                    url += ':' + str(self.port)
-                if self.path:
-                    url += '/' + self.path
-                if self.query:
-                    if not self.path:
-                        url += '/'
-                    url += '?' + self.query
-                if self.fragment:
-                    if not self.path and not self.query:
-                        url += '/'
-                    url += '#' + self.fragment
-                return url
+            dummy_scheme = 'dummy-scheme'  # workaround for https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988
+            url = hyperlink.EncodedURL(
+                scheme=self.protocol if self.protocol else dummy_scheme,
+                userinfo=self.userinfo or '',
+                host=self.host,
+                port=self.port,
+                path=tuple(self.path.split('/')) if self.path else (),
+                query=tuple(
+                    (
+                        qe.split(u"=", 1)
+                        if u"=" in qe
+                        else (qe, None)
+                    )
+                    for qe in self.query.split(u"&")
+                ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
+                fragment=self.fragment or ''
+            )
+            # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
+            # Example: https://google.com and https://google.com:443
+            clean_url = url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
+            if not self.protocol:
+                if clean_url[:len(dummy_scheme)+3] == (dummy_scheme + '://'):
+                    clean_url = clean_url[len(dummy_scheme)+3:]
+                else:
+                    raise ValueError('hyperlink lib did not create URL as was expected')
+            return clean_url
         else:
             return ''
 
