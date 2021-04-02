@@ -17,7 +17,7 @@ from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
 from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
 from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, \
-    calculate_grade, redirect
+    calculate_grade, redirect, add_error_message_to_response
 from dojo.notifications.helper import create_notification
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -369,6 +369,9 @@ def edit_meta_data(request, eid):
 def endpoint_bulk_update_all(request, pid=None):
     if request.method == "POST":
         endpoints_to_update = request.POST.getlist('endpoints_to_update')
+        finds = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
+        total_endpoint_count = finds.count()
+
         if request.POST.get('delete_bulk_endpoints') and endpoints_to_update:
 
             if not settings.FEATURE_AUTHORIZATION_V2:
@@ -382,12 +385,24 @@ def endpoint_bulk_update_all(request, pid=None):
                     product = get_object_or_404(Product, id=pid)
                     user_has_permission_or_403(request.user, product, Permissions.Endpoint_Delete)
 
-            finds = Endpoint.objects.filter(id__in=endpoints_to_update)
             finds = get_authorized_endpoints(Permissions.Endpoint_Delete, finds, request.user)
+
+            skipped_endpoint_count = total_endpoint_count - finds.count()
+            deleted_endpoint_count = finds.count()
+
             product_calc = list(Product.objects.filter(endpoint__id__in=endpoints_to_update).distinct())
             finds.delete()
             for prod in product_calc:
                 calculate_grade(prod)
+
+            if skipped_endpoint_count > 0:
+                add_error_message_to_response('Skipped deletion of {} endpoints because you are not authorized.'.format(skipped_endpoint_count))
+
+            if deleted_endpoint_count > 0:
+                messages.add_message(request,
+                    messages.SUCCESS,
+                    'Bulk delete of {} endpoints was successful.'.format(deleted_endpoint_count),
+                    extra_tags='alert-success')
         else:
             if endpoints_to_update:
 
@@ -402,17 +417,24 @@ def endpoint_bulk_update_all(request, pid=None):
                         product = get_object_or_404(Product, id=pid)
                         user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
-                finds = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
                 finds = get_authorized_endpoints(Permissions.Endpoint_Edit, finds, request.user)
+
+                skipped_endpoint_count = total_endpoint_count - finds.count()
+                updated_endpoint_count = finds.count()
+
+                if skipped_endpoint_count > 0:
+                    add_error_message_to_response('Skipped mitigation of {} endpoints because you are not authorized.'.format(skipped_endpoint_count))
+
                 for endpoint in finds:
                     endpoint.mitigated = not endpoint.mitigated
                     endpoint.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Bulk edit of endpoints was successful.  Check to make sure it is what you intended.',
-                                     extra_tags='alert-success')
+
+                if updated_endpoint_count > 0:
+                    messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'Bulk mitigation of {} endpoints was successful.'.format(updated_endpoint_count),
+                                        extra_tags='alert-success')
             else:
-                # raise Exception('STOP')
                 messages.add_message(request,
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',

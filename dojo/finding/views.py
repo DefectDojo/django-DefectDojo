@@ -1831,14 +1831,20 @@ def finding_bulk_update_all(request, pid=None):
                 finds = get_authorized_findings(Permissions.Finding_Delete, finds).distinct()
 
                 skipped_find_count = total_find_count - finds.count()
+                deleted_find_count = finds.count()
 
                 finds.delete()
                 for prod in prods:
                     calculate_grade(prod)
 
                 if skipped_find_count > 0:
-                    add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
+                    add_error_message_to_response('Skipped deletion of {} findings because you are not authorized.'.format(skipped_find_count))
 
+                if deleted_find_count > 0:
+                    messages.add_message(request,
+                        messages.SUCCESS,
+                        'Bulk delete of {} findings was successful.'.format(deleted_find_count),
+                        extra_tags='alert-success')
         else:
             if form.is_valid() and finding_to_update:
 
@@ -1857,9 +1863,10 @@ def finding_bulk_update_all(request, pid=None):
                 finds = get_authorized_findings(Permissions.Finding_Edit, finds).distinct()
 
                 skipped_find_count = total_find_count - finds.count()
+                updated_find_count = finds.count()
 
                 if skipped_find_count > 0:
-                    add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
+                    add_error_message_to_response('Skipped update of {} findings because you are not authorized.'.format(skipped_find_count))
 
                 finds = prefetch_for_findings(finds)
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
@@ -2035,10 +2042,11 @@ def finding_bulk_update_all(request, pid=None):
                 if success_count > 0:
                     add_success_message_to_response('%i findings pushed to JIRA succesfully' % success_count)
 
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Bulk edit of findings was successful. Check alerts top right and result to make sure it is what you intended.',
-                                     extra_tags='alert-success')
+                if updated_find_count > 0:
+                    messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'Bulk update of {} findings was successful.'.format(updated_find_count),
+                                        extra_tags='alert-success')
             else:
                 messages.add_message(request,
                                      messages.ERROR,
