@@ -52,12 +52,10 @@
                                         {{ conf.description }}
                                 </td>
                                 <td>    <div class="btn-group">
-                                        <a class="btn btn-sm btn-primary"
-                                           href="www.ndnd">View</a>
                                         <a class="btn btn-sm btn-warning"
-                                           href=""www.ndnd"">Edit</a>
+                                           href="{% url 'edit_tool_type' conf.id %}">Edit</a>
                                         <a class="btn btn-sm btn-danger delete-finding"
-                                           href=""www.ndnd"">Delete</a>
+                                           href="{% url 'delete_tool_type' conf.id %}">Delete</a>
                                     </div>
                                 </td>
                             </tr>
