@@ -31,6 +31,7 @@ class TestEndpointMigrationBroken(TransactionTestCase):
             'fragment_mismatch': Endpoint.objects.create(host='https://foo.bar/#fragment', fragment='#fragment').pk,
             'missing_host': Endpoint.objects.create(host='file:///etc/passwd').pk,
         }
+
     def tearDown(self):
         try:
             self.migrator.reset()
@@ -39,15 +40,14 @@ class TestEndpointMigrationBroken(TransactionTestCase):
         super().tearDown()
 
     def test_migration_0087_endpoint_broken(self):
-        with self.assertRaisesRegex(FieldError, '^It is not possible to migrate database because there is\/are {} '
-                                                'broken endpoint\(s\)\. Please check logs\.$'.format(len(self.endpoints))):
+        with self.assertRaisesRegex(FieldError, r'^It is not possible to migrate database because there is\/are {} brok'
+                                                r'en endpoint\(s\)\. Please check logs\.$'.format(len(self.endpoints))):
             self.migrator.apply_tested_migration(self.migrate_to)
 
 
 class TestEndpointMigration(MigratorTestCase):
     migrate_from = ('dojo', '0086_endpoint_userinfo_creation')
     migrate_to = ('dojo', '0087_endpoint_host_migration')
-
 
     def prepare(self):
         Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
