@@ -38,6 +38,8 @@
                         <tr>
                             <th>Tool Type Category</th>
                             <th>Description</th>
+                            <th>Details</th>
+
                         </tr>
                         </thead>
                         <tbody>
@@ -48,6 +50,15 @@
                                 </td>
                                 <td>
                                         {{ conf.description }}
+                                </td>
+                                <td>    <div class="btn-group">
+                                        <a class="btn btn-sm btn-primary"
+                                           href="www.ndnd">View</a>
+                                        <a class="btn btn-sm btn-warning"
+                                           href=""www.ndnd"">Edit</a>
+                                        <a class="btn btn-sm btn-danger delete-finding"
+                                           href=""www.ndnd"">Delete</a>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}
