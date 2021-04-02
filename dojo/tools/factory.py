@@ -1,6 +1,6 @@
 import logging
 import json
-from dojo.models import Test_Type, Tool_Type, Tool_Configuration
+from dojo.models import Test_Type
 
 
 PARSERS = {}
@@ -38,28 +38,11 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         raise ValueError(f'Unknown Test Type {scan_type}')
 
 
-def get_enables_scanners():
-    scanners = []
-    enabled = Tool_Type.objects.all().filter(enabled=True)
-    for scanner in enabled:
-        scanners.append(scanner.name.lower())
-    return scanners
-
-
 def get_choices():
     res = list()
-    enabled = get_enables_scanners()
-    for key in PARSERS.keys():
-        if key.lower() in enabled:
-            res.append((key, PARSERS[key].get_label_for_scan_types(key)))
+    for key in PARSERS:
+        res.append((key, PARSERS[key].get_label_for_scan_types(key)))
     return tuple(res)
-
-def get_available_configurations():
-    configs = list()
-    configurations = Tool_Configuration.objects.filter(tool_type__enabled=True)
-    for item in configurations:
-        configs.append((item.tool_type,item.name))
-    return tuple(configs)
 
 ##This just helped to create JSON fixtures
 def dump_fixture():
@@ -85,6 +68,14 @@ def requires_file(scan_type):
     # FIXME switch to method of the parser
     # parser = PARSERS[scan_type]
     return scan_type != SCAN_SONARQUBE_API
+
+
+def handles_active_verified_statuses(scan_type):
+    # FIXME switch to method of the parser
+    # parser = PARSERS[scan_type]
+    return scan_type in [
+        'Generic Findings Import', SCAN_SONARQUBE_API, 'Qualys Scan'
+    ]
 
 
 import os
