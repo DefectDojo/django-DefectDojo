@@ -58,7 +58,11 @@ def edit_tool_type(request, ttid):
 def delete_tool_type(request, ttid):
     conf = get_object_or_404(Tool_Type, pk=ttid)
     conf.delete()
-    return HttpResponseRedirect(reverse('tool_type'))
+    confs = Tool_Type.objects.all().order_by('name')
+    return render(request,
+                  'dojo/tool_type.html',
+                  {'confs': confs,
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
