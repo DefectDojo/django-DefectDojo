@@ -1,5 +1,7 @@
 import logging
+import json
 from dojo.models import Test_Type
+
 
 PARSERS = {}
 # TODO remove that
@@ -42,6 +44,23 @@ def get_choices():
         res.append((key, PARSERS[key].get_label_for_scan_types(key)))
     return tuple(res)
 
+##This just helped to create JSON fixtures
+def dump_fixture():
+    counter = 1
+    model = "dojo.Tool_Type"
+    dump = []
+    for parser in PARSERS:
+      dump.append(
+          {   'model': model,
+              'pk': counter,
+              'fields': {
+                  'name': PARSERS[parser].get_scan_types()[0],
+                  'description': PARSERS[parser].get_description_for_scan_types("mock")
+              }
+          }
+      )
+      counter+=1
+    print(json.dumps(dump))
 
 def requires_file(scan_type):
     if scan_type is None or scan_type not in PARSERS:
