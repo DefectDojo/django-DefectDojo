@@ -133,7 +133,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
         self.assertEqual('http://localhost/default.aspx',
-                         findings[0].url)
+                         str(findings[0].unsaved_endpoints[0]))
 
     def test_parsed_finding_has_severity(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified

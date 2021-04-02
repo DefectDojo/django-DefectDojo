@@ -546,8 +546,9 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
             path = data.get('path', self.instance.path)
             query = data.get('query', self.instance.query)
             fragment = data.get('fragment', self.instance.fragment)
-            if 'product' in data:
+            if 'product' in data and data['product'] != self.instance.product:
                 raise serializers.ValidationError('Change of product is not possible')
+            product = self.instance.product
 
         try:
             Endpoint(  # Endpoint constructor validate formats

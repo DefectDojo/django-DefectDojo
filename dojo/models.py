@@ -1141,7 +1141,7 @@ class Endpoint(models.Model):
     def __str__(self):
         if self.host:
             if self.protocol:
-                url = hyperlink.URL(
+                url = hyperlink.EncodedURL(
                     scheme=self.protocol,
                     userinfo=self.userinfo or '',
                     host=self.host,
@@ -1159,13 +1159,13 @@ class Endpoint(models.Model):
                 )
                 # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
                 # Example: https://google.com and https://google.com:443
-                return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_text()
+                return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
             else:  # we need this because of https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988 - endpoint without scheme is not automaticly http endpoint
                 url = self.host
                 if self.port:
                     url += ':' + str(self.port)
                 if self.path:
-                    url += self.path
+                    url += '/' + self.path
                 if self.query:
                     if not self.path:
                         url += '/'
@@ -1246,7 +1246,7 @@ class Endpoint(models.Model):
             host=url.host if url.host != '' else None,
             port=url.port,
             path='/'.join(url.path) if url.path != () else None,
-            query=query_string,
+            query=query_string if query_string != '' else None,
             fragment=url.fragment if url.fragment != '' else None
         )
 
