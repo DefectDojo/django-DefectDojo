@@ -1135,7 +1135,15 @@ class Endpoint(models.Model):
                 kwargs['port'] = int_port
             except ValueError:
                 raise ValidationError('Port "{}" has invalid format - it is not a number'.format(kwargs['port']))
-        # we are not checking path, query and fragment because we assume they have been already decoded (for example by Endpoint.from_uri())
+        if kwargs.get('path'):
+            if kwargs['path'][0] == "/":
+                raise ValidationError('Path must not start with "/"')
+        if kwargs.get('query'):
+            if kwargs['query'][0] == "?":
+                raise ValidationError('Query must not start with "?"')
+        if kwargs.get('fragment'):
+            if kwargs['fragment'][0] == "#":
+                raise ValidationError('Fragment must not start with "#"')
         super(Endpoint, self).__init__(*args, **kwargs)
 
     def __str__(self):
