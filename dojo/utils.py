@@ -98,6 +98,14 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id
+def do_dedupe_finding_task(new_finding, *args, **kwargs):
+    return do_dedupe_finding(new_finding, *args, **kwargs)
+
+
 def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
@@ -105,7 +113,7 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
         logger.warning("system settings not found")
         enabled = False
     if enabled:
-        deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
+        deduplicationLogger.debug('dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
         # TODO use test.dedupe_algo and case statement
         if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
@@ -131,7 +139,7 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
     else:
-        deduplicationLogger.debug("sync_dedupe: skipping dedupe because it's disabled in system settings get()")
+        deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -1896,3 +1904,66 @@ def add_field_errors_to_response(form):
     if form and get_current_request():
         for field, error in form.errors.items():
             add_error_message_to_response(error)
+
+
+def mass_model_updater(model_type, models, function, fields=None, page_size=1000, order='asc'):
+    """ Using the default for model in queryset can be slow for large querysets. Even
+    when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
+    this process very well if we can process the models ordered by id.
+    In that case we don't need LIMIT or OFFSET, but can keep track of the latest id that
+    was processed and continue from there on the next page. This is fast because
+    it results in an index seek instead of executing the whole query again and skipping
+    the first X items.
+    """
+    # force ordering by id to make our paging work
+    last_id = None
+    models = models.order_by()
+    if order == 'asc':
+        logger.debug('ordering ascending')
+        models = models.order_by('id')
+        last_id = 0
+    elif order == 'desc':
+        logger.debug('ordering descending')
+        models = models.order_by('-id')
+        # get maximum, which is the first due to descending order
+        last_id = models.first().id + 1
+    else:
+        raise ValueError('order must be ''asc'' or ''desc''')
+    # use filter to make count fast on mysql
+    total_count = models.filter(id__gt=0).count()
+    logger.debug('found %d models for mass update:', total_count)
+
+    i = 0
+    batch = []
+    total_pages = (total_count // page_size) + 2
+    # logger.info('pages to process: %d', total_pages)
+    logger.info('%s out of %s models processed ...', i, total_count)
+    for p in range(1, total_pages):
+        # logger.info('page: %d', p)
+        if order == 'asc':
+            page = models.filter(id__gt=last_id)[:page_size]
+        else:
+            page = models.filter(id__lt=last_id)[:page_size]
+
+        # logger.info('page query: %s', page.query)
+        # if p == 23:
+        #     raise ValueError('bla')
+        for model in page:
+            i += 1
+            last_id = model.id
+            # logger.info('last_id: %s', last_id)
+
+            function(model)
+
+            batch.append(model)
+
+            if (i > 0 and i % page_size == 0):
+                if fields:
+                    model_type.objects.bulk_update(batch, fields)
+                batch = []
+                logger.info('%s out of %s models processed ...', i, total_count)
+
+    if fields:
+        model_type.objects.bulk_update(batch, fields)
+    batch = []
+    logger.info('%s out of %s models processed ...', i, total_count)

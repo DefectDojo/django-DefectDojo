@@ -25,6 +25,7 @@ def we_want_async(*args, **kwargs):
         logger.debug('dojo_async_task: running task in the foreground as block_execution is set to True for %s', user)
         return False
 
+    logger.debug('dojo_async_task: no current user, running task in the background')
     return True
 
 
