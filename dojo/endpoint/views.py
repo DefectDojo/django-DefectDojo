@@ -223,7 +223,7 @@ def delete_endpoint(request, eid):
                 create_notification(event='other',
                                     title='Deletion of %s' % endpoint,
                                     description='The endpoint "%s" was deleted by %s' % (endpoint, request.user),
-                                    url=request.build_absolute_uri(reverse('endpoints')),
+                                    url=request.build_absolute_uri(reverse('endpoint')),
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 
@@ -268,7 +268,7 @@ def add_endpoint(request, pid):
                 resp += '<script type="text/javascript">window.close();</script>'
                 return HttpResponse(resp)
             else:
-                return HttpResponseRedirect(reverse('endpoints') + "?product=" + pid)
+                return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
 
     product_tab = None
     if '_popup' not in request.GET:
@@ -295,7 +295,7 @@ def add_product_endpoint(request):
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('endpoints') + "?product=%s" % form.product.id)
+            return HttpResponseRedirect(reverse('endpoint') + "?product=%s" % form.product.id)
     add_breadcrumb(title="Add Endpoint", top_level=False, request=request)
     return render(request,
                   'dojo/add_endpoint.html',
@@ -394,7 +394,7 @@ def endpoint_bulk_update_all(request, pid=None):
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
-    return HttpResponseRedirect(reverse('endpoints', args=()))
+    return HttpResponseRedirect(reverse('endpoint', args=()))
 
 
 # @user_passes_test(lambda u: u.is_staff)

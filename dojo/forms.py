@@ -1326,6 +1326,8 @@ class AddEndpointForm(forms.Form):
                     # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
                     # format doesn't follow RFC 3986 but users use it
                     endpoint = Endpoint.from_uri('//' + endpoint)
+                if not endpoint.host:
+                    raise ValidationError("Host is required")
                 self.endpoints_to_process.append([
                     endpoint.protocol,
                     endpoint.userinfo,
