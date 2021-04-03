@@ -1,9 +1,7 @@
-from functools import lru_cache
-from django.db.models.signals import post_save, post_delete
-from django.dispatch.dispatcher import receiver
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
+from dojo.authorization.utils import ttl_lru_cache
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint
 
@@ -89,7 +87,7 @@ class RoleDoesNotExistError(Exception):
         self.message = message
 
 
-@lru_cache()
+@ttl_lru_cache()
 def get_product_member(user, product):
     try:
         return Product_Member.objects.get(user=user, product=product)
@@ -97,21 +95,9 @@ def get_product_member(user, product):
         return None
 
 
-@lru_cache()
+@ttl_lru_cache()
 def get_product_type_member(user, product_type):
     try:
         return Product_Type_Member.objects.get(user=user, product_type=product_type)
     except Product_Type_Member.DoesNotExist:
         return None
-
-
-@receiver(post_save, sender=Product_Member)
-@receiver(post_delete, sender=Product_Member)
-def clear_product_member_cache(sender, **kwargs):
-    get_product_member.cache_clear()
-
-
-@receiver(post_save, sender=Product_Type_Member)
-@receiver(post_delete, sender=Product_Type_Member)
-def clear_product_type_member_cache(sender, **kwargs):
-    get_product_type_member.cache_clear()

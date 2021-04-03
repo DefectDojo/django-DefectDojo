@@ -174,6 +174,11 @@ env = environ.Env(
     DD_FEATURE_AUTHORIZATION_V2=(bool, False),
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
+    # Database reads for Product_Member and Product_Type_Member are cached to improve performance
+    # TTL (time to live) is the time after the cache is cleared in seconds
+    # Maxsize is the amount of entries per cache
+    DD_AUTHORIZATION_CACHE_TTL=(int, 10),
+    DD_AUTHORIZATION_CACHE_MAXSIZE=(int, 128),
 
     # Feature toggle to show legacy list of PDF reports
     # You need to have wkhtmltopdf installed on your system to generate PDF reports
@@ -1050,6 +1055,11 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
 # When enabled, staff users have full access to all product types and products
 AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
+# Database reads for Product_Member and Product_Type_Member are cached to improve performance
+# TTL (time to live) is the time after the cache is cleared in seconds
+# Maxsize is the amount of entries per cache
+AUTHORIZATION_CACHE_TTL = env('DD_AUTHORIZATION_CACHE_TTL')
+AUTHORIZATION_CACHE_MAXSIZE = env('DD_AUTHORIZATION_CACHE_MAXSIZE')
 
 # Feature toggle to show legacy list of PDF reports
 # You need to have wkhtmltopdf installed on your system to generate PDF reports
