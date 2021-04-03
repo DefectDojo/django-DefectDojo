@@ -1906,7 +1906,7 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def mass_model_updater(model_type, models, function, fields=None, page_size=1000, order='asc'):
+def mass_model_updater(model_type, models, function, fields=None, page_size=1000, order='asc', log_prefix=''):
     """ Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
     this process very well if we can process the models ordered by id.
@@ -1931,13 +1931,13 @@ def mass_model_updater(model_type, models, function, fields=None, page_size=1000
         raise ValueError('order must be ''asc'' or ''desc''')
     # use filter to make count fast on mysql
     total_count = models.filter(id__gt=0).count()
-    logger.debug('found %d models for mass update:', total_count)
+    logger.debug('%s found %d models for mass update:', log_prefix, total_count)
 
     i = 0
     batch = []
     total_pages = (total_count // page_size) + 2
     # logger.info('pages to process: %d', total_pages)
-    logger.info('%s out of %s models processed ...', i, total_count)
+    logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
     for p in range(1, total_pages):
         # logger.info('page: %d', p)
         if order == 'asc':
@@ -1961,9 +1961,9 @@ def mass_model_updater(model_type, models, function, fields=None, page_size=1000
                 if fields:
                     model_type.objects.bulk_update(batch, fields)
                 batch = []
-                logger.info('%s out of %s models processed ...', i, total_count)
+                logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
 
     if fields:
         model_type.objects.bulk_update(batch, fields)
     batch = []
-    logger.info('%s out of %s models processed ...', i, total_count)
+    logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
