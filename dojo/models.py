@@ -2054,10 +2054,10 @@ class Finding(models.Model):
 
     def save_no_options(self, *args, **kwargs):
         return self.save(dedupe_option=False, false_history=False, rules_option=False, product_grading_option=False,
-             issue_updater_option=False, push_to_jira=False, user=None, sync=False, *args, **kwargs)
+             issue_updater_option=False, push_to_jira=False, user=None, *args, **kwargs)
 
     def save(self, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
-             issue_updater_option=True, push_to_jira=False, user=None, sync=False, *args, **kwargs):
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
         from dojo.finding import helper as finding_helper
 
@@ -2129,7 +2129,7 @@ class Finding(models.Model):
 
         # postprocessing is done in a celery task
         finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
-             issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, sync=sync, *args, **kwargs)
+             issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
 
     def delete(self, *args, **kwargs):
         for find in self.original_finding.all():
