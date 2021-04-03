@@ -58,7 +58,6 @@ class EndpointTest(APITestCase):
         eid = r.json()['id']
         self.assertEqual(r.status_code, 201, r.content[:1000])
 
-
         r = self.client.patch(reverse('endpoint-detail', args=(eid,)), {
             "product": 2
         }, format='json')

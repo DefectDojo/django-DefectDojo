@@ -55,7 +55,7 @@ class TestNiktoParser(TestCase):
                 endpoint = finding.unsaved_endpoints[0]
                 self.assertEqual(443, endpoint.port)
                 self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
-                self.assertEqual("/public/", endpoint.path)
+                self.assertEqual("public/", endpoint.path)
             if ("Retrieved via header: 1.1 vegur" == finding.title and
                     "Info" == finding.severity):
                 self.assertEqual(1, len(finding.unsaved_endpoints))

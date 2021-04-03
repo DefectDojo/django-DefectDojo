@@ -99,7 +99,7 @@
                                           <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
-                                          <li><a href="{% url 'endpoints' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                                          <li><a href="{% url 'endpoint' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
                                           <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
                                           <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
                                         {% if prod|has_object_permission:"Endpoint_Add" or user|is_authorized_for_staff:prod %}
