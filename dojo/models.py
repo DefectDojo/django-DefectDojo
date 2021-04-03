@@ -1136,14 +1136,20 @@ class Endpoint(models.Model):
             except ValueError:
                 raise ValidationError('Port "{}" has invalid format - it is not a number'.format(kwargs['port']))
         if kwargs.get('path'):
-            if kwargs['path'][0] == "/":
-                raise ValidationError('Path must not start with "/"')
+            while len(kwargs['path']) > 0 and kwargs['path'][0] == "/":  # Endpoint store "root-less" path
+                kwargs['path'] = kwargs['path'][1:]
+            if kwargs['path'] == '':
+                kwargs['path'] = None
         if kwargs.get('query'):
-            if kwargs['query'][0] == "?":
-                raise ValidationError('Query must not start with "?"')
+            if len(kwargs['query']) > 0 and kwargs['query'][0] == "?":
+                kwargs['query'] = kwargs['query'][1:]
+            if kwargs['query'] == '':
+                kwargs['query'] = None
         if kwargs.get('fragment'):
-            if kwargs['fragment'][0] == "#":
-                raise ValidationError('Fragment must not start with "#"')
+            if len(kwargs['fragment']) > 0 and kwargs['fragment'][0] == "#":
+                kwargs['fragment'] = kwargs['fragment'][1:]
+            if kwargs['fragment'] == '':
+                kwargs['fragment'] = None
         super(Endpoint, self).__init__(*args, **kwargs)
 
     def __str__(self):

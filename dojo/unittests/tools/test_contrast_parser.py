@@ -25,7 +25,7 @@ class TestContrastParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual('http', endpoint.protocol)
-            self.assertEqual('/WebGoat/login.mvc', endpoint.path)
+            self.assertEqual('WebGoat/login.mvc', endpoint.path)
 
     def test_example2_report(self):
         test = Test()
