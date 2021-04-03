@@ -571,15 +571,15 @@ Severity and Product.
 
 ![Finding Listing Page](../../images/find_1.png)
 
-| 
+|
 
 ![Finding Listing Page](../../images/find_2.png)
 
-| 
+|
 
 ![Finding Listing Page](../../images/find_3.png)
 
-| 
+|
 
 Visual representation of a Finding:
 
@@ -791,7 +791,7 @@ Custom reports, generated with the Report Builder, allow you to select specific 
 1.  Cover Page
 2.  Table of Contents
 3.  WYSIWYG Content
-4.  Findings 
+4.  Findings
 5.  Vulnerable Endpoints
 6.  Page Breaks
 
@@ -840,7 +840,7 @@ When a duplicate is found:
 
 There are two ways to use the deduplication:
 
--   
+-
 
     Deduplicate vulnerabilities in the same build/release. The vulnerabilities may be found by the same scanner (same scanner deduplication) or by different scanners (cross-scanner deduplication).
 
@@ -849,7 +849,7 @@ There are two ways to use the deduplication:
             detecting duplicates across scanners is not trivial as it
             requires a certain standardization.
 
--   
+-
 
     Track unique vulnerabilities across builds/releases so that defectDojo knows when it finds a vulnerability whether it has seen it before.
 
@@ -888,7 +888,7 @@ settings.dist.py (or settings.py after install) by configuring the
 
 The available algorithms are:
 
--   
+-
 
     [DEDUPE\_ALGO\_UNIQUE\_ID\_FROM\_TOOL]{.title-ref}
 
@@ -897,7 +897,7 @@ The available algorithms are:
             id existing in the source tool. Few scanners populate this
             field currently. If you want to use this algorithm, you may
             need to update the scanner code beforehand
-        -   
+        -
 
             Advantages:
 
@@ -906,7 +906,7 @@ The available algorithms are:
                     configuration will allow defectDojo to use this
                     ability
 
-        -   
+        -
 
             Drawbacks:
 
@@ -918,7 +918,7 @@ The available algorithms are:
                     able to recognise that findings found in previous
                     scans are actually the same as the new findings.
 
--   
+-
 
     [DEDUPE\_ALGO\_HASH\_CODE]{.title-ref}
 
@@ -926,13 +926,13 @@ The available algorithms are:
             hash\_code itself is configurable for each scanner in
             parameter [HASHCODE\_FIELDS\_PER\_SCANNER]{.title-ref}
 
--   
+-
 
     [DEDUPE\_ALGO\_UNIQUE\_ID\_FROM\_TOOL\_OR\_HASH\_CODE]{.title-ref}
 
     :   -   a finding is a duplicate with another if they have the same
             unique\_id\_from\_tool OR the same hash\_code
-        -   
+        -
 
             Allows to use both
 
@@ -943,14 +943,14 @@ The available algorithms are:
                     on CWE+severity+file\_path for example) for
                     cross-parser deduplication
 
--   
+-
 
     [DEDUPE\_ALGO\_LEGACY]{.title-ref}
 
     :   -   This is algorithm that was in place before the configuration
             per parser was made possible, and also the default one for
             backward compatibility reasons.
-        -   
+        -
 
             Legacy algorithm basically deduplicates based on:
 
@@ -992,7 +992,7 @@ Tips:
     For example [title]{.title-ref} and [description]{.title-ref} tend
     to change when the tools evolve and don\'t allow cross-scanner
     deduplication
--   
+-
 
     Good candidates are
 
@@ -1007,6 +1007,32 @@ Tips:
     switching to legacy algorithm when a null cwe is found for a given
     finding: this is to avoid getting many duplicates when the tool
     fails to give a cwe while we are expecting it.
+
+### Hashcode generation / regeneration ###
+When you change the hashcode configuration, it is needed to regenerated the hashcodes for all findings,
+or at least those findings found by scanners for which the configuration was updated.
+
+This is sometimes also needed after an upgrade to a new Defect Dojo version, for example when we made changes
+to the hashcode configuration or calculation logic. We will mention this in the upgrade notes.
+
+To regenerate the hashcodes, use the `dedupe` management command:
+
+    docker-compose exec uwsgi ./manage.py dedupe --hash_code_only
+
+This will only regenerated the hashcodes, but will not run any deduplication logic on existing findings.
+If you want to run deduplication again on existing findings to make sure any duplicates found by the new
+hashcode config are marked as such, run
+
+    docker-compose exec uwsgi ./manage.py dedupe
+
+The deduplication part of this command will run the deduplication for each finding in a celery task. If you want to
+run the deduplication in the foreground process, use:
+
+    docker-compose exec uwsgi ./manage.py dedupe --dedupe-sync
+
+Please note the deduplication process is resource intensive and can take a long time to complete
+(estimated ~7500 findings per minute when run in the foreground)
+
 
 ### Debugging deduplication
 
