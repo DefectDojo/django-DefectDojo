@@ -1,6 +1,7 @@
 # requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.23
 bleach==3.3.0
+beautifulsoup4==4.9.3 # Required by SpotBugs parser
 celery==4.4.7
 coverage==5.5
 defusedxml==0.7.1

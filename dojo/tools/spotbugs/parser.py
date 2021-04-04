@@ -4,9 +4,8 @@ __email__ = "bigorigor.ua@gmail.com"
 __status__ = "Development"
 
 import re
-
+from bs4 import BeautifulSoup
 from defusedxml import ElementTree as ET
-
 from dojo.models import Finding
 
 
@@ -22,7 +21,8 @@ class SpotbugsParser(object):
         return "XML report of textui cli."
 
     def get_findings(self, filename, test):
-        bug_patterns = dict()
+        mitigation_patterns = dict()
+        reference_patterns = dict()
         dupes = dict()
 
         SEVERITY = {
@@ -34,14 +34,51 @@ class SpotbugsParser(object):
         tree = ET.parse(filename)
         root = tree.getroot()
 
+        # Parse <BugPattern> tags
         for pattern in root.findall('BugPattern'):
-            plain_pattern = re.sub(r'<[b-z/]*?>|<a|</a>|href=', '', ET.tostring(pattern.find('Details'), method='text').decode('utf-8'))
-            bug_patterns[pattern.get('type')] = plain_pattern
+            # Parse <BugPattern> content as html
+            html_text = BeautifulSoup(ET.tostring(pattern.find('Details'), method='text').decode('utf-8'), features="html.parser")
 
+            # Surround text inside <pre> tags with ```
+            for pre in html_text.find_all('pre'):
+                temp = pre.text
+                pre.string = '```\n'+temp+'\n```'
+            # Surround text inside <code> tags with `
+            for code in html_text.find_all('code'):
+                temp = code.text
+                code.string = '`'+temp+'`'
+            # Surround text inside <b> tags with **
+            for bold in html_text.find_all('b'):
+                temp = bold.text
+                bold.string = '**'+temp+'**'
+
+            # Get <p> tags
+            paragraphs = html_text.find_all('p')
+
+            # All <p> tags (except the last one) are the bug description with instructions on how to fix it
+            mitigation = ''
+            for p in paragraphs[:-1]:
+                if ('Vulnerable Code:' in p.text) or ('Insecure configuration:' in p.text) or ('Code at risk:' in p.text):
+                    # Add a string indicating the code here its just an example, NOT the actual scanned code
+                    mitigation += '\n\n\n#### Example\n'
+                # Append text removing leading whitespaces if is not a code
+                mitigation += re.sub("  +", "", p.text) if '```' not in p.text else p.text
+            mitigation_patterns[pattern.get('type')] = mitigation
+
+            # The last <p> is always references
+            reference = ''
+            links = paragraphs[-1].find_all('a', href=True)
+            for link in links:
+                reference += link['href']+' - '+link.text+'\n'
+            reference_patterns[pattern.get('type')] = reference
+
+        # Parse <BugInstance> tags
         for bug in root.findall('BugInstance'):
             desc = ''
             for message in bug.itertext():
-                desc += message
+                # The message comes with multiple breaklines,
+                # so were removing all of them and adding only one at the end
+                desc += message.replace('\n','')+'\n'
 
             dupe_key = bug.get('instanceHash')
 
@@ -49,9 +86,8 @@ class SpotbugsParser(object):
             cwe = bug.get('cweid', default=0)
             severity = SEVERITY[bug.get('priority')]
             description = desc
-            mitigation = bug_patterns[bug.get('type')]
-            impact = 'N/A'
-            references = 'N/A'
+            mitigation = mitigation_patterns[bug.get('type')]
+            references = reference_patterns[bug.get('type')]
 
             # find the source line and file on the buginstance
             source_line = None
@@ -71,7 +107,6 @@ class SpotbugsParser(object):
                     severity=severity,
                     description=description,
                     mitigation=mitigation,
-                    impact=impact,
                     references=references,
                     test=test,
                     active=False,
