@@ -40,6 +40,10 @@ def create_notification(event=None, **kwargs):
         if not product and 'finding' in kwargs:
             product = kwargs['finding'].test.engagement.product
 
+        if not product and 'obj' in kwargs:
+            from dojo.utils import get_product
+            product = get_product(kwargs['obj'])
+
         # notifications are made synchronous again due to serialization bug in django-tagulous
         # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
         # kwargs = convert_kwargs_if_async(**kwargs)
