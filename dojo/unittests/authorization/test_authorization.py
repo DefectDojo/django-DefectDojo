@@ -1,4 +1,3 @@
-from importlib import reload
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase, override_settings
@@ -87,8 +86,6 @@ class TestAuthorization(TestCase):
     def test_user_has_permission_or_403_success(self, mock_get):
         mock_get.return_value = self.product_type_member_owner
 
-        reload(dojo.authorization.authorization)
-
         user_has_permission_or_403(self.user, self.product_type, Permissions.Product_Type_Delete)
 
         self.assertEqual(mock_get.call_args[1]['user'], self.user)
@@ -106,8 +103,6 @@ class TestAuthorization(TestCase):
     @patch('dojo.models.Product_Type_Member.objects.get')
     def test_user_has_permission_product_type_no_permissions(self, mock_get):
         mock_get.return_value = self.product_type_member_reader
-
-        reload(dojo.authorization.authorization)
 
         result = user_has_permission(self.user, self.product_type, Permissions.Product_Type_Delete)
 
@@ -128,8 +123,6 @@ class TestAuthorization(TestCase):
     def test_user_has_permission_staff_override(self):
         self.user.is_staff = True
 
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(self.user, self.product_type, Permissions.Product_Type_Delete)
 
         self.assertTrue(result)
@@ -140,8 +133,6 @@ class TestAuthorization(TestCase):
     def test_user_has_permission_product_type_success(self, mock_get):
         mock_get.return_value = self.product_type_member_owner
 
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(self.user, self.product_type, Permissions.Product_Type_Delete)
 
         self.assertTrue(result)
@@ -149,16 +140,12 @@ class TestAuthorization(TestCase):
         self.assertEqual(mock_get.call_args[1]['product_type'], self.product_type)
 
     def test_user_has_permission_product_no_member(self):
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(self.user, self.product, Permissions.Product_View)
         self.assertFalse(result)
 
     @patch('dojo.models.Product_Member.objects.get')
     def test_user_has_permission_product_no_permissions(self, mock_get):
         mock_get.return_value = self.product_member_reader
-
-        reload(dojo.authorization.authorization)
 
         result = user_has_permission(self.user, self.product, Permissions.Product_Delete)
 
@@ -170,8 +157,6 @@ class TestAuthorization(TestCase):
     def test_user_has_permission_product_product_type_success(self, mock_get):
         mock_get.return_value = self.product_type_member_owner
 
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(self.user, self.product, Permissions.Product_Delete)
 
         self.assertTrue(result)
@@ -181,8 +166,6 @@ class TestAuthorization(TestCase):
     @patch('dojo.models.Product_Member.objects.get')
     def test_user_has_permission_product_success(self, mock_get):
         mock_get.return_value = self.product_member_owner
-
-        reload(dojo.authorization.authorization)
 
         result = user_has_permission(self.user, self.product, Permissions.Product_Delete)
 
@@ -194,8 +177,6 @@ class TestAuthorization(TestCase):
     def test_user_has_permission_engagement_no_permissions(self, mock_get):
         mock_get.return_value = self.product_member_reader
 
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(self.user, self.engagement, Permissions.Engagement_Edit)
 
         self.assertFalse(result)
@@ -205,8 +186,6 @@ class TestAuthorization(TestCase):
     @patch('dojo.models.Product_Member.objects.get')
     def test_user_has_permission_engagement_success(self, mock_get):
         mock_get.return_value = self.product_member_owner
-
-        reload(dojo.authorization.authorization)
 
         result = user_has_permission(self.user, self.engagement, Permissions.Engagement_Delete)
 
@@ -218,8 +197,6 @@ class TestAuthorization(TestCase):
     def test_user_has_permission_test_no_permissions(self, mock_get):
         mock_get.return_value = self.product_member_reader
 
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(self.user, self.test, Permissions.Test_Edit)
 
         self.assertFalse(result)
@@ -229,8 +206,6 @@ class TestAuthorization(TestCase):
     @patch('dojo.models.Product_Member.objects.get')
     def test_user_has_permission_test_success(self, mock_get):
         mock_get.return_value = self.product_member_owner
-
-        reload(dojo.authorization.authorization)
 
         result = user_has_permission(self.user, self.test, Permissions.Test_Delete)
 
@@ -242,8 +217,6 @@ class TestAuthorization(TestCase):
     def test_user_has_permission_finding_no_permissions(self, mock_get):
         mock_get.return_value = self.product_member_reader
 
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(self.user, self.finding, Permissions.Finding_Edit)
 
         self.assertFalse(result)
@@ -253,8 +226,6 @@ class TestAuthorization(TestCase):
     @patch('dojo.models.Product_Member.objects.get')
     def test_user_has_permission_finding_success(self, mock_get):
         mock_get.return_value = self.product_member_owner
-
-        reload(dojo.authorization.authorization)
 
         result = user_has_permission(self.user, self.finding, Permissions.Finding_Delete)
 
@@ -266,8 +237,6 @@ class TestAuthorization(TestCase):
     def test_user_has_permission_endpoint_no_permissions(self, mock_get):
         mock_get.return_value = self.product_member_reader
 
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(self.user, self.endpoint, Permissions.Endpoint_Edit)
 
         self.assertFalse(result)
@@ -277,8 +246,6 @@ class TestAuthorization(TestCase):
     @patch('dojo.models.Product_Member.objects.get')
     def test_user_has_permission_endpoint_success(self, mock_get):
         mock_get.return_value = self.product_member_owner
-
-        reload(dojo.authorization.authorization)
 
         result = user_has_permission(self.user, self.endpoint, Permissions.Endpoint_Delete)
 
@@ -301,8 +268,6 @@ class TestAuthorization(TestCase):
         product_type_member_other_user.role = Roles.Reader
         mock_get.return_value = product_type_member_other_user
 
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(other_user, self.product_type_member_owner, Permissions.Product_Type_Remove_Member)
 
         self.assertFalse(result)
@@ -319,8 +284,6 @@ class TestAuthorization(TestCase):
         product_type_member_other_user.product_type = self.product_type
         product_type_member_other_user.role = Roles.Owner
         mock_get.return_value = product_type_member_other_user
-
-        reload(dojo.authorization.authorization)
 
         result = user_has_permission(other_user, self.product_type_member_reader, Permissions.Product_Type_Remove_Member)
 
@@ -343,8 +306,6 @@ class TestAuthorization(TestCase):
         product_member_other_user.role = Roles.Reader
         mock_get.return_value = product_member_other_user
 
-        reload(dojo.authorization.authorization)
-
         result = user_has_permission(other_user, self.product_member_owner, Permissions.Product_Remove_Member)
 
         self.assertFalse(result)
@@ -361,8 +322,6 @@ class TestAuthorization(TestCase):
         product_member_other_user.product_type = self.product
         product_member_other_user.role = Roles.Owner
         mock_get.return_value = product_member_other_user
-
-        reload(dojo.authorization.authorization)
 
         result = user_has_permission(other_user, self.product_member_reader, Permissions.Product_Remove_Member)
 

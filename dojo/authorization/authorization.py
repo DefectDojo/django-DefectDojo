@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
+from django_request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
-from dojo.authorization.utils import ttl_lru_cache
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint
 
@@ -87,7 +87,7 @@ class RoleDoesNotExistError(Exception):
         self.message = message
 
 
-@ttl_lru_cache()
+@cache_for_request
 def get_product_member(user, product):
     try:
         return Product_Member.objects.get(user=user, product=product)
@@ -95,7 +95,7 @@ def get_product_member(user, product):
         return None
 
 
-@ttl_lru_cache()
+@cache_for_request
 def get_product_type_member(user, product_type):
     try:
         return Product_Type_Member.objects.get(user=user, product_type=product_type)
