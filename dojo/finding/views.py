@@ -114,6 +114,7 @@ def closed_findings(request, pid=None, eid=None, view=None):
 
 def findings(request, pid=None, eid=None, view=None, filter_name=None, query_filter=None, order_by='numerical_severity',
 django_filter=open_findings_filter, prefetch_type='all'):
+
     show_product_column = True
     custom_breadcrumb = None
     product_tab = None
