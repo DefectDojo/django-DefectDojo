@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import logging
+from operator import itemgetter
 import os
 import re
 from uuid import uuid4
@@ -30,6 +31,7 @@ from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
 from django_jsonfield_backport.models import JSONField
+from itertools import groupby
 import hyperlink
 from cvss import CVSS3
 
@@ -1924,6 +1926,17 @@ class Finding(models.Model):
         else:
             return 5
 
+    @staticmethod
+    def get_severity(num_severity):
+        severities = {0: 'Info', 1: 'Low', 2: 'Medium', 3: 'High', 4: 'Critical'}
+        logger.debug(severities.keys())
+        logger.debug(num_severity in severities.keys())
+        if num_severity in severities.keys():
+            logger.debug('returning severity: %s', severities[num_severity])
+            return severities[num_severity]
+
+        return None
+
     def __str__(self):
         return self.title
 
@@ -2024,10 +2037,26 @@ class Finding(models.Model):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_issue(self)
 
+    @cached_property
+    def finding_group(self):
+        return self.finding_group_set.all().first()
+
+    @cached_property
+    def has_jira_group_issue(self):
+        if not self.has_finding_group:
+            return False
+
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self.finding_group)
+
     @property
     def has_jira_configured(self):
         import dojo.jira_link.helper as jira_helper
         return jira_helper.has_jira_configured(self)
+
+    @cached_property
+    def has_finding_group(self):
+        return self.finding_group is not None
 
     def long_desc(self):
         long_desc = ''
@@ -2256,6 +2285,90 @@ class Stub_Finding(models.Model):
         bc += [{'title': "Potential Finding: " + str(self),
                 'url': reverse('view_potential_finding', args=(self.id,))}]
         return bc
+
+
+class Finding_Group(TimeStampedModel):
+    name = models.CharField(max_length=255, blank=False, null=False)
+    test = models.ForeignKey(Test, on_delete=models.CASCADE)
+    findings = models.ManyToManyField(Finding)
+    creator = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def has_jira_issue(self):
+        import dojo.jira_link.helper as jira_helper
+        return jira_helper.has_jira_issue(self)
+
+    @cached_property
+    def severity(self):
+        if not self.findings.all():
+            return None
+        max_number_severity = max([Finding.get_number_severity(find.severity) for find in self.findings.all()])
+        logger.debug('MAX:%s', max_number_severity)
+        return Finding.get_severity(max_number_severity)
+
+    @cached_property
+    def components(self):
+        # Using defaultdict() + groupby()
+        # Convert list of tuples to dictionary value lists
+        component_tuples = set([(find.component_name, find.component_version) for find in self.findings.all()])
+        components = dict((k, [v[1] for v in itr]) for k, itr in groupby(
+                                component_tuples, itemgetter(0)))
+        return ','.join([key + ':' + ', '.join(value) for key, value in components.items() if key and value])
+
+    @property
+    def age(self):
+        if not self.findings.all():
+            return None
+
+        return max([find.age for find in self.findings.all()])
+
+    @cached_property
+    def sla_days_remaining_internal(self):
+        if not self.findings.all():
+            return None
+
+        return min([find.sla_days_remaining() for find in self.findings.all()])
+
+    def sla_days_remaining(self):
+        return self.sla_days_remaining_internal
+
+    def sla_deadline(self):
+        if not self.findings.all():
+            return None
+
+        return min([find.sla_deadline() for find in self.findings.all()])
+
+    # def cves(self):
+    #     return ', '.join([find.cve for find in self.findings.all() if find.cve is not None])
+
+    def status(self):
+        if not self.findings.all():
+            return None
+
+        if any([find.active for find in self.findings.all()]):
+            return 'Active'
+
+        if all([find.is_Mitigated for find in self.findings.all()]):
+            return 'Mitigated'
+
+        return 'Inactive'
+
+    @cached_property
+    def mitigated(self):
+        return all([find.mitigated is not None for find in self.findings.all()])
+
+    def get_sla_start_date(self):
+        return min([find.sla_deadline() for find in self.findings.all()])
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('view_test', args=[str(self.test.id)])
+
+    class Meta:
+        ordering = ['id']
 
 
 class Finding_Template(models.Model):
@@ -2580,10 +2693,10 @@ class JIRA_Instance(models.Model):
                                           choices=default_issue_type_choices,
                                           default='Bug',
                                           help_text='You can define extra issue types in settings.py')
-    issue_template = models.CharField(max_length=255,
+    issue_template_dir = models.CharField(max_length=255,
                                       null=True,
                                       blank=True,
-                                      help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
+                                      help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
     epic_name_id = models.IntegerField(help_text="To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here.")
     open_status_key = models.IntegerField(verbose_name="Reopen Transition ID", help_text="Transition ID to Re-Open JIRA issues, visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to find the ID for your JIRA instance")
     close_status_key = models.IntegerField(verbose_name="Close Transition ID", help_text="Transition ID to Close JIRA issues, visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to find the ID for your JIRA instance")
@@ -2609,6 +2722,7 @@ class JIRA_Instance(models.Model):
         return self.configuration_name + " | " + self.url + " | " + self.username
 
     def get_priority(self, status):
+        logger.debug('get_priority for: %s', status)
         if status == 'Info':
             return self.info_mapping_severity
         elif status == 'Low':
@@ -2655,10 +2769,10 @@ class JIRA_Project(models.Model):
                              null=True, blank=True, on_delete=models.CASCADE)
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
-    issue_template = models.CharField(max_length=255,
+    issue_template_dir = models.CharField(max_length=255,
                                       null=True,
                                       blank=True,
-                                      help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
+                                      help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
     engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
     component = models.CharField(max_length=200, blank=True)
     push_all_issues = models.BooleanField(default=False, blank=True,
@@ -2710,6 +2824,7 @@ class JIRA_Issue(models.Model):
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
     engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
+    finding_group = models.OneToOneField(Finding_Group, null=True, blank=True, on_delete=models.CASCADE)
 
     jira_creation = models.DateTimeField(editable=True,
                                          null=True,
@@ -2719,6 +2834,16 @@ class JIRA_Issue(models.Model):
                                        null=True,
                                        verbose_name="Jira last update",
                                        help_text="The date the linked Jira issue was last modified.")
+
+    def set_obj(self, obj):
+        if type(obj) == Finding:
+            self.finding = obj
+        elif type(obj) == Finding_Group:
+            self.finding_group = obj
+        elif type(obj) == Engagement:
+            self.engagement = obj
+        else:
+            raise ValueError('unknown objec type whiel creating JIRA_Issue: %s', to_str_typed(obj))
 
     def __str__(self):
         text = ""
@@ -3378,7 +3503,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
-from dojo.utils import get_system_setting
+from dojo.utils import get_system_setting, to_str_typed
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
 
 tagulous.admin.register(Product.tags)

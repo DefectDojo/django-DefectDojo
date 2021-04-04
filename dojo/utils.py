@@ -22,8 +22,8 @@ from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-from dojo.models import Finding, Engagement, Finding_Template, Product, \
-    Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
+from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
+    Dojo_User, Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
@@ -1786,7 +1786,13 @@ def sla_compute_and_notify(*args, **kwargs):
                     continue
 
                 do_jira_sla_comment = False
+                jira_issue = None
                 if finding.has_jira_issue:
+                    jira_issue = finding.jira_issue
+                elif finding.grouped:
+                    jira_issue = finding.finding_group.jira_issue
+
+                if jira_issue:
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:
@@ -1807,7 +1813,6 @@ def sla_compute_and_notify(*args, **kwargs):
                                 product_jira_sla_comment_enabled
                             ))
                             do_jira_sla_comment = True
-                            jira_issue = finding.jira_issue
                             logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
 
                 logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
@@ -1892,6 +1897,14 @@ def get_object_or_none(klass, *args, **kwargs):
         return None
 
 
+def add_success_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.SUCCESS,
+                            message,
+                            extra_tags='alert-success')
+
+
 def add_error_message_to_response(message):
     if get_current_request():
         messages.add_message(get_current_request(),
@@ -1967,3 +1980,33 @@ def mass_model_updater(model_type, models, function, fields=None, page_size=1000
         model_type.objects.bulk_update(batch, fields)
     batch = []
     logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+
+
+def to_str_typed(obj):
+    """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    return '%s: %s' % (type(obj), obj)
+
+
+def get_product(obj):
+    logger.debug('getting product for %s:%s', type(obj), obj)
+    if not obj:
+        return None
+
+    if type(obj) == Finding or type(obj) == Finding_Group:
+        return obj.test.engagement.product
+
+    if type(obj) == Test:
+        return obj.engagement.product
+
+    if type(obj) == Engagement:
+        return obj.product
+
+    if type(obj) == Product:
+        return obj
+
+
+def prod_name(obj):
+    if not obj:
+        return 'Unknown'
+
+    return get_product(obj).name
