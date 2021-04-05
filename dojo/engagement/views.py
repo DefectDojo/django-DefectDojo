@@ -206,7 +206,7 @@ def edit_engagement(request, eid):
                 'Engagement updated successfully.',
                 extra_tags='alert-success')
 
-            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, engagement=engagement)
+            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, target='engagement', engagement=engagement, product=engagement.product)
             error = not success
 
             success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)

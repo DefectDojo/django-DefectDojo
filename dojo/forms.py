@@ -44,7 +44,6 @@ from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 
-
 logger = logging.getLogger(__name__)
 
 RE_DATE = re.compile(r'(\d{4})-(\d\d?)-(\d\d?)$')
@@ -2143,6 +2142,7 @@ class GITHUB_Product_Form(forms.ModelForm):
 
 
 class JIRAProjectForm(forms.ModelForm):
+    inherit_from_product = forms.BooleanField(label='inherit JIRA settings from product', required=False)
     jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label='JIRA Instance', required=False)
     issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
@@ -2153,15 +2153,18 @@ class JIRAProjectForm(forms.ModelForm):
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
+        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
 
     def __init__(self, *args, **kwargs):
+        from dojo.jira_link import helper as jira_helper
         # if the form is shown for an engagement, we set a placeholder text around inherited settings from product
         self.target = kwargs.pop('target', 'product')
         self.product = kwargs.pop('product', None)
         self.engagement = kwargs.pop('engagement', None)
         super().__init__(*args, **kwargs)
 
-        # logger.debug('self.target: %s, self.product: %s, self.instance: %s', self.target, self.product, self.instance)
+        logger.debug('self.target: %s, self.product: %s, self.instance: %s', self.target, self.product, self.instance)
+        logger.debug('data: %s', self.data)
         if self.target == 'engagement':
             product_name = self.product.name if self.product else self.engagement.product.name if self.engagement.product else ''
 
@@ -2169,26 +2172,90 @@ class JIRAProjectForm(forms.ModelForm):
             self.fields['project_key'].help_text = 'JIRA settings are inherited from product ''%s'', unless configured differently here.' % product_name
             self.fields['jira_instance'].help_text = 'JIRA settings are inherited from product ''%s'' , unless configured differently here.' % product_name
 
+            # if we don't have an instance, django will insert a blank empty one :-(
+            # so we have to check for id to make sure we only trigger this when there is a real instance from db
+            if self.instance.id:
+                logger.debug('jira project instance found for engagement, unchecking inherit checkbox')
+                self.fields['jira_instance'].required = True
+                self.fields['project_key'].required = True
+                self.initial['inherit_from_product'] = False
+                # once a jira project config is attached to an engagement, we can't go back to inheriting
+                # because the config needs to remain in place for the existing jira issues
+                self.fields['inherit_from_product'].disabled = True
+                self.fields['inherit_from_product'].help_text = 'Once an engagement has a JIRA Project stored, you can no   t switch back to inheritance to avoid breaking existing JIRA issues'
+
+                self.fields['jira_instance'].disabled = False
+                self.fields['project_key'].disabled = False
+                self.fields['issue_template_dir'].disabled = False
+                self.fields['component'].disabled = False
+                self.fields['push_all_issues'].disabled = False
+                self.fields['enable_engagement_epic_mapping'].disabled = False
+                self.fields['push_notes'].disabled = False
+                self.fields['product_jira_sla_notification'].disabled = False
+                self.fields['risk_acceptance_expiration_notification'].disabled = False
+
+            elif self.product:
+                logger.debug('setting jira project fields from product1')
+                self.initial['inherit_from_product'] = True
+                jira_project_product = jira_helper.get_jira_project(self.product)
+                # we have to check that we are not in a POST request where jira project config data is posted
+                # this is because initial values will overwrite the actual values entered by the user
+                # makes no sense, but seems to be accepted behaviour: https://code.djangoproject.com/ticket/30407
+                if jira_project_product and not (self.prefix + '-jira_instance') in self.data:
+                    logger.debug('setting jira project fields from product2')
+                    self.initial['jira_instance'] = jira_project_product.jira_instance.id if jira_project_product.jira_instance else None
+                    self.initial['project_key'] = jira_project_product.project_key
+                    self.initial['issue_template_dir'] = jira_project_product.issue_template_dir
+                    self.initial['component'] = jira_project_product.component
+                    self.initial['push_all_issues'] = jira_project_product.push_all_issues
+                    self.initial['enable_engagement_epic_mapping'] = jira_project_product.enable_engagement_epic_mapping
+                    self.initial['push_notes'] = jira_project_product.push_notes
+                    self.initial['product_jira_sla_notification'] = jira_project_product.product_jira_sla_notification
+                    self.initial['risk_acceptance_expiration_notification'] = jira_project_product.risk_acceptance_expiration_notification
+
+                    self.fields['jira_instance'].disabled = True
+                    self.fields['project_key'].disabled = True
+                    self.fields['issue_template_dir'].disabled = True
+                    self.fields['component'].disabled = True
+                    self.fields['push_all_issues'].disabled = True
+                    self.fields['enable_engagement_epic_mapping'].disabled = True
+                    self.fields['push_notes'].disabled = True
+                    self.fields['product_jira_sla_notification'].disabled = True
+                    self.fields['risk_acceptance_expiration_notification'].disabled = True
+
+        else:
+            del self.fields['inherit_from_product']
+
         # if we don't have an instance, django will insert a blank empty one :-(
         # so we have to check for id to make sure we only trigger this when there is a real instance from db
         if self.instance.id:
             self.fields['jira_instance'].required = True
             self.fields['project_key'].required = True
 
+        if self.data.get(self.prefix + '-inherit_from_product', False):
+            logger.debug('marking jira instance and project key optional')
+            self.fields['jira_instance'].required = False
+            self.fields['project_key'].required = False
+
     def clean(self):
         logger.debug('validating jira project form')
         cleaned_data = super().clean()
 
-        project_key = self.cleaned_data.get('project_key')
-        jira_instance = self.cleaned_data.get('jira_instance')
+        logger.debug('clean: inherit: %s', self.cleaned_data.get('inherit_from_product', False))
+        if not self.cleaned_data.get('inherit_from_product', False):
+            jira_instance = self.cleaned_data.get('jira_instance')
+            project_key = self.cleaned_data.get('project_key')
 
-        if project_key and jira_instance:
-            return cleaned_data
+            if project_key and jira_instance:
+                return cleaned_data
 
-        if not project_key and not jira_instance:
-            return cleaned_data
+            if not project_key and not jira_instance:
+                return cleaned_data
 
-        raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, or leave both empty')
+            if self.target == 'engagement':
+                raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, or choose to inherit settings from product')
+            else:
+                raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, leave empty to have no JIRA integration setup')
 
 
 class GITHUBFindingForm(forms.Form):

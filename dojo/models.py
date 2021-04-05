@@ -2766,7 +2766,7 @@ class JIRA_Instance_Admin(admin.ModelAdmin):
 
 class JIRA_Project(models.Model):
     jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
-                             null=True, blank=True, on_delete=models.CASCADE)
+                             null=True, blank=True, on_delete=models.PROTECT)
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
     issue_template_dir = models.CharField(max_length=255,
@@ -2780,8 +2780,8 @@ class JIRA_Project(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
-    product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
-    risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=False, verbose_name="Send Risk Acceptance expiration notifications as comment?")
+    product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name="Send SLA notifications as comment?")
+    risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name="Send Risk Acceptance expiration notifications as comment?")
 
     def clean(self):
         if not self.jira_instance:
@@ -2819,7 +2819,7 @@ class JIRA_Conf_Admin(admin.ModelAdmin):
 
 
 class JIRA_Issue(models.Model):
-    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.SET_NULL, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
+    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.PROTECT, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
     jira_id = models.CharField(max_length=200)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)

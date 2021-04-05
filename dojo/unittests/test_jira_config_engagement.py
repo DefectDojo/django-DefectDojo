@@ -20,6 +20,7 @@ class JIRAConfigEngagementBase(object):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'IUNSEC',
             'jira-project-form-product_jira_sla_notification': 'on',
@@ -34,6 +35,7 @@ class JIRAConfigEngagementBase(object):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'IUNSEC',
             'jira-project-form-product_jira_sla_notification': 'on',
@@ -50,11 +52,12 @@ class JIRAConfigEngagementBase(object):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            'jira-project-form-inherit_from_product': 'on',
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_engagement_with_jira_project_data(self, engagement):
@@ -66,6 +69,7 @@ class JIRAConfigEngagementBase(object):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'ISEC',
             'jira-project-form-product_jira_sla_notification': 'on',
@@ -80,6 +84,7 @@ class JIRAConfigEngagementBase(object):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'ISEC2',
             'jira-project-form-product_jira_sla_notification': 'on',
@@ -94,11 +99,12 @@ class JIRAConfigEngagementBase(object):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            'jira-project-form-inherit_from_product': 'on',
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_expected_redirect_engagement(self, engagement):
