@@ -262,25 +262,6 @@
             <div class="clearfix">
                 <h4 class="has-filters"> Groups ({{ finding_groups|length }})</small>
                     <div class="dropdown pull-right">
-                        <div id="test-pulldown" class="dropdown pull-right">
-                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                    data-toggle="dropdown" aria-expanded="true">
-                                <span class="fa fa-plus"></span>
-                                <span class="caret"></span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                <li role="presentation">
-                                    <a title="Add Finding" href="{% url 'add_findings' test.id %}">
-                                        <span class="fa fa-bug"></span> New Finding
-                                    </a>
-                                </li>
-                                <li role="presentation">
-                                    <a title="Add Finding from Template" href="{% url 'search' test.id %}">
-                                        <span class="icon-add-template"></span> Finding From Template
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
                         <span class="pull-right">
                             <a data-toggle="collapse" href="#finding_groups_panel">
                                 <i class="glyphicon glyphicon-chevron-down"></i>
@@ -294,7 +275,7 @@
     </div>
 
     <div id="finding_groups_panel" class="panel panel-default table-responsive collapse">
-        <span>Experimental feature</span>
+        <span>Experimental feature, use bulk edit to create/edit them</span>
         {% if finding_groups %}
             <table id="finding_groups" class="table-striped tablesorter-bootstrap table table-condensed table-hover">
                 <thead>
