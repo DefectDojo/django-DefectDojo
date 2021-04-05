@@ -2205,15 +2205,23 @@ class UserFilter(DojoFilter):
 
 
 class TestImportFilter(DojoFilter):
-    version = CharFilter(field_name='version', lookup_expr='icontains', label='Version')
-    version_exact = CharFilter(field_name='version', lookup_expr='iexact', label='Version')
+    version = CharFilter(field_name='version', lookup_expr='icontains')
+    version_exact = CharFilter(field_name='version', lookup_expr='iexact', label='Version Exact')
+    branch_tag = CharFilter(lookup_expr='icontains', label='Version')
+    build_id = CharFilter(lookup_expr='icontains')
+    commit_hash = CharFilter(lookup_expr='icontains')
+
     findings_affected = BooleanFilter(field_name='findings_affected', lookup_expr='isnull', exclude=True, label='Findings affected')
 
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
-            ('version', 'version'),
             ('date', 'date'),
+            ('version', 'version'),
+            ('branch_tag', 'branch_tag'),
+            ('build_id', 'build_id'),
+            ('commit_hash', 'commit_hash'),
+
         )
     )
 
