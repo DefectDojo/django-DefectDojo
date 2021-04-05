@@ -1,6 +1,6 @@
 import logging
 import json
-from dojo.models import Test_Type
+from dojo.models import Test_Type, Tool_Type
 
 
 PARSERS = {}
@@ -38,10 +38,20 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         raise ValueError(f'Unknown Test Type {scan_type}')
 
 
+def get_disabled_scanners():
+    scanners = []
+    enabled = Tool_Type.objects.all().filter(enabled=False)
+    for scanner in enabled:
+        scanners.append(scanner.name)
+    return scanners
+
+
 def get_choices():
     res = list()
+    disabled = get_disabled_scanners()
     for key in PARSERS:
-        res.append((key, PARSERS[key].get_label_for_scan_types(key)))
+        if key not in disabled:
+            res.append((key, PARSERS[key].get_label_for_scan_types(key)))
     return tuple(res)
 
 ##This just helped to create JSON fixtures
