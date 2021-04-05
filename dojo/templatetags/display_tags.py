@@ -985,8 +985,3 @@ def import_history(finding, autoescape=True):
         list_of_status_changes += '<b>' + status_change.created.strftime('%b %d, %Y, %H:%M:%S') + '</b>: ' + status_change.get_action_display() + '<br/>'
 
     return mark_safe(html % (list_of_status_changes))
-
-
-@register.simple_tag
-def feature_reports_pdf_list():
-    return settings.FEATURE_REPORTS_PDF_LIST
