@@ -1090,8 +1090,8 @@ class Endpoint(models.Model):
     port = models.IntegerField(null=True, blank=True,
                                help_text="The network port associated with the endpoint.")
     path = models.CharField(null=True, blank=True, max_length=500,
-                            help_text="The location of the resource, it should start with a '/'. For example"
-                                      "/endpoint/420/edit")
+                            help_text="The location of the resource, it must not start with a '/'. For example "
+                                      "endpoint/420/edit")
     query = models.CharField(null=True, blank=True, max_length=1000,
                              help_text="The query string, the question mark should be omitted."
                                        "For example 'group=4&team=8'")
