@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from dojo.models import Tool_Configuration
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view
 from dojo.utils import add_breadcrumb
@@ -58,6 +58,16 @@ def edit_tool_config(request, ttid):
                   {
                       'tform': tform,
                   })
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_tool_config(request, ttid):
+    conf = get_object_or_404(Tool_Configuration, pk=ttid)
+    conf.delete()
+    confs = Tool_Configuration.objects.all().order_by('name')
+    return render(request,
+                  'dojo/tool_config.html',
+                  {'conf': confs,
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)

@@ -36,9 +36,10 @@
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Tool Name</th>
+                            <th>Tool Configuration Name</th>
                             <th>Description</th>
-                            <th>Category</th>
+                            <th>Tool Type</th>
+                            <th>Details</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -52,6 +53,14 @@
                                 </td>
                                 <td>
                                   {{ conf.tool_type.name }}
+                                </td>
+                                <td style="width:10%">
+                                    <div class="btn-group">
+                                        <a class="btn btn-sm btn-warning"
+                                           href="{% url 'edit_tool_config' conf.id %}">Edit</a>
+                                        <a class="btn btn-sm btn-danger delete-finding"
+                                           href="{% url 'delete_tool_config' conf.id %}">Delete</a>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}
