@@ -1843,6 +1843,8 @@ class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type
         exclude = ['product']
+        fields = ['name','description','enabled']
+
 
 
 class RegulationForm(forms.ModelForm):
