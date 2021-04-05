@@ -121,6 +121,8 @@ def view_test(request, tid):
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
 
+    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue')
+
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
     google_sheets_enabled = system_settings.enable_google_sheets
@@ -180,6 +182,7 @@ def view_test(request, tid):
                    'sheet_url': sheet_url,
                    'bulk_edit_form': bulk_edit_form,
                    'paged_test_imports': paged_test_imports,
+                   'finding_groups': finding_groups,
                    })
 
 
@@ -187,7 +190,7 @@ def prefetch_for_findings(findings):
     prefetched_findings = findings
     if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         prefetched_findings = prefetched_findings.select_related('reporter')
-        prefetched_findings = prefetched_findings.prefetch_related('jira_issue')
+        prefetched_findings = prefetched_findings.prefetch_related('jira_issue__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_project_set__jira_instance')
@@ -204,6 +207,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
