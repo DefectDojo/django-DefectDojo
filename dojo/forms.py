@@ -2232,11 +2232,6 @@ class JIRAProjectForm(forms.ModelForm):
             self.fields['jira_instance'].required = True
             self.fields['project_key'].required = True
 
-        if self.data.get(self.prefix + '-inherit_from_product', False):
-            logger.debug('marking jira instance and project key optional')
-            self.fields['jira_instance'].required = False
-            self.fields['project_key'].required = False
-
     def clean(self):
         logger.debug('validating jira project form')
         cleaned_data = super().clean()
