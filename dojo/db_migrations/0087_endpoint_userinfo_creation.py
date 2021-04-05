@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0085_add_publish_date_cvssv3_score'),
+        ('dojo', '0086_finding_groups'),
     ]
 
     operations = [
@@ -32,5 +32,11 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True,
                                    help_text="The communication protocol/scheme such as 'http', 'ftp', 'dns', etc.",
                                    max_length=10, null=True),
+        ),
+        migrations.AlterField(
+            model_name='endpoint',
+            name='path',
+            field=models.CharField(blank=True, help_text="The location of the resource, it must not start with a '/'. "
+                                                         "For example endpoint/420/edit", max_length=500, null=True),
         )
     ]
