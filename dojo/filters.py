@@ -2207,9 +2207,9 @@ class UserFilter(DojoFilter):
 class TestImportFilter(DojoFilter):
     version = CharFilter(field_name='version', lookup_expr='icontains')
     version_exact = CharFilter(field_name='version', lookup_expr='iexact', label='Version Exact')
-    branch_tag = CharFilter(lookup_expr='icontains', label='Version')
-    build_id = CharFilter(lookup_expr='icontains')
-    commit_hash = CharFilter(lookup_expr='icontains')
+    branch_tag = CharFilter(lookup_expr='icontains', label='Branch/Tag')
+    build_id = CharFilter(lookup_expr='icontains', label="Build ID")
+    commit_hash = CharFilter(lookup_expr='icontains', label="Commit hash")
 
     findings_affected = BooleanFilter(field_name='findings_affected', lookup_expr='isnull', exclude=True, label='Findings affected')
 

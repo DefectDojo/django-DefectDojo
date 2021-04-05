@@ -786,17 +786,7 @@ class DeleteTestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        exclude = ('test_type',
-                   'environment',
-                   'target_start',
-                   'target_end',
-                   'engagement',
-                   'percent_complete',
-                   'description',
-                   'lead',
-                   'title',
-                   'tags',
-                   'version')
+        fields = []
 
 
 class AddFindingForm(forms.ModelForm):

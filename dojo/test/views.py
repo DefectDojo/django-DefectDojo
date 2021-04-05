@@ -53,7 +53,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 @user_is_authorized(Test, Permissions.Test_View, 'tid', 'view')
 def view_test(request, tid):
     test_prefetched = get_authorized_tests(Permissions.Test_View)
-    test_prefetched = test_prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
+    test_prefetched = test_prefetched.annotate(total_reimport_count=Count('test_import__id', distinct=True))
     # tests_prefetched = test_prefetched.prefetch_related(Prefetch('test_import_set', queryset=Test_Import.objects.filter(~Q(findings_affected=None))))
     # tests_prefetched = test_prefetched.prefetch_related('test_import_set')
     # test_prefetched = test_prefetched.prefetch_related('test_import_set__test_import_finding_action_set')
