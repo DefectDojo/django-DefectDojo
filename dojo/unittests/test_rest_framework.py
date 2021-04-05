@@ -664,7 +664,10 @@ class TestsTest(BaseClass.RESTEndpointTest):
             "target_end": "2017-01-12T00:00",
             "percent_complete": 0,
             "lead": 2,
-            "tags": []
+            "tags": [],
+            "version": "1.0",
+            "branch_tag": "master",
+            "commit_hash": "1234567890abcdefghijkl",
         }
         self.update_fields = {'percent_complete': 100}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
