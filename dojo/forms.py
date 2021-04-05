@@ -1907,7 +1907,7 @@ class App_AnalysisTypeForm(forms.ModelForm):
 
 
 class ToolConfigForm(forms.ModelForm):
-    tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label='Tool Type')
+    tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all().filter(enabled=True), label='Tool Type')
     ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label='SSH Key')
 
     class Meta:
@@ -1915,16 +1915,17 @@ class ToolConfigForm(forms.ModelForm):
         exclude = ['product']
 
     def clean(self):
+
         from django.core.validators import URLValidator
         form_data = self.cleaned_data
-
-        try:
-            url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
-            url_validator(form_data["url"])
-        except forms.ValidationError:
-            raise forms.ValidationError(
-                'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
-                code='invalid')
+        if form_data['url'] is not None:
+            try:
+                url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
+                url_validator(form_data["url"])
+            except forms.ValidationError:
+                raise forms.ValidationError(
+                    'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
+                    code='invalid')
 
         return form_data
 
