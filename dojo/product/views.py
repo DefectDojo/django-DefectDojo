@@ -38,8 +38,8 @@ from dojo.authorization.authorization import user_has_permission, user_has_permi
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product.queries import get_authorized_products, get_authorized_product_members
-from dojo.product_type.queries import get_authorized_members
+from dojo.product.queries import get_authorized_products, get_authorized_product_members_product
+from dojo.product_type.queries import get_authorized_members_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -134,8 +134,8 @@ def view_product(request, pid):
                                       .prefetch_related('members') \
                                       .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
-    product_members = get_authorized_product_members(prod, Permissions.Product_View)
-    product_type_members = get_authorized_members(prod.prod_type, Permissions.Product_Type_View)
+    product_members = get_authorized_product_members_product(prod, Permissions.Product_View)
+    product_type_members = get_authorized_members_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))

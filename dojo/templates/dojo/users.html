@@ -59,15 +59,15 @@
                                 <td>
                                     <ul>
                                         <li class="dropdown" style="list-style:none;position:absolute">
-                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuProductType">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuUser">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUsers">
                                                 <li role="presentation">
-                                                    <a class="" href="{% url 'view_user' u.id %}">
+                                                    <a class="" href="{% url 'view_user' u.id %}" id="viewUser">
                                                     <i class="fa fa-list-alt"></i> View</a>
                                                 </li>
                                                 {% if request.user.is_superuser %}
                                                 <li role="presentation">
-                                                    <a class="" href="{% url 'edit_user' u.id %}">
+                                                    <a class="" href="{% url 'edit_user' u.id %}"  id="editUser">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                 </li>
                                                 {% endif %}

@@ -1589,19 +1589,25 @@ class DojoUserForm(forms.ModelForm):
 
 
 class AddDojoUserForm(forms.ModelForm):
-    authorized_products = forms.ModelMultipleChoiceField(
-        queryset=Product.objects.all(), required=False,
-        help_text='Select the products this user should have access to.')
-    authorized_product_types = forms.ModelMultipleChoiceField(
-        queryset=Product_Type.objects.all(), required=False,
-        help_text='Select the product types this user should have access to.')
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        authorized_products = forms.ModelMultipleChoiceField(
+            queryset=Product.objects.all(), required=False,
+            help_text='Select the products this user should have access to.')
+        authorized_product_types = forms.ModelMultipleChoiceField(
+            queryset=Product_Type.objects.all(), required=False,
+            help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
         fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
-        exclude = ['password', 'last_login', 'groups',
-                   'date_joined', 'user_permissions']
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['password', 'last_login', 'groups',
+                    'date_joined', 'user_permissions']
+        else:
+            exclude = ['password', 'last_login', 'groups',
+                    'date_joined', 'user_permissions',
+                    'authorized_products', 'authorized_product_types']
 
 
 class DeleteUserForm(forms.ModelForm):

@@ -32,7 +32,7 @@
                                 {% if request.user.is_superuser and user.id != request.user.id %}
                                 <li role="separator" class="divider"></li>
                                 <li>
-                                    <a class="" href="{% url 'delete_user' user.id %}">
+                                    <a class="" href="{% url 'delete_user' user.id %}" id="deleteUser"> 
                                         <i class="fa fa-trash"></i> Delete</a>
                                 </li>
                                 {% endif %}
@@ -107,12 +107,12 @@
                     <h4 class="pull-left">Product Type Members</h4>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
-                        <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu1"
+                        <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu2"
                             data-toggle="dropdown" aria-expanded="true">
                             <span class="fa fa-bars"></span>
                             <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu2">
                             <li role="presentation">
                                 <a class="" href="{% url 'add_product_type_member_user' user.id %}">
                                     <i class="fa fa-plus"></i> Add Member
@@ -177,12 +177,12 @@
                     <h4 class="pull-left">Product Members</h4>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
-                        <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu1"
+                        <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu3"
                             data-toggle="dropdown" aria-expanded="true">
                             <span class="fa fa-bars"></span>
                             <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu3">
                             <li role="presentation">
                                 <a class="" href="{% url 'add_product_member_user' user.id %}">
                                     <i class="fa fa-plus"></i> Add Member
