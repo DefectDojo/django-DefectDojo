@@ -1,6 +1,6 @@
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
-from django_request_cache import cache_for_request
+from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint
