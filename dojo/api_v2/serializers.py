@@ -1,5 +1,5 @@
 from drf_yasg.utils import swagger_serializer_method
-from dojo.models import Product, Engagement, Test, Finding, \
+from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -650,9 +650,18 @@ class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FindingGroupSerializer(serializers.ModelSerializer):
+    jira_issue = JIRAIssueSerializer(read_only=True)
+
+    class Meta:
+        model = Finding_Group
+        fields = ('name', 'test', 'jira_issue')
+
+
 class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
+    finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
 
     class Meta:
         model = Test
@@ -811,6 +820,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     jira_creation = serializers.SerializerMethodField(read_only=True)
     jira_change = serializers.SerializerMethodField(read_only=True)
     display_status = serializers.SerializerMethodField()
+    finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
 
     class Meta:
         model = Finding
@@ -838,6 +848,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     @swagger_serializer_method(serializers.ListField(serializers.CharField()))
     def get_display_status(self, obj):
+        logger.debug('get_display_status for: %i:%s', obj.id, obj)
         return obj.status()
 
     # Overriding this to push add Push to JIRA functionality
@@ -1366,13 +1377,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 component_name = item.component_name if hasattr(item, 'component_name') else None
                 component_version = item.component_version if hasattr(item, 'component_version') else None
 
-                from titlecase import titlecase
-                item.title = titlecase(item.title)
-
                 item.hash_code = item.compute_hash_code()
                 deduplicationLogger.debug("new finding's hash_code: %s", item.hash_code)
 
                 findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type)
+
+                deduplicationLogger.debug('found %i findings matching with current new finding', len(findings))
 
                 if findings:
                     # existing finding found

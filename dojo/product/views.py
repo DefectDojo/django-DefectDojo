@@ -81,8 +81,11 @@ def prefetch_for_product(prods):
     prefetched_prods = prods
     if isinstance(prods,
                   QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        prefetched_prods = prefetched_prods.select_related('technical_contact').select_related(
-            'product_manager').select_related('prod_type').select_related('team_manager')
+
+        prefetched_prods = prefetched_prods.prefetch_related('team_manager')
+        prefetched_prods = prefetched_prods.prefetch_related('product_manager')
+        prefetched_prods = prefetched_prods.prefetch_related('technical_contact')
+
         prefetched_prods = prefetched_prods.annotate(
             active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
         prefetched_prods = prefetched_prods.annotate(
@@ -96,6 +99,8 @@ def prefetch_for_product(prods):
                                                                                     engagement__test__finding__active=True,
                                                                                     engagement__test__finding__verified=True)))
         prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
+        prefetched_prods = prefetched_prods.prefetch_related('authorized_users')
+        prefetched_prods = prefetched_prods.prefetch_related('prod_type__authorized_users')
         active_endpoint_query = Endpoint.objects.filter(
             finding__active=True,
             finding__mitigated__isnull=True)

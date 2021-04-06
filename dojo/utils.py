@@ -22,8 +22,8 @@ from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-from dojo.models import Finding, Engagement, Finding_Template, Product, \
-    Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
+from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
+    Dojo_User, Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
@@ -45,10 +45,6 @@ Helper functions for DefectDojo
 """
 
 
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
 def do_false_positive_history(new_finding, *args, **kwargs):
     logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
@@ -102,16 +98,7 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
     return not new_finding.test.engagement.deduplication_on_engagement and to_duplicate_finding.test.engagement.deduplication_on_engagement
 
 
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
 def do_dedupe_finding(new_finding, *args, **kwargs):
-    do_dedupe_finding_sync(new_finding, *args, **kwargs)
-
-
-# This function can be called directly for synchronous deduplication
-def do_dedupe_finding_sync(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
     except System_Settings.DoesNotExist:
@@ -206,6 +193,11 @@ def deduplicate_legacy(new_finding):
             else:
                 deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
         else:
+            deduplicationLogger.debug('find.static/dynamic: %s/%s', find.static_finding, find.dynamic_finding)
+            deduplicationLogger.debug('new_finding.static/dynamic: %s/%s', new_finding.static_finding, new_finding.dynamic_finding)
+            deduplicationLogger.debug('find.file_path: %s', find.file_path)
+            deduplicationLogger.debug('new_finding.file_path: %s', new_finding.file_path)
+
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
 
         if find.hash_code == new_finding.hash_code:
@@ -369,10 +361,6 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
-@dojo_model_to_id
-@dojo_async_task
-@app.task
-@dojo_model_from_id
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
@@ -1432,6 +1420,10 @@ def get_system_setting(setting, default=None):
     return getattr(system_settings, setting, (default if default is not None else None))
 
 
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id(model=Product)
 def calculate_grade(product):
     system_settings = System_Settings.objects.get()
     if system_settings.enable_product_grade:
@@ -1786,7 +1778,13 @@ def sla_compute_and_notify(*args, **kwargs):
                     continue
 
                 do_jira_sla_comment = False
+                jira_issue = None
                 if finding.has_jira_issue:
+                    jira_issue = finding.jira_issue
+                elif finding.grouped:
+                    jira_issue = finding.finding_group.jira_issue
+
+                if jira_issue:
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:
@@ -1807,7 +1805,6 @@ def sla_compute_and_notify(*args, **kwargs):
                                 product_jira_sla_comment_enabled
                             ))
                             do_jira_sla_comment = True
-                            jira_issue = finding.jira_issue
                             logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
 
                 logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
@@ -1892,6 +1889,14 @@ def get_object_or_none(klass, *args, **kwargs):
         return None
 
 
+def add_success_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.SUCCESS,
+                            message,
+                            extra_tags='alert-success')
+
+
 def add_error_message_to_response(message):
     if get_current_request():
         messages.add_message(get_current_request(),
@@ -1904,3 +1909,33 @@ def add_field_errors_to_response(form):
     if form and get_current_request():
         for field, error in form.errors.items():
             add_error_message_to_response(error)
+
+
+def to_str_typed(obj):
+    """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    return '%s: %s' % (type(obj), obj)
+
+
+def get_product(obj):
+    logger.debug('getting product for %s:%s', type(obj), obj)
+    if not obj:
+        return None
+
+    if type(obj) == Finding or type(obj) == Finding_Group:
+        return obj.test.engagement.product
+
+    if type(obj) == Test:
+        return obj.engagement.product
+
+    if type(obj) == Engagement:
+        return obj.product
+
+    if type(obj) == Product:
+        return obj
+
+
+def prod_name(obj):
+    if not obj:
+        return 'Unknown'
+
+    return get_product(obj).name

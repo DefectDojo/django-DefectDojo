@@ -1584,8 +1584,6 @@ class ReImportScanResource(MultipartResource, Resource):
                 if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                     continue
 
-                from titlecase import titlecase
-                item.title = titlecase(item.title)
                 if scan_type == 'Veracode Scan':
                     find = Finding.objects.filter(title=item.title,
                                                   test__id=test.id,
