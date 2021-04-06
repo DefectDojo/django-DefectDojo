@@ -32,7 +32,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
     Product_Member
 
-from dojo.tools.factory import requires_file, get_choices
+from dojo.tools.factory import requires_file, get_choices, get_available_configurations
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 from tagulous.forms import TagField
@@ -381,6 +381,9 @@ class DojoMetaDataForm(forms.ModelForm):
 
 class ImportScanForm(forms.Form):
     SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
+    AVAILABLE_SCAN_TYPE_CONFIG = sorted(get_available_configurations(), key=lambda x: x[1])
+
+
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -393,6 +396,7 @@ class ImportScanForm(forms.Form):
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
+    scan_type_configuration = forms.ChoiceField(required=True, choices=AVAILABLE_SCAN_TYPE_CONFIG)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
