@@ -775,7 +775,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'Dependency Check Scan': ['cve', 'file_path'],
+    'Dependency Check Scan': ['cve', 'file_path', 'endpoints'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'vuln_id_from_tool'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe', 'endpoints'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
