@@ -378,12 +378,6 @@ class DojoMetaDataForm(forms.ModelForm):
         model = DojoMeta
         fields = '__all__'
 
-'''
-Below I wanted to skip validation for given type
-'''
-class ChoiceFieldNoValidate(forms.ChoiceField):
-    def validate(self, value):
-        pass
 
 class ImportScanForm(forms.Form):
     SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
@@ -402,7 +396,7 @@ class ImportScanForm(forms.Form):
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
-    scan_type_configuration = ChoiceFieldNoValidate(required=False, choices=AVAILABLE_SCAN_TYPE_CONFIG)
+    scan_type_configuration = forms.ChoiceField(required=True, choices=AVAILABLE_SCAN_TYPE_CONFIG)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -419,14 +413,8 @@ class ImportScanForm(forms.Form):
         label="Choose report file",
         required=False)
 
-    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get mitigated when importing."
-                                                        "This affects the whole engagement/product depending on your deduplication scope.",
-                                            required=False, initial=False)
-
     def __init__(self, *args, **kwargs):
         super(ImportScanForm, self).__init__(*args, **kwargs)
-        self.fields["scan_type"].choices = sorted(get_choices(), key=lambda x: x[1])
-        self.fields["scan_type_configuration"].choices = sorted(get_available_configurations(), key=lambda x: x[1])
 
     def clean(self):
         cleaned_data = super().clean()
@@ -442,7 +430,6 @@ class ImportScanForm(forms.Form):
         if date.date() > datetime.today().date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
-
 
     def get_scan_type(self):
         TGT_scan = self.cleaned_data['scan_type']
