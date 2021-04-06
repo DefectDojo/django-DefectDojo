@@ -1,5 +1,4 @@
 from crum import get_current_user
-from django.contrib.auth.models import Permission
 from django.db.models import Exists, OuterRef
 from django.conf import settings
 from dojo.models import Product_Type, Product_Type_Member

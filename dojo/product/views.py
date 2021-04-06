@@ -25,7 +25,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, T
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
-                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
 
 from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F, OuterRef, Subquery
@@ -1500,7 +1500,10 @@ def edit_product_member(request, memberid):
                                     messages.SUCCESS,
                                     'Product member updated successfully.',
                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+                if is_title_in_breadcrumbs('View User', request.session.get('dojo_breadcrumbs')):
+                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
     product_tab = Product_Tab(member.product.id, title="Edit Product Member", tab="settings")
     return render(request, 'dojo/edit_product_member.html', {
         'memberid': memberid,
@@ -1522,10 +1525,13 @@ def delete_product_member(request, memberid):
                             messages.SUCCESS,
                             'Product member deleted successfully.',
                             extra_tags='alert-success')
-        if user == request.user:
-            return HttpResponseRedirect(reverse('product'))
+        if is_title_in_breadcrumbs('View User', request.session.get('dojo_breadcrumbs')):
+            return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
         else:
-            return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+            if user == request.user:
+                return HttpResponseRedirect(reverse('product'))
+            else:
+                return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
     product_tab = Product_Tab(member.product.id, title="Delete Product Member", tab="settings")
     return render(request, 'dojo/delete_product_member.html', {
         'memberid': memberid,

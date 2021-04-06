@@ -11,7 +11,7 @@ from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
     Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm
 from dojo.models import Product_Type, Product_Type_Member
-from dojo.utils import get_page_items, add_breadcrumb
+from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
@@ -226,7 +226,10 @@ def edit_product_type_member(request, memberid):
                                     messages.SUCCESS,
                                     'Product type member updated successfully.',
                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
+                if is_title_in_breadcrumbs('View User', request.session.get('dojo_breadcrumbs')):
+                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
     add_breadcrumb(title="Edit Product Type Member", top_level=False, request=request)
     return render(request, 'dojo/edit_product_type_member.html', {
         'memberid': memberid,
@@ -256,10 +259,13 @@ def delete_product_type_member(request, memberid):
                             messages.SUCCESS,
                             'Product type member deleted successfully.',
                             extra_tags='alert-success')
-        if user == request.user:
-            return HttpResponseRedirect(reverse('product_type'))
+        if is_title_in_breadcrumbs('View User', request.session.get('dojo_breadcrumbs')):
+            return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
         else:
-            return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
+            if user == request.user:
+                return HttpResponseRedirect(reverse('product_type'))
+            else:
+                return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
     add_breadcrumb(title="Delete Product Type Member", top_level=False, request=request)
     return render(request, 'dojo/delete_product_type_member.html', {
         'memberid': memberid,
