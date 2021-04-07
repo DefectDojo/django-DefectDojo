@@ -776,7 +776,7 @@ class TestForm(forms.ModelForm):
     class Meta:
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end', 'description',
-                  'environment', 'percent_complete', 'tags', 'lead', 'version']
+                  'environment', 'percent_complete', 'tags', 'lead', 'version', 'branch_tag', 'build_id', 'commit_hash']
 
 
 class DeleteTestForm(forms.ModelForm):
