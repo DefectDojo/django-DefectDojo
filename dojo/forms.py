@@ -373,6 +373,12 @@ class DojoMetaDataForm(forms.ModelForm):
         model = DojoMeta
         fields = '__all__'
 
+'''
+Below I wanted to skip validation for given type
+'''
+class ChoiceFieldNoValidate(forms.ChoiceField):
+    def validate(self, value):
+        pass
 
 class ImportScanForm(forms.Form):
     SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
@@ -391,7 +397,7 @@ class ImportScanForm(forms.Form):
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
     scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
-    scan_type_configuration = forms.ChoiceField(required=True, choices=AVAILABLE_SCAN_TYPE_CONFIG)
+    scan_type_configuration = ChoiceFieldNoValidate(required=False, choices=AVAILABLE_SCAN_TYPE_CONFIG)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -422,6 +428,11 @@ class ImportScanForm(forms.Form):
         if date.date() > datetime.today().date():
             raise forms.ValidationError("The date cannot be in the future!")
         return date
+
+#    def clean_scan_type_configuration(self):
+#        print(self.cleaned_data)
+#        scan_type_configuration = self.cleaned_data['scan_type_configuration']
+#        return scan_type_configuration
 
     def get_scan_type(self):
         TGT_scan = self.cleaned_data['scan_type']
