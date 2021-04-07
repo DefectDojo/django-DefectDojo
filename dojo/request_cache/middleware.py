@@ -5,7 +5,11 @@ from django.core.cache.backends.base import BaseCache
 from django.core.cache.backends.locmem import LocMemCache
 from django.utils.deprecation import MiddlewareMixin
 
-# Attribution: RequestCache and RequestCacheMiddleware are from a source code snippet on StackOverflow
+# Attribution 1: This code has been taken from https://github.com/anexia-it/django-request-cache, which has
+# been published under the MIT License. Since this project hasn't been updated for more than a year,
+# the code has been copied to DefectDojo, to be able to fix issues ourselves.
+
+# Attribution 2: RequestCache and RequestCacheMiddleware are from a source code snippet on StackOverflow
 # https://stackoverflow.com/questions/3151469/per-request-cache-in-django/37015573#37015573
 # created by coredumperror https://stackoverflow.com/users/464318/coredumperror
 # Original Question was posted by https://stackoverflow.com/users/7679/chase-seibert
