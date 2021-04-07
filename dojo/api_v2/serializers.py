@@ -848,7 +848,6 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     @swagger_serializer_method(serializers.ListField(serializers.CharField()))
     def get_display_status(self, obj):
-        logger.debug('get_display_status for: %i:%s', obj.id, obj)
         return obj.status()
 
     # Overriding this to push add Push to JIRA functionality

@@ -1,5 +1,3 @@
-import sys
-sys.path.append('..')
 import datetime
 from django.test import TestCase
 from dojo.models import Test, Engagement, Product
@@ -110,6 +108,18 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         self.assertEqual('Potential XSS Vulnerability',
                          findings[0].title)
 
+    def test_parsed_finding_has_cve(self):
+        content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,CVE
+11/7/2015,Potential XSS Vulnerability,79,,High,"FileName: default.aspx.cs
+Description: Potential XSS Vulnerability
+Line:18
+Code Line: Response.Write(output);",None,,,TRUE,FALSE,CVE-2021-26919
+"""
+        file = TestFile("findings.csv", content)
+        parser = GenericParser()
+        findings = parser.get_findings(file, self.test, True, True)
+        self.assertEqual("CVE-2021-26919", findings[0].cve)
+
     def test_parsed_finding_has_cwe(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
 11/7/2015,Potential XSS Vulnerability,79,,High,"FileName: default.aspx.cs
@@ -123,6 +133,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         self.assertEqual(79, findings[0].cwe)
 
     def test_parsed_finding_has_url(self):
+        """Test url management as an EndPoint"""
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
 11/7/2015,Potential XSS Vulnerability,79,"http://localhost/default.aspx",High,"FileName: default.aspx.cs
 Description: Potential XSS Vulnerability
@@ -132,8 +143,15 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
-        self.assertEqual('http://localhost/default.aspx',
-                         findings[0].url)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual('localhost:80', endpoint.host)
+        self.assertEqual('http', endpoint.protocol)
+        self.assertEqual('default.aspx', endpoint.path)
+        self.assertIsNone(endpoint.query)
+        self.assertIsNone(endpoint.fragment)
 
     def test_parsed_finding_has_severity(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
@@ -209,8 +227,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
-        self.assertEqual('Finding has references.',
-                         findings[0].references)
+        self.assertEqual('Finding has references.', findings[0].references)
 
     def test_parsed_finding_has_positive_active_status(self):
         content = """Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
@@ -233,7 +250,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
 """
         file = TestFile("findings.csv", content)
         parser = GenericParser()
-        findings = parser.get_findings(file, self.test, True, True)
+        findings = parser.get_findings(file, self.test, None, None)
         self.assertEqual(False, findings[0].active)
 
     def test_parsed_finding_has_positive_verified_status(self):
@@ -245,7 +262,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
 """
         file = TestFile("findings.csv", content)
         parser = GenericParser()
-        findings = parser.get_findings(file, self.test, True, True)
+        findings = parser.get_findings(file, self.test)
         self.assertEqual(True, findings[0].verified)
 
     def test_parsed_finding_has_negative_verified_status(self):
@@ -257,7 +274,7 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
 """
         file = TestFile("findings.csv", content)
         parser = GenericParser()
-        findings = parser.get_findings(file, self.test, True, True)
+        findings = parser.get_findings(file, self.test, None, None)
         self.assertEqual(False, findings[0].verified)
 
     def test_parsed_finding_has_positive_false_positive_status(self):
