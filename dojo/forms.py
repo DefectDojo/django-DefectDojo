@@ -429,10 +429,6 @@ class ImportScanForm(forms.Form):
             raise forms.ValidationError("The date cannot be in the future!")
         return date
 
-#    def clean_scan_type_configuration(self):
-#        print(self.cleaned_data)
-#        scan_type_configuration = self.cleaned_data['scan_type_configuration']
-#        return scan_type_configuration
 
     def get_scan_type(self):
         TGT_scan = self.cleaned_data['scan_type']
