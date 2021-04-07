@@ -1,5 +1,4 @@
 import logging
-
 from dojo.utils import add_error_message_to_response, get_system_setting, to_str_typed
 import os
 import io
@@ -1211,7 +1210,7 @@ def unlink_jira(request, obj):
 
 
 # return True if no errors
-def process_jira_project_form(request, instance=None, product=None, engagement=None):
+def process_jira_project_form(request, instance=None, target=None, product=None, engagement=None):
     if not get_system_setting('enable_jira'):
         return True, None
 
@@ -1219,14 +1218,28 @@ def process_jira_project_form(request, instance=None, product=None, engagement=N
     jira_project = None
     # supply empty instance to form so it has default values needed to make has_changed() work
     # jform = JIRAProjectForm(request.POST, instance=instance if instance else JIRA_Project(), product=product)
-    jform = JIRAProjectForm(request.POST, instance=instance, product=product, engagement=engagement)
+    jform = JIRAProjectForm(request.POST, instance=instance, target=target, product=product, engagement=engagement)
     # logging has_changed because it sometimes doesn't do what we expect
     logger.debug('jform has changed: %s', str(jform.has_changed()))
 
     if jform.has_changed():  # if no data was changed, no need to do anything!
         logger.debug('jform changed_data: %s', jform.changed_data)
         logger.debug('jform: %s', vars(jform))
-        if jform.is_valid():
+        logger.debug('request.POST: %s', request.POST)
+
+        # calling jform.is_valid() here with inheritance enabled would call clean() on the JIRA_Project model
+        # resulting in a validation error if no jira_instance or project_key is provided
+        # this validation is done because the form is a model form and cannot be skipped
+        # so we check for inheritance checkbox before validating the form.
+        # seems like it's impossible to write clean code with the Django forms framework.
+        if request.POST.get('jira-project-form-inherit_from_product', False):
+            logger.debug('inherit chosen')
+            if not instance:
+                logger.debug('inheriting but no existing JIRA Project for engagement, so nothing to do')
+            else:
+                error = True
+                raise ValueError('Not allowed to remove existing JIRA Config for an engagement')
+        elif jform.is_valid():
             try:
                 jira_project = jform.save(commit=False)
                 # could be a new jira_project, so set product_id
