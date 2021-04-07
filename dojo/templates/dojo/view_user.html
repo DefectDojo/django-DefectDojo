@@ -99,8 +99,7 @@
                 </table>
             </div>
         </div>
-        {% feature_authorization_v2 as feature_authorization_v2_flag %}
-        {% if feature_authorization_v2_flag %}
+        {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
@@ -293,8 +292,7 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% feature_authorization_v2 as feature_authorization_v2_flag %}
-                        {% if feature_authorization_v2_flag is False %}
+                        {% if not 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                         <tr>
                             <td style="width: 200px;"><strong>Authorized Products</strong></td>
                             <td>
