@@ -71,16 +71,21 @@
     	var optarray = $("select#id_scan_type_configuration option").map(function() {
         return {
             "value": this.value,
+            "text": this.text,
             "option": "<option value='" + this.value + "'>" + this.text + "</option>"
         }
     });
 
+
+
   	$("select#id_scan_type").change(function() {
         $("select#id_scan_type_configuration option").remove();
+
         var addoptarr = [];
         for (i = 0; i < optarray.length; i++) {
             if (optarray[i].value.indexOf($(this).val()) > -1) {
-                addoptarr.push(optarray[i].option);
+                altered = "<option value='" + optarray[i].text + "'>" + optarray[i].text + "</option>"
+                addoptarr.push(altered);
             }
         }
         $("select#id_scan_type_configuration").html(addoptarr.join(''))
