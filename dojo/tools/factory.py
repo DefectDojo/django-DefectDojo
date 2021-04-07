@@ -42,15 +42,15 @@ def get_enables_scanners():
     scanners = []
     enabled = Tool_Type.objects.all().filter(enabled=True)
     for scanner in enabled:
-        scanners.append(scanner.name)
+        scanners.append(scanner.name.lower())
     return scanners
 
 
 def get_choices():
     res = list()
     enabled = get_enables_scanners()
-    for key in PARSERS:
-        if key in enabled:
+    for key in PARSERS.keys():
+        if key.lower() in enabled:
             res.append((key, PARSERS[key].get_label_for_scan_types(key)))
     return tuple(res)
 
