@@ -78,14 +78,15 @@ class AnchoreEngineParser(object):
                     severity=sev,
                     numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
-                    impact='No impact provided',
                     references=references,
                     file_path=item["package_path"],
                     component_name=item['package_name'],
                     component_version=item['package_version'],
                     url=item.get('url'),
                     static_finding=True,
-                    dynamic_finding=False)
+                    dynamic_finding=False,
+                    unique_id_from_tool=item.get('vuln'),
+                )
 
                 dupes[dupe_key] = find
 
