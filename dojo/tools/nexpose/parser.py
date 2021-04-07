@@ -26,27 +26,10 @@ class NexposeParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Use the full XML export template from Nexpose."
 
-    # def get_nexpose_filers(self):
-    #     """
-    #     Reads configuration for the scanner, looking for the type 'Nexpose Scan'
-    #     """
-    #     tool_type = Tool_Type.objects.get(name=self.get_scan_types()[0])
-    #
-    #     if tool_type:
-    #         try:
-    #             tool_config = Tool_Configuration.objects.get(tool_type=tool_type)
-    #             extras = tool_config.extras
-    #             if extras:
-    #                 return extras.lower().split(",")
-    #         except Tool_Configuration.MultipleObjectsReturned:
-    #             raise Exception(
-    #                 'It has configured more than one Nexpose tool. \n'
-    #             )
+    def set_filter(self, filter):
+        self.filter = filter.split(",")
 
-    def get_findings(self, xml_output, test, **kwargs ):
-
-        if 'filter' in kwargs.keys():
-            self.filter = kwargs['filter'].split(",")
+    def get_findings(self, xml_output, test):
 
         tree = ElementTree.parse(xml_output)
         vuln_definitions = self.get_vuln_definitions(tree)
