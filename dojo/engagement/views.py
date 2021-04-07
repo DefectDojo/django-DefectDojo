@@ -533,6 +533,9 @@ def import_scan_results(request, eid=None, pid=None):
         if form.is_valid() and (jform is None or jform.is_valid()):
             # Allows for a test to be imported with an engagement created on the fly
             version = form.cleaned_data['version']
+            branch_tag = form.cleaned_data.get('branch_tag', None)
+            build_id = form.cleaned_data.get('build_id', None)
+            commit_hash = form.cleaned_data.get('commit_hash', None)
 
             if engagement is None:
                 engagement = Engagement()
@@ -548,6 +551,9 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.active = True
                 engagement.status = 'In Progress'
                 engagement.version = version
+                engagement.branch_tag = branch_tag
+                engagement.build_id = build_id
+                engagement.commit_hash = commit_hash
                 engagement.save()
             file = request.FILES.get('file', None)
             scan_date = form.cleaned_data['scan_date']
@@ -581,6 +587,9 @@ def import_scan_results(request, eid=None, pid=None):
                 environment=environment,
                 percent_complete=100,
                 version=version,
+                branch_tag=branch_tag,
+                build_id=build_id,
+                commit_hash=commit_hash,
                 tags=tags)
             t.lead = user
             t.full_clean()
@@ -722,12 +731,11 @@ def import_scan_results(request, eid=None, pid=None):
                     import_settings['minimum_severity'] = min_sev
                     import_settings['close_old_findings'] = None  # not implemented via UI
                     import_settings['push_to_jira'] = push_to_jira
-                    import_settings['version'] = version
                     import_settings['tags'] = tags
                     # if endpoint_to_add:    # not implemented via UI
                     #     import_settings['endpoint'] = endpoint_to_add
 
-                    test_import = Test_Import(test=t, import_settings=import_settings, version=version, type=Test_Import.IMPORT_TYPE)
+                    test_import = Test_Import(test=t, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.IMPORT_TYPE)
                     test_import.save()
 
                     test_import_finding_action_list = []
