@@ -556,6 +556,7 @@ def import_scan_results(request, eid=None, pid=None):
             verified = form.cleaned_data['verified']
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
+            logger.info(request.POST['scan_type_configuration'])
 
             if not any(scan_type in code
                        for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
