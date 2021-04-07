@@ -17,7 +17,7 @@ from django.core.exceptions import PermissionDenied
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes
-from dojo.utils import add_breadcrumb, get_system_setting
+from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system_setting
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
 import dojo.jira_link.helper as jira_helper
@@ -410,17 +410,20 @@ def delete_jira(request, tid):
         if 'id' in request.POST and str(jira_instance.id) == request.POST['id']:
             form = DeleteJIRAInstanceForm(request.POST, instance=jira_instance)
             if form.is_valid():
-                jira_instance.delete()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'JIRA Conf and relationships removed.',
-                                     extra_tags='alert-success')
-                create_notification(event='other',
-                                    title='Deletion of JIRA: %s' % jira_instance.configuration_name,
-                                    description='JIRA "%s" was deleted by %s' % (jira_instance.configuration_name, request.user),
-                                    url=request.build_absolute_uri(reverse('jira')),
-                                    )
-                return HttpResponseRedirect(reverse('jira'))
+                try:
+                    jira_instance.delete()
+                    messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'JIRA Conf and relationships removed.',
+                                        extra_tags='alert-success')
+                    create_notification(event='other',
+                                        title='Deletion of JIRA: %s' % jira_instance.configuration_name,
+                                        description='JIRA "%s" was deleted by %s' % (jira_instance.configuration_name, request.user),
+                                        url=request.build_absolute_uri(reverse('jira')),
+                                        )
+                    return HttpResponseRedirect(reverse('jira'))
+                except Exception as e:
+                    add_error_message_to_response('Unable to delete JIRA Instance, probably because it is used by JIRA Issues: %s' % str(e))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([jira_instance])

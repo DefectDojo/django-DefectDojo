@@ -113,7 +113,7 @@ class BaseClass():
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '%s/' % current_objects['results'][-1]['id']
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code, response.content[:1000])
 
