@@ -67,5 +67,24 @@
 	$.hotkeys.options.filterTextInputs = false;
 	$('#add_id_endpoints').attr('href', '/endpoints/{{ product_tab.product.id }}/add?_popup');
 
+	$(document).ready(function() {
+    	var optarray = $("select#id_scan_type_configuration option").map(function() {
+        return {
+            "value": this.value,
+            "option": "<option value='" + this.value + "'>" + this.text + "</option>"
+        }
+    });
+
+  	$("select#id_scan_type").change(function() {
+        $("select#id_scan_type_configuration option").remove();
+        var addoptarr = [];
+        for (i = 0; i < optarray.length; i++) {
+            if (optarray[i].value.indexOf($(this).val()) > -1) {
+                addoptarr.push(optarray[i].option);
+            }
+        }
+        $("select#id_scan_type_configuration").html(addoptarr.join(''))
+    }).change();
+	})
     </script>
 {% endblock %}
