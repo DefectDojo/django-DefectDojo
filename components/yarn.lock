@@ -818,24 +818,24 @@ path-parse@^1.0.6:
   resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.6.tgz#d62dbb5679405d72c4737ec58600e9ddcf06d24c"
   integrity sha512-GSmOT2EbHrINBf9SR7CDELwlJ8AENk3Qn7OikK4nFYAu3Ote2+JYNVvkpAEQm3/TLNEJFD/xZJjzyxg3KBWOzw==
 
-pdfkit@>=0.8.1, pdfkit@^0.11.0:
-  version "0.11.0"
-  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.11.0.tgz#9cdb2fc42bd2913587fe3ddf48cc5bbb3c36f7de"
-  integrity sha512-1s9gaumXkYxcVF1iRtSmLiISF2r4nHtsTgpwXiK8Swe+xwk/1pm8FJjYqN7L3x13NsWnGyUFntWcO8vfqq+wwA==
+pdfkit@>=0.8.1, pdfkit@^0.12.0:
+  version "0.12.0"
+  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.12.0.tgz#0681f84d83fd08fa0a1f3237338c8b9a27bdaa4c"
+  integrity sha512-DnfNzX4WKfnxuk90V+focyck01QEmfSc0VBm2g9ElPKVWLcJEg66dd+t1TdaEPL3TKgDFXQOpIquEh6in6UWoA==
   dependencies:
     crypto-js "^3.1.9-1"
     fontkit "^1.8.0"
     linebreak "^1.0.2"
     png-js "^1.0.0"
 
-pdfmake@^0.1.70:
-  version "0.1.70"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.1.70.tgz#b5102799deef264defa675dbb2dbf12ad49a9bae"
-  integrity sha512-xPhkblaQ71U97qhRTPj/1HknAHHFZ3cPRmRdrqEWD2xXBcEjEM3Yw0MIjML8DRy9Dt9n6QRjHVf662f0eLtd7Q==
+pdfmake@^0.1.71:
+  version "0.1.71"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.1.71.tgz#9cb20032cfed534f1bb5aa95026343fd7b4a5953"
+  integrity sha512-uXUy+NZ8R5pwJ6rYLJRu7VRw/w5ogBScNk440CHpMZ6Z0+E1uc1XvwK4I1U5ry0UZQ3qPD0dpSvbzAkRBKYoJA==
   dependencies:
     iconv-lite "^0.6.2"
     linebreak "^1.0.2"
-    pdfkit "^0.11.0"
+    pdfkit "^0.12.0"
     svg-to-pdfkit "^0.1.8"
     xmldoc "^1.1.2"
 

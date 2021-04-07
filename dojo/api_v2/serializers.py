@@ -748,7 +748,7 @@ class FindingEngagementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Engagement
-        fields = ["id", "name", "product", "branch_tag"]
+        fields = ["id", "name", "product", "branch_tag", "build_id", "commit_hash", "version"]
 
 
 class FindingEnvironmentSerializer(serializers.ModelSerializer):
@@ -770,7 +770,7 @@ class FindingTestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = ["id", "title", "test_type", "engagement", "environment"]
+        fields = ["id", "title", "test_type", "engagement", "environment", "branch_tag", "build_id", "commit_hash", "version"]
 
 
 class FindingRelatedFieldsSerializer(serializers.Serializer):
@@ -831,7 +831,6 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     @swagger_serializer_method(serializers.ListField(serializers.CharField()))
     def get_display_status(self, obj):
-        logger.debug('get_display_status for: %i:%s', obj.id, obj)
         return obj.status()
 
     # Overriding this to push add Push to JIRA functionality
@@ -1024,6 +1023,10 @@ class ImportScanSerializer(serializers.Serializer):
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
     version = serializers.CharField(required=False)
+    build_id = serializers.CharField(required=False)
+    branch_tag = serializers.CharField(required=False)
+    commit_hash = serializers.CharField(required=False)
+
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
     # class Meta:
@@ -1048,6 +1051,9 @@ class ImportScanSerializer(serializers.Serializer):
         # Will save in the provided environment or in the `Development` one if absent
         environment_name = data.get('environment', 'Development')
         version = data.get('version', None)
+        build_id = data.get('build_id', None)
+        branch_tag = data.get('branch_tag', None)
+        commit_hash = data.get('commit_hash', None)
 
         environment = Development_Environment.objects.get(name=environment_name)
         tags = None
@@ -1065,6 +1071,9 @@ class ImportScanSerializer(serializers.Serializer):
             environment=environment,
             percent_complete=100,
             version=version,
+            branch_tag=branch_tag,
+            build_id=build_id,
+            commit_hash=commit_hash,
             tags=tags)
         try:
             test.full_clean()
@@ -1229,12 +1238,11 @@ class ImportScanSerializer(serializers.Serializer):
             import_settings['minimum_severity'] = min_sev
             import_settings['close_old_findings'] = close_old_findings
             import_settings['push_to_jira'] = push_to_jira
-            import_settings['version'] = version
             import_settings['tags'] = tags
             if endpoint_to_add:
                 import_settings['endpoint'] = endpoint_to_add
 
-            test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.IMPORT_TYPE)
+            test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.IMPORT_TYPE)
             test_import.save()
 
             test_import_finding_action_list = []
@@ -1300,6 +1308,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     # also for ReImport.
     close_old_findings = serializers.BooleanField(required=False, default=True)
     version = serializers.CharField(required=False)
+    build_id = serializers.CharField(required=False)
+    branch_tag = serializers.CharField(required=False)
+    commit_hash = serializers.CharField(required=False)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1315,6 +1326,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         verified = data['verified']
         active = data['active']
         version = data.get('version', None)
+        build_id = data.get('build_id', None)
+        branch_tag = data.get('branch_tag', None)
+        commit_hash = data.get('commit_hash', None)
 
         try:
             parser = import_parser_factory(data.get('file', None),
@@ -1535,6 +1549,16 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
             if version:
                 test.version = version
+
+            if branch_tag:
+                test.branch_tag = branch_tag
+
+            if build_id:
+                test.build_id = build_id
+
+            if branch_tag:
+                test.commit_hash = commit_hash
+
             test.save()
             test.engagement.save()
 
@@ -1545,12 +1569,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 import_settings['minimum_severity'] = min_sev
                 import_settings['close_old_findings'] = close_old_findings
                 import_settings['push_to_jira'] = push_to_jira
-                import_settings['version'] = version
+
                 # tags=tags TODO no tags field in api for reimport it seems
                 if endpoint_to_add:
                     import_settings['endpoint'] = endpoint_to_add
 
-                test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.REIMPORT_TYPE)
+                test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.REIMPORT_TYPE)
                 test_import.save()
 
                 test_import_finding_action_list = []

@@ -114,7 +114,7 @@ class JIRAConfigProductTest(DojoTestCase):
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_empty_jira_project_to_product_without_jira_project(self, jira_mock):
-        jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
+        jira_mock.return_value = True  # cannot set return_value in decorater AND have the mock into the method
         product = self.add_product_without_jira_project(expected_delta_jira_project_db=0)
         response = self.empty_jira_project_for_product(product, expected_delta_jira_project_db=0)
         self.assertEqual(jira_mock.call_count, 0)

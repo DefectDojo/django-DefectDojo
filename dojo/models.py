@@ -1299,6 +1299,13 @@ class Test(models.Model):
 
     version = models.CharField(max_length=100, null=True, blank=True)
 
+    build_id = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Build ID that was tested, a reimport may update this field.", verbose_name="Build ID")
+    commit_hash = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
+    branch_tag = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
+
     class Meta:
         indexes = [
             models.Index(fields=['engagement', 'test_type']),
@@ -1351,8 +1358,15 @@ class Test_Import(TimeStampedModel):
     test = models.ForeignKey(Test, editable=False, null=False, blank=False, on_delete=models.CASCADE)
     findings_affected = models.ManyToManyField('Finding', through='Test_Import_Finding_Action')
     import_settings = JSONField(null=True)
-    version = models.CharField(max_length=100, null=True, blank=True)
     type = models.CharField(max_length=64, null=False, blank=False, default='unknown')
+
+    version = models.CharField(max_length=100, null=True, blank=True)
+    build_id = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Build ID that was tested, a reimport may update this field.", verbose_name="Build ID")
+    commit_hash = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
+    branch_tag = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
 
     def get_queryset(self):
         logger.debug('prefetch test_import counts')
@@ -2797,7 +2811,7 @@ class JIRA_Instance_Admin(admin.ModelAdmin):
 
 class JIRA_Project(models.Model):
     jira_instance = models.ForeignKey(JIRA_Instance, verbose_name="JIRA Instance",
-                             null=True, blank=True, on_delete=models.CASCADE)
+                             null=True, blank=True, on_delete=models.PROTECT)
     project_key = models.CharField(max_length=200, blank=True)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
     issue_template_dir = models.CharField(max_length=255,
@@ -2811,8 +2825,8 @@ class JIRA_Project(models.Model):
     enable_engagement_epic_mapping = models.BooleanField(default=False,
                                                          blank=True)
     push_notes = models.BooleanField(default=False, blank=True)
-    product_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name="Send SLA notifications as comment?")
-    risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=False, verbose_name="Send Risk Acceptance expiration notifications as comment?")
+    product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name="Send SLA notifications as comment?")
+    risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name="Send Risk Acceptance expiration notifications as comment?")
 
     def clean(self):
         if not self.jira_instance:
@@ -2850,7 +2864,7 @@ class JIRA_Conf_Admin(admin.ModelAdmin):
 
 
 class JIRA_Issue(models.Model):
-    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.SET_NULL, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
+    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.PROTECT, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
     jira_id = models.CharField(max_length=200)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
