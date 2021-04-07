@@ -1,3 +1,5 @@
+from django.db.models.signals import post_delete, pre_delete
+from django.dispatch.dispatcher import receiver
 from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 import logging
@@ -5,8 +7,9 @@ from time import strftime
 from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
-from dojo.utils import get_current_user
+from dojo.utils import calculate_grade, get_current_user
 from dojo.models import Finding, Finding_Group, System_Settings
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -217,3 +220,42 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
         logger.debug('pushing finding %s to jira from finding.save()', finding.pk)
         import dojo.jira_link.helper as jira_helper
         jira_helper.push_to_jira(finding)
+
+
+@receiver(pre_delete, sender=Finding)
+def finding_pre_delete(sender, instance, **kwargs):
+    logger.debug('finding pre_delete!: %s:%s', instance.id, instance.title)
+
+    if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+        for find in instance.original_finding.all():
+            # Explicitely delete the duplicates
+            find.delete()
+    else:
+        logger.debug('original_finding first: %s', instance.original_finding.first())
+        # when a finding is deleted, and is an original of a duplicate cluster, we have to chose a new original for the cluster
+        cluster = instance.original_finding.all().order_by('id')
+        logger.debug('cluster: %s', cluster)
+        if cluster:
+            new_original = cluster.first()
+            logger.debug('finding pre_delete: changing original of duplicate cluster to: %s:%s', new_original.id, new_original.title)
+
+            new_original.duplicate = False
+            new_original.duplicate_finding = None
+            new_original.active = True
+            new_original.save_no_options()
+            new_original.found_by.add(*instance.found_by.all())
+
+            if new_original and len(cluster) > 1:
+                for find in cluster:
+                    if find != new_original:
+                        find.duplicate_finding = new_original
+                        find.save_no_options()
+
+    # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
+    # https://code.djangoproject.com/ticket/154
+    instance.found_by.clear()
+
+
+@receiver(post_delete, sender=Finding)
+def finding_post_delete(sender, instance, **kwargs):
+    calculate_grade(instance.test.engagement.product)

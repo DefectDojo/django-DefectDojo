@@ -1501,7 +1501,7 @@ class Finding(models.Model):
                                           editable=False,
                                           null=True,
                                           related_name='original_finding',
-                                          blank=True, on_delete=models.CASCADE,
+                                          blank=True, on_delete=models.DO_NOTHING,
                                           verbose_name="Duplicate Finding",
                                           help_text="Link to the original finding if this finding is a duplicate.")
     out_of_scope = models.BooleanField(default=False,
@@ -2159,14 +2159,6 @@ class Finding(models.Model):
         # postprocessing is done in a celery task
         finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
              issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
-
-    def delete(self, *args, **kwargs):
-        for find in self.original_finding.all():
-            # Explicitely delete the duplicates
-            super(Finding, find).delete()
-        super(Finding, self).delete(*args, **kwargs)
-        from dojo.utils import calculate_grade
-        calculate_grade(self.test.engagement.product)
 
     # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
