@@ -930,6 +930,7 @@ def import_settings_tag(test_import, autoescape=True):
     <i class="fa %s has-popover %s"
         title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
         data-content="
+            <b>ID:</b> %s<br/>
             <b>Active:</b> %s<br/>
             <b>Verified:</b> %s<br/>
             <b>Minimum Severity:</b> %s<br/>
@@ -937,7 +938,6 @@ def import_settings_tag(test_import, autoescape=True):
             <b>Push to jira:</b> %s<br/>
             <b>Tags:</b> %s<br/>
             <b>Endpoint:</b> %s<br/>
-            <b>Version:</b> %s<br/>
         "
     </i>
     """
@@ -946,14 +946,14 @@ def import_settings_tag(test_import, autoescape=True):
     color = ''
 
     return mark_safe(html % (icon, color, icon,
+                                esc(test_import.id),
                                 esc(test_import.import_settings.get('active', None)),
                                 esc(test_import.import_settings.get('verified', None)),
                                 esc(test_import.import_settings.get('minimum_severity', None)),
                                 esc(test_import.import_settings.get('close_old_findings', None)),
                                 esc(test_import.import_settings.get('push_to_jira', None)),
                                 esc(test_import.import_settings.get('tags', None)),
-                                esc(test_import.import_settings.get('endpoint', None)),
-                                esc(test_import.import_settings.get('version', None))))
+                                esc(test_import.import_settings.get('endpoint', None))))
 
 
 @register.filter(needs_autoescape=True)

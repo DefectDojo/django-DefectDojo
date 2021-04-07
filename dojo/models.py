@@ -1272,6 +1272,13 @@ class Test(models.Model):
 
     version = models.CharField(max_length=100, null=True, blank=True)
 
+    build_id = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Build ID that was tested, a reimport may update this field.", verbose_name="Build ID")
+    commit_hash = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
+    branch_tag = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
+
     class Meta:
         indexes = [
             models.Index(fields=['engagement', 'test_type']),
@@ -1324,8 +1331,15 @@ class Test_Import(TimeStampedModel):
     test = models.ForeignKey(Test, editable=False, null=False, blank=False, on_delete=models.CASCADE)
     findings_affected = models.ManyToManyField('Finding', through='Test_Import_Finding_Action')
     import_settings = JSONField(null=True)
-    version = models.CharField(max_length=100, null=True, blank=True)
     type = models.CharField(max_length=64, null=False, blank=False, default='unknown')
+
+    version = models.CharField(max_length=100, null=True, blank=True)
+    build_id = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Build ID that was tested, a reimport may update this field.", verbose_name="Build ID")
+    commit_hash = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
+    branch_tag = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
 
     def get_queryset(self):
         logger.debug('prefetch test_import counts')
