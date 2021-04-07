@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0086_finding_groups'),
+        ('dojo', '0088_import_history_cicd'),
     ]
 
     operations = [
