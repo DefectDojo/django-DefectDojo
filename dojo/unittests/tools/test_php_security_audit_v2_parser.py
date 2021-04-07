@@ -20,3 +20,21 @@ class TestPhpSecurityAuditV2ParserParser(TestCase):
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("/Applications/MAMP/htdocs/wordpress/wp-content/themes/twentyseventeen/index.php", finding.file_path)
         self.assertEqual(35, finding.line)
+
+    def test_php_symfony_security_check_parser_with_many_vuln(self):
+        """New report with latest version"""
+        testfile = open("dojo/unittests/scans/php_security_audit_v2/many_vulns.json")
+        parser = PhpSecurityAuditV2Parser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        items = findings
+        self.assertEqual(908, len(items))
+        finding = findings[0]
+        self.assertEqual("Security.Misc.TypeJuggle.TypeJuggle", finding.title)
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual("/home/xcvb/xfgkfhkhlj/bigbangwp/page-blog-2.php", finding.file_path)
+        self.assertEqual(33, finding.line)
+        finding = findings[200]
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual("/home/xcvb/xfgkfhkhlj/bigbangwp/page-blog-6.php", finding.file_path)
+        self.assertEqual(53, finding.line)
