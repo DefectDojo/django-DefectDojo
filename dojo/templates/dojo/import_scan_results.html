@@ -71,8 +71,7 @@
     	var optarray = $("select#id_scan_type_configuration option").map(function() {
         return {
             "value": this.value,
-            "text": this.text,
-            "option": "<option value='" + this.value + "'>" + this.text + "</option>"
+            "text": this.text
         }
     });
 
