@@ -116,11 +116,11 @@ def get_rule_violation_model(rule_violation_unresolved, packages, licenses, depe
     for id in project_ids:
         project_names.append(get_name_id_for_package(packages, id))
     package = find_package_by_id(packages, rule_violation_unresolved['pkg'])
-    if 'license' in rule_violation_unresolved: 
+    if 'license' in rule_violation_unresolved:
         license_tmp = rule_violation_unresolved['license']
     else:
         license_tmp = 'unset'
-    if 'license_source' not in rule_violation_unresolved: 
+    if 'license_source' not in rule_violation_unresolved:
         rule_violation_unresolved['license_source'] = 'unset'
     license_id = find_license_id(licenses, license_tmp)
 
@@ -155,7 +155,7 @@ def find_finding_path(findings, license_num):
 def get_item(model, test):
 
     if 'findings' in model.pkg:
-        finding_path = find_finding_path(model.pkg['findings'], model.license_id_number) 
+        finding_path = find_finding_path(model.pkg['findings'], model.license_id_number)
         desc = f"""root projects: {', '.join(model.projects)}
         source  : {model.rule_violation['license_source']}
         license : {model.license_id}
