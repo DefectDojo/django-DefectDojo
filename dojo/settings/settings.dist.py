@@ -755,6 +755,11 @@ CELERY_BEAT_SCHEDULE = {
     #     'schedule': timedelta(hours=12),
     #     'kwargs': {'mode': 'reconcile', 'dryrun': True, 'daysback': 10, 'product': None, 'engagement': None}
     # },
+    # 'fix_loop_duplicates': {
+    #     'task': 'dojo.tasks.fix_loop_duplicates_task',
+    #     'schedule': timedelta(hours=12)
+    # },
+
 
 }
 
