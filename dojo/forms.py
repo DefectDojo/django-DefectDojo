@@ -413,6 +413,8 @@ class ImportScanForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(ImportScanForm, self).__init__(*args, **kwargs)
+        self.fields["scan_type"].choices = sorted(get_choices(), key=lambda x: x[1])
+        self.fields["scan_type_configuration"].choices = sorted(get_available_configurations(), key=lambda x: x[1])
 
     def clean(self):
         cleaned_data = super().clean()
