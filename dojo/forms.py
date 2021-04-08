@@ -21,7 +21,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
-from dojo.models import Finding, Product_Type, Product, Note_Type, \
+from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
@@ -294,6 +294,15 @@ class DeleteProductForm(forms.ModelForm):
                    'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
 
+class DeleteFindingGroupForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Finding_Group
+        fields = ['id']
+
+
 class Edit_Product_MemberForm(forms.ModelForm):
     user = forms.ModelChoiceField(queryset=None, required=True)
     role = forms.ChoiceField(choices=Roles.choices())
@@ -392,7 +401,10 @@ class ImportScanForm(forms.Form):
         queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
-    version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on the Test object that will be created.")
+    version = forms.CharField(max_length=100, required=False, help_text="Version that was scanned.")
+    branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
+    commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
+    build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
 
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
@@ -447,6 +459,9 @@ class ReImportScanForm(forms.Form):
     close_old_findings = forms.BooleanField(help_text="Select if old findings get mitigated when importing.",
                                             required=False, initial=True)
     version = forms.CharField(max_length=100, required=False, help_text="Version that will be set on existing Test object. Leave empty to leave existing value in place.")
+    branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
+    commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
+    build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
 
     def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
@@ -761,7 +776,7 @@ class TestForm(forms.ModelForm):
     class Meta:
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end', 'description',
-                  'environment', 'percent_complete', 'tags', 'lead', 'version']
+                  'environment', 'percent_complete', 'tags', 'lead', 'version', 'branch_tag', 'build_id', 'commit_hash']
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -770,17 +785,7 @@ class DeleteTestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        exclude = ('test_type',
-                   'environment',
-                   'target_start',
-                   'target_end',
-                   'engagement',
-                   'percent_complete',
-                   'description',
-                   'lead',
-                   'title',
-                   'tags',
-                   'version')
+        fields = []
 
 
 class AddFindingForm(forms.ModelForm):
@@ -796,8 +801,8 @@ class AddFindingForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -805,6 +810,7 @@ class AddFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+    publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -853,8 +859,8 @@ class AdHocFindingForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -862,6 +868,7 @@ class AdHocFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
     is_template = forms.BooleanField(label="Create Template?", required=False,
                                      help_text="A new finding template will be created from this finding.")
+    publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
@@ -905,8 +912,8 @@ class PromoteFindingForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
                                                widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
@@ -976,8 +983,8 @@ class FindingForm(forms.ModelForm):
         error_messages={
             'required': 'Select valid choice: In Progress, On Hold, Completed',
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -990,8 +997,10 @@ class FindingForm(forms.ModelForm):
     mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
     mitigated_by = forms.ModelChoiceField(required=True, queryset=User.objects.all(), initial=get_current_user)
 
+    publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
+
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact',
+    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
                    'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
@@ -1103,8 +1112,8 @@ class ApplyFindingTemplateForm(forms.Form):
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={'required': 'Select valid choice: In Progress, On Hold, Completed', 'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
 
     description = forms.CharField(widget=forms.Textarea)
-    mitigation = forms.CharField(widget=forms.Textarea)
-    impact = forms.CharField(widget=forms.Textarea)
+    mitigation = forms.CharField(widget=forms.Textarea, required=False)
+    impact = forms.CharField(widget=forms.Textarea, required=False)
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     tags = TagField(required=False, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.", initial=Finding.tags.tag_model.objects.all().order_by('name'))
@@ -1170,6 +1179,13 @@ class FindingBulkUpdateForm(forms.ModelForm):
     risk_acceptance = forms.BooleanField(required=False)
     risk_accept = forms.BooleanField(required=False)
     risk_unaccept = forms.BooleanField(required=False)
+
+    finding_group = forms.BooleanField(required=False)
+    finding_group_create = forms.BooleanField(required=False)
+    finding_group_create_name = forms.CharField(required=False)
+    finding_group_add = forms.BooleanField(required=False)
+    add_to_finding_group = forms.BooleanField(required=False)
+    finding_group_remove = forms.BooleanField(required=False)
 
     push_to_jira = forms.BooleanField(required=False)
     # unlink_from_jira = forms.BooleanField(required=False)
@@ -1735,19 +1751,25 @@ class ExpressGITHUBForm(forms.ModelForm):
                     'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
 
 
-def get_jira_issue_template_choices():
-    template_dir = settings.JIRA_TEMPLATE_DIR
-    template_list = [('', '---')]
-    for base_dir, dirnames, filenames in os.walk(template_dir):
-        for filename in filenames:
+def get_jira_issue_template_dir_choices():
+    template_root = settings.JIRA_TEMPLATE_ROOT
+    template_dir_list = [('', '---')]
+    for base_dir, dirnames, filenames in os.walk(template_root):
+        # for filename in filenames:
+        #     if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
+        #         base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
+        #     template_list.append((os.path.join(base_dir, filename), filename))
+
+        for dirname in dirnames:
             if base_dir.startswith(settings.TEMPLATE_DIR_PREFIX):
                 base_dir = base_dir[len(settings.TEMPLATE_DIR_PREFIX):]
-            template_list.append((os.path.join(base_dir, filename), filename))
-    logger.debug('templates: %s', template_list)
-    return template_list
+            template_dir_list.append((os.path.join(base_dir, dirname), dirname))
+
+    logger.debug('templates: %s', template_dir_list)
+    return template_dir_list
 
 
-JIRA_TEMPLATE_CHOICES = sorted(get_jira_issue_template_choices())
+JIRA_TEMPLATE_CHOICES = sorted(get_jira_issue_template_dir_choices())
 
 
 class JIRA_IssueForm(forms.ModelForm):
@@ -1758,9 +1780,9 @@ class JIRA_IssueForm(forms.ModelForm):
 
 
 class JIRAForm(forms.ModelForm):
-    issue_template = forms.ChoiceField(required=False,
+    issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
-                                       help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
+                                       help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
 
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
@@ -1773,6 +1795,21 @@ class JIRAForm(forms.ModelForm):
         model = JIRA_Instance
         exclude = ['']
 
+    def clean(self):
+        import dojo.jira_link.helper as jira_helper
+        form_data = self.cleaned_data
+
+        try:
+            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'], validate=True)
+            logger.debug('valid JIRA config!')
+        except Exception as e:
+            # form only used by admins, so we can show full error message using str(e) which can help debug any problems
+            message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
+            self.add_error('username', message)
+            self.add_error('password', message)
+
+        return form_data
+
 
 class ExpressJIRAForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=True)
@@ -1784,6 +1821,21 @@ class ExpressJIRAForm(forms.ModelForm):
                     'close_status_key', 'info_mapping_severity',
                     'low_mapping_severity', 'medium_mapping_severity',
                     'high_mapping_severity', 'critical_mapping_severity', 'finding_text']
+
+    def clean(self):
+        import dojo.jira_link.helper as jira_helper
+        form_data = self.cleaned_data
+
+        try:
+            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'], validate=True)
+            logger.debug('valid JIRA config!')
+        except Exception as e:
+            # form only used by admins, so we can show full error message using str(e) which can help debug any problems
+            message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, Network connection. Details in alert on top right. ' + str(e)
+            self.add_error('username', message)
+            self.add_error('password', message)
+
+        return form_data
 
 
 class Benchmark_Product_SummaryForm(forms.ModelForm):
@@ -2086,31 +2138,89 @@ class GITHUB_Product_Form(forms.ModelForm):
 
 
 class JIRAProjectForm(forms.ModelForm):
+    inherit_from_product = forms.BooleanField(label='inherit JIRA settings from product', required=False)
     jira_instance = forms.ModelChoiceField(queryset=JIRA_Instance.objects.all(), label='JIRA Instance', required=False)
-    issue_template = forms.ChoiceField(required=False,
+    issue_template_dir = forms.ChoiceField(required=False,
                                        choices=JIRA_TEMPLATE_CHOICES,
-                                       help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.')
+                                       help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.')
 
     prefix = 'jira-project-form'
 
     class Meta:
         model = JIRA_Project
         exclude = ['product', 'engagement']
+        fields = ['inherit_from_product', 'jira_instance', 'project_key', 'issue_template_dir', 'component', 'push_all_issues', 'enable_engagement_epic_mapping', 'push_notes', 'product_jira_sla_notification', 'risk_acceptance_expiration_notification']
 
     def __init__(self, *args, **kwargs):
+        from dojo.jira_link import helper as jira_helper
         # if the form is shown for an engagement, we set a placeholder text around inherited settings from product
         self.target = kwargs.pop('target', 'product')
         self.product = kwargs.pop('product', None)
         self.engagement = kwargs.pop('engagement', None)
         super().__init__(*args, **kwargs)
 
-        # logger.debug('self.target: %s, self.product: %s, self.instance: %s', self.target, self.product, self.instance)
+        logger.debug('self.target: %s, self.product: %s, self.instance: %s', self.target, self.product, self.instance)
+        logger.debug('data: %s', self.data)
         if self.target == 'engagement':
             product_name = self.product.name if self.product else self.engagement.product.name if self.engagement.product else ''
 
             self.fields['project_key'].widget = forms.TextInput(attrs={'placeholder': 'JIRA settings inherited from product ''%s''' % product_name})
             self.fields['project_key'].help_text = 'JIRA settings are inherited from product ''%s'', unless configured differently here.' % product_name
             self.fields['jira_instance'].help_text = 'JIRA settings are inherited from product ''%s'' , unless configured differently here.' % product_name
+
+            # if we don't have an instance, django will insert a blank empty one :-(
+            # so we have to check for id to make sure we only trigger this when there is a real instance from db
+            if self.instance.id:
+                logger.debug('jira project instance found for engagement, unchecking inherit checkbox')
+                self.fields['jira_instance'].required = True
+                self.fields['project_key'].required = True
+                self.initial['inherit_from_product'] = False
+                # once a jira project config is attached to an engagement, we can't go back to inheriting
+                # because the config needs to remain in place for the existing jira issues
+                self.fields['inherit_from_product'].disabled = True
+                self.fields['inherit_from_product'].help_text = 'Once an engagement has a JIRA Project stored, you can no   t switch back to inheritance to avoid breaking existing JIRA issues'
+
+                self.fields['jira_instance'].disabled = False
+                self.fields['project_key'].disabled = False
+                self.fields['issue_template_dir'].disabled = False
+                self.fields['component'].disabled = False
+                self.fields['push_all_issues'].disabled = False
+                self.fields['enable_engagement_epic_mapping'].disabled = False
+                self.fields['push_notes'].disabled = False
+                self.fields['product_jira_sla_notification'].disabled = False
+                self.fields['risk_acceptance_expiration_notification'].disabled = False
+
+            elif self.product:
+                logger.debug('setting jira project fields from product1')
+                self.initial['inherit_from_product'] = True
+                jira_project_product = jira_helper.get_jira_project(self.product)
+                # we have to check that we are not in a POST request where jira project config data is posted
+                # this is because initial values will overwrite the actual values entered by the user
+                # makes no sense, but seems to be accepted behaviour: https://code.djangoproject.com/ticket/30407
+                if jira_project_product and not (self.prefix + '-jira_instance') in self.data:
+                    logger.debug('setting jira project fields from product2')
+                    self.initial['jira_instance'] = jira_project_product.jira_instance.id if jira_project_product.jira_instance else None
+                    self.initial['project_key'] = jira_project_product.project_key
+                    self.initial['issue_template_dir'] = jira_project_product.issue_template_dir
+                    self.initial['component'] = jira_project_product.component
+                    self.initial['push_all_issues'] = jira_project_product.push_all_issues
+                    self.initial['enable_engagement_epic_mapping'] = jira_project_product.enable_engagement_epic_mapping
+                    self.initial['push_notes'] = jira_project_product.push_notes
+                    self.initial['product_jira_sla_notification'] = jira_project_product.product_jira_sla_notification
+                    self.initial['risk_acceptance_expiration_notification'] = jira_project_product.risk_acceptance_expiration_notification
+
+                    self.fields['jira_instance'].disabled = True
+                    self.fields['project_key'].disabled = True
+                    self.fields['issue_template_dir'].disabled = True
+                    self.fields['component'].disabled = True
+                    self.fields['push_all_issues'].disabled = True
+                    self.fields['enable_engagement_epic_mapping'].disabled = True
+                    self.fields['push_notes'].disabled = True
+                    self.fields['product_jira_sla_notification'].disabled = True
+                    self.fields['risk_acceptance_expiration_notification'].disabled = True
+
+        else:
+            del self.fields['inherit_from_product']
 
         # if we don't have an instance, django will insert a blank empty one :-(
         # so we have to check for id to make sure we only trigger this when there is a real instance from db
@@ -2122,16 +2232,21 @@ class JIRAProjectForm(forms.ModelForm):
         logger.debug('validating jira project form')
         cleaned_data = super().clean()
 
-        project_key = self.cleaned_data.get('project_key')
-        jira_instance = self.cleaned_data.get('jira_instance')
+        logger.debug('clean: inherit: %s', self.cleaned_data.get('inherit_from_product', False))
+        if not self.cleaned_data.get('inherit_from_product', False):
+            jira_instance = self.cleaned_data.get('jira_instance')
+            project_key = self.cleaned_data.get('project_key')
 
-        if project_key and jira_instance:
-            return cleaned_data
+            if project_key and jira_instance:
+                return cleaned_data
 
-        if not project_key and not jira_instance:
-            return cleaned_data
+            if not project_key and not jira_instance:
+                return cleaned_data
 
-        raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, or leave both empty')
+            if self.target == 'engagement':
+                raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, or choose to inherit settings from product')
+            else:
+                raise ValidationError('JIRA Project needs a JIRA Instance and JIRA Project Key, leave empty to have no JIRA integration setup')
 
 
 class GITHUBFindingForm(forms.Form):
@@ -2178,6 +2293,12 @@ class JIRAFindingForm(forms.Form):
 
         self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
 
+        if self.instance.has_jira_group_issue:
+            self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
+            self.fields['jira_issue'].help_text = 'Changing the linked JIRA issue for finding groups is not (yet) supported.'
+            self.initial['jira_issue'] = self.instance.finding_group.jira_issue.jira_key
+            self.fields['jira_issue'].disabled = True
+
     def clean(self):
         logger.debug('jform clean')
         import dojo.jira_link.helper as jira_helper
@@ -2188,14 +2309,22 @@ class JIRAFindingForm(forms.Form):
 
         logger.debug('self.cleaned_data.push_to_jira: %s', self.cleaned_data.get('push_to_jira', None))
 
-        if self.cleaned_data.get('push_to_jira', None):
-            can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(self.instance, self.finding_form)
+        if self.cleaned_data.get('push_to_jira', None) and finding.has_jira_group_issue:
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(self.instance.finding_group, self.finding_form)
             if not can_be_pushed_to_jira:
                 self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
                 # for field in error_fields:
                 #     self.finding_form.add_error(field, error)
 
-        if jira_issue_key_new:
+        elif self.cleaned_data.get('push_to_jira', None):
+            can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(self.instance, self.finding_form)
+            if not can_be_pushed_to_jira:
+                self.add_error('push_to_jira', ValidationError(error_message, code=error_code))
+                # for field in error_fields:
+                #     self.finding_form.add_error(field, error)
+
+        if jira_issue_key_new and not finding.has_jira_group_issue:
+            # when there is a group jira issue, we skip all the linking/unlinking as this is not supported (yet)
             if finding:
                 # in theory there can multiple jira instances that have similar projects
                 # so checking by only the jira issue key can lead to false positives

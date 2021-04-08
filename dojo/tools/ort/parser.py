@@ -116,7 +116,13 @@ def get_rule_violation_model(rule_violation_unresolved, packages, licenses, depe
     for id in project_ids:
         project_names.append(get_name_id_for_package(packages, id))
     package = find_package_by_id(packages, rule_violation_unresolved['pkg'])
-    license_id = find_license_id(licenses, rule_violation_unresolved['license'])
+    if 'license' in rule_violation_unresolved:
+        license_tmp = rule_violation_unresolved['license']
+    else:
+        license_tmp = 'unset'
+    if 'license_source' not in rule_violation_unresolved:
+        rule_violation_unresolved['license_source'] = 'unset'
+    license_id = find_license_id(licenses, license_tmp)
 
     return RuleViolationModel(package, license_id, project_names, rule_violation_unresolved)
 
