@@ -430,11 +430,8 @@
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'view_engagements' product_tab.product.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
                       {% if product_tab.product|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:product_tab.product %}
-                      <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
-                      {% endif %}
                       <li role="separator" class="divider"></li>
-                      <li><a href="{% url 'view_engagements_cicd' product_tab.product.id %}"><i class="fa fa-calendar"></i> View CI/CD Engagements</a></li>
-                      {% if product_tab.product|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:product_tab.product%}
+                      <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Interactive Engagement</a></li>
                       <li><a href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New CI/CD Engagement</a></li>
                       {% endif %}
                     </ul>

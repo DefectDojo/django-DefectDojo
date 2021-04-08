@@ -245,11 +245,16 @@ def edit_engagement(request, eid):
             logger.debug('showing jira-epic-form')
             jira_epic_form = JIRAEngagementForm(instance=engagement)
 
-    title = ' CI/CD' if is_ci_cd else ''
-    product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
+    if is_ci_cd:
+        title = 'Edit CI/CD Engagement'
+    else:
+        title = 'Edit Interactive Engagement'
+
+    product_tab = Product_Tab(engagement.product.id, title=title, tab="engagements")
     product_tab.setEngagement(engagement)
     return render(request, 'dojo/new_eng.html', {
         'product_tab': product_tab,
+        'title': title,
         'form': form,
         'edit': True,
         'jira_epic_form': jira_epic_form,
@@ -281,10 +286,7 @@ def delete_engagement(request, eid):
                                     recipients=[engagement.lead],
                                     icon="exclamation-triangle")
 
-                if engagement.engagement_type == 'CI/CD':
-                    return HttpResponseRedirect(reverse("view_engagements_cicd", args=(product.id, )))
-                else:
-                    return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+                return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([engagement])
@@ -826,10 +828,7 @@ def close_eng(request, eid):
                         title='Closure of %s' % eng.name,
                         description='The engagement "%s" was closed' % (eng.name),
                         engagement=eng, url=reverse('engagment_all_findings', args=(eng.id, ))),
-    if eng.engagement_type == 'CI/CD':
-        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
-    else:
-        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
@@ -845,10 +844,7 @@ def reopen_eng(request, eid):
                         title='Reopening of %s' % eng.name,
                         description='The engagement "%s" was reopened' % (eng.name),
                         url=reverse('view_engagement', args=(eng.id, ))),
-    if eng.engagement_type == 'CI/CD':
-        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
-    else:
-        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 """

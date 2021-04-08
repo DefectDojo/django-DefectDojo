@@ -621,44 +621,38 @@ def view_product_metrics(request, pid):
 
 
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
-def view_engagements(request, pid, engagement_type="Interactive"):
+def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
 
     default_page_num = 10
     recent_test_day_count = 7
 
     # In Progress Engagements
-    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress",
-                                     engagement_type=engagement_type).order_by('-updated')
+    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress").order_by('-updated')
     active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
     result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
     result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list, recent_test_day_count)
 
     # Engagements that are queued because they haven't started or paused
-    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True,
-                                     engagement_type=engagement_type).order_by('-updated')
+    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True).order_by('-updated')
     queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
     result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
     result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list, recent_test_day_count)
 
     # Cancelled or Completed Engagements
-    engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by(
-        '-target_end')
+    engs = Engagement.objects.filter(product=prod, active=False).order_by('-target_end')
     inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
     result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
     result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list, recent_test_day_count)
 
     title = "All Engagements"
-    if engagement_type == "CI/CD":
-        title = "CI/CD Engagements"
 
     product_tab = Product_Tab(pid, title=title, tab="engagements")
     return render(request,
                   'dojo/view_engagements.html',
                   {'prod': prod,
                    'product_tab': product_tab,
-                   'engagement_type': engagement_type,
                    'engs': result_active_engs,
                    'engs_count': result_active_engs.paginator.count,
                    'engs_filter': active_engs_filter,
@@ -702,11 +696,6 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
         )
 
     return engagements
-
-
-@user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
-def view_engagements_cicd(request, pid):
-    return view_engagements(request, pid=pid, engagement_type="CI/CD")
 
 
 # Authorization is within the import_scan_results method
@@ -1022,9 +1011,15 @@ def new_eng_for_app(request, pid, cicd=False):
             logger.debug('showing jira-epic-form')
             jira_epic_form = JIRAEngagementForm()
 
-    product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
+    if cicd:
+        title = 'New CI/CD Engagement'
+    else:
+        title = 'New Interactive Engagement'
+
+    product_tab = Product_Tab(pid, title=title, tab="engagements")
     return render(request, 'dojo/new_eng.html',
                   {'form': form,
+                   'title': title,
                    'product_tab': product_tab,
                    'jira_epic_form': jira_epic_form,
                    'jira_project_form': jira_project_form,
