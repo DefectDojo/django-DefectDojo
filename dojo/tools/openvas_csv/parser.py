@@ -68,15 +68,15 @@ class CweColumnMappingStrategy(ColumnMappingStrategy):
             finding.cwe = int(column_value)
 
 
-class UrlColumnMappingStrategy(ColumnMappingStrategy):
+class IpColumnMappingStrategy(ColumnMappingStrategy):
 
     def __init__(self):
         self.mapped_column = 'ip'
-        super(UrlColumnMappingStrategy, self).__init__()
+        super(IpColumnMappingStrategy, self).__init__()
 
     def map_column_value(self, finding, column_value):
-        url = column_value
-        endpoint = Endpoint(host=url)
+        ip = column_value
+        endpoint = Endpoint(host=ip)
         if endpoint not in finding.unsaved_endpoints:
             finding.unsaved_endpoints.append(endpoint)
 
@@ -185,7 +185,7 @@ class OpenVASCsvParser(object):
         date_column_strategy = DateColumnMappingStrategy()
         title_column_strategy = TitleColumnMappingStrategy()
         cwe_column_strategy = CweColumnMappingStrategy()
-        url_column_strategy = UrlColumnMappingStrategy()
+        ip_column_strategy = IpColumnMappingStrategy()
         severity_column_strategy = SeverityColumnMappingStrategy()
         description_column_strategy = DescriptionColumnMappingStrategy()
         mitigation_column_strategy = MitigationColumnMappingStrategy()
@@ -204,8 +204,8 @@ class OpenVASCsvParser(object):
         mitigation_column_strategy.successor = impact_column_strategy
         description_column_strategy.successor = mitigation_column_strategy
         severity_column_strategy.successor = description_column_strategy
-        url_column_strategy.successor = severity_column_strategy
-        cwe_column_strategy.successor = url_column_strategy
+        ip_column_strategy.successor = severity_column_strategy
+        cwe_column_strategy.successor = ip_column_strategy
         title_column_strategy.successor = cwe_column_strategy
         date_column_strategy.successor = title_column_strategy
 
@@ -254,14 +254,12 @@ class OpenVASCsvParser(object):
                 column_number += 1
 
             if finding is not None and row_number > 0:
-                if finding.url is None:
-                    finding.url = ""
                 if finding.title is None:
                     finding.title = ""
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.md5((finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
+                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
                 if key not in dupes:
                     dupes[key] = finding
