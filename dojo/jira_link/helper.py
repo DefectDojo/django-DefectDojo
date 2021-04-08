@@ -311,12 +311,12 @@ def has_jira_configured(obj):
     return get_jira_project(obj) is not None
 
 
-def get_jira_connection_raw(jira_server, jira_username, jira_password, validate=False):
+def get_jira_connection_raw(jira_server, jira_username, jira_password):
     try:
         jira = JIRA(server=jira_server,
                 basic_auth=(jira_username, jira_password),
                 options={"verify": settings.JIRA_SSL_VERIFY},
-                max_retries=0, validate=validate)
+                max_retries=0)
 
         logger.debug('logged in to JIRA ''%s'' successfully', jira_server)
 
