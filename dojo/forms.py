@@ -1800,7 +1800,7 @@ class JIRAForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'], validate=True)
+            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'])
             logger.debug('valid JIRA config!')
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
@@ -1827,7 +1827,7 @@ class ExpressJIRAForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'], validate=True)
+            jira = jira_helper.get_jira_connection_raw(form_data['url'], form_data['username'], form_data['password'],)
             logger.debug('valid JIRA config!')
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
