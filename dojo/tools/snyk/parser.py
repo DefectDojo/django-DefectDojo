@@ -134,7 +134,7 @@ def get_item(vulnerability, test):
         "CVSS score of: **" + str(vulnerability['cvssScore']) + "**",
         cwe=cwe,
         cve=cve,
-        cvssv3=vulnerability['CVSSv3'][9:],
+        cvssv3=vulnerability['CVSSv3'],
         description="## Component Details\n - **Vulnerable Package**: " +
         vulnerability['packageName'] + "\n- **Current Version**: " + str(
             vulnerability['version']) + "\n- **Vulnerable Version(s)**: " +

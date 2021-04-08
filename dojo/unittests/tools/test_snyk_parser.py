@@ -67,7 +67,7 @@ class TestSnykParser(TestCase):
         )
         self.assertEqual("CVE-2019-12400", finding.cve)
         self.assertEqual(611, finding.cwe)
-        self.assertEqual("AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L", finding.cvssv3)
+        self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L", finding.cvssv3)
         self.assertEqual(
             "## Remediation\nUpgrade `org.apache.santuario:xmlsec` to version 2.1.4 or higher.\n",
             finding.mitigation,
