@@ -210,7 +210,6 @@ class System_Settings(models.Model):
     time_zone = models.CharField(max_length=50,
                                  choices=[(tz, tz) for tz in all_timezones],
                                  default='UTC', blank=False)
-    display_endpoint_uri = models.BooleanField(default=False, verbose_name="Display Endpoint Full URI", help_text="Displays the full endpoint URI in the endpoint view.")
     enable_product_grade = models.BooleanField(default=False, verbose_name="Enable Product Grading", help_text="Displays a grade letter next to a product to show the overall health.")
     product_grade = models.CharField(max_length=800, blank=True)
     product_grade_a = models.IntegerField(default=90,
@@ -1175,7 +1174,8 @@ class Endpoint(models.Model):
             )
             # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
             # Example: https://google.com and https://google.com:443
-            clean_url = url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
+            normalize_path = self.protocol and (self.protocol.lower() in ['http', 'https'])  # it used to add '/' at the end for host
+            clean_url = url.normalize(scheme=True, host=True, path=normalize_path, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
             if not self.protocol:
                 if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
                     clean_url = clean_url[len(dummy_scheme) + 3:]
@@ -1194,38 +1194,54 @@ class Endpoint(models.Model):
         else:
             return NotImplemented
 
-    @cached_property
-    def finding_count(self):
-        endpoints = Endpoint.objects.filter(host=self.host,
-                                            product=self.product).distinct()
+    def findings(self):
+        return Finding.objects.filter(endpoints=self,
+                                     active=True,
+                                     verified=True,
+                                     out_of_scope=False).distinct()
 
-        findings = Finding.objects.filter(endpoints__in=endpoints,
-                                          active=True,
-                                          verified=True,
-                                          out_of_scope=False).distinct()
-
-        return findings.count()
+    def findings_count(self):
+        return self.finding().count()
 
     def active_findings(self):
-        endpoints = Endpoint.objects.filter(host=self.host,
-                                            product=self.product).distinct()
-        return Finding.objects.filter(endpoints__in=endpoints,
+        return self.findings().filter(mitigated__isnull=True,
+                                      false_p=False,
+                                      duplicate=False).order_by('numerical_severity')
+
+    def active_findings_count(self):
+        return self.active_findings().count()
+
+    def host_endpoints(self):
+        return Endpoint.objects.filter(host=self.host,
+                                       product=self.product).distinct()
+
+    def host_endpoints_count(self):
+        return self.host_endpoints().count()
+
+    def host_mitigated_endpoints(self):
+        return Endpoint.objects.filter(host=self.host,
+                                       product=self.product,
+                                       mitigated=True).distinct()
+
+    def host_mitigated_endpoints_count(self):
+        return self.host_mitigated_endpoints().count()
+
+    def host_findings(self):
+        return Finding.objects.filter(endpoints__in=self.host_endpoints(),
                                       active=True,
                                       verified=True,
-                                      mitigated__isnull=True,
+                                      out_of_scope=False).distinct()
+
+    def host_findings_count(self):
+        return self.finding().count()
+
+    def host_active_findings(self):
+        return self.findings().filter(mitigated__isnull=True,
                                       false_p=False,
-                                      duplicate=False).distinct().order_by(
-            'numerical_severity')
+                                      duplicate=False).order_by('numerical_severity')
 
-    @cached_property
-    def finding_count_endpoint(self):
-        findings = Finding.objects.filter(endpoints=self,
-                                          active=True,
-                                          verified=True,
-                                          duplicate=False,
-                                          out_of_scope=False).distinct()
-
-        return findings.count()
+    def host_active_findings_count(self):
+        return self.active_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()

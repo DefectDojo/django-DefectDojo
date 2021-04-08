@@ -15,100 +15,12 @@ from django.db.models import Q, QuerySet, Count
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
-from dojo.models import Product, Endpoint, Finding, System_Settings, DojoMeta, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, \
-    calculate_grade, redirect
+from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, Product_Tab, calculate_grade, redirect
 from dojo.notifications.helper import create_notification
 from dojo.user.helper import user_must_be_authorized
 
 logger = logging.getLogger(__name__)
-
-
-def vulnerable_endpoints(request):
-    endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                        finding__duplicate=False, finding__out_of_scope=False, mitigated=False).prefetch_related('product', 'product__tags', 'tags').distinct()
-
-    # are they authorized
-    if request.user.is_staff:
-        pass
-    else:
-        endpoints = Endpoint.objects.filter(
-            Q(product__authorized_users__in=[request.user]) |
-            Q(product__prod_type__authorized_users__in=[request.user])
-        )
-        if not endpoints:
-            raise PermissionDenied
-
-    product = None
-    if 'product' in request.GET:
-        p = request.GET.getlist('product', [])
-        if len(p) == 1:
-            product = get_object_or_404(Product, id=p[0])
-
-    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
-    endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
-    endpoints_query = endpoints.qs.order_by('host')
-    paged_endpoints = get_page_items(request, endpoints_query, 25)
-    add_breadcrumb(title="Vulnerable Endpoints", top_level=not len(request.GET), request=request)
-
-    system_settings = System_Settings.objects.get()
-
-    product_tab = None
-    view_name = "All Endpoints"
-    if product:
-        product_tab = Product_Tab(product.id, "Vulnerable Endpoints", tab="endpoints")
-    return render(
-        request, 'dojo/endpoints.html', {
-            'product_tab': product_tab,
-            "endpoints": paged_endpoints,
-            "filtered": endpoints,
-            "name": "Vulnerable Endpoints",
-        })
-
-
-def all_endpoints(request):
-    endpoints = Endpoint.objects.all().prefetch_related('product', 'tags', 'product__tags')
-    show_uri = get_system_setting('display_endpoint_uri')
-    # are they authorized
-    if request.user.is_staff:
-        pass
-    else:
-        endpoints = Endpoint.objects.filter(
-            Q(product__authorized_users__in=[request.user]) |
-            Q(product__prod_type__authorized_users__in=[request.user])
-        )
-        if not endpoints:
-            raise PermissionDenied
-
-    product = None
-    if 'product' in request.GET:
-        p = request.GET.getlist('product', [])
-        if len(p) == 1:
-            product = get_object_or_404(Product, id=p[0])
-
-    if show_uri:
-        endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
-        paged_endpoints = get_page_items(request, endpoints.qs, 25)
-    else:
-        ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
-        endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
-        paged_endpoints = get_page_items(request, endpoints.qs, 25)
-    add_breadcrumb(title="All Endpoints", top_level=not len(request.GET), request=request)
-
-    product_tab = None
-    view_name = "All Endpoints"
-    if product:
-        view_name = "Endpoints"
-        product_tab = Product_Tab(product.id, "Endpoints", tab="endpoints")
-
-    return render(
-        request, 'dojo/endpoints.html', {
-            'product_tab': product_tab,
-            "endpoints": paged_endpoints,
-            "filtered": endpoints,
-            "name": view_name,
-            "show_uri": show_uri
-        })
 
 
 def get_endpoint_ids(endpoints):
@@ -124,8 +36,130 @@ def get_endpoint_ids(endpoints):
     return ids
 
 
+def process_endpoints_view(request, host=False, vulnerable=False):
+    # are they authorized
+    if request.user.is_staff:
+        endpoints = Endpoint.objects.all()
+    else:
+        endpoints = Endpoint.objects.filter(
+            Q(product__authorized_users__in=[request.user]) |
+            Q(product__prod_type__authorized_users__in=[request.user])
+        )
+        if not endpoints:
+            raise PermissionDenied
+
+    endpoints = endpoints.prefetch_related('product', 'product__tags', 'tags').distinct()
+
+    if vulnerable:
+        endpoints = endpoints.filter(finding__active=True, finding__verified=True, finding__false_p=False,
+                                     finding__duplicate=False, finding__out_of_scope=False, mitigated=False)
+
+    if host:
+        ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
+        endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
+    else:
+        endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
+
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
+
+    if vulnerable:
+        view_name = "Vulnerable"
+    else:
+        view_name = "All"
+
+    if host:
+        view_name += " Endpoint Hosts"
+    else:
+        view_name += " Endpoints"
+
+    add_breadcrumb(title=view_name, top_level=not len(request.GET), request=request)
+
+    product_tab = None
+    if 'product' in request.GET:
+        p = request.GET.getlist('product', [])
+        if len(p) == 1:
+            product = get_object_or_404(Product, id=p[0])
+            product_tab = Product_Tab(product.id, view_name, tab="endpoints")
+
+    return render(
+        request, 'dojo/endpoints.html', {
+            'product_tab': product_tab,
+            "endpoints": paged_endpoints,
+            "filtered": endpoints,
+            "name": view_name,
+            "host": host
+        })
+
+
+def all_endpoints(request):
+    return process_endpoints_view(request, host=False, vulnerable=False)
+
+
+def all_endpoint_hosts(request):
+    return process_endpoints_view(request, host=True, vulnerable=False)
+
+
+def vulnerable_endpoints(request):
+    return process_endpoints_view(request, host=False, vulnerable=True)
+
+
+def vulnerable_endpoint_hosts(request):
+    return process_endpoints_view(request, host=True, vulnerable=True)
+
+
 @user_must_be_authorized(Endpoint, 'view', 'eid')
 def view_endpoint(request, eid):
+    endpoint = get_object_or_404(Endpoint, id=eid)
+    endpoints = Endpoint.objects.filter(host=endpoint.host,
+                                        product=endpoint.product).distinct()
+
+    endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
+
+    all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
+
+    active_findings = Finding.objects.filter(endpoints__in=endpoints,
+                                             active=True,
+                                             verified=True).distinct()
+
+    closed_findings = Finding.objects.filter(endpoints__in=endpoints,
+                                             mitigated__isnull=False).distinct()
+    if all_findings:
+        start_date = timezone.make_aware(datetime.combine(all_findings.last().date, datetime.min.time()))
+    else:
+        start_date = timezone.now()
+    end_date = timezone.now()
+
+    r = relativedelta(end_date, start_date)
+    months_between = (r.years * 12) + r.months
+    # include current month
+    months_between += 1
+
+    monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
+                                       relative_delta='months')
+
+    paged_findings = get_page_items(request, active_findings, 25)
+
+    vulnerable = False
+
+    if active_findings.count() != 0:
+        vulnerable = True
+
+    product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
+    return render(request,
+                  "dojo/view_endpoint.html",
+                  {"endpoint": endpoint,
+                   'product_tab': product_tab,
+                   "endpoints": endpoints,
+                   "findings": paged_findings,
+                   'all_findings': all_findings,
+                   'opened_per_month': monthly_counts['opened_per_period'],
+                   'endpoint_metadata': endpoint_metadata,
+                   'vulnerable': vulnerable,
+                   })
+
+
+@user_must_be_authorized(Endpoint, 'view', 'eid')
+def view_endpoint_host(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     endpoints = Endpoint.objects.filter(host=endpoint.host,
                                         product=endpoint.product).distinct()
@@ -423,14 +457,14 @@ def endpoint_status_bulk_update(request, fid):
                 endpoint_status.last_modified = timezone.now()
                 endpoint_status.save()
             messages.add_message(request,
-                                    messages.SUCCESS,
-                                    'Bulk edit of endpoints was successful. Check to make sure it is what you intended.',
-                                    extra_tags='alert-success')
+                                 messages.SUCCESS,
+                                 'Bulk edit of endpoints was successful. Check to make sure it is what you intended.',
+                                 extra_tags='alert-success')
         else:
             messages.add_message(request,
-                                    messages.ERROR,
-                                    'Unable to process bulk update. Required fields were not selected.',
-                                    extra_tags='alert-danger')
+                                 messages.ERROR,
+                                 'Unable to process bulk update. Required fields were not selected.',
+                                 extra_tags='alert-danger')
     return redirect(request, post['return_url'])
 
 

@@ -1497,6 +1497,8 @@ class Product_Tab():
                                                           mitigated__isnull=True).count()
         self.endpoints_count = Endpoint.objects.filter(
             product=self.product).count()
+        self.endpoint_hosts_count = Endpoint.objects.filter(
+            product=self.product).values('host').distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
             enabled=True).order_by('name')
         self.engagement = None
@@ -1530,6 +1532,9 @@ class Product_Tab():
 
     def endpoints(self):
         return self.endpoints_count
+
+    def endpoint_hosts(self):
+        return self.endpoint_hosts_count
 
     def benchmark_type(self):
         return self.benchmark_type

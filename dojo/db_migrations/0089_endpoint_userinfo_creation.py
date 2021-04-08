@@ -38,5 +38,9 @@ class Migration(migrations.Migration):
             name='path',
             field=models.CharField(blank=True, help_text="The location of the resource, it must not start with a '/'. "
                                                          "For example endpoint/420/edit", max_length=500, null=True),
-        )
+        ),
+        migrations.RemoveField(
+            model_name='system_settings',
+            name='display_endpoint_uri',
+        ),
     ]
