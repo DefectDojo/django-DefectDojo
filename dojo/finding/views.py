@@ -25,7 +25,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 from itertools import chain
 from dojo.user.helper import user_must_be_authorized
-from dojo.utils import add_error_message_to_response, add_field_errors_to_response, close_external_issue, reopen_external_issue
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 
 from dojo.filters import OpenFindingFilter, OpenFindingSuperFilter, AcceptedFindingFilter, AcceptedFindingSuperFilter, \
@@ -34,7 +34,7 @@ from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, P
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
-from dojo.models import Finding, Notes, NoteHistory, Note_Type, \
+from dojo.models import Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
     BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Endpoint_Status, \
     FindingImageAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
@@ -138,7 +138,7 @@ django_filter=open_findings_filter, prefetch_type='all'):
 
     elif eid:
         engagement = get_object_or_404(Engagement, id=eid)
-        findings = Finding.objects.filter(test__engagement=eid).order_by('numerical_severity')
+        findings = findings.filter(test__engagement=eid)
 
         show_product_column = False
         product_tab = Product_Tab(engagement.product_id, title=engagement.name, tab="engagements")
@@ -194,7 +194,7 @@ django_filter=open_findings_filter, prefetch_type='all'):
 def prefetch_for_findings(findings, prefetch_type='all'):
     prefetched_findings = findings
     if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        prefetched_findings = prefetched_findings.select_related('reporter')
+        prefetched_findings = prefetched_findings.prefetch_related('reporter')
         prefetched_findings = prefetched_findings.prefetch_related('jira_issue__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project__jira_instance')
@@ -219,6 +219,7 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -228,7 +229,7 @@ def prefetch_for_findings(findings, prefetch_type='all'):
 def prefetch_for_similar_findings(findings):
     prefetched_findings = findings
     if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        prefetched_findings = prefetched_findings.select_related('reporter')
+        prefetched_findings = prefetched_findings.prefetch_related('reporter')
         prefetched_findings = prefetched_findings.prefetch_related('jira_issue__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project__jira_instance')
@@ -310,8 +311,12 @@ def view_finding(request, fid):
             finding.last_reviewed = new_note.date
             finding.last_reviewed_by = user
             finding.save()
+
             if finding.has_jira_issue:
                 jira_helper.add_comment(finding, new_note)
+            elif finding.has_jira_group_issue:
+                jira_helper.add_comment(finding.finding_group, new_note)
+
             if note_type_activation:
                 form = TypedNoteForm(available_note_types=available_note_types)
             else:
@@ -359,7 +364,7 @@ def view_finding(request, fid):
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="View Finding", tab="findings")
 
-    can_be_pushed_to_jira, can_be_pushed_to_jira_error, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
+    can_be_pushed_to_jira, can_be_pushed_to_jira_error, error_code = jira_helper.can_be_pushed_to_jira(finding)
 
     lastPos = (len(findings)) - 1
     return render(
@@ -437,7 +442,7 @@ def close_finding(request, fid):
                     status.last_modified = timezone.now()
                     status.save()
 
-                # only push to JIRA if there is an issue, otherwise a new one is created
+                # only push to JIRA if there is an issue, to prevent a new one from being created
                 if jira_helper.is_push_all_issues(finding) and finding.has_jira_issue:
                     finding.save(push_to_jira=True)
                 else:
@@ -527,7 +532,11 @@ def defect_finding_review(request, fid):
                         new_note.entry = new_note.entry + "\nJira issue re-opened."
 
             # Update Dojo and Jira with a notes
-            jira_helper.add_comment(finding, new_note, force_push=True)
+            if finding.has_jira_issue:
+                jira_helper.add_comment(finding, new_note, force_push=True)
+            elif finding.has_jira_group_issue:
+                jira_helper.add_comment(finding.finding_group, new_note, force_push=True)
+
             finding.save()
 
             messages.add_message(
@@ -754,29 +763,32 @@ def edit_finding(request, fid):
 
                 logger.debug('push_to_jira: %s', push_to_jira)
                 logger.debug('push_all_jira_issues: %s', push_all_jira_issues)
+                logger.debug('has_jira_group_issue: %s', new_finding.has_jira_group_issue)
 
                 # if the jira issue key was changed, update database
                 new_jira_issue_key = jform.cleaned_data.get('jira_issue')
-                if new_finding.has_jira_issue:
-                    jira_issue = new_finding.jira_issue
+                # we only support linking / changing if there is no group issue
+                if not new_finding.has_jira_group_issue:
+                    if new_finding.has_jira_issue:
+                        jira_issue = new_finding.jira_issue
 
-                    # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
-                    # instead of on the public jira issue key.
-                    # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
-                    # we can assume the issue exist, which is already checked in the validation of the jform
+                        # everything in DD around JIRA integration is based on the internal id of the issue in JIRA
+                        # instead of on the public jira issue key.
+                        # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
+                        # we can assume the issue exist, which is already checked in the validation of the jform
 
-                    if not new_jira_issue_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_message = 'Link to JIRA issue removed successfully.'
+                        if not new_jira_issue_key:
+                            jira_helper.finding_unlink_jira(request, new_finding)
+                            jira_message = 'Link to JIRA issue removed successfully.'
 
-                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
-                        jira_message = 'Changed JIRA link successfully.'
-                else:
-                    if new_jira_issue_key:
-                        jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
-                        jira_message = 'Linked a JIRA issue successfully.'
+                        elif new_jira_issue_key != new_finding.jira_issue.jira_key:
+                            jira_helper.finding_unlink_jira(request, new_finding)
+                            jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
+                            jira_message = 'Changed JIRA link successfully.'
+                    else:
+                        if new_jira_issue_key:
+                            jira_helper.finding_link_jira(request, new_finding, new_jira_issue_key)
+                            jira_message = 'Linked a JIRA issue successfully.'
 
             if 'githubform-push_to_github' in request.POST:
                 gform = GITHUBFindingForm(
@@ -787,7 +799,17 @@ def edit_finding(request, fid):
                     else:
                         add_external_issue(new_finding, 'github')
 
+            # if there's a finding group, that's what we need to push
+            push_group_to_jira = push_to_jira and new_finding.finding_group
+            # any existing finding should be updated
+            push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
+
             new_finding.save(push_to_jira=push_to_jira)
+
+            # we only push the group after storing the finding to make sure
+            # the updated data of the finding is pushed as part of the group
+            if push_group_to_jira:
+                jira_helper.push_to_jira(new_finding.finding_group)
 
             messages.add_message(
                 request,
@@ -1800,40 +1822,38 @@ def merge_finding_product(request, pid):
 def finding_bulk_update_all(request, pid=None):
     form = FindingBulkUpdateForm(request.POST)
     now = timezone.now()
+    return_url = None
+
     if request.method == "POST":
         finding_to_update = request.POST.getlist('finding_to_update')
+        finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
+        total_find_count = finds.count()
+        skipped_find_count = 0
 
-        if request.POST.get('delete_bulk_findings') and finding_to_update:
-            finds = Finding.objects.filter(id__in=finding_to_update)
-            total_find_count = finds.count()
-            skipped_find_count = 0
+        prods = set([find.test.engagement.product for find in finds])
+        if request.POST.get('delete_bulk_findings'):
+            if form.is_valid() and finding_to_update:
+                # make sure users are not deleting stuff they are not authorized for
+                if not request.user.is_staff and not request.user.is_superuser:
+                    if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
+                        raise PermissionDenied()
 
-            # make sure users are not deleting stuff they are not authorized for
-            if not request.user.is_staff and not request.user.is_superuser:
-                if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
-                    raise PermissionDenied()
-
-                finds = finds.filter(
-                    Q(test__engagement__product__authorized_users__in=[request.user]) |
-                    Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                ).distinct()
+                    finds = finds.filter(
+                        Q(test__engagement__product__authorized_users__in=[request.user]) |
+                        Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
+                    ).distinct()
 
                 skipped_find_count = total_find_count - finds.count()
 
-            product_calc = list(Product.objects.filter(engagement__test__finding__id__in=finding_to_update).distinct())
-            finds.delete()
-            for prod in product_calc:
-                calculate_grade(prod)
+                finds.delete()
+                for prod in prods:
+                    calculate_grade(prod)
 
-            if skipped_find_count > 0:
-                add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
+                if skipped_find_count > 0:
+                    add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
 
         else:
             if form.is_valid() and finding_to_update:
-                finding_to_update = request.POST.getlist('finding_to_update')
-                finds = Finding.objects.filter(id__in=finding_to_update).order_by("finding__test__engagement__product__id")
-                total_find_count = finds.count()
-                skipped_find_count = 0
 
                 # make sure users are not deleting stuff they are not authorized for
                 if not request.user.is_staff and not request.user.is_superuser:
@@ -1873,6 +1893,9 @@ def finding_bulk_update_all(request, pid=None):
                         # it will trigger the pre_save signal
                         find.save_no_options()
 
+                    for prod in prods:
+                        calculate_grade(prod)
+
                 skipped_risk_accept_count = 0
                 if form.cleaned_data['risk_acceptance']:
                     for finding in finds:
@@ -1884,11 +1907,59 @@ def finding_bulk_update_all(request, pid=None):
                         elif form.cleaned_data['risk_unaccept']:
                             ra_helper.risk_unaccept(finding)
 
+                    for prod in prods:
+                        calculate_grade(prod)
+
                 if skipped_risk_accept_count > 0:
                     messages.add_message(request,
                                         messages.WARNING,
                                         'Skipped simple risk acceptance of %i findings, simple risk acceptance is disabled on the related products' % skipped_risk_accept_count,
                                         extra_tags='alert-warning')
+
+                if form.cleaned_data['finding_group_create']:
+                    logger.debug('finding_group_create checked!')
+                    finding_group_name = form.cleaned_data['finding_group_create_name']
+                    logger.debug('finding_group_create_name: %s', finding_group_name)
+                    finding_group, added, skipped = finding_helper.create_finding_group(finds, finding_group_name)
+
+                    if added:
+                        add_success_message_to_response('Created finding group with %s findings' % added)
+                        return_url = reverse('view_finding_group', args=(finding_group.id,))
+
+                    if skipped:
+                        add_success_message_to_response('Skipped %s findings in group creation, findings already part of another group' % skipped)
+
+                    # refresh findings from db
+                    finds = finds.all()
+
+                if form.cleaned_data['finding_group_add']:
+                    logger.debug('finding_group_add checked!')
+                    fgid = form.cleaned_data['add_to_finding_group']
+                    finding_group = Finding_Group.objects.get(id=fgid)
+                    finding_group, added, skipped = finding_helper.add_to_finding_group(finding_group, finds)
+
+                    if added:
+                        add_success_message_to_response('Added %s findings to finding group %s' % (added, finding_group.name))
+                        return_url = reverse('view_finding_group', args=(finding_group.id,))
+
+                    if skipped:
+                        add_success_message_to_response('Skipped %s findings when adding to finding group %s, findings already part of another group' % (skipped, finding_group.name))
+
+                    # refresh findings from db
+                    finds = finds.all()
+
+                if form.cleaned_data['finding_group_remove']:
+                    logger.debug('finding_group_remove checked!')
+                    finding_groups, removed, skipped = finding_helper.remove_from_finding_group(finds)
+
+                    if removed:
+                        add_success_message_to_response('Removed %s findings from finding groups %s' % (removed, ','.join([finding_group.name for finding_group in finding_groups])))
+
+                    if skipped:
+                        add_success_message_to_response('Skipped %s findings when removing from any finding group, findings not part of any group' % (skipped))
+
+                    # refresh findings from db
+                    finds = finds.all()
 
                 if form.cleaned_data['push_to_github']:
                     logger.info('push selected findings to github')
@@ -1910,15 +1981,34 @@ def finding_bulk_update_all(request, pid=None):
                         finding.tags = tags
                         finding.save()
 
-                if form.cleaned_data['severity'] or form.cleaned_data['status']:
-                    prev_prod = None
-                    for finding in finds:
-                        # findings are ordered by product_id
-                        if prev_prod != finding.test.engagement.product.id:
-                            # TODO this can be inefficient as most findings usually have the same product
-                            calculate_grade(finding.test.engagement.product)
-                            prev_prod = finding.test.engagement.product.id
+                error_counts = defaultdict(lambda: 0)
+                success_count = 0
+                finding_groups = set([find.finding_group for find in finds if find.has_finding_group])
+                logger.info('finding_groups: %s', finding_groups)
+                for group in finding_groups:
+                    if form.cleaned_data.get('push_to_jira'):
+                        can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(group)
+                        if not can_be_pushed_to_jira:
+                            error_counts[error_message] += 1
+                            jira_helper.log_jira_alert(error_message, group)
+                        else:
+                            logger.debug('pushing to jira from finding.finding_bulk_update_all()')
+                            jira_helper.push_to_jira(group)
+                            success_count += 1
 
+                        jira_helper.push_to_jira(group)
+
+                for error_message, error_count in error_counts.items():
+                    add_error_message_to_response('%i finding groups could not be pushed to JIRA: %s' % (error_count, error_message))
+
+                if success_count > 0:
+                    add_success_message_to_response('%i finding groups pushed to JIRA succesfully' % success_count)
+
+                # refresh from db
+                finds = finds.all()
+
+                error_counts = defaultdict(lambda: 0)
+                success_count = 0
                 for finding in finds:
                     from dojo.tools import tool_issue_updater
                     tool_issue_updater.async_tool_issue_update(finding)
@@ -1933,18 +2023,26 @@ def finding_bulk_update_all(request, pid=None):
 
                     # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
                     # push_to_jira = jira_helper.is_push_to_jira(new_finding, form.cleaned_data.get('push_to_jira'))
-                    error_counts = defaultdict(lambda: 0)
                     if jira_helper.is_push_all_issues(finding) or form.cleaned_data.get('push_to_jira'):
-                        can_be_pushed_to_jira, error_message, error_code = jira_helper.finding_can_be_pushed_to_jira(finding)
-                        if not can_be_pushed_to_jira:
+
+                        can_be_pushed_to_jira, error_message, error_code = jira_helper.can_be_pushed_to_jira(finding)
+                        if finding.has_jira_group_issue and not finding.has_jira_issue:
+                            error_message = 'finding already pushed as part of Finding Group'
+                            error_counts[error_message] += 1
+                            jira_helper.log_jira_alert(error_message, finding)
+                        elif not can_be_pushed_to_jira:
                             error_counts[error_message] += 1
                             jira_helper.log_jira_alert(error_message, finding)
                         else:
                             logger.debug('pushing to jira from finding.finding_bulk_update_all()')
                             jira_helper.push_to_jira(finding)
+                            success_count += 1
 
-                        for error_message, error_count in error_counts.items():
-                            add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
+                for error_message, error_count in error_counts.items():
+                    add_error_message_to_response('%i findings could not be pushed to JIRA: %s' % (error_count, error_message))
+
+                if success_count > 0:
+                    add_success_message_to_response('%i findings pushed to JIRA succesfully' % success_count)
 
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -1955,6 +2053,9 @@ def finding_bulk_update_all(request, pid=None):
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
+
+    if return_url:
+        redirect(request, return_url)
 
     return redirect_to_return_url_or_else(request, None)
 

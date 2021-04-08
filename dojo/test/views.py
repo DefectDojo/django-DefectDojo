@@ -2,7 +2,6 @@
 import logging
 import operator
 import json
-from django.db.models.query import Prefetch
 import httplib2
 import base64
 from datetime import datetime
@@ -20,7 +19,7 @@ from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 
-from dojo.filters import TemplateFindingFilter, OpenFindingFilter
+from dojo.filters import TemplateFindingFilter, OpenFindingFilter, TestImportFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
@@ -53,12 +52,13 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 @sensitive_variables('service_account_info', 'credentials')
 @user_is_authorized(Test, Permissions.Test_View, 'tid', 'view')
 def view_test(request, tid):
-    tests_prefetched = get_authorized_tests(Permissions.Test_View)
-    tests_prefetched = tests_prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
-    tests_prefetched = tests_prefetched.prefetch_related(Prefetch('test_import_set', queryset=Test_Import.objects.filter(~Q(findings_affected=None))))
-    tests_prefetched = tests_prefetched.prefetch_related('test_import_set__test_import_finding_action_set')
+    test_prefetched = get_authorized_tests(Permissions.Test_View)
+    test_prefetched = test_prefetched.annotate(total_reimport_count=Count('test_import__id', distinct=True))
+    # tests_prefetched = test_prefetched.prefetch_related(Prefetch('test_import_set', queryset=Test_Import.objects.filter(~Q(findings_affected=None))))
+    # tests_prefetched = test_prefetched.prefetch_related('test_import_set')
+    # test_prefetched = test_prefetched.prefetch_related('test_import_set__test_import_finding_action_set')
 
-    test = get_object_or_404(tests_prefetched, pk=tid)
+    test = get_object_or_404(test_prefetched, pk=tid)
     # test = get_object_or_404(Test, pk=tid)
 
     prod = test.engagement.product
@@ -111,7 +111,11 @@ def view_test(request, tid):
     component_words = get_words_for_field(findings.qs, 'component_name')
 
     # test_imports = test.test_import_set.all()
-    paged_test_imports = get_page_items_and_count(request, test.test_import_set.all(), 5, prefix='test_imports')
+    test_imports = Test_Import.objects.filter(test=test)
+    test_import_filter = TestImportFilter(request.GET, test_imports)
+
+    paged_test_imports = get_page_items_and_count(request, test_import_filter.qs, 5, prefix='test_imports')
+    paged_test_imports.object_list = paged_test_imports.object_list.prefetch_related('test_import_finding_action_set')
 
     paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix='findings')
     paged_stub_findings = get_page_items(request, stub_findings, 25)
@@ -120,6 +124,8 @@ def view_test(request, tid):
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
+
+    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue')
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
@@ -180,6 +186,8 @@ def view_test(request, tid):
                    'sheet_url': sheet_url,
                    'bulk_edit_form': bulk_edit_form,
                    'paged_test_imports': paged_test_imports,
+                   'test_import_filter': test_import_filter,
+                   'finding_groups': finding_groups,
                    })
 
 
@@ -187,7 +195,7 @@ def prefetch_for_findings(findings):
     prefetched_findings = findings
     if isinstance(findings, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         prefetched_findings = prefetched_findings.select_related('reporter')
-        prefetched_findings = prefetched_findings.prefetch_related('jira_issue')
+        prefetched_findings = prefetched_findings.prefetch_related('jira_issue__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__test_type')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__jira_project__jira_instance')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__jira_project_set__jira_instance')
@@ -204,6 +212,9 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
+        prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
+        prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
+
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -676,6 +687,10 @@ def re_import_scan_results(request, tid):
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
             version = form.cleaned_data.get('version', None)
+            branch_tag = form.cleaned_data.get('branch_tag', None)
+            build_id = form.cleaned_data.get('build_id', None)
+            commit_hash = form.cleaned_data.get('commit_hash', None)
+
             close_old_findings = form.cleaned_data.get('close_old_findings', True)
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
@@ -739,8 +754,6 @@ def re_import_scan_results(request, tid):
                     if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                         continue
 
-                    from titlecase import titlecase
-                    item.title = titlecase(item.title)
                     item.hash_code = item.compute_hash_code()
                     deduplicationLogger.debug("new finding's hash_code: %s", item.hash_code)
 
@@ -914,6 +927,18 @@ def re_import_scan_results(request, tid):
                 test.updated = max_safe([scan_date_time, test.updated])
                 test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
 
+                if version:
+                    test.version = version
+
+                if branch_tag:
+                    test.branch_tag = branch_tag
+
+                if build_id:
+                    test.build_id = build_id
+
+                if branch_tag:
+                    test.commit_hash = commit_hash
+
                 test.save()
                 test.engagement.save()
 
@@ -950,11 +975,10 @@ def re_import_scan_results(request, tid):
                     import_settings['minimum_severity'] = min_sev
                     import_settings['close_old_findings'] = close_old_findings
                     import_settings['push_to_jira'] = push_to_jira
-                    import_settings['version'] = version
                     # tags=tags TODO no tags field in api for reimport it seems
                     import_settings['endpoint'] = ','.join(form.cleaned_data['endpoints'])
 
-                    test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.REIMPORT_TYPE)
+                    test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.REIMPORT_TYPE)
                     test_import.save()
 
                     test_import_finding_action_list = []

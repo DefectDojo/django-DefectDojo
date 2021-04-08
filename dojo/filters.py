@@ -15,7 +15,7 @@ from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
 import pytz
 from django.db.models import Q
-from dojo.models import Dojo_User, Product_Type, Finding, Product, Test_Type, \
+from dojo.models import Dojo_User, Finding_Group, Product_Type, Finding, Product, Test_Import, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
     ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES
@@ -735,6 +735,8 @@ class ApiFindingFilter(DojoFilter):
     test__test_type = NumberInFilter(field_name='test__test_type', lookup_expr='in')
     test__engagement = NumberInFilter(field_name='test__engagement', lookup_expr='in')
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
+    finding_group = NumberInFilter(field_name='finding_group', lookup_expr='in')
+
     # ReportRiskAcceptanceFilter
     risk_acceptance = ReportRiskAcceptanceFilter()
 
@@ -798,6 +800,17 @@ class OpenFindingFilter(DojoFilter):
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.none(),
         label="Engagement")
+
+    if settings.FEATURE_FINDING_GROUPS:
+        finding_group = ModelMultipleChoiceFilter(
+            queryset=Finding_Group.objects.none(),
+            label="Finding Group")
+
+        has_finding_group = BooleanFilter(field_name='finding_group',
+                                    lookup_expr='isnull',
+                                    exclude=True,
+                                    label='is Grouped')
+
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
 
@@ -807,6 +820,12 @@ class OpenFindingFilter(DojoFilter):
                                 lookup_expr='isnull',
                                 exclude=True,
                                 label='has JIRA')
+
+    if settings.FEATURE_FINDING_GROUPS:
+        has_jira_group_issue = BooleanFilter(field_name='finding_group__jira_issue',
+                                    lookup_expr='isnull',
+                                    exclude=True,
+                                    label='has Group JIRA')
 
     has_component = BooleanFilter(field_name='component_name',
                                 lookup_expr='isnull',
@@ -897,8 +916,20 @@ class OpenFindingFilter(DojoFilter):
         if self.form.fields.get('test__engagement__product'):
             self.form.fields['test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
         if self.user is not None and not self.user.is_staff:
+
+            if self.form.fields.get('finding_group', None):
+                logger.debug('setting queryset for finding_group field')
+                self.form.fields['test__engagement__product'].queryset = \
+                    Finding_Group.objects.filter(
+                        Q(test__engagement__product__authorized_users__in=[self.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[self.user])
+                                                )
+
             self.form.fields['endpoints'].queryset = Endpoint.objects.filter(
                 product__authorized_users__in=[self.user]).distinct()
+
+        else:
+            if self.form.fields.get('finding_group', None):
+                self.form.fields['finding_group'].queryset = Finding_Group.objects.all()
 
         # Don't show the product filter on the product finding view
         if self.pid:
@@ -1910,6 +1941,9 @@ class ApiTestFilter(DojoFilter):
             ('test_type', 'test_type'),
             ('lead', 'lead'),
             ('version', 'version'),
+            ('branch_tag', 'branch_tag'),
+            ('build_id', 'build_id'),
+            ('commit_hash', 'commit_hash'),
             ('engagement', 'engagement'),
             ('created', 'created'),
             ('updated', 'updated'),
@@ -1923,7 +1957,8 @@ class ApiTestFilter(DojoFilter):
         model = Test
         fields = ['id', 'title', 'test_type', 'target_start',
                      'target_end', 'notes', 'percent_complete',
-                     'actual_time', 'engagement', 'version']
+                     'actual_time', 'engagement', 'version',
+                     'branch_tag', 'build_id', 'commit_hash']
 
 
 class ApiAppAnalysisFilter(DojoFilter):
@@ -2167,6 +2202,32 @@ class UserFilter(DojoFilter):
                   'last_name', 'username']
         exclude = ['password', 'last_login', 'groups', 'user_permissions',
                    'date_joined']
+
+
+class TestImportFilter(DojoFilter):
+    version = CharFilter(field_name='version', lookup_expr='icontains')
+    version_exact = CharFilter(field_name='version', lookup_expr='iexact', label='Version Exact')
+    branch_tag = CharFilter(lookup_expr='icontains', label='Branch/Tag')
+    build_id = CharFilter(lookup_expr='icontains', label="Build ID")
+    commit_hash = CharFilter(lookup_expr='icontains', label="Commit hash")
+
+    findings_affected = BooleanFilter(field_name='findings_affected', lookup_expr='isnull', exclude=True, label='Findings affected')
+
+    o = OrderingFilter(
+        # tuple-mapping retains order
+        fields=(
+            ('date', 'date'),
+            ('version', 'version'),
+            ('branch_tag', 'branch_tag'),
+            ('build_id', 'build_id'),
+            ('commit_hash', 'commit_hash'),
+
+        )
+    )
+
+    class Meta:
+        model = Test_Import
+        fields = []
 
 
 class ReportFilter(DojoFilter):

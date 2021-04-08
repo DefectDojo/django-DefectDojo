@@ -179,8 +179,14 @@ env = environ.Env(
     # You need to have wkhtmltopdf installed on your system to generate PDF reports
     DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
 
-    DD_JIRA_TEMPLATE_DIR=(str, 'dojo/templates/issue-trackers'),
-    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/')
+    DD_FEATURE_FINDING_GROUPS=(bool, False),
+    DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
+    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
+
+    # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
+    # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
+    # Set to True to revert to the old behaviour where all duplicates are deleted
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False)
 )
 
 
@@ -749,6 +755,11 @@ CELERY_BEAT_SCHEDULE = {
     #     'schedule': timedelta(hours=12),
     #     'kwargs': {'mode': 'reconcile', 'dryrun': True, 'daysback': 10, 'product': None, 'engagement': None}
     # },
+    # 'fix_loop_duplicates': {
+    #     'task': 'dojo.tasks.fix_loop_duplicates_task',
+    #     'schedule': timedelta(hours=12)
+    # },
+
 
 }
 
@@ -996,7 +1007,7 @@ LOGGING = {
             'propagate': False,
         },
         'titlecase': {
-            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
+            # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
@@ -1053,5 +1064,8 @@ EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
 
-JIRA_TEMPLATE_DIR = env('DD_JIRA_TEMPLATE_DIR')
+FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
+JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
+
+DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')

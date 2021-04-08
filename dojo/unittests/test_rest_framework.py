@@ -113,7 +113,7 @@ class BaseClass():
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '%s/' % current_objects['results'][-1]['id']
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code, response.content[:1000])
 
@@ -664,7 +664,10 @@ class TestsTest(BaseClass.RESTEndpointTest):
             "target_end": "2017-01-12T00:00",
             "percent_complete": 0,
             "lead": 2,
-            "tags": []
+            "tags": [],
+            "version": "1.0",
+            "branch_tag": "master",
+            "commit_hash": "1234567890abcdefghijkl",
         }
         self.update_fields = {'percent_complete': 100}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
