@@ -327,6 +327,7 @@ def deduplicate_uid_or_hash_code(new_finding):
 
 def set_duplicate(new_finding, existing_finding):
     if existing_finding.duplicate:
+        logger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
@@ -1434,7 +1435,11 @@ def get_system_setting(setting, default=None):
 @dojo_model_from_id(model=Product)
 def calculate_grade(product):
     system_settings = System_Settings.objects.get()
+    if not product:
+        logger.warning('ignoring calculate product for product None!')
+
     if system_settings.enable_product_grade:
+        logger.debug('calculating product grade for %s:%s', product.id, product.name)
         severity_values = Finding.objects.filter(
             ~Q(severity='Info'),
             active=True,
