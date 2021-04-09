@@ -1805,11 +1805,14 @@ def merge_finding_product(request, pid):
 
 # bulk update and delete are combined, so we can't have the nice user_is_authorized decorator
 def finding_bulk_update_all(request, pid=None):
+    logger.debug('bulk 10')
     form = FindingBulkUpdateForm(request.POST)
     now = timezone.now()
     return_url = None
 
     if request.method == "POST":
+        logger.debug('bulk 20')
+
         finding_to_update = request.POST.getlist('finding_to_update')
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
@@ -1819,7 +1822,7 @@ def finding_bulk_update_all(request, pid=None):
             if form.is_valid() and finding_to_update:
 
                 if not settings.FEATURE_AUTHORIZATION_V2:
-                    if not request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_DELETE or settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                    if not request.user.is_staff and not settings.AUTHORIZED_USERS_ALLOW_DELETE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
                         raise PermissionDenied
                 else:
                     if pid is None:
@@ -1850,7 +1853,7 @@ def finding_bulk_update_all(request, pid=None):
             if form.is_valid() and finding_to_update:
 
                 if not settings.FEATURE_AUTHORIZATION_V2:
-                    if not request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_CHANGE or settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                    if not request.user.is_staff and not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
                         raise PermissionDenied
                 else:
                     if pid is None:
