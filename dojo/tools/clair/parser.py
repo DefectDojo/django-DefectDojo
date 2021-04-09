@@ -57,8 +57,6 @@ def get_item(item_node, test):
                       component_name=item_node['featurename'],
                       component_version=item_node['featureversion'],
                       cve=item_node['vulnerability'],
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,

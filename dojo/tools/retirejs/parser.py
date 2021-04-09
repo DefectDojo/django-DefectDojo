@@ -54,8 +54,6 @@ class RetireJsParser(object):
                         file_path=file,
                         mitigation="No Mitigation Provided",
                         references="\n".join(item_node['info']),
-                        active=False,
-                        verified=False,
                         false_p=False,
                         duplicate=False,
                         out_of_scope=False,

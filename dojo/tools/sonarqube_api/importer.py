@@ -101,7 +101,6 @@ class SonarQubeApiImporter(object):
                     references=references,
                     file_path=component_key,
                     line=line,
-                    active=True,
                     verified=self.is_confirmed(status),
                     false_p=False,
                     duplicate=False,
