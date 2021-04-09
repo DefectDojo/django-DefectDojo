@@ -16,7 +16,6 @@ from django.http import HttpResponse
 from django_filters.filters import _truncate
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-from django.db.models import Q
 
 from dojo.celery import app
 from dojo.endpoint.views import get_endpoint_ids
@@ -34,6 +33,7 @@ from dojo.user.helper import check_auth_users_list
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.finding.queries import get_authorized_findings
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ def report_url_resolver(request):
 
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
-    findings = Finding.objects.all()
+    findings = get_authorized_findings(Permissions.Finding_View)
     findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
@@ -356,14 +356,7 @@ def product_report(request, pid):
 
 
 def product_findings_report(request):
-    if request.user.is_staff:
-        findings = Finding.objects.filter().distinct()
-    else:
-        findings = Finding.objects.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-        )
-
+    findings = get_authorized_findings(Permissions.Finding_View)
     return generate_report(request, findings)
 
 

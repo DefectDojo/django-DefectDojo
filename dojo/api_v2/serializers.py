@@ -1,5 +1,5 @@
 from drf_yasg.utils import swagger_serializer_method
-from dojo.models import Product, Engagement, Test, Finding, \
+from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -650,9 +650,18 @@ class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FindingGroupSerializer(serializers.ModelSerializer):
+    jira_issue = JIRAIssueSerializer(read_only=True)
+
+    class Meta:
+        model = Finding_Group
+        fields = ('name', 'test', 'jira_issue')
+
+
 class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
     test_type_name = serializers.ReadOnlyField()
+    finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
 
     class Meta:
         model = Test
@@ -756,7 +765,7 @@ class FindingEngagementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Engagement
-        fields = ["id", "name", "product", "branch_tag"]
+        fields = ["id", "name", "product", "branch_tag", "build_id", "commit_hash", "version"]
 
 
 class FindingEnvironmentSerializer(serializers.ModelSerializer):
@@ -778,7 +787,7 @@ class FindingTestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = ["id", "title", "test_type", "engagement", "environment"]
+        fields = ["id", "title", "test_type", "engagement", "environment", "branch_tag", "build_id", "commit_hash", "version"]
 
 
 class FindingRelatedFieldsSerializer(serializers.Serializer):
@@ -811,6 +820,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
     jira_creation = serializers.SerializerMethodField(read_only=True)
     jira_change = serializers.SerializerMethodField(read_only=True)
     display_status = serializers.SerializerMethodField()
+    finding_groups = FindingGroupSerializer(source='finding_group_set', many=True, read_only=True)
 
     class Meta:
         model = Finding
@@ -1030,6 +1040,10 @@ class ImportScanSerializer(serializers.Serializer):
     push_to_jira = serializers.BooleanField(default=False)
     environment = serializers.CharField(required=False)
     version = serializers.CharField(required=False)
+    build_id = serializers.CharField(required=False)
+    branch_tag = serializers.CharField(required=False)
+    commit_hash = serializers.CharField(required=False)
+
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
     # class Meta:
@@ -1054,6 +1068,9 @@ class ImportScanSerializer(serializers.Serializer):
         # Will save in the provided environment or in the `Development` one if absent
         environment_name = data.get('environment', 'Development')
         version = data.get('version', None)
+        build_id = data.get('build_id', None)
+        branch_tag = data.get('branch_tag', None)
+        commit_hash = data.get('commit_hash', None)
 
         environment = Development_Environment.objects.get(name=environment_name)
         tags = None
@@ -1071,6 +1088,9 @@ class ImportScanSerializer(serializers.Serializer):
             environment=environment,
             percent_complete=100,
             version=version,
+            branch_tag=branch_tag,
+            build_id=build_id,
+            commit_hash=commit_hash,
             tags=tags)
         try:
             test.full_clean()
@@ -1237,12 +1257,11 @@ class ImportScanSerializer(serializers.Serializer):
             import_settings['minimum_severity'] = min_sev
             import_settings['close_old_findings'] = close_old_findings
             import_settings['push_to_jira'] = push_to_jira
-            import_settings['version'] = version
             import_settings['tags'] = tags
             if endpoint_to_add:
                 import_settings['endpoint'] = endpoint_to_add
 
-            test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.IMPORT_TYPE)
+            test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.IMPORT_TYPE)
             test_import.save()
 
             test_import_finding_action_list = []
@@ -1308,6 +1327,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     # also for ReImport.
     close_old_findings = serializers.BooleanField(required=False, default=True)
     version = serializers.CharField(required=False)
+    build_id = serializers.CharField(required=False)
+    branch_tag = serializers.CharField(required=False)
+    commit_hash = serializers.CharField(required=False)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1323,6 +1345,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         verified = data['verified']
         active = data['active']
         version = data.get('version', None)
+        build_id = data.get('build_id', None)
+        branch_tag = data.get('branch_tag', None)
+        commit_hash = data.get('commit_hash', None)
 
         try:
             parser = import_parser_factory(data.get('file', None),
@@ -1371,13 +1396,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 component_name = item.component_name if hasattr(item, 'component_name') else None
                 component_version = item.component_version if hasattr(item, 'component_version') else None
 
-                from titlecase import titlecase
-                item.title = titlecase(item.title)
-
                 item.hash_code = item.compute_hash_code()
                 deduplicationLogger.debug("new finding's hash_code: %s", item.hash_code)
 
                 findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type)
+
+                deduplicationLogger.debug('found %i findings matching with current new finding', len(findings))
 
                 if findings:
                     # existing finding found
@@ -1541,6 +1565,16 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
             if version:
                 test.version = version
+
+            if branch_tag:
+                test.branch_tag = branch_tag
+
+            if build_id:
+                test.build_id = build_id
+
+            if branch_tag:
+                test.commit_hash = commit_hash
+
             test.save()
             test.engagement.save()
 
@@ -1551,12 +1585,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 import_settings['minimum_severity'] = min_sev
                 import_settings['close_old_findings'] = close_old_findings
                 import_settings['push_to_jira'] = push_to_jira
-                import_settings['version'] = version
+
                 # tags=tags TODO no tags field in api for reimport it seems
                 if endpoint_to_add:
                     import_settings['endpoint'] = endpoint_to_add
 
-                test_import = Test_Import(test=test, import_settings=import_settings, version=version, type=Test_Import.REIMPORT_TYPE)
+                test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.REIMPORT_TYPE)
                 test_import.save()
 
                 test_import_finding_action_list = []

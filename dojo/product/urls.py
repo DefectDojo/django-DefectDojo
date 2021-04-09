@@ -11,8 +11,6 @@ urlpatterns = [
         name='view_product_components'),
     url(r'^product/(?P<pid>\d+)/engagements$', views.view_engagements,
         name='view_engagements'),
-    url(r'^product/(?P<pid>\d+)/engagements/cicd$', views.view_engagements_cicd,
-        name='view_engagements_cicd'),
     url(r'^product/(?P<pid>\d+)/import_scan_results$',
         views.import_scan_results_prod, name='import_scan_results_prod'),
     url(r'^product/(?P<pid>\d+)/metrics$', views.view_product_metrics,

@@ -303,3 +303,15 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
             sla_compute_and_notify(*args, **kwargs)
     except Exception as e:
         logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))
+
+
+@app.task
+def jira_status_reconciliation_task(*args, **kwargs):
+    from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
+    return jira_status_reconciliation(*args, **kwargs)
+
+
+@app.task
+def fix_loop_duplicates_task(*args, **kwargs):
+    from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
+    return fix_loop_duplicates()

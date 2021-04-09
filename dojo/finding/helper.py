@@ -1,11 +1,18 @@
+from django.db.models.signals import post_delete, pre_delete
+from django.dispatch.dispatcher import receiver
+from dojo.celery import app
+from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 import logging
+from time import strftime
 from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
-from dojo.models import Finding
-from dojo.utils import get_current_user
+from dojo.utils import calculate_grade, get_current_user
+from dojo.models import Finding, Finding_Group, System_Settings
+
 
 logger = logging.getLogger(__name__)
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 # this signal is triggered just before a finding is getting saved
@@ -15,11 +22,11 @@ logger = logging.getLogger(__name__)
 # - update any audit log / status history
 def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwargs):
     # some code is cloning findings by setting id/pk to None, ignore those, will be handled on next save
-    if not instance.id:
-        logger.info('ignoring save of finding without id')
-        return
+    # if not instance.id:
+    #     logger.debug('ignoring save of finding without id')
+    #     return
 
-    logger.info('%i: changed status fields pre_save: %s', instance.id or 0, changed_fields)
+    logger.debug('%i: changed status fields pre_save: %s', instance.id or 0, changed_fields)
 
     for field, (old, new) in changed_fields.items():
         logger.debug("%i: %s changed from %s to %s" % (instance.id or 0, field, old, new))
@@ -105,3 +112,150 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
 
 def can_edit_mitigated_data(user):
     return settings.EDITABLE_MITIGATED_DATA and user.is_superuser
+
+
+def create_finding_group(finds, finding_group_name):
+    logger.debug('creating finding_group_create')
+    if not finds or len(finds) == 0:
+        raise ValueError('cannot create empty Finding Group')
+
+    finding_group_name_dummy = 'bulk group ' + strftime("%a, %d %b  %Y %X", timezone.now().timetuple())
+
+    finding_group = Finding_Group(test=finds[0].test)
+    finding_group.creator = get_current_user()
+    finding_group.name = finding_group_name + finding_group_name_dummy
+    finding_group.save()
+    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    finding_group.findings.set(available_findings)
+
+    # if user provided a name, we use that, else:
+    # if we have components, we may set a nice name but catch 'name already exist' exceptions
+    try:
+        if finding_group_name:
+            finding_group.name = finding_group_name
+        elif finding_group.components:
+            finding_group.name = finding_group.components
+        finding_group.save()
+    except:
+        pass
+
+    added = len(available_findings)
+    skipped = len(finds) - added
+    return finding_group, added, skipped
+
+
+def add_to_finding_group(finding_group, finds):
+    added = 0
+    skipped = 0
+    available_findings = [find for find in finds if not find.finding_group_set.all()]
+    finding_group.findings.add(*available_findings)
+
+    added = len(available_findings)
+    skipped = len(finds) - added
+    return finding_group, added, skipped
+
+
+def remove_from_finding_group(finds):
+    removed = 0
+    skipped = 0
+    affected_groups = []
+    for find in finds:
+        groups = find.finding_group_set.all()
+        if not groups:
+            skipped += 1
+            continue
+
+        for group in find.finding_group_set.all():
+            group.findings.remove(find)
+            affected_groups.append(group)
+
+        removed += 1
+
+    return affected_groups, removed, skipped
+
+
+# def delete_finding_group(finding_group):
+#     pass
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id
+def post_process_finding_save(finding, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
+
+    system_settings = System_Settings.objects.get()
+
+    # STEP 1 run all status changing tasks sequentially to avoid race conditions
+    if dedupe_option:
+        if finding.hash_code is not None:
+            if system_settings.enable_deduplication:
+                from dojo.utils import do_dedupe_finding
+                do_dedupe_finding(finding, *args, **kwargs)
+            else:
+                deduplicationLogger.debug("skipping dedupe because it's disabled in system settings")
+        else:
+            deduplicationLogger.warning("skipping dedupe because hash_code is None")
+
+    if false_history:
+        if system_settings.false_positive_history:
+            from dojo.utils import do_false_positive_history
+            do_false_positive_history(finding, *args, **kwargs)
+        else:
+            deduplicationLogger.debug("skipping false positive history because it's disabled in system settings")
+
+    # STEP 2 run all non-status changing tasks as celery tasks in the background
+    if issue_updater_option:
+        from dojo.tools import tool_issue_updater
+        tool_issue_updater.async_tool_issue_update(finding)
+
+    if product_grading_option:
+        if system_settings.enable_product_grade:
+            from dojo.utils import calculate_grade
+            calculate_grade(finding.test.engagement.product)
+        else:
+            deduplicationLogger.debug("skipping product grading because it's disabled in system settings")
+
+    # Adding a snippet here for push to JIRA so that it's in one place
+    if push_to_jira:
+        logger.debug('pushing finding %s to jira from finding.save()', finding.pk)
+        import dojo.jira_link.helper as jira_helper
+        jira_helper.push_to_jira(finding)
+
+
+@receiver(pre_delete, sender=Finding)
+def finding_pre_delete(sender, instance, **kwargs):
+    logger.debug('finding pre_delete!: %s:%s', instance.id, instance.title)
+
+    if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+        for find in instance.original_finding.all():
+            # Explicitely delete the duplicates
+            find.delete()
+    else:
+        logger.debug('original_finding first: %s', instance.original_finding.first())
+        # when a finding is deleted, and is an original of a duplicate cluster, we have to chose a new original for the cluster
+        cluster = instance.original_finding.all().order_by('id')
+        logger.debug('cluster: %s', cluster)
+        if cluster:
+            new_original = cluster.first()
+            logger.debug('finding pre_delete: changing original of duplicate cluster to: %s:%s', new_original.id, new_original.title)
+
+            new_original.duplicate = False
+            new_original.duplicate_finding = None
+            new_original.active = True
+            new_original.save_no_options()
+            new_original.found_by.add(*instance.found_by.all())
+
+            if new_original and len(cluster) > 1:
+                for find in cluster:
+                    if find != new_original:
+                        find.duplicate_finding = new_original
+                        find.save_no_options()
+
+    # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
+    # https://code.djangoproject.com/ticket/154
+    instance.found_by.clear()
+
+
+@receiver(post_delete, sender=Finding)
+def finding_post_delete(sender, instance, **kwargs):
+    calculate_grade(instance.test.engagement.product)
