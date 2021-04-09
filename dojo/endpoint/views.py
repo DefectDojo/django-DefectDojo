@@ -107,22 +107,22 @@ def vulnerable_endpoint_hosts(request):
     return process_endpoints_view(request, host=True, vulnerable=True)
 
 
-@user_must_be_authorized(Endpoint, 'view', 'eid')
-def view_endpoint(request, eid):
+def process_endpoint_view(request, eid, host=False):
     endpoint = get_object_or_404(Endpoint, id=eid)
-    endpoints = Endpoint.objects.filter(host=endpoint.host,
-                                        product=endpoint.product).distinct()
 
-    endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
+    if host:
+        endpoints = endpoint.host_endpoints()
+        endpoint_metadata = None
+        all_findings = endpoint.host_findings()
+        active_findings = endpoint.host_active_findings()
+        closed_findings = endpoint.host_closed_findings()
+    else:
+        endpoints = None
+        endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
+        all_findings = endpoint.findings()
+        active_findings = endpoint.active_findings()
+        closed_findings = endpoint.closed_findings()
 
-    all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
-
-    active_findings = Finding.objects.filter(endpoints__in=endpoints,
-                                             active=True,
-                                             verified=True).distinct()
-
-    closed_findings = Finding.objects.filter(endpoints__in=endpoints,
-                                             mitigated__isnull=False).distinct()
     if all_findings:
         start_date = timezone.make_aware(datetime.combine(all_findings.last().date, datetime.min.time()))
     else:
@@ -144,7 +144,7 @@ def view_endpoint(request, eid):
     if active_findings.count() != 0:
         vulnerable = True
 
-    product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
+    product_tab = Product_Tab(endpoint.product.id, "Host" if host else "Endpoint", tab="endpoints")
     return render(request,
                   "dojo/view_endpoint.html",
                   {"endpoint": endpoint,
@@ -155,58 +155,18 @@ def view_endpoint(request, eid):
                    'opened_per_month': monthly_counts['opened_per_period'],
                    'endpoint_metadata': endpoint_metadata,
                    'vulnerable': vulnerable,
+                   'host': host,
                    })
+
+
+@user_must_be_authorized(Endpoint, 'view', 'eid')
+def view_endpoint(request, eid):
+    return process_endpoint_view(request, eid, host=False)
 
 
 @user_must_be_authorized(Endpoint, 'view', 'eid')
 def view_endpoint_host(request, eid):
-    endpoint = get_object_or_404(Endpoint, id=eid)
-    endpoints = Endpoint.objects.filter(host=endpoint.host,
-                                        product=endpoint.product).distinct()
-
-    endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
-
-    all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
-
-    active_findings = Finding.objects.filter(endpoints__in=endpoints,
-                                             active=True,
-                                             verified=True).distinct()
-
-    closed_findings = Finding.objects.filter(endpoints__in=endpoints,
-                                             mitigated__isnull=False).distinct()
-    if all_findings:
-        start_date = timezone.make_aware(datetime.combine(all_findings.last().date, datetime.min.time()))
-    else:
-        start_date = timezone.now()
-    end_date = timezone.now()
-
-    r = relativedelta(end_date, start_date)
-    months_between = (r.years * 12) + r.months
-    # include current month
-    months_between += 1
-
-    monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
-                                       relative_delta='months')
-
-    paged_findings = get_page_items(request, active_findings, 25)
-
-    vulnerable = False
-
-    if active_findings.count() != 0:
-        vulnerable = True
-
-    product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
-    return render(request,
-                  "dojo/view_endpoint.html",
-                  {"endpoint": endpoint,
-                   'product_tab': product_tab,
-                   "endpoints": endpoints,
-                   "findings": paged_findings,
-                   'all_findings': all_findings,
-                   'opened_per_month': monthly_counts['opened_per_period'],
-                   'endpoint_metadata': endpoint_metadata,
-                   'vulnerable': vulnerable,
-                   })
+    return process_endpoint_view(request, eid, host=True)
 
 
 # @user_passes_test(lambda u: u.is_staff)

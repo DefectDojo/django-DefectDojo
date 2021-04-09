@@ -1174,7 +1174,7 @@ class Endpoint(models.Model):
             )
             # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
             # Example: https://google.com and https://google.com:443
-            normalize_path = self.protocol and (self.protocol.lower() in ['http', 'https'])  # it used to add '/' at the end for host
+            normalize_path = self.path  # it used to add '/' at the end of host
             clean_url = url.normalize(scheme=True, host=True, path=normalize_path, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
             if not self.protocol:
                 if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
@@ -1194,22 +1194,31 @@ class Endpoint(models.Model):
         else:
             return NotImplemented
 
+    def vulnerable(self):
+        return self.active_findings_count() > 0
+
     def findings(self):
-        return Finding.objects.filter(endpoints=self,
-                                     active=True,
-                                     verified=True,
-                                     out_of_scope=False).distinct()
+        return Finding.objects.filter(endpoints=self).distinct()
 
     def findings_count(self):
-        return self.finding().count()
+        return self.findings().count()
 
     def active_findings(self):
-        return self.findings().filter(mitigated__isnull=True,
+        return self.findings().filter(active=True,
+                                      verified=True,
+                                      out_of_scope=False,
+                                      mitigated__isnull=True,
                                       false_p=False,
                                       duplicate=False).order_by('numerical_severity')
 
     def active_findings_count(self):
         return self.active_findings().count()
+
+    def closed_findings(self):
+        return self.findings().filter(mitigated__isnull=False)
+
+    def closed_findings_count(self):
+        return self.closed_findings().count()
 
     def host_endpoints(self):
         return Endpoint.objects.filter(host=self.host,
@@ -1227,21 +1236,28 @@ class Endpoint(models.Model):
         return self.host_mitigated_endpoints().count()
 
     def host_findings(self):
-        return Finding.objects.filter(endpoints__in=self.host_endpoints(),
-                                      active=True,
-                                      verified=True,
-                                      out_of_scope=False).distinct()
+        return Finding.objects.filter(endpoints__in=self.host_endpoints()).distinct()
 
     def host_findings_count(self):
-        return self.finding().count()
+        return self.host_finding().count()
 
     def host_active_findings(self):
-        return self.findings().filter(mitigated__isnull=True,
-                                      false_p=False,
-                                      duplicate=False).order_by('numerical_severity')
+        return self.host_findings().filter(active=True,
+                                           verified=True,
+                                           out_of_scope=False,
+                                           mitigated__isnull=True,
+                                           false_p=False,
+                                           duplicate=False).order_by('numerical_severity')
 
     def host_active_findings_count(self):
-        return self.active_findings().count()
+        return self.host_active_findings().count()
+
+
+    def host_closed_findings(self):
+        return self.host_findings().filter(mitigated__isnull=False)
+
+    def host_closed_findings_count(self):
+        return self.host_closed_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()

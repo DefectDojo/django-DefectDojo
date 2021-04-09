@@ -14,11 +14,20 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h4 class="pull-left finding-title">
-                    {{ endpoint }}
-                    {% if endpoint.mitigated %}
-                        - Mitigated
+                    {% if host %}
+                      {{ endpoint.host }} -
+                      {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} Mitigated Endpoints
                     {% else %}
-                        - Vulnerable
+                      {{ endpoint }} -
+                      {% if endpoint.mitigated %}
+                        Mitigated
+                      {% else %}
+                        {% if endpoint.active_findings_count > 0 %}
+                          Vulnerable
+                        {% else %}
+                          No Open, Active Findings
+                        {% endif %}
+                      {% endif %}
                     {% endif %}
                     <span class="text-muted endpoint_product">
                         <a href="{% url 'view_product' endpoint.product.id %}">{{ endpoint.product }}</a>
@@ -38,36 +47,50 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                 {% if user|is_authorized_for_change:endpoint %}
+                                  {% if not host %}
                                     <li role="presentation">
                                         <a href="{% url 'edit_endpoint' endpoint.id %}">
                                             <i class="fa fa-pencil-square-o"></i> Edit Endpoint
                                         </a>
                                     </li>
+                                  {% endif %}
                                 {% endif %}
                                 {% if user|is_authorized_for_staff:endpoint %}
+                                  {% if not host %}
                                     <li role="presentation">
                                         <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
                                             <i class="fa fa-list-alt"></i> Add Metadata
                                         </a>
                                     </li>
+                                  {% endif %}
                                     <li role="presentation">
-                                        <a href="{% url 'endpoint_report' endpoint.id %}">
+                                      {% if host %}
+                                        <a href="{% url 'endpoint_host_report' endpoint.id %}">
                                             <i class="fa fa-file-text-o"></i> Report
                                         </a>
+                                      {% else %}
+                                        <a href="{% url 'endpoint_host_report' endpoint.id %}">
+                                            <i class="fa fa-file-text-o"></i> Report
+                                        </a>
+                                      {% endif %}
                                     </li>
+                                  {% if not host %}
                                     <li role="presentation">
                                         <a href="{% url 'action_history' endpoint|content_type endpoint.id %}">
                                             <i class="fa fa-history"></i> View History
                                         </a>
                                     </li>
+                                  {% endif %}
                                 {% endif %}
                                 {% if user|is_authorized_for_delete:endpoint %}
+                                  {% if not host %}
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation" class="text-danger">
                                         <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">
                                             <i class="fa fa-trash-o"></i> Delete Endpoint
                                         </a>
                                     </li>
+                                  {% endif %}
                                 {% endif %}
                             </ul>
                     </div>
@@ -127,7 +150,7 @@
                                 <i class="fa fa-bug fa-2x"></i>
 
                                 <div class="pull-right inline-block text-right">
-                                    <span>Opened bug count by month</span>
+                                    <span>Opened findings count by month</span>
                                 </div>
                             </div>
                         </div>
@@ -143,21 +166,24 @@
         </div>
     </div>
 
+    {% if host %}
     <div class="panel panel-default endpoints table-responsive">
-        <div class="panel-heading">
-            {% if vulnerable and not endpoint.mitigated %}
-            <h4>Vulnerable Services</h4>
-            {% else %}
-            <h4>Endpoints Services</h4>
-            {% endif %}
-        </div>
-        {% if  endpoints %}
+        <div class="panel-heading">Endpoints</div>
+        {% if endpoints %}
             {% colgroup endpoints into 3 cols as grouped_items %}
             <table class="table-striped table table table-condensed table-hover finding-endpoints">
                 {% for row in grouped_items %}
                     <tr>
                         {% for item in row %}
-                            <td>{% if item %}<i class="fa fa-circle"></i> <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="#">{{ item|url_shortner }}</a>{% endif %}
+                            <td>{% if item %}
+                                  <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
+                                  {% if item.vulnerable %}
+                                    &#10005;
+                                  {% else %}
+                                    &#10003;
+                                  {% endif %}
+                                  {{ item }}</a>
+                                {% endif %}
                             </td>
                         {% endfor %}
                     </tr>
@@ -168,10 +194,10 @@
                 No endpoints.
             </div>
         {% endif %}
-
     </div>
+    {% endif %}
 
-    {% if endpoint.tags %}
+    {% if not host and endpoint.tags %}
         <div class="panel panel-default tags">
             <div class="panel-heading">
                 <h4>Tags</h4>
@@ -184,7 +210,7 @@
         </div>
     {% endif %}
 
-    {% if endpoint_metadata %}
+    {% if not host and endpoint_metadata %}
         <div class="row">
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">
