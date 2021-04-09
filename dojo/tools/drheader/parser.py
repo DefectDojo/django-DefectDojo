@@ -24,8 +24,6 @@ class DrHeaderParser(object):
             severity = item["severity"].title()
             find = Finding(title=title,
                            test=test,
-                           active=True,
-                           verified=True,
                            description=message,
                            severity=severity,
                            numerical_severity=Finding.get_numerical_severity(severity),

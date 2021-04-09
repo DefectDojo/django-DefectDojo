@@ -30,7 +30,6 @@ from dojo.models import Finding, IMPORT_CREATED_FINDING, Product, Engagement, Te
     Check_List, Test_Import, Test_Import_Finding_Action, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
-from dojo.tools.factory import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory, get_choices
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
@@ -659,8 +658,11 @@ def import_scan_results(request, eid=None, pid=None):
                     item.reporter = user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = user
-                    if not handles_active_verified_statuses(form.get_scan_type()):
+
+                    # Only set active/verified flags if they were NOT set by default value(True)
+                    if item.active:
                         item.active = active
+                    if item.verified:
                         item.verified = verified
 
                     item.save(dedupe_option=False, false_history=True)
