@@ -505,6 +505,8 @@ def add_tests(request, eid):
     })
 
 
+
+
 # Cant use the easy decorator because of the potential for either eid/pid being used
 def import_scan_results(request, eid=None, pid=None):
     engagement = None
@@ -819,6 +821,20 @@ def import_scan_results(request, eid=None, pid=None):
          'jform': jform,
          'scan_types': get_choices(),
          })
+
+
+def get_scanner_config(scan_type, scan_type_configuration):
+    '''
+    This is refactored code to retrive configuration for particular scanner
+    '''
+    if scan_type_configuration and scan_type_configuration not in 'Default':
+        extras = Tool_Configuration.objects.get(tool_type__name=scan_type,
+                                                name=scan_type_configuration)
+        logger.debug("Scanner configuration: {}".format(extras.extras))
+        return extras.extras
+    else:
+        logger.debug("Scanner configuration not defined")
+        return None
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
