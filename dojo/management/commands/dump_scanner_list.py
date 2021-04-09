@@ -8,7 +8,7 @@ class Command(BaseCommand):
         """
         Dumps json file of supported scanners
         """
-        counter = 1
+        counter = 30
         model = "dojo.Tool_Type"
         dump = []
         for parser in factory.PARSERS:
