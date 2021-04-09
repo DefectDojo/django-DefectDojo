@@ -259,7 +259,6 @@ class MobSFParser(object):
                 dupes[dupe_key] = finding
         return list(dupes.values())
 
-
     def getSeverityForPermission(self, status):
         """Convert status for permission detection to severity
 
