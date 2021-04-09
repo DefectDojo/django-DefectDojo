@@ -1251,7 +1251,6 @@ class Endpoint(models.Model):
     def host_active_findings_count(self):
         return self.host_active_findings().count()
 
-
     def host_closed_findings(self):
         return self.host_findings().filter(mitigated__isnull=False)
 

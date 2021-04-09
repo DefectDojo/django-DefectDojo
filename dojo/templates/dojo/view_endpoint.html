@@ -83,7 +83,6 @@
                                         </a>
                                     </li>
                                   {% endif %}
-                                {% endif %}
                                 {% if endpoint|has_object_permission:"Endpoint_Delete" or user|is_authorized_for_delete:endpoint %}
                                   {% if not host %}
                                     <li role="separator" class="divider"></li>
