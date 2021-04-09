@@ -24,7 +24,6 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from itertools import chain
-from dojo.user.helper import user_must_be_authorized
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 
@@ -48,6 +47,10 @@ from django.db.models import Q, QuerySet, Count
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 import dojo.finding.helper as finding_helper
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.queries import get_authorized_findings
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +114,7 @@ def closed_findings(request, pid=None, eid=None, view=None):
 
 def findings(request, pid=None, eid=None, view=None, filter_name=None, query_filter=None, order_by='numerical_severity',
 django_filter=open_findings_filter, prefetch_type='all'):
+
     show_product_column = True
     custom_breadcrumb = None
     product_tab = None
@@ -119,7 +123,7 @@ django_filter=open_findings_filter, prefetch_type='all'):
 
     tags = Finding.tags.tag_model.objects.all()
 
-    findings = Finding.objects.all()
+    findings = get_authorized_findings(Permissions.Finding_View)
     if view == "All":
         filter_name = "All"
     else:
@@ -146,12 +150,6 @@ django_filter=open_findings_filter, prefetch_type='all'):
         github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
-
-    if not request.user.is_staff:
-        findings = findings.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-        )
 
     findings_filter = django_filter(request, findings, request.user, pid)
 
@@ -220,6 +218,8 @@ def prefetch_for_findings(findings, prefetch_type='all'):
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__members')
+        prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__members')
     else:
         logger.debug('unable to prefetch because query was already executed')
 
@@ -256,7 +256,7 @@ def prefetch_for_similar_findings(findings):
     return prefetched_findings
 
 
-@user_must_be_authorized(Finding, 'view', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_View, 'fid', 'view')
 def view_finding(request, fid):
     finding_qs = prefetch_for_findings(Finding.objects.all())
     finding = get_object_or_404(finding_qs, id=fid)
@@ -352,7 +352,7 @@ def view_finding(request, fid):
     if finding.duplicate_finding:
         finding.duplicate_finding.related_actions = calculate_possible_related_actions_for_similar_finding(request, finding, finding.duplicate_finding)
 
-    similar_findings_filter = SimilarFindingFilter(request.GET, queryset=Finding.objects.all(), user=request.user, finding=finding)
+    similar_findings_filter = SimilarFindingFilter(request.GET, queryset=get_authorized_findings(Permissions.Finding_View), user=request.user, finding=finding)
     logger.debug('similar query: %s', similar_findings_filter.qs.query)
 
     similar_findings = get_page_items(request, similar_findings_filter.qs, settings.SIMILAR_FINDINGS_MAX_RESULTS, prefix='similar')
@@ -395,8 +395,7 @@ def view_finding(request, fid):
         })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'change', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
 def close_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -479,8 +478,7 @@ def close_finding(request, fid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
 def defect_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -560,8 +558,7 @@ def defect_finding_review(request, fid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'change', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -599,7 +596,7 @@ def reopen_finding(request, fid):
     return HttpResponseRedirect(reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
 def apply_template_cwe(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -626,7 +623,7 @@ def apply_template_cwe(request, fid):
         return HttpResponseForbidden()
 
 
-@user_must_be_authorized(Finding, 'delete', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Delete, 'fid', 'delete')
 def delete_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -659,8 +656,7 @@ def delete_finding(request, fid):
         return HttpResponseForbidden()
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'change', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
 def edit_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # finding = finding._detag_to_serializable()
@@ -882,8 +878,7 @@ def edit_finding(request, fid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'change', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -892,8 +887,7 @@ def touch_finding(request, fid):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_is_authorized(Finding, Permissions.Risk_Acceptance, 'fid', 'staff')
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -905,16 +899,14 @@ def simple_risk_accept(request, fid):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_is_authorized(Finding, Permissions.Risk_Acceptance, 'fid', 'staff')
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(finding)
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -975,8 +967,7 @@ def request_finding_review(request, fid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1169,7 +1160,7 @@ def apply_template_to_finding(request, fid, tid):
             reverse('view_finding', args=(finding.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Add, 'tid', 'staff')
 def add_stub_finding(request, tid):
     test = get_object_or_404(Test, id=tid)
     form = StubFindingForm()
@@ -1211,7 +1202,7 @@ def add_stub_finding(request, tid):
     return HttpResponseRedirect(reverse('view_test', args=(tid, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Delete, 'fid', 'staff')
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     form = DeleteStubFindingForm(instance=finding)
@@ -1237,7 +1228,7 @@ def delete_stub_finding(request, fid):
         return HttpResponseForbidden()
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
 def promote_to_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     test = finding.test
@@ -1383,6 +1374,7 @@ def templates(request):
         })
 
 
+@user_passes_test(lambda u: u.is_staff)
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize('json', Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type='json')
@@ -1535,13 +1527,7 @@ def delete_template(request, tid):
         return HttpResponseForbidden()
 
 
-@user_passes_test(lambda u: u.is_staff)
-def finding_from_template(request, tid):
-    template = get_object_or_404(Finding_Template, id=tid)
-
-
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Finding, 'staff', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
 def manage_images(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     images_formset = FindingImageFormSet(queryset=finding.images.all())
@@ -1667,8 +1653,7 @@ def download_finding_pic(request, token):
     return response
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Finding_Edit, 'pid', 'staff')
 def merge_finding_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     finding_to_update = request.GET.getlist('finding_to_update')
@@ -1818,57 +1803,74 @@ def merge_finding_product(request, pid):
     })
 
 
-# bulk update and delete are combined, so we can't have the nice user_must_be_authorized decorator (yet)
+# bulk update and delete are combined, so we can't have the nice user_is_authorized decorator
 def finding_bulk_update_all(request, pid=None):
+    logger.debug('bulk 10')
     form = FindingBulkUpdateForm(request.POST)
     now = timezone.now()
     return_url = None
 
     if request.method == "POST":
+        logger.debug('bulk 20')
+
         finding_to_update = request.POST.getlist('finding_to_update')
         finds = Finding.objects.filter(id__in=finding_to_update).order_by("id")
         total_find_count = finds.count()
         skipped_find_count = 0
-
         prods = set([find.test.engagement.product for find in finds])
         if request.POST.get('delete_bulk_findings'):
             if form.is_valid() and finding_to_update:
-                # make sure users are not deleting stuff they are not authorized for
-                if not request.user.is_staff and not request.user.is_superuser:
-                    if not settings.AUTHORIZED_USERS_ALLOW_DELETE:
-                        raise PermissionDenied()
 
-                    finds = finds.filter(
-                        Q(test__engagement__product__authorized_users__in=[request.user]) |
-                        Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                    ).distinct()
+                if not settings.FEATURE_AUTHORIZATION_V2:
+                    if not request.user.is_staff and not settings.AUTHORIZED_USERS_ALLOW_DELETE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                        raise PermissionDenied
+                else:
+                    if pid is None:
+                        if not request.user.is_staff:
+                            raise PermissionDenied
+                    else:
+                        product = get_object_or_404(Product, id=pid)
+                        user_has_permission_or_403(request.user, product, Permissions.Finding_Delete)
+
+                finds = get_authorized_findings(Permissions.Finding_Delete, finds).distinct()
 
                 skipped_find_count = total_find_count - finds.count()
+                deleted_find_count = finds.count()
 
                 finds.delete()
                 for prod in prods:
                     calculate_grade(prod)
 
                 if skipped_find_count > 0:
-                    add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
+                    add_error_message_to_response('Skipped deletion of {} findings because you are not authorized.'.format(skipped_find_count))
 
+                if deleted_find_count > 0:
+                    messages.add_message(request,
+                        messages.SUCCESS,
+                        'Bulk delete of {} findings was successful.'.format(deleted_find_count),
+                        extra_tags='alert-success')
         else:
             if form.is_valid() and finding_to_update:
 
-                # make sure users are not deleting stuff they are not authorized for
-                if not request.user.is_staff and not request.user.is_superuser:
-                    if not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
-                        raise PermissionDenied()
+                if not settings.FEATURE_AUTHORIZATION_V2:
+                    if not request.user.is_staff and not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                        raise PermissionDenied
+                else:
+                    if pid is None:
+                        if not request.user.is_staff:
+                            raise PermissionDenied
+                    else:
+                        product = get_object_or_404(Product, id=pid)
+                        user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
 
-                    finds = finds.filter(
-                        Q(test__engagement__product__authorized_users__in=[request.user]) |
-                        Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-                    ).distinct()
+                # make sure users are not editing stuff they are not authorized for
+                finds = get_authorized_findings(Permissions.Finding_Edit, finds).distinct()
 
-                    skipped_find_count = total_find_count - finds.count()
+                skipped_find_count = total_find_count - finds.count()
+                updated_find_count = finds.count()
 
                 if skipped_find_count > 0:
-                    add_error_message_to_response('skipped %i findings because you''re not authorized', skipped_find_count)
+                    add_error_message_to_response('Skipped update of {} findings because you are not authorized.'.format(skipped_find_count))
 
                 finds = prefetch_for_findings(finds)
                 if form.cleaned_data['severity'] or form.cleaned_data['status']:
@@ -2044,10 +2046,11 @@ def finding_bulk_update_all(request, pid=None):
                 if success_count > 0:
                     add_success_message_to_response('%i findings pushed to JIRA succesfully' % success_count)
 
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Bulk edit of findings was successful. Check alerts top right and result to make sure it is what you intended.',
-                                     extra_tags='alert-success')
+                if updated_find_count > 0:
+                    messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'Bulk update of {} findings was successful.'.format(updated_find_count),
+                                        extra_tags='alert-success')
             else:
                 messages.add_message(request,
                                      messages.ERROR,
@@ -2090,7 +2093,7 @@ def get_missing_mandatory_notetypes(finding):
     return queryset
 
 
-@user_must_be_authorized(Finding, 'change', 'original_id')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'original_id', 'change')
 @require_POST
 def mark_finding_duplicate(request, original_id, duplicate_id):
     original = get_object_or_404(Finding, id=original_id)
@@ -2144,7 +2147,7 @@ def reset_finding_duplicate_status_internal(user, duplicate_id):
     return duplicate.id
 
 
-@user_must_be_authorized(Finding, 'change', 'duplicate_id')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'duplicate_id', 'change')
 @require_POST
 def reset_finding_duplicate_status(request, duplicate_id):
     checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, duplicate_id)
@@ -2205,7 +2208,7 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     return True
 
 
-@user_must_be_authorized(Finding, 'change', 'finding_id')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'finding_id', 'change')
 @require_POST
 def set_finding_as_original(request, finding_id, new_original_id):
     success = set_finding_as_original_internal(request.user, finding_id, new_original_id)
@@ -2219,7 +2222,7 @@ def set_finding_as_original(request, finding_id, new_original_id):
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding_id,)))
 
 
-@user_must_be_authorized(Finding, 'change', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
 @require_POST
 def unlink_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
@@ -2253,7 +2256,7 @@ def unlink_jira(request, fid):
         return HttpResponse(status=400)
 
 
-@user_must_be_authorized(Finding, 'change', 'fid')
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'change')
 @require_POST
 def push_to_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)

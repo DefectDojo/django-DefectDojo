@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load static %}
 {% block add_styles %}
     .graph {min-height: 158px;}
@@ -46,7 +47,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                {% if user|is_authorized_for_change:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Edit" or user|is_authorized_for_change:endpoint %}
                                   {% if not host %}
                                     <li role="presentation">
                                         <a href="{% url 'edit_endpoint' endpoint.id %}">
@@ -55,7 +56,7 @@
                                     </li>
                                   {% endif %}
                                 {% endif %}
-                                {% if user|is_authorized_for_staff:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Edit" or user|is_authorized_for_staff:endpoint %}
                                   {% if not host %}
                                     <li role="presentation">
                                         <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
@@ -63,6 +64,7 @@
                                         </a>
                                     </li>
                                   {% endif %}
+                                {% endif %}
                                     <li role="presentation">
                                       {% if host %}
                                         <a href="{% url 'endpoint_host_report' endpoint.id %}">
@@ -82,7 +84,7 @@
                                     </li>
                                   {% endif %}
                                 {% endif %}
-                                {% if user|is_authorized_for_delete:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Delete" or user|is_authorized_for_delete:endpoint %}
                                   {% if not host %}
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation" class="text-danger">

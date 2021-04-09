@@ -676,6 +676,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
+    'dojo.request_cache.middleware.RequestCacheMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES

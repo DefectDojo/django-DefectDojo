@@ -1,60 +1,29 @@
 from crum import get_current_user
 from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
-from dojo.models import Test, Product_Member, Product_Type_Member, Test_Import
+from dojo.models import Finding, Product_Member, Product_Type_Member, Stub_Finding
 from dojo.authorization.authorization import get_roles_for_permission
 
 
-def get_authorized_tests(permission):
-    user = get_current_user()
+def get_authorized_findings(permission, queryset=None, user=None):
 
     if user is None:
-        return Test.objects.none()
+        user = get_current_user()
 
-    if user.is_superuser:
-        return Test.objects.all()
+    if user is None:
+        return Finding.objects.none()
 
-    if settings.FEATURE_AUTHORIZATION_V2:
-        if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-            return Test.objects.all()
-
-        roles = get_roles_for_permission(permission)
-        authorized_product_type_roles = Product_Type_Member.objects.filter(
-            product_type=OuterRef('engagement__product__prod_type_id'),
-            user=user,
-            role__in=roles)
-        authorized_product_roles = Product_Member.objects.filter(
-            product=OuterRef('engagement__product_id'),
-            user=user,
-            role__in=roles)
-        tests = Test.objects.annotate(
-            engagement__product__prod_type__member=Exists(authorized_product_type_roles),
-            engagement__product__member=Exists(authorized_product_roles))
-        tests = tests.filter(
-            Q(engagement__product__prod_type__member=True) |
-            Q(engagement__product__member=True))
+    if queryset is None:
+        findings = Finding.objects.all()
     else:
-        if user.is_staff:
-            tests = Test.objects.all()
-        else:
-            tests = Test.objects.filter(
-                Q(engagement__product__authorized_users__in=[user]) |
-                Q(engagement__product__prod_type__authorized_users__in=[user]))
-    return tests
-
-
-def get_authorized_test_imports(permission):
-    user = get_current_user()
-
-    if user is None:
-        return Test_Import.objects.none()
+        findings = queryset
 
     if user.is_superuser:
-        return Test_Import.objects.all()
+        return findings
 
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-            return Test_Import.objects.all()
+            return findings
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -65,17 +34,53 @@ def get_authorized_test_imports(permission):
             product=OuterRef('test__engagement__product_id'),
             user=user,
             role__in=roles)
-        test_imports = Test_Import.objects.annotate(
+        findings = findings.annotate(
             test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
             test__engagement__product__member=Exists(authorized_product_roles))
-        test_imports = test_imports.filter(
+        findings = findings.filter(
+            Q(test__engagement__product__prod_type__member=True) |
+            Q(test__engagement__product__member=True))
+    else:
+        if not user.is_staff:
+            findings = findings.filter(
+                Q(test__engagement__product__authorized_users__in=[user]) |
+                Q(test__engagement__product__prod_type__authorized_users__in=[user]))
+    return findings
+
+
+def get_authorized_stub_findings(permission):
+    user = get_current_user()
+
+    if user is None:
+        return Stub_Finding.objects.none()
+
+    if user.is_superuser:
+        return Stub_Finding.objects.all()
+
+    if settings.FEATURE_AUTHORIZATION_V2:
+        if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+            return Stub_Finding.objects.all()
+
+        roles = get_roles_for_permission(permission)
+        authorized_product_type_roles = Product_Type_Member.objects.filter(
+            product_type=OuterRef('test__engagement__product__prod_type_id'),
+            user=user,
+            role__in=roles)
+        authorized_product_roles = Product_Member.objects.filter(
+            product=OuterRef('test__engagement__product_id'),
+            user=user,
+            role__in=roles)
+        findings = Stub_Finding.objects.annotate(
+            test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
+            test__engagement__product__member=Exists(authorized_product_roles))
+        findings = findings.filter(
             Q(test__engagement__product__prod_type__member=True) |
             Q(test__engagement__product__member=True))
     else:
         if user.is_staff:
-            test_imports = Test_Import.objects.all()
+            findings = Stub_Finding.objects.all()
         else:
-            test_imports = Test_Import.objects.filter(
+            findings = Stub_Finding.objects.filter(
                 Q(test__engagement__product__authorized_users__in=[user]) |
                 Q(test__engagement__product__prod_type__authorized_users__in=[user]))
-    return test_imports
+    return findings

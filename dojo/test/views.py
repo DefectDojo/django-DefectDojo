@@ -734,7 +734,7 @@ def re_import_scan_results(request, tid):
                 push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
 
                 logger.debug('starting reimport of %i items.', len(items))
-                from dojo.reimport_utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
+                from dojo.importers.reimport.utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
                 deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
 
                 i = 0

@@ -14,11 +14,7 @@
     }
 {% endblock %}
 {% block content %}
-    {% if edit %}
-        <h3> Edit Engagement </h3>
-    {% else %}
-        <h3> New Engagement </h3>
-    {% endif %}
+    <h3> {{ title }} </h3>
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
 
