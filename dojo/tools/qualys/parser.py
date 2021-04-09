@@ -3,7 +3,7 @@ import datetime
 import logging
 import html2text
 from . import utfdictcsv
-from lxml import etree
+from defusedxml import ElementTree as etree
 
 from dojo.models import Endpoint, Finding
 
@@ -207,13 +207,13 @@ def issue_r(raw_row, vuln):
 
 
 def qualys_parser(qualys_xml_file):
-    parser = etree.XMLParser(resolve_entities=False, remove_blank_text=True, no_network=True, recover=True)
+    parser = etree.XMLParser()
     d = etree.parse(qualys_xml_file, parser)
-    r = d.xpath('//ASSET_DATA_REPORT/HOST_LIST/HOST')
+    r = d.find('HOST_LIST')
     master_list = []
-
-    for issue in r:
-        master_list += issue_r(issue, d)
+    if r is not None:
+        for issue in r:
+            master_list += issue_r(issue, d)
     return master_list
     # report_writer(master_list, args.outfile)
 
