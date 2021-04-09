@@ -74,5 +74,5 @@ class TestEndpointModel(TestCase):
         endpoint2 = Endpoint.from_uri('HtTp://foo.BAR/')
         self.assertEqual(endpoint1.protocol, 'HTTP')
         self.assertEqual(endpoint1.host, 'foo.bar')
-        self.assertEqual(str(endpoint1), 'http://foo.bar/')
+        self.assertEqual(str(endpoint1), 'http://foo.bar')
         self.assertEqual(endpoint1, endpoint2)
