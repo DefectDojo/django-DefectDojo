@@ -94,23 +94,6 @@ class MicrofocusWebinspectParser(object):
                     find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                     find.nb_occurences += finding.nb_occurences
                 else:
-                    dupes[dupe_key] = True
-
-                    finding = Finding(title=title,
-                                    test=test,
-                                    cwe=cwe,
-                                    description=description,
-                                    severity=severity,
-                                    numerical_severity=Finding.get_numerical_severity(
-                                        severity),
-                                    mitigation=mitigation,
-                                    references=reference,
-                                    static_finding=False,
-                                    dynamic_finding=True)
-                    if "id" in issue.attrib:
-                        finding.unique_id_from_tool = issue.attrib.get("id")
-                    # manage endpoint
-                    finding.unsaved_endpoints.append(endpoint)
                     dupes[dupe_key] = finding
 
         return list(dupes.values())
