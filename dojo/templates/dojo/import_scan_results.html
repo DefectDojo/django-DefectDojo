@@ -79,8 +79,9 @@
 
   	$("select#id_scan_type").change(function() {
         $("select#id_scan_type_configuration option").remove();
-
         var addoptarr = [];
+		addoptarr.push("<option value='Default'>Default</option>");
+
         for (i = 0; i < optarray.length; i++) {
             if (optarray[i].value.indexOf($(this).val()) > -1) {
                 altered = "<option value='" + optarray[i].text + "'>" + optarray[i].text + "</option>"

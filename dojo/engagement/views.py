@@ -636,13 +636,14 @@ def import_scan_results(request, eid=None, pid=None):
             #             'It has configured more than one {} tool. \n'.format(scan_type)
             #
 
-            scanner_filter = 'vulnerable-exploited,vulnerable-version,vulnerable-potential,potential'
 
             try:
                 parser = import_parser_factory(file, t, active, verified, scan_type)
                 if callable(getattr(parser, 'set_filter', None)):
                     logger.debug('Scanner filter supported')
-                    parser.set_filter(scanner_filter)
+                    filters = get_scanner_config(scan_type, request.POST['scan_type_configuration'])
+                    if filters is not None:
+                        parser.set_filter(filters)
                 else:
                     logger.debug('Scanner filter not supported')
                 parser_findings = parser.get_findings(file, t)
@@ -770,7 +771,7 @@ def import_scan_results(request, eid=None, pid=None):
                     # if endpoint_to_add:    # not implemented via UI
                     #     import_settings['endpoint'] = endpoint_to_add
 
-                    test_import = Test_Import(test=t, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.IMPORT_TYPE)
+                    test_import = Test_Import(test=t, import_settings=import_settings, version=version, type=Test_Import.IMPORT_TYPE)
                     test_import.save()
 
                     test_import_finding_action_list = []
@@ -1287,7 +1288,7 @@ def engagement_ics(request, eid):
         "Set aside for engagement %s, on product %s.  Additional detail can be found at %s"
         % (eng.name, eng.product.name,
            request.build_absolute_uri(
-               (reverse("view_engagement", args=(eng.id, ))))), uid)
+               (reverse("view_engagement", args=(eng.id,))))), uid)
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'
