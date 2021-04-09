@@ -179,7 +179,7 @@
                           </div>
                         </sup>
                         {% endif %}
-                        {% if eng.test_set.all|length == 0 %}
+                        {% if eng.count_tests == 0 %}
                         &nbsp;<sup>
                           <div class="tag-label amber-color">
                             no tests
@@ -202,21 +202,38 @@
                     {% endif %}
                     <td class="text-center" class="nowrap">
                       <div class="align-top">
-                      {% if eng.test_set.all|length %}
+                      {% if eng.count_tests %}
                       <div class="dropdown">
-                        <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                        <a href="{% url 'view_engagement' eng.id %}#tests">{{ eng.count_tests }}</a>
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
                         <ul class="dropdown-menu">
+                          <li>
+                            <a>
+                              <i class="fa fa-info"></i>
+                              {% if eng.test_set.all|length %}
+                                Recent tests
+                              {% else %}
+                                No recent tests
+                              {% endif %}
+                              (last {{recent_test_day_count}} day{{recent_test_day_count|pluralize}})
+                            </a>
+                          </li>
                           {% for test in eng.test_set.all %}
-                               <li>
-                                 <a class="" href="{% url 'view_test' test.id %}">
-                                   <i class="fa fa-list-alt"></i> {{test}}, {{test.updated}}
-                               </li>
-                            {% endfor %}
+                            <li>
+                              <a href="{% url 'view_test' test.id %}">
+                                <i class="fa fa-list-alt"></i> {{test}}, {{test.updated}}
+                              </a>
+                            </li>
+                          {% endfor %}
+                          <li>
+                            <a href="{% url 'view_engagement' eng.id %}#tests">
+                              <i class="fa fa-globe"></i> View all {{ eng.count_tests }} tests...
+                            </a>
+                          </li>
                         </ul>
                       </div>
                       {% else %}
-                      <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                      <a href="{% url 'view_engagement' eng.id %}">{{ eng.count_tests }}</a>
                       {% endif %}
                       </div>
                     </td>

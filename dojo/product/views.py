@@ -28,7 +28,7 @@ from dojo.utils import add_external_issue, add_error_message_to_response, add_fi
                        get_system_setting, Product_Tab, get_punchcard_data, queryset_check
 
 from dojo.notifications.helper import create_notification
-from django.db.models import Prefetch, F
+from django.db.models import Prefetch, F, OuterRef, Subquery
 from django.db.models.query import QuerySet
 from github import Github
 from django.contrib.postgres.aggregates import StringAgg
@@ -625,6 +625,7 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     prod = get_object_or_404(Product, id=pid)
 
     default_page_num = 10
+    recent_test_day_count = 7
 
     # In Progress Engagements
     engs = Engagement.objects.filter(product=prod, active=True, status="In Progress",
@@ -632,21 +633,21 @@ def view_engagements(request, pid, engagement_type="Interactive"):
     active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
     result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list)
+    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list, recent_test_day_count)
 
     # Engagements that are queued because they haven't started or paused
     engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True,
                                      engagement_type=engagement_type).order_by('-updated')
     queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
     result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
-    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list)
+    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list, recent_test_day_count)
 
     # Cancelled or Completed Engagements
     engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by(
         '-target_end')
     inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
     result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
-    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list)
+    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list, recent_test_day_count)
 
     title = "All Engagements"
     if engagement_type == "CI/CD":
@@ -667,30 +668,40 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'inactive_engs': result_inactive_engs,
                    'inactive_engs_count': result_inactive_engs.paginator.count,
                    'inactive_engs_filter': inactive_engs_filter,
+                   'recent_test_day_count': recent_test_day_count,
                    'user': request.user})
 
 
-def prefetch_for_view_engagements(engs):
-    prefetched_engs = engs
-    if isinstance(engs,
-                  QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        prefetched_engs = prefetched_engs.select_related('lead')
-        prefetched_engs = prefetched_engs.prefetch_related('test_set')
-        prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
-        prefetched_engs = prefetched_engs.prefetch_related('jira_project__jira_instance')
-        prefetched_engs = prefetched_engs.prefetch_related('product__jira_project_set__jira_instance')
-        prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
-        prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
-        ACCEPTED_FINDINGS_QUERY = Q(test__finding__risk_accepted=True)
-        prefetched_engs = prefetched_engs.annotate(count_findings_accepted=Count('test__finding__id', filter=ACCEPTED_FINDINGS_QUERY))
-        prefetched_engs = prefetched_engs.prefetch_related('tags')
-    else:
-        logger.debug('unable to prefetch because query was already executed')
+def prefetch_for_view_engagements(engagements, recent_test_day_count):
+    engagements = engagements.select_related(
+        'lead'
+    ).prefetch_related(
+        Prefetch('test_set', queryset=Test.objects.filter(
+            id__in=Subquery(
+                Test.objects.filter(
+                    engagement_id=OuterRef('engagement_id'),
+                    updated__gte=timezone.now() - timedelta(days=recent_test_day_count)
+                ).values_list('id', flat=True)
+            ))
+        ),
+        'test_set__test_type',
+    ).annotate(
+        count_tests=Count('test', distinct=True),
+        count_findings_all=Count('test__finding__id'),
+        count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)),
+        count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
+        count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)),
+        count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)),
+        count_findings_accepted=Count('test__finding__id', filter=Q(test__finding__risk_accepted=True)),
+    )
 
-    return prefetched_engs
+    if System_Settings.objects.get().enable_jira:
+        engagements = engagements.prefetch_related(
+            'jira_project__jira_instance',
+            'product__jira_project_set__jira_instance',
+        )
+
+    return engagements
 
 
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
