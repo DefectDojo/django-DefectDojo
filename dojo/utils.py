@@ -1087,6 +1087,7 @@ def opened_in_period(start_date, end_date, pt):
     return oip
 
 
+# TODO harmonize: can be removed?
 def message(count, noun, verb):
     return ('{} ' + noun + '{} {} ' + verb).format(
         count, pluralize(count), pluralize(count, 'was,were'))

@@ -5,7 +5,7 @@ from dojo.models import Test, Finding, \
     Test_Import, \
     Test_Import_Finding_Action, IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING
 
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import handles_active_verified_statuses, import_parser_factory
 from dojo.utils import get_current_user, max_safe
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
@@ -63,14 +63,20 @@ class DojoDefaultImporter(object):
                                            scan_type)
             parsed_findings = parser.get_findings(scan, test)
             return parsed_findings
-        except SyntaxError:
-            raise Exception('Parser SyntaxError')
-        except ValueError:
-            raise Exception('FileParser ValueError')
-        except:
-            raise Exception('Error while parsing the report, did you specify the correct scan type ?')
+        except SyntaxError as se:
+            logger.exception(se)
+            logger.warn("Error in parser: {}".format(str(se)))
+            raise
+        except ValueError as ve:
+            logger.exception(ve)
+            logger.warn("Error in parser: {}".format(str(ve)))
+            raise
+        except Exception as e:
+            logger.exception(e)
+            logger.warn("Error in parser: {}".format(str(e)))
+            raise
 
-    def process_parsed_findings(self, test, parsed_findings, user, active, verified, minimum_severity=None, endpoint_to_add=None, push_to_jira=None, now=timezone.now()):
+    def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None, endpoints_to_add=None, push_to_jira=None, now=timezone.now()):
         new_findings = []
         items = parsed_findings
         logger.debug('starting import of %i items.', len(items) if items else 0)
@@ -90,8 +96,12 @@ class DojoDefaultImporter(object):
             item.reporter = user if user else get_current_user
             item.last_reviewed = now
             item.last_reviewed_by = user if user else get_current_user
-            item.active = active
-            item.verified = verified
+
+            # TODO this is not really used, and there's PR https://github.com/DefectDojo/django-DefectDojo/pull/4014 with a better/generic solution
+            if not handles_active_verified_statuses(scan_type):
+                item.active = active
+                item.verified = verified
+
             item.created = now
             item.updated = now
             item.save(dedupe_option=False)
@@ -137,17 +147,28 @@ class DojoDefaultImporter(object):
                 ep.endpoint_status.add(eps)
                 item.endpoint_status.add(eps)
                 item.endpoints.add(ep)
-            if endpoint_to_add:
-                item.endpoints.add(endpoint_to_add)
-                try:
-                    eps, created = Endpoint_Status.objects.get_or_create(
-                        finding=item,
-                        endpoint=endpoint_to_add)
-                except (MultipleObjectsReturned):
-                    pass
 
-                endpoint_to_add.endpoint_status.add(eps)
-                item.endpoint_status.add(eps)
+                for endpoint in endpoints_to_add:
+                    try:
+                        ep, created = Endpoint.objects.get_or_create(
+                            protocol=endpoint.protocol,
+                            host=endpoint.host,
+                            path=endpoint.path,
+                            query=endpoint.query,
+                            fragment=endpoint.fragment,
+                            product=test.engagement.product)
+                    except (MultipleObjectsReturned):
+                        pass
+                    try:
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=ep)
+                    except (MultipleObjectsReturned):
+                        pass
+
+                    ep.endpoint_status.add(eps)
+                    item.endpoints.add(ep)
+                    item.endpoint_status.add(eps)
 
             if item.unsaved_tags:
                 item.tags = item.unsaved_tags
@@ -173,6 +194,7 @@ class DojoDefaultImporter(object):
                                                 test__test_type=test.test_type,
                                                 active=True)
         else:
+            # TODO BUG? this will violate the deduplication_on_engagement setting for other engagements
             old_findings = Finding.objects.exclude(test=test) \
                                             .exclude(hash_code__in=new_hash_codes) \
                                             .filter(test__engagement__product=test.engagement.product,
@@ -199,7 +221,7 @@ class DojoDefaultImporter(object):
         return old_findings
 
     def import_scan(self, scan, scan_type, engagement, lead, environment, active=True, verified=True, tags=None, minimum_severity=None,
-                    user=None, endpoint_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None, commit_hash=None, push_to_jira=None, close_old_findings=False):
+                    user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None, commit_hash=None, push_to_jira=None, close_old_findings=False):
         now = timezone.now()
         user = user or get_current_user()
 
@@ -214,7 +236,7 @@ class DojoDefaultImporter(object):
 
         logger.debug('IMPORT_SCAN: Processing findings')
 
-        new_findings = self.process_parsed_findings(test, parsed_findings, user, active, verified, minimum_severity=minimum_severity, endpoint_to_add=endpoint_to_add, push_to_jira=push_to_jira, now=now)
+        new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified, minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira, now=now)
 
         closed_findings = []
         if close_old_findings:
@@ -236,8 +258,8 @@ class DojoDefaultImporter(object):
             import_settings['close_old_findings'] = close_old_findings
             import_settings['push_to_jira'] = push_to_jira
             import_settings['tags'] = tags
-            if endpoint_to_add:
-                import_settings['endpoint'] = endpoint_to_add
+            if endpoints_to_add:
+                import_settings['endpoints'] = endpoints_to_add
 
             test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.IMPORT_TYPE)
             test_import.save()
@@ -264,4 +286,4 @@ class DojoDefaultImporter(object):
                                 url=reverse('view_test', args=(test.id,)))
         logger.debug('IMPORT_SCAN: Done')
 
-        return test
+        return test, len(new_findings), len(closed_findings)

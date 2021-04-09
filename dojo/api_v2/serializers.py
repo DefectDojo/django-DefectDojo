@@ -1074,8 +1074,15 @@ class ImportScanSerializer(serializers.Serializer):
         scan = data.get('file', None)
 
         importer = Importer()
-        test = importer.import_scan(scan, scan_type, engagement, lead, environment, active=active, verified=verified, tags=tags, minimum_severity=minimum_severity,
-                    endpoint_to_add=endpoint_to_add, scan_date=scan_date, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira, close_old_findings=close_old_findings)
+        try:
+            test = importer.import_scan(scan, scan_type, engagement, lead, environment, active=active, verified=verified, tags=tags, minimum_severity=minimum_severity,
+                        endpoints_to_add=[endpoint_to_add], scan_date=scan_date, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira, close_old_findings=close_old_findings)
+        # convert to exception otherwise django rest framework will swallow them as 400 error
+        # exceptions are already logged in the importer
+        except SyntaxError as se:
+            raise Exception(se)
+        except ValueError as ve:
+            raise Exception(ve)
 
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
         self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
