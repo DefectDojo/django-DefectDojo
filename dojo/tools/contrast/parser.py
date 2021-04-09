@@ -52,10 +52,14 @@ class ContrastParser(object):
                 unique_id_from_tool=row.get('Vulnerability ID'),
                 nb_occurences=1,
             )
-            endpoint = Endpoint(host="0.0.0.0", protocol="http")
+            finding.unsaved_endpoints = []
             if row.get('Request URI'):
-                endpoint.path = row.get('Request URI')
-            finding.unsaved_endpoints = [endpoint]
+                endpoint = Endpoint(
+                    host="0.0.0.0",
+                    path=row.get('Request URI'),
+                    protocol=row.get('Request Protocol'),
+                )
+                finding.unsaved_endpoints.append(endpoint)
 
             if row.get('Request Qs', '') != '' and row.get('Request Body', '') != '':
                 finding.unsaved_req_resp = []
