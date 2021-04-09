@@ -1072,11 +1072,12 @@ class ImportScanSerializer(serializers.Serializer):
         lead = data['lead']
 
         scan = data.get('file', None)
+        endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
         importer = Importer()
         try:
-            test = importer.import_scan(scan, scan_type, engagement, lead, environment, active=active, verified=verified, tags=tags, minimum_severity=minimum_severity,
-                        endpoints_to_add=[endpoint_to_add], scan_date=scan_date, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira, close_old_findings=close_old_findings)
+            test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment, active=active, verified=verified, tags=tags, minimum_severity=minimum_severity,
+                        endpoints_to_add=endpoints_to_add, scan_date=scan_date, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira, close_old_findings=close_old_findings)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:

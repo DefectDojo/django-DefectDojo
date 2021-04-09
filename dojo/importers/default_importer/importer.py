@@ -76,7 +76,9 @@ class DojoDefaultImporter(object):
             logger.warn("Error in parser: {}".format(str(e)))
             raise
 
-    def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None, endpoints_to_add=None, push_to_jira=None, now=timezone.now()):
+    def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
+                                endpoints_to_add=None, push_to_jira=None, now=timezone.now()):
+        logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
         logger.debug('starting import of %i items.', len(items) if items else 0)
@@ -148,27 +150,28 @@ class DojoDefaultImporter(object):
                 item.endpoint_status.add(eps)
                 item.endpoints.add(ep)
 
-                for endpoint in endpoints_to_add:
-                    try:
-                        ep, created = Endpoint.objects.get_or_create(
-                            protocol=endpoint.protocol,
-                            host=endpoint.host,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=test.engagement.product)
-                    except (MultipleObjectsReturned):
-                        pass
-                    try:
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=item,
-                            endpoint=ep)
-                    except (MultipleObjectsReturned):
-                        pass
+                if endpoints_to_add:
+                    for endpoint in endpoints_to_add:
+                        try:
+                            ep, created = Endpoint.objects.get_or_create(
+                                protocol=endpoint.protocol,
+                                host=endpoint.host,
+                                path=endpoint.path,
+                                query=endpoint.query,
+                                fragment=endpoint.fragment,
+                                product=test.engagement.product)
+                        except (MultipleObjectsReturned):
+                            pass
+                        try:
+                            eps, created = Endpoint_Status.objects.get_or_create(
+                                finding=item,
+                                endpoint=ep)
+                        except (MultipleObjectsReturned):
+                            pass
 
-                    ep.endpoint_status.add(eps)
-                    item.endpoints.add(ep)
-                    item.endpoint_status.add(eps)
+                        ep.endpoint_status.add(eps)
+                        item.endpoints.add(ep)
+                        item.endpoint_status.add(eps)
 
             if item.unsaved_tags:
                 item.tags = item.unsaved_tags
@@ -221,7 +224,8 @@ class DojoDefaultImporter(object):
         return old_findings
 
     def import_scan(self, scan, scan_type, engagement, lead, environment, active=True, verified=True, tags=None, minimum_severity=None,
-                    user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None, commit_hash=None, push_to_jira=None, close_old_findings=False):
+                    user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
+                    commit_hash=None, push_to_jira=None, close_old_findings=False):
         now = timezone.now()
         user = user or get_current_user()
 
