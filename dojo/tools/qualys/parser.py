@@ -1,8 +1,6 @@
-import csv
 import datetime
 import logging
 import html2text
-from . import utfdictcsv
 from defusedxml import ElementTree as etree
 
 from dojo.models import Endpoint, Finding
@@ -46,8 +44,6 @@ REPORT_HEADERS = ['CVSS_score',
                   'category',
                   ]
 
-################################################################
-
 
 def htmltext(blob):
     h = html2text.HTML2Text()
@@ -55,25 +51,15 @@ def htmltext(blob):
     return h.handle(blob)
 
 
-def report_writer(report_dic, output_filename):
-    with open(output_filename, "wb") as outFile:
-        csvWriter = utfdictcsv.DictUnicodeWriter(outFile, REPORT_HEADERS, quoting=csv.QUOTE_ALL)
-        csvWriter.writerow(CUSTOM_HEADERS)
-        csvWriter.writerows(report_dic)
-    logger.debug("Successfully parsed.")
-
-################################################################
-
-
-def issue_r(raw_row, vuln):
+def parse_finding(host, tree):
     ret_rows = []
     issue_row = {}
 
     # IP ADDRESS
-    issue_row['ip_address'] = raw_row.findtext('IP')
+    issue_row['ip_address'] = host.findtext('IP')
 
     # FQDN
-    issue_row['fqdn'] = raw_row.findtext('DNS')
+    issue_row['fqdn'] = host.findtext('DNS')
 
     # Create Endpoint
     if issue_row['fqdn']:
@@ -82,10 +68,10 @@ def issue_r(raw_row, vuln):
         ep = Endpoint(host=issue_row['ip_address'])
 
     # OS NAME
-    issue_row['os'] = raw_row.findtext('OPERATING_SYSTEM')
+    issue_row['os'] = host.findtext('OPERATING_SYSTEM')
 
     # Scan details
-    for vuln_details in raw_row.iterfind('VULN_INFO_LIST/VULN_INFO'):
+    for vuln_details in host.iterfind('VULN_INFO_LIST/VULN_INFO'):
         _temp = issue_row
         # Port
         _gid = vuln_details.find('QID').attrib['id']
@@ -114,7 +100,7 @@ def issue_r(raw_row, vuln):
             else:
                 _temp['mitigation_date'] = None
         search = "//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{}']".format(_gid)
-        vuln_item = vuln.find(search)
+        vuln_item = tree.find(search)
         if vuln_item is not None:
             finding = Finding()
             # Vuln name
@@ -176,7 +162,7 @@ def issue_r(raw_row, vuln):
         finding = None
         if _temp_cve_details:
             refs = "\n".join(list(_cl.values()))
-            finding = Finding(title=_temp['vuln_name'],
+            finding = Finding(title="QID-" + _gid[4:] + " | " + _temp['vuln_name'],
                               mitigation=_temp['solution'],
                               description=_temp['vuln_description'],
                               severity=sev,
@@ -187,7 +173,7 @@ def issue_r(raw_row, vuln):
                               )
 
         else:
-            finding = Finding(title=_temp['vuln_name'],
+            finding = Finding(title="QID-" + _gid[4:] + " | " + _temp['vuln_name'],
                               mitigation=_temp['solution'],
                               description=_temp['vuln_description'],
                               severity=sev,
@@ -207,15 +193,14 @@ def issue_r(raw_row, vuln):
 
 
 def qualys_parser(qualys_xml_file):
-    parser = etree.XMLParser(resolve_entities=False, remove_blank_text=True, no_network=True, recover=True)
-    d = etree.parse(qualys_xml_file, parser)
-    r = d.xpath('//ASSET_DATA_REPORT/HOST_LIST/HOST')
-    master_list = []
-
-    for issue in r:
-        master_list += issue_r(issue, d)
-    return master_list
-    # report_writer(master_list, args.outfile)
+    parser = etree.XMLParser()
+    tree = etree.parse(qualys_xml_file, parser)
+    host_list = tree.find('HOST_LIST')
+    finding_list = []
+    if host_list is not None:
+        for host in host_list:
+            finding_list += parse_finding(host, tree)
+    return finding_list
 
 
 class QualysParser(object):
