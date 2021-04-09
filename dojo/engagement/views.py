@@ -19,7 +19,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.core.exceptions import MultipleObjectsReturned
 
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.filters import EngagementFilter, EngagementTestFilter
+from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
@@ -85,30 +85,57 @@ def engagement_calendar(request):
 
 def engagement(request):
     products = get_authorized_products(Permissions.Engagement_View).distinct()
-    engagements = get_authorized_engagements(Permissions.Engagement_View).distinct()
+    engagements = Engagement.objects.filter(
+        product__in=products
+    ).select_related(
+        'product',
+        'product__prod_type',
+    ).prefetch_related(
+        'lead',
+        'tags',
+        'product__tags',
+    )
 
-    products_with_engagements = products.filter(~Q(engagement=None), engagement__active=True).distinct()
-    filtered = EngagementFilter(
+    # Get the test counts per engagments. As a separate query, this is much
+    # faster than annotating the above `engagements` query.
+    engagement_test_counts = {
+        test['engagement']: test['test_count']
+        for test in Test.objects.filter(
+            engagement__in=engagements
+        ).values(
+            'engagement'
+        ).annotate(
+            test_count=Count('engagement')
+        )
+    }
+
+    if System_Settings.objects.get().enable_jira:
+        engagements = engagements.prefetch_related(
+            'jira_project__jira_instance',
+            'product__jira_project_set__jira_instance'
+        )
+
+    filtered_engagements = EngagementDirectFilter(
         request.GET,
-        queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
-                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
-    prods = get_page_items(request, filtered.qs, 25)
-    name_words = products_with_engagements.values_list('name', flat=True)
-    eng_words = engagements.filter(active=True).values_list('name', flat=True).distinct()
+        queryset=engagements
+    )
+
+    engs = get_page_items(request, filtered_engagements.qs, 25)
+    product_name_words = sorted(products.values_list('name', flat=True))
+    engagement_name_words = sorted(engagements.values_list('name', flat=True).distinct())
 
     add_breadcrumb(
         title="Active Engagements",
         top_level=not len(request.GET),
         request=request)
 
-    prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
-
     return render(
         request, 'dojo/engagement.html', {
-            'products': prods,
-            'filtered': filtered,
-            'name_words': sorted(set(name_words)),
-            'eng_words': sorted(set(eng_words)),
+            'engagements': engs,
+            'engagement_test_counts': engagement_test_counts,
+            'filter_form': filtered_engagements.form,
+            'product_name_words': product_name_words,
+            'engagement_name_words': engagement_name_words,
         })
 
 
@@ -156,20 +183,6 @@ def engagements_all(request):
             'name_words': sorted(set(name_words)),
             'eng_words': sorted(set(eng_words)),
         })
-
-
-def prefetch_for_products_with_engagments(products_with_engagements):
-    if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        return products_with_engagements.prefetch_related(
-            'tags',
-            'engagement_set__tags',
-            'engagement_set__test_set__tags',
-            'engagement_set__jira_project__jira_instance',
-            'jira_project_set__jira_instance'
-        )
-
-    logger.debug('unable to prefetch because query was already executed')
-    return products_with_engagements
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'change')
