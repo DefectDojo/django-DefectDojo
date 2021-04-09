@@ -65,8 +65,4 @@ class TestContrastParser(TestCase):
             self.assertEqual("crypto-bad-mac", finding.vuln_id_from_tool)
             self.assertEqual("072U-8EYA-BNSH-PGN6", finding.unique_id_from_tool)
             self.assertEqual(327, finding.cwe)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual("http", endpoint.protocol)
-            self.assertEqual("0.0.0.0", endpoint.host)
-            self.assertIsNone(endpoint.path)
+            self.assertEqual(0, len(finding.unsaved_endpoints))
