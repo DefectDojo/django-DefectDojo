@@ -22,7 +22,8 @@ from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
-    EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
+    EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, \
+    ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
 
@@ -49,7 +50,6 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.authorization.authorization_decorators import user_is_authorized
-
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -91,7 +91,8 @@ def engagement(request):
     filtered = EngagementFilter(
         request.GET,
         queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
-                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
+                                                            'engagement_set__test_set__lead',
+                                                            'engagement_set__test_set__test_type'))
     prods = get_page_items(request, filtered.qs, 25)
     name_words = products_with_engagements.values_list('name', flat=True)
     eng_words = engagements.filter(active=True).values_list('name', flat=True).distinct()
@@ -113,7 +114,6 @@ def engagement(request):
 
 
 def engagements_all(request):
-
     products_with_engagements = get_authorized_products(Permissions.Engagement_View)
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
@@ -159,7 +159,8 @@ def engagements_all(request):
 
 
 def prefetch_for_products_with_engagments(products_with_engagements):
-    if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
+    if isinstance(products_with_engagements,
+                  QuerySet):  # old code can arrive here with prods being a list because the query was already executed
         return products_with_engagements.prefetch_related(
             'tags',
             'engagement_set__tags',
@@ -192,9 +193,10 @@ def edit_engagement(request, eid):
             if (new_status == "Cancelled" or new_status == "Completed"):
                 engagement.active = False
                 create_notification(event='close_engagement',
-                        title='Closure of %s' % engagement.name,
-                        description='The engagement "%s" was closed' % (engagement.name),
-                        engagement=engagement, url=reverse('engagment_all_findings', args=(engagement.id, ))),
+                                    title='Closure of %s' % engagement.name,
+                                    description='The engagement "%s" was closed' % (engagement.name),
+                                    engagement=engagement,
+                                    url=reverse('engagment_all_findings', args=(engagement.id,))),
             else:
                 engagement.active = True
             engagement.save()
@@ -206,7 +208,8 @@ def edit_engagement(request, eid):
                 'Engagement updated successfully.',
                 extra_tags='alert-success')
 
-            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, engagement=engagement)
+            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project,
+                                                                               engagement=engagement)
             error = not success
 
             success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
@@ -215,15 +218,16 @@ def edit_engagement(request, eid):
             if not error:
                 if '_Add Tests' in request.POST:
                     return HttpResponseRedirect(
-                        reverse('add_tests', args=(engagement.id, )))
+                        reverse('add_tests', args=(engagement.id,)))
                 else:
                     return HttpResponseRedirect(
-                        reverse('view_engagement', args=(engagement.id, )))
+                        reverse('view_engagement', args=(engagement.id,)))
         else:
             logger.debug(form.errors)
 
     else:
-        form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
+        form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd,
+                       product=engagement.product, user=request.user)
 
         jira_epic_form = None
         if get_system_setting('enable_jira'):
@@ -263,15 +267,16 @@ def delete_engagement(request, eid):
                     extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
-                                    description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
-                                    url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
+                                    description='The engagement "%s" was deleted by %s' % (
+                                    engagement.name, request.user),
+                                    url=request.build_absolute_uri(reverse('view_engagements', args=(product.id,))),
                                     recipients=[engagement.lead],
                                     icon="exclamation-triangle")
 
                 if engagement.engagement_type == 'CI/CD':
-                    return HttpResponseRedirect(reverse("view_engagements_cicd", args=(product.id, )))
+                    return HttpResponseRedirect(reverse("view_engagements_cicd", args=(product.id,)))
                 else:
-                    return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+                    return HttpResponseRedirect(reverse("view_engagements", args=(product.id,)))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([engagement])
@@ -300,7 +305,8 @@ def view_engagement(request, eid):
     paged_tests.object_list = prefetch_for_view_tests(paged_tests.object_list)
 
     prod = eng.product
-    risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(accepted_findings_count=Count('accepted_findings__id'))
+    risks_accepted = eng.risk_acceptance.all().select_related('owner').annotate(
+        accepted_findings_count=Count('accepted_findings__id'))
     preset_test_type = None
     network = None
     if eng.preset:
@@ -399,11 +405,19 @@ def prefetch_for_view_tests(tests):
         prefetched = prefetched.select_related('lead')
         prefetched = prefetched.prefetch_related('tags', 'test_type', 'notes')
         prefetched = prefetched.annotate(count_findings_test_all=Count('finding__id', distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_active=Count('finding__id', filter=Q(finding__active=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True))
-        prefetched = prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
+        prefetched = prefetched.annotate(
+            count_findings_test_active=Count('finding__id', filter=Q(finding__active=True), distinct=True))
+        prefetched = prefetched.annotate(count_findings_test_active_verified=Count('finding__id',
+                                                                                   filter=Q(finding__active=True) & Q(
+                                                                                       finding__verified=True),
+                                                                                   distinct=True))
+        prefetched = prefetched.annotate(
+            count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True), distinct=True))
+        prefetched = prefetched.annotate(
+            count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True))
+        prefetched = prefetched.annotate(
+            total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE),
+                                       distinct=True))
 
     else:
         logger.warn('unable to prefetch because query was already executed')
@@ -463,17 +477,17 @@ def add_tests(request, eid):
                 title=new_test.test_type.name + " for " + eng.product.name,
                 test=new_test,
                 engagement=eng,
-                url=reverse('view_engagement', args=(eng.id, )))
+                url=reverse('view_engagement', args=(eng.id,)))
 
             if '_Add Another Test' in request.POST:
                 return HttpResponseRedirect(
-                    reverse('add_tests', args=(eng.id, )))
+                    reverse('add_tests', args=(eng.id,)))
             elif '_Add Findings' in request.POST:
                 return HttpResponseRedirect(
-                    reverse('add_findings', args=(new_test.id, )))
+                    reverse('add_findings', args=(new_test.id,)))
             elif '_Finished' in request.POST:
                 return HttpResponseRedirect(
-                    reverse('view_engagement', args=(eng.id, )))
+                    reverse('view_engagement', args=(eng.id,)))
     else:
         form = TestForm(engagement=eng)
         form.initial['target_start'] = eng.target_start
@@ -557,14 +571,14 @@ def import_scan_results(request, eid=None, pid=None):
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
 
-
             if not any(scan_type in code
                        for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
                 raise Http404()
             if file and is_scan_file_too_large(file):
                 messages.add_message(request,
                                      messages.ERROR,
-                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     "Report file is too large. Maximum supported size is {} MB".format(
+                                         settings.SCAN_FILE_MAX_SIZE),
                                      extra_tags='alert-danger')
                 return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
 
@@ -614,13 +628,14 @@ def import_scan_results(request, eid=None, pid=None):
             #             'It has configured more than one {} tool. \n'.format(scan_type)
             #
 
-            scanner_filter = 'vulnerable-exploited,vulnerable-version,vulnerable-potential,potential'
 
             try:
                 parser = import_parser_factory(file, t, active, verified, scan_type)
                 if callable(getattr(parser, 'set_filter', None)):
                     logger.debug('Scanner filter supported')
-                    parser.set_filter(scanner_filter)
+                    filters = get_scanner_config(scan_type, request.POST['scan_type_configuration'])
+                    if filters is not None:
+                        parser.set_filter(filters)
                 else:
                     logger.debug('Scanner filter not supported')
                 parser_findings = parser.get_findings(file, t)
@@ -662,7 +677,8 @@ def import_scan_results(request, eid=None, pid=None):
                         item.verified = verified
 
                     item.save(dedupe_option=False, false_history=True)
-                    logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
+                    logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name,
+                                 item.component_version)
 
                     if hasattr(item, 'unsaved_req_resp') and len(
                             item.unsaved_req_resp) > 0:
@@ -749,7 +765,8 @@ def import_scan_results(request, eid=None, pid=None):
                     # if endpoint_to_add:    # not implemented via UI
                     #     import_settings['endpoint'] = endpoint_to_add
 
-                    test_import = Test_Import(test=t, import_settings=import_settings, version=version, type=Test_Import.IMPORT_TYPE)
+                    test_import = Test_Import(test=t, import_settings=import_settings, version=version,
+                                              type=Test_Import.IMPORT_TYPE)
                     test_import.save()
 
                     test_import_finding_action_list = []
@@ -758,7 +775,9 @@ def import_scan_results(request, eid=None, pid=None):
                     #     test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
                     for finding in new_findings:
                         logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
+                        test_import_finding_action_list.append(
+                            Test_Import_Finding_Action(test_import=test_import, finding=finding,
+                                                       action=IMPORT_CREATED_FINDING))
 
                     Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
 
@@ -775,10 +794,10 @@ def import_scan_results(request, eid=None, pid=None):
                     finding_count=finding_count,
                     test=t,
                     engagement=engagement,
-                    url=reverse('view_test', args=(t.id, )))
+                    url=reverse('view_test', args=(t.id,)))
 
                 return HttpResponseRedirect(
-                    reverse('view_test', args=(t.id, )))
+                    reverse('view_test', args=(t.id,)))
             except SyntaxError:
                 messages.add_message(
                     request,
@@ -802,16 +821,30 @@ def import_scan_results(request, eid=None, pid=None):
 
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     return render(request,
-        'dojo/import_scan_results.html',
-        {'form': form,
-         'product_tab': product_tab,
-         'engagement_or_product': engagement_or_product,
-         'custom_breadcrumb': custom_breadcrumb,
-         'title': title,
-         'cred_form': cred_form,
-         'jform': jform,
-         'scan_types': get_choices(),
-         })
+                  'dojo/import_scan_results.html',
+                  {'form': form,
+                   'product_tab': product_tab,
+                   'engagement_or_product': engagement_or_product,
+                   'custom_breadcrumb': custom_breadcrumb,
+                   'title': title,
+                   'cred_form': cred_form,
+                   'jform': jform,
+                   'scan_types': get_choices(),
+                   })
+
+
+def get_scanner_config(scan_type, scan_type_configuration):
+    '''
+    This is refactored code to retrive configuration for particular scanner
+    '''
+    if scan_type_configuration and scan_type_configuration not in 'Default':
+        extras = Tool_Configuration.objects.get(tool_type__name=scan_type,
+                                                name=scan_type_configuration)
+        logger.debug("Scanner configuration: {}".format(extras.extras))
+        return extras.extras
+    else:
+        logger.debug("Scanner configuration not defined")
+        return None
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
@@ -826,11 +859,11 @@ def close_eng(request, eid):
     create_notification(event='close_engagement',
                         title='Closure of %s' % eng.name,
                         description='The engagement "%s" was closed' % (eng.name),
-                        engagement=eng, url=reverse('engagment_all_findings', args=(eng.id, ))),
+                        engagement=eng, url=reverse('engagment_all_findings', args=(eng.id,))),
     if eng.engagement_type == 'CI/CD':
-        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
+        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id,)))
     else:
-        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id,)))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
@@ -845,11 +878,11 @@ def reopen_eng(request, eid):
     create_notification(event='other',
                         title='Reopening of %s' % eng.name,
                         description='The engagement "%s" was reopened' % (eng.name),
-                        url=reverse('view_engagement', args=(eng.id, ))),
+                        url=reverse('view_engagement', args=(eng.id,))),
     if eng.engagement_type == 'CI/CD':
-        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
+        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id,)))
     else:
-        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id,)))
 
 
 """
@@ -895,7 +928,7 @@ def complete_checklist(request, eid):
                 'Checklist saved.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(
-                reverse('view_engagement', args=(eid, )))
+                reverse('view_engagement', args=(eid,)))
     else:
         tests = Test.objects.filter(engagement=eng)
         findings = Finding.objects.filter(test__in=tests).all()
@@ -961,12 +994,13 @@ def add_risk_acceptance(request, eid, fid=None):
                 'Risk acceptance saved.',
                 extra_tags='alert-success')
 
-            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
+            return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid,)))
     else:
         risk_acceptance_title_suggestion = 'Accept: %s' % finding
         form = RiskAcceptanceForm(initial={'owner': request.user, 'name': risk_acceptance_title_suggestion})
 
-    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
+    finding_choices = Finding.objects.filter(duplicate=False, test__engagement=eng).filter(
+        NOT_ACCEPTED_FINDINGS_QUERY).order_by('title')
 
     form.fields['accepted_findings'].queryset = finding_choices
     if fid:
@@ -975,10 +1009,10 @@ def add_risk_acceptance(request, eid, fid=None):
     product_tab.setEngagement(eng)
 
     return render(request, 'dojo/add_risk_acceptance.html', {
-                  'eng': eng,
-                  'product_tab': product_tab,
-                  'form': form
-                  })
+        'eng': eng,
+        'product_tab': product_tab,
+        'form': form
+    })
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
@@ -1185,7 +1219,7 @@ def delete_risk_acceptance(request, eid, raid):
         messages.SUCCESS,
         'Risk acceptance deleted successfully.',
         extra_tags='alert-success')
-    return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
+    return HttpResponseRedirect(reverse("view_engagement", args=(eng.id,)))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
@@ -1236,7 +1270,7 @@ def upload_threatmodel(request, eid):
                 'Threat model saved.',
                 extra_tags='alert-success')
             return HttpResponseRedirect(
-                reverse('view_engagement', args=(eid, )))
+                reverse('view_engagement', args=(eid,)))
     else:
         form = UploadThreatForm()
     product_tab = Product_Tab(eng.product.id, title="Upload Threat Model", tab="engagements")
@@ -1266,7 +1300,7 @@ def engagement_ics(request, eid):
         "Set aside for engagement %s, on product %s.  Additional detail can be found at %s"
         % (eng.name, eng.product.name,
            request.build_absolute_uri(
-               (reverse("view_engagement", args=(eng.id, ))))), uid)
+               (reverse("view_engagement", args=(eng.id,))))), uid)
     output = cal.serialize()
     response = HttpResponse(content=output)
     response['Content-Type'] = 'text/calendar'
