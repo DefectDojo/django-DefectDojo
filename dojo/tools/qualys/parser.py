@@ -50,6 +50,7 @@ def htmltext(blob):
     h.ignore_links = False
     return h.handle(blob)
 
+
 def parse_finding(host, tree):
     ret_rows = []
     issue_row = {}
