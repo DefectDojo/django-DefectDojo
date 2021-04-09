@@ -4,18 +4,25 @@
 <div class="col-md-12">
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
+            <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} Engagements ({{ count }})
                 <div class="dropdown pull-right">
-                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters-{{status}}" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                    {% if prod|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:prod %}
-                        {% if type == "CI/CD" %}
-                        <a title="Add New Engagement" class="btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
-                            class="fa fa-plus"></span> </a>
-                        {% else %}
-                        <a title="Add New Engagement" class="btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"><span
-                            class="fa fa-plus"></span> </a>
-                        {% endif %}
-                    {% endif %}
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" aria-label="Add Engagement"
+                    data-toggle="dropdown" aria-expanded="true">
+                <span class="fa fa-bars"></span>
+                <span class="caret"></span>
+            </button>
+          <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            <li role="presentation">
+                                <a class="" href="{% url 'new_eng_for_prod' prod.id %}">
+                                    <i class="fa fa-plus"></i> Add New Interactive Engagement
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a class="" href="{% url 'new_eng_for_prod_cicd' prod.id %}">
+                                    <i class="fa fa-plus"></i> Add New CI/CD Engagement
+                                </a>
+                            </li>
+                    </ul>
                 </div>
               </h4>
         </div>
@@ -33,6 +40,7 @@
                 <tr>
                     <th></th>
                     <th>Name</th>
+                    <th>Type</th>
                     <th>Lead</th>
                     <th class="text-left">Date</th>
                     <th class="text-left">Length</th>
@@ -45,7 +53,6 @@
                     <th class="text-center">Accepted</th>
                     <th class="text-center">All</th>
                     <th class="text-center">Duplicates</th>
-                    <th class="text-left">Updated</th>
                     {% if status == "paused" or status == "closed" %}
                       <th class="text-left">Status</th>
                     {% endif %}
@@ -141,7 +148,7 @@
                          </li>
                      </ul>
                     </td>
-                    <td class="text-center" style="width: 250px;">
+                    <td style="width: 250px;">
                     <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
                     {{ eng.name|truncatechars_html:35|default:"N/A" }}</a>
                     {% if eng.version %}
@@ -158,6 +165,7 @@
                         </sup>
                     {% endif %}
                     </td>
+                    <td>{{ eng.engagement_type }}</td>
                     <td style="width: 150px;">
                       {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
                           {{ eng.lead.get_full_name }}
@@ -242,9 +250,6 @@
                     <td class="text-center">{{ eng.count_findings_accepted }}</td>
                     <td class="text-center">{{ eng.count_findings_all }}</td>
                     <td class="text-center">{{ eng.count_findings_duplicate }}</td>
-                    <td class="text-left"><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
-                    {{ eng.updated|naturaltime|default_if_none:"" }}</a>
-                    </td>
                     {% if status == "paused" or status == "closed" %}
                     <td class="text-left">
                       {% if eng.status == "Blocked" %}
@@ -295,6 +300,7 @@
                 "columns": [
                     { "data": "action" },
                     { "data": "eng_name" },
+                    { "data": "engagement_type" },
                     { "data": "lead" },
                     { "data": "date" },
                     { "data": "length" },
@@ -307,9 +313,8 @@
                     { "data": "accepted" },
                     { "data": "all" },
                     { "data": "dups" },
-                    { "data": "updated" },
                     {% if status == "paused" or status == "closed" %}
-                      { "data": "updated" },
+                      { "data": "status" },
                     {% endif %}
                 ],
                 columnDefs: [
