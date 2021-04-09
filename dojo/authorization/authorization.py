@@ -1,5 +1,6 @@
 from django.core.exceptions import PermissionDenied
 from django.conf import settings
+from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint
@@ -14,9 +15,8 @@ def user_has_permission(user, obj, permission):
         return True
 
     if isinstance(obj, Product_Type):
-        try:
-            member = Product_Type_Member.objects.get(user=user, product_type=obj)
-        except Product_Type_Member.DoesNotExist:
+        member = get_product_type_member(user, obj)
+        if member is None:
             return False
         return role_has_permission(member.role, permission)
     elif (isinstance(obj, Product) and
@@ -26,9 +26,8 @@ def user_has_permission(user, obj, permission):
             return True
 
         # Maybe the user has a role for the product with the requested permissions
-        try:
-            member = Product_Member.objects.get(user=user, product=obj)
-        except Product_Member.DoesNotExist:
+        member = get_product_member(user, obj)
+        if member is None:
             return False
         return role_has_permission(member.role, permission)
     elif isinstance(obj, Engagement) and permission in Permissions.get_engagement_permissions():
@@ -86,3 +85,19 @@ class PermissionDoesNotExistError(Exception):
 class RoleDoesNotExistError(Exception):
     def __init__(self, message):
         self.message = message
+
+
+@cache_for_request
+def get_product_member(user, product):
+    try:
+        return Product_Member.objects.get(user=user, product=product)
+    except Product_Member.DoesNotExist:
+        return None
+
+
+@cache_for_request
+def get_product_type_member(user, product_type):
+    try:
+        return Product_Type_Member.objects.get(user=user, product_type=product_type)
+    except Product_Type_Member.DoesNotExist:
+        return None

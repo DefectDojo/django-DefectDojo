@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load get_endpoint_status %}
 {% load static %}
 {% block findings_list %}
@@ -29,9 +30,9 @@
                 <div class="clearfix">
                     {% include "dojo/paging_snippet.html" with page=findings page_size=True %}
                 </div>
-            {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+            {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
             <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                     <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                         Bulk Edit
@@ -46,7 +47,7 @@
                       </a>
                     </button>
                     {% endif %}
-                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+                    {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Finding_Delete" %}
                     <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                       <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                         <i class="fa fa-trash"></i>
@@ -137,7 +138,7 @@
                            class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
-                          {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled%}
+                          {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                           <th class="hidden-sm centered" title="Select all visible findings.">
                               <div class="dropdown">
                                   <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -194,7 +195,7 @@
                         <tbody>
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
-                                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+                                {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
                                   <td class="hidden-sm centered">
                                     <form action="#">
                                         <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}"
@@ -212,15 +213,15 @@
                                             <i class="fa fa-arrow-circle-right"></i> View
                                           </a>
                                        </li>
-                                       {% if user|is_authorized_for_change:finding %}
+                                       {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                        <li>
                                           <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                           <i class="fa fa-pencil-square-o"></i> Edit
                                           </a>
                                        </li>
                                        {% endif %}
-                                       <li class="divider"></li>
-                                       {% if user|is_authorized_for_staff:finding %}
+                                       {% if user|is_authorized_for_staff:finding or finding|has_object_permission:"Finding_Edit" %}
+                                          <li class="divider"></li>
                                           <li role="presentation">
                                               <a href="{% url 'manage_images' finding.id %}">
                                                   <i class="fa fa-file-image-o"></i> Manage Images
@@ -240,7 +241,7 @@
                                               </li>
                                           {% endif %}
                                        {% endif %}
-                                       {% if user|is_authorized_for_change:finding %}
+                                       {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                           <li role="presentation">
                                               <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                   <i class="fa fa-clock-o"></i> Touch Finding
@@ -259,7 +260,7 @@
                                               </a>
                                           </li>
                                        {% endif %}
-                                       {% if user|is_authorized_for_change:finding %}
+                                       {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                         {% if finding.active %}
                                             <li role="presentation">
                                                 <a href="{% url 'close_finding' finding.id %}">
@@ -275,7 +276,7 @@
                                         {% endif %}
                                        {% endif %}
                                        <li class="divider"></li>
-                                        {% if user|is_authorized_for_staff:finding %}
+                                        {% if user|is_authorized_for_staff:finding or finding|has_object_permission:"Risk_Acceptance" %}
                                           {% if finding.risk_accepted %}
                                               <li role="presentation">
                                               <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
@@ -304,7 +305,8 @@
                                                <i class="fa fa-history"></i> View History
                                            </a>
                                        </li>
-                                       {% if user|is_authorized_for_delete:finding %}
+                                       {% if user|is_authorized_for_delete:finding or finding|has_object_permission:"Finding_Delete" %}
+                                          <li class="divider"></li>
                                           <li>
                                             <form method="post" action="{% url 'delete_finding' finding.id %}"
                                                   style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
