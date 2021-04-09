@@ -515,7 +515,6 @@ def import_scan_results(request, eid=None, pid=None):
     finding_count = 0
     jform = None
     user = request.user
-
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
         engagement_or_product = engagement
@@ -525,7 +524,6 @@ def import_scan_results(request, eid=None, pid=None):
         engagement_or_product = product
     elif not user.is_staff:
         raise PermissionDenied
-
     if settings.FEATURE_AUTHORIZATION_V2:
         user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
     else:
@@ -578,10 +576,11 @@ def import_scan_results(request, eid=None, pid=None):
             scan_type = request.POST['scan_type']
             tags = form.cleaned_data['tags']
 
-
             if not any(scan_type in code
-                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
+                       for code in ImportScanForm().SORTED_SCAN_TYPE_CHOICES):
+                logging.debug('Not supported scanner')
                 raise Http404()
+
             if file and is_scan_file_too_large(file):
                 messages.add_message(request,
                                      messages.ERROR,
