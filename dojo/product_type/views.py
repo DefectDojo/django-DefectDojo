@@ -212,9 +212,12 @@ def edit_product_type_member(request, memberid):
                 if owners < 1:
                     messages.add_message(request,
                                         messages.SUCCESS,
-                                        'There must be at least one owner.',
+                                        'There must be at least one owner for Product Type {}.'.format(member.product_type.name),
                                         extra_tags='alert-warning')
-                    return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
+                    if is_title_in_breadcrumbs('View User', request.session.get('dojo_breadcrumbs')):
+                        return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                    else:
+                        return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
             if member.role == Roles.Owner and not user_has_permission(request.user, member.product_type, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
