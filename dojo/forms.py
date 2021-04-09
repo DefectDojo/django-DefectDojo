@@ -386,9 +386,9 @@ class ChoiceFieldNoValidate(forms.ChoiceField):
         pass
 
 class ImportScanForm(forms.Form):
-    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
-    AVAILABLE_SCAN_TYPE_CONFIG = sorted(get_available_configurations(), key=lambda x: x[1])
 
+    SORTED_SCAN_TYPE_CHOICES = []
+    AVAILABLE_SCAN_TYPE_CONFIG = []
 
     scan_date = forms.DateTimeField(
         required=True,
@@ -401,8 +401,8 @@ class ImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES)
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
-    scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
-    scan_type_configuration = ChoiceFieldNoValidate(required=False, choices=AVAILABLE_SCAN_TYPE_CONFIG)
+    scan_type = forms.ChoiceField(required=True)
+    scan_type_configuration = ChoiceFieldNoValidate(required=False)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -423,6 +423,7 @@ class ImportScanForm(forms.Form):
         super(ImportScanForm, self).__init__(*args, **kwargs)
         self.fields["scan_type"].choices = sorted(get_choices(), key=lambda x: x[1])
         self.fields["scan_type_configuration"].choices = sorted(get_available_configurations(), key=lambda x: x[1])
+
 
     def clean(self):
         cleaned_data = super().clean()
