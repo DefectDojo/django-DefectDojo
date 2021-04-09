@@ -876,7 +876,6 @@ class ToolConfigForm_Admin(forms.ModelForm):
             self.api_key = self.instance.api_key
 
     def clean(self):
-        # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super().clean()
         if not cleaned_data['password'] and not cleaned_data['ssh'] and not cleaned_data['api_key']:
             cleaned_data['password'] = self.password_from_db
@@ -2758,7 +2757,6 @@ class JIRAForm_Admin(forms.ModelForm):
             self.fields['password'].required = False
 
     def clean(self):
-        # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super().clean()
         if not cleaned_data['password']:
             cleaned_data['password'] = self.password_from_db
@@ -2812,7 +2810,6 @@ class JIRAForm_Admin(forms.ModelForm):
             self.fields['password'].required = False
 
     def clean(self):
-        # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super().clean()
         if not cleaned_data['password']:
             cleaned_data['password'] = self.password_from_db

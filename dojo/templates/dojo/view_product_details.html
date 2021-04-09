@@ -190,8 +190,7 @@
 </div>
 {% endif %}
 
-{% feature_authorization_v2 as feature_authorization_v2_flag %}
-{% if feature_authorization_v2_flag %}
+{% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -402,8 +401,7 @@
             <td><strong>Technical Contact</strong></td>
             <td>{% if prod.technical_contact != "0" %}{{ prod.technical_contact | default:"Unknown" }}{% endif %}</td>
           </tr>
-          {% feature_authorization_v2 as feature_authorization_v2_flag %}
-          {% if feature_authorization_v2_flag is False %}
+          {% if not 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
           <tr>
             <td><strong>Authorized Users</strong></td>
             <td>

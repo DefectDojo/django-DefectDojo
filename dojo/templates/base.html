@@ -220,7 +220,7 @@
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user.is_staff %}
+                            {% if request.user|feature_authorization_v2_or_user_is_staff %}
                                 <li>
                                     <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                         <i class="fa fa-bug fa-fw"></i>
@@ -240,12 +240,16 @@
                                         <li>
                                             <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
                                         </li>
+                                        {% if request.user.is_staff %}
                                         <li>
                                             <a href="{% url 'templates' %}">Finding Templates</a>
                                         </li>
+                                        {% endif %}
                                     </ul>
                                     <!-- /.nav-second-level -->
                                 </li>
+                            {% endif %}
+                            {% if request.user.is_staff %}
                                 <li>
 				                    <a href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
                                         <i class="fa fa-th-large fa-fw"></i>
@@ -257,6 +261,8 @@
                                         </li>
                                     </ul>
                                 </li>
+                            {% endif %}
+                            {% if request.user|feature_authorization_v2_or_user_is_staff %}
                                 <li>
                                     <a href="{% url 'endpoints' %}" aria-expanded="false" aria-label="Endpoints">
 					                    <i class="fa fa-sitemap fa-fw"></i>

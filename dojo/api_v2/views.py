@@ -34,14 +34,15 @@ from django.conf import settings
 from datetime import datetime
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions, prefetch, schema
-from django.db.models import Q
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
 from dojo.product_type.queries import get_authorized_product_types
-from dojo.product.queries import get_authorized_products
+from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.test.queries import get_authorized_tests
+from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
+from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
+from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.authorization.roles_permissions import Permissions, Roles
 
 logger = logging.getLogger(__name__)
@@ -55,18 +56,14 @@ class EndPointViewSet(mixins.ListModelMixin,
                       mixins.CreateModelMixin,
                       viewsets.GenericViewSet):
     serializer_class = serializers.EndpointSerializer
-    queryset = Endpoint.objects.all()
+    queryset = Endpoint.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiEndpointFilter
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasEndpointPermission)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return Endpoint.objects.filter(
-                Q(product__authorized_users__in=[self.request.user]) |
-                Q(product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return Endpoint.objects.all()
+        return get_authorized_endpoints(Permissions.Endpoint_View).distinct()
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
@@ -101,19 +98,15 @@ class EndpointStatusViewSet(mixins.ListModelMixin,
                       mixins.CreateModelMixin,
                       viewsets.GenericViewSet):
     serializer_class = serializers.EndpointStatusSerializer
-    queryset = Endpoint_Status.objects.all()
+    queryset = Endpoint_Status.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('mitigated', 'false_positive', 'out_of_scope',
                      'risk_accepted', 'mitigated_by', 'finding', 'endpoint')
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasEndpointStatusPermission)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return Endpoint_Status.objects.filter(
-                Q(endpoint__product__authorized_users__in=[self.request.user]) |
-                Q(endpoint__product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return Endpoint_Status.objects.all()
+        return get_authorized_endpoint_status(Permissions.Endpoint_View).distinct()
 
 
 # Authorization: object-based
@@ -279,18 +272,14 @@ class AppAnalysisViewSet(mixins.ListModelMixin,
                         mixins.CreateModelMixin,
                         viewsets.GenericViewSet):
     serializer_class = serializers.AppAnalysisSerializer
-    queryset = App_Analysis.objects.all()
+    queryset = App_Analysis.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiAppAnalysisFilter
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasAppAnalysisPermission)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(
-                Q(product__authorized_users__in=[self.request.user]) |
-                Q(product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return self.queryset
+        return get_authorized_app_analysis(Permissions.Product_View)
 
 
 # Authorization: staff
@@ -327,20 +316,11 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                      ra_api.AcceptedFindingsMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.FindingSerializer
-    queryset = Finding.objects.all().prefetch_related('endpoints',
-                                                    'reviewers',
-                                                    'images',
-                                                    'found_by',
-                                                    'notes',
-                                                    'risk_acceptance_set',
-                                                    'test',
-                                                    'test__test_type',
-                                                    'test__engagement',
-                                                    'test__environment',
-                                                    'test__engagement__product',
-                                                    'test__engagement__product__prod_type')
+    queryset = Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ApiFindingFilter
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
 
     _related_field_parameters = [openapi.Parameter(
                 name="related_fields",
@@ -364,13 +344,18 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(
-                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return self.queryset
+        return get_authorized_findings(Permissions.Finding_View).prefetch_related('endpoints',
+                                                    'reviewers',
+                                                    'images',
+                                                    'found_by',
+                                                    'notes',
+                                                    'risk_acceptance_set',
+                                                    'test',
+                                                    'test__test_type',
+                                                    'test__engagement',
+                                                    'test__environment',
+                                                    'test__engagement__product',
+                                                    'test__engagement__product__prod_type').distinct()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -870,22 +855,14 @@ class DojoMetaViewSet(mixins.ListModelMixin,
                      mixins.UpdateModelMixin,
                      viewsets.GenericViewSet):
     serializer_class = serializers.MetaSerializer
-    queryset = DojoMeta.objects.all()
+    queryset = DojoMeta.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasDojoMetaPermission)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return self.queryset.filter(
-                Q(product__authorized_users__in=[self.request.user]) |
-                Q(product__prod_type__authorized_users__in=[self.request.user]) |
-                Q(endpoint__product__authorized_users__in=[self.request.user]) |
-                Q(endpoint__product__prod_type__authorized_users__in=[self.request.user]) |
-                Q(finding__test__engagement__product__authorized_users__in=[self.request.user]) |
-                Q(finding__test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return self.queryset
+        return get_authorized_dojo_meta(Permissions.Product_View)
 
 
 # Authorization: object-based
@@ -994,18 +971,14 @@ class StubFindingsViewSet(mixins.ListModelMixin,
                           mixins.UpdateModelMixin,
                           viewsets.GenericViewSet):
     serializer_class = serializers.StubFindingSerializer
-    queryset = Stub_Finding.objects.all()
+    queryset = Stub_Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'title', 'date', 'severity', 'description')
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasFindingPermission)
 
     def get_queryset(self):
-        if not self.request.user.is_staff:
-            return Finding.objects.filter(
-                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            return Finding.objects.all()
+        return get_authorized_stub_findings(Permissions.Finding_View).distinct()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -1196,16 +1169,11 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                     'test_import_finding_action__finding', 'test_import_finding_action__created')
     swagger_schema = prefetch.get_prefetch_schema(["test_imports_list", "test_imports_read"], serializers.TestImportSerializer). \
         to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasTestImportPermission)
 
     def get_queryset(self):
-        if not self.request.user.is_staff and not self.request.user.is_superuser:
-            test_imports = Test_Import.objects.filter(
-                Q(test__engagement__product__authorized_users__in=[self.request.user]) |
-                Q(test__engagement__product__prod_type__authorized_users__in=[self.request.user])
-            ).distinct()
-        else:
-            test_imports = Test_Import.objects.all()
-        return test_imports.prefetch_related(
+        return get_authorized_test_imports(Permissions.Test_View).prefetch_related(
                                         'test_import_finding_action_set',
                                         'findings_affected',
                                         'findings_affected__endpoints',
