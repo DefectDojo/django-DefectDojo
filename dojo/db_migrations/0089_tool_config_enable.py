@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0085_add_publish_date_cvssv3_score'),
+        ('dojo', '0088_import_history_cicd.py'),
     ]
 
     operations = [

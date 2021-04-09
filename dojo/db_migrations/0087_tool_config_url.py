@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0086_tool_config_enable'),
+        ('dojo', '0087_protect_jira_issues.py'),
     ]
 
     operations = [
