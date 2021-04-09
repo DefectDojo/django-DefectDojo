@@ -1369,7 +1369,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             unchanged_items = []
 
             logger.debug('starting reimport of %i items.', len(items))
-            from dojo.reimport_utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
+            from dojo.importers.reimport.utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
             deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
 
             i = 0
