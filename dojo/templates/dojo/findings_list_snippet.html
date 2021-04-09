@@ -104,6 +104,11 @@
                                 <input id="id_bulk_risk_unaccept" name="risk_unaccept" type="checkbox" disabled/> <span>Unaccept</span>
                             </label>
 
+                            {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                            <label><b>Group</b></label>
+                            <span style="font-size: 80%;">(Only available in per test for now)</span><br/>
+                            {% endif %}
+
                             <br>
                             {% if system_settings.enable_jira %}
                             <label style="font-size: 80%; font-weight: bold; display: block">Push to Jira
