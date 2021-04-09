@@ -214,7 +214,7 @@ def edit_product_type_member(request, memberid):
                                         messages.SUCCESS,
                                         'There must be at least one owner for Product Type {}.'.format(member.product_type.name),
                                         extra_tags='alert-warning')
-                    if is_title_in_breadcrumbs('View User', request.session.get('dojo_breadcrumbs')):
+                    if is_title_in_breadcrumbs('View User'):
                         return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
                     else:
                         return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
@@ -229,7 +229,7 @@ def edit_product_type_member(request, memberid):
                                     messages.SUCCESS,
                                     'Product type member updated successfully.',
                                     extra_tags='alert-success')
-                if is_title_in_breadcrumbs('View User', request.session.get('dojo_breadcrumbs')):
+                if is_title_in_breadcrumbs('View User'):
                     return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
                 else:
                     return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
@@ -262,7 +262,7 @@ def delete_product_type_member(request, memberid):
                             messages.SUCCESS,
                             'Product type member deleted successfully.',
                             extra_tags='alert-success')
-        if is_title_in_breadcrumbs('View User', request.session.get('dojo_breadcrumbs')):
+        if is_title_in_breadcrumbs('View User'):
             return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
         else:
             if user == request.user:

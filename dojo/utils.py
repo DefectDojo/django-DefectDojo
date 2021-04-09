@@ -625,7 +625,12 @@ def add_breadcrumb(parent=None,
     request.session['dojo_breadcrumbs'] = crumbs
 
 
-def is_title_in_breadcrumbs(title, breadcrumbs):
+def is_title_in_breadcrumbs(title):
+    request = crum.get_current_request()
+    if request is None:
+        return False
+
+    breadcrumbs = request.session.get('dojo_breadcrumbs')
     if breadcrumbs is None:
         return False
 
