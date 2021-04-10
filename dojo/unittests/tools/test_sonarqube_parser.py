@@ -220,9 +220,9 @@ class TestSonarQubeParser(TestCase):
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(0, item.cwe)
         self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
+        self.assertEqual(True, item.active)
         self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
+        self.assertEqual(True, item.verified)
         self.assertEqual(str, type(item.description))
         self.assertMultiLineEqual(
             "Many consider clone and Cloneable broken in Java, largely because the rules for overriding clone are tricky\n"
@@ -302,9 +302,9 @@ class TestSonarQubeParser(TestCase):
         # no rule found -> 0
         self.assertEqual(0, item.cwe)
         self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
+        self.assertEqual(True, item.active)
         self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
+        self.assertEqual(True, item.verified)
         self.assertEqual(str, type(item.description))
         self.assertEqual("No description provided", item.description)
         self.assertEqual(str, type(item.severity))

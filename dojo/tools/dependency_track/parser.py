@@ -201,8 +201,6 @@ class DependencyTrackParser(object):
             test=test,
             cwe=cwe,
             cve=cve,
-            active=False,
-            verified=False,
             description=vulnerability_description,
             severity=vulnerability_severity,
             numerical_severity=Finding.get_numerical_severity(vulnerability_severity),

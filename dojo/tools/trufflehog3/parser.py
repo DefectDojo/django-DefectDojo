@@ -61,8 +61,6 @@ class TruffleHog3Parser(object):
                 finding = Finding(title=titleText,
                                   test=test,
                                   cwe=798,
-                                  active=False,
-                                  verified=False,
                                   description=description,
                                   severity=severity,
                                   numerical_severity=Finding.get_numerical_severity(severity),

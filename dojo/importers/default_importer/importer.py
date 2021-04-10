@@ -5,7 +5,7 @@ from dojo.models import Test, Finding, \
     Test_Import, \
     Test_Import_Finding_Action, IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING
 
-from dojo.tools.factory import handles_active_verified_statuses, import_parser_factory
+from dojo.tools.factory import import_parser_factory
 from dojo.utils import get_current_user, max_safe
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
@@ -99,9 +99,10 @@ class DojoDefaultImporter(object):
             item.last_reviewed = now
             item.last_reviewed_by = user if user else get_current_user
 
-            # TODO this is not really used, and there's PR https://github.com/DefectDojo/django-DefectDojo/pull/4014 with a better/generic solution
-            if not handles_active_verified_statuses(scan_type):
+            # Only set active/verified flags if they were NOT set by default value(True)
+            if item.active:
                 item.active = active
+            if item.verified:
                 item.verified = verified
 
             item.created = now
@@ -223,7 +224,7 @@ class DojoDefaultImporter(object):
 
         return old_findings
 
-    def import_scan(self, scan, scan_type, engagement, lead, environment, active=True, verified=True, tags=None, minimum_severity=None,
+    def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False):
         now = timezone.now()
