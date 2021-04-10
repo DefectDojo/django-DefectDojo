@@ -703,7 +703,7 @@ def re_import_scan_results(request, tid):
 
             push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
             error = False
-            finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0, 0
+            finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0
             reimporter = ReImporter()
             try:
                 test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
