@@ -42,15 +42,15 @@ class SpotbugsParser(object):
             # Surround text inside <pre> tags with ```
             for pre in html_text.find_all('pre'):
                 temp = pre.text
-                pre.string = '```\n'+temp+'\n```'
+                pre.string = '```\n' + temp + '\n```'
             # Surround text inside <code> tags with `
             for code in html_text.find_all('code'):
                 temp = code.text
-                code.string = '`'+temp+'`'
+                code.string = '`' + temp + '`'
             # Surround text inside <b> tags with **
             for bold in html_text.find_all('b'):
                 temp = bold.text
-                bold.string = '**'+temp+'**'
+                bold.string = '**' + temp + '**'
 
             # Get <p> tags
             paragraphs = html_text.find_all('p')
@@ -69,7 +69,7 @@ class SpotbugsParser(object):
             reference = ''
             links = paragraphs[-1].find_all('a', href=True)
             for link in links:
-                reference += link['href']+' - '+link.text+'\n'
+                reference += link['href'] + ' - ' + link.text + '\n'
             reference_patterns[pattern.get('type')] = reference
 
         # Parse <BugInstance> tags
@@ -78,7 +78,7 @@ class SpotbugsParser(object):
             for message in bug.itertext():
                 # The message comes with multiple breaklines,
                 # so were removing all of them and adding only one at the end
-                desc += message.replace('\n','')+'\n'
+                desc += message.replace('\n', '') + '\n'
 
             dupe_key = bug.get('instanceHash')
 
