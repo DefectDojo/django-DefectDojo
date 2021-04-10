@@ -1281,7 +1281,10 @@ class ImportScanView(mixins.CreateModelMixin,
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
+    else:
+        permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def perform_create(self, serializer):
         engagement = serializer.validated_data['engagement']
@@ -1304,7 +1307,10 @@ class ReImportScanView(mixins.CreateModelMixin,
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasReimportPermission)
+    else:
+        permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def get_queryset(self):
         return get_authorized_tests(Permissions.Import_Scan_Result)

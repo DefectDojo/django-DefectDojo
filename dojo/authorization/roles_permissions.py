@@ -3,7 +3,7 @@ from enum import IntEnum
 
 class Roles(IntEnum):
     Reader = 0
-    Technical_User = 1
+    Scan_User = 1
     Writer = 2
     Maintainer = 3
     Owner = 4
@@ -91,13 +91,15 @@ class Permissions(IntEnum):
         return {Permissions.Engagement_View, Permissions.Engagement_Edit,
             Permissions.Engagement_Delete, Permissions.Risk_Acceptance,
             Permissions.Test_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History}
+            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
+            .union(cls.get_test_permissions())
 
     @classmethod
     def get_test_permissions(cls):
         return {Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete,
             Permissions.Finding_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History}
+            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
+            .union(cls.get_finding_permissions())
 
     @classmethod
     def get_finding_permissions(cls):
@@ -137,7 +139,7 @@ def get_roles_with_permissions():
 
             Permissions.Component_View
         },
-        Roles.Technical_User: {
+        Roles.Scan_User: {
             Permissions.Import_Scan_Result
         },
         Roles.Writer: {

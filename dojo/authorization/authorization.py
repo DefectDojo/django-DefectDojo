@@ -3,7 +3,7 @@ from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint
+    Test, Finding, Endpoint, Finding_Group
 
 
 def user_has_permission(user, obj, permission):
@@ -35,6 +35,8 @@ def user_has_permission(user, obj, permission):
     elif isinstance(obj, Test) and permission in Permissions.get_test_permissions():
         return user_has_permission(user, obj.engagement.product, permission)
     elif isinstance(obj, Finding) and permission in Permissions.get_finding_permissions():
+        return user_has_permission(user, obj.test.engagement.product, permission)
+    elif isinstance(obj, Finding_Group) and permission in Permissions.get_finding_permissions():
         return user_has_permission(user, obj.test.engagement.product, permission)
     elif isinstance(obj, Endpoint) and permission in Permissions.get_endpoint_permissions():
         return user_has_permission(user, obj.product, permission)

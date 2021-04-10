@@ -220,7 +220,7 @@ def view_product_components(request, pid):
 
     # Append finding counts
     component_query = component_query.annotate(total=Count('id')).order_by('component_name', 'component_version')
-    component_query = component_query.annotate(actives=Count('id', filter=Q(active=True)))
+    component_query = component_query.annotate(active=Count('id', filter=Q(active=True)))
     component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))
 
     # Default sort by total descending
