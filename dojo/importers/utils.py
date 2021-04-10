@@ -54,7 +54,10 @@ def update_timestamps(test, scan_date, version, branch_tag, build_id, commit_has
     test.engagement.save()
 
 
-def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag, build_id, commit_hash, push_to_jira, close_old_findings, test, new_findings=[], closed_findings=[], reactivated_findings=[]):
+def update_import_history(type, active, verified, tags, minimum_severity, endpoints_to_add, version, branch_tag,
+                            build_id, commit_hash, push_to_jira, close_old_findings, test,
+                            new_findings=[], closed_findings=[], reactivated_findings=[]):
+    logger.debug("new: %d closed: %d reactivated: %d", len(new_findings), len(closed_findings), len(reactivated_findings))
     # json field
     import_settings = {}
     import_settings['active'] = active
