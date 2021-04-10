@@ -46,7 +46,8 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.importers.default_importer.importer import DojoDefaultImporter as Importer
+from dojo.importers.importer.importer import DojoDefaultImporter as Importer
+import dojo.notifications.helper as notifications_helper
 
 
 logger = logging.getLogger(__name__)
@@ -470,12 +471,7 @@ def add_tests(request, eid):
                 'Test added successfully.',
                 extra_tags='alert-success')
 
-            create_notification(
-                event='test_added',
-                title=new_test.test_type.name + " for " + eng.product.name,
-                test=new_test,
-                engagement=eng,
-                url=reverse('view_engagement', args=(eng.id, )))
+            notifications_helper.notify_test_created(new_test)
 
             if '_Add Another Test' in request.POST:
                 return HttpResponseRedirect(
@@ -594,6 +590,7 @@ def import_scan_results(request, eid=None, pid=None):
             # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
             # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
             push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
+            error = False
 
             try:
                 importer = Importer()
@@ -614,6 +611,7 @@ def import_scan_results(request, eid=None, pid=None):
             except Exception as e:
                 # exceptions are already logged by the importer
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+                error = True
 
             # Save the credential to the test
             if cred_form.is_valid():
@@ -628,8 +626,9 @@ def import_scan_results(request, eid=None, pid=None):
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            return HttpResponseRedirect(
-                reverse('view_test', args=(test.id, )))
+            if not error:
+                return HttpResponseRedirect(
+                    reverse('view_test', args=(test.id, )))
 
     prod_id = None
     custom_breadcrumb = None
