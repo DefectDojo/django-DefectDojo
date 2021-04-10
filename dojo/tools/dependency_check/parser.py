@@ -223,6 +223,8 @@ class DependencyCheckParser(object):
 
         component_name, component_version = self.get_component_name_and_version_from_dependency(dependency, related_dependency, namespace)
 
+        mitigation = 'Update '+component_name+'-'+component_version+' to at least the version recommended in the description'
+
         return Finding(
             title=title,
             file_path=dependency_filename,
@@ -234,6 +236,7 @@ class DependencyCheckParser(object):
             description=description,
             severity=severity,
             numerical_severity=Finding.get_numerical_severity(severity),
+            mitigation=mitigation,
             static_finding=True,
             references=reference_detail,
             component_name=component_name,
