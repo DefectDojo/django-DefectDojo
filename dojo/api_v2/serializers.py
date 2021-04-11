@@ -1141,8 +1141,13 @@ class ImportScanSerializer(serializers.Serializer):
                 item.reporter = self.context['request'].user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = self.context['request'].user
-                item.active = data['active']
-                item.verified = data['verified']
+
+                # Only set active/verified flags if they were NOT set by default value(True)
+                if item.active:
+                    item.active = data['active']
+                if item.verified:
+                    item.verified = data['verified']
+
                 logger.debug('going to save finding')
                 item.save(dedupe_option=False)
 
@@ -1369,7 +1374,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             unchanged_items = []
 
             logger.debug('starting reimport of %i items.', len(items))
-            from dojo.reimport_utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
+            from dojo.importers.reimport.utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
             deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
 
             i = 0

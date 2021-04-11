@@ -92,8 +92,6 @@ def get_item(vuln, test, check_type):
 
     finding = Finding(title=title,
                       test=test,
-                      active=False,
-                      verified=False,
                       description=description,
                       severity=severity,
                       numerical_severity=numerical_severity,

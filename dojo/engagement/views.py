@@ -19,7 +19,7 @@ from django.db import DEFAULT_DB_ALIAS
 from django.core.exceptions import MultipleObjectsReturned
 
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.filters import EngagementFilter, EngagementTestFilter
+from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
@@ -30,7 +30,6 @@ from dojo.models import Finding, IMPORT_CREATED_FINDING, Product, Engagement, Te
     Check_List, Test_Import, Test_Import_Finding_Action, Test_Type, Notes, \
     Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
-from dojo.tools.factory import handles_active_verified_statuses
 from dojo.tools.factory import import_parser_factory, get_choices
 from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
@@ -85,30 +84,57 @@ def engagement_calendar(request):
 
 def engagement(request):
     products = get_authorized_products(Permissions.Engagement_View).distinct()
-    engagements = get_authorized_engagements(Permissions.Engagement_View).distinct()
+    engagements = Engagement.objects.filter(
+        product__in=products
+    ).select_related(
+        'product',
+        'product__prod_type',
+    ).prefetch_related(
+        'lead',
+        'tags',
+        'product__tags',
+    )
 
-    products_with_engagements = products.filter(~Q(engagement=None), engagement__active=True).distinct()
-    filtered = EngagementFilter(
+    # Get the test counts per engagments. As a separate query, this is much
+    # faster than annotating the above `engagements` query.
+    engagement_test_counts = {
+        test['engagement']: test['test_count']
+        for test in Test.objects.filter(
+            engagement__in=engagements
+        ).values(
+            'engagement'
+        ).annotate(
+            test_count=Count('engagement')
+        )
+    }
+
+    if System_Settings.objects.get().enable_jira:
+        engagements = engagements.prefetch_related(
+            'jira_project__jira_instance',
+            'product__jira_project_set__jira_instance'
+        )
+
+    filtered_engagements = EngagementDirectFilter(
         request.GET,
-        queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
-                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
-    prods = get_page_items(request, filtered.qs, 25)
-    name_words = products_with_engagements.values_list('name', flat=True)
-    eng_words = engagements.filter(active=True).values_list('name', flat=True).distinct()
+        queryset=engagements
+    )
+
+    engs = get_page_items(request, filtered_engagements.qs, 25)
+    product_name_words = sorted(products.values_list('name', flat=True))
+    engagement_name_words = sorted(engagements.values_list('name', flat=True).distinct())
 
     add_breadcrumb(
         title="Active Engagements",
         top_level=not len(request.GET),
         request=request)
 
-    prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
-
     return render(
         request, 'dojo/engagement.html', {
-            'products': prods,
-            'filtered': filtered,
-            'name_words': sorted(set(name_words)),
-            'eng_words': sorted(set(eng_words)),
+            'engagements': engs,
+            'engagement_test_counts': engagement_test_counts,
+            'filter_form': filtered_engagements.form,
+            'product_name_words': product_name_words,
+            'engagement_name_words': engagement_name_words,
         })
 
 
@@ -156,20 +182,6 @@ def engagements_all(request):
             'name_words': sorted(set(name_words)),
             'eng_words': sorted(set(eng_words)),
         })
-
-
-def prefetch_for_products_with_engagments(products_with_engagements):
-    if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        return products_with_engagements.prefetch_related(
-            'tags',
-            'engagement_set__tags',
-            'engagement_set__test_set__tags',
-            'engagement_set__jira_project__jira_instance',
-            'jira_project_set__jira_instance'
-        )
-
-    logger.debug('unable to prefetch because query was already executed')
-    return products_with_engagements
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'change')
@@ -232,11 +244,16 @@ def edit_engagement(request, eid):
             logger.debug('showing jira-epic-form')
             jira_epic_form = JIRAEngagementForm(instance=engagement)
 
-    title = ' CI/CD' if is_ci_cd else ''
-    product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
+    if is_ci_cd:
+        title = 'Edit CI/CD Engagement'
+    else:
+        title = 'Edit Interactive Engagement'
+
+    product_tab = Product_Tab(engagement.product.id, title=title, tab="engagements")
     product_tab.setEngagement(engagement)
     return render(request, 'dojo/new_eng.html', {
         'product_tab': product_tab,
+        'title': title,
         'form': form,
         'edit': True,
         'jira_epic_form': jira_epic_form,
@@ -268,10 +285,7 @@ def delete_engagement(request, eid):
                                     recipients=[engagement.lead],
                                     icon="exclamation-triangle")
 
-                if engagement.engagement_type == 'CI/CD':
-                    return HttpResponseRedirect(reverse("view_engagements_cicd", args=(product.id, )))
-                else:
-                    return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+                return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([engagement])
@@ -644,8 +658,11 @@ def import_scan_results(request, eid=None, pid=None):
                     item.reporter = user
                     item.last_reviewed = timezone.now()
                     item.last_reviewed_by = user
-                    if not handles_active_verified_statuses(form.get_scan_type()):
+
+                    # Only set active/verified flags if they were NOT set by default value(True)
+                    if item.active:
                         item.active = active
+                    if item.verified:
                         item.verified = verified
 
                     item.save(dedupe_option=False, false_history=True)
@@ -813,10 +830,7 @@ def close_eng(request, eid):
                         title='Closure of %s' % eng.name,
                         description='The engagement "%s" was closed' % (eng.name),
                         engagement=eng, url=reverse('engagment_all_findings', args=(eng.id, ))),
-    if eng.engagement_type == 'CI/CD':
-        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
-    else:
-        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
@@ -832,10 +846,7 @@ def reopen_eng(request, eid):
                         title='Reopening of %s' % eng.name,
                         description='The engagement "%s" was reopened' % (eng.name),
                         url=reverse('view_engagement', args=(eng.id, ))),
-    if eng.engagement_type == 'CI/CD':
-        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
-    else:
-        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 """
