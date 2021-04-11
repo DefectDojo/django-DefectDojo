@@ -237,8 +237,6 @@ class MobSFParser(object):
                 title=title,
                 cwe=919,  # Weaknesses in Mobile Applications
                 test=test,
-                active=False,
-                verified=False,
                 description=description,
                 severity=sev,
                 numerical_severity=Finding.get_numerical_severity(sev),

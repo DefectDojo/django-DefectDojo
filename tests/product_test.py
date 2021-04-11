@@ -119,7 +119,7 @@ class ProductTest(BaseTestCase):
         # Click on the 'Engagement dropdown button'
         driver.find_element_by_partial_link_text("Engagement").click()
         # 'click' the Add New Engagement option
-        driver.find_element_by_link_text("Add New Engagement").click()
+        driver.find_element_by_link_text("Add New Interactive Engagement").click()
         # Keep a good practice of clearing field before entering value
         # fill up at least all required input field options.
         # fields: 'Name', 'Description', 'Target Start', 'Target End', 'Testing Lead' and 'Status'

@@ -876,7 +876,6 @@ class ToolConfigForm_Admin(forms.ModelForm):
             self.api_key = self.instance.api_key
 
     def clean(self):
-        # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super().clean()
         if not cleaned_data['password'] and not cleaned_data['ssh'] and not cleaned_data['api_key']:
             cleaned_data['password'] = self.password_from_db
@@ -1272,6 +1271,13 @@ class Test(models.Model):
 
     version = models.CharField(max_length=100, null=True, blank=True)
 
+    build_id = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Build ID that was tested, a reimport may update this field.", verbose_name="Build ID")
+    commit_hash = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
+    branch_tag = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
+
     class Meta:
         indexes = [
             models.Index(fields=['engagement', 'test_type']),
@@ -1324,8 +1330,15 @@ class Test_Import(TimeStampedModel):
     test = models.ForeignKey(Test, editable=False, null=False, blank=False, on_delete=models.CASCADE)
     findings_affected = models.ManyToManyField('Finding', through='Test_Import_Finding_Action')
     import_settings = JSONField(null=True)
-    version = models.CharField(max_length=100, null=True, blank=True)
     type = models.CharField(max_length=64, null=False, blank=False, default='unknown')
+
+    version = models.CharField(max_length=100, null=True, blank=True)
+    build_id = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Build ID that was tested, a reimport may update this field.", verbose_name="Build ID")
+    commit_hash = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
+    branch_tag = models.CharField(editable=True, max_length=150,
+                                   null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
 
     def get_queryset(self):
         logger.debug('prefetch test_import counts')
@@ -1501,7 +1514,7 @@ class Finding(models.Model):
                                           editable=False,
                                           null=True,
                                           related_name='original_finding',
-                                          blank=True, on_delete=models.CASCADE,
+                                          blank=True, on_delete=models.DO_NOTHING,
                                           verbose_name="Duplicate Finding",
                                           help_text="Link to the original finding if this finding is a duplicate.")
     out_of_scope = models.BooleanField(default=False,
@@ -2160,14 +2173,6 @@ class Finding(models.Model):
         finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
              issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
 
-    def delete(self, *args, **kwargs):
-        for find in self.original_finding.all():
-            # Explicitely delete the duplicates
-            super(Finding, find).delete()
-        super(Finding, self).delete(*args, **kwargs)
-        from dojo.utils import calculate_grade
-        calculate_grade(self.test.engagement.product)
-
     # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
         no_check = ["test", "reporter"]
@@ -2628,7 +2633,7 @@ class FindingImageAccessToken(models.Model):
 
 class BannerConf(models.Model):
     banner_enable = models.BooleanField(default=False, null=True, blank=True)
-    banner_message = models.CharField(max_length=500, help_text="This message will be displayed on the login page", default='')
+    banner_message = models.CharField(max_length=500, help_text="This message will be displayed on the login page. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>", default='')
 
 
 class GITHUB_Conf(models.Model):
@@ -2752,7 +2757,6 @@ class JIRAForm_Admin(forms.ModelForm):
             self.fields['password'].required = False
 
     def clean(self):
-        # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super().clean()
         if not cleaned_data['password']:
             cleaned_data['password'] = self.password_from_db
@@ -2806,7 +2810,6 @@ class JIRAForm_Admin(forms.ModelForm):
             self.fields['password'].required = False
 
     def clean(self):
-        # self.fields['endpoints'].queryset = Endpoint.objects.all()
         cleaned_data = super().clean()
         if not cleaned_data['password']:
             cleaned_data['password'] = self.password_from_db

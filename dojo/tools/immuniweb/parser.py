@@ -78,8 +78,8 @@ class ImmuniwebParser(object):
             else:  # finding is not a duplicate
                 # create finding
                 finding = Finding(title=title,
-                    test=test, active=False,
-                    verified=False, cve=cve,
+                    test=test,
+                    cve=cve,
                     description=description,
                     severity=severity,
                     steps_to_reproduce=steps_to_reproduce,
