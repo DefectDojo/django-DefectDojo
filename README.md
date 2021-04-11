@@ -43,7 +43,7 @@ For detailed documentation you can visit
 * [Docker / Docker Compose](DOCKER.md)
 * [godojo](https://github.com/DefectDojo/godojo)
 
-Now EOL'ed
+** Now EOL'ed **
 * [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)
 
 ## Getting Started
