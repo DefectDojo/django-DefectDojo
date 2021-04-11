@@ -167,36 +167,41 @@
         </div>
     </div>
 
-    {% if host %}
     <div class="panel panel-default endpoints table-responsive">
-        <div class="panel-heading">Endpoints</div>
-        {% if endpoints %}
-            {% colgroup endpoints into 3 cols as grouped_items %}
-            <table class="table-striped table table table-condensed table-hover finding-endpoints">
-                {% for row in grouped_items %}
-                    <tr>
-                        {% for item in row %}
-                            <td>{% if item %}
-                                  <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
-                                  {% if item.vulnerable %}
-                                    &#10005;
-                                  {% else %}
-                                    &#10003;
-                                  {% endif %}
-                                  {{ item }}</a>
-                                {% endif %}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </table>
+        {% if host %}
+            <div class="panel-heading">Endpoints</div>
+            {% if endpoints %}
+                {% colgroup endpoints into 3 cols as grouped_items %}
+                <table class="table-striped table table table-condensed table-hover finding-endpoints">
+                    {% for row in grouped_items %}
+                        <tr>
+                            {% for item in row %}
+                                <td>{% if item %}
+                                      <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
+                                      {% if item.vulnerable %}
+                                        &#10005;
+                                      {% else %}
+                                        &#10003;
+                                      {% endif %}
+                                      {{ item }}</a>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
+                    No endpoints.
+                </div>
+            {% endif %}
         {% else %}
+            <div class="panel-heading">Host</div>
             <div id="vuln_endpoints" class="panel-body endpoint-panel table-responsive">
-                No endpoints.
+                <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.host }}" href="{% url 'view_endpoint_host' endpoint.id %}">{{ endpoint.host }}</a>
             </div>
         {% endif %}
     </div>
-    {% endif %}
 
     {% if not host and endpoint.tags %}
         <div class="panel panel-default tags">
