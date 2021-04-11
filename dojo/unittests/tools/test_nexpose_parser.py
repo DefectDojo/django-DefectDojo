@@ -19,7 +19,7 @@ class TestNexposeParser(TestCase):
         parser = NexposeParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(16, len(findings))
+        self.assertEqual(17, len(findings))
         # vuln 1
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
@@ -47,6 +47,14 @@ class TestNexposeParser(TestCase):
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(22, endpoint.port)
         self.assertEqual("ssh", endpoint.protocol)
+        # vuln 16
+        finding = findings[16]
+        self.assertEqual("TLS/SSL Server Supports DES and IDEA Cipher Suites", finding.title)
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        # vuln 16 - endpoint
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual(443, endpoint.port)
+        self.assertIsNone(endpoint.protocol)
 
     def test_nexpose_parser_tests_outside_endpoint(self):
         testfile = open("dojo/unittests/scans/nexpose/report_auth.xml")

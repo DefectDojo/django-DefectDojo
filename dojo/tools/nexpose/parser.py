@@ -229,7 +229,10 @@ class NexposeParser(object):
 
                     find = self.findings(dupe_key, dupes, test, vuln)
 
-                    endpoint = Endpoint(host=host['name'], port=service['port'], protocol=service['name'].lower())
+                    endpoint = Endpoint(host=host['name'],
+                                        port=service['port'],
+                                        protocol=service['name'].lower() if service['name'] != "<unknown>" else None
+                                        )
                     find.unsaved_endpoints.append(endpoint)
                     find.unsaved_tags = vuln['tags']
 
