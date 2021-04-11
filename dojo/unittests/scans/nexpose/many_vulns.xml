@@ -1152,6 +1152,7 @@
 					</services>
 				</endpoint>
 			</endpoints>
+
 		</node>
 
 		<node address="192.168.1.18" status="alive" device-id="6">
@@ -6666,6 +6667,44 @@ D63FFE5FA76C15D2D63FFE5FA77AE579  &#65533;?&#65533;_&#65533;l.&#65533;&#65533;?&
 				<test id="udp-ipid-zero" status="unknown"/>
 			</tests>
 			<endpoints>
+				<endpoint protocol="tcp" port="443" status="open">
+					<services>
+						<service name="&lt;unknown&gt;">
+							<tests>
+
+								<test id="ssl-des-ciphers" key="" status="vulnerable-exploited" scan-id="26581" vulnerable-since="20210111T013814423" pci-compliance-status="fail">
+
+									<Paragraph>
+										<UnorderedList>
+											<ListItem>
+												<Paragraph>Negotiated with the following insecure cipher suites:
+													<UnorderedList>
+														<ListItem>TLS 1.0 ciphers:
+															<UnorderedList>
+																<ListItem>TLS_RSA_WITH_IDEA_CBC_SHA</ListItem>
+															</UnorderedList>
+														</ListItem>
+														<ListItem>TLS 1.1 ciphers:
+															<UnorderedList>
+																<ListItem>TLS_RSA_WITH_IDEA_CBC_SHA</ListItem>
+															</UnorderedList>
+														</ListItem>
+														<ListItem>TLS 1.2 ciphers:
+															<UnorderedList>
+																<ListItem>TLS_RSA_WITH_IDEA_CBC_SHA</ListItem>
+															</UnorderedList>
+														</ListItem>
+													</UnorderedList>
+												</Paragraph>
+											</ListItem>
+										</UnorderedList>
+									</Paragraph>
+								</test>
+							</tests>
+						</service>
+					</services>
+				</endpoint>
+
 				<endpoint protocol="tcp" port="5000" status="open">
 					<services>
 						<service name="UPnP-HTTPU">
@@ -14664,6 +14703,41 @@ Pragma SecureShell v3.0 ( http://www.pragmasys.com/SecureShell/ )
 			</solution>
 		</vulnerability>
 
+		<vulnerability id="ssl-des-ciphers" title="TLS/SSL Server Supports DES and IDEA Cipher Suites" severity="6" pciSeverity="3" cvssScore="5.8" cvssVector="(AV:N/AC:M/Au:N/C:P/I:P/A:N)" published="20090201T000000000" added="20150930T000000000" modified="20160428T000000000" riskScore="653.8307">
+			<malware>
+			</malware>
+			<exploits>
+			</exploits>
+			<description>
+				<ContainerBlockElement>
+					<Paragraph>
+						Transport Layer Security (TLS) versions 1.0 (RFC 2246) and 1.1 (RFC 4346) include cipher suites based on
+						the DES (Data Encryption Standard) and IDEA (International Data Encryption Algorithm) algorithms. DES and IDEA
+						algorithms are no longer recommended for general use in TLS, and have been removed from TLS version 1.2.
+					</Paragraph>
+				</ContainerBlockElement>
+			</description>
+			<references>
+				<reference source="URL">http://www.nist.gov/manuscript-publication-search.cfm?pub_id=915295</reference>
+				<reference source="URL">https://wiki.mozilla.org/Security/Server_Side_TLS</reference>
+				<reference source="URL">https://www.owasp.org/index.php/Transport_Layer_Protection_Cheat_Sheet#Rule_-_Only_Support_Strong_Cryptographic_Ciphers</reference>
+				<reference source="URL">http://support.microsoft.com/kb/245030/</reference>
+				<reference source="URL">https://tools.ietf.org/html/rfc5469</reference>
+			</references>
+			<tags>
+				<tag>Network</tag>
+			</tags>
+			<solution>
+				<ContainerBlockElement>
+					<Paragraph>
+						<Paragraph>Configure the server to disable support for DES and IDEA cipher suites.</Paragraph>
+						<Paragraph>For Microsoft IIS web servers, see Microsoft Knowledgebase article
+							<URLLink LinkURL="http://support.microsoft.com/kb/245030/" href="http://support.microsoft.com/kb/245030/" LinkTitle="http://support.microsoft.com/kb/245030/">245030</URLLink> for instructions on disabling DES and IDEA cipher suites.
+						</Paragraph>
+						<Paragraph>The following recommended configuration provides a higher level of security. This configuration is compatible with Firefox 27, Chrome 22, IE 11, Opera 14 and Safari 7. SSLv2, SSLv3, and TLSv1 protocols are not recommended in this configuration. Instead, use TLSv1.1 and TLSv1.2 protocols.</Paragraph>
+						<Paragraph>Refer to your server vendor documentation to apply the recommended cipher configuration:</Paragraph>
+						<Paragraph>ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK</Paragraph></Paragraph></ContainerBlockElement></solution>
+		</vulnerability>
 		<vulnerability id="TELNET-GENERIC-0005" title="TELNET access with root and no password" severity="10" pciSeverity="5" cvssScore="10.0" cvssVector="(AV:N/AC:L/Au:N/C:C/I:C/A:C)" published="20041101T000000000" added="20041101T000000000" modified="20120716T000000000">
 			<description>
 
