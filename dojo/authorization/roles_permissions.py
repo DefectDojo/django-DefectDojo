@@ -32,14 +32,14 @@ def django_enum(cls):
 class Permissions(IntEnum):
     Product_Type_Add_Product = 1001
     Product_Type_View = 1002
-    Product_Type_Remove_Member = 1003
+    Product_Type_Member_Delete = 1003
     Product_Type_Manage_Members = 1004
     Product_Type_Member_Add_Owner = 1005
     Product_Type_Edit = 1006
     Product_Type_Delete = 1007
 
     Product_View = 1102
-    Product_Remove_Member = 1103
+    Product_Member_Delete = 1103
     Product_Manage_Members = 1104
     Product_Member_Add_Owner = 1105
     Product_Configure_Notifications = 1106
@@ -113,21 +113,21 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_product_member_permissions(cls):
-        return {Permissions.Product_Manage_Members, Permissions.Product_Remove_Member}
+        return {Permissions.Product_View, Permissions.Product_Manage_Members,
+            Permissions.Product_Member_Delete}
 
     @classmethod
     def get_product_type_member_permissions(cls):
-        return {Permissions.Product_Type_Manage_Members, Permissions.Product_Type_Remove_Member}
+        return {Permissions.Product_Type_View, Permissions.Product_Type_Manage_Members,
+            Permissions.Product_Type_Member_Delete}
 
 
 def get_roles_with_permissions():
     return {
         Roles.Reader: {
             Permissions.Product_Type_View,
-            Permissions.Product_Type_Remove_Member,
 
             Permissions.Product_View,
-            Permissions.Product_Remove_Member,
 
             Permissions.Engagement_View,
 
@@ -144,10 +144,8 @@ def get_roles_with_permissions():
         },
         Roles.Writer: {
             Permissions.Product_Type_View,
-            Permissions.Product_Type_Remove_Member,
 
             Permissions.Product_View,
-            Permissions.Product_Remove_Member,
 
             Permissions.Engagement_View,
             Permissions.Engagement_Add,
@@ -178,12 +176,12 @@ def get_roles_with_permissions():
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
             Permissions.Product_Type_View,
-            Permissions.Product_Type_Remove_Member,
+            Permissions.Product_Type_Member_Delete,
             Permissions.Product_Type_Manage_Members,
             Permissions.Product_Type_Edit,
 
             Permissions.Product_View,
-            Permissions.Product_Remove_Member,
+            Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
             Permissions.Product_Configure_Notifications,
             Permissions.Product_Edit,
@@ -223,14 +221,14 @@ def get_roles_with_permissions():
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
             Permissions.Product_Type_View,
-            Permissions.Product_Type_Remove_Member,
+            Permissions.Product_Type_Member_Delete,
             Permissions.Product_Type_Manage_Members,
             Permissions.Product_Type_Member_Add_Owner,
             Permissions.Product_Type_Edit,
             Permissions.Product_Type_Delete,
 
             Permissions.Product_View,
-            Permissions.Product_Remove_Member,
+            Permissions.Product_Member_Delete,
             Permissions.Product_Manage_Members,
             Permissions.Product_Member_Add_Owner,
             Permissions.Product_Configure_Notifications,

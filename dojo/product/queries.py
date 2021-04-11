@@ -43,7 +43,7 @@ def get_authorized_products(permission):
     return products
 
 
-def get_authorized_product_members_product(product, permission):
+def get_authorized_product_members_for_product(product, permission):
     user = get_current_user()
 
     if user.is_superuser or user_has_permission(user, product, permission):
@@ -52,20 +52,20 @@ def get_authorized_product_members_product(product, permission):
         return None
 
 
-def get_authorized_product_members_user(user, permission):
-    request_user = get_current_user()
+def get_authorized_product_members(permission):
+    user = get_current_user()
 
-    if request_user is None:
+    if user is None:
         return Product_Member.objects.none()
 
-    if request_user.is_superuser:
-        return Product_Member.objects.filter(user=user)
+    if user.is_superuser:
+        return Product_Member.objects.all()
 
-    if request_user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Product_Member.objects.all(user=user)
+    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+        return Product_Member.objects.all()
 
     products = get_authorized_products(permission)
-    return Product_Member.objects.filter(user=user, product__in=products)
+    return Product_Member.objects.filter(product__in=products)
 
 
 def get_authorized_app_analysis(permission):
