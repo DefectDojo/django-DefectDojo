@@ -115,8 +115,6 @@ def get_item(vulnerability, test):
             description=finding_description,
             mitigation=status,
             references="{}\n{}\n".format(main_finding['url'], "\n".join(references)),
-            active=False,
-            verified=False,
             false_p=False,
             duplicate=False,
             out_of_scope=False,

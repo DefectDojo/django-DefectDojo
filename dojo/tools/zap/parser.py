@@ -79,8 +79,6 @@ class ZapParser(object):
                                severity=severity,
                                mitigation=strip_tags(item.resolution),
                                references=references,
-                               active=False,
-                               verified=False,
                                false_p=False,
                                duplicate=False,
                                out_of_scope=False,

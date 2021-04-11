@@ -121,8 +121,6 @@ class FortifyParser(object):
                     line_number=int(issue['LineStart']),
                     line=int(issue['LineStart']),
                     static_finding=True,
-                    active=False,
-                    verified=False,
                     test=test,
                     date=find_date,
                     description=self.format_description(issue, cat_meta),

@@ -56,8 +56,6 @@ class ContrastParser(object):
                 finding = Finding(title=title,
                                   cwe=cwe,
                                   test=test,
-                                  active=False,
-                                  verified=False,
                                   description=description,
                                   severity=severity,
                                   numerical_severity=Finding.get_numerical_severity(

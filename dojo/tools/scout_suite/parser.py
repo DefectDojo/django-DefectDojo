@@ -101,8 +101,6 @@ class ScoutSuiteParser(object):
                 find = Finding(title=textwrap.shorten(title, 150),
                                 cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                                 test=test,
-                                active=False,
-                                verified=False,
                                 description="**Account:** " + account_id + "\n" + description,
                                 severity=sev,
                                 numerical_severity=Finding.get_numerical_severity(sev),
