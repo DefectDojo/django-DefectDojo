@@ -90,8 +90,6 @@ class VeracodeParser(object):
         finding = Finding()
         finding.test = test
         finding.mitigation = mitigation_text
-        finding.verified = False
-        finding.active = False
         finding.static_finding = True
         finding.dynamic_finding = False
         finding.unique_id_from_tool = cls.__xml_flaw_to_unique_id(app_id, xml_node)

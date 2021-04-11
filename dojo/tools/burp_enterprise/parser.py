@@ -177,8 +177,6 @@ class BurpEnterpriseParser(object):
                            references=details.get('References'),
                            impact=details.get('Impact'),
                            cwe=int(details.get('CWE')),
-                           active=False,
-                           verified=False,
                            false_p=False,
                            duplicate=False,
                            out_of_scope=False,

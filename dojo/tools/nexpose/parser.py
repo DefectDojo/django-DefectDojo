@@ -255,8 +255,6 @@ class NexposeParser(object):
                            mitigation=html2text.html2text(vuln['resolution']),
                            impact=vuln['vector'],
                            test=test,
-                           active=False,
-                           verified=False,
                            false_p=False,
                            duplicate=False,
                            out_of_scope=False,

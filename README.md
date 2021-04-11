@@ -9,7 +9,7 @@
 [DefectDojo](https://www.defectdojo.org/) is a security program and
 vulnerability management tool.
 DefectDojo allows you to manage your application security program, maintain
-product and application information, schedule scans, triage vulnerabilities and
+product and application information, triage vulnerabilities and
 push findings into defect trackers.
 Consolidate your findings into one source of truth with DefectDojo.
 
@@ -41,7 +41,10 @@ For detailed documentation you can visit
 ## Supported Installation Options
 
 * [Docker / Docker Compose](DOCKER.md)
-* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)(End of Life 31/12/2020)
+* [godojo](https://github.com/DefectDojo/godojo)
+
+** Now EOL'ed **
+* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)
 
 ## Getting Started
 
@@ -73,8 +76,8 @@ See [Release and branch model](BRANCHING-MODEL.md)
 
 ## Roadmap
 A magical, illusionary, non-existent, YMMV, wannabe, no guarantees list of thing we may or may not be working on:
-- New permission model
-- Push groups of findings to a single JIRA ticket
+- New permission model (underway)
+- Push groups of findings to a single JIRA ticket (experimental now in!)
 - Reimport matching improvements
 
 
@@ -84,6 +87,7 @@ To manage expectations, we call this the wishlist. These are items we want to do
 - New dashboarding / statistics
 - New search engine
 - Adopt a plugin framework to allow plugins for issue trackers, parsers, reports, etc
+- More flexible model
 
 
 ## Support, Bug Reports and Getting Involved

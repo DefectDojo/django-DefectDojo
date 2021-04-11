@@ -74,8 +74,6 @@ class SpotbugsParser(object):
                     impact=impact,
                     references=references,
                     test=test,
-                    active=False,
-                    verified=False,
                     numerical_severity=Finding.get_numerical_severity(severity),
                     static_finding=True,
                     line=source_line,
