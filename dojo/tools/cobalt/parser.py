@@ -1,19 +1,26 @@
-import io
 import csv
 import hashlib
+import io
+
 from dojo.models import Finding
 
 __author__ = 'dr3dd589'
 
 
-class CobaltCSVParser(object):
-    def __init__(self, filename, test):
-        self.dupes = dict()
-        self.items = ()
+class CobaltParser(object):
 
+    def get_scan_types(self):
+        return ["Cobalt.io Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "CSV Report"
+
+    def get_findings(self, filename, test):
         if filename is None:
-            self.items = ()
-            return
+            return list()
 
         content = filename.read()
         if type(content) is bytes:
@@ -21,6 +28,9 @@ class CobaltCSVParser(object):
         reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
         csvarray = []
 
+        dupes = dict()
+
+        # FIXME double loop, could lead to performance pb if the number of issues is big
         for row in reader:
             csvarray.append(row)
 
@@ -45,7 +55,7 @@ class CobaltCSVParser(object):
 
                 key = hashlib.md5((finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+                if key not in dupes:
+                    dupes[key] = finding
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

@@ -7,7 +7,6 @@ import unittest
 import sys
 import os
 from base_test_class import BaseTestCase
-# from base_test_class import on_exception_html_source_logger
 from product_test import ProductTest
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -41,7 +40,7 @@ class ReportBuilderTest(BaseTestCase):
         self.enter_values(driver)
         Select(driver.find_element_by_id("id_report_type")).select_by_visible_text("HTML")
         driver.find_element_by_id("id_report_name").send_keys('Test Report')
-        driver.find_elements_by_class_name("run_report")[1].click()
+        driver.find_element_by_class_name("run_report").click()
         self.assertTrue(driver.current_url == self.base_url + "reports/custom")
 
     def generate_AsciiDoc_report(self):
@@ -51,12 +50,13 @@ class ReportBuilderTest(BaseTestCase):
         self.enter_values(driver)
         Select(driver.find_element_by_id("id_report_type")).select_by_visible_text("AsciiDoc")
         driver.find_element_by_id("id_report_name").send_keys('Test Report')
-        driver.find_elements_by_class_name("run_report")[1].click()
+        driver.find_element_by_class_name("run_report").click()
         self.assertTrue(driver.current_url == self.base_url + "reports/custom")
 
     def test_product_type_report(self):
         driver = self.driver
         driver.get(self.base_url + "product/type")
+        driver.find_element_by_id("dropdownMenuProductType").click()
         driver.find_element_by_partial_link_text('Report').click()
         my_select = Select(driver.find_element_by_id("id_include_finding_notes"))
         my_select.select_by_index(1)
@@ -131,7 +131,6 @@ class ReportBuilderTest(BaseTestCase):
 
         driver.find_element_by_name('_generate').click()
 
-    # @on_exception_html_source_logger
     def test_product_endpoint_report(self):
         driver = self.driver
         self.goto_product_overview(driver)

@@ -1,8 +1,8 @@
-import io
 import csv
+import hashlib
+import io
 import json
 import logging
-import hashlib
 import textwrap
 
 from dojo.models import Finding
@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class TwistlockCSVParser(object):
+
     def parse_issue(self, row, test):
         if not row:
             return None
@@ -42,8 +43,6 @@ class TwistlockCSVParser(object):
             mitigation=data_fix_status,
             component_name=textwrap.shorten(data_package_name, width=200, placeholder="..."),
             component_version=data_package_version,
-            active=False,
-            verified=False,
             false_p=False,
             duplicate=False,
             out_of_scope=False,
@@ -131,8 +130,6 @@ def get_item(vulnerability, test):
         references=vulnerability['link'],
         component_name=vulnerability['packageName'],
         component_version=vulnerability['packageVersion'],
-        active=False,
-        verified=False,
         false_p=False,
         duplicate=False,
         out_of_scope=False,
@@ -162,16 +159,23 @@ def convert_severity(severity):
 
 class TwistlockParser(object):
 
-    def __init__(self, filename, test):
-        self.dupes = dict()
+    def get_scan_types(self):
+        return ["Twistlock Image Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Twistlock Image Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JSON output of twistcli image scan or CSV."
+
+    def get_findings(self, filename, test):
 
         if filename is None:
-            self.items = []
-            return
+            return list()
 
         if filename.name.lower().endswith('.json'):
-            self.items = TwistlockJsonParser().parse(filename, test)
+            return TwistlockJsonParser().parse(filename, test)
         elif filename.name.lower().endswith('.csv'):
-            self.items = TwistlockCSVParser().parse(filename, test)
+            return TwistlockCSVParser().parse(filename, test)
         else:
             raise Exception('Unknown File Format')

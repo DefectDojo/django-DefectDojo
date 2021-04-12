@@ -1,18 +1,21 @@
 import requests
 import logging
 from django.core.mail import EmailMessage
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo
+from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
 from dojo.celery import app
-from dojo.decorators import we_want_async, dojo_async_task, convert_kwargs_if_async
+# from dojo.decorators import dojo_async_task, we_want_async, convert_kwargs_if_async
 
 logger = logging.getLogger(__name__)
 
 
 def create_notification(event=None, **kwargs):
+    system_settings = System_Settings.objects.get()
+    kwargs["system_settings"] = system_settings
+
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients')
@@ -37,7 +40,13 @@ def create_notification(event=None, **kwargs):
         if not product and 'finding' in kwargs:
             product = kwargs['finding'].test.engagement.product
 
-        kwargs = convert_kwargs_if_async(**kwargs)
+        if not product and 'obj' in kwargs:
+            from dojo.utils import get_product
+            product = get_product(kwargs['obj'])
+
+        # notifications are made synchronous again due to serialization bug in django-tagulous
+        # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+        # kwargs = convert_kwargs_if_async(**kwargs)
 
         # System notifications
         try:
@@ -83,6 +92,8 @@ def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
             kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+        elif event == 'product_type_added':
+            kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
         else:
             kwargs["description"] = "Event " + str(event) + " has occured."
 
@@ -117,7 +128,7 @@ def process_notifications(event, notifications=None, **kwargs):
         return
 
     # logger.debug('sync: %s %s', sync, vars(notifications))
-    logger.debug('sending notification ' + ('asynchronously' if we_want_async() else 'synchronously'))
+    # logger.debug('sending notification ' + ('asynchronously' if we_want_async() else 'synchronously'))
     logger.debug('process notifications for %s', notifications.user)
     logger.debug('notifications: %s', vars(notifications))
 
@@ -126,20 +137,26 @@ def process_notifications(event, notifications=None, **kwargs):
     mail_enabled = get_system_setting('enable_mail_notifications')
 
     if slack_enabled and 'slack' in getattr(notifications, event):
+        logger.debug('Sending Slack Notification')
         send_slack_notification(event, notifications.user, **kwargs)
 
     if msteams_enabled and 'msteams' in getattr(notifications, event):
+        logger.debug('Sending MSTeams Notification')
         send_msteams_notification(event, notifications.user, **kwargs)
 
     if mail_enabled and 'mail' in getattr(notifications, event):
+        logger.debug('Sending Mail Notification')
         send_mail_notification(event, notifications.user, **kwargs)
 
     if 'alert' in getattr(notifications, event, None):
+        logger.debug('Sending Alert')
         send_alert_notification(event, notifications.user, **kwargs)
 
 
-@dojo_async_task
-@app.task(name='send_slack_notification')
+# notifications are made synchronous again due to serialization bug in django-tagulous
+# see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+# @dojo_async_task
+@app.task
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -193,11 +210,13 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
     except Exception as e:
         logger.exception(e)
-        log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs['url'])
+        log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs.get('url', None))
 
 
-@dojo_async_task
-@app.task(name='send_msteams_notification')
+# notifications are made synchronous again due to serialization bug in django-tagulous
+# see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+# @dojo_async_task
+@app.task
 def send_msteams_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -205,6 +224,7 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         # Microsoft Teams doesn't offer direct message functionality, so no MS Teams PM functionality here...
         if user is None:
             if get_system_setting('msteams_url') is not None:
+                logger.debug('sending MSTeams message')
                 res = requests.request(
                     method='POST',
                     url=get_system_setting('msteams_url'),
@@ -222,8 +242,10 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         pass
 
 
-@dojo_async_task
-@app.task(name='send_mail_notification')
+# notifications are made synchronous again due to serialization bug in django-tagulous
+# see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+# @dojo_async_task
+@app.task
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -264,7 +286,7 @@ def send_alert_notification(event, user=None, *args, **kwargs):
         icon = kwargs.get('icon', 'info-circle')
         alert = Alerts(
             user_id=user,
-            title=kwargs.get('title')[:100],
+            title=kwargs.get('title')[:250],
             description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
@@ -323,11 +345,24 @@ def log_alert(e, notification_type=None, *args, **kwargs):
     for user in users:
         alert = Alerts(
             user_id=user,
-            url=kwargs.get('url', reverse('alerts'))[:100],
-            title=kwargs.get('title', 'Notification issue'),
+            url=kwargs.get('url', reverse('alerts')),
+            title=kwargs.get('title', 'Notification issue')[:250],
             description=kwargs.get('description', '%s' % e)[:2000],
             icon="exclamation-triangle",
             source=notification_type[:100] if notification_type else kwargs.get('source', 'unknown')[:100])
         # relative urls will fail validation
         alert.clean_fields(exclude=['url'])
         alert.save()
+
+
+def notify_test_created(test):
+    title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+    create_notification(event='test_added', title=title, test=test, engagement=test.engagement, product=test.engagement.product,
+                        url=reverse('view_test', args=(test.id,)))
+
+
+def notify_scan_added(test, updated_count, new_findings, findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
+    title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+    create_notification(event='scan_added', title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
+                        finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,
+                        url=reverse('view_test', args=(test.id,)))

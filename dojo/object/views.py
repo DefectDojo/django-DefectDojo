@@ -21,10 +21,6 @@ def new_object(request, pid):
             new_prod.product = prod
             new_prod.save()
 
-            # tags = request.POST.getlist('tags')
-            # t = ", ".join('"{0}"'.format(w) for w in tags)
-            # new_prod.tags = t
-
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Added Tracked File to a Product',
@@ -63,10 +59,6 @@ def edit_object(request, pid, ttid):
         if tform.is_valid():
             tform.save()
 
-            # tags = request.POST.getlist('tags')
-            # t = ", ".join('"{0}"'.format(w) for w in tags)
-            # object.tags = t
-
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Tool Product Configuration Successfully Updated.',
@@ -75,7 +67,6 @@ def edit_object(request, pid, ttid):
     else:
         tform = ObjectSettingsForm(instance=object)
 
-    # tform.initial['tags'] = [tag.name for tag in object.tags.all()]
     product_tab = Product_Tab(pid, title="Edit Tracked Files", tab="settings")
     return render(request,
                   'dojo/edit_object.html',

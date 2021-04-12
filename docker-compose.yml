@@ -1,3 +1,10 @@
+# This docker-compose.yml file  is fully functional to evaluate DefectDojo
+# in your local environment. 
+#
+# Although Docker Compose is one of the supported installation methods to
+# deploy a containerized DefectDojo in a production environment, the 
+# docker-compose.yml file is not intended for production use without first
+# customizing it to your particular situation.
 ---
 version: '3.7'
 services:
@@ -10,6 +17,8 @@ services:
       - uwsgi
     environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
+    volumes:
+      - defectdojo_media:/usr/share/nginx/html/media
     ports:
       - target: 8080
         published: ${DD_PORT:-8080}
@@ -40,8 +49,9 @@ services:
         - type: bind
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
+        - defectdojo_media:${DD_MEDIA_ROOT:-/app/media}
   celerybeat:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
       - mysql
       - rabbitmq
@@ -57,7 +67,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   celeryworker:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
       - mysql
       - rabbitmq
@@ -73,7 +83,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   initializer:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
       - mysql
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '--', '/entrypoint-initializer.sh']
@@ -91,7 +101,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   mysql:
-    image: mysql:5.7.33@sha256:45ad5952e4f304d39aedb02caf7e0afc30a310e66f7ab60af8acf20fd4a0f54c
+    image: mysql:5.7.33@sha256:e42a18d0bd0aa746a734a49cbbcc079ccdf6681c474a238d38e79dc0884e0ecc
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -102,6 +112,7 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.8.10@sha256:90a6e41ed76fa2c21dd7b1df662fb727c10b61d25e1540c6baafea982b5bc947
+    image: rabbitmq:3.8.14@sha256:fee70e7e568db7da0043773d3bad64dbdcd922ecfd9a1050e26b49564fad040f
 volumes:
   defectdojo_data: {}
+  defectdojo_media: {}

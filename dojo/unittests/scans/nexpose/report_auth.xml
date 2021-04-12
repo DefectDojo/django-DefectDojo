@@ -1,0 +1,652 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<NexposeReport version="2.0">
+    <scans>
+        <scan id="27992" name="Site1-serv1" startTime="20210211T162340221" endTime="20210211T164705486"
+              status="finished"/>
+    </scans>
+    <nodes>
+        <node address="192.168.0.12" status="alive" device-id="26083" site-name="Site1" site-importance="Normal"
+              scan-template="Discovery Scan,Full audit" risk-score="2649.9238">
+            <names>
+                <name>host0</name>
+            </names>
+            <fingerprints>
+                <os certainty="1.00" vendor="Ubuntu" family="Linux" product="Linux" version="20.04"/>
+            </fingerprints>
+            <tests>
+                <test id="linux-icmp-redirect" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163822649" pci-compliance-status="fail">
+
+                    <Paragraph>
+                        <UnorderedList>
+                            <ListItem>The net.ipv4.conf.all.accept_redirects sysctl variable is set to 1, expected 0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.default.accept_redirects sysctl variable is set to 1, expected
+                                0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.all.secure_redirects sysctl variable is set to 1, expected 0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.default.secure_redirects sysctl variable is set to 1, expected
+                                0.
+                            </ListItem>
+                        </UnorderedList>
+                    </Paragraph>
+                </test>
+
+                <test id="linux-grub-missing-passwd" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163822649" pci-compliance-status="fail">
+
+                    <Paragraph>
+                        <Paragraph>Grub config with no password found.
+                            <UnorderedList>
+                                <ListItem>Vulnerable file: /boot/grub/grub.cfg</ListItem>
+                            </UnorderedList>
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163822649" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user anycastcontrol was found to be 755 which
+                            is more permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163822649" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user netdata was found to be 775 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163822649" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user lxd was found to be 711 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163822649" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user ubuntu was found to be 755 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+            </tests>
+        </node>
+
+        <node address="192.168.0.10" status="alive" device-id="26084" site-name="Site1" site-importance="Normal"
+              scan-template="Discovery Scan,Full audit" risk-score="2649.9238">
+            <names>
+                <name>host1</name>
+            </names>
+            <fingerprints>
+                <os certainty="1.00" vendor="Ubuntu" family="Linux" product="Linux" version="20.04"/>
+            </fingerprints>
+            <tests>
+                <test id="linux-icmp-redirect" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163833380" pci-compliance-status="fail">
+
+                    <Paragraph>
+                        <UnorderedList>
+                            <ListItem>The net.ipv4.conf.all.accept_redirects sysctl variable is set to 1, expected 0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.default.accept_redirects sysctl variable is set to 1, expected
+                                0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.all.secure_redirects sysctl variable is set to 1, expected 0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.default.secure_redirects sysctl variable is set to 1, expected
+                                0.
+                            </ListItem>
+                        </UnorderedList>
+                    </Paragraph>
+                </test>
+
+                <test id="linux-grub-missing-passwd" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163833380" pci-compliance-status="fail">
+
+                    <Paragraph>
+                        <Paragraph>Grub config with no password found.
+                            <UnorderedList>
+                                <ListItem>Vulnerable file: /boot/grub/grub.cfg</ListItem>
+                            </UnorderedList>
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163833380" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user lxd was found to be 711 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163833380" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user ubuntu was found to be 755 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163833380" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user anycastcontrol was found to be 755 which
+                            is more permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163833380" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user netdata was found to be 775 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+            </tests>
+        </node>
+
+        <node address="192.168.0.11" status="alive" device-id="26086" site-name="Site1" site-importance="Normal"
+              scan-template="Discovery Scan,Full audit" risk-score="2649.9238">
+            <names>
+                <name>host3</name>
+            </names>
+            <fingerprints>
+                <os certainty="1.00" vendor="Ubuntu" family="Linux" product="Linux" version="20.04"/>
+            </fingerprints>
+            <tests>
+                <test id="linux-icmp-redirect" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163823297" pci-compliance-status="fail">
+
+                    <Paragraph>
+                        <UnorderedList>
+                            <ListItem>The net.ipv4.conf.all.accept_redirects sysctl variable is set to 1, expected 0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.default.accept_redirects sysctl variable is set to 1, expected
+                                0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.all.secure_redirects sysctl variable is set to 1, expected 0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.default.secure_redirects sysctl variable is set to 1, expected
+                                0.
+                            </ListItem>
+                        </UnorderedList>
+                    </Paragraph>
+                </test>
+
+                <test id="linux-grub-missing-passwd" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163823297" pci-compliance-status="fail">
+
+                    <Paragraph>
+                        <Paragraph>Grub config with no password found.
+                            <UnorderedList>
+                                <ListItem>Vulnerable file: /boot/grub/grub.cfg</ListItem>
+                            </UnorderedList>
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163823297" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user anycastcontrol was found to be 755 which
+                            is more permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163823297" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user lxd was found to be 711 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163823297" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user ubuntu was found to be 755 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163823297" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user netdata was found to be 775 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="generic-tcp-timestamp" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163823297" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>Able to determine system boot time.</Paragraph>
+                    </Paragraph>
+                </test>
+
+            </tests>
+        </node>
+
+        <node address="192.168.0.42" status="alive" device-id="26088" site-name="Site1" site-importance="Normal"
+              scan-template="Discovery Scan,Full audit" risk-score="2649.9238">
+            <names>
+                <name>host4</name>
+            </names>
+            <fingerprints>
+                <os certainty="1.00" vendor="Ubuntu" family="Linux" product="Linux" version="20.04"/>
+            </fingerprints>
+            <tests>
+                <test id="linux-icmp-redirect" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163822163" pci-compliance-status="fail">
+
+                    <Paragraph>
+                        <UnorderedList>
+                            <ListItem>The net.ipv4.conf.all.accept_redirects sysctl variable is set to 1, expected 0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.default.accept_redirects sysctl variable is set to 1, expected
+                                0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.all.secure_redirects sysctl variable is set to 1, expected 0.
+                            </ListItem>
+                            <ListItem>The net.ipv4.conf.default.secure_redirects sysctl variable is set to 1, expected
+                                0.
+                            </ListItem>
+                        </UnorderedList>
+                    </Paragraph>
+                </test>
+
+                <test id="linux-grub-missing-passwd" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163822163" pci-compliance-status="fail">
+
+                    <Paragraph>
+                        <Paragraph>Grub config with no password found.
+                            <UnorderedList>
+                                <ListItem>Vulnerable file: /boot/grub/grub.cfg</ListItem>
+                            </UnorderedList>
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163822163" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user netdata was found to be 775 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163822163" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user anycastcontrol was found to be 755 which
+                            is more permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163822163" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user ubuntu was found to be 755 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="unix-user-home-dir-mode" key="" status="vulnerable-version" scan-id="27992"
+                      vulnerable-since="20210211T163822163" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>The permissions for home directory of user lxd was found to be 711 which is more
+                            permissive than 750.
+                        </Paragraph>
+                    </Paragraph>
+                </test>
+
+                <test id="generic-tcp-timestamp" key="" status="vulnerable-exploited" scan-id="27992"
+                      vulnerable-since="20210211T163822163" pci-compliance-status="pass">
+
+                    <Paragraph>
+                        <Paragraph>Able to determine system boot time.</Paragraph>
+                    </Paragraph>
+                </test>
+
+            </tests>
+        </node>
+    </nodes>
+    <VulnerabilityDefinitions>
+        <vulnerability id="generic-tcp-timestamp" title="TCP timestamp response" severity="1" pciSeverity="1"
+                       cvssScore="0.0" cvssVector="(AV:N/AC:L/Au:N/C:N/I:N/A:N)" published="19970801T000000000"
+                       added="20110401T000000000" modified="20180321T000000000" riskScore="0.0">
+            <malware/>
+            <exploits/>
+            <description>
+
+                <ContainerBlockElement>
+
+                    <Paragraph>
+                        The remote host responded with a TCP timestamp. The TCP timestamp response
+                        can be used to approximate the remote host's uptime, potentially aiding in
+                        further attacks. Additionally, some operating systems can be fingerprinted
+                        based on the behavior of their TCP timestamps.
+                    </Paragraph>
+                </ContainerBlockElement>
+            </description>
+            <references>
+                <reference source="URL">http://uptime.netcraft.com</reference>
+                <reference source="URL">http://www.forensicswiki.org/wiki/TCP_timestamps</reference>
+                <reference source="URL">http://www.ietf.org/rfc/rfc1323.txt</reference>
+            </references>
+            <tags>
+                <tag>Network</tag>
+            </tags>
+            <solution>
+
+                <ContainerBlockElement>
+                    <UnorderedList>
+                        <ListItem>
+                            <Paragraph>Cisco</Paragraph>
+                            <Paragraph>
+                                <Paragraph>
+                                    Run the following command to disable TCP timestamps:
+                                </Paragraph>
+                                <Paragraph preformat="true">
+                                    no ip tcp timestamp
+                                </Paragraph>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>FreeBSD</Paragraph>
+                            <Paragraph>
+                                <Paragraph>
+                                    Set the value of net.inet.tcp.rfc1323 to 0 by running the
+                                    following command:
+                                </Paragraph>
+                                <Paragraph preformat="true">
+                                    sysctl -w net.inet.tcp.rfc1323=0
+                                </Paragraph>
+                                <Paragraph>
+                                    Additionally, put the following value in the default sysctl
+                                    configuration file, generally sysctl.conf:
+                                </Paragraph>
+                                <Paragraph preformat="true">
+                                    net.inet.tcp.rfc1323=0
+                                </Paragraph>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>Linux</Paragraph>
+                            <Paragraph>
+                                <Paragraph>
+                                    Set the value of net.ipv4.tcp_timestamps to 0 by running the
+                                    following command:
+                                </Paragraph>
+                                <Paragraph preformat="true">
+                                    sysctl -w net.ipv4.tcp_timestamps=0
+                                </Paragraph>
+                                <Paragraph>
+                                    Additionally, put the following value in the default sysctl
+                                    configuration file, generally sysctl.conf:
+                                </Paragraph>
+                                <Paragraph preformat="true">
+                                    net.ipv4.tcp_timestamps=0
+                                </Paragraph>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>OpenBSD</Paragraph>
+                            <Paragraph>
+                                <Paragraph>
+                                    Set the value of net.inet.tcp.rfc1323 to 0 by running the
+                                    following command:
+                                </Paragraph>
+                                <Paragraph preformat="true">
+                                    sysctl -w net.inet.tcp.rfc1323=0
+                                </Paragraph>
+                                <Paragraph>
+                                    Additionally, put the following value in the default sysctl
+                                    configuration file, generally sysctl.conf:
+                                </Paragraph>
+                                <Paragraph preformat="true">
+                                    net.inet.tcp.rfc1323=0
+                                </Paragraph>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>Microsoft Windows NT, Microsoft Windows NT Workstation, Microsoft Windows NT
+                                Server, Microsoft Windows NT Advanced Server, Microsoft Windows NT Server, Enterprise
+                                Edition, Microsoft Windows NT Server, Terminal Server Edition, Microsoft Windows 95,
+                                Microsoft Windows 98, Microsoft Windows 98SE, Microsoft Windows ME, Microsoft Windows
+                                2000, Microsoft Windows 2000 Professional, Microsoft Windows 2000 Server, Microsoft
+                                Windows 2000 Advanced Server, Microsoft Windows 2000 Datacenter Server, Microsoft
+                                Windows XP, Microsoft Windows XP Home, Microsoft Windows XP Professional, Microsoft
+                                Windows XP Tablet PC Edition, Microsoft Windows CE, Microsoft Windows Server 2003,
+                                Microsoft Windows Server 2003, Standard Edition, Microsoft Windows Server 2003,
+                                Enterprise Edition, Microsoft Windows Server 2003, Datacenter Edition, Microsoft Windows
+                                Server 2003, Web Edition, Microsoft Windows Small Business Server 2003, Microsoft
+                                Windows Server 2003 R2, Microsoft Windows Server 2003 R2, Standard Edition, Microsoft
+                                Windows Server 2003 R2, Enterprise Edition, Microsoft Windows Server 2003 R2, Datacenter
+                                Edition, Microsoft Windows Server 2003 R2, Web Edition, Microsoft Windows Small Business
+                                Server 2003 R2, Microsoft Windows Server 2003 R2, Express Edition, Microsoft Windows
+                                Server 2003 R2, Workgroup Edition
+                            </Paragraph>
+                            <Paragraph>
+                                <Paragraph>
+                                    Set the Tcp1323Opts value in the following key to 1:
+                                </Paragraph>
+                                <Paragraph preformat="true">
+                                    HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\Tcpip\Parameters
+                                </Paragraph>
+                            </Paragraph>
+                        </ListItem>
+                        <ListItem>
+                            <Paragraph>Microsoft Windows Server 2008, Microsoft Windows Server 2008 Standard Edition,
+                                Microsoft Windows Server 2008 Enterprise Edition, Microsoft Windows Server 2008
+                                Datacenter Edition, Microsoft Windows Server 2008 HPC Edition, Microsoft Windows Server
+                                2008 Web Edition, Microsoft Windows Server 2008 Storage Edition, Microsoft Windows Small
+                                Business Server 2008, Microsoft Windows Essential Business Server 2008, Microsoft
+                                Windows Server 2008 R2, Microsoft Windows Server 2008 R2, Standard Edition, Microsoft
+                                Windows Server 2008 R2, Enterprise Edition, Microsoft Windows Server 2008 R2, Datacenter
+                                Edition, Microsoft Windows Server 2008 R2, Web Edition, Microsoft Windows Server 2012,
+                                Microsoft Windows Server 2012 Standard Edition, Microsoft Windows Server 2012 Foundation
+                                Edition, Microsoft Windows Server 2012 Essentials Edition, Microsoft Windows Server 2012
+                                Datacenter Edition, Microsoft Windows Storage Server 2012, Microsoft Windows Vista,
+                                Microsoft Windows Vista Home, Basic Edition, Microsoft Windows Vista Home, Basic N
+                                Edition, Microsoft Windows Vista Home, Premium Edition, Microsoft Windows Vista Ultimate
+                                Edition, Microsoft Windows Vista Enterprise Edition, Microsoft Windows Vista Business
+                                Edition, Microsoft Windows Vista Business N Edition, Microsoft Windows Vista Starter
+                                Edition, Microsoft Windows 7, Microsoft Windows 7 Home, Basic Edition, Microsoft Windows
+                                7 Home, Basic N Edition, Microsoft Windows 7 Home, Premium Edition, Microsoft Windows 7
+                                Home, Premium N Edition, Microsoft Windows 7 Ultimate Edition, Microsoft Windows 7
+                                Ultimate N Edition, Microsoft Windows 7 Enterprise Edition, Microsoft Windows 7
+                                Enterprise N Edition, Microsoft Windows 7 Professional Edition, Microsoft Windows 7
+                                Starter Edition, Microsoft Windows 7 Starter N Edition, Microsoft Windows 8, Microsoft
+                                Windows 8 Enterprise Edition, Microsoft Windows 8 Professional Edition, Microsoft
+                                Windows 8 RT, Microsoft Windows Longhorn Server Beta
+                            </Paragraph>
+                            <Paragraph>
+                                <Paragraph>
+                                    TCP timestamps cannot be reliably disabled on this OS. If TCP timestamps present
+                                    enough of a risk, put a firewall capable of blocking TCP timestamp packets in front
+                                    of the affected assets.
+                                </Paragraph>
+                            </Paragraph>
+                        </ListItem>
+                    </UnorderedList>
+                </ContainerBlockElement>
+            </solution>
+        </vulnerability>
+
+        <vulnerability id="linux-grub-missing-passwd" title="No password for Grub" severity="5" pciSeverity="3"
+                       cvssScore="4.6" cvssVector="(AV:L/AC:L/Au:N/C:P/I:P/A:P)" published="19990101T000000000"
+                       added="20041130T000000000" modified="20190711T000000000" riskScore="751.7289">
+            <malware/>
+            <exploits/>
+            <description>
+
+                <ContainerBlockElement>
+
+                    <Paragraph>GRUB bootloader is not password protected. An attacker can use the
+                        GRUB editor interface to change its configuration or to gather information
+                        using the cat command. It can also be exploited to boot into single user
+                        mode as root or boot into an insecure operating system.
+                    </Paragraph>
+                </ContainerBlockElement>
+            </description>
+            <references>
+            </references>
+            <tags>
+                <tag>UNIX</tag>
+            </tags>
+            <solution>
+
+                <ContainerBlockElement>
+                    <Paragraph>
+                        <Paragraph>Set a password in the GRUB configuration file. This
+                            is often located in one of several locations, but can really be
+                            anywhere:
+                        </Paragraph>
+                        <Paragraph preformat="true">
+                            /etc/grub.conf
+                            /boot/grub/grub.conf
+                            /boot/grub/grub.cfg
+                            /boot/grub/menu.lst
+                        </Paragraph>
+                        <Paragraph>For all files mentioned above ensure that a password is set or that the files do not
+                            exist.
+                        </Paragraph>
+                        <Paragraph>To set a plain-text password, edit your GRUB configuration file
+                            and add the following line before the first uncommented line:
+                        </Paragraph>
+                        <Paragraph preformat="true">password &lt;password&gt;</Paragraph>
+                        <Paragraph>To set an encrypted password, run grub-md5-crypt and use its
+                            output when adding the following line before the first
+                            uncommented line:
+                        </Paragraph>
+                        <Paragraph preformat="true">password --md5 &lt;encryptedpassword&gt;</Paragraph>
+                        <Paragraph>For either approach, choose an appropriately strong password.</Paragraph>
+                    </Paragraph>
+                </ContainerBlockElement>
+            </solution>
+        </vulnerability>
+
+        <vulnerability id="linux-icmp-redirect" title="ICMP redirection enabled" severity="7" pciSeverity="4"
+                       cvssScore="6.8" cvssVector="(AV:N/AC:M/Au:N/C:P/I:P/A:P)" published="20031231T000000000"
+                       added="20041130T000000000" modified="20120719T000000000" riskScore="740.62415">
+            <malware/>
+            <exploits/>
+            <description>
+
+                <ContainerBlockElement>
+
+                    <Paragraph>By default, many linux systems enable a feature called ICMP redirection,
+                        where the machine will alter its route table in response to an ICMP
+                        redirect message from any network device.
+                    </Paragraph>
+
+
+                    <Paragraph>There is a risk that this feature could be used to subvert a host's
+                        routing table in order to compromise its security (e.g., tricking it
+                        into sending packets via a specific route where they may be sniffed
+                        or altered).
+                    </Paragraph>
+                </ContainerBlockElement>
+            </description>
+            <references>
+                <reference source="BID">6823</reference>
+                <reference source="MSKB">293626</reference>
+                <reference source="XF">cisco-ios-icmp-redirect(11306)</reference>
+            </references>
+            <tags>
+                <tag>UNIX</tag>
+            </tags>
+            <solution>
+
+                <ContainerBlockElement>
+                    <Paragraph>Linux</Paragraph>
+                    <Paragraph>
+                        <Paragraph>Issue the following commands as root:</Paragraph>
+                        <Paragraph preformat="true">sysctl -w net.ipv4.conf.all.accept_redirects=0</Paragraph>
+                        <Paragraph preformat="true">sysctl -w net.ipv4.conf.default.accept_redirects=0</Paragraph>
+                        <Paragraph preformat="true">sysctl -w net.ipv4.conf.all.secure_redirects=0</Paragraph>
+                        <Paragraph preformat="true">sysctl -w net.ipv4.conf.default.secure_redirects=0</Paragraph>
+                        <Paragraph>These settings can be added to /etc/sysctl.conf to make them permanent.</Paragraph>
+                    </Paragraph>
+                </ContainerBlockElement>
+            </solution>
+        </vulnerability>
+
+        <vulnerability id="unix-user-home-dir-mode" title="User home directory mode unsafe" severity="2" pciSeverity="2"
+                       cvssScore="2.1" cvssVector="(AV:L/AC:L/Au:N/C:P/I:N/A:N)" published="20050115T000000000"
+                       added="20050115T000000000" modified="20200211T000000000" riskScore="579.081">
+            <malware/>
+            <exploits/>
+            <description>
+
+                <ContainerBlockElement>
+
+                    <Paragraph>A user's home directory was found to have a permission mode which is more permissive than
+                        750 (Owner=READ/WRITE/EXECUTE, Group=READ/EXECUTE, Other=NONE).
+                        "Group" or "Other" WRITE permissions means that a malicious user may gain complete access to
+                        user data by escalating privileges.
+                        In addition "read" and "execute" access for "Other" should always be disabled (sensitive data
+                        access).
+                    </Paragraph>
+                </ContainerBlockElement>
+            </description>
+            <references>
+            </references>
+            <tags>
+                <tag>UNIX</tag>
+            </tags>
+            <solution>
+
+                <ContainerBlockElement>
+                    <Paragraph>
+                        <Paragraph>Restrict the user home directory mode to at most 750 using the command:</Paragraph>
+                        <Paragraph preformat="true">chmod 750 userDir</Paragraph>
+                    </Paragraph>
+                </ContainerBlockElement>
+            </solution>
+        </vulnerability>
+    </VulnerabilityDefinitions>
+</NexposeReport>

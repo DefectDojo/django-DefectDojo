@@ -1,19 +1,6 @@
 import requests
 
 
-def print_map(map, tab):
-    for key, value in map.items():
-        if isinstance(key, dict):
-            print(tab, print_map(key, tab + '\t'))
-        elif key is not None:
-            print(tab, 'Key :: ', key)
-
-        if isinstance(value, dict):
-            print(tab, print_map(value, tab + '\t'))
-        elif value is not None:
-            print(tab, 'Value :: ', value)
-
-
 class RiskReconAPI:
     def __init__(self, api_key, endpoint, data):
         self.key = api_key
@@ -26,13 +13,13 @@ class RiskReconAPI:
             raise Exception(
                 'Please supply a Risk Recon API key. \n'
                 'This can be generated in the system admin panel. \n'
-                'See https://defectdojo.readthedocs.io/en/latest/integrations.html#risk-recon-api-importer \n'
+                'See https://defectdojo.github.io/django-DefectDojo/integrations/import/#risk-recon-api-importer \n'
             )
         if not self.url:
             raise Exception(
                 'Please supply a Risk Recon API url. \n'
                 'A general url is https://api.riskrecon.com/v1/ \n'
-                'See https://defectdojo.readthedocs.io/en/latest/integrations.html#risk-recon-api-importer \n'
+                'See https://defectdojo.github.io/django-DefectDojo/integrations/import/#risk-recon-api-importer \n'
             )
         if self.url.endswith('/'):
             self.url = endpoint[:-1]

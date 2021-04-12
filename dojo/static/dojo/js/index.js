@@ -229,7 +229,7 @@ function punchcard(element, data, ticks) {
 function togglePassVisibility() {
     var passwdInput = document.getElementById("id_password");
     var toggleBox = document.getElementById("toggleBox");
-    
+
     // swap password
     if (passwdInput.type === "password") {
         passwdInput.type = "text";
@@ -240,20 +240,20 @@ function togglePassVisibility() {
         toggleBox.innerHTML = "<i class='fa fa-eye'></i>\
         <span><b>Show Password</b></span>";
     }
-} 
+}
 
 function asciidocDownload() {
     var content = document.getElementById('base-content')
     var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + 
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' +
         encodeURIComponent(content.innerText.slice(16)));
     element.setAttribute('download', 'asciidoc-report.txt');
-  
+
     element.style.display = 'none';
     document.body.appendChild(element);
-  
+
     element.click();
-  
+
     document.body.removeChild(element);
   }
 
@@ -295,7 +295,7 @@ function getDojoExportValueFromTag(htmlString, tag, htmlTagAttribValue){
     return exportValue.toString().replace(/<\/?[^>]+(>|$)/g, " ");
 }
 
-generateGUID = (typeof(window.crypto) != 'undefined' && 
+generateGUID = (typeof(window.crypto) != 'undefined' &&
                 typeof(window.crypto.getRandomValues) != 'undefined') ?
     function() {
         // If we have a cryptographically secure PRNG, use that
@@ -327,4 +327,25 @@ generateGUID = (typeof(window.crypto) != 'undefined' &&
         var link = document.createElement("a");
         link.href = href;
         return link.href;
-    }    
+    }
+
+function clear_form(form){
+    $(form).find(':input').each(function() {
+        console.log(this.type)
+        switch(this.type) {
+            case 'number':
+            case 'password':
+            case 'select-one':
+            case 'text':
+            case 'textarea':
+                $(this).val('');
+                break;
+            case 'checkbox':
+            case 'radio':
+                this.checked = false;
+                break;
+            case 'select-multiple':
+                $(this).val(null).trigger('change');
+        }
+    });
+}

@@ -1,8 +1,10 @@
-from .parser_helper import get_defectdojo_findings
-from dojo.models import Finding
 import hashlib
 import logging
 import re
+
+from dojo.models import Finding
+
+from .parser_helper import get_defectdojo_findings
 
 __author__ = "Vijay Bheemineni"
 __license__ = "MIT"
@@ -12,17 +14,23 @@ __status__ = "Development"
 logger = logging.getLogger(__name__)
 
 
-class AcunetixScannerParser(object):
-    """
-        This class parse Acunetix XML file using helper methods from 'parser_helper.py'.
-    """
+class AcunetixParser(object):
+    """Parser for Acunetix XML files."""
 
-    def __init__(self, xml_output, test):
-        self.items = []
+    def get_scan_types(self):
+        return ["Acunetix Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Acunetix Scanner"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "XML format"
+
+    def get_findings(self, xml_output, test):
         if xml_output is None:
-            return
+            return list()
         acunetix_defectdojo_findings = get_defectdojo_findings(xml_output)
-        self.set_defectdojo_findings(acunetix_defectdojo_findings, test)
+        return self.set_defectdojo_findings(acunetix_defectdojo_findings, test)
 
     def set_defectdojo_findings(self, acunetix_defectdojo_findings, test):
         defectdojo_findings = dict()
@@ -48,7 +56,7 @@ class AcunetixScannerParser(object):
             else:
                 logger.debug("Duplicate finding : {defectdojo_title}".format(defectdojo_title=acunetix_defectdojo_finding.title))
 
-        self.items = list(defectdojo_findings.values())
+        return list(defectdojo_findings.values())
 
 
 def get_defectdojo_date(date):
@@ -77,7 +85,7 @@ def get_cwe_number(cwe):
     if cwe is None:
         return None
     else:
-        return cwe.split("-")[1]
+        return int(cwe.split("-")[1])
 
 
 def get_severity(severity):

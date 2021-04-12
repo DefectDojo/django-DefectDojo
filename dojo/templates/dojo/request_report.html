@@ -18,13 +18,13 @@
                         {% endif %}
                         Report
                         <div class="dropdown pull-right">
-
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
 
                     </h3>
                 </div>
 
-                <div id="the-filters" class="panel-body {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body {% if findings.form.has_changed %}in{% endif %}">
                     <div class="dojo-filter-heading">Filters</div>
                     <div class="filter-set">
 

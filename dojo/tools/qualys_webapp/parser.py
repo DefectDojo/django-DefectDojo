@@ -2,12 +2,18 @@
 #
 # -*- coding:utf-8 -*-
 
-import xml.etree.ElementTree
-import re
 import base64
+import re
+import xml.etree.ElementTree
 from datetime import datetime
-from dojo.models import Finding, Endpoint
+from dojo.models import Endpoint, Finding
 from urllib.parse import urlparse
+
+try:
+    from dojo.settings.settings import QUALYS_WAS_WEAKNESS_IS_VULN
+except ImportError:
+    # Avoid breaking change
+    QUALYS_WAS_WEAKNESS_IS_VULN = False
 
 # Severities are listed under WAS_SCAN_REPORT/APPENDIX/SEVERITY_CATEGORY_LIST
 # Since Info findings are not recroded in the Confirmed Vulnerability or
@@ -18,10 +24,6 @@ SEVERITY_MATCH = ['Low',
                    'Medium',
                    'High',
                    'Critical']
-# All QIDs in this category will be info because they only carry
-# three levels of severity (Minimal, Medium, Serious)
-INFO_CATEGORIES = ['Sensitive Content',
-                   'Information Gathered']
 
 
 def truncate_str(value: str, maxlen: int):
@@ -169,15 +171,14 @@ def get_vulnerabilities(vulnerabilities, is_info=False, is_app_report=False):
 
 # Retrieve information from a single glossary entry such as description,
 # severity, title, impact, mitigation, and CWE
-def get_glossary_item(glossary, finding):
+def get_glossary_item(glossary, finding, is_info=False, enable_weakness=False):
     title = glossary.findtext('TITLE')
     if title is not None:
         finding.title = str(title)
     severity = glossary.findtext('SEVERITY')
     if severity is not None:
         group = glossary.findtext('GROUP')
-        category = glossary.findtext('CATEGORY')
-        if category in INFO_CATEGORIES or group == "DIAG":
+        if is_info and (not enable_weakness or group in ("DIAG", "IG")):
             # Scan Diagnostics are always Info.
             finding.severity = "Info"
         else:
@@ -206,7 +207,7 @@ def get_info_item(info_gathered, finding):
 
 
 # Create finding items for all vulnerabilities in the report
-def get_items(vulnerabilities, info_gathered, glossary, is_app_report):
+def get_items(vulnerabilities, info_gathered, glossary, is_app_report, enable_weakness=False):
     ig_qid_list = [int(ig.findtext('QID')) for ig in info_gathered]
     g_qid_list = [int(g.findtext('QID')) for g in glossary]
 
@@ -216,11 +217,11 @@ def get_items(vulnerabilities, info_gathered, glossary, is_app_report):
     for qid, finding in get_vulnerabilities(vulnerabilities, False, is_app_report).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            findings[qid] = get_glossary_item(glossary[index], finding)
+            findings[qid] = get_glossary_item(glossary[index], finding, enable_weakness)
     for qid, finding in get_vulnerabilities(info_gathered, True, is_app_report).items():
         if qid in g_qid_list:
             index = g_qid_list.index(qid)
-            finding = get_glossary_item(glossary[index], finding)
+            finding = get_glossary_item(glossary[index], finding, True, enable_weakness)
         if qid in ig_qid_list:
             index = ig_qid_list.index(qid)
             findings[qid] = get_info_item(info_gathered[index], finding)
@@ -228,7 +229,7 @@ def get_items(vulnerabilities, info_gathered, glossary, is_app_report):
     return findings
 
 
-def qualys_webapp_parser(qualys_xml_file, test):
+def qualys_webapp_parser(qualys_xml_file, test, enable_weakness=False):
     if qualys_xml_file is None:
         return []
 
@@ -244,11 +245,21 @@ def qualys_webapp_parser(qualys_xml_file, test):
         info_gathered = tree.findall('./RESULTS/INFORMATION_GATHERED_LIST/INFORMATION_GATHERED')
     glossary = tree.findall('./GLOSSARY/QID_LIST/QID')
 
-    items = list(get_items(vulnerabilities, info_gathered, glossary, is_app_report).values())
+    items = list(get_items(vulnerabilities, info_gathered, glossary, is_app_report, enable_weakness).values())
 
     return items
 
 
 class QualysWebAppParser(object):
-    def __init__(self, file, test):
-        self.items = qualys_webapp_parser(file, test)
+
+    def get_scan_types(self):
+        return ["Qualys Webapp Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Qualys WebScan output files can be imported in XML format."
+
+    def get_findings(self, file, test, enable_weakness=QUALYS_WAS_WEAKNESS_IS_VULN):
+        return qualys_webapp_parser(file, test, enable_weakness)

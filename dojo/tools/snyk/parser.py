@@ -4,11 +4,17 @@ from dojo.models import Finding
 
 
 class SnykParser(object):
-    def __init__(self, json_output, test):
-        self.items = []
 
-        if json_output is None:
-            return
+    def get_scan_types(self):
+        return ["Snyk Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Snyk output file (snyk test --json > snyk.json) can be imported in JSON format."
+
+    def get_findings(self, json_output, test):
 
         reportTree = self.parse_json(json_output)
 
@@ -16,9 +22,9 @@ class SnykParser(object):
             temp = []
             for moduleTree in reportTree:
                 temp += self.process_tree(moduleTree, test)
-            self.items = temp
+            return temp
         else:
-            self.items = self.process_tree(reportTree, test)
+            return self.process_tree(reportTree, test)
 
     def process_tree(self, tree, test):
         if tree:
@@ -111,6 +117,14 @@ def get_item(vulnerability, test):
     for item in vulnerability['references']:
         references += "**" + item['title'] + "**: " + item['url'] + "\n"
 
+    # Construct "file_path" removing versions
+    vulnPath = ''
+    for index, item in enumerate(vulnerability['from']):
+        if index == 0:
+            vulnPath += item.split("@")[0]
+        else:
+            vulnPath += " > " + item.split("@")[0]
+
     # create the finding object
     finding = Finding(
         title=vulnerability['from'][0] + ": " + vulnerability['title'],
@@ -130,13 +144,15 @@ def get_item(vulnerability, test):
         references=references,
         component_name=vulnerability['packageName'],
         component_version=vulnerability['version'],
-        active=False,
-        verified=False,
         false_p=False,
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
-        impact=severity)
+        impact=severity,
+        static_finding=True,
+        dynamic_finding=False,
+        file_path=vulnPath,
+        vuln_id_from_tool=vulnerability['id'])
 
     finding.description = finding.description.strip()
 
