@@ -1225,7 +1225,7 @@ class ImportScanValidation(Validation):
                 get_pk_from_uri(uri=bundle.data['engagement'])
             except NotFound:
                 errors.setdefault('engagement', []).append('A valid engagement must be supplied. Ex. /api/v1/engagements/1/')
-        scan_type_list = list([x[0] for x in ImportScanForm().SORTED_SCAN_TYPE_CHOICES])
+        scan_type_list = list([x[0] for x in ImportScanForm.SORTED_SCAN_TYPE_CHOICES])
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:
                 errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
@@ -1473,7 +1473,7 @@ class ReImportScanValidation(Validation):
                 get_pk_from_uri(uri=bundle.data['test'])
             except NotFound:
                 errors.setdefault('test', []).append('A valid test must be supplied. Ex. /api/v1/tests/1/')
-        scan_type_list = list([x[0] for x in ImportScanForm().SORTED_SCAN_TYPE_CHOICES])
+        scan_type_list = list([x[0] for x in ImportScanForm.SORTED_SCAN_TYPE_CHOICES])
         if 'scan_type' in bundle.data:
             if bundle.data['scan_type'] not in scan_type_list:
                 errors.setdefault('scan_type', []).append('scan_type must be one of the following: ' + ', '.join(scan_type_list))
