@@ -1,5 +1,5 @@
 import logging
-from dojo.models import Test_Type
+from dojo.models import Test_Type, Tool_Type
 
 PARSERS = {}
 # TODO remove that
@@ -36,10 +36,20 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         raise ValueError(f'Unknown Test Type {scan_type}')
 
 
+def get_enabled_scanners():
+    scanners = []
+    enabled = Tool_Type.objects.all().filter(enabled=True)
+    for scanner in enabled:
+        scanners.append(scanner.name.lower())
+    return scanners
+
+
 def get_choices():
     res = list()
-    for key in PARSERS:
-        res.append((key, PARSERS[key].get_label_for_scan_types(key)))
+    enabled = get_enabled_scanners()
+    for key in PARSERS.keys():
+        if key.lower() in enabled:
+            res.append((key, PARSERS[key].get_label_for_scan_types(key)))
     return tuple(res)
 
 
