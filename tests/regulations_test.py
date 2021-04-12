@@ -30,7 +30,7 @@ class RegulationTest(BaseTestCase):
         driver.find_element_by_id("id_jurisdiction").clear()
         driver.find_element_by_id("id_jurisdiction").send_keys("Europe")
         driver.find_element_by_id("id_description").clear()
-        driver.find_element_by_id("id_description").send_keys("Few words abot PSA")
+        driver.find_element_by_id("id_description").send_keys("Few words about PSA")
         driver.find_element_by_id("id_reference").clear()
         driver.find_element_by_id("id_reference").send_keys("http://www.psa.eu")
         driver.find_element_by_css_selector(".col-sm-offset-2 > .btn").click()
