@@ -20,8 +20,14 @@ class RegulationTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "tool_type")
         driver.find_element_by_link_text("Nexpose Scan").click()
-        driver.find_elements_by_id("id_enabled").clear()
-        driver.find_element_by_css_selector(".col-sm-offset-2  > .btn").click()
+        checkbox = driver.find_element_by_id("id_enabled")
+        if checkbox.is_selected():
+            checkbox.click()
+
+        driver.find_element_by_css_selector(".col-sm-offset-2 > .btn").click()
+        self.assertTrue((self.is_success_message_present(text="Tool Type Configuration Successfully Updated.") and
+                         driver.find_element_by_css_selector("tr:nth-child(57) > td > b").text == "Disabled"
+                         ))
 
 
     def test_delete_scanner(self):
