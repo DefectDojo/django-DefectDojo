@@ -41,7 +41,12 @@ def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(RegulationTest('test_disable_scanner'))
+<<<<<<< HEAD
     suite.addTest(RegulationTest('test_delete_scanner'))
+=======
+    # suite.addTest(RegulationTest('test_edit_regulation'))
+    # suite.addTest(RegulationTest('test_delete_regulation'))
+>>>>>>> Add: Disable Nexpose test
     return suite
 
 
