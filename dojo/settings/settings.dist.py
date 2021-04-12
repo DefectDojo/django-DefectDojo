@@ -796,6 +796,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
@@ -829,6 +830,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
+    'Anchore Grype': True,
     'Checkmarx Scan': False,
     'Checkmarx OSA': True,
     'SonarQube Scan': False,
@@ -870,7 +872,7 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
-    'Anchore Grype': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
