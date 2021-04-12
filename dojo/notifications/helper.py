@@ -7,6 +7,8 @@ from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
 from dojo.celery import app
+from dojo.user.queries import get_authorized_users_for_product_and_product_type
+from dojo.authorization.roles_permissions import Permissions
 # from dojo.decorators import dojo_async_task, we_want_async, convert_kwargs_if_async
 
 logger = logging.getLogger(__name__)
@@ -73,7 +75,7 @@ def create_notification(event=None, **kwargs):
 
         # only send to authorized users or admin/superusers
         if product:
-            users = users.filter(Q(id__in=product.authorized_users.all()) | Q(id__in=product.prod_type.authorized_users.all()) | Q(is_superuser=True) | Q(is_staff=True))
+            users = get_authorized_users_for_product_and_product_type(users, product, Permissions.Product_View)
 
         for user in users:
             # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
