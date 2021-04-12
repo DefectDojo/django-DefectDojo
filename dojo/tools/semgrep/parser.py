@@ -22,20 +22,36 @@ class SemgrepParser(object):
         for item in data["results"]:
             finding = Finding(
                 test=test,
-                title=item["extra"]["message"].split(".")[0],
+                title=item["check_id"],
                 severity=self.convert_severity(item["extra"]["severity"]),
                 numerical_severity=Finding.get_numerical_severity(self.convert_severity(item["extra"]["severity"])),
                 description=item["extra"]["message"],
                 file_path=item['path'],
-                cwe=int(item["extra"]["metadata"].get("cwe").partition(':')[0].partition('-')[2]),
                 line=item["start"]["line"],
-                references="\n".join(item["extra"]["metadata"]["references"]),
-                mitigation=item["extra"]["fix"],
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=item["check_id"],
                 nb_occurences=1,
             )
+
+            # manage CWE
+            if 'cwe' in item["extra"]["metadata"]:
+                finding.cwe = int(item["extra"]["metadata"].get("cwe").partition(':')[0].partition('-')[2])
+
+            # manage references from metadata
+            if 'references' in item["extra"]["metadata"]:
+                finding.references = "\n".join(item["extra"]["metadata"]["references"])
+
+            # manage mitigation from metadata
+            if 'fix' in item["extra"]:
+                finding.mitigation = item["extra"]["fix"]
+            elif 'fix_regex' in item["extra"]:
+                finding.mitigation = "\n".join([
+                    "**You can automaticaly apply this regex:**",
+                    "\n```\n",
+                    json.dumps(item["extra"]["fix_regex"]),
+                    "\n```\n",
+                ])
 
             dupe_key = finding.title + finding.file_path + str(finding.line)
 
