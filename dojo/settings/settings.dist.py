@@ -1071,5 +1071,5 @@ TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
 
 DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
 
-#Make use of numpy's business day counter for SLA's rather than calendar days
+# Make use of numpy's business day counter for SLA's rather than calendar days
 USE_BUSDAY_COUNT = False
