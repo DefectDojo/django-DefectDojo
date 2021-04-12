@@ -320,21 +320,29 @@ def deduplicate_uid_or_hash_code(new_finding):
         break
 
 
-def set_duplicate(new_finding, existing_finding):
+def set_duplicate(new_finding, existing_finding, update_existing_finding = True):
     if existing_finding.duplicate:
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
-    if is_duplicate_changed_status(new_finding, existing_finding):
+
+    # Update existing finding's status in case of changes.
+    if update_existing_finding and is_duplicate_changed_status(new_finding, existing_finding):
         set_existing_change_status(new_finding, existing_finding)
+
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
+
+    # Load optional 'original' findings on new duplicate.
+    # Remove and reset (link those former original findings
+    # as duplicate to 'this' finding).
     for find in new_finding.original_finding.all():
         new_finding.original_finding.remove(find)
-        set_duplicate(find, existing_finding)
+        set_duplicate(find, existing_finding, False)
+
     existing_finding.found_by.add(new_finding.test.test_type)
     logger.debug('saving new finding')
     super(Finding, new_finding).save()
