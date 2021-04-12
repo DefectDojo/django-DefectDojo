@@ -1,0 +1,405 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-04-12 06:21+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: dojo/templates/403.html:7
+msgid ""
+"You don't have permission to do that. Contact your administrator for "
+"additional access."
+msgstr "没得登陆, 没得权限"
+
+#: dojo/templates/404.html:7
+msgid " Well..."
+msgstr "好的..."
+
+#: dojo/templates/404.html:10
+msgid " ...we can't find what you need."
+msgstr "找不到"
+
+#: dojo/templates/base.html:24
+msgid "DefectDojo"
+msgstr "漏洞管理平台"
+
+#: dojo/templates/base.html:172
+msgid "API v1 Key"
+msgstr "API v1 密钥"
+
+#: dojo/templates/base.html:173
+msgid "API v2 Key"
+msgstr "API v2 密钥"
+
+#: dojo/templates/base.html:175
+msgid "API v1 Docs"
+msgstr "API v1 文档"
+
+#: dojo/templates/base.html:176
+msgid "API v2 Docs"
+msgstr "API v2 文档"
+
+#: dojo/templates/base.html:179 dojo/templates/base.html:349
+msgid "Questionnaires"
+msgstr "问卷"
+
+#: dojo/templates/base.html:184
+msgid "SAML Logout"
+msgstr "SAML 登出"
+
+#: dojo/templates/base.html:186
+msgid "Logout"
+msgstr "退出"
+
+#: dojo/templates/base.html:203
+msgid "Dashboard"
+msgstr "仪表盘"
+
+#: dojo/templates/base.html:209
+msgid "Products"
+msgstr "产品"
+
+#: dojo/templates/base.html:213
+msgid "All Products"
+msgstr "所有产品"
+
+#: dojo/templates/base.html:215
+msgid "Add Product"
+msgstr "添加产品"
+
+#: dojo/templates/base.html:217
+msgid "All Product Types"
+msgstr "所有产品类型"
+
+#: dojo/templates/base.html:219
+msgid "Add Product Type"
+msgstr "添加产品类型"
+
+#: dojo/templates/base.html:227 dojo/templates/base.html:436
+msgid "Engagements"
+msgstr "任务"
+
+#: dojo/templates/base.html:231
+msgid "Active Engagements"
+msgstr "激活的任务"
+
+#: dojo/templates/base.html:233
+msgid "All Engagements"
+msgstr "所有任务"
+
+#: dojo/templates/base.html:236
+msgid "Test Types"
+msgstr "测试类型"
+
+#: dojo/templates/base.html:237
+msgid "Environments"
+msgstr "测试环境"
+
+#: dojo/templates/base.html:246 dojo/templates/base.html:453
+msgid "Findings"
+msgstr "漏洞"
+
+#: dojo/templates/base.html:251
+msgid "Open Findings"
+msgstr "开放的漏洞"
+
+#: dojo/templates/base.html:254
+msgid "All Findings"
+msgstr "所有漏洞"
+
+#: dojo/templates/base.html:257
+msgid "Closed Findings"
+msgstr "关闭的漏洞"
+
+#: dojo/templates/base.html:260
+msgid "Risk Accepted Findings"
+msgstr "接受风险漏洞"
+
+#: dojo/templates/base.html:263
+msgid "Finding Templates"
+msgstr "漏洞模板"
+
+#: dojo/templates/base.html:271 dojo/templates/base.html:431
+msgid "Components"
+msgstr "组件"
+
+#: dojo/templates/base.html:275
+msgid "All Components"
+msgstr "所有组件"
+
+#: dojo/templates/base.html:282 dojo/templates/base.html:476
+msgid "Endpoints"
+msgstr "端点"
+
+#: dojo/templates/base.html:287
+msgid "All Endpoints"
+msgstr "所有端点"
+
+#: dojo/templates/base.html:291
+msgid "Vulnerable Endpoints"
+msgstr "脆弱端点"
+
+#: dojo/templates/base.html:300
+msgid "Reports"
+msgstr "报表"
+
+#: dojo/templates/base.html:306
+msgid "All Reports"
+msgstr "所有报表"
+
+#: dojo/templates/base.html:308
+msgid "Report Builder "
+msgstr "报表生成"
+
+#: dojo/templates/base.html:315 dojo/templates/base.html:432
+msgid "Metrics"
+msgstr "指标"
+
+#: dojo/templates/base.html:319
+msgid "Metrics Dashboard"
+msgstr "指标仪表盘"
+
+#: dojo/templates/base.html:320
+msgid "Critical Product Metrics"
+msgstr "关键产品指标"
+
+#: dojo/templates/base.html:321
+msgid "Product Type Metrics"
+msgstr "产品类型指标"
+
+#: dojo/templates/base.html:322
+msgid "Product Type Counts"
+msgstr "产品类型计数"
+
+#: dojo/templates/base.html:323
+msgid "Simple Metrics"
+msgstr "简单指标"
+
+#: dojo/templates/base.html:325
+msgid "Engineer Metrics"
+msgstr "工程指标"
+
+#: dojo/templates/base.html:326
+msgid "Security Research Metrics"
+msgstr "安全考察指标"
+
+#: dojo/templates/base.html:335
+msgid "Users"
+msgstr "用户"
+
+#: dojo/templates/base.html:343
+msgid "Calendar"
+msgstr "日历"
+
+#: dojo/templates/base.html:352
+msgid "All Questionnaires"
+msgstr "所有问卷"
+
+#: dojo/templates/base.html:353
+msgid "All Questions"
+msgstr "所有问题"
+
+#: dojo/templates/base.html:362
+msgid "Configuration"
+msgstr "配置"
+
+#: dojo/templates/base.html:366
+msgid "Credential Manager"
+msgstr "凭证管理"
+
+#: dojo/templates/base.html:368
+msgid "JIRA"
+msgstr "JIRA"
+
+#: dojo/templates/base.html:371
+msgid "GitHub"
+msgstr "GitHub"
+
+#: dojo/templates/base.html:373
+msgid "Tool Configuration"
+msgstr "工具配置"
+
+#: dojo/templates/base.html:374
+msgid "Tool Type"
+msgstr "工具类型"
+
+#: dojo/templates/base.html:375
+msgid "Rules Framework"
+msgstr "规则框架"
+
+#: dojo/templates/base.html:376
+msgid "Regulations"
+msgstr "规章指定"
+
+#: dojo/templates/base.html:377
+msgid "System Settings"
+msgstr "系统设置"
+
+#: dojo/templates/base.html:378
+msgid "Note Types"
+msgstr "笔记类型"
+
+#: dojo/templates/base.html:379
+msgid "Google Sheets Sync"
+msgstr "Google 表格"
+
+#: dojo/templates/base.html:380
+msgid "Login banner"
+msgstr "登陆横幅"
+
+#: dojo/templates/base.html:382
+msgid "Notifications"
+msgstr "通知事项"
+
+#: dojo/templates/base.html:390
+msgid "Collapse Menu"
+msgstr "折叠菜单"
+
+#: dojo/templates/base.html:430
+msgid "Overview"
+msgstr "概览"
+
+#: dojo/templates/base.html:439
+msgid "View Engagements"
+msgstr "查看任务"
+
+#: dojo/templates/base.html:441
+msgid "Add New Engagement"
+msgstr "添加新任务"
+
+#: dojo/templates/base.html:444
+msgid "View CI/CD Engagements"
+msgstr "查看 CI/CD 任务"
+
+#: dojo/templates/base.html:446
+msgid "Add New CI/CD Engagement"
+msgstr "添加新 CI/CD 任务"
+
+#: dojo/templates/base.html:456
+msgid "View Active Findings"
+msgstr "查看激活的漏洞"
+
+#: dojo/templates/base.html:457
+msgid "View Active Verified Findings"
+msgstr "查看有效的漏洞"
+
+#: dojo/templates/base.html:458
+msgid "View Critical Findings"
+msgstr "查看严重的漏洞"
+
+#: dojo/templates/base.html:459
+msgid "View Findings from Last 7 Days"
+msgstr "查看最近7天的漏洞"
+
+#: dojo/templates/base.html:461
+msgid "View Risk Accepted Findings"
+msgstr "查看可接受风险的漏洞"
+
+#: dojo/templates/base.html:462
+msgid "View All Findings"
+msgstr "查看所有漏洞"
+
+#: dojo/templates/base.html:463
+msgid "View Closed Findings"
+msgstr "查看关闭的漏洞"
+
+#: dojo/templates/base.html:466
+msgid "Add New Finding"
+msgstr "添加新漏洞"
+
+#: dojo/templates/base.html:469
+msgid "Import Scan Results"
+msgstr "导入扫描报告"
+
+#: dojo/templates/base.html:479
+msgid "View Endpoint"
+msgstr "查看端点"
+
+#: dojo/templates/base.html:480
+msgid "View Vulnerable Endpoints"
+msgstr "查看易受攻击端点"
+
+#: dojo/templates/base.html:482
+msgid "Endpoint Report"
+msgstr "端点报告"
+
+#: dojo/templates/base.html:485
+msgid "Add New Endpoint"
+msgstr "添加新端点"
+
+#: dojo/templates/base.html:494
+msgid "Benchmarks"
+msgstr "基准测试"
+
+#: dojo/templates/base.html:508
+msgid "Settings"
+msgstr "设置"
+
+#: dojo/templates/base.html:514
+msgid "Edit"
+msgstr "编辑"
+
+#: dojo/templates/base.html:520
+msgid "Add Custom Fields"
+msgstr "添加自定义字段"
+
+#: dojo/templates/base.html:526
+msgid "Edit Custom Fields"
+msgstr "编辑自定义字段"
+
+#: dojo/templates/base.html:532
+msgid "Add Product Tracking Files"
+msgstr "添加产品跟踪文件"
+
+#: dojo/templates/base.html:537
+msgid "View Product Tracking Files"
+msgstr "查看产品跟踪文件"
+
+#: dojo/templates/base.html:543
+msgid "Add Credentials"
+msgstr "添加凭据"
+
+#: dojo/templates/base.html:548
+msgid "View Credentials"
+msgstr "查看凭据"
+
+#: dojo/templates/base.html:554
+msgid "Add Tools"
+msgstr "添加工具"
+
+#: dojo/templates/base.html:559
+msgid "View Tools"
+msgstr "查看工具"
+
+#: dojo/templates/base.html:565
+msgid "Add Engagement Presets"
+msgstr "添加预设任务"
+
+#: dojo/templates/base.html:570
+msgid "View Engagement Presets"
+msgstr "查看预设任务"
+
+#: dojo/templates/base.html:576
+msgid "View History"
+msgstr "查看历史"
+
+#: dojo/templates/base.html:584
+msgid "Delete"
+msgstr "删除"
+
+#: dojo/templates/dojo/login.html:5
+msgid "Login"
+msgstr "登陆"
+

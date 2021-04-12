@@ -1,0 +1,418 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-04-12 06:21+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: dojo/templates/403.html:7
+msgid ""
+"You don't have permission to do that. Contact your administrator for "
+"additional access."
+msgstr ""
+
+#: dojo/templates/404.html:7
+msgid " Well..."
+msgstr ""
+
+#: dojo/templates/404.html:10
+msgid " ...we can't find what you need."
+msgstr ""
+
+#: dojo/templates/base.html:24
+msgid "DefectDojo"
+msgstr "de"
+
+#: dojo/templates/base.html:172
+msgid "API v1 Key"
+msgstr ""
+
+#: dojo/templates/base.html:173
+msgid "API v2 Key"
+msgstr ""
+
+#: dojo/templates/base.html:175
+msgid "API v1 Docs"
+msgstr ""
+
+#: dojo/templates/base.html:176
+msgid "API v Docs"
+msgstr ""
+
+#: dojo/templates/base.html:179 dojo/templates/base.html:349
+msgid "Questionnaires"
+msgstr ""
+
+#: dojo/templates/base.html:184
+msgid "SAML Logout"
+msgstr ""
+
+#: dojo/templates/base.html:186
+msgid "Logout"
+msgstr ""
+
+#: dojo/templates/base.html:203
+msgid "Dashboard"
+msgstr "dee"
+
+#: dojo/templates/base.html:209
+msgid "Products"
+msgstr "dddd"
+
+#: dojo/templates/base.html:213
+msgid "All Products"
+msgstr "sssssssssss"
+
+#: dojo/templates/base.html:215
+#, fuzzy
+#| msgid "All Products"
+msgid "Add Product"
+msgstr "sssssssssss"
+
+#: dojo/templates/base.html:217
+#, fuzzy
+#| msgid "All Products"
+msgid "All Product Types"
+msgstr "sssssssssss"
+
+#: dojo/templates/base.html:219
+#, fuzzy
+#| msgid "All Products"
+msgid "Add Product Type"
+msgstr "sssssssssss"
+
+#: dojo/templates/base.html:227 dojo/templates/base.html:436
+msgid "Engagements"
+msgstr ""
+
+#: dojo/templates/base.html:231
+msgid "Active Engagements"
+msgstr ""
+
+#: dojo/templates/base.html:233
+msgid "All Engagements"
+msgstr ""
+
+#: dojo/templates/base.html:236
+msgid "Test Types"
+msgstr ""
+
+#: dojo/templates/base.html:237
+msgid "Environments"
+msgstr ""
+
+#: dojo/templates/base.html:246 dojo/templates/base.html:453
+msgid "Findings"
+msgstr ""
+
+#: dojo/templates/base.html:251
+msgid "Open Findings"
+msgstr ""
+
+#: dojo/templates/base.html:254
+msgid "All Findings"
+msgstr ""
+
+#: dojo/templates/base.html:257
+msgid "Closed Findings"
+msgstr ""
+
+#: dojo/templates/base.html:260
+msgid "Risk Accepted Findings"
+msgstr ""
+
+#: dojo/templates/base.html:263
+msgid "Finding Templates"
+msgstr ""
+
+#: dojo/templates/base.html:271 dojo/templates/base.html:431
+msgid "Components"
+msgstr ""
+
+#: dojo/templates/base.html:275
+msgid "All Components"
+msgstr ""
+
+#: dojo/templates/base.html:282 dojo/templates/base.html:476
+msgid "Endpoints"
+msgstr ""
+
+#: dojo/templates/base.html:287
+msgid "All Endpoints"
+msgstr ""
+
+#: dojo/templates/base.html:291
+msgid "Vulnerable Endpoints"
+msgstr ""
+
+#: dojo/templates/base.html:300
+msgid "Reports"
+msgstr ""
+
+#: dojo/templates/base.html:306
+#, fuzzy
+#| msgid "All Products"
+msgid "All Reports"
+msgstr "sssssssssss"
+
+#: dojo/templates/base.html:308
+msgid "Report Builder "
+msgstr ""
+
+#: dojo/templates/base.html:315 dojo/templates/base.html:432
+msgid "Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:319
+#, fuzzy
+#| msgid "Dashboard"
+msgid "Metrics Dashboard"
+msgstr "dee"
+
+#: dojo/templates/base.html:320
+msgid "Critical Product Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:321
+msgid "Product Type Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:322
+msgid "Product Type Counts"
+msgstr ""
+
+#: dojo/templates/base.html:323
+msgid "Simple Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:325
+msgid "Engineer Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:326
+msgid "Security Research Metrics"
+msgstr ""
+
+#: dojo/templates/base.html:335
+msgid "Users"
+msgstr ""
+
+#: dojo/templates/base.html:343
+msgid "Calendar"
+msgstr ""
+
+#: dojo/templates/base.html:352
+msgid "All Questionnaires"
+msgstr ""
+
+#: dojo/templates/base.html:353
+msgid "All Questions"
+msgstr ""
+
+#: dojo/templates/base.html:362
+msgid "Configuration"
+msgstr ""
+
+#: dojo/templates/base.html:366
+msgid "Credential Manager"
+msgstr ""
+
+#: dojo/templates/base.html:368
+msgid "JIRA"
+msgstr ""
+
+#: dojo/templates/base.html:371
+msgid "GitHub"
+msgstr ""
+
+#: dojo/templates/base.html:373
+msgid "Tool Configuration"
+msgstr ""
+
+#: dojo/templates/base.html:374
+msgid "Tool Type"
+msgstr ""
+
+#: dojo/templates/base.html:375
+msgid "Rules Framework"
+msgstr ""
+
+#: dojo/templates/base.html:376
+msgid "Regulations"
+msgstr ""
+
+#: dojo/templates/base.html:377
+msgid "System Settings"
+msgstr ""
+
+#: dojo/templates/base.html:378
+msgid "Note Types"
+msgstr ""
+
+#: dojo/templates/base.html:379
+msgid "Google Sheets Sync"
+msgstr ""
+
+#: dojo/templates/base.html:380
+msgid "Login banner"
+msgstr ""
+
+#: dojo/templates/base.html:382
+msgid "Notifications"
+msgstr ""
+
+#: dojo/templates/base.html:390
+msgid "Collapse Menu"
+msgstr ""
+
+#: dojo/templates/base.html:430
+msgid "Overview"
+msgstr ""
+
+#: dojo/templates/base.html:439
+msgid "View Engagements"
+msgstr ""
+
+#: dojo/templates/base.html:441
+msgid "Add New Engagement"
+msgstr ""
+
+#: dojo/templates/base.html:444
+msgid "View CI/CD Engagements"
+msgstr ""
+
+#: dojo/templates/base.html:446
+msgid "Add New CI/CD Engagement"
+msgstr ""
+
+#: dojo/templates/base.html:456
+msgid "View Active Findings"
+msgstr ""
+
+#: dojo/templates/base.html:457
+msgid "View Active Verified Findings"
+msgstr ""
+
+#: dojo/templates/base.html:458
+msgid "View Critical Findings"
+msgstr ""
+
+#: dojo/templates/base.html:459
+msgid "View Findings from Last 7 Days"
+msgstr ""
+
+#: dojo/templates/base.html:461
+msgid "View Risk Accepted Findings"
+msgstr ""
+
+#: dojo/templates/base.html:462
+msgid "View All Findings"
+msgstr ""
+
+#: dojo/templates/base.html:463
+msgid "View Closed Findings"
+msgstr ""
+
+#: dojo/templates/base.html:466
+msgid "Add New Finding"
+msgstr ""
+
+#: dojo/templates/base.html:469
+msgid "Import Scan Results"
+msgstr ""
+
+#: dojo/templates/base.html:479
+msgid "View Endpoint"
+msgstr ""
+
+#: dojo/templates/base.html:480
+msgid "View Vulnerable Endpoints"
+msgstr ""
+
+#: dojo/templates/base.html:482
+msgid "Endpoint Report"
+msgstr ""
+
+#: dojo/templates/base.html:485
+msgid "Add New Endpoint"
+msgstr ""
+
+#: dojo/templates/base.html:494
+msgid "Benchmarks"
+msgstr ""
+
+#: dojo/templates/base.html:508
+msgid "Settings"
+msgstr ""
+
+#: dojo/templates/base.html:514
+msgid "Edit"
+msgstr ""
+
+#: dojo/templates/base.html:520
+msgid "Add Custom Fields"
+msgstr ""
+
+#: dojo/templates/base.html:526
+msgid "Edit Custom Fields"
+msgstr ""
+
+#: dojo/templates/base.html:532
+msgid "Add Product Tracking Files"
+msgstr ""
+
+#: dojo/templates/base.html:537
+msgid "View Product Tracking Files"
+msgstr ""
+
+#: dojo/templates/base.html:543
+msgid "Add Credentials"
+msgstr ""
+
+#: dojo/templates/base.html:548
+msgid "View Credentials"
+msgstr ""
+
+#: dojo/templates/base.html:554
+msgid "Add Tools"
+msgstr ""
+
+#: dojo/templates/base.html:559
+msgid "View Tools"
+msgstr ""
+
+#: dojo/templates/base.html:565
+msgid "Add Engagement Presets"
+msgstr ""
+
+#: dojo/templates/base.html:570
+msgid "View Engagement Presets"
+msgstr ""
+
+#: dojo/templates/base.html:576
+msgid "View History"
+msgstr ""
+
+#: dojo/templates/base.html:584
+msgid "Delete"
+msgstr ""
+
+#: dojo/templates/dojo/login.html:5
+msgid "Login"
+msgstr "laginse"
+
+#~ msgid "参与度"
+#~ msgstr "ddddddd"
