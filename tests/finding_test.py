@@ -317,9 +317,9 @@ class FindingTest(BaseTestCase):
             driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
         # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
-        # print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
+        # print("Checking for '.*ZAP Scan processed a total of 4 findings.*'")
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed, a total of 4 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed a total of 4 findings'))
 
     def test_delete_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
