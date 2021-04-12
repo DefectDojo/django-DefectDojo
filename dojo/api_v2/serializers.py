@@ -1023,7 +1023,7 @@ class ImportScanSerializer(serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm().SORTED_SCAN_TYPE_CHOICES)
+        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
                                                          default=None)
@@ -1309,7 +1309,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm().SORTED_SCAN_TYPE_CHOICES)
+        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
