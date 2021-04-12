@@ -4,6 +4,19 @@ from dojo.models import Product_Member, Product_Type_Member
 from dojo.authorization.authorization import get_roles_for_permission
 
 
+def get_authorized_users_for_product_type(users, product_type, permission):
+    if settings.FEATURE_AUTHORIZATION_V2:
+        roles = get_roles_for_permission(permission)
+        product_type_members = Product_Type_Member.objects \
+            .filter(product_type=product_type, role__in=roles) \
+            .values_list('user_id', flat=True)
+        return users.filter(Q(id__in=product_type_members) | Q(is_superuser=True))
+    else:
+        return users.filter(Q(id__in=product_type.authorized_users.all()) |
+            Q(is_superuser=True) |
+            Q(is_staff=True))
+
+
 def get_authorized_users_for_product_and_product_type(users, product, permission):
     if settings.FEATURE_AUTHORIZATION_V2:
         roles = get_roles_for_permission(permission)

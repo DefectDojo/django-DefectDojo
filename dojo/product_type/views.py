@@ -86,6 +86,7 @@ def add_product_type(request):
                                  'Product type added successfully.',
                                  extra_tags='alert-success')
             create_notification(event='product_type_added', title=product_type.name,
+                                product_type=product_type,
                                 url=reverse('view_product_type', args=(product_type.id,)))
             return HttpResponseRedirect(reverse('product_type'))
     add_breadcrumb(title="Add Product Type", top_level=False, request=request)
@@ -124,6 +125,7 @@ def delete_product_type(request, ptid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                 title='Deletion of %s' % product_type.name,
+                                no_users=True,
                                 description='The product type "%s" was deleted by %s' % (product_type.name, request.user),
                                 url=request.build_absolute_uri(reverse('product_type')),
                                 icon="exclamation-triangle")

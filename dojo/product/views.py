@@ -775,6 +775,7 @@ def new_product(request, ptid=None):
                 sonarqube_product.save()
 
             create_notification(event='product_added', title=product.name,
+                                product=product,
                                 url=reverse('view_product', args=(product.id,)))
 
             if not error:
@@ -902,6 +903,7 @@ def delete_product(request, pid):
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
+                product_type = product.prod_type
                 product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -909,6 +911,7 @@ def delete_product(request, pid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % product.name,
+                                    product_type=product_type,
                                     description='The product "%s" was deleted by %s' % (product.name, request.user),
                                     url=request.build_absolute_uri(reverse('product')),
                                     icon="exclamation-triangle")
