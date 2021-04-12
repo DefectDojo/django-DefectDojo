@@ -818,10 +818,11 @@ class Product_Type_Member(models.Model):
 
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)
+    enabled = models.BooleanField(default=True, help_text="Enables or disables scanner")
     description = models.CharField(max_length=2000, null=True)
 
     class Meta:
-        ordering = ['name']
+        ordering = ['name', 'description', 'enabled']
 
     def __str__(self):
         return self.name

@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from dojo.utils import add_breadcrumb
 from dojo.forms import ToolTypeForm
 from dojo.models import Tool_Type
@@ -52,6 +52,13 @@ def edit_tool_type(request, ttid):
                   {
                       'tform': tform,
                   })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def delete_tool_type(request, ttid):
+    conf = get_object_or_404(Tool_Type, pk=ttid)
+    conf.delete()
+    return HttpResponseRedirect(reverse('tool_type', ))
 
 
 @user_passes_test(lambda u: u.is_staff)
