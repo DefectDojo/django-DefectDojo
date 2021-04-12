@@ -23,8 +23,8 @@ Aqua
 
 JSON report format.
 
-Anchore Grype (anchore_grype)
----------------------
+Anchore Grype
+-------------
 
 Anchore Grype JSON report format generated with `-o json` option.
 
@@ -566,7 +566,7 @@ Follow below steps to setup API Import:
     instance.
 
 **NOTE**: If `https` is in use for the SonarQube than certificate should be
-trusted by DD instance. 
+trusted by DD instance.
 
 
 
@@ -661,7 +661,7 @@ Wfuzz JSON importer
 
 Import the result of Wfuzz (https://github.com/xmendez/wfuzz) if you export in JSON the result (`wfuzz  -o json -f myJSONReport.json,json ` ).
 
-The return code matching are directly put in Severity as follow(this is hardcoded in the parser actually). 
+The return code matching are directly put in Severity as follow(this is hardcoded in the parser actually).
 
 ```
 HTTP Return Code | Severity
