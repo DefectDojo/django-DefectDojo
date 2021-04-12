@@ -90,5 +90,4 @@ class TestSemgrepParser(TestCase):
         self.assertEqual("management/commands/csv_findings_export.py", finding.file_path)
         self.assertEqual(33, finding.line)
         self.assertEqual(1236, finding.cwe)
-        self.assertIsNone(finding.mitigation)
         self.assertEqual("python.lang.security.unquoted-csv-writer.unquoted-csv-writer", finding.vuln_id_from_tool)
