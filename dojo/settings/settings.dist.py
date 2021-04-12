@@ -1062,11 +1062,9 @@ TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
 
 LANGUAGES = (
     ('en', _('English')),
-    ('zh-hans', _('Simplified Chinese')),
-    ('de',_('German')),
-    ('ja',_('Japanese')),
+    ('zh-hans', _('Simplified Chinese'))
 )
 
 LOCALE_PATHS =(
-    os.path.join(BASE_DIR, 'locale'),
+    os.path.join(BASE_DIR, 'locale')
 )
