@@ -2,9 +2,12 @@
 import os
 from datetime import timedelta
 from celery.schedules import crontab
+from pathlib import Path
+from django.utils.translation import ugettext_lazy as _
 
 import environ
 root = environ.Path(__file__) - 3  # Three folders back
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # reference: https://pypi.org/project/django-environ/
 env = environ.Env(
@@ -657,9 +660,10 @@ INSTALLED_APPS = (
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 DJANGO_MIDDLEWARE_CLASSES = [
-    'django.middleware.common.CommonMiddleware',
     'dojo.middleware.DojoSytemSettingsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -1055,3 +1059,14 @@ USE_L10N = True
 
 JIRA_TEMPLATE_DIR = env('DD_JIRA_TEMPLATE_DIR')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
+
+LANGUAGES = (
+    ('en', _('English')),
+    ('zh-hans', _('Simplified Chinese')),
+    ('de',_('German')),
+    ('ja',_('Japanese')),
+)
+
+LOCALE_PATHS =(
+    os.path.join(BASE_DIR, 'locale'),
+)
