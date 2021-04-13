@@ -72,6 +72,7 @@ def delete_tool_type(request, ttid):
             extra_tags='alert-danger')
     return HttpResponseRedirect(reverse('tool_type', ))
 
+
 @user_passes_test(lambda u: u.is_staff)
 def tool_type(request):
     confs = Tool_Type.objects.all().order_by('name')
