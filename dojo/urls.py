@@ -183,6 +183,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('i18n/', include('django.conf.urls.i18n')),
     # These are the SAML2 related URLs. You can change "^saml2_auth/" regex to
     # any path you want, like "^sso_auth/", "^sso_login/", etc. (required)
     url(r'^saml2/', include('django_saml2_auth.urls')),
