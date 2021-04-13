@@ -46,4 +46,3 @@ def get_authorized_finding_groups(permission, queryset=None, user=None):
                 Q(test__engagement__product__authorized_users__in=[user]) |
                 Q(test__engagement__product__prod_type__authorized_users__in=[user]))
     return finding_groups
-
