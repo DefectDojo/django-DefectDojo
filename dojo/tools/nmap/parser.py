@@ -88,7 +88,7 @@ class NmapParser(object):
                                 severity=severity,
                                 mitigation="N/A",
                                 impact="No impact provided",
-                    )
+                                   )
                     find.unsaved_endpoints = list()
                     dupes[dupe_key] = find
 

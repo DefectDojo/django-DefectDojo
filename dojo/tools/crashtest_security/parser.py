@@ -209,7 +209,7 @@ class CrashtestSecurityXmlParser(object):
                            out_of_scope=False,
                            mitigated=None,
                            impact="No impact provided",
-            )
+                           )
             items.append(find)
 
         return items
