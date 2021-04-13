@@ -3,8 +3,6 @@ from django.core.management.base import BaseCommand
 from dojo.tools import factory
 
 
-##This just helped to create JSON fixtures
-
 class Command(BaseCommand):
     """
         Dumps json file of supported scanners
