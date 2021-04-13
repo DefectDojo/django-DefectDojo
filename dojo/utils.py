@@ -324,7 +324,7 @@ def deduplicate_uid_or_hash_code(new_finding):
         break
 
 
-def set_duplicate(new_finding, existing_finding, update_existing_finding = True):
+def set_duplicate(new_finding, existing_finding, update_existing_finding=True):
     if existing_finding.duplicate:
         logger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
         raise Exception("Existing finding is a duplicate")
@@ -340,7 +340,6 @@ def set_duplicate(new_finding, existing_finding, update_existing_finding = True)
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
-
 
     # Make sure transitive duplication is flattened
     # if A -> B and B is made a duplicate of C here, aferwards:
@@ -365,6 +364,7 @@ def is_duplicate_changed_status(new_finding, existing_finding):
             return True
     return False
 
+
 def set_existing_change_status(new_finding, existing_finding):
     if new_finding.mitigated and not existing_finding.mitigated:
         event = "marked mitigated"
@@ -386,6 +386,7 @@ def set_existing_change_status(new_finding, existing_finding):
     existing_finding.notes.create(author=existing_finding.reporter,
                                   entry="This finding has been automatically " + event + " due to a new scan import.")
     existing_finding.save()
+
 
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
