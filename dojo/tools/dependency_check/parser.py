@@ -231,7 +231,6 @@ class DependencyCheckParser(object):
             cve=cve,
             description=description,
             severity=severity,
-            numerical_severity=Finding.get_numerical_severity(severity),
             static_finding=True,
             references=reference_detail,
             component_name=component_name,

@@ -239,7 +239,6 @@ class MobSFParser(object):
                 test=test,
                 description=description,
                 severity=sev,
-                numerical_severity=Finding.get_numerical_severity(sev),
                 references=None,
                 date=find_date,
                 static_finding=True,
