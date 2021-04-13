@@ -58,7 +58,6 @@ def edit_tool_type(request, ttid):
 def delete_tool_type(request, ttid):
     tool_type = get_object_or_404(Tool_Type, id=ttid)
     tform = DeleteToolTypeForm(request.POST, instance=tool_type)
-    print(tform)
     if tform.is_valid():
         tool_type.delete()
         messages.add_message(request,
