@@ -5,8 +5,10 @@ from dojo.models import Product, Product_Member, Product_Type_Member, App_Analys
 from dojo.authorization.authorization import get_roles_for_permission, user_has_permission
 
 
-def get_authorized_products(permission):
-    user = get_current_user()
+def get_authorized_products(permission, user=None):
+
+    if user is None:
+        user = get_current_user()
 
     if user is None:
         return Product.objects.none()
@@ -43,7 +45,7 @@ def get_authorized_products(permission):
     return products
 
 
-def get_authorized_product_members_for_product(product, permission):
+def get_authorized_members_for_product(product, permission):
     user = get_current_user()
 
     if user.is_superuser or user_has_permission(user, product, permission):

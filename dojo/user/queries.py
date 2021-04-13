@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db.models import Q
 from dojo.models import Product_Member, Product_Type_Member
@@ -18,6 +19,10 @@ def get_authorized_users_for_product_type(users, product_type, permission):
 
 
 def get_authorized_users_for_product_and_product_type(users, product, permission):
+    if users is None:
+        User = get_user_model()
+        users = User.objects.all()
+
     if settings.FEATURE_AUTHORIZATION_V2:
         roles = get_roles_for_permission(permission)
         product_members = Product_Member.objects \

@@ -1860,9 +1860,6 @@ def finding_bulk_update_all(request, pid=None):
                     if not request.user.is_staff and not settings.AUTHORIZED_USERS_ALLOW_CHANGE and not settings.AUTHORIZED_USERS_ALLOW_STAFF:
                         raise PermissionDenied
                 else:
-                    print('---------------------------------------------')
-                    print('PID: ', pid)
-                    print('---------------------------------------------')
                     if pid is None:
                         if not request.user.is_staff:
                             raise PermissionDenied

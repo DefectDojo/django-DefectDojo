@@ -32,7 +32,7 @@ def get_authorized_product_types(permission):
     return product_types
 
 
-def get_authorized_product_type_members_for_product_type(product_type, permission):
+def get_authorized_members_for_product_type(product_type, permission):
     user = get_current_user()
 
     if user.is_superuser or user_has_permission(user, product_type, permission):
