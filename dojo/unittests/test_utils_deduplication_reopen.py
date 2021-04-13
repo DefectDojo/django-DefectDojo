@@ -134,6 +134,7 @@ class TestDuplicationReopen(TestCase):
 
         # Newly imported, active finding.
         self.finding_b.active = True
+        self.finding_b.verified = True
         self.finding_b.duplicate = False
         self.finding_b.duplicate_finding = None
 
