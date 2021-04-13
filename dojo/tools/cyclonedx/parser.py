@@ -32,17 +32,17 @@ class CycloneDXParser(object):
         if not namespace.startswith('{http://cyclonedx.org/schema/bom/'):
             raise ValueError(f"This doesn't seem to be a valid CyclonDX BOM XML file. Namespace={namespace}")
         ns = {
+            "b": namespace.replace('{', '').replace('}', ''),  # we accept whatever the version
             "v": "http://cyclonedx.org/schema/ext/vulnerability/1.0",
         }
         # get report date
         report_date = None
-        report_date_raw = root.findtext(f"{namespace}metadata/{namespace}timestamp")
+        report_date_raw = root.findtext("b:metadata/b:timestamp", namespaces=ns)
         if report_date_raw:
             report_date = dateutil.parser.parse(report_date_raw)
         bom_refs = {}
         dupes = {}
-        for component in root.findall(f"{namespace}components/{namespace}component"):
-            print('comp')
+        for component in root.findall("b:components/b:component", namespaces=ns):
             component_name = component.findtext(f"{namespace}name")
             component_version = component.findtext(f"{namespace}version")
             # add finding for the component
@@ -58,7 +58,7 @@ class CycloneDXParser(object):
             ):
                 self.manage_vulnerability(
                     dupes,
-                    vulnerability, namespace,
+                    vulnerability, ns,
                     bom_refs,
                     report_date=report_date,
                     component_name=component_name,
@@ -68,7 +68,7 @@ class CycloneDXParser(object):
         for vulnerability in root.findall(
             "v:vulnerabilities/v:vulnerability", namespaces=ns
         ):
-            self.manage_vulnerability(dupes, vulnerability, namespace, bom_refs, report_date)
+            self.manage_vulnerability(dupes, vulnerability, ns, bom_refs, report_date)
 
         return list(dupes.values())
 
@@ -79,10 +79,10 @@ class CycloneDXParser(object):
                 cwes.append(int(cwe.text))
         return cwes
 
-    def _get_cvssv3(self, node):
-        for rating in node.findall("v:ratings/v:rating", namespaces=self.ns):
-            if "CVSSv3" == rating.findtext("v:method", namespaces=self.ns):
-                raw_vector = rating.findtext("v:vector", namespaces=self.ns)
+    def _get_cvssv3(self, node, namespaces):
+        for rating in node.findall("v:ratings/v:rating", namespaces=namespaces):
+            if "CVSSv3" == rating.findtext("v:method", namespaces=namespaces):
+                raw_vector = rating.findtext("v:vector", namespaces=namespaces)
                 if raw_vector is None or "" == raw_vector:
                     return None
                 if not raw_vector.startswith("CVSS:3"):
@@ -95,22 +95,18 @@ class CycloneDXParser(object):
         return None
 
     def manage_vulnerability(
-        self, dupes, vulnerability, namespace, bom_refs, report_date, component_name=None, component_version=None
+        self, dupes, vulnerability, ns, bom_refs, report_date, component_name=None, component_version=None
     ):
-        ns = {
-            "v": "http://cyclonedx.org/schema/ext/vulnerability/1.0",
-        }
         ref = vulnerability.attrib["ref"]
-        cve = vulnerability.findtext("v:id", namespaces=ns)
+        vuln_id = vulnerability.findtext("v:id", namespaces=ns)
 
-        title = cve
         severity = vulnerability.findtext(
             "v:ratings/v:rating/v:severity", namespaces=ns
         )
         description = "\n".join(
             [
                 f"**Ref:** {ref}",
-                f"**Id:** {cve}",
+                f"**Id:** {vuln_id}",
                 f"**Severity:** {severity}",
             ]
         )
@@ -130,43 +126,54 @@ class CycloneDXParser(object):
         for adv in vulnerability.findall("v:advisories/v:advisory", namespaces=ns):
             references += f"{adv.text}\n"
 
-        dupe_key = "vulnerability" + ref
+        finding = Finding(
+                title=vuln_id,
+                description=description,
+                severity=severity,
+                numerical_severity=Finding.get_numerical_severity(severity),
+                references=references,
+                component_name=component_name,
+                component_version=component_version,
+                unique_id_from_tool=vuln_id,
+                nb_occurences=1,
+        )
+        if report_date:
+            finding.date = report_date
+
+        # manage if the ID is a CVE
+        if re.fullmatch("CVE-[0-9]+-[0-9]+", vuln_id):
+            finding.cve = vuln_id
+
+        # manage CVSS
+        cvssv3 = self._get_cvssv3(vulnerability, ns)
+        if cvssv3:
+            cvssv3.compute_base_score()
+            finding.cvssv3 = cvssv3.clean_vector()
+            finding.cvssv3_score = float(cvssv3.base_score)
+
+        # if there is some CWE
+        cwes = self.get_cwes(vulnerability, ns)
+        if len(cwes) > 1:
+            # FIXME support more than one CWE
+            LOGGER.warning(
+                f"more than one CWE for a finding {cwes}. NOT supported by parser API"
+            )
+        if len(cwes) > 0:
+            finding.cwe = cwes[0]
+
+        dupe_key = hashlib.sha256("|".join(
+            [
+                "vulnerability",
+                ref,
+            ]
+        ).encode("utf-8")).hexdigest()
 
         if dupe_key in dupes:
             find = dupes[dupe_key]
             find.description += description
             find.nb_occurences += 1
         else:
-            find = Finding(
-                title=title,
-                description=description,
-                severity=severity,
-                numerical_severity=Finding.get_numerical_severity(severity),
-                references=references,
-                cve=cve,
-                component_name=component_name,
-                component_version=component_version,
-                unique_id_from_tool=cve,
-                nb_occurences=1,
-            )
-            if report_date:
-                find.date = report_date
-            # manage CVSS
-            cvssv3 = self._get_cvssv3(vulnerability)
-            if cvssv3:
-                cvssv3.compute_base_score()
-                find.cvssv3 = cvssv3.clean_vector()
-                find.cvssv3_score = float(cvssv3.base_score)
-            # if there is some CWE
-            cwes = self.get_cwes(vulnerability)
-            if len(cwes) > 1:
-                # FIXME support more than one CWE
-                LOGGER.warning(
-                    f"more than one CWE for a finding {cwes}. NOT supported by parser API"
-                )
-            if len(cwes) > 0:
-                find.cwe = cwes[0]
-            dupes[dupe_key] = find
+            dupes[dupe_key] = finding
 
     def manage_component(self, dupes, component_node, report_date, namespace):
         bom_ref = component_node.attrib.get('bom-ref')
