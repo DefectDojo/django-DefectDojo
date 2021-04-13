@@ -1879,8 +1879,14 @@ class DeleteJIRAInstanceForm(forms.ModelForm):
 class ToolTypeForm(forms.ModelForm):
     class Meta:
         model = Tool_Type
-        exclude = ['product']
         fields = ['name', 'description', 'enabled']
+
+
+class DeleteToolTypeForm(forms.ModelForm):
+
+    class Meta:
+        model = Tool_Type
+        fields = []
 
 
 class RegulationForm(forms.ModelForm):

@@ -1,6 +1,7 @@
 import unittest
 import sys
 import os
+
 from base_test_class import BaseTestCase
 
 
@@ -31,7 +32,10 @@ class RegulationTest(BaseTestCase):
 
 
     def test_delete_scanner(self):
-        pass
+        driver = self.driver
+        driver.get(self.base_url + "tool_type")
+        driver.find_element_by_xpath("/table[@id='products']/tbody/tr/td[4]/div/a[2]").click()
+
 
     def test_enable_scanner(self):
         pass
