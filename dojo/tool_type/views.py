@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.utils import add_breadcrumb
-from dojo.forms import ToolTypeForm
+from dojo.forms import ToolTypeForm, DeleteToolTypeForm
 from dojo.models import Tool_Type
 
 logger = logging.getLogger(__name__)
@@ -21,12 +21,12 @@ def new_tool_type(request):
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Tool Type Configuration Successfully Created.',
+                                 'Tool Type Successfully Created.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('tool_type', ))
     else:
         tform = ToolTypeForm()
-        add_breadcrumb(title="New Tool Type Configuration", top_level=False, request=request)
+        add_breadcrumb(title="New Tool Type", top_level=False, request=request)
     return render(request, 'dojo/new_tool_type.html',
                   {'tform': tform})
 
@@ -40,12 +40,12 @@ def edit_tool_type(request, ttid):
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Tool Type Configuration Successfully Updated.',
+                                 'Tool Type Successfully Updated.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('tool_type', ))
     else:
         tform = ToolTypeForm(instance=tool_type)
-    add_breadcrumb(title="Edit Tool Type Configuration", top_level=False, request=request)
+    add_breadcrumb(title="Edit Tool Type", top_level=False, request=request)
 
     return render(request,
                   'dojo/edit_tool_type.html',
@@ -56,10 +56,22 @@ def edit_tool_type(request, ttid):
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_tool_type(request, ttid):
-    conf = get_object_or_404(Tool_Type, pk=ttid)
-    conf.delete()
+    tool_type = get_object_or_404(Tool_Type, id=ttid)
+    tform = DeleteToolTypeForm(request.POST, instance=tool_type)
+    print(tform)
+    if tform.is_valid():
+        tool_type.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Tool Type Successfully Deleted.',
+                             extra_tags='alert-success')
+    else:
+        messages.add_message(
+            request,
+            messages.ERROR,
+            'Unable to delete tool type, please try again.',
+            extra_tags='alert-danger')
     return HttpResponseRedirect(reverse('tool_type', ))
-
 
 @user_passes_test(lambda u: u.is_staff)
 def tool_type(request):
