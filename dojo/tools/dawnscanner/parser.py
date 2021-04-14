@@ -60,7 +60,6 @@ class DawnScannerParser(object):
                     cve=cve,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
                     impact=impact,
                     references=references,

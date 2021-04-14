@@ -255,12 +255,9 @@ class NexposeParser(object):
                            description=html2text.html2text(
                                vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].strip()),
                            severity=vuln['severity'],
-                           numerical_severity=Finding.get_numerical_severity(vuln['severity']),
                            mitigation=html2text.html2text(vuln['resolution']),
                            impact=vuln['vector'],
                            test=test,
-                           active=False,
-                           verified=False,
                            false_p=False,
                            duplicate=False,
                            out_of_scope=False,

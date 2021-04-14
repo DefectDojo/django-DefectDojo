@@ -82,7 +82,6 @@ def get_item(vuln, test, check_type):
     # Checkov doesn't define severities. Sine the findings are
     # vulnerabilities, we set them to Medium
     severity = 'Medium'
-    numerical_severity = Finding.get_numerical_severity(severity)
 
     mitigation = ''
 
@@ -94,7 +93,6 @@ def get_item(vuln, test, check_type):
                       test=test,
                       description=description,
                       severity=severity,
-                      numerical_severity=numerical_severity,
                       mitigation=mitigation,
                       references=references,
                       file_path=file_path,

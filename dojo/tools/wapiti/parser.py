@@ -71,7 +71,6 @@ class WapitiParser(object):
                     title=title,
                     description=description,
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     mitigation=mitigation,
                     references=references,
                     dynamic_finding=True,

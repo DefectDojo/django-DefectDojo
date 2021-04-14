@@ -180,7 +180,6 @@ class BurpEnterpriseParser(object):
                            duplicate=False,
                            out_of_scope=False,
                            mitigated=None,
-                           numerical_severity=Finding.get_numerical_severity(details.get('Severity')),
                            static_finding=False,
                            dynamic_finding=True,
                            nb_occurences=1)
