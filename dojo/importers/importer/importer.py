@@ -66,6 +66,7 @@ class DojoDefaultImporter(object):
                 sev = 'Info'
 
             item.severity = sev
+            item.numerical_severity = Finding.get_numerical_severity(sev)
 
             if minimum_severity and (Finding.SEVERITIES[sev] >
                     Finding.SEVERITIES[minimum_severity]):
