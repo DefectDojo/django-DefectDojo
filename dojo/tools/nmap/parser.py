@@ -88,7 +88,7 @@ class NmapParser(object):
                                 severity=severity,
                                 mitigation="N/A",
                                 impact="No impact provided",
-                                numerical_severity=Finding.get_numerical_severity(severity))
+                                   )
                     find.unsaved_endpoints = list()
                     dupes[dupe_key] = find
 
@@ -140,7 +140,6 @@ class NmapParser(object):
                                     severity=severity,
                                     mitigation="N/A",
                                     impact="No impact provided",
-                                    numerical_severity=Finding.get_numerical_severity(severity),
                                     component_name=component_cpe.get_product()[0] if len(component_cpe.get_product()) > 0 else '',
                                     component_version=component_cpe.get_version()[0] if len(component_cpe.get_version()) > 0 else '',
                                    )

@@ -118,7 +118,6 @@ class ArachniParser(object):
                             mitigation=remediation,
                             references=references,
                             impact="No impact provided",
-                            numerical_severity=Finding.get_numerical_severity(severity),
                             cwe=item_node.get('cwe'),
                             vuln_id_from_tool=item_node.get('digest'),
                           )

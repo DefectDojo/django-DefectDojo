@@ -229,7 +229,10 @@ class NexposeParser(object):
 
                     find = self.findings(dupe_key, dupes, test, vuln)
 
-                    endpoint = Endpoint(host=host['name'], port=service['port'], protocol=service['name'].lower())
+                    endpoint = Endpoint(host=host['name'],
+                                        port=service['port'],
+                                        protocol=service['name'].lower() if service['name'] != "<unknown>" else None
+                                        )
                     find.unsaved_endpoints.append(endpoint)
                     find.unsaved_tags = vuln['tags']
 
@@ -251,7 +254,6 @@ class NexposeParser(object):
                            description=html2text.html2text(
                                vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].strip()),
                            severity=vuln['severity'],
-                           numerical_severity=Finding.get_numerical_severity(vuln['severity']),
                            mitigation=html2text.html2text(vuln['resolution']),
                            impact=vuln['vector'],
                            test=test,

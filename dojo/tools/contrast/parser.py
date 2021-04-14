@@ -45,7 +45,6 @@ class ContrastParser(object):
                 test=test,
                 description=description,
                 severity=severity,
-                numerical_severity=Finding.get_numerical_severity(severity),
                 dynamic_finding=True,
                 static_finding=False,
                 vuln_id_from_tool=row.get('Rule Name'),

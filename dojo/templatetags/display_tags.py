@@ -937,7 +937,7 @@ def import_settings_tag(test_import, autoescape=True):
             <b>Close Old Findings:</b> %s<br/>
             <b>Push to jira:</b> %s<br/>
             <b>Tags:</b> %s<br/>
-            <b>Endpoint:</b> %s<br/>
+            <b>Endpoints:</b> %s<br/>
         "
     </i>
     """
@@ -953,7 +953,7 @@ def import_settings_tag(test_import, autoescape=True):
                                 esc(test_import.import_settings.get('close_old_findings', None)),
                                 esc(test_import.import_settings.get('push_to_jira', None)),
                                 esc(test_import.import_settings.get('tags', None)),
-                                esc(test_import.import_settings.get('endpoint', None))))
+                                esc(test_import.import_settings.get('endpoints', test_import.import_settings.get('endpoint', None)))))
 
 
 @register.filter(needs_autoescape=True)
