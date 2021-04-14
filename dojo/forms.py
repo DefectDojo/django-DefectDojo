@@ -840,11 +840,13 @@ class AddFindingForm(forms.ModelForm):
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = (
-    'title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response',
-    'steps_to_reproduce',
-    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate',
-    'out_of_scope',
-    'risk_accepted', 'under_defect_review')
+        'title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request',
+        'response',
+        'steps_to_reproduce',
+        'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p',
+        'duplicate',
+        'out_of_scope',
+        'risk_accepted', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -904,11 +906,13 @@ class AdHocFindingForm(forms.ModelForm):
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = (
-    'title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response',
-    'steps_to_reproduce',
-    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate',
-    'out_of_scope',
-    'risk_accepted', 'under_defect_review', 'sla_start_date')
+        'title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request',
+        'response',
+        'steps_to_reproduce',
+        'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p',
+        'duplicate',
+        'out_of_scope',
+        'risk_accepted', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -1041,13 +1045,14 @@ class FindingForm(forms.ModelForm):
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}),
                                    required=False)
 
-    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    # the only reliable way without hacking internal fields to get predictable ordering is to make it explicit
     field_order = (
-    'title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation',
-    'impact',
-    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
-    'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
-    'out_of_scope', 'risk_accept', 'under_defect_review')
+        'title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description',
+        'mitigation',
+        'impact',
+        'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
+        'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+        'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
@@ -1900,7 +1905,6 @@ class DeleteBenchmarkForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
 
-
     class Meta:
         model = Benchmark_Product_Summary
         fields = []
@@ -2430,7 +2434,7 @@ class JIRAFindingForm(forms.Form):
                 if len(jira_issues) > 0:
                     raise ValidationError(
                         'JIRA issue ' + jira_issue_key_new + ' already linked to ' + reverse('view_finding', args=(
-                        jira_issues[0].finding_id,)))
+                            jira_issues[0].finding_id,)))
 
     jira_issue = forms.CharField(required=False, label="Linked JIRA Issue",
                                  validators=[validators.RegexValidator(
