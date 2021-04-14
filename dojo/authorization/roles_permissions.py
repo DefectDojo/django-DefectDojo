@@ -78,6 +78,11 @@ class Permissions(IntEnum):
     Note_Edit = 1806
     Note_Delete = 1807
 
+    Finding_Group_View = 1902
+    Finding_Group_Add = 1903
+    Finding_Group_Edit = 1906
+    Finding_Group_Delete = 1907
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -105,7 +110,13 @@ class Permissions(IntEnum):
     def get_finding_permissions(cls):
         return {Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Import_Scan_Result,
             Permissions.Finding_Delete, Permissions.Risk_Acceptance, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History}
+            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
+            .union(cls.get_finding_group_permissions)
+
+    @classmethod
+    def get_finding_group_permissions(cls):
+        return {Permissions.Finding_Group_View, Permissions.Finding_Group_Edit,
+            Permissions.Finding_Group_Delete}
 
     @classmethod
     def get_endpoint_permissions(cls):
@@ -135,6 +146,8 @@ def get_roles_with_permissions():
 
             Permissions.Finding_View,
 
+            Permissions.Finding_Group_View,
+
             Permissions.Endpoint_View,
 
             Permissions.Component_View
@@ -160,6 +173,11 @@ def get_roles_with_permissions():
             Permissions.Finding_Add,
             Permissions.Import_Scan_Result,
             Permissions.Finding_Edit,
+
+            Permissions.Finding_Group_View,
+            Permissions.Finding_Group_Add,
+            Permissions.Finding_Group_Edit,
+            Permissions.Finding_Group_Delete,
 
             Permissions.Endpoint_View,
             Permissions.Endpoint_Add,
@@ -202,6 +220,11 @@ def get_roles_with_permissions():
             Permissions.Import_Scan_Result,
             Permissions.Finding_Edit,
             Permissions.Finding_Delete,
+
+            Permissions.Finding_Group_View,
+            Permissions.Finding_Group_Add,
+            Permissions.Finding_Group_Edit,
+            Permissions.Finding_Group_Delete,
 
             Permissions.Endpoint_View,
             Permissions.Endpoint_Add,
@@ -251,6 +274,11 @@ def get_roles_with_permissions():
             Permissions.Import_Scan_Result,
             Permissions.Finding_Edit,
             Permissions.Finding_Delete,
+
+            Permissions.Finding_Group_View,
+            Permissions.Finding_Group_Add,
+            Permissions.Finding_Group_Edit,
+            Permissions.Finding_Group_Delete,
 
             Permissions.Endpoint_View,
             Permissions.Endpoint_Add,

@@ -335,7 +335,7 @@ def edit_user(request, uid):
 
         if form.is_valid() and contact_form.is_valid():
             form.save()
-            if settings.FEATURE_AUTHORIZATION_V2:
+            if not settings.FEATURE_AUTHORIZATION_V2:
                 for init_auth_prods in authed_products:
                     init_auth_prods.authorized_users.remove(user)
                     init_auth_prods.save()

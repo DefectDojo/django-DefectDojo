@@ -64,6 +64,8 @@ def create_notification(event=None, **kwargs):
         # only retrieve users which have at least one notification type enabled for this event type.
         logger.debug('creating personal notifications for event: %s', event)
 
+        # There are notification like deleting a product type that shall not be sent to users. 
+        # These notifications will have the parameter no_users=True
         if not ('no_users' in kwargs and kwargs['no_users'] is True):
             # get users with either global notifications, or a product specific noditiciation
             # and all admin/superuser, they will always be notified

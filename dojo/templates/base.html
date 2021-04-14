@@ -210,7 +210,7 @@
                                 </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
-                                    {% if request.user|feature_authorization_v2_or_user_is_staff %}
+                                    {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                         <li><a href="{% url 'engagements_all' %}">All Engagements</a></li>
                                     {% endif %}
                                     {% if request.user.is_staff %}
@@ -220,7 +220,7 @@
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user|feature_authorization_v2_or_user_is_staff %}
+                            {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <li>
                                     <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                         <i class="fa fa-bug fa-fw"></i>
@@ -324,7 +324,7 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if request.user|feature_authorization_v2_or_user_is_staff %}
+                            {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <li>
 				                    <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                         <i class="fa fa-calendar fa-fw"></i>

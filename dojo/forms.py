@@ -711,10 +711,10 @@ class EngForm(forms.ModelForm):
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
             if not settings.FEATURE_AUTHORIZATION_V2:
-                authorized_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
+                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
+                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
             else:
-                authorized_users = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
-            self.fields['lead'].queryset = User.objects.filter(id__in=authorized_users)
+                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
@@ -791,10 +791,10 @@ class TestForm(forms.ModelForm):
         if obj:
             product = get_product(obj)
             if not settings.FEATURE_AUTHORIZATION_V2:
-                authorized_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
+                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
+                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
             else:
-                authorized_users = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
-            self.fields['lead'].queryset = User.objects.filter(id__in=authorized_users)
+                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
