@@ -99,9 +99,6 @@ class IbmAppParser(object):
                                           cve=cve,
                                           description=issue_description,
                                           severity=severity,
-                                          numerical_severity=Finding.get_numerical_severity(
-                                              severity
-                                          ),
                                           mitigation=recommendation_data,
                                           impact=impact,
                                           references=ref_link,

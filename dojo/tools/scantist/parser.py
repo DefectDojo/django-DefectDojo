@@ -66,7 +66,6 @@ class ScantistParser(object):
                 cve=cve,
                 cwe=cwe,
                 mitigation=mitigation,
-                numerical_severity=Finding.get_numerical_severity(severity),
                 references=vuln.get('references'),
                 file_path=file_path,
                 component_name=component_name,

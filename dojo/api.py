@@ -1388,6 +1388,7 @@ class ImportScanResource(MultipartResource, Resource):
                     sev = 'Info'
 
                 item.severity = sev
+                item.numerical_severity = Finding.get_numerical_severity(sev)
 
                 if Finding.SEVERITIES[sev] > Finding.SEVERITIES[bundle.data['minimum_severity']]:
                     continue

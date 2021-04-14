@@ -63,7 +63,6 @@ class BrakemanParser(object):
                     test=test,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     impact=impact,
                     references=references,
                     file_path=item['file'],

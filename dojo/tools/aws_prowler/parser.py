@@ -59,7 +59,6 @@ class AWSProwlerParser(object):
                                test=test,
                                description="**AWS Account:** " + str(account) + "\n**Control:** " + title_text + "\n**CIS Control:** " + str(title_id) + ", " + level + "\n\n" + description,
                                severity=sev,
-                               numerical_severity=Finding.get_numerical_severity(sev),
                                references=None,
                                date=find_date,
                                dynamic_finding=True,

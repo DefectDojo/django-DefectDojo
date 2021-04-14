@@ -24,7 +24,6 @@ class SemgrepParser(object):
                 test=test,
                 title=item["check_id"],
                 severity=self.convert_severity(item["extra"]["severity"]),
-                numerical_severity=Finding.get_numerical_severity(self.convert_severity(item["extra"]["severity"])),
                 description=item["extra"]["message"],
                 file_path=item['path'],
                 line=item["start"]["line"],

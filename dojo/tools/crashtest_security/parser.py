@@ -83,7 +83,6 @@ class CrashtestSecurityJsonParser(object):
             out_of_scope=False,
             mitigated=None,
             impact=impact,
-            numerical_severity=Finding.get_numerical_severity(severity),
         )
 
     def generate_cve_finding(self, cve_finding, test):
@@ -112,7 +111,6 @@ class CrashtestSecurityJsonParser(object):
             out_of_scope=False,
             mitigated=None,
             impact="No impact provided.",
-            numerical_severity=Finding.get_numerical_severity(severity),
         )
 
     def get_severity(self, cvss_base_score):
@@ -211,7 +209,7 @@ class CrashtestSecurityXmlParser(object):
                            out_of_scope=False,
                            mitigated=None,
                            impact="No impact provided",
-                           numerical_severity=Finding.get_numerical_severity(severity))
+                           )
             items.append(find)
 
         return items
