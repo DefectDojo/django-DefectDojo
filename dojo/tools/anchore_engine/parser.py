@@ -76,7 +76,6 @@ class AnchoreEngineParser(object):
                     cvssv3_score=cvssv3_base_score,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
                     references=references,
                     file_path=item["package_path"],

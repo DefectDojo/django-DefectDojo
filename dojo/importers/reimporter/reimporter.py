@@ -43,10 +43,11 @@ class DojoDefaultReImporter(object):
         deduplicationLogger.debug('Algorithm used for matching new findings to existing findings: %s', deduplication_algorithm)
         for item in items:
             sev = item.severity
-
             if sev == 'Information' or sev == 'Informational':
                 sev = 'Info'
-                item.severity = sev
+
+            item.severity = sev
+            item.numerical_severity = Finding.get_numerical_severity(sev)
 
             if (Finding.SEVERITIES[sev] >
                     Finding.SEVERITIES[minimum_severity]):
