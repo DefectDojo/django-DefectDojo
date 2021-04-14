@@ -52,7 +52,6 @@ class WFuzzParser(object):
                     title=f"Found {url.to_text()}",
                     test=test,
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     description=description,
                     mitigation="N/A",
                     static_finding=False,

@@ -1,4 +1,5 @@
 # #  tests
+from dojo.importers.utils import construct_imported_message
 import logging
 import operator
 import json
@@ -12,7 +13,7 @@ from django.contrib import messages
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, QuerySet, Count
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -24,25 +25,25 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
-from dojo.models import Finding, IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, Test, Notes, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Test_Import_Finding_Action
-# IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING, IMPORT_REACTIVATED_FINDING, IMPORT_UPDATED_FINDING, \
-# IMPORT_ACTIONS
-from dojo.tools.factory import import_parser_factory, get_choices
-from dojo.utils import add_error_message_to_response, add_field_errors_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, message, process_notifications, get_system_setting, \
-    Product_Tab, max_safe, is_scan_file_too_large, get_words_for_field
+from dojo.models import Finding, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import
+
+from dojo.tools.factory import get_choices
+from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
+    Product_Tab, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
 import dojo.jira_link.helper as jira_helper
 import dojo.finding.helper as finding_helper
 from django.views.decorators.vary import vary_on_cookie
-from django.core.exceptions import MultipleObjectsReturned
 from django.views.decorators.debug import sensitive_variables
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.test.queries import get_authorized_tests
+from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
+
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger('dojo')
@@ -677,12 +678,8 @@ def re_import_scan_results(request, tid):
         if form.is_valid() and (jform is None or jform.is_valid()):
             scan_date = form.cleaned_data['scan_date']
 
-            scan_date_time = datetime.combine(scan_date, timezone.now().time())
-            if settings.USE_TZ:
-                scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
-
-            min_sev = form.cleaned_data['minimum_severity']
-            file = request.FILES.get('file', None)
+            minimum_severity = form.cleaned_data['minimum_severity']
+            scan = request.FILES.get('file', None)
             active = form.cleaned_data['active']
             verified = form.cleaned_data['verified']
             tags = form.cleaned_data['tags']
@@ -691,328 +688,44 @@ def re_import_scan_results(request, tid):
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
 
+            endpoints_to_add = None  # not available on reimport UI
+
             close_old_findings = form.cleaned_data.get('close_old_findings', True)
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
             test.version = version
-            if file and is_scan_file_too_large(file):
+            if scan and is_scan_file_too_large(scan):
                 messages.add_message(request,
                                      messages.ERROR,
                                      "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
                                      extra_tags='alert-danger')
                 return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
 
+            push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
+            error = False
+            finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = 0, 0, 0, 0, 0
+            reimporter = ReImporter()
             try:
-                parser = import_parser_factory(file, test, active, verified, scan_type=scan_type)
-                parser_findings = parser.get_findings(file, test)
-            except ValueError:
-                raise Http404()
+                test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
+                    reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
+                                                tags=None, minimum_severity=minimum_severity,
+                                                endpoints_to_add=endpoints_to_add, scan_date=scan_date,
+                                                version=version, branch_tag=branch_tag, build_id=build_id,
+                                                commit_hash=commit_hash, push_to_jira=push_to_jira,
+                                                close_old_findings=close_old_findings)
             except Exception as e:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     "An error has occurred in the parser, please see error "
-                                     "log for details.",
-                                     extra_tags='alert-danger')
-                parse_logger.exception(e)
-                parse_logger.error("Error in parser: {}".format(str(e)))
-                return HttpResponseRedirect(reverse('re_import_scan_results', args=(test.id,)))
+                # exceptions are already logged by the importer
+                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+                error = True
 
-            try:
-                items = parser_findings
-                original_items = list(test.finding_set.all())
-                new_items = []
-                mitigated_count = 0
-                finding_count = 0
-                finding_added_count = 0
-                reactivated_count = 0
-                reactivated_items = []
-                unchanged_count = 0
-                unchanged_items = []
+            if not error:
+                message = construct_imported_message(scan_type, finding_count, new_finding_count=new_finding_count,
+                                                        closed_finding_count=closed_finding_count,
+                                                        reactivated_finding_count=reactivated_finding_count,
+                                                        untouched_finding_count=untouched_finding_count)
+                add_success_message_to_response(message)
 
-                # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
-                # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
-                push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
-
-                logger.debug('starting reimport of %i items.', len(items))
-                from dojo.importers.reimport.utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
-                deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
-
-                i = 0
-                logger.debug('STEP 1: looping over findings from the reimported report and trying to match them to existing findings')
-                deduplicationLogger.debug('Algorithm used for matching new findings to existing findings: ' + deduplication_algorithm)
-                for item in items:
-                    sev = item.severity
-                    if sev == 'Information' or sev == 'Informational':
-                        sev = 'Info'
-                        item.severity = sev
-
-                    # existing findings may be from before we had component_name/version fields
-                    component_name = item.component_name if hasattr(item, 'component_name') else None
-                    component_version = item.component_version if hasattr(item, 'component_version') else None
-
-                    # If it doesn't clear minimum severity, move on
-                    if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
-                        continue
-
-                    item.hash_code = item.compute_hash_code()
-                    deduplicationLogger.debug("new finding's hash_code: %s", item.hash_code)
-
-                    findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type)
-
-                    if findings:
-                        finding = findings[0]
-                        if finding.false_p or finding.out_of_scope or finding.risk_accepted:
-                            logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
-                        elif finding.mitigated or finding.is_Mitigated:
-                            logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                            # it was once fixed, but now back
-                            finding.mitigated = None
-                            finding.is_Mitigated = False
-                            finding.mitigated_by = None
-                            finding.active = True
-                            finding.verified = verified
-
-                            # existing findings may be from before we had component_name/version fields
-                            finding.component_name = finding.component_name if finding.component_name else component_name
-                            finding.component_version = finding.component_version if finding.component_version else component_version
-
-                            # don't run dedupe when reactivating
-                            finding.save(dedupe_option=False)
-                            note = Notes(
-                                entry="Re-activated by %s re-upload." % scan_type,
-                                author=request.user)
-                            note.save()
-                            finding.notes.add(note)
-
-                            endpoint_status = finding.endpoint_status.all()
-                            for status in endpoint_status:
-                                status.mitigated_by = None
-                                status.mitigated_time = None
-                                status.mitigated = False
-                                status.last_modified = timezone.now()
-                                status.save()
-
-                            reactivated_items.append(finding)
-                            reactivated_count += 1
-                        else:
-                            # existing findings may be from before we had component_name/version fields
-                            logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                            if not finding.component_name or not finding.component_version:
-                                finding.component_name = finding.component_name if finding.component_name else component_name
-                                finding.component_version = finding.component_version if finding.component_version else component_version
-                                finding.save(dedupe_option=False)
-                            unchanged_items.append(finding)
-                            unchanged_count += 1
-                        if finding.dynamic_finding:
-                            logger.debug("Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints")
-                            update_endpoint_status(finding, item, request.user)
-                    else:
-                        item.test = test
-                        item.reporter = request.user
-                        item.last_reviewed = timezone.now()
-                        item.last_reviewed_by = request.user
-                        item.verified = verified
-                        item.active = active
-
-                        # Save it. Don't dedupe before endpoints are added.
-                        item.save(dedupe_option=False)
-                        logger.debug('%i: reimport creating new finding as no existing finding match: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
-                        finding_added_count += 1
-                        # Add it to the new items
-                        new_items.append(item)
-                        finding = item
-
-                        if hasattr(item, 'unsaved_req_resp') and len(item.unsaved_req_resp) > 0:
-                            for req_resp in item.unsaved_req_resp:
-                                burp_rr = BurpRawRequestResponse(
-                                    finding=item,
-                                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
-                                )
-                                burp_rr.clean()
-                                burp_rr.save()
-
-                        if item.unsaved_request is not None and item.unsaved_response is not None:
-                            burp_rr = BurpRawRequestResponse(finding=finding,
-                                                             burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
-                                                             burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
-                                                             )
-                            burp_rr.clean()
-                            burp_rr.save()
-
-                    if finding:
-                        finding_count += 1
-                        for endpoint in item.unsaved_endpoints:
-                            try:
-                                ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
-                                                                            host=endpoint.host,
-                                                                            path=endpoint.path,
-                                                                            query=endpoint.query,
-                                                                            fragment=endpoint.fragment,
-                                                                            product=test.engagement.product)
-                            except (MultipleObjectsReturned):
-                                pass
-                            try:
-                                eps, created = Endpoint_Status.objects.get_or_create(
-                                    finding=finding,
-                                    endpoint=ep)
-                            except (MultipleObjectsReturned):
-                                pass
-
-                            ep.endpoint_status.add(eps)
-                            finding.endpoints.add(ep)
-                            finding.endpoint_status.add(eps)
-
-                        for endpoint in form.cleaned_data['endpoints']:
-                            try:
-                                ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
-                                                                            host=endpoint.host,
-                                                                            path=endpoint.path,
-                                                                            query=endpoint.query,
-                                                                            fragment=endpoint.fragment,
-                                                                            product=test.engagement.product)
-                            except (MultipleObjectsReturned):
-                                pass
-                            try:
-                                eps, created = Endpoint_Status.objects.get_or_create(
-                                    finding=finding,
-                                    endpoint=ep)
-                            except (MultipleObjectsReturned):
-                                pass
-
-                            ep.endpoint_status.add(eps)
-                            finding.endpoints.add(ep)
-                            finding.endpoint_status.add(eps)
-
-                        if item.unsaved_tags:
-                            finding.tags = item.unsaved_tags
-
-                    # Save it. This may be the second time we save it in this function.
-                    finding.save(push_to_jira=push_to_jira)
-                    i += 1
-                # calculate the difference
-                to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
-                mitigated_findings = []
-                if close_old_findings:
-                    logger.debug('STEP 2: Mitigating existing findings that are not present anymore in the report')
-                    for finding in to_mitigate:
-                        # finding = Finding.objects.get(id=finding_id)
-                        if not finding.mitigated or not finding.is_Mitigated:
-                            logger.debug('mitigating finding: %i:%s', finding.id, finding)
-                            finding.mitigated = scan_date_time
-                            finding.is_Mitigated = True
-                            finding.mitigated_by = request.user
-                            finding.active = False
-
-                            # if we're mitigating a finding, we don't want to run dedupe
-                            # finding.save(push_to_jira=push_to_jira)
-                            finding.save(push_to_jira=push_to_jira, dedupe_option=False)
-                            note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                                        author=request.user)
-                            note.save()
-                            finding.notes.add(note)
-                            mitigated_findings.append(finding)
-                            mitigated_count += 1
-
-                            endpoint_status = finding.endpoint_status.all()
-                            for status in endpoint_status:
-                                status.mitigated_by = request.user
-                                status.mitigated_time = timezone.now()
-                                status.mitigated = True
-                                status.last_modified = timezone.now()
-                                status.save()
-
-                untouched = set(unchanged_items) - set(to_mitigate)
-
-                test.updated = max_safe([scan_date_time, test.updated])
-                test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
-
-                if version:
-                    test.version = version
-
-                if branch_tag:
-                    test.branch_tag = branch_tag
-
-                if build_id:
-                    test.build_id = build_id
-
-                if branch_tag:
-                    test.commit_hash = commit_hash
-
-                test.save()
-                test.engagement.save()
-
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     '%s processed, a total of ' % scan_type + message(finding_count, 'finding',
-                                                                                       'processed'),
-                                     extra_tags='alert-success')
-                if finding_added_count > 0:
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A total of ' + message(finding_added_count, 'finding',
-                                                                 'added') + ', that are new to scan.',
-                                         extra_tags='alert-success')
-                if reactivated_count > 0:
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A total of ' + message(reactivated_count, 'finding',
-                                                                 'reactivated') + ', that are back in scan results.',
-                                         extra_tags='alert-success')
-                if mitigated_count > 0:
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A total of ' + message(mitigated_count, 'finding',
-                                                                 'mitigated') + '. Please manually verify each one.',
-                                         extra_tags='alert-success')
-
-                # create_notification(event='scan_added', title=str(finding_count) + " findings for " + test.engagement.product.name, finding_count=finding_count, test=test, engagement=test.engagement, url=reverse('view_test', args=(test.id,)))
-
-                if settings.TRACK_IMPORT_HISTORY:
-                    import_settings = {}  # json field
-                    import_settings['active'] = active
-                    import_settings['verified'] = verified
-                    import_settings['minimum_severity'] = min_sev
-                    import_settings['close_old_findings'] = close_old_findings
-                    import_settings['push_to_jira'] = push_to_jira
-                    # tags=tags TODO no tags field in api for reimport it seems
-                    import_settings['endpoint'] = ','.join(form.cleaned_data['endpoints'])
-
-                    test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.REIMPORT_TYPE)
-                    test_import.save()
-
-                    test_import_finding_action_list = []
-                    for finding in mitigated_findings:
-                        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
-                    for finding in new_items:
-                        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
-                    for finding in reactivated_items:
-                        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING))
-
-                    Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
-
-                updated_count = mitigated_count + reactivated_count + len(new_items)
-                if updated_count > 0:
-                    # new_items = original_items
-                    title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-                    create_notification(event='scan_added', title=title, findings_new=new_items, findings_mitigated=mitigated_findings, findings_reactivated=reactivated_items,
-                                        finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=untouched,
-                                        url=reverse('view_test', args=(test.id,)))
-                else:
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'No findings were added/updated/closed/reactivated as the findings in Defect Dojo are identical to those in the uploaded report.',
-                                         extra_tags='alert-success')
-
-                return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
-            except SyntaxError:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     'There appears to be an error in the XML report, please check and try again.',
-                                     extra_tags='alert-danger')
+            return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
 
     product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)

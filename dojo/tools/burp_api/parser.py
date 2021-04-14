@@ -55,7 +55,6 @@ class BurpApiParser(object):
                 finding = Finding(
                     title=title,
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     description=description_formated,
                     mitigation="No mitigation provided",
                     references="No references provided",

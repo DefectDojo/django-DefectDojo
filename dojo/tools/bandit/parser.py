@@ -42,7 +42,6 @@ class BanditParser(object):
                 test=test,
                 description=findingdetail,
                 severity=sev,
-                numerical_severity=Finding.get_numerical_severity(sev),
                 file_path=item["filename"],
                 line=item["line_number"],
                 date=find_date,

@@ -2,7 +2,6 @@
 import logging
 from datetime import datetime
 import operator
-import base64
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
@@ -16,7 +15,6 @@ from django.utils import timezone
 from time import strftime
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.core.exceptions import MultipleObjectsReturned
 
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
@@ -26,13 +24,13 @@ from dojo.forms import CheckForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
 
-from dojo.models import Finding, IMPORT_CREATED_FINDING, Product, Engagement, Test, \
-    Check_List, Test_Import, Test_Import_Finding_Action, Test_Type, Notes, \
-    Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
-from dojo.tools.factory import import_parser_factory, get_choices
-from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
+from dojo.models import Finding, Product, Engagement, Test, \
+    Check_List, Test_Import, Notes, \
+    Risk_Acceptance, Development_Environment, Endpoint, \
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type
+from dojo.tools.factory import get_choices
+from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
+    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
     get_system_setting, redirect_to_return_url_or_else, get_return_url
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
@@ -48,10 +46,11 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.product.queries import get_authorized_products
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.importers.importer.importer import DojoDefaultImporter as Importer
+import dojo.notifications.helper as notifications_helper
 
 
 logger = logging.getLogger(__name__)
-parse_logger = logging.getLogger('dojo')
 
 
 @cache_page(60 * 5)  # cache for 5 minutes
@@ -472,12 +471,7 @@ def add_tests(request, eid):
                 'Test added successfully.',
                 extra_tags='alert-success')
 
-            create_notification(
-                event='test_added',
-                title=new_test.test_type.name + " for " + eng.product.name,
-                test=new_test,
-                engagement=eng,
-                url=reverse('view_engagement', args=(eng.id, )))
+            notifications_helper.notify_test_created(new_test)
 
             if '_Add Another Test' in request.POST:
                 return HttpResponseRedirect(
@@ -545,15 +539,38 @@ def import_scan_results(request, eid=None, pid=None):
             logger.debug('jform errors: %s', jform.errors)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
-            # Allows for a test to be imported with an engagement created on the fly
+            scan = request.FILES.get('file', None)
+            scan_date = form.cleaned_data['scan_date']
+            minimum_severity = form.cleaned_data['minimum_severity']
+            active = form.cleaned_data['active']
+            verified = form.cleaned_data['verified']
+            scan_type = request.POST['scan_type']
+            tags = form.cleaned_data['tags']
             version = form.cleaned_data['version']
             branch_tag = form.cleaned_data.get('branch_tag', None)
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
+            close_old_findings = form.cleaned_data.get('close_old_findings', None)
+            # Will save in the provided environment or in the `Development` one if absent
+            environment_id = request.POST.get('environment', 'Development')
+            environment = Development_Environment.objects.get(id=environment_id)
 
+            # TODO move to form validation?
+            if not any(scan_type in code
+                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
+                raise Http404()
+
+            # TODO move to form validation?
+            if scan and is_scan_file_too_large(scan):
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
+
+            # Allows for a test to be imported with an engagement created on the fly
             if engagement is None:
                 engagement = Engagement()
-                # product = get_object_or_404(Product, id=pid)
                 engagement.name = "AdHoc Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
                 engagement.threat_model = False
                 engagement.api_test = False
@@ -569,45 +586,32 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.build_id = build_id
                 engagement.commit_hash = commit_hash
                 engagement.save()
-            file = request.FILES.get('file', None)
-            scan_date = form.cleaned_data['scan_date']
-            min_sev = form.cleaned_data['minimum_severity']
-            active = form.cleaned_data['active']
-            verified = form.cleaned_data['verified']
-            scan_type = request.POST['scan_type']
-            tags = form.cleaned_data['tags']
 
-            if not any(scan_type in code
-                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
-                raise Http404()
-            if file and is_scan_file_too_large(file):
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
-                                     extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
+            # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+            # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
+            push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
+            error = False
 
-            tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
+            try:
+                importer = Importer()
+                test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
+                            minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
+                            version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
+                            close_old_findings=close_old_findings)
 
-            # Will save in the provided environment or in the `Development` one if absent
-            environment_id = request.POST.get('environment', 'Development')
-            environment = Development_Environment.objects.get(id=environment_id)
+                message = scan_type + '%s processed a total of %s findings' % (scan_type, finding_count)
 
-            t = Test(
-                engagement=engagement,
-                test_type=tt,
-                target_start=scan_date,
-                target_end=scan_date,
-                environment=environment,
-                percent_complete=100,
-                version=version,
-                branch_tag=branch_tag,
-                build_id=build_id,
-                commit_hash=commit_hash,
-                tags=tags)
-            t.lead = user
-            t.full_clean()
-            t.save()
+                if close_old_findings:
+                    message = message + ' and closed %d findings' % (closed_finding_count)
+
+                message = message + "."
+
+                add_success_message_to_response(message)
+
+            except Exception as e:
+                # exceptions are already logged by the importer
+                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+                error = True
 
             # Save the credential to the test
             if cred_form.is_valid():
@@ -618,176 +622,14 @@ def import_scan_results(request, eid=None, pid=None):
                         engagement=eid).first()
 
                     new_f = cred_form.save(commit=False)
-                    new_f.test = t
+                    new_f.test = test
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            try:
-                parser = import_parser_factory(file, t, active, verified, scan_type)
-                parser_findings = parser.get_findings(file, t)
-            except Exception as e:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     "An error has occurred in the parser, please see error "
-                                     "log for details.",
-                                     extra_tags='alert-danger')
-                parse_logger.exception(e)
-                parse_logger.error("Error in parser: {}".format(str(e)))
-                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id,)))
-
-            try:
-                # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
-                # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
-                push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
-
-                items = parser_findings
-                logger.debug('starting reimport of %i items.', len(items))
-                i = 0
-                new_findings = []
-                for item in items:
-                    sev = item.severity
-                    if sev == 'Information' or sev == 'Informational':
-                        sev = 'Info'
-
-                    item.severity = sev
-
-                    if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
-                        continue
-
-                    item.test = t
-                    item.reporter = user
-                    item.last_reviewed = timezone.now()
-                    item.last_reviewed_by = user
-
-                    # Only set active/verified flags if they were NOT set by default value(True)
-                    if item.active:
-                        item.active = active
-                    if item.verified:
-                        item.verified = verified
-
-                    item.save(dedupe_option=False, false_history=True)
-                    logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
-
-                    if hasattr(item, 'unsaved_req_resp') and len(
-                            item.unsaved_req_resp) > 0:
-                        for req_resp in item.unsaved_req_resp:
-                            burp_rr = BurpRawRequestResponse(
-                                finding=item,
-                                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
-                            )
-                            burp_rr.clean()
-                            burp_rr.save()
-
-                    if item.unsaved_request is not None and item.unsaved_response is not None:
-                        burp_rr = BurpRawRequestResponse(
-                            finding=item,
-                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
-                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
-                        )
-                        burp_rr.clean()
-                        burp_rr.save()
-
-                    for endpoint in item.unsaved_endpoints:
-                        try:
-                            ep, created = Endpoint.objects.get_or_create(
-                                protocol=endpoint.protocol,
-                                host=endpoint.host,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=t.engagement.product)
-                        except (MultipleObjectsReturned):
-                            pass
-                        try:
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=item,
-                                endpoint=ep)
-                        except (MultipleObjectsReturned):
-                            pass
-
-                        ep.endpoint_status.add(eps)
-                        item.endpoints.add(ep)
-                        item.endpoint_status.add(eps)
-
-                    for endpoint in form.cleaned_data['endpoints']:
-                        try:
-                            ep, created = Endpoint.objects.get_or_create(
-                                protocol=endpoint.protocol,
-                                host=endpoint.host,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=t.engagement.product)
-                        except (MultipleObjectsReturned):
-                            pass
-                        try:
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=item,
-                                endpoint=ep)
-                        except (MultipleObjectsReturned):
-                            pass
-
-                        ep.endpoint_status.add(eps)
-                        item.endpoints.add(ep)
-                        item.endpoint_status.add(eps)
-
-                    if item.unsaved_tags:
-                        item.tags = item.unsaved_tags
-
-                    item.save(false_history=True, push_to_jira=push_to_jira)
-                    new_findings.append(item)
-
-                    finding_count += 1
-                    i += 1
-
-                if settings.TRACK_IMPORT_HISTORY:
-                    import_settings = {}  # json field
-                    import_settings['active'] = active
-                    import_settings['verified'] = verified
-                    import_settings['minimum_severity'] = min_sev
-                    import_settings['close_old_findings'] = None  # not implemented via UI
-                    import_settings['push_to_jira'] = push_to_jira
-                    import_settings['tags'] = tags
-                    # if endpoint_to_add:    # not implemented via UI
-                    #     import_settings['endpoint'] = endpoint_to_add
-
-                    test_import = Test_Import(test=t, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.IMPORT_TYPE)
-                    test_import.save()
-
-                    test_import_finding_action_list = []
-                    # for finding in old_findings:  # not implemented via UI
-                    #     logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                    #     test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
-                    for finding in new_findings:
-                        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
-
-                    Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
-
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    scan_type + ' processed, a total of ' + message(
-                        finding_count, 'finding', 'processed'),
-                    extra_tags='alert-success')
-
-                create_notification(
-                    event='scan_added',
-                    title=str(finding_count) + " findings for " + engagement.product.name,
-                    finding_count=finding_count,
-                    test=t,
-                    engagement=engagement,
-                    url=reverse('view_test', args=(t.id, )))
-
+            if not error:
                 return HttpResponseRedirect(
-                    reverse('view_test', args=(t.id, )))
-            except SyntaxError:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    'There appears to be an error in the XML report, please check and try again.',
-                    extra_tags='alert-danger')
+                    reverse('view_test', args=(test.id, )))
+
     prod_id = None
     custom_breadcrumb = None
     title = "Import Scan Results"

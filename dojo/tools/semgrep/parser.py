@@ -25,7 +25,6 @@ class SemgrepParser(object):
             findingItem = Finding(
                 title=semgrep_result.title,
                 severity=semgrep_result.severity,
-                numerical_severity=Finding.get_numerical_severity(semgrep_result.severity),
                 description=semgrep_result.message,
                 mitigation='N/A',
                 file_path=item['path'],

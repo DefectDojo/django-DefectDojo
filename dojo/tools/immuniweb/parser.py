@@ -83,9 +83,6 @@ class ImmuniwebParser(object):
                     description=description,
                     severity=severity,
                     steps_to_reproduce=steps_to_reproduce,
-                    numerical_severity=Finding.get_numerical_severity(
-                        severity
-                    ),
                     cwe=cwe,
                     mitigation=mitigation,
                     impact=impact,

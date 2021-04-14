@@ -409,6 +409,10 @@ class ImportScanForm(forms.Form):
         label="Choose report file",
         required=False)
 
+    close_old_findings = forms.BooleanField(help_text="Select if old findings no longer present in the report get mitigated when importing."
+                                                        "This affects the whole engagement/product depending on your deduplication scope.",
+                                            required=False, initial=False)
+
     def __init__(self, *args, **kwargs):
         super(ImportScanForm, self).__init__(*args, **kwargs)
 
