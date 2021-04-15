@@ -7,8 +7,8 @@ from time import strftime
 from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
-from dojo.utils import calculate_grade, get_current_user
-from dojo.models import Finding, Finding_Group, System_Settings
+from dojo.utils import calculate_grade, get_current_user, mass_model_updater, to_str_typed
+from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test
 
 
 logger = logging.getLogger(__name__)
@@ -224,38 +224,130 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
 
 @receiver(pre_delete, sender=Finding)
 def finding_pre_delete(sender, instance, **kwargs):
-    logger.debug('finding pre_delete!: %s:%s', instance.id, instance.title)
+    logger.debug('finding pre_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))
 
-    if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
-        for find in instance.original_finding.all():
-            # Explicitely delete the duplicates
-            find.delete()
+    # the idea is that the engagement/test pre delete already prepared all the duplicates inside
+    # the test/engagement to no longer point to any original so they can be safely deleted.
+    # so if we still find that the finding that is going to be delete is an original, it is either
+    # a manual / single finding delete, or a bulke delete of findings
+    # in which case we have to process all the duplicates
+    # TODO: should we add the prepocessing also to the bulk edit form?
+    instance.refresh_from_db()
+    duplicate_cluster = instance.original_finding.all()
+    if duplicate_cluster:
+        reconfigure_duplicate_cluster(instance, duplicate_cluster)
     else:
-        logger.debug('original_finding first: %s', instance.original_finding.first())
-        # when a finding is deleted, and is an original of a duplicate cluster, we have to chose a new original for the cluster
-        cluster = instance.original_finding.all().order_by('id')
-        logger.debug('cluster: %s', cluster)
-        if cluster:
-            new_original = cluster.first()
-            logger.debug('finding pre_delete: changing original of duplicate cluster to: %s:%s', new_original.id, new_original.title)
+        logger.debug('no duplicate cluster found for finding: %d, so no need to reconfigure', instance.id)
+
+    # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
+    # https://code.djangoproject.com/ticket/154
+    logger.debug('finding pre_delete: clearing found by')
+    instance.found_by.clear()
+    instance.status_finding.clear()
+
+
+@receiver(post_delete, sender=Finding)
+def finding_post_delete(sender, instance, **kwargs):
+    logger.debug('finding post_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))
+    calculate_grade(instance.test.engagement.product)
+
+
+def reset_duplicate_before_delete(dupe):
+    dupe.duplicate_finding = None
+    dupe.duplicate = False
+
+
+def reset_duplicates_before_delete(qs):
+    mass_model_updater(Finding, qs, lambda f: reset_duplicate_before_delete(f), fields=['duplicate', 'duplicate_finding'])
+
+
+def reconfigure_duplicate_cluster(original, cluster_outside):
+    # when a finding is deleted, and is an original of a duplicate cluster, we have to chose a new original for the cluster
+    # only look for a new original if there is one outside this test
+    if original is None or cluster_outside is None or len(cluster_outside) == 0:
+        return
+
+    logger.debug('reconfigure_duplicate_cluster: cluster_outside: %s', cluster_outside)
+    if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+        cluster_outside.order_by('-id').delete()
+    else:
+        # set new original to first finding in cluster (ordered by id)
+        new_original = cluster_outside.order_by('id').first()
+        if new_original:
+            logger.debug('test delete: changing original of duplicate cluster to: %s:%s', new_original.id, new_original.title)
 
             new_original.duplicate = False
             new_original.duplicate_finding = None
             new_original.active = True
             new_original.save_no_options()
-            new_original.found_by.add(*instance.found_by.all())
+            new_original.found_by.set(original.found_by.all())
 
-            if new_original and len(cluster) > 1:
-                for find in cluster:
-                    if find != new_original:
-                        find.duplicate_finding = new_original
-                        find.save_no_options()
-
-    # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
-    # https://code.djangoproject.com/ticket/154
-    instance.found_by.clear()
+        # if the cluster is size 1, there's only the new original left
+        if new_original and len(cluster_outside) > 1:
+            for find in cluster_outside:
+                if find != new_original:
+                    find.duplicate_finding = new_original
+                    find.save_no_options()
 
 
-@receiver(post_delete, sender=Finding)
-def finding_post_delete(sender, instance, **kwargs):
-    calculate_grade(instance.test.engagement.product)
+def prepare_duplicates_for_delete(test=None, engagement=None):
+    if test is None and engagement is None:
+        logger.warn('nothing to prepare as test and engagement are None')
+
+    # get all originals in the test/engagement
+    originals = Finding.objects.filter(original_finding__isnull=False)
+    if engagement:
+        originals = originals.filter(test__engagement=engagement)
+    if test:
+        originals = originals.filter(test=test)
+
+    if len(originals) == 0:
+        logger.debug('no originals found, so no duplicates to prepare for deletion of original')
+
+    # remove the link to the original from the duplicates inside the cluster so they can be safely deleted by the django framework
+    for original in originals:
+        logger.debug('preparing duplicate cluster for original: %d', original.id)
+        cluster_inside = original.original_finding.all()
+        if engagement:
+            cluster_inside = cluster_inside.filter(test__engagement=engagement)
+
+        if test:
+            cluster_inside = cluster_inside.filter(test=test)
+
+        logger.debug('cluster_inside: ')
+
+        if len(cluster_inside) > 0:
+            reset_duplicates_before_delete(cluster_inside)
+
+        # reconfigure duplicates outside test/engagement
+        cluster_outside = original.original_finding.all()
+        if engagement:
+            cluster_outside = cluster_outside.exclude(test__engagement=engagement)
+
+        if test:
+            cluster_outside = cluster_outside.exclude(test=test)
+
+        if len(cluster_outside) > 0:
+            reconfigure_duplicate_cluster(original, cluster_outside)
+
+
+@receiver(pre_delete, sender=Test)
+def test_pre_delete(sender, instance, **kwargs):
+    logger.debug('test pre_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))
+    prepare_duplicates_for_delete(test=instance)
+
+
+@receiver(post_delete, sender=Test)
+def test_post_delete(sender, instance, **kwargs):
+    logger.debug('test post_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))
+
+
+@receiver(pre_delete, sender=Engagement)
+def engagement_pre_delete(sender, instance, **kwargs):
+    logger.debug('engagement pre_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))
+    prepare_duplicates_for_delete(engagement=instance)
+
+
+@receiver(post_delete, sender=Engagement)
+def engagement_post_delete(sender, instance, **kwargs):
+    logger.debug('engagement post_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))

@@ -905,11 +905,11 @@ class Engagement_Presets(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=False)
 
-    def __str__(self):
-        return self.title
-
     class Meta:
         ordering = ['title']
+
+    def __str__(self):
+        return self.title
 
 
 class Engagement_Type(models.Model):
@@ -1034,6 +1034,12 @@ class Engagement(models.Model):
     @property
     def is_ci_cd(self):
         return self.engagement_type == "CI/CD"
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d engagement delete', self.id)
+        import dojo.finding.helper as helper
+        helper.prepare_duplicates_for_delete(engagement=self)
+        super().delete(*args, **kwargs)
 
 
 class CWE(models.Model):
@@ -1320,6 +1326,10 @@ class Test(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_test', args=[str(self.id)])
+
+    # def delete(self, *args, **kwargs):
+    #     logger.debug('%d test delete', self.id)
+    #     super().delete(*args, **kwargs)
 
 
 class Test_Import(TimeStampedModel):
@@ -2257,6 +2267,10 @@ class Finding(models.Model):
                 self.references = self.references.replace(match[0], create_bleached_link(match[0], match[0]), 1)
         return self.references
 
+    def delete(self, *args, **kwargs):
+        logger.debug('%d finding delete', self.id)
+        super().delete(*args, **kwargs)
+
 
 class FindingAdmin(admin.ModelAdmin):
     # For efficiency with large databases, display many-to-many fields with raw
@@ -2650,7 +2664,7 @@ class GITHUB_Issue(models.Model):
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
+        return str(self.issue_id) + '| GitHub Issue URL: ' + str(self.issue_url)
 
 
 class GITHUB_Clone(models.Model):
