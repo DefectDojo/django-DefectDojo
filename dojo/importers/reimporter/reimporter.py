@@ -150,7 +150,10 @@ class DojoDefaultReImporter(object):
                     try:
                         ep, created = Endpoint.objects.get_or_create(
                             protocol=endpoint.protocol,
+                            userinfo=endpoint.userinfo,
                             host=endpoint.host,
+                            fqdn=endpoint.fqdn,
+                            port=endpoint.port,
                             path=endpoint.path,
                             query=endpoint.query,
                             fragment=endpoint.fragment,
