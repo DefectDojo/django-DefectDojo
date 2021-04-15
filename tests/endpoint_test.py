@@ -63,7 +63,7 @@ class EndpointTest(BaseTestCase):
         # Navigate to the endpoint page
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to delete
-        driver.find_element_by_link_text("rnd.moving.com").click()
+        driver.find_element_by_link_text("rnd.moving.com:8080").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
         # "Click" the Delete Endpoint
