@@ -261,6 +261,9 @@ rabbitmq:
     erlangCookie: ""
     existingPasswordSecret: defectdojo-rabbitmq-specific
     existingErlangSecret: defectdojo-rabbitmq-specific
+  memoryHighWatermark.enabled: true  
+  memoryHighWatermark.type: relative
+  memoryHighWatermark.value: 0.5
     affinity: {}
     nodeSelector: {}
   resources:
