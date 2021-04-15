@@ -1327,9 +1327,9 @@ class Test(models.Model):
         from django.urls import reverse
         return reverse('view_test', args=[str(self.id)])
 
-    # def delete(self, *args, **kwargs):
-    #     logger.debug('%d test delete', self.id)
-    #     super().delete(*args, **kwargs)
+    def delete(self, *args, **kwargs):
+        logger.debug('%d test delete', self.id)
+        super().delete(*args, **kwargs)
 
 
 class Test_Import(TimeStampedModel):
@@ -1780,6 +1780,12 @@ class Finding(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_finding', args=[str(self.id)])
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d finding delete', self.id)
+        import dojo.finding.helper as helper
+        helper.finding_pre_delete(Finding, self)
+        super().delete(*args, **kwargs)
 
     # only used by bulk risk acceptance api
     @classmethod
@@ -2266,10 +2272,6 @@ class Finding(models.Model):
             if not (match[0].startswith('[') or match[0].startswith('(')):
                 self.references = self.references.replace(match[0], create_bleached_link(match[0], match[0]), 1)
         return self.references
-
-    def delete(self, *args, **kwargs):
-        logger.debug('%d finding delete', self.id)
-        super().delete(*args, **kwargs)
 
 
 class FindingAdmin(admin.ModelAdmin):

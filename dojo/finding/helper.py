@@ -222,7 +222,7 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
         jira_helper.push_to_jira(finding)
 
 
-@receiver(pre_delete, sender=Finding)
+# @receiver(pre_delete, sender=Finding)
 def finding_pre_delete(sender, instance, **kwargs):
     logger.debug('finding pre_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))
 
