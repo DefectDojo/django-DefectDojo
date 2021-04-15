@@ -36,7 +36,7 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(user, obj.engagement.product, permission)
     elif isinstance(obj, Finding) and permission in Permissions.get_finding_permissions():
         return user_has_permission(user, obj.test.engagement.product, permission)
-    elif isinstance(obj, Finding_Group) and permission in Permissions.get_finding_permissions():
+    elif isinstance(obj, Finding_Group) and permission in Permissions.get_finding_group_permissions():
         return user_has_permission(user, obj.test.engagement.product, permission)
     elif isinstance(obj, Endpoint) and permission in Permissions.get_endpoint_permissions():
         return user_has_permission(user, obj.product, permission)

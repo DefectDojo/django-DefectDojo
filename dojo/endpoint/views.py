@@ -98,7 +98,8 @@ def all_endpoints(request):
             "endpoints": paged_endpoints,
             "filtered": endpoints,
             "name": view_name,
-            "show_uri": show_uri
+            "show_uri": show_uri,
+            "product_tab": product_tab
         })
 
 

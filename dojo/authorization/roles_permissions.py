@@ -111,7 +111,7 @@ class Permissions(IntEnum):
         return {Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Import_Scan_Result,
             Permissions.Finding_Delete, Permissions.Risk_Acceptance, Permissions.Note_Add,
             Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
-            .union(cls.get_finding_group_permissions)
+            .union(cls.get_finding_group_permissions())
 
     @classmethod
     def get_finding_group_permissions(cls):
