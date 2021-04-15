@@ -3,7 +3,7 @@ import datetime
 import logging
 import html2text
 from . import utfdictcsv
-from defusedxml import ElementTree as etree
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 

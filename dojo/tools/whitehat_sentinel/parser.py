@@ -4,6 +4,7 @@ import json
 import logging
 import re
 from typing import Union
+from urllib.parse import urlparse
 
 from dojo.models import Finding
 
@@ -136,9 +137,16 @@ class WhiteHatSentinelParser(object):
 			date_created = attack_vector.get('found').split('T')[0]
 
 
+	def _convert_attack_vectors_to_endpoints(self, location):
+
+		parsed_url = urlparse(url = location)
+
+
+
+
 	def _convert_whitehat_sentinel_vuln_to_dojo_finding(self, whitehat_sentinel_vuln, test):
 		"""
-		Converts a WhiteHat Sentinel finding to a DefectDojo finding
+		Converts a WhiteHat Sentinel vuln to a DefectDojo finding
 
 		:param whitehat_sentinel_vuln:
 		:param test: The test that the DefectDojo finding should be associated to
@@ -148,7 +156,7 @@ class WhiteHatSentinelParser(object):
 		# Out of scope is considered Active because the issue is valid, just not for the asset in question.
 		active = whitehat_sentinel_vuln.get('status') in ('open', 'out of scope')
 
-		date_created = whitehat_sentinel_vuln['opened'].split('T')[0]
+		date_created = whitehat_sentinel_vuln['firstOpened'].split('T')[0]
 
 		mitigated_ts = whitehat_sentinel_vuln.get('closed'.split('T')[0], None)
 
