@@ -1189,7 +1189,8 @@ class Endpoint(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, Endpoint):
-            return str(self) == str(other)
+            return str(self) == str(other) and self.product == other.product
+            # same endpoints in different products are not the same
         else:
             return NotImplemented
 

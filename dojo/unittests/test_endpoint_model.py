@@ -1,5 +1,5 @@
 from django.test import TestCase
-from dojo.models import Endpoint
+from dojo.models import Endpoint, Product
 from django.core.exceptions import ValidationError
 
 
@@ -76,3 +76,14 @@ class TestEndpointModel(TestCase):
         self.assertEqual(endpoint1.host, 'foo.bar')
         self.assertEqual(str(endpoint1), 'http://foo.bar')
         self.assertEqual(endpoint1, endpoint2)
+
+    def test_product_allocation(self):
+        product1 = Product()
+        product2 = Product()
+        endpoint1 = Endpoint(host='foo.bar', product=product1)
+        endpoint2 = Endpoint(host='foo.bar', product=product1)
+        endpoint3 = Endpoint(host='foo.bar', product=product2)
+        self.assertEqual(str(endpoint1), str(endpoint2))
+        self.assertEqual(endpoint1, endpoint2)
+        self.assertEqual(str(endpoint1), str(endpoint3))
+        self.assertNotEqual(endpoint1, endpoint3)
