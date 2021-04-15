@@ -226,8 +226,8 @@ def finding_pre_delete(sender, instance, **kwargs):
     # https://code.djangoproject.com/ticket/154
     logger.debug('finding pre_delete: %d', instance.id)
 
-    instance.found_by.clear()
-    instance.status_finding.clear()
+    # instance.found_by.clear()
+    # instance.status_finding.clear()
 
 
 def finding_delete(instance, **kwargs):
@@ -276,6 +276,14 @@ def reset_duplicates_before_delete(qs):
     mass_model_updater(Finding, qs, lambda f: reset_duplicate_before_delete(f), fields=['duplicate', 'duplicate_finding'])
 
 
+def set_new_original(finding, new_original):
+    if finding.duplicate:
+        finding.duplicate_finding = new_original
+
+
+# can't use model to id here due to the queryset
+# @dojo_async_task
+# @app.task
 def reconfigure_duplicate_cluster(original, cluster_outside):
     # when a finding is deleted, and is an original of a duplicate cluster, we have to chose a new original for the cluster
     # only look for a new original if there is one outside this test
@@ -289,7 +297,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
         # set new original to first finding in cluster (ordered by id)
         new_original = cluster_outside.order_by('id').first()
         if new_original:
-            logger.debug('test delete: changing original of duplicate cluster to: %s:%s', new_original.id, new_original.title)
+            logger.debug('changing original of duplicate cluster %d to: %s:%s', original.id, new_original.id, new_original.title)
 
             new_original.duplicate = False
             new_original.duplicate_finding = None
@@ -299,13 +307,16 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 
         # if the cluster is size 1, there's only the new original left
         if new_original and len(cluster_outside) > 1:
-            for find in cluster_outside:
-                if find != new_original:
-                    find.duplicate_finding = new_original
-                    find.save_no_options()
+            # for find in cluster_outside:
+            #     if find != new_original:
+            #         find.duplicate_finding = new_original
+            #         find.save_no_options()
+
+            mass_model_updater(Finding, cluster_outside, lambda f: set_new_original(f, new_original), fields=['duplicate_finding'])
 
 
 def prepare_duplicates_for_delete(test=None, engagement=None):
+    logger.debug('prepare duplicates for delete, test: %s, engagement: %s', test.id if test else None, engagement.id if engagement else None)
     if test is None and engagement is None:
         logger.warn('nothing to prepare as test and engagement are None')
 
@@ -316,12 +327,20 @@ def prepare_duplicates_for_delete(test=None, engagement=None):
     if test:
         originals = originals.filter(test=test)
 
+    # use distinct to flatten the join result
+    originals = originals.distinct()
+
     if len(originals) == 0:
         logger.debug('no originals found, so no duplicates to prepare for deletion of original')
+        return
 
     # remove the link to the original from the duplicates inside the cluster so they can be safely deleted by the django framework
+    total = len(originals)
+    i = 0
+    # logger.debug('originals: %s', [original.id for original in originals])
     for original in originals:
-        logger.debug('preparing duplicate cluster for deletion of original: %d', original.id)
+        i += 1
+        logger.debug('%d/%d: preparing duplicate cluster for deletion of original: %d', i, total, original.id)
         cluster_inside = original.original_finding.all()
         if engagement:
             cluster_inside = cluster_inside.filter(test__engagement=engagement)
@@ -342,6 +361,8 @@ def prepare_duplicates_for_delete(test=None, engagement=None):
 
         if len(cluster_outside) > 0:
             reconfigure_duplicate_cluster(original, cluster_outside)
+
+        logger.debug('done preparing duplicate cluster for deletion of original: %d', original.id)
 
 
 @receiver(pre_delete, sender=Test)

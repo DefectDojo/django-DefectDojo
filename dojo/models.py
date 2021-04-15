@@ -2174,7 +2174,7 @@ class Finding(models.Model):
             finding_helper.update_finding_status(self, user, changed_fields={'id': (None, None)})
 
         else:
-            logger.debug('setting static / dynamic in save')
+            # logger.debug('setting static / dynamic in save')
             # need to have an id/pk before we can access endpoints
             if (self.file_path is not None) and (self.endpoints.count() == 0):
                 self.static_finding = True
