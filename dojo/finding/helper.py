@@ -45,7 +45,9 @@ pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=
 def update_finding_status(new_state_finding, user, changed_fields=None):
     now = timezone.now()
 
-    is_new_finding = changed_fields and len(changed_fields) == 1 and 'id' in changed_fields
+    logger.debug('changed fields: %s', changed_fields)
+
+    is_new_finding = not changed_fields or (changed_fields and len(changed_fields) == 1 and 'id' in changed_fields)
 
     # activated
     # reactivated
@@ -55,7 +57,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     # marked as duplicate
     # marked as original
 
-    if 'is_Mitigated' in changed_fields or is_new_finding:
+    if is_new_finding or 'is_Mitigated' in changed_fields:
         # finding is being mitigated
         if new_state_finding.is_Mitigated:
             # when mitigating a finding, the meta fields can only be editted if allowed
@@ -78,7 +80,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
         new_state_finding.mitigated = new_state_finding.mitigated or now
         new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
 
-    if 'active' in changed_fields or is_new_finding:
+    if is_new_finding or 'active' in changed_fields:
         # finding is being (re)activated
         if new_state_finding.active:
             new_state_finding.false_p = False
@@ -90,10 +92,10 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             # finding is being deactivated
             pass
 
-    if 'verified' in changed_fields or is_new_finding:
+    if is_new_finding or 'verified' in changed_fields:
         pass
 
-    if 'false_p' in changed_fields or 'out_of_scope' in changed_fields or is_new_finding:
+    if is_new_finding or 'false_p' in changed_fields or 'out_of_scope' in changed_fields:
         # existing behaviour is that false_p or out_of_scope implies mitigated
         if new_state_finding.false_p or new_state_finding.out_of_scope:
             new_state_finding.mitigated = new_state_finding.mitigated or now
