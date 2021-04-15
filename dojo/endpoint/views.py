@@ -27,19 +27,6 @@ from dojo.endpoint.queries import get_authorized_endpoints
 logger = logging.getLogger(__name__)
 
 
-def get_endpoint_ids(endpoints):
-    hosts = []
-    ids = []
-    for e in endpoints:
-        key = e.host + '-' + str(e.product.id)
-        if key in hosts:
-            continue
-        else:
-            hosts.append(key)
-            ids.append(e.id)
-    return ids
-
-
 def process_endpoints_view(request, host=False, vulnerable=False):
 
     if vulnerable:
@@ -91,6 +78,19 @@ def process_endpoints_view(request, host=False, vulnerable=False):
             "name": view_name,
             "host": host
         })
+
+
+def get_endpoint_ids(endpoints):
+    hosts = []
+    ids = []
+    for e in endpoints:
+        key = e.host + '-' + str(e.product.id)
+        if key in hosts:
+            continue
+        else:
+            hosts.append(key)
+            ids.append(e.id)
+    return ids
 
 
 def all_endpoints(request):
