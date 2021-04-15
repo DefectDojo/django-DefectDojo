@@ -222,9 +222,18 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
         jira_helper.push_to_jira(finding)
 
 
-# @receiver(pre_delete, sender=Finding)
+@receiver(pre_delete, sender=Finding)
 def finding_pre_delete(sender, instance, **kwargs):
-    logger.debug('finding pre_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))
+    # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
+    # https://code.djangoproject.com/ticket/154
+    logger.debug('finding pre_delete: %d', instance.id)
+
+    instance.found_by.clear()
+    instance.status_finding.clear()
+
+
+def finding_delete(instance, **kwargs):
+    logger.debug('finding delete, instance: %s', instance.id)
 
     # the idea is that the engagement/test pre delete already prepared all the duplicates inside
     # the test/engagement to no longer point to any original so they can be safely deleted.
@@ -232,7 +241,15 @@ def finding_pre_delete(sender, instance, **kwargs):
     # a manual / single finding delete, or a bulke delete of findings
     # in which case we have to process all the duplicates
     # TODO: should we add the prepocessing also to the bulk edit form?
-    instance.refresh_from_db()
+    logger.debug('finding_delete: refresh from db: pk: %d', instance.pk)
+
+    try:
+        instance.refresh_from_db()
+    except Finding.DoesNotExist:
+        # due to cascading deletes, the current finding could have been deleted already
+        # but django still calls delete() in this case
+        return
+
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
         reconfigure_duplicate_cluster(instance, duplicate_cluster)
@@ -241,7 +258,7 @@ def finding_pre_delete(sender, instance, **kwargs):
 
     # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
     # https://code.djangoproject.com/ticket/154
-    logger.debug('finding pre_delete: clearing found by')
+    logger.debug('finding delete: clearing found by')
     instance.found_by.clear()
     instance.status_finding.clear()
 

@@ -1784,7 +1784,7 @@ class Finding(models.Model):
     def delete(self, *args, **kwargs):
         logger.debug('%d finding delete', self.id)
         import dojo.finding.helper as helper
-        helper.finding_pre_delete(Finding, self)
+        helper.finding_delete(self)
         super().delete(*args, **kwargs)
 
     # only used by bulk risk acceptance api
