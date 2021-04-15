@@ -7,7 +7,7 @@ from time import strftime
 from django.utils import timezone
 from django.conf import settings
 from fieldsignals import pre_save_changed
-from dojo.utils import calculate_grade, get_current_user, mass_model_updater, to_str_typed
+from dojo.utils import get_current_user, mass_model_updater, to_str_typed
 from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Test
 
 
@@ -174,13 +174,11 @@ def remove_from_finding_group(finds):
     return affected_groups, removed, skipped
 
 
-# def delete_finding_group(finding_group):
-#     pass
 @dojo_model_to_id
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def post_process_finding_save(finding, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
+def post_process_finding_save_internal(finding, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
     system_settings = System_Settings.objects.get()
@@ -266,7 +264,7 @@ def finding_delete(instance, **kwargs):
 @receiver(post_delete, sender=Finding)
 def finding_post_delete(sender, instance, **kwargs):
     logger.debug('finding post_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))
-    calculate_grade(instance.test.engagement.product)
+    # calculate_grade(instance.test.engagement.product)
 
 
 def reset_duplicate_before_delete(dupe):
@@ -330,8 +328,6 @@ def prepare_duplicates_for_delete(test=None, engagement=None):
 
         if test:
             cluster_inside = cluster_inside.filter(test=test)
-
-        logger.debug('cluster_inside: ')
 
         if len(cluster_inside) > 0:
             reset_duplicates_before_delete(cluster_inside)
