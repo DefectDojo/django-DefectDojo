@@ -5,7 +5,7 @@ import os
 from base_test_class import BaseTestCase
 
 
-class RegulationTest(BaseTestCase):
+class ScanTypeTest(BaseTestCase):
 
     def login_page(self):
         driver = self.driver
@@ -40,8 +40,8 @@ class RegulationTest(BaseTestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(RegulationTest('test_disable_scanner'))
-    suite.addTest(RegulationTest('test_delete_scanner'))
+    suite.addTest(ScanTypeTest('test_disable_scanner'))
+    suite.addTest(ScanTypeTest('test_delete_scanner'))
     return suite
 
 
