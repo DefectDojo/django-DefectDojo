@@ -178,7 +178,7 @@ def remove_from_finding_group(finds):
 @dojo_async_task
 @app.task
 @dojo_model_from_id
-def post_process_finding_save_internal(finding, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
+def post_process_finding_save(finding, dedupe_option=True, false_history=False, rules_option=True, product_grading_option=True,
              issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):
 
     system_settings = System_Settings.objects.get()
@@ -282,10 +282,10 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
     if original is None or cluster_outside is None or len(cluster_outside) == 0:
         return
 
-    logger.debug('reconfigure_duplicate_cluster: cluster_outside: %s', cluster_outside)
     if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
         cluster_outside.order_by('-id').delete()
     else:
+        logger.debug('reconfigure_duplicate_cluster: cluster_outside: %s', cluster_outside)
         # set new original to first finding in cluster (ordered by id)
         new_original = cluster_outside.order_by('id').first()
         if new_original:
@@ -321,7 +321,7 @@ def prepare_duplicates_for_delete(test=None, engagement=None):
 
     # remove the link to the original from the duplicates inside the cluster so they can be safely deleted by the django framework
     for original in originals:
-        logger.debug('preparing duplicate cluster for original: %d', original.id)
+        logger.debug('preparing duplicate cluster for deletion of original: %d', original.id)
         cluster_inside = original.original_finding.all()
         if engagement:
             cluster_inside = cluster_inside.filter(test__engagement=engagement)
