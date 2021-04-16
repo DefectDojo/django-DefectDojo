@@ -1860,7 +1860,7 @@ class EndpointFilter(DojoFilter):
     product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
-    schema = CharFilter(lookup_expr='icontains')
+    protocol = CharFilter(lookup_expr='icontains')
     userinfo = CharFilter(lookup_expr='contains')
     host = CharFilter(lookup_expr='icontains')
     fqdn = CharFilter(lookup_expr='icontains')
@@ -2010,7 +2010,7 @@ class ApiAppAnalysisFilter(DojoFilter):
 
 
 class EndpointReportFilter(DojoFilter):
-    schema = CharFilter(lookup_expr='icontains')
+    protocol = CharFilter(lookup_expr='icontains')
     userinfo = CharFilter(lookup_expr='contains')
     host = CharFilter(lookup_expr='icontains')
     fqdn = CharFilter(lookup_expr='icontains')

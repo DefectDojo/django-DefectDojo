@@ -6,7 +6,7 @@
     <li><a data-toggle="tooltip" data-placement="top" title="Engagement" href="{% url 'view_engagement' product_tab.engagement.id %}">{{product_tab.engagement.name}}</a></li>
   {% endif %}
   {% if endpoint.id %}
-    {% if host %}
+    {% if host_view %}
       <li><a data-toggle="tooltip" data-placement="top" title="Test" href="{% url 'view_endpoint_host' endpoint.id %}">{{endpoint.host}}</a></li>
     {% else %}
       <li><a data-toggle="tooltip" data-placement="top" title="Test" href="{% url 'view_endpoint' endpoint.id %}">{{endpoint}}</a></li>

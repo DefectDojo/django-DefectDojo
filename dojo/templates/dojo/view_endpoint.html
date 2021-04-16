@@ -15,7 +15,7 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h4 class="pull-left finding-title">
-                    {% if host %}
+                    {% if host_view %}
                       {{ endpoint.host }} -
                       {{ endpoint.host_mitigated_endpoints_count }} / {{ endpoint.host_endpoints_count }} Mitigated Endpoints
                     {% else %}
@@ -47,7 +47,7 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                              {% if not host %}
+                              {% if not host_view %}
                                 {% if endpoint|has_object_permission:"Endpoint_Edit" or user|is_authorized_for_change:endpoint %}
                                     <li role="presentation">
                                         <a href="{% url 'edit_endpoint' endpoint.id %}">
@@ -67,6 +67,12 @@
                                             <i class="fa fa-history"></i> View History
                                         </a>
                                     </li>
+                                    <li role="separator" class="divider"></li>
+                                    <li role="presentation">
+                                        <a href="{% url 'endpoint_report' endpoint.id %}">
+                                            <i class="fa fa-file-text-o"></i> Report
+                                        </a>
+                                    </li>
                                 {% if endpoint|has_object_permission:"Endpoint_Delete" or user|is_authorized_for_delete:endpoint %}
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation" class="text-danger">
@@ -77,7 +83,7 @@
                                 {% endif %}
                               {% else %}
                                 <li role="presentation">
-                                    <a href="{% url 'endpoint_report' endpoint.id %}">
+                                    <a href="{% url 'endpoint_report' endpoint.id %}?host_view">
                                         <i class="fa fa-file-text-o"></i> Report
                                     </a>
                                 </li>
@@ -157,7 +163,7 @@
     </div>
 
     <div class="panel panel-default endpoints table-responsive">
-        {% if host %}
+        {% if host_view %}
             <div class="panel-heading">Endpoints</div>
             {% if endpoints %}
                 {% colgroup endpoints into 3 cols as grouped_items %}
@@ -172,7 +178,7 @@
                                       {% else %}
                                         &#10003;
                                       {% endif %}
-                                      {{ item }}</a>
+                                      {{ item|url_shortner }}</a>
                                     {% endif %}
                                 </td>
                             {% endfor %}
@@ -192,7 +198,7 @@
         {% endif %}
     </div>
 
-    {% if not host and endpoint.tags %}
+    {% if not host_view and endpoint.tags %}
         <div class="panel panel-default tags">
             <div class="panel-heading">
                 <h4>Tags</h4>
@@ -205,7 +211,7 @@
         </div>
     {% endif %}
 
-    {% if not host and endpoint_metadata %}
+    {% if not host_view and endpoint_metadata %}
         <div class="row">
             <div class="col-md-12">
                 <div class="panel panel-default table-responsive">

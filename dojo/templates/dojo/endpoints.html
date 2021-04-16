@@ -71,7 +71,7 @@
                                 </form>
                             </th>
                             {% endif %}
-                            {% if host %}
+                            {% if host_view %}
                                 <th>{% dojo_sort request 'Host' 'host' %}</th>
                             {% else %}
                                 <th>{% dojo_sort request 'Endpoint' 'endpoint' %}</th>
@@ -93,7 +93,7 @@
                                     </form>
                                 </td>
                                 {% endif %}
-                                {% if host %}
+                                {% if host_view %}
                                   <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
                                 {% else %}
                                   <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}</a>
@@ -117,7 +117,7 @@
                                   </td>
                                 {% endif %}
                                 <td>
-                                  {% if host %}
+                                  {% if host_view %}
                                     {% if e.host_active_findings_count > 0 %}
                                       {{ e.host_active_findings_count }}
                                     {% else %}
@@ -132,7 +132,7 @@
                                   {% endif %}
                                 </td>
                                 <td>
-                                  {% if host %}
+                                  {% if host_view %}
                                     {{ e.host_mitigated_endpoints_count }} / {{ e.host_endpoints_count }} Mitigated Endpoints
                                   {% else %}
                                     {% if e.mitigated %}

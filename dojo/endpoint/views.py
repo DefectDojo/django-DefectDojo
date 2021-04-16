@@ -27,7 +27,7 @@ from dojo.endpoint.queries import get_authorized_endpoints
 logger = logging.getLogger(__name__)
 
 
-def process_endpoints_view(request, host=False, vulnerable=False):
+def process_endpoints_view(request, host_view=False, vulnerable=False):
 
     if vulnerable:
         endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
@@ -38,7 +38,7 @@ def process_endpoints_view(request, host=False, vulnerable=False):
     endpoints = endpoints.prefetch_related('product', 'product__tags', 'tags').distinct()
     endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
 
-    if host:
+    if host_view:
         ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
         endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
     else:
@@ -51,7 +51,7 @@ def process_endpoints_view(request, host=False, vulnerable=False):
     else:
         view_name = "All"
 
-    if host:
+    if host_view:
         view_name += " Endpoint Hosts"
     else:
         view_name += " Endpoints"
@@ -76,7 +76,7 @@ def process_endpoints_view(request, host=False, vulnerable=False):
             "endpoints": paged_endpoints,
             "filtered": endpoints,
             "name": view_name,
-            "host": host
+            "host_view": host_view
         })
 
 
@@ -94,25 +94,25 @@ def get_endpoint_ids(endpoints):
 
 
 def all_endpoints(request):
-    return process_endpoints_view(request, host=False, vulnerable=False)
+    return process_endpoints_view(request, host_view=False, vulnerable=False)
 
 
 def all_endpoint_hosts(request):
-    return process_endpoints_view(request, host=True, vulnerable=False)
+    return process_endpoints_view(request, host_view=True, vulnerable=False)
 
 
 def vulnerable_endpoints(request):
-    return process_endpoints_view(request, host=False, vulnerable=True)
+    return process_endpoints_view(request, host_view=False, vulnerable=True)
 
 
 def vulnerable_endpoint_hosts(request):
-    return process_endpoints_view(request, host=True, vulnerable=True)
+    return process_endpoints_view(request, host_view=True, vulnerable=True)
 
 
-def process_endpoint_view(request, eid, host=False):
+def process_endpoint_view(request, eid, host_view=False):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
-    if host:
+    if host_view:
         endpoints = endpoint.host_endpoints()
         endpoint_metadata = None
         all_findings = endpoint.host_findings()
@@ -146,7 +146,7 @@ def process_endpoint_view(request, eid, host=False):
     if active_findings.count() != 0:
         vulnerable = True
 
-    product_tab = Product_Tab(endpoint.product.id, "Host" if host else "Endpoint", tab="endpoints")
+    product_tab = Product_Tab(endpoint.product.id, "Host" if host_view else "Endpoint", tab="endpoints")
     return render(request,
                   "dojo/view_endpoint.html",
                   {"endpoint": endpoint,
@@ -157,18 +157,18 @@ def process_endpoint_view(request, eid, host=False):
                    'opened_per_month': monthly_counts['opened_per_period'],
                    'endpoint_metadata': endpoint_metadata,
                    'vulnerable': vulnerable,
-                   'host': host,
+                   'host_view': host_view,
                    })
 
 
 @user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
 def view_endpoint(request, eid):
-    return process_endpoint_view(request, eid, host=False)
+    return process_endpoint_view(request, eid, host_view=False)
 
 
 @user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
 def view_endpoint_host(request, eid):
-    return process_endpoint_view(request, eid, host=True)
+    return process_endpoint_view(request, eid, host_view=True)
 
 
 @user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'change')

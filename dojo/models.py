@@ -707,7 +707,7 @@ class Product(models.Model):
             return self.active_verified_finding_count
 
     @cached_property
-    def endpoint_count(self):
+    def endpoint_host_count(self):
         # active_endpoints is (should be) prefetched
         endpoints = self.active_endpoints
 
@@ -719,6 +719,11 @@ class Product(models.Model):
                 hosts.append(e.host)
 
         return len(hosts)
+
+    @cached_property
+    def endpoint_count(self):
+        # active_endpoints is (should be) prefetched
+        return len(self.active_endpoints)
 
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
