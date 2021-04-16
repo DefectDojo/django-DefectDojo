@@ -454,6 +454,7 @@ def close_finding(request, fid):
                     extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Closing of %s' % finding.title,
+                                    finding=finding,
                                     description='The finding "%s" was closed by %s' % (finding.title, request.user),
                                     url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
                                     )
@@ -590,6 +591,7 @@ def reopen_finding(request, fid):
         extra_tags='alert-success')
     create_notification(event='other',
                         title='Reopening of %s' % finding.title,
+                        finding=finding,
                         description='The finding "%s" was reopened by %s' % (finding.title, request.user),
                         url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
                         )
@@ -642,6 +644,7 @@ def delete_finding(request, fid):
             create_notification(event='other',
                                 title='Deletion of %s' % finding.title,
                                 description='The finding "%s" was deleted by %s' % (finding.title, request.user),
+                                product=product,
                                 url=request.build_absolute_uri(reverse('all_findings')),
                                 recipients=[finding.test.engagement.lead],
                                 icon="exclamation-triangle")
@@ -942,6 +945,7 @@ def request_finding_review(request, fid):
 
             create_notification(event='review_requested',
                                 title='Finding review requested',
+                                finding=finding,
                                 description='User %s has requested that users %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
                                 icon='check',
                                 url=reverse("view_finding", args=(finding.id,)))

@@ -271,6 +271,7 @@ def delete_engagement(request, eid):
         if 'id' in request.POST and str(engagement.id) == request.POST['id']:
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
+                product = engagement.product
                 engagement.delete()
                 messages.add_message(
                     request,
@@ -279,6 +280,7 @@ def delete_engagement(request, eid):
                     extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
+                                    product=product,
                                     description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
                                     url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
                                     recipients=[engagement.lead],
@@ -609,7 +611,7 @@ def import_scan_results(request, eid=None, pid=None):
                 add_success_message_to_response(message)
 
             except Exception as e:
-                # exceptions are already logged by the importer
+                logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
                 error = True
 
@@ -686,6 +688,7 @@ def reopen_eng(request, eid):
         extra_tags='alert-success')
     create_notification(event='other',
                         title='Reopening of %s' % eng.name,
+                        engagement=eng,
                         description='The engagement "%s" was reopened' % (eng.name),
                         url=reverse('view_engagement', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))

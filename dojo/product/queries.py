@@ -5,8 +5,10 @@ from dojo.models import Product, Product_Member, Product_Type_Member, App_Analys
 from dojo.authorization.authorization import get_roles_for_permission, user_has_permission
 
 
-def get_authorized_products(permission):
-    user = get_current_user()
+def get_authorized_products(permission, user=None):
+
+    if user is None:
+        user = get_current_user()
 
     if user is None:
         return Product.objects.none()
@@ -43,13 +45,45 @@ def get_authorized_products(permission):
     return products
 
 
-def get_authorized_product_members(product, permission):
+def get_authorized_members_for_product(product, permission):
     user = get_current_user()
 
     if user.is_superuser or user_has_permission(user, product, permission):
         return Product_Member.objects.filter(product=product).order_by('user__first_name', 'user__last_name')
     else:
         return None
+
+
+def get_authorized_product_members(permission):
+    user = get_current_user()
+
+    if user is None:
+        return Product_Member.objects.none()
+
+    if user.is_superuser:
+        return Product_Member.objects.all()
+
+    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+        return Product_Member.objects.all()
+
+    products = get_authorized_products(permission)
+    return Product_Member.objects.filter(product__in=products)
+
+
+def get_authorized_product_members_for_user(user, permission):
+    request_user = get_current_user()
+
+    if request_user is None:
+        return Product_Member.objects.none()
+
+    if request_user.is_superuser:
+        return Product_Member.objects.filter(user=user)
+
+    if request_user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+        return Product_Member.objects.all(user=user)
+
+    products = get_authorized_products(permission)
+    return Product_Member.objects.filter(user=user, product__in=products)
 
 
 def get_authorized_app_analysis(permission):
