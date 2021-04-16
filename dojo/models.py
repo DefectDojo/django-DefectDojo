@@ -2256,7 +2256,10 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return self.sast_source_file_path
-        return create_bleached_link(self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path, self.sast_source_file_path)
+        link = self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path
+        if self.sast_source_line:
+            link = link + '#L' + str(self.sast_source_line)
+        return create_bleached_link(link, self.sast_source_file_path)
 
     def get_file_path_with_link(self):
         from dojo.utils import create_bleached_link
@@ -2264,7 +2267,10 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return self.file_path
-        return create_bleached_link(self.test.engagement.source_code_management_uri + '/' + self.file_path, self.file_path)
+        link = self.test.engagement.source_code_management_uri + '/' + self.file_path
+        if self.line:
+            link = link + '#L' + str(self.line)
+        return create_bleached_link(link, self.file_path)
 
     def get_references_with_links(self):
         import re

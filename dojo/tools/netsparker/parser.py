@@ -67,7 +67,6 @@ class NetsparkerParser(object):
                                test=test,
                                description=findingdetail,
                                severity=sev.title(),
-                               numerical_severity=Finding.get_numerical_severity(sev),
                                mitigation=mitigation,
                                impact=impact,
                                references=references,

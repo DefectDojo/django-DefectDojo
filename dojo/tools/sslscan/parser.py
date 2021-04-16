@@ -70,7 +70,6 @@ class SslscanParser(object):
                             test=test,
                             description=description,
                             severity=severity,
-                            numerical_severity=Finding.get_numerical_severity(severity),
                             dynamic_finding=True,)
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding
