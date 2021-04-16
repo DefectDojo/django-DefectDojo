@@ -15,7 +15,6 @@ from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 import dateutil.relativedelta
 import datetime
-from urllib.parse import urlparse
 import bleach
 import git
 from django.conf import settings
