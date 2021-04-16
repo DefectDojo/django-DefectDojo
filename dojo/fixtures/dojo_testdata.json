@@ -389,7 +389,7 @@
     "pk": 3,
     "model": "dojo.engagement_type",
     "fields": {
-      "name": "Type 3",
+      "name": "CI/CD",
       "id": 3
     }
   },
@@ -428,7 +428,7 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
+      "eng_type": 3,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",

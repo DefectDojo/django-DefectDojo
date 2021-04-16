@@ -609,7 +609,7 @@ def import_scan_results(request, eid=None, pid=None):
                 add_success_message_to_response(message)
 
             except Exception as e:
-                # exceptions are already logged by the importer
+                logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
                 error = True
 
