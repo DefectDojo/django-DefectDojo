@@ -95,6 +95,7 @@ def clean_hosts(apps, schema_editor):
                     except ValidationError:
                         logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk, endpoint.host, error_prefix))
                         broken_endpoints.append(endpoint.pk)
+    # TODO check duplicities (group by products)
     if broken_endpoints != []:
         raise FieldError('It is not possible to migrate database because there is/are {} broken endpoint(s). '
                          'Please check logs.'.format(len(broken_endpoints)))
@@ -102,7 +103,7 @@ def clean_hosts(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0089_endpoint_userinfo_creation'),
+        ('dojo', '0090_endpoint_userinfo_creation'),
     ]
 
     operations = [
