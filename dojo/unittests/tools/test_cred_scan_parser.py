@@ -21,5 +21,4 @@ class TestCredScanParser(TestCase):
         testfile = open("dojo/unittests/scans/cred_scan/cred_scan_many_vuln.csv")
         parser = CredScanParser()
         findings = parser.get_findings(testfile, Test())
-        import pprint
         self.assertEqual(3, len(findings))
