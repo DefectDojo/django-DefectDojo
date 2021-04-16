@@ -45,7 +45,8 @@ def get_cwe(cwe):
 # them to fit their respective model structures and the adds them to a
 # newly generated Finding
 def attach_extras(endpoints, requests, responses, finding, date, qid, param, payload, unique_id, active_text, test):
-    if finding is None: #finding should always be none, since unique ID's are being used
+    # finding should always be none, since unique ID's are being used
+    if finding is None:
         finding = Finding()
         finding.unsaved_req_resp = list()
         finding.unsaved_endpoints = list()
