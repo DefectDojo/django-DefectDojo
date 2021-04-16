@@ -2828,7 +2828,7 @@ class JIRA_Conf_Admin(admin.ModelAdmin):
 
 
 class JIRA_Issue(models.Model):
-    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.PROTECT, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
+    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.CASCADE, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
     jira_id = models.CharField(max_length=200)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
