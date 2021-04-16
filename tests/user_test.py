@@ -59,8 +59,9 @@ class UserTest(BaseTestCase):
         driver.find_element_by_id("id_username").send_keys("propersahm")
         # click on 'apply filter' button
         driver.find_element_by_css_selector("button.btn.btn-sm.btn-primary").click()
-        # only the needed user is now available proceed with clicking 'Edit' button
-        driver.find_element_by_link_text("Edit").click()
+        # only the needed user is now available, proceed with opening the context menu and clicking 'Edit' button
+        driver.find_element_by_id("dropdownMenuUser").click()
+        driver.find_element_by_id("editUser").click()
         # Unselect Super Admin Permission from previously created user
         # and only select Staff Permission
         driver.find_element_by_name("is_superuser").click()
@@ -87,10 +88,12 @@ class UserTest(BaseTestCase):
         driver.find_element_by_id("id_username").send_keys("propersahm")
         # click on 'apply filter' button
         driver.find_element_by_css_selector("button.btn.btn-sm.btn-primary").click()
-        # only the needed user is now available proceed with clicking 'Edit' button
-        driver.find_element_by_link_text("Edit").click()
-        # "Click" the delete button to complete the transaction
-        driver.find_element_by_css_selector("a.btn.btn-danger").click()
+        # only the needed user is now available, proceed with clicking 'View' button
+        driver.find_element_by_id("dropdownMenuUser").click()
+        driver.find_element_by_id("viewUser").click()
+        # in View User dialog open the menu to click the delete entry
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_id("deleteUser").click()
         # confirm deletion, by clicking delete a second time
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the User has been deleted

@@ -25,7 +25,7 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, T
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
-                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
 
 from dojo.notifications.helper import create_notification
 from django.db.models import Prefetch, F, OuterRef, Subquery
@@ -38,8 +38,8 @@ from dojo.authorization.authorization import user_has_permission, user_has_permi
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product.queries import get_authorized_products, get_authorized_product_members
-from dojo.product_type.queries import get_authorized_members
+from dojo.product.queries import get_authorized_products, get_authorized_product_members_product
+from dojo.product_type.queries import get_authorized_members_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -134,8 +134,8 @@ def view_product(request, pid):
                                       .prefetch_related('members') \
                                       .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
-    product_members = get_authorized_product_members(prod, Permissions.Product_View)
-    product_type_members = get_authorized_members(prod.prod_type, Permissions.Product_Type_View)
+    product_members = get_authorized_product_members_product(prod, Permissions.Product_View)
+    product_type_members = get_authorized_members_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
@@ -1495,7 +1495,10 @@ def edit_product_member(request, memberid):
                                     messages.SUCCESS,
                                     'Product member updated successfully.',
                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+                if is_title_in_breadcrumbs('View User'):
+                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
     product_tab = Product_Tab(member.product.id, title="Edit Product Member", tab="settings")
     return render(request, 'dojo/edit_product_member.html', {
         'memberid': memberid,
@@ -1517,10 +1520,13 @@ def delete_product_member(request, memberid):
                             messages.SUCCESS,
                             'Product member deleted successfully.',
                             extra_tags='alert-success')
-        if user == request.user:
-            return HttpResponseRedirect(reverse('product'))
+        if is_title_in_breadcrumbs('View User'):
+            return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
         else:
-            return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+            if user == request.user:
+                return HttpResponseRedirect(reverse('product'))
+            else:
+                return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
     product_tab = Product_Tab(member.product.id, title="Delete Product Member", tab="settings")
     return render(request, 'dojo/delete_product_member.html', {
         'memberid': memberid,
