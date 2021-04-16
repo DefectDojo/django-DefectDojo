@@ -714,7 +714,7 @@ def re_import_scan_results(request, tid):
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings)
             except Exception as e:
-                # exceptions are already logged by the importer
+                logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
                 error = True
 
