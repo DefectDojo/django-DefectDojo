@@ -38,8 +38,8 @@ from dojo.authorization.authorization import user_has_permission, user_has_permi
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product.queries import get_authorized_products, get_authorized_product_members_product
-from dojo.product_type.queries import get_authorized_members_product_type
+from dojo.product.queries import get_authorized_products, get_authorized_members_for_product
+from dojo.product_type.queries import get_authorized_members_for_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -134,8 +134,8 @@ def view_product(request, pid):
                                       .prefetch_related('members') \
                                       .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
-    product_members = get_authorized_product_members_product(prod, Permissions.Product_View)
-    product_type_members = get_authorized_members_product_type(prod.prod_type, Permissions.Product_Type_View)
+    product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
+    product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
@@ -220,7 +220,7 @@ def view_product_components(request, pid):
 
     # Append finding counts
     component_query = component_query.annotate(total=Count('id')).order_by('component_name', 'component_version')
-    component_query = component_query.annotate(actives=Count('id', filter=Q(active=True)))
+    component_query = component_query.annotate(active=Count('id', filter=Q(active=True)))
     component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))
 
     # Default sort by total descending
@@ -775,6 +775,7 @@ def new_product(request, ptid=None):
                 sonarqube_product.save()
 
             create_notification(event='product_added', title=product.name,
+                                product=product,
                                 url=reverse('view_product', args=(product.id,)))
 
             if not error:
@@ -902,6 +903,7 @@ def delete_product(request, pid):
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
+                product_type = product.prod_type
                 product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -909,6 +911,7 @@ def delete_product(request, pid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % product.name,
+                                    product_type=product_type,
                                     description='The product "%s" was deleted by %s' % (product.name, request.user),
                                     url=request.build_absolute_uri(reverse('product')),
                                     icon="exclamation-triangle")
@@ -1507,7 +1510,7 @@ def edit_product_member(request, memberid):
     })
 
 
-@user_is_authorized(Product_Member, Permissions.Product_Remove_Member, 'memberid')
+@user_is_authorized(Product_Member, Permissions.Product_Member_Delete, 'memberid')
 def delete_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
     memberform = Delete_Product_MemberForm(instance=member)

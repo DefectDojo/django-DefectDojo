@@ -3,7 +3,7 @@ from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint
+    Test, Finding, Endpoint, Finding_Group
 
 
 def user_has_permission(user, obj, permission):
@@ -36,12 +36,22 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(user, obj.engagement.product, permission)
     elif isinstance(obj, Finding) and permission in Permissions.get_finding_permissions():
         return user_has_permission(user, obj.test.engagement.product, permission)
+    elif isinstance(obj, Finding_Group) and permission in Permissions.get_finding_group_permissions():
+        return user_has_permission(user, obj.test.engagement.product, permission)
     elif isinstance(obj, Endpoint) and permission in Permissions.get_endpoint_permissions():
         return user_has_permission(user, obj.product, permission)
     elif isinstance(obj, Product_Type_Member) and permission in Permissions.get_product_type_member_permissions():
-        return obj.user == user or user_has_permission(user, obj.product_type, Permissions.Product_Type_Manage_Members)
+        if permission == Permissions.Product_Type_Member_Delete:
+            # Every member is allowed to remove himself
+            return obj.user == user or user_has_permission(user, obj.product_type, permission)
+        else:
+            return user_has_permission(user, obj.product_type, permission)
     elif isinstance(obj, Product_Member) and permission in Permissions.get_product_member_permissions():
-        return obj.user == user or user_has_permission(user, obj.product, Permissions.Product_Manage_Members)
+        if permission == Permissions.Product_Member_Delete:
+            # Every member is allowed to remove himself
+            return obj.user == user or user_has_permission(user, obj.product, permission)
+        else:
+            return user_has_permission(user, obj.product, permission)
     else:
         raise NoAuthorizationImplementedError('No authorization implemented for class {} and permission {}'.
             format(type(obj).__name__, permission))

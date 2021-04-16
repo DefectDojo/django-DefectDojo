@@ -26,9 +26,9 @@
                     <tr>
                         <th>Name</th>
                         <th>Version</th>
-                        <th>Active</th>
-                        <th>Duplicate</th>
-                        <th>Total</th>
+                        <th class="text-center">Active</th>
+                        <th class="text-center">Duplicate</th>
+                        <th class="text-center">Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -42,7 +42,7 @@
                             {% endif %}
                         </td>
                         <td>{{result.component_version}} </td>
-                        <td>
+                        <td class="text-center">
                             {% if result.active and result.component_name == none %}
                             <a href="{% url 'open_findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.active }}</b></a>
                             {% elif result.active %}
@@ -51,7 +51,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td>
+                        <td class="text-center">
                             {% if result.duplicate and result.component_name == none %}
                             <a href="{% url 'findings' %}?has_component=false&test__engagement__product={{prod.id}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% elif result.duplicate %}
@@ -60,7 +60,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td>
+                        <td class="text-center">
                             {% if result.total and result.component_name == none %}
                             <a href="{% url 'findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.total }}</b></a>
                             {% elif result.total %}

@@ -104,12 +104,25 @@ class UserHasFindingPermission(permissions.BasePermission):
         return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Delete)
 
 
+class UserHasImportPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Engagement, 'engagement', Permissions.Import_Scan_Result)
+
+
 class UserHasProductPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(request, Product_Type, 'prod_type', Permissions.Product_Type_Add_Product)
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(request, obj, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Delete)
+
+
+class UserHasProductMemberPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Product, 'product', Permissions.Product_Manage_Members)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Product_View, Permissions.Product_Manage_Members, Permissions.Product_Member_Delete)
 
 
 class UserHasProductTypePermission(permissions.BasePermission):
@@ -121,6 +134,19 @@ class UserHasProductTypePermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(request, obj, Permissions.Product_Type_View, Permissions.Product_Type_Edit, Permissions.Product_Type_Delete)
+
+
+class UserHasProductTypeMemberPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Product_Type, 'product_type', Permissions.Product_Type_Manage_Members)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Product_Type_View, Permissions.Product_Type_Manage_Members, Permissions.Product_Type_Member_Delete)
+
+
+class UserHasReimportPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Test, 'test', Permissions.Import_Scan_Result)
 
 
 class UserHasTestPermission(permissions.BasePermission):

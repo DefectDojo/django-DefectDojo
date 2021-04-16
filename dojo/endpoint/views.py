@@ -98,7 +98,8 @@ def all_endpoints(request):
             "endpoints": paged_endpoints,
             "filtered": endpoints,
             "name": view_name,
-            "show_uri": show_uri
+            "show_uri": show_uri,
+            "product_tab": product_tab
         })
 
 
@@ -209,6 +210,7 @@ def delete_endpoint(request, eid):
         if 'id' in request.POST and str(endpoint.id) == request.POST['id']:
             form = DeleteEndpointForm(request.POST, instance=endpoint)
             if form.is_valid():
+                product = endpoint.product
                 endpoint.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -216,6 +218,7 @@ def delete_endpoint(request, eid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % endpoint,
+                                    product=product,
                                     description='The endpoint "%s" was deleted by %s' % (endpoint, request.user),
                                     url=request.build_absolute_uri(reverse('endpoints')),
                                     icon="exclamation-triangle")
@@ -375,7 +378,7 @@ def endpoint_bulk_update_all(request, pid=None):
         if request.POST.get('delete_bulk_endpoints') and endpoints_to_update:
 
             if not settings.FEATURE_AUTHORIZATION_V2:
-                if not request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_DELETE or settings.AUTHORIZED_USERS_ALLOW_STAFF:
+                if not (request.user.is_staff or settings.AUTHORIZED_USERS_ALLOW_DELETE or settings.AUTHORIZED_USERS_ALLOW_STAFF):
                     raise PermissionDenied
             else:
                 if pid is None:
