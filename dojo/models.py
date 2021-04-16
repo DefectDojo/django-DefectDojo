@@ -1776,6 +1776,7 @@ class Finding(models.Model):
             models.Index(fields=['line']),
             models.Index(fields=['component_name']),
             models.Index(fields=['duplicate']),
+            models.Index(fields=['duplicate_finding', 'id']),
             models.Index(fields=['is_Mitigated']),
         ]
 

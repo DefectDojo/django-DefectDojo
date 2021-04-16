@@ -322,6 +322,8 @@ def prepare_duplicates_for_delete(test=None, engagement=None):
     if test is None and engagement is None:
         logger.warn('nothing to prepare as test and engagement are None')
 
+    fix_loop_duplicates()
+
     # get all originals in the test/engagement
     originals = Finding.objects.filter(original_finding__isnull=False)
     if engagement:
@@ -387,3 +389,67 @@ def engagement_pre_delete(sender, instance, **kwargs):
 @receiver(post_delete, sender=Engagement)
 def engagement_post_delete(sender, instance, **kwargs):
     logger.debug('engagement post_delete, sender: %s instance: %s', to_str_typed(sender), to_str_typed(instance))
+
+
+def fix_loop_duplicates():
+    """ Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates. """
+    """ i.e. A -> B -> C. This can lead to problems when deleting findingns, performing deduplication, etc """
+    candidates = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).order_by("-id")
+    print(candidates.query)
+
+    loop_count = len(candidates)
+
+    if loop_count > 0:
+        deduplicationLogger.info("Identified %d Findings with Loops" % len(candidates))
+        for find_id in candidates.values_list('id', flat=True):
+            removeLoop(find_id, 50)
+
+        new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
+        for f in new_originals:
+            deduplicationLogger.info("New Original: %d " % f.id)
+            f.duplicate = False
+            super(Finding, f).save()
+
+        loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+        deduplicationLogger.info("%d Finding found which still has Loops, please run fix loop duplicates again" % loop_count)
+    return loop_count
+
+
+def removeLoop(finding_id, counter):
+    # get latest status
+    finding = Finding.objects.get(id=finding_id)
+    real_original = finding.duplicate_finding
+
+    if not real_original or real_original is None:
+        # loop fully removed
+        return
+
+    # duplicate of itself -> clear duplicate status
+    if finding_id == real_original.id:
+        # loop fully removed
+        finding.duplicate_finding = None
+        # duplicate remains True, will be set to False in fix_loop_duplicates (and logged as New Original?).
+        super(Finding, finding).save()
+        return
+
+    # Only modify the findings if the original ID is lower to get the oldest finding as original
+    if (real_original.id > finding_id) and (real_original.duplicate_finding is not None):
+        # If not, swap them around
+        tmp = finding_id
+        finding_id = real_original.id
+        real_original = Finding.objects.get(id=tmp)
+        finding = Finding.objects.get(id=finding_id)
+
+    if real_original in finding.original_finding.all():
+        # remove the original from the duplicate list if it is there
+        finding.original_finding.remove(real_original)
+        super(Finding, finding).save()
+    if counter <= 0:
+        # Maximum recursion depth as safety method to circumvent recursion here
+        return
+    for f in finding.original_finding.all():
+        # for all duplicates set the original as their original, get rid of self in between
+        f.duplicate_finding = real_original
+        super(Finding, f).save()
+        super(Finding, real_original).save()
+        removeLoop(f.id, counter - 1)
