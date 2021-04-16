@@ -16,4 +16,8 @@ class Migration(migrations.Migration):
             name='jira_project',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='dojo.JIRA_Project'),
         ),
+        migrations.AddIndex(
+            model_name='finding',
+            index=models.Index(fields=['duplicate_finding', 'id'], name='dojo_findin_duplica_94e6c5_idx'),
+        ),
     ]
