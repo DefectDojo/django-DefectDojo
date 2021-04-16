@@ -30,13 +30,12 @@ class Command(BaseCommand):
             )
             if options['resync']:
                 try:
-                    print('Managing {0}'.format(factory.PARSERS[parser].get_scan_types()[0]))
-                    scanner = Tool_Type.objects.create( pk = counter, name = factory.PARSERS[parser].get_scan_types()[0], description = factory.PARSERS[parser].get_description_for_scan_types("mock"))
-                    print('Entered {0}'.format(factory.PARSERS[parser].get_scan_types()[0]))
-                    scanner.save()
-                except:
-                    print('Already exists {0}'.format(factory.PARSERS[parser].get_scan_types()[0]))
-                    pass
+                    print('Sync {0}'.format(factory.PARSERS[parser].get_scan_types()[0]))
+                    scanner = Tool_Type.objects.get_or_create(name = factory.PARSERS[parser].get_scan_types()[0], description = factory.PARSERS[parser].get_description_for_scan_types("mock"))
+
+                except Exception as e:
+                    print(e)
+
             counter += 1
         if options['file_path']:
             file = open(options['file_path'], "a")
