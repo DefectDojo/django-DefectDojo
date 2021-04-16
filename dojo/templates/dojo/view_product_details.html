@@ -238,7 +238,7 @@
                                             <i class="fa fa-pencil-square-o"></i> Edit</a>
                                         </li>
                                         {% endif %}
-                                        {% if member|has_object_permission:"Product_Remove_Member" %}
+                                        {% if member|has_object_permission:"Product_Member_Delete" %}
                                         <li>
                                             <a class="" href="{% url 'delete_product_member' member.id %}">
                                             <i class="fa fa-trash"></i> Delete</a>

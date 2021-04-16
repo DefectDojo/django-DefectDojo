@@ -19,7 +19,7 @@ from django.conf import settings
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_product_type
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type
 from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)
@@ -86,6 +86,7 @@ def add_product_type(request):
                                  'Product type added successfully.',
                                  extra_tags='alert-success')
             create_notification(event='product_type_added', title=product_type.name,
+                                product_type=product_type,
                                 url=reverse('view_product_type', args=(product_type.id,)))
             return HttpResponseRedirect(reverse('product_type'))
     add_breadcrumb(title="Add Product Type", top_level=False, request=request)
@@ -98,7 +99,7 @@ def add_product_type(request):
 @user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid', 'view')
 def view_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    members = get_authorized_members_product_type(pt, Permissions.Product_Type_View)
+    members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_View)
     products = get_authorized_products(Permissions.Product_View).filter(prod_type=pt)
     add_breadcrumb(title="View Product Type", top_level=False, request=request)
     return render(request, 'dojo/view_product_type.html', {
@@ -124,6 +125,7 @@ def delete_product_type(request, ptid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                 title='Deletion of %s' % product_type.name,
+                                no_users=True,
                                 description='The product type "%s" was deleted by %s' % (product_type.name, request.user),
                                 url=request.build_absolute_uri(reverse('product_type')),
                                 icon="exclamation-triangle")
@@ -145,7 +147,7 @@ def delete_product_type(request, ptid):
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     authed_users = pt.authorized_users.all()
-    members = get_authorized_members_product_type(pt, Permissions.Product_Type_Manage_Members)
+    members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_Manage_Members)
     pt_form = Product_TypeForm(instance=pt, initial={'authorized_users': authed_users})
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
@@ -240,7 +242,7 @@ def edit_product_type_member(request, memberid):
     })
 
 
-@user_is_authorized(Product_Type_Member, Permissions.Product_Type_Remove_Member, 'memberid')
+@user_is_authorized(Product_Type_Member, Permissions.Product_Type_Member_Delete, 'memberid')
 def delete_product_type_member(request, memberid):
     member = get_object_or_404(Product_Type_Member, pk=memberid)
     memberform = Delete_Product_Type_MemberForm(instance=member)

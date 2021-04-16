@@ -31,6 +31,7 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests
 from dojo.finding.queries import get_authorized_findings
 from dojo.endpoint.queries import get_authorized_endpoints
+from dojo.finding_group.queries import get_authorized_finding_groups
 from django.forms import HiddenInput
 
 logger = logging.getLogger(__name__)
@@ -967,18 +968,8 @@ class OpenFindingFilter(DojoFilter):
         self.form.fields['cwe'].choices = list(cwe.items())
         if self.form.fields.get('test__engagement__product'):
             self.form.fields['test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
-        if self.user is not None and not self.user.is_staff:
-
-            if self.form.fields.get('finding_group', None):
-                logger.debug('setting queryset for finding_group field')
-                self.form.fields['test__engagement__product'].queryset = \
-                    Finding_Group.objects.filter(
-                        Q(test__engagement__product__authorized_users__in=[self.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[self.user])
-                                                )
-        else:
-            if self.form.fields.get('finding_group', None):
-                self.form.fields['finding_group'].queryset = Finding_Group.objects.all()
-
+        if self.form.fields.get('finding_group', None):
+            self.form.fields['finding_group'].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
         self.form.fields['endpoints'].queryset = get_authorized_endpoints(Permissions.Endpoint_View).distinct()
 
         # Don't show the product filter on the product finding view

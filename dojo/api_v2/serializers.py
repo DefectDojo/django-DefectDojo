@@ -7,13 +7,15 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
-    Test_Import_Finding_Action, Product_Type_Member
+    Test_Import_Finding_Action, Product_Type_Member, Product_Member
+
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
 from dojo.utils import is_scan_file_too_large
 from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
 from rest_framework import serializers
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils import timezone
 import base64
 import datetime
@@ -25,6 +27,8 @@ import logging
 import tagulous
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
+from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.roles_permissions import Roles, Permissions
 
 
 logger = logging.getLogger(__name__)
@@ -365,6 +369,24 @@ class FileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProductMemberSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product_Member
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            members = Product_Member.objects.filter(product=data.get('product'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Product member already exists')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Member_Add_Owner):
+            raise PermissionDenied('You are not permitted to add users as owners')
+
+        return data
+
+
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -374,11 +396,13 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ('tid', 'manager', 'prod_manager', 'tech_contact',
-                   'updated')
-        extra_kwargs = {
-            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-        }
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['tid', 'manager', 'prod_manager', 'tech_contact', 'updated', 'members']
+            extra_kwargs = {
+                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+            }
+        else:
+            exclude = ['tid', 'manager', 'prod_manager', 'tech_contact', 'updated', 'authorized_users']
 
     def get_findings_count(self, obj):
         return obj.findings_count
@@ -388,16 +412,29 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
-    user = UserStubSerializer(many=False, read_only=True)
 
     class Meta:
         model = Product_Type_Member
-        exclude = ['product_type']
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            members = Product_Type_Member.objects.filter(product_type=data.get('product_type'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Product type member already exists')
+        else:
+            if data.get('role') != Roles.Owner:
+                owners = Product_Type_Member.objects.filter(product_type=data.get('product_type'), role=Roles.Owner).exclude(id=self.instance.id).count()
+                if owners < 1:
+                    raise ValidationError('There must be at least one owner')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Member_Add_Owner):
+            raise PermissionDenied('You are not permitted to add users as owners')
+
+        return data
 
 
 class ProductTypeSerializer(serializers.ModelSerializer):
-    if settings.FEATURE_AUTHORIZATION_V2:
-        members = ProductTypeMemberSerializer(source='product_type_member_set', read_only=True, many=True)
 
     class Meta:
         model = Product_Type

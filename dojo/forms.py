@@ -38,12 +38,13 @@ from django.urls import reverse
 from tagulous.forms import TagField
 import logging
 from crum import get_current_user
-from dojo.utils import get_system_setting
+from dojo.utils import get_system_setting, get_product
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
+from dojo.user.queries import get_authorized_users_for_product_and_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -709,8 +710,11 @@ class EngForm(forms.ModelForm):
 
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
-            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
-            self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
+                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
+            else:
+                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
@@ -785,10 +789,14 @@ class TestForm(forms.ModelForm):
         super(TestForm, self).__init__(*args, **kwargs)
 
         if obj:
-            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', obj)]
+            product = get_product(obj)
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
+                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
+            else:
+                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
         else:
-            staff_users = [user.id for user in User.objects.exclude(is_staff=False)]
-        self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
+            self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
     class Meta:
         model = Test
