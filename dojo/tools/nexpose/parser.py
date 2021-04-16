@@ -104,7 +104,7 @@ class NexposeParser(object):
                 if test.get('id') in vulnsDefinitions and (
                         test.get('status') in ['vulnerable-exploited', 'vulnerable-version', 'vulnerable-potential']):
                     vuln = vulnsDefinitions[test.get('id').lower()]
-                    for desc in test.getchildren():
+                    for desc in list(test):
                         if 'pluginOutput' in vuln:
                             vuln['pluginOutput'] += "\n\n" + \
                                 self.parse_html_type(desc)
@@ -143,18 +143,18 @@ class NexposeParser(object):
                     'severity': sev,
                     'tags': list()
                 }
-                for item in vulnDef.getchildren():
+                for item in list(vulnDef):
                     if item.tag == 'description':
-                        for htmlType in item.getchildren():
+                        for htmlType in list(item):
                             vuln['desc'] += self.parse_html_type(htmlType)
 
                     elif item.tag == 'exploits':
-                        for exploit in item.getchildren():
+                        for exploit in list(item):
                             vuln['refs'][exploit.get('title')] = str(exploit.get('title')).strip() + ' ' + \
                                                                  str(exploit.get('link')).strip()
 
                     elif item.tag == 'references':
-                        for ref in item.getchildren():
+                        for ref in list(item):
                             if 'URL' in ref.get('source'):
                                 vuln['refs'][ref.get('source') + str(url_index)] = str(ref.text).strip()
                                 url_index += 1
@@ -162,12 +162,12 @@ class NexposeParser(object):
                                 vuln['refs'][ref.get('source')] = str(ref.text).strip()
 
                     elif item.tag == 'solution':
-                        for htmlType in item.getchildren():
+                        for htmlType in list(item):
                             vuln['resolution'] += self.parse_html_type(htmlType)
 
                     # there is currently no method to register tags in vulns
                     elif item.tag == 'tags':
-                        for tag in item.getchildren():
+                        for tag in list(item):
                             vuln['tags'].append(tag.text.lower())
 
                 vulns[vid] = vuln
