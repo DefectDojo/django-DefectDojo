@@ -19,8 +19,8 @@ from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm
     Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm
 from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member
 from dojo.utils import get_page_items, add_breadcrumb
-from dojo.product.queries import get_authorized_product_members_user
-from dojo.product_type.queries import get_authorized_members_user
+from dojo.product.queries import get_authorized_product_members_for_user
+from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
@@ -293,8 +293,8 @@ def view_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authorized_products = Product.objects.filter(authorized_users__in=[user])
     authorized_product_types = Product_Type.objects.filter(authorized_users__in=[user])
-    product_members = get_authorized_product_members_user(user, Permissions.Product_View)
-    product_type_members = get_authorized_members_user(user, Permissions.Product_Type_View)
+    product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
+    product_type_members = get_authorized_product_type_members_for_user(user, Permissions.Product_Type_View)
 
     add_breadcrumb(title="View User", top_level=False, request=request)
     return render(request, 'dojo/view_user.html', {

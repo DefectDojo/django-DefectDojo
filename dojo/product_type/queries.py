@@ -55,3 +55,19 @@ def get_authorized_product_type_members(permission):
 
     product_types = get_authorized_product_types(permission)
     return Product_Type_Member.objects.filter(product_type__in=product_types)
+
+
+def get_authorized_product_type_members_for_user(user, permission):
+    request_user = get_current_user()
+
+    if request_user is None:
+        return Product_Type_Member.objects.none()
+
+    if request_user.is_superuser:
+        return Product_Type_Member.objects.filter(user=user)
+
+    if request_user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+        return Product_Type_Member.objects.all(user=user)
+
+    product_types = get_authorized_product_types(permission)
+    return Product_Type_Member.objects.filter(user=user, product_type__in=product_types)
