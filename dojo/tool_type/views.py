@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.utils import add_breadcrumb
-from dojo.forms import ToolTypeForm
+from dojo.forms import ToolTypeForm, DeleteToolTypeForm
 from dojo.models import Tool_Type
 
 logger = logging.getLogger(__name__)
