@@ -32,7 +32,7 @@ def parse_findings(scan, test, active, verified, scan_type):
 def update_timestamps(test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time):
     test.engagement.updated = now
     if test.engagement.engagement_type == 'CI/CD':
-        test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
+        test.engagement.target_end = max_safe([scan_date_time.date(), test.engagement.target_end])
 
     test.updated = now
     test.target_end = max_safe([scan_date_time, test.target_end])
