@@ -141,6 +141,11 @@ Crashtest Security
 
 Import JSON Report Import XML Report in JUnit Format
 
+CredScan Report
+---------------
+
+Import CSV credential scanner reports
+
 Contrast Scanner
 ----------------
 
