@@ -105,6 +105,9 @@ EOD
     python3 manage.py loaddata ${i%.*}
   done
 
+  echo "Registrating the  scanners"
+  python3 manage.py dump_scanner_list -r
+
   echo "Installing watson search index"
   python3 manage.py installwatson
 fi

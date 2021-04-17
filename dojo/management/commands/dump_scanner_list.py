@@ -17,6 +17,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("-f", "--file_path", required=False)
         parser.add_argument("-r", "--resync", action="store_true")
+        parser.add_argument("-d", "--dump", action="store_true")
 
     def handle(self, *args, **options):
         counter = 30
@@ -50,5 +51,5 @@ class Command(BaseCommand):
             file = open(options["file_path"], "a")
             file.write(json.dumps(dump, indent=2))
             file.close()
-        else:
+        if options["dump"]:
             print(json.dumps(dump, indent=2))
