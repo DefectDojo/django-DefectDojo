@@ -6,5 +6,4 @@ urlpatterns = [
     url(r'^tool_type/(?P<ttid>\d+)/edit$', views.edit_tool_type,
         name='edit_tool_type'),
     url(r'^tool_type$', views.tool_type, name='tool_type'),
-    url(r'^tool_type/(?P<ttid>\d+)/delete$', views.delete_tool_type, name='delete_tool_type'),
 ]

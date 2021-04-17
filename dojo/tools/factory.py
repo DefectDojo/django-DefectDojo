@@ -36,20 +36,25 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         raise ValueError(f'Unknown Test Type {scan_type}')
 
 
-def get_enabled_scanners():
+def get_disabled_scanners():
     scanners = []
-    enabled = Tool_Type.objects.all().filter(enabled=True)
-    for scanner in enabled:
-        scanners.append(scanner.name.lower())
+    try:
+        disabled = Tool_Type.objects.all().filter(enabled=False)
+        for scanner in disabled:
+            scanners.append(scanner.name.lower())
+    except Exception as e:
+        logging.warning("Empty Tool_Type table, run: ./manage dump_scanner_list -r")
     return scanners
 
 
 def get_choices():
     res = list()
-    enabled = get_enabled_scanners()
+    disabled = get_disabled_scanners()
+    print('TEst {}'.format(disabled))
     for key in PARSERS.keys():
-        if key.lower() in enabled:
+        if key.lower() not in disabled:
             res.append((key, PARSERS[key].get_label_for_scan_types(key)))
+    print(res)
     return tuple(res)
 
 
