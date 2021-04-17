@@ -238,7 +238,7 @@ class DojoDefaultReImporter(object):
 
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False):
+                    commit_hash=None, push_to_jira=None, close_old_findings=True):
 
         user = user or get_current_user()
 
