@@ -20,7 +20,5 @@ class TestOpenVASUploadCsvParser(TestCase):
             self.assertEqual(1, len(findings[0].unsaved_endpoints))
             # endpoint
             self.assertEqual("10.0.0.8", findings[0].unsaved_endpoints[0].host)
-            # FIXME there is a 'Port protocole' column
-            # self.assertEqual("tcp", findings[0].unsaved_endpoints[0].protocol)
-            # FIXME there is a 'Port' column
-            # self.assertEqual(22, findings[0].unsaved_endpoints[0].port)
+            self.assertEqual("tcp", findings[0].unsaved_endpoints[0].protocol)
+            self.assertEqual(22, findings[0].unsaved_endpoints[0].port)
