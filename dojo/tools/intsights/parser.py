@@ -1,7 +1,6 @@
 import json
-from urllib.parse import urlparse
 
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding
 
 
 class IntSightsParser(object):
@@ -10,13 +9,25 @@ class IntSightsParser(object):
     """
 
     def get_scan_types(self):
-        return ["IntSights Scan"]
+        return ["IntSights Report"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "IntSights Scan"
+        return "IntSights Report"
 
     def get_description_for_scan_types(self, scan_type):
         return "IntSights report file can be imported in JSON format."
+
+    def _parser_assets(self, assets):
+        """
+        Parses the Assets node to create a string to be used in the Description
+        """
+
+        assets_affected = ''
+
+        for entry in assets:
+            assets_affected = f'{assets_affected} Type: {entry["Type"]}, Value: {entry["Value"]},'
+
+        return assets_affected[:-1]
 
     def get_findings(self, file, test):
         duplicates = dict()
@@ -38,37 +49,29 @@ class IntSightsParser(object):
             for finding in findings['Findings']:
                 unique_id_from_tool = finding['_id']
                 title = finding['Details']['Title']
+
+                assets_affected = self._parser_assets(finding['Assets'])
+
                 description = f'{finding["Details"]["Description"]}' \
+                              f'\r\n\r\n----' \
+                              f'\r\n**Date Found**: {finding.get("FoundDate", "None provided")}' \
+                              f'\r\n**Date Updated**: {finding.get("UpdateDate", "None provided")}' \
                               f'\r\n\r\n----' \
                               f'\r\n\r\n**Type**: {finding["Details"]["Type"]}' \
                               f'\r\n**SubType**: {finding["Details"]["SubType"]}' \
-                              f'\r\n**Source**: {finding["Details"]["Source"]["URL"]}' \
-                              f'\r\n**Source Type**: {finding["Details"]["Source"]["Type"]}' \
-                              f'\r\n**Source Network Type**: {finding["Details"]["Source"]["NetworkType"]}' \
+                              f'\r\n**Source**: {finding["Details"]["Source"].get("URL", "None provided")}' \
+                              f'\r\n**Source Date**: {finding["Details"]["Source"].get("Date", "None provided")}' \
+                              f'\r\n**Source Type**: {finding["Details"]["Source"].get("URL", "N/A")}' \
+                              f'\r\n**Source Network Type**: {finding["Details"]["Source"].get("NetworkType", "N/A")}' \
                               f'\r\n\r\n----' \
-                              f'\r\n**Asset Type**: {finding["Assets"][0]["Type"]}' \
+                              f'\r\n**Assets Affected**: {assets_affected}' \
                               f'\r\n\r\n----' \
                               f'\r\n**Takedown Status**: {finding["TakedownStatus"]}'
                 severity = finding['Details']['Severity']
                 mitigation = "N/A"
                 impact = "N/A"
-                references = finding["Details"]["Source"]["URL"]
-                output = "N/A"
+                references = finding["Details"]["Source"].get("URL", "")
                 active = False if finding['Closed']['IsClosed'] else True
-                try:
-                    url = finding["Assets"][0]["Value"]
-                    parsed_url = urlparse(url)
-                    protocol = parsed_url.scheme
-                    query = parsed_url.query
-                    fragment = parsed_url.fragment
-                    path = parsed_url.path
-                    port = ""
-                    try:
-                        host, port = parsed_url.netloc.split(':')
-                    except ValueError:
-                        host = parsed_url.netloc
-                except:
-                    url = None
 
                 dupe_key = finding['_id']
 
@@ -91,15 +94,8 @@ class IntSightsParser(object):
                                       static_finding = False,
                                       dynamic_finding = True,
                                       unique_id_from_tool = unique_id_from_tool)
-                    finding.unsaved_endpoints = list()
                     duplicates[dupe_key] = finding
 
-                    if url is not None:
-                        finding.unsaved_endpoints.append(Endpoint(
-                            host = host, port = port,
-                            path = path,
-                            protocol = protocol,
-                            query = query, fragment = fragment))
             return duplicates.values()
         else:
             return []

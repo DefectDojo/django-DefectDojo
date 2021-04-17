@@ -722,7 +722,7 @@
     },
     {
         "fields": {
-            "name": "IntSights"
+            "name": "IntSights Report"
         },
         "model": "dojo.test_type",
         "pk": 195

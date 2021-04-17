@@ -292,7 +292,13 @@ XML file from IBM App Scanner.
 
 XML Scan Result File from Immuniweb Scan.
 
-### Kiuwan Scanner
+IntSights Report
+--------------
+
+JSON report from IntSights ETP Suite API
+
+Kiuwan Scanner
+--------------
 
 Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan.
 
