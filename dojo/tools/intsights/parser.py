@@ -17,7 +17,7 @@ class IntSightsParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "IntSights report file can be imported in JSON format."
 
-    def _parser_assets(self, assets):
+    def _parse_assets(self, assets):
         """
         Parses the Assets node to create a string to be used in the Description
         """
@@ -50,7 +50,7 @@ class IntSightsParser(object):
                 unique_id_from_tool = finding['_id']
                 title = finding['Details']['Title']
 
-                assets_affected = self._parser_assets(finding['Assets'])
+                assets_affected = self._parse_assets(finding['Assets'])
 
                 description = f'{finding["Details"]["Description"]}' \
                               f'\r\n\r\n----' \
