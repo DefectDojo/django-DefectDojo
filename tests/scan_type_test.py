@@ -30,18 +30,11 @@ class ScanTypeTest(BaseTestCase):
                          driver.find_element_by_css_selector("tr:nth-child(9) > td > b").text == "Disabled"
                          ))
 
-    def test_delete_scanner(self):
-        driver = self.driver
-        driver.get(self.base_url + "tool_type")
-        driver.find_element_by_xpath("//table[@id='products']/tbody/tr/td[4]/div/a[2]").click()
-        self.assertTrue(self.is_success_message_present(text="Tool Type Successfully Deleted."))
-
 
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(ScanTypeTest('test_disable_scanner'))
-    suite.addTest(ScanTypeTest('test_delete_scanner'))
     return suite
 
 
