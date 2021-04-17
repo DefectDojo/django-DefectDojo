@@ -320,6 +320,11 @@ Immuniweb Scan
 
 XML Scan Result File from Immuniweb Scan.
 
+IntSights Report
+--------------
+
+JSON report from IntSights ETP Suite API
+
 Kiuwan Scanner
 --------------
 
