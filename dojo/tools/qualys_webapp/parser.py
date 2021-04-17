@@ -249,6 +249,7 @@ def get_items(vulnerabilities, info_gathered, glossary, is_app_report, test, ena
             findings[unique_id] = get_info_item(info_gathered[index], finding)
     return findings
 
+
 def qualys_webapp_parser(qualys_xml_file, test, enable_weakness=False):
     if qualys_xml_file is None:
         return []
