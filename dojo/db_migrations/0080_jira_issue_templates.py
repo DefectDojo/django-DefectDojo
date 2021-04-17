@@ -13,11 +13,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='jira_instance',
             name='issue_template',
-            field=models.CharField(blank=True, help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.', max_length=255, null=True),
+            field=models.CharField(blank=True, help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.', max_length=255, null=True),
         ),
         migrations.AddField(
             model_name='jira_project',
             name='issue_template',
-            field=models.CharField(blank=True, help_text='Choose a Django template used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira-description.tpl.', max_length=255, null=True),
+            field=models.CharField(blank=True, help_text='Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates.', max_length=255, null=True),
         ),
     ]

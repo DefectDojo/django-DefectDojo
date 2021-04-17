@@ -309,3 +309,9 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
 def jira_status_reconciliation_task(*args, **kwargs):
     from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
     return jira_status_reconciliation(*args, **kwargs)
+
+
+@app.task
+def fix_loop_duplicates_task(*args, **kwargs):
+    from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
+    return fix_loop_duplicates()

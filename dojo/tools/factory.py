@@ -51,14 +51,6 @@ def requires_file(scan_type):
     return scan_type != SCAN_SONARQUBE_API
 
 
-def handles_active_verified_statuses(scan_type):
-    # FIXME switch to method of the parser
-    # parser = PARSERS[scan_type]
-    return scan_type in [
-        'Generic Findings Import', SCAN_SONARQUBE_API, 'Qualys Scan'
-    ]
-
-
 import os
 from inspect import isclass
 from pkgutil import iter_modules

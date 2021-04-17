@@ -104,6 +104,44 @@ class ImportReimportMixin(object):
 
         return test_id
 
+    # import zap scan, testing:
+    # - import
+    # - active/verifed = False
+    def test_zap_scan_base_not_active_not_verified(self):
+        logger.debug('importing original zap xml report')
+        endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
+        endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
+        notes_count_before = self.db_notes_count()
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
+            import0 = self.import_scan_with_params(self.zap_sample0_filename, active=False, verified=False)
+
+        # 0_zap_sample.xml: basic file with 4 out of 5 findings reported, zap4 absent
+        # 1 inactive
+        # 2 inactive
+        # 3 inactive
+        # 4 absent
+        # 5 inactive
+
+        test_id = import0['test']
+        findings = self.get_test_findings_api(test_id, active=False, verified=False)
+        self.log_finding_summary_json_api(findings)
+
+        # imported count must match count in xml report
+        self.assert_finding_count_json(4, findings)
+
+        # the zap scan contains 3 endpoints (mainsite with pot + uris from findings)
+        self.assertEqual(endpoint_count_before + 3, self.db_endpoint_count())
+        # 4 findings, total 11 endpoint statuses
+        self.assertEqual(endpoint_status_count_before_active + 11, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
+
+        # no notes expected
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+        return test_id
+
     # Test re-import with unique_id_from_tool algorithm
     # import sonar scan with detailed parser, testing:
     # - import

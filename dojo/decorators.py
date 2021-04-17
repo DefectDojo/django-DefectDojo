@@ -25,6 +25,7 @@ def we_want_async(*args, **kwargs):
         logger.debug('dojo_async_task: running task in the foreground as block_execution is set to True for %s', user)
         return False
 
+    logger.debug('dojo_async_task: no current user, running task in the background')
     return True
 
 
@@ -48,7 +49,7 @@ def dojo_model_to_id(_func=None, *, parameter=0):
     # logger.debug('dec_kwargs:' + str(dec_kwargs))
     # logger.debug('_func:%s', _func)
 
-    def dojo_model_from_id_internal(func, *args, **kwargs):
+    def dojo_model_to_id_internal(func, *args, **kwargs):
         @wraps(func)
         def __wrapper__(*args, **kwargs):
             if not settings.CELERY_PASS_MODEL_BY_ID:
@@ -57,7 +58,7 @@ def dojo_model_to_id(_func=None, *, parameter=0):
             model_or_id = get_parameter_froms_args_kwargs(args, kwargs, parameter)
 
             if model_or_id:
-                if isinstance(model_or_id, models.Model) and we_want_async():
+                if isinstance(model_or_id, models.Model) and we_want_async(*args, **kwargs):
                     logger.debug('converting model_or_id to id: %s', model_or_id)
                     id = model_or_id.id
                     args = list(args)
@@ -69,9 +70,9 @@ def dojo_model_to_id(_func=None, *, parameter=0):
 
     if _func is None:
         # decorator called without parameters
-        return dojo_model_from_id_internal
+        return dojo_model_to_id_internal
     else:
-        return dojo_model_from_id_internal(_func)
+        return dojo_model_to_id_internal(_func)
 
 
 # decorator with parameters needs another wrapper layer
@@ -96,7 +97,7 @@ def dojo_model_from_id(_func=None, *, model=Finding, parameter=0):
             model_or_id = get_parameter_froms_args_kwargs(args, kwargs, parameter)
 
             if model_or_id:
-                if not isinstance(model_or_id, models.Model) and we_want_async():
+                if not isinstance(model_or_id, models.Model) and we_want_async(*args, **kwargs):
                     logger.debug('instantiating model_or_id: %s for model: %s', model_or_id, model)
                     try:
                         instance = model.objects.get(id=model_or_id)

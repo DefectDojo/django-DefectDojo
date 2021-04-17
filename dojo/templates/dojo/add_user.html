@@ -24,11 +24,7 @@
         </fieldset>
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
-                <input class="btn btn-primary" type="submit" name="add_user" value="{{ name }}"/>
-                &nbsp;&nbsp;
-                {% if to_edit and to_edit.id != user.id %}
-                    <a class="btn btn-danger" href="{% url 'delete_user' to_edit.id %}">Delete User</a>
-                {% endif %}
+                <input class="btn btn-primary" type="submit" name="add_user" value="Submit"/>
             </div>
         </div>
     </form>

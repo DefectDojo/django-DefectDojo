@@ -1,12 +1,8 @@
-# Sorry for the lazyness but I just update the column name fields
-# Didn't change the class names, only the main one..
 
 import csv
 import hashlib
 import io
-import re
 import socket
-from urllib.parse import urlparse
 
 from dateutil.parser import parse
 
@@ -71,6 +67,27 @@ class CweColumnMappingStrategy(ColumnMappingStrategy):
             finding.cwe = int(column_value)
 
 
+class PortColumnMappingStrategy(ColumnMappingStrategy):
+
+    def __init__(self):
+        self.mapped_column = 'port'
+        super(PortColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        if column_value.isdigit():
+            finding.unsaved_endpoints[0].port = int(column_value)
+
+
+class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
+
+    def __init__(self):
+        self.mapped_column = 'port protocol'
+        super(ProtocolColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.unsaved_endpoints[0].protocol = column_value
+
+
 class UrlColumnMappingStrategy(ColumnMappingStrategy):
 
     def __init__(self):
@@ -87,82 +104,7 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
         return valid
 
     def map_column_value(self, finding, column_value):
-        url = column_value
-        finding.url = url
-        o = urlparse(url)
-
-        """
-        Todo: Replace this with a centralized parsing function as many of the parsers
-        use the same method for parsing urls.
-
-        ParseResult(scheme='http', netloc='www.cwi.nl:80', path='/%7Eguido/Python.html',
-                    params='', query='', fragment='')
-        """
-        if not self.is_valid_ipv4_address(url):
-            rhost = re.match(
-                r"(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-                url)
-
-            if rhost:
-                protocol = o.scheme
-                host = o.netloc
-                path = o.path
-                query = o.query
-                fragment = o.fragment
-
-                port = 80
-                if protocol == 'https':
-                    port = 443
-
-                if rhost[11] is not None:
-                    port = rhost[11]
-
-                try:
-                    dupe_endpoint = Endpoint.objects.get(protocol=protocol,
-                                                         host=host + (":" + port) if port is not None else "",
-                                                         query=query,
-                                                         fragment=fragment,
-                                                         path=path,
-                                                         product=finding.test.engagement.product)
-                except:
-                    dupe_endpoint = None
-
-                if not dupe_endpoint:
-                    endpoint = Endpoint(protocol=protocol,
-                                        host=host + (":" + str(port)) if port is not None else "",
-                                        query=query,
-                                        fragment=fragment,
-                                        path=path,
-                                        product=finding.test.engagement.product)
-                else:
-                    endpoint = dupe_endpoint
-
-                if not dupe_endpoint:
-                    endpoints = [endpoint]
-                else:
-                    endpoints = [endpoint, dupe_endpoint]
-
-                finding.unsaved_endpoints = endpoints
-
-        # FIXME manage port and protocole event if it's an IP address
-        # URL is an IP so save as an IP endpoint
-        elif self.is_valid_ipv4_address(url):
-            try:
-                dupe_endpoint = Endpoint.objects.get(protocol=None,
-                                                     host=url,
-                                                     path=None,
-                                                     query=None,
-                                                     fragment=None,
-                                                     product=finding.test.engagement.product)
-            except:
-                dupe_endpoint = None
-
-            if not dupe_endpoint:
-                endpoints = [Endpoint(host=url, product=finding.test.engagement.product)]
-            else:
-                endpoints = [dupe_endpoint]
-
-            finding.unsaved_endpoints = endpoints
+        finding.unsaved_endpoints[0].host = column_value
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -279,7 +221,11 @@ class OpenVASCsvParser(object):
         verified_column_strategy = VerifiedColumnMappingStrategy()
         false_positive_strategy = FalsePositiveColumnMappingStrategy()
         duplicate_strategy = DuplicateColumnMappingStrategy()
+        port_strategy = PortColumnMappingStrategy()
+        protocol_strategy = ProtocolColumnMappingStrategy()
 
+        port_strategy.successor = protocol_strategy
+        duplicate_strategy.successor = port_strategy
         false_positive_strategy.successor = duplicate_strategy
         verified_column_strategy.successor = false_positive_strategy
         active_column_strategy.successor = verified_column_strategy
@@ -326,6 +272,7 @@ class OpenVASCsvParser(object):
         row_number = 0
         for row in reader:
             finding = Finding(test=test)
+            finding.unsaved_endpoints = [Endpoint()]
 
             if row_number == 0:
                 column_names = self.read_column_names(row)
@@ -338,14 +285,12 @@ class OpenVASCsvParser(object):
                 column_number += 1
 
             if finding is not None and row_number > 0:
-                if finding.url is None:
-                    finding.url = ""
                 if finding.title is None:
                     finding.title = ""
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.md5((finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
+                key = hashlib.sha256((finding.unsaved_endpoints[0].get_normalized_url() + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
                 if key not in dupes:
                     dupes[key] = finding

@@ -154,7 +154,9 @@
     </div>
   </div>
 </div>
-      <!-- Benchmark Tab -->
+
+<!-- Benchmark Tab -->
+{% if system_settings.enable_benchmark %}
 <div class="row">
   <div class="col-md-12">
     <div class="panel panel-default">
@@ -186,8 +188,9 @@
     </div>
   </div>
 </div>
-{% feature_authorization_v2 as feature_authorization_v2_flag %}
-{% if feature_authorization_v2_flag %}
+{% endif %}
+
+{% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -235,7 +238,7 @@
                                             <i class="fa fa-pencil-square-o"></i> Edit</a>
                                         </li>
                                         {% endif %}
-                                        {% if member|has_object_permission:"Product_Remove_Member" %}
+                                        {% if member|has_object_permission:"Product_Member_Delete" %}
                                         <li>
                                             <a class="" href="{% url 'delete_product_member' member.id %}">
                                             <i class="fa fa-trash"></i> Delete</a>
@@ -398,8 +401,7 @@
             <td><strong>Technical Contact</strong></td>
             <td>{% if prod.technical_contact != "0" %}{{ prod.technical_contact | default:"Unknown" }}{% endif %}</td>
           </tr>
-          {% feature_authorization_v2 as feature_authorization_v2_flag %}
-          {% if feature_authorization_v2_flag is False %}
+          {% if not 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
           <tr>
             <td><strong>Authorized Users</strong></td>
             <td>
