@@ -1,9 +1,8 @@
-# Sorry for the lazyness but I just update the column name fields
-# Didn't change the class names, only the main one..
 
 import csv
 import hashlib
 import io
+import socket
 
 from dateutil.parser import parse
 
@@ -68,17 +67,44 @@ class CweColumnMappingStrategy(ColumnMappingStrategy):
             finding.cwe = int(column_value)
 
 
-class IpColumnMappingStrategy(ColumnMappingStrategy):
+class PortColumnMappingStrategy(ColumnMappingStrategy):
+
+    def __init__(self):
+        self.mapped_column = 'port'
+        super(PortColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        if column_value.isdigit():
+            finding.unsaved_endpoints[0].port = int(column_value)
+
+
+class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
+
+    def __init__(self):
+        self.mapped_column = 'port protocol'
+        super(ProtocolColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.unsaved_endpoints[0].protocol = column_value
+
+
+class UrlColumnMappingStrategy(ColumnMappingStrategy):
 
     def __init__(self):
         self.mapped_column = 'ip'
-        super(IpColumnMappingStrategy, self).__init__()
+        super(UrlColumnMappingStrategy, self).__init__()
+
+    def is_valid_ipv4_address(self, address):
+        valid = True
+        try:
+            socket.inet_aton(address.strip())
+        except:
+            valid = False
+
+        return valid
 
     def map_column_value(self, finding, column_value):
-        ip = column_value
-        endpoint = Endpoint(host=ip)
-        if endpoint not in finding.unsaved_endpoints:
-            finding.unsaved_endpoints.append(endpoint)
+        finding.unsaved_endpoints[0].host = column_value
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -185,7 +211,7 @@ class OpenVASCsvParser(object):
         date_column_strategy = DateColumnMappingStrategy()
         title_column_strategy = TitleColumnMappingStrategy()
         cwe_column_strategy = CweColumnMappingStrategy()
-        ip_column_strategy = IpColumnMappingStrategy()
+        url_column_strategy = UrlColumnMappingStrategy()
         severity_column_strategy = SeverityColumnMappingStrategy()
         description_column_strategy = DescriptionColumnMappingStrategy()
         mitigation_column_strategy = MitigationColumnMappingStrategy()
@@ -195,7 +221,11 @@ class OpenVASCsvParser(object):
         verified_column_strategy = VerifiedColumnMappingStrategy()
         false_positive_strategy = FalsePositiveColumnMappingStrategy()
         duplicate_strategy = DuplicateColumnMappingStrategy()
+        port_strategy = PortColumnMappingStrategy()
+        protocol_strategy = ProtocolColumnMappingStrategy()
 
+        port_strategy.successor = protocol_strategy
+        duplicate_strategy.successor = port_strategy
         false_positive_strategy.successor = duplicate_strategy
         verified_column_strategy.successor = false_positive_strategy
         active_column_strategy.successor = verified_column_strategy
@@ -204,8 +234,8 @@ class OpenVASCsvParser(object):
         mitigation_column_strategy.successor = impact_column_strategy
         description_column_strategy.successor = mitigation_column_strategy
         severity_column_strategy.successor = description_column_strategy
-        ip_column_strategy.successor = severity_column_strategy
-        cwe_column_strategy.successor = ip_column_strategy
+        url_column_strategy.successor = severity_column_strategy
+        cwe_column_strategy.successor = url_column_strategy
         title_column_strategy.successor = cwe_column_strategy
         date_column_strategy.successor = title_column_strategy
 
@@ -242,6 +272,7 @@ class OpenVASCsvParser(object):
         row_number = 0
         for row in reader:
             finding = Finding(test=test)
+            finding.unsaved_endpoints = [Endpoint()]
 
             if row_number == 0:
                 column_names = self.read_column_names(row)
@@ -259,7 +290,7 @@ class OpenVASCsvParser(object):
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.md5((finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
+                key = hashlib.sha256((finding.unsaved_endpoints[0].get_normalized_url() + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
                 if key not in dupes:
                     dupes[key] = finding
