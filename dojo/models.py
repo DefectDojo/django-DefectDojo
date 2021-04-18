@@ -2112,7 +2112,7 @@ class Finding(models.Model):
 
         # Title Casing
         from titlecase import titlecase
-        self.title = titlecase(self.title)
+        self.title = titlecase(self.title[:511])
 
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
