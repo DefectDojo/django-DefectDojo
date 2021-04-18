@@ -42,6 +42,8 @@ class AcunetixParser(object):
                     severity=self.get_severity(item.findtext("Severity")),
                     description=html2text.html2text(item.findtext("Description")).strip(),
                     false_p=self.get_false_positive(item.findtext("IsFalsePositive")),
+                    static_finding=True,
+                    dynamic_finding=False,
                     nb_occurences=1,
                 )
 
@@ -75,29 +77,34 @@ class AcunetixParser(object):
                     finding.description += "\n\n**TechnicalDetails:**\n\n{}".format(item.findtext("TechnicalDetails"))
 
                 # add requests
+                finding.unsaved_req_resp = list()
                 if len(item.findall("TechnicalDetails/Request")):
-                    finding.unsaved_req_resp = list()
+                    finding.dynamic_finding = True  # if there is some requests it's dynamic
+                    finding.static_finding = False  # if there is some requests it's dynamic
                     for request in item.findall("TechnicalDetails/Request"):
                         finding.unsaved_req_resp.append({"req": (request.text or ""), "resp": ""})
 
-                if start_url:
-                    url = hyperlink.parse(start_url)
-                    endpoint = Endpoint(
-                            host=url.host,
-                            port=url.port,
-                            path=item.findtext("Affects"),
-                    )
-                    if url.scheme is not None and "" != url.scheme:
-                        endpoint.protocol = url.scheme
-                    finding.unsaved_endpoints = [endpoint]
+                # manage the endpoint
+                url = hyperlink.parse(start_url)
+                endpoint = Endpoint(
+                        host=url.host,
+                        port=url.port,
+                        path=item.findtext("Affects"),
+                )
+                if url.scheme is not None and "" != url.scheme:
+                    endpoint.protocol = url.scheme
+                finding.unsaved_endpoints = [endpoint]
 
                 dupe_key = hashlib.sha256("|".join([
                     finding.title,
-                    finding.description,
+                    str(finding.impact),
+                    str(finding.mitigation),
                 ]).encode("utf-8")).hexdigest()
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    find.unsaved_req_resp.extend(finding.unsaved_req_resp)
                     find.nb_occurences += finding.nb_occurences
                     logger.debug("Duplicate finding : {defectdojo_title}".format(defectdojo_title=finding.title))
                 else:
