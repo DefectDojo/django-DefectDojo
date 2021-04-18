@@ -1,13 +1,10 @@
-# from selenium.webdriver.support.ui import Select
 import unittest
 import sys
 from base_test_class import BaseTestCase
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait, Select
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import ActionChains
-from product_test import ProductTest
-# from django.conf import settings
 
 
 class UserTest(BaseTestCase):
@@ -36,8 +33,6 @@ class UserTest(BaseTestCase):
         # Email Address
         driver.find_element_by_id("id_email").clear()
         driver.find_element_by_id("id_email").send_keys("propersam@example.com")
-        # Give user super user permissions by ticking the checkbox 'is_superuser'
-        driver.find_element_by_name("is_superuser").click()  # Clicking will mark the checkbox
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the user has been created
@@ -64,8 +59,7 @@ class UserTest(BaseTestCase):
         # only the needed user is now available, proceed with opening the context menu and clicking 'Edit' button
         driver.find_element_by_id("dropdownMenuUser").click()
         driver.find_element_by_id("editUser").click()
-        # Unselect Super Admin Permission from previously created user
-        # and only select Staff Permission
+        # Select Superuser and Staff Permission
         driver.find_element_by_name("is_superuser").click()
         driver.find_element_by_name("is_staff").click()
         # "Click" the submit button to complete the transaction
@@ -74,152 +68,6 @@ class UserTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='User saved successfully.'))
-
-    def test_user_add_product_type_member(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.driver
-        # Navigate to User Management page
-        driver.get(self.base_url + "user")
-        # Select and click on the particular user to view
-        driver.find_element_by_link_text("propersahm").click()
-        if self.is_element_by_id_present('dropdownMenuAddProductTypeMember'):
-            # Open the menu to add users and click the 'Add User' button
-            driver.find_element_by_id("dropdownMenuAddProductTypeMember").click()
-            driver.find_element_by_id("addProductTypeMember").click()
-            # Select the product type 'Research and Development'
-            Select(driver.find_element_by_id("id_product_type")).select_by_visible_text("Research and Development")
-            # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
-            # Query the site to determine if the User permission has been changed
-
-            # Assert ot the query to determine success status
-            self.assertTrue(self.is_success_message_present(text='Product type member added successfully.'))
-        else:
-            print('--------------------------------')
-            print('test_user_add_product_type_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
-
-    def test_user_edit_product_type_member(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.driver
-        # Navigate to User Management page
-        driver.get(self.base_url + "user")
-        # Select and click on the particular user to view
-        driver.find_element_by_link_text("propersahm").click()
-        if self.is_element_by_id_present('dropdownMenuAddProductTypeMember'):
-            # Open the menu to manage members and click the 'Edit' button
-            driver.find_element_by_id("dropdownManageProductTypeMember").click()
-            driver.find_element_by_id("editProductTypeMember").click()
-            # Select the role 'Owner'
-            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Owner")
-            # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
-            # Query the site to determine if the User permission has been changed
-
-            # Assert ot the query to determine success status
-            self.assertTrue(self.is_success_message_present(text='Product type member updated successfully.'))
-        else:
-            print('--------------------------------')
-            print('test_user_edit_product_type_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
-
-    def test_user_delete_product_type_member(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.driver
-        # Navigate to User Management page
-        driver.get(self.base_url + "user")
-        # Select and click on the particular user to view
-        driver.find_element_by_link_text("propersahm").click()
-        if self.is_element_by_id_present('dropdownMenuAddProductTypeMember'):
-            # Open the menu to manage members and click the 'Delete' button
-            driver.find_element_by_id("dropdownManageProductTypeMember").click()
-            driver.find_element_by_id("deleteProductTypeMember").click()
-            # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-danger").click()
-            # Query the site to determine if the User permission has been changed
-
-            # Assert ot the query to determine success status
-            self.assertTrue(self.is_success_message_present(text='Product type member deleted successfully.'))
-        else:
-            print('--------------------------------')
-            print('test_user_delete_product_type_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
-
-    def test_user_add_product_member(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.driver
-        # Navigate to User Management page
-        driver.get(self.base_url + "user")
-        # Select and click on the particular user to view
-        driver.find_element_by_link_text("propersahm").click()
-        if self.is_element_by_id_present('dropdownMenuAddProductMember'):
-            # Open the menu to add users and click the 'Add User' button
-            driver.find_element_by_id("dropdownMenuAddProductMember").click()
-            driver.find_element_by_id("addProductMember").click()
-            # Select the product type 'Research and Development'
-            Select(driver.find_element_by_id("id_product")).select_by_visible_text("QA Test")
-            # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
-            # Query the site to determine if the User permission has been changed
-
-            # Assert ot the query to determine success status
-            self.assertTrue(self.is_success_message_present(text='Product member added successfully.'))
-        else:
-            print('--------------------------------')
-            print('test_user_add_product_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
-
-    def test_user_edit_product_member(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.driver
-        # Navigate to User Management page
-        driver.get(self.base_url + "user")
-        # Select and click on the particular user to view
-        driver.find_element_by_link_text("propersahm").click()
-        if self.is_element_by_id_present('dropdownMenuAddProductMember'):
-            # Open the menu to manage members and click the 'Edit' button
-            driver.find_element_by_id("dropdownManageProductMember").click()
-            driver.find_element_by_id("editProductMember").click()
-            # Select the role 'Owner'
-            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Maintainer")
-            # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-primary").click()
-            # Query the site to determine if the User permission has been changed
-
-            # Assert ot the query to determine success status
-            self.assertTrue(self.is_success_message_present(text='Product member updated successfully.'))
-        else:
-            print('--------------------------------')
-            print('test_edit_add_product_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
-
-    def test_user_delete_product_member(self):
-        # Login to the site. Password will have to be modified
-        # to match an admin password in your own container
-        driver = self.driver
-        # Navigate to User Management page
-        driver.get(self.base_url + "user")
-        # Select and click on the particular user to view
-        driver.find_element_by_link_text("propersahm").click()
-        if self.is_element_by_id_present('dropdownMenuAddProductMember'):
-            # Open the menu to manage members and click the 'Delete' button
-            driver.find_element_by_id("dropdownManageProductMember").click()
-            driver.find_element_by_id("deleteProductMember").click()
-            # "Click" the submit button to complete the transaction
-            driver.find_element_by_css_selector("input.btn.btn-danger").click()
-            # Query the site to determine if the User permission has been changed
-
-            # Assert ot the query to determine success status
-            self.assertTrue(self.is_success_message_present(text='Product member deleted successfully.'))
-        else:
-            print('--------------------------------')
-            print('test_user_delete_product_member: Not executed because legacy authorization is active')
-            print('--------------------------------')
 
     def test_user_delete(self):
         # Login to the site. Password will have to be modified
@@ -277,14 +125,6 @@ def suite():
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_create_user'))
     suite.addTest(UserTest('test_user_edit_permissions'))
-    suite.addTest(UserTest('test_user_add_product_type_member'))
-    suite.addTest(UserTest('test_user_edit_product_type_member'))
-    suite.addTest(UserTest('test_user_delete_product_type_member'))
-    suite.addTest(ProductTest('test_create_product'))
-    suite.addTest(UserTest('test_user_add_product_member'))
-    suite.addTest(UserTest('test_user_edit_product_member'))
-    suite.addTest(UserTest('test_user_delete_product_member'))
-    suite.addTest(ProductTest('test_delete_product'))
     suite.addTest(UserTest('test_user_delete'))
 
     # not really for the user we created, but still related to user settings

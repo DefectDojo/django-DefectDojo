@@ -138,18 +138,18 @@
                             <td>
                                 <ul>
                                     <li class="dropdown" style="list-style:none;position:absolute">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="dropdownManageProductTypeMember"
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductTypeMember"
                                             aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                         <ul class="dropdown-menu">
                                             {% if member.product_type|has_object_permission:"Product_Type_Manage_Members" %}
                                             <li>
-                                                <a id="editProductTypeMember" href="{% url 'edit_product_type_member' member.id %}">
+                                                <a name="editProductTypeMember" href="{% url 'edit_product_type_member' member.id %}">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                             </li>
                                             {% endif %}
                                             {% if member|has_object_permission:"Product_Type_Member_Delete" %}
                                             <li>
-                                                <a id="deleteProductTypeMember" href="{% url 'delete_product_type_member' member.id %}">
+                                                <a name="deleteProductTypeMember" href="{% url 'delete_product_type_member' member.id %}">
                                                     <i class="fa fa-trash"></i> Delete</a>
                                             </li>
                                             {% endif %}
@@ -157,8 +157,8 @@
                                     </li>
                                 </ul>
                             </td>
-                            <td><a href="{% url 'view_product_type' member.product_type.id %}">{{ member.product_type }}</a></td>
-                            <td>{% role_as_string member.role %}</td>
+                            <td name="member_product_type"><a href="{% url 'view_product_type' member.product_type.id %}">{{ member.product_type }}</a></td>
+                            <td name="member_product_type_role">{% role_as_string member.role %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -208,18 +208,18 @@
                             <td>
                                 <ul>
                                     <li class="dropdown" style="list-style:none;position:absolute">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" id="dropdownManageProductMember"
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductMember"
                                             aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                         <ul class="dropdown-menu">
                                             {% if member.product|has_object_permission:"Product_Manage_Members" %}
                                             <li>
-                                                <a id="editProductMember" href="{% url 'edit_product_member' member.id %}">
+                                                <a name="editProductMember" href="{% url 'edit_product_member' member.id %}">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                             </li>
                                             {% endif %}
                                             {% if member|has_object_permission:"Product_Member_Delete" %}
                                             <li>
-                                                <a id="deleteProductMember" href="{% url 'delete_product_member' member.id %}">
+                                                <a name="deleteProductMember" href="{% url 'delete_product_member' member.id %}">
                                                     <i class="fa fa-trash"></i> Delete</a>
                                             </li>
                                             {% endif %}
@@ -227,8 +227,8 @@
                                     </li>
                                 </ul>
                             </td>
-                            <td><a href="{% url 'view_product' member.product.id %}">{{ member.product }}</a></td>
-                            <td>{% role_as_string member.role %}</td>
+                            <td name="member_product"><a href="{% url 'view_product' member.product.id %}">{{ member.product }}</a></td>
+                            <td name="member_product_role">{% role_as_string member.role %}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
