@@ -10,11 +10,6 @@ class TestIntSightsParser(TestCase):
         test.engagement.product = Product()
         return test
 
-    def test_intsights_parser_without_file_has_no_findings(self):
-        parser = IntSightsParser()
-        findings = parser.get_findings(None, self.get_test())
-        self.assertEqual(0, len(findings))
-
     def test_intsights_parser_with_no_vuln_has_no_findings(self):
         testfile = open("dojo/unittests/scans/intsights/intsights_zero_vul.json")
         parser = IntSightsParser()
