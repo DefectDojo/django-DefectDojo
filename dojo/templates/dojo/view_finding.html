@@ -249,14 +249,14 @@
                     <th>Found by</th>
                 </tr>
                 <tr>
-                    <td>{{ finding.id }}</td>
+                    <td title="hash_code: {{ finding.hash_code }}">{{ finding.id }}</td>
                     <td>
                         <span class="label severity severity-{{ finding.severity }}">
                             {% if finding.severity %}
                                 {% if finding.cvssv3 %}
                                     <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
                                         data-content="{{ finding.cvssv3 }}">
-                                {% endif %}        
+                                {% endif %}
                                 {{ finding.severity_display }}
                                 {% if finding.cvssv3_score %}
                                     ({{ finding.cvssv3_score }})
