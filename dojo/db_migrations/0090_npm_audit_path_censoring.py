@@ -22,7 +22,8 @@ def npm_censor_hashes(apps, schema_editor):
     now = timezone.now()
     Finding = apps.get_model('dojo', 'Finding')
     Test_Type = apps.get_model('dojo', 'Test_Type')
-    findings = Finding.objects.filter(test__test_type=Test_Type.objects.get(name='NPM Audit Scan'))
+    npm_audit, _ = Test_Type.objects.get_or_create(name='NPM Audit Scan')
+    findings = Finding.objects.filter(test__test_type=npm_audit)
 
     mass_model_updater(Finding, findings, lambda f: censor_hashes(f), fields=['file_path', 'hash_code'])
 
