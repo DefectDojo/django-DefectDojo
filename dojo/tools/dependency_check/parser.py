@@ -16,9 +16,9 @@ SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
 class DependencyCheckParser(object):
     def add_finding(self, finding, dupes):
         if finding is not None:
-            key_str = '{}|{}|{}'.format(finding.severity,
-                                            finding.title,
-                                            finding.description)
+            key_str = '{}|{}|{}'.format(finding.cve,
+                                            finding.cwe,
+                                            finding.file_path.lower())
             key = hashlib.md5(key_str.encode('utf-8')).hexdigest()
 
             if key not in dupes:
@@ -187,7 +187,18 @@ class DependencyCheckParser(object):
                 cwe = int(m.group(2))
 
         component_name, component_version = self.get_component_name_and_version_from_dependency(dependency, related_dependency, namespace)
-        title = '%s:%s | %s' % (component_name.split(':')[-1], component_version, description)
+
+        stripped_name = name
+        # startswith CVE-XXX-YYY
+        stripped_name = re.sub(r'^CVE-\d{4}-\d{4,7}', '', stripped_name).strip()
+        # startswith CWE-XXX:
+        stripped_name = re.sub(r'^CWE-\d+\:', '', stripped_name).strip()
+        # startswith CWE-XXX
+        stripped_name = re.sub(r'^CWE-\d+', '', stripped_name).strip()
+
+        title = '%s:%s | %s(in %s)' % (component_name.split(':')[-1], component_version,
+            (stripped_name + ' ' if stripped_name else '') + (description if len(stripped_name) < 25 else ''),
+            dependency_filename)
 
         # some changes in v6.0.0 around CVSS version information
         # https://github.com/jeremylong/DependencyCheck/pull/2781
