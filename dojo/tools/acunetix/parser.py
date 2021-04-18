@@ -103,6 +103,9 @@ class AcunetixParser(object):
 
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
+                    # add details for the duplicate finding
+                    if item.findtext("Details") and len(item.findtext("Details").strip()) > 0:
+                        find.description += "\n-----\n\n**Details:**\n{}".format(html2text.html2text(item.findtext("Details")))
                     find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                     find.unsaved_req_resp.extend(finding.unsaved_req_resp)
                     find.nb_occurences += finding.nb_occurences
