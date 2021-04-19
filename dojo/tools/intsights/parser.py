@@ -9,7 +9,7 @@ from dojo.models import Finding
 
 class IntSightsParser(object):
     """
-    IntSights Threat Intelligence Feed
+    IntSights Threat Intelligence Report
     """
 
     _LOGGER = logging.getLogger(__name__)
@@ -23,36 +23,18 @@ class IntSightsParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "IntSights report file can be imported in JSON format."
 
-    def _parse_assets(self, assets):
+    def _parse_json(self, json_file) -> [{}]:
         """
-        Parses the Assets node to create a string to be used in the Description
-        """
-
-        assets_affected = ''
-
-        for entry in assets:
-            assets_affected = f'{assets_affected} Type: {entry["Type"]}, Value: {entry["Value"]},'
-
-        return assets_affected[:-1]
-
-    def _get_alerts_from_file(self, file) -> []:
-        """
-        Parse Alerts from a JSON file compiled from the Threat Command API, or CSV file provided by the IntSights
-        Threat Command GUI.
-
-        Normalize the key/value pairs using the CSV keys as canonical.
-
+        Parses entries from the JSON object into a list of alerts
         Args:
-            file: The file object from the get_findings() method
-
+            json_file: The JSON file object to parse
         Returns:
-            A list of IntSights alerts in dict format
+            A list of alerts [dict()]
         """
         alerts = []
 
-
-        original_alerts = json.load(file)
-        for original_alert in original_alerts['Alerts']:
+        original_alerts = json.load(json_file)
+        for original_alert in original_alerts.get('Alerts', []):
             alert = dict()
             alert['alert_id'] = original_alert['_id']
             alert['title'] = original_alert['Details']['Title']
@@ -72,42 +54,34 @@ class IntSightsParser(object):
 
             alerts.append(alert)
 
-            return alerts
-
-
-
-    def _parse_json(self, json_file):
-        """
-
-        Args:
-            json_file:
-
-        Returns:
-
-        """
+        return alerts
 
     def _parse_csv(self, csv_file):
         """
 
+        Parses entries from the CSV file object into a list of alerts
         Args:
-            csv_file:
-
+            csv_file: The JSON file object to parse
         Returns:
+            A list of alerts [dict()]
 
         """
-        # If JSON parsing fails, try CSV parsing
         default_keys = ['Alert ID', 'Title', 'Description', 'Severity', 'Type', 'Source Date (UTC)',
                         'Report Date (UTC)', 'Network Type', 'Source URL', 'Source Name', 'Assets', 'Tags',
                         'Assignees', 'Remediation', 'Status', 'Closed Reason', 'Additional Info', 'Rating',
                         'Alert Link']
 
+        # These keys require a value. If one ore more of the values is null or empty, the entire Alert is ignored.
+        # This is to avoid attempting to import incomplete Findings.
+        required_keys = ['alert_id', 'title', 'severity', 'status']
+
         alerts = []
+        invalid_alerts = []
 
-        file_content  = csv_file.read()
-        if type(file_content) is bytes:
-            file_content = file_content.decode('utf-8')
-
-        csv_reader = csv.DictReader(io.StringIO(file_content), delimiter=',', quotechar='"')
+        content = csv_file.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        csv_reader = csv.DictReader(io.StringIO(content), delimiter = ',', quotechar = '"')
 
         # Don't bother parsing if the keys don't match exactly what's expected
         if collections.Counter(default_keys) == collections.Counter(csv_reader.fieldnames):
@@ -129,19 +103,28 @@ class IntSightsParser(object):
                 alert.pop('Remediation')
                 alert.pop('Closed Reason')
                 alert.pop('Rating')
-                alerts.append(alert)
-        return alerts
+                for key in required_keys:
+                    if not alert[key]:
+                        invalid_alerts.append(alert)
 
+                if alert not in invalid_alerts:
+                    alerts.append(alert)
+        else:
+            self._LOGGER.error('The CSV file has one or more missing or unexpected header values')
+
+        return alerts
 
     def get_findings(self, file, test):
         duplicates = dict()
 
-        alerts = []
+        self._LOGGER.error(type(file))
 
-        if 'text/json' == file.content_type:
-            alerts = self._parse_json(file)
-        elif 'text/csv' == file.content_type:
+        if file.name.lower().endswith('.json'):
+            alerts = self._parse_json(file, )
+        elif file.name.lower().endswith('.csv'):
             alerts = self._parse_csv(file)
+        else:
+            raise ValueError('IntSights report contains errors: Unknown File Format')
 
         if not alerts:
             raise ValueError('IntSights report contains errors: No vulnerabilities were found in the data provided')
