@@ -33,7 +33,6 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
 
-from dojo.tools.factory import get_disabled_scanners
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions, prefetch, schema
 import dojo.jira_link.helper as jira_helper

@@ -57,6 +57,7 @@ def manage_disabled_scanners():
     q_list = reduce(lambda a, b: a | b, q_list)
     return q_list
 
+
 def now():
     return local_tz.localize(datetime.today())
 
