@@ -10,7 +10,7 @@ from dojo.models import Endpoint
 logger = logging.getLogger(__name__)
 
 
-def endpoint_get_or_create(**kwargs):
+def endpoint_filter(**kwargs):
     qs = Endpoint.objects.all()
 
     if kwargs.get('protocol'):
@@ -60,6 +60,13 @@ def endpoint_get_or_create(**kwargs):
         qs = qs.filter(product__exact=kwargs['product'])
     else:
         qs = qs.filter(product__isnull=True)
+
+    return qs
+
+
+def endpoint_get_or_create(**kwargs):
+
+    qs = endpoint_filter(**kwargs)
 
     if qs.count() == 0:
         return Endpoint.objects.get_or_create(**kwargs)

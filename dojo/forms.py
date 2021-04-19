@@ -19,7 +19,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
-from dojo.endpoint.utils import endpoint_get_or_create
+from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
@@ -1280,7 +1280,7 @@ class EditEndpointForm(forms.ModelForm):
         except ValidationError as e:
             raise forms.ValidationError('; '.join(e), code='invalid')
 
-        endpoint = Endpoint.objects.filter(protocol=protocol,
+        endpoint = endpoint_filter(protocol=protocol,
                                            userinfo=userinfo,
                                            host=host,
                                            fqdn=fqdn,

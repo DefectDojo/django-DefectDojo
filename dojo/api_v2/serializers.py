@@ -1,4 +1,6 @@
 from drf_yasg.utils import swagger_serializer_method
+
+from dojo.endpoint.utils import endpoint_filter
 from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -596,7 +598,7 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
         except ValidationError as e:
             raise serializers.ValidationError('; '.join(e), code='invalid')
 
-        endpoint = Endpoint.objects.filter(protocol=protocol,
+        endpoint = endpoint_filter(protocol=protocol,
                                            userinfo=userinfo,
                                            host=host,
                                            fqdn=fqdn,
