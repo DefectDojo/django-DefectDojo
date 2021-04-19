@@ -166,6 +166,13 @@ else
     echo "Error: Check Various Pages test failed"; exit 1
 fi
 
+echo "Test type enable/disable"
+if python3 tests/scan_type_test.py ; then
+    echo "Success: Test type enable/disable tests passed"
+else
+    echo "Error: Test type enable/disable test failed"; exit 1
+fi
+
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
