@@ -60,7 +60,8 @@ class SpotbugsParser(object):
             source_extract = bug.find('SourceLine')
             if source_extract is not None:
                 source_file = source_extract.get("sourcepath")
-                source_line = int(source_extract.get("start") if source_extract.get("start") is not None else "0")
+                if 'start' in source_extract and source_extract["start"].isdigit():
+                    source_line = int(source_extract["start"])
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
