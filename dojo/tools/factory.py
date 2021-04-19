@@ -50,11 +50,9 @@ def get_disabled_scanners():
 def get_choices():
     res = list()
     disabled = get_disabled_scanners()
-    print('TEst {}'.format(disabled))
     for key in PARSERS.keys():
         if key.lower() not in disabled:
             res.append((key, PARSERS[key].get_label_for_scan_types(key)))
-    print(res)
     return tuple(res)
 
 

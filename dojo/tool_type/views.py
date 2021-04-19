@@ -21,12 +21,12 @@ def new_tool_type(request):
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Tool Type Configuration Successfully Created.',
+                                 'Tool Type Successfully Created.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('tool_type', ))
     else:
         tform = ToolTypeForm()
-        add_breadcrumb(title="New Tool Type Configuration", top_level=False, request=request)
+        add_breadcrumb(title="New Tool Type", top_level=False, request=request)
     return render(request, 'dojo/new_tool_type.html',
                   {'tform': tform})
 
@@ -40,12 +40,12 @@ def edit_tool_type(request, ttid):
             tform.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Tool Type Configuration Successfully Updated.',
+                                 'Tool Type Successfully Updated.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('tool_type', ))
     else:
         tform = ToolTypeForm(instance=tool_type)
-    add_breadcrumb(title="Edit Tool Type Configuration", top_level=False, request=request)
+    add_breadcrumb(title="Edit Tool Type", top_level=False, request=request)
 
     return render(request,
                   'dojo/edit_tool_type.html',

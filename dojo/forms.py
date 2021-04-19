@@ -1,6 +1,7 @@
 import os
 import re
 from datetime import datetime, date
+from functools import reduce
 from urllib.parse import urlsplit, urlunsplit
 import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
@@ -32,7 +33,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
     Product_Member
 
-from dojo.tools.factory import requires_file, get_choices
+from dojo.tools.factory import requires_file, get_choices, get_disabled_scanners
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 from tagulous.forms import TagField
@@ -742,10 +743,20 @@ class DeleteEngagementForm(forms.ModelForm):
         fields = []
 
 
+def manage_disabled_scanners():
+    disabled = get_disabled_scanners()
+    # this dirty solution is to filter out scanners that are disabled, needs some refactory
+    q_list = map(lambda n: Q(name__iexact=n), disabled)
+    q_list = reduce(lambda a, b: a | b, q_list)
+    return q_list
+
+
 class TestForm(forms.ModelForm):
+
     title = forms.CharField(max_length=255, required=False)
     description = forms.CharField(widget=forms.Textarea(attrs={'rows': '3'}), required=False)
-    test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
+    test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().exclude(manage_disabled_scanners()).order_by('name'))
+
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
     # credential = forms.ModelChoiceField(Cred_User.objects.all(), required=False)
@@ -759,6 +770,8 @@ class TestForm(forms.ModelForm):
         required=False, label="Testing Lead")
 
     def __init__(self, *args, **kwargs):
+
+
         obj = None
 
         if 'engagement' in kwargs:
@@ -774,6 +787,8 @@ class TestForm(forms.ModelForm):
         else:
             staff_users = [user.id for user in User.objects.exclude(is_staff=False)]
         self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
+
+        self.fields['test_type'].queryset = Test_Type.objects.all().exclude(manage_disabled_scanners()).order_by('name')
 
     class Meta:
         model = Test
