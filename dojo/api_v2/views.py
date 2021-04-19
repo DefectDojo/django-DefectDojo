@@ -1,3 +1,6 @@
+from functools import reduce
+
+from django.db.models import Q
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -32,6 +35,8 @@ from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
+
+from dojo.tools.factory import get_disabled_scanners
 from dojo.utils import get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions, prefetch, schema
 import dojo.jira_link.helper as jira_helper
@@ -1142,6 +1147,13 @@ class TestsViewSet(mixins.ListModelMixin,
         return Response(serialized_files,
                 status=status.HTTP_200_OK)
 
+def manage_disabled_scanners():
+    disabled = get_disabled_scanners()
+    # this dirty solution is to filter out scanners that are disabled, needs some refactory
+    q_list = []
+    q_list = map(lambda n: Q(name__iexact=n), disabled)
+    q_list = reduce(lambda a, b: a | b, q_list)
+    return q_list
 
 # Authorization: authenticated users
 class TestTypesViewSet(mixins.ListModelMixin,
@@ -1150,7 +1162,7 @@ class TestTypesViewSet(mixins.ListModelMixin,
                        mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.TestTypeSerializer
-    queryset = Test_Type.objects.all()
+    queryset = Test_Type.objects.all().exclude(manage_disabled_scanners())
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('name',)
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
