@@ -75,6 +75,7 @@ class ScanTypeTest(BaseTestCase):
         driver.find_element_by_id("id_title").send_keys("Test Acunetix_Scan")
         self.assertTrue("Acunetix Scan" in self.driver.find_element_by_id("id_test_type").text)
 
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))

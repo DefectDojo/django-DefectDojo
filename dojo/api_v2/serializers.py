@@ -1,4 +1,3 @@
-from functools import reduce
 
 from drf_yasg.utils import swagger_serializer_method
 from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
@@ -11,7 +10,7 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member
 from dojo.forms import ImportScanForm
-from dojo.tools.factory import requires_file, get_disabled_scanners
+from dojo.tools.factory import requires_file
 from dojo.utils import is_scan_file_too_large
 from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
