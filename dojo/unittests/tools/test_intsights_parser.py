@@ -1,5 +1,3 @@
-import json
-
 from django.test import TestCase
 
 from dojo.models import Engagement, Product, Test
@@ -45,14 +43,11 @@ class TestIntSightsParser(TestCase):
 
         finding = list(findings)[0]
 
-
         self.assertEqual('5c80dbf83b4a3900078b6be6', finding.unique_id_from_tool)
         self.assertEqual('HTTP headers weakness in initech.com web server', finding.title)
         self.assertEquals('Critical', finding.severity)
         self.assertEquals("https://dashboard.intsights.com/#/threat-command/alerts?search=5c80dbf83b4a3900078b6be6",
                           finding.references)
-
-
 
     def test_intsights_parser_with_one_critical_vuln_has_one_findings_csv(self):
         testfile = open("dojo/unittests/scans/intsights/intsights_one_vuln.csv")
