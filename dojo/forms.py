@@ -746,6 +746,7 @@ class DeleteEngagementForm(forms.ModelForm):
 def manage_disabled_scanners():
     disabled = get_disabled_scanners()
     # this dirty solution is to filter out scanners that are disabled, needs some refactory
+    q_list = []
     q_list = map(lambda n: Q(name__iexact=n), disabled)
     q_list = reduce(lambda a, b: a | b, q_list)
     return q_list
