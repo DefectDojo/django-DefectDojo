@@ -1,7 +1,6 @@
 import os
 import re
 from datetime import datetime, date
-from functools import reduce
 from urllib.parse import urlsplit, urlunsplit
 import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
@@ -780,9 +779,10 @@ class TestForm(forms.ModelForm):
         else:
             staff_users = [user.id for user in User.objects.exclude(is_staff=False)]
         self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
-
-        self.fields['test_type'].queryset = Test_Type.objects.all().exclude(manage_disabled_scanners()).order_by('name')
-
+        try:
+            self.fields['test_type'].queryset = Test_Type.objects.all().exclude(manage_disabled_scanners()).order_by('name')
+        except:
+            pass
     class Meta:
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end', 'description',
