@@ -22,6 +22,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
+from dojo.filters import manage_disabled_scanners
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
@@ -741,15 +742,6 @@ class DeleteEngagementForm(forms.ModelForm):
     class Meta:
         model = Engagement
         fields = []
-
-
-def manage_disabled_scanners():
-    disabled = get_disabled_scanners()
-    # this dirty solution is to filter out scanners that are disabled, needs some refactory
-    q_list = []
-    q_list = map(lambda n: Q(name__iexact=n), disabled)
-    q_list = reduce(lambda a, b: a | b, q_list)
-    return q_list
 
 
 class TestForm(forms.ModelForm):

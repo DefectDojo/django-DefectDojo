@@ -49,6 +49,7 @@ from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.filters import manage_disabled_scanners
 
 logger = logging.getLogger(__name__)
 
@@ -1142,22 +1143,10 @@ class TestsViewSet(mixins.ListModelMixin,
                     "test_id": test, "files": files
             })
             return Response(serialized_files.data,
-                    status=status.HTTP_200_OK)
+                    status= status.HTTP_200_OK)
 
         return Response(serialized_files,
                 status=status.HTTP_200_OK)
-
-
-def manage_disabled_scanners():
-    disabled = get_disabled_scanners()
-    # this dirty/ugly as hell solution is to filter out scanners that are disabled, needs some refactory on design level
-    q_list = []
-    try:
-        q_list = map(lambda n: Q(name__iexact=n), disabled)
-        q_list = reduce(lambda a, b: a | b, q_list)
-    except:
-        pass
-    return q_list
 
 
 # Authorization: authenticated users
