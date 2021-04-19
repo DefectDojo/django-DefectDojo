@@ -95,7 +95,6 @@ def clean_hosts(apps, schema_editor):
                     except ValidationError:
                         logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk, endpoint.host, error_prefix))
                         broken_endpoints.append(endpoint.pk)
-    # TODO check duplicities (group by products)
     if broken_endpoints != []:
         raise FieldError('It is not possible to migrate database because there is/are {} broken endpoint(s). '
                          'Please check logs.'.format(len(broken_endpoints)))
@@ -107,7 +106,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # This step wasn't possible to merge with 0089_endpoint_userinfo_creation, because Unittest shows:
+        # This step wasn't possible to merge with 0090_endpoint_userinfo_creation, because Unittest shows:
         # django.db.utils.OperationalError: (1060, "Duplicate column name 'userinfo'")
         migrations.RunPython(clean_hosts)
     ]

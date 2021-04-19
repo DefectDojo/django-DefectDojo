@@ -15,6 +15,8 @@ from django.utils import timezone
 from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
+
+from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
@@ -1184,7 +1186,7 @@ def ad_hoc_finding(request, pid):
                 new_finding.endpoint_status.add(eps)
 
             for endpoint in new_finding.unsaved_endpoints:
-                ep, created = Endpoint.objects.get_or_create(
+                ep, created = endpoint_get_or_create(
                     protocol=endpoint.protocol,
                     userinfo=endpoint.userinfo,
                     host=endpoint.host,
@@ -1202,7 +1204,7 @@ def ad_hoc_finding(request, pid):
                 new_finding.endpoints.add(ep)
                 new_finding.endpoint_status.add(eps)
             for endpoint in form.cleaned_data['endpoints']:
-                ep, created = Endpoint.objects.get_or_create(
+                ep, created = endpoint_get_or_create(
                     protocol=endpoint.protocol,
                     userinfo=endpoint.userinfo,
                     host=endpoint.host,

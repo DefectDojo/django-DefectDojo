@@ -2,9 +2,10 @@ import datetime
 from dojo.importers import utils as importer_utils
 from dojo.models import Test, Finding, \
     Test_Type, \
-    Endpoint, BurpRawRequestResponse, \
+    BurpRawRequestResponse, \
     Endpoint_Status, \
     Test_Import
+from dojo.endpoint.utils import endpoint_get_or_create
 
 from dojo.utils import get_current_user, max_safe
 
@@ -108,7 +109,7 @@ class DojoDefaultImporter(object):
 
             for endpoint in item.unsaved_endpoints:
                 try:
-                    ep, created = Endpoint.objects.get_or_create(
+                    ep, created = endpoint_get_or_create(
                         protocol=endpoint.protocol,
                         userinfo=endpoint.userinfo,
                         host=endpoint.host,
@@ -136,7 +137,7 @@ class DojoDefaultImporter(object):
                     for endpoint in endpoints_to_add:
                         # TODO Not sure what happens here, we get an endpoint model and try to create it again?
                         try:
-                            ep, created = Endpoint.objects.get_or_create(
+                            ep, created = endpoint_get_or_create(
                                 protocol=endpoint.protocol,
                                 userinfo=endpoint.userinfo,
                                 host=endpoint.host,

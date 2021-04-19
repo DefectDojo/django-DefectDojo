@@ -19,6 +19,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
+from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
@@ -1323,7 +1324,7 @@ class AddEndpointForm(forms.Form):
     def save(self):
         processed_endpoints = []
         for e in self.endpoints_to_process:
-            endpoint, created = Endpoint.objects.get_or_create(protocol=e[0],
+            endpoint, created = endpoint_get_or_create(protocol=e[0],
                                                                userinfo=e[1],
                                                                host=e[2],
                                                                port=e[3],

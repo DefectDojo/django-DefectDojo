@@ -37,6 +37,8 @@ from dojo.forms import ProductForm, EngForm, TestForm, \
     Development_EnvironmentForm, Product_TypeForm, Test_TypeForm, NoteTypeForm
 from dojo.tools.factory import import_parser_factory, requires_file
 from datetime import datetime
+
+from .endpoint.utils import endpoint_get_or_create
 from .object.parser import import_object_eng
 
 """
@@ -1419,7 +1421,7 @@ class ImportScanResource(MultipartResource, Resource):
                     burp_rr.save()
 
                 for endpoint in item.unsaved_endpoints:
-                    ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                    ep, created = endpoint_get_or_create(protocol=endpoint.protocol,
                                                                  userinfo=endpoint.userinfo,
                                                                  host=endpoint.host,
                                                                  fqdn=endpoint.fqdn,
@@ -1648,7 +1650,7 @@ class ReImportScanResource(MultipartResource, Resource):
                 if find:
                     finding_count += 1
                     for endpoint in item.unsaved_endpoints:
-                        ep, created = Endpoint.objects.get_or_create(protocol=endpoint.protocol,
+                        ep, created = endpoint_get_or_create(protocol=endpoint.protocol,
                                                                      userinfo=endpoint.userinfo,
                                                                      host=endpoint.host,
                                                                      fqdn=endpoint.fqdn,
