@@ -320,18 +320,20 @@ Immuniweb Scan
 
 XML Scan Result File from Immuniweb Scan.
 
-IntSights JSON Report
+IntSights Report
 --------------
 
-IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to 
-identify 
-threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.). Alerts for these threats can be 
-consumed via the threat 
-command API.
+IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.). 
 
-The IntSights `get-complete-alert` API only returns details for a single alert. To use this importer you'll need to 
-fetch each alert individually and 
-append to a list. The list is then saved as the value for the key "Alerts".
+### Manual Import
+Use the Export CSV feature in the IntSights Threat Command GUI to create an *IntSights Alerts.csv* file. This CSV 
+file can then be imported into Defect Dojo.
+
+### Automated Import
+
+The IntSights `get-complete-alert` API only returns details for a single alert. To automate the process, 
+individually fetch details for each alert and append to a list. The list is then saved as the value for the key 
+"Alerts". This JSON object can then be imported into Defect Dojo.
 
 Example:
 
