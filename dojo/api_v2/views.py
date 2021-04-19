@@ -1,6 +1,3 @@
-from functools import reduce
-
-from django.db.models import Q
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
