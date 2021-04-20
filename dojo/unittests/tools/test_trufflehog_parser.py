@@ -1,18 +1,14 @@
-import os.path
+from os import path
 
 from django.test import TestCase
-from dojo.tools.trufflehog.parser import TruffleHogParser
 from dojo.models import Test
-
-
-def sample_path(file_name):
-    return os.path.join("dojo/unittests/scans/trufflehog", file_name)
+from dojo.tools.trufflehog.parser import TruffleHogParser
 
 
 class TestTruffleHogParser(TestCase):
 
     def test_many_vulns(self):
-        test_file = open(sample_path("many_vulns.json"))
+        test_file = open(path.join(path.dirname(__file__), "scans/trufflehog/many_vulns.json"))
         parser = TruffleHogParser()
         findings = parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 18)

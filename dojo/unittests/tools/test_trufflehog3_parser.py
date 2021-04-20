@@ -1,18 +1,16 @@
-import os.path
+
 import datetime
+from os import path
+
 from django.test import TestCase
-from dojo.tools.trufflehog3.parser import TruffleHog3Parser
 from dojo.models import Test
-
-
-def sample_path(file_name):
-    return os.path.join("dojo/unittests/scans/trufflehog3", file_name)
+from dojo.tools.trufflehog3.parser import TruffleHog3Parser
 
 
 class TestTruffleHog3Parser(TestCase):
 
     def test_many_vulns(self):
-        test_file = open(sample_path("many_vulns.json"))
+        test_file = open(path.join(path.dirname(__file__), "scans/trufflehog3/many_vulns.json"))
         parser = TruffleHog3Parser()
         findings = parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 7)
@@ -39,7 +37,7 @@ class TestTruffleHog3Parser(TestCase):
         self.assertEqual(7, finding.nb_occurences)
 
     def test_many_vulns2(self):
-        test_file = open(sample_path("many_vulns2.json"))
+        test_file = open(path.join(path.dirname(__file__), "scans/trufflehog3/many_vulns2.json"))
         parser = TruffleHog3Parser()
         findings = parser.get_findings(test_file, Test())
         self.assertEqual(len(findings), 27)

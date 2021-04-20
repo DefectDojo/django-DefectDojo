@@ -1,20 +1,21 @@
 import datetime
+from os import path
 
 from django.test import SimpleTestCase
-from dojo.tools.veracode.parser import VeracodeParser
 from dojo.models import Test
+from dojo.tools.veracode.parser import VeracodeParser
 
 
 class TestVeracodeScannerParser(SimpleTestCase):
 
     def test_parse_file_with_one_finding(self):
-        testfile = open("dojo/unittests/scans/veracode/one_finding.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/veracode/one_finding.xml"))
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
     def test_parse_file_many_findings_different_hash_code_different_unique_id(self):
-        testfile = open("dojo/unittests/scans/veracode/many_findings_different_hash_code_different_unique_id.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/veracode/many_findings_different_hash_code_different_unique_id.xml"))
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
@@ -34,7 +35,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertFalse(finding.is_Mitigated)
 
     def test_parse_file_with_multiple_finding(self):
-        testfile = open("dojo/unittests/scans/veracode/many_findings.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/veracode/many_findings.xml"))
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
@@ -59,7 +60,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertFalse(finding.is_Mitigated)
 
     def test_parse_file_with_multiple_finding2(self):
-        testfile = open("dojo/unittests/scans/veracode/veracode_scan.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/veracode/veracode_scan.xml"))
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(7, len(findings))
@@ -85,7 +86,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual("CVE-2012-6153", finding.unique_id_from_tool)
 
     def test_parse_file_with_mitigated_finding(self):
-        testfile = open("dojo/unittests/scans/veracode/mitigated_finding.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/veracode/mitigated_finding.xml"))
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))

@@ -1,7 +1,7 @@
 import datetime
+from os import path
 
 from django.test import TestCase
-
 from dojo.models import Test
 from dojo.tools.wpscan.parser import WpscanParser
 
@@ -10,13 +10,13 @@ class TestWpscanParser(TestCase):
 
     def test_parse_file_empty(self):
         """Report from the tool wich have no data"""
-        testfile = open("dojo/unittests/scans/wpscan/empty.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/wpscan/empty.json"))
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_exemple(self):
-        testfile = open("dojo/unittests/scans/wpscan/sample.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/wpscan/sample.json"))
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(4, len(findings))
@@ -27,13 +27,13 @@ class TestWpscanParser(TestCase):
         self.assertEqual(datetime.datetime(2021, 3, 26, 11, 50, 50), finding.date)
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/wpscan/wordpress_no_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/wpscan/wordpress_no_vuln.json"))
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(7, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
-        testfile = open("dojo/unittests/scans/wpscan/wordpress_one_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/wpscan/wordpress_one_vuln.json"))
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(8, len(findings))
@@ -44,7 +44,7 @@ class TestWpscanParser(TestCase):
         self.assertEqual(datetime.datetime(2019, 7, 2, 19, 11, 16), finding.date)
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
-        testfile = open("dojo/unittests/scans/wpscan/wordpress_many_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/wpscan/wordpress_many_vuln.json"))
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(8, len(findings))
@@ -55,7 +55,7 @@ class TestWpscanParser(TestCase):
         self.assertEqual(datetime.datetime(2019, 7, 2, 19, 11, 16), finding.date)
 
     def test_parse_file_with_multiple_vuln(self):
-        testfile = open("dojo/unittests/scans/wpscan/wpscan.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/wpscan/wpscan.json"))
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(6, len(findings))

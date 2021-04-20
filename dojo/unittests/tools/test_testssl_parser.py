@@ -1,24 +1,26 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.testssl.parser import TestsslParser
 from dojo.models import Test
+from dojo.tools.testssl.parser import TestsslParser
 
 
 class TestTestsslParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_finding(self):
-        testfile = open("dojo/unittests/scans/testssl/defectdojo_no_vuln.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/testssl/defectdojo_no_vuln.csv"))
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
-        testfile = open("dojo/unittests/scans/testssl/defectdojo_one_vuln.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/testssl/defectdojo_one_vuln.csv"))
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_many_vuln_has_many_findings(self):
-        testfile = open("dojo/unittests/scans/testssl/defectdojo_many_vuln.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/testssl/defectdojo_many_vuln.csv"))
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(100, len(findings))
@@ -35,7 +37,7 @@ class TestTestsslParser(TestCase):
         self.assertEqual(310, finding.cwe)
 
     def test_parse_file_with_many_cves(self):
-        testfile = open("dojo/unittests/scans/testssl/many_cves.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/testssl/many_cves.csv"))
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(2, len(findings))
@@ -51,13 +53,13 @@ class TestTestsslParser(TestCase):
         self.assertEqual(310, finding.cwe)
 
     def test_parse_file_with_31_version(self):
-        testfile = open("dojo/unittests/scans/testssl/demo.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/testssl/demo.csv"))
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(12, len(findings))
 
     def test_parse_file_with_31_version2(self):
-        testfile = open("dojo/unittests/scans/testssl/demo2.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/testssl/demo2.csv"))
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))

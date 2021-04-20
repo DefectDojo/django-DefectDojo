@@ -1,12 +1,9 @@
-import os.path
+
+from os import path
 
 from django.test import TestCase
+from dojo.models import Engagement, Product, Test
 from dojo.tools.trustwave.parser import TrustwaveParser
-from dojo.models import Test, Engagement, Product
-
-
-def sample_path(file_name):
-    return os.path.join("dojo/unittests/scans/trustwave", file_name)
 
 
 class TestTrivyParser(TestCase):
@@ -15,7 +12,7 @@ class TestTrivyParser(TestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        test_file = open(sample_path("many_vulns.csv"))
+        test_file = open(path.join(path.dirname(__file__), "scans/trustwave/many_vulns.csv"))
         parser = TrustwaveParser()
         findings = parser.get_findings(test_file, test)
         self.assertEqual(len(findings), 4)

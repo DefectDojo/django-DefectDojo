@@ -1,13 +1,15 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.wapiti.parser import WapitiParser
 from dojo.models import Test
+from dojo.tools.wapiti.parser import WapitiParser
 
 
 class TestWapitiParser(TestCase):
 
     def test_parse_file_3_0_4(self):
         """Generated with version 3.0.4 on OWASP Juicy Shop"""
-        testfile = open("dojo/unittests/scans/wapiti/juicyshop.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/wapiti/juicyshop.xml"))
         parser = WapitiParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
@@ -25,7 +27,7 @@ class TestWapitiParser(TestCase):
 
     def test_parse_file_demo(self):
         """"""
-        testfile = open("dojo/unittests/scans/wapiti/demo.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/wapiti/demo.xml"))
         parser = WapitiParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(3, len(findings))
@@ -35,7 +37,7 @@ class TestWapitiParser(TestCase):
 
     def test_parse_file_example(self):
         """"""
-        testfile = open("dojo/unittests/scans/wapiti/example.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/wapiti/example.xml"))
         parser = WapitiParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(5, len(findings))
@@ -45,7 +47,7 @@ class TestWapitiParser(TestCase):
 
     def test_parse_cwe(self):
         """File to test CWE"""
-        testfile = open("dojo/unittests/scans/wapiti/cwe.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/wapiti/cwe.xml"))
         parser = WapitiParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
