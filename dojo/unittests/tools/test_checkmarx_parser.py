@@ -1,8 +1,9 @@
-from django.test import TestCase
-
-from dojo.models import Test, Engagement, Product
-from dojo.tools.checkmarx.parser import CheckmarxParser
 import datetime
+from os import path
+
+from django.test import TestCase
+from dojo.models import Engagement, Product, Test
+from dojo.tools.checkmarx.parser import CheckmarxParser
 
 
 class TestCheckmarxParser(TestCase):
@@ -29,7 +30,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/no_finding.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/no_finding.xml")
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -39,7 +40,7 @@ class TestCheckmarxParser(TestCase):
     # Checkmarx detailed scanner, with all vulnerabilities from checkmarx
     def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/no_finding.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/no_finding.xml")
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -51,7 +52,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/single_finding.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/single_finding.xml")
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -82,7 +83,7 @@ class TestCheckmarxParser(TestCase):
 
     def test_detailed_parse_file_with_single_vulnerability_has_single_finding(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/single_finding.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/single_finding.xml")
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -222,7 +223,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/single_finding_false_positive.xml")
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -232,7 +233,7 @@ class TestCheckmarxParser(TestCase):
 
     def test_detailed_parse_file_with_false_positive_is_false_positive(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/single_finding_false_positive.xml")
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -261,7 +262,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml")
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -285,7 +286,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/multiple_findings.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/multiple_findings.xml")
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -297,7 +298,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/multiple_findings.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/multiple_findings.xml")
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -312,7 +313,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml")
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -327,7 +328,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml")
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -344,7 +345,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml")
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -356,7 +357,7 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml")
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -369,7 +370,7 @@ class TestCheckmarxParser(TestCase):
     # ----------------------------------------------------------------------------
     def test_file_name_aggregated_parse_file_with_utf8_replacement_char(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/utf8_replacement_char.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/utf8_replacement_char.xml")
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -400,7 +401,7 @@ class TestCheckmarxParser(TestCase):
 
     def test_detailed_parse_file_with_utf8_replacement_char(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/utf8_replacement_char.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/utf8_replacement_char.xml")
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')
@@ -522,7 +523,7 @@ class TestCheckmarxParser(TestCase):
     # ----------------------------------------------------------------------------
     def test_file_name_aggregated_parse_file_with_utf8_various_non_ascii_char(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/utf8_various_non_ascii_char.xml")
         )
         parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -553,7 +554,7 @@ class TestCheckmarxParser(TestCase):
 
     def test_detailed_parse_file_with_utf8_various_non_ascii_char(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml"
+            path.join(path.dirname(__file__), "scans/checkmarx/utf8_various_non_ascii_char.xml")
         )
         parser = CheckmarxParser()
         parser.set_mode('detailed')

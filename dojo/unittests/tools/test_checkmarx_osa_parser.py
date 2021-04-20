@@ -1,8 +1,9 @@
-from django.test import TestCase
-
-from dojo.models import Test, Engagement, Product
-from dojo.tools.checkmarx_osa.parser import CheckmarxOsaParser
 from datetime import datetime
+from os import path
+
+from django.test import TestCase
+from dojo.models import Engagement, Product, Test
+from dojo.tools.checkmarx_osa.parser import CheckmarxOsaParser
 
 
 class TestCheckmarxOsaParser(TestCase):
@@ -28,7 +29,7 @@ class TestCheckmarxOsaParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx_osa/no_finding.json"
+            path.join(path.dirname(__file__), "scans/checkmarx_osa/no_finding.json")
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -42,7 +43,7 @@ class TestCheckmarxOsaParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx_osa/single_finding.json"
+            path.join(path.dirname(__file__), "scans/checkmarx_osa/single_finding.json")
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -94,7 +95,7 @@ class TestCheckmarxOsaParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx_osa/single_finding_false_positive.json"
+            path.join(path.dirname(__file__), "scans/checkmarx_osa/single_finding_false_positive.json")
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -115,7 +116,7 @@ class TestCheckmarxOsaParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx_osa/single_finding_confirmed.json"
+            path.join(path.dirname(__file__), "scans/checkmarx_osa/single_finding_confirmed.json")
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -136,7 +137,7 @@ class TestCheckmarxOsaParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx_osa/multiple_findings.json"
+            path.join(path.dirname(__file__), "scans/checkmarx_osa/multiple_findings.json")
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -150,7 +151,7 @@ class TestCheckmarxOsaParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx_osa/single_finding_no_score.json"
+            path.join(path.dirname(__file__), "scans/checkmarx_osa/single_finding_no_score.json")
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -166,7 +167,7 @@ class TestCheckmarxOsaParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx_osa/single_finding_no_url.json"
+            path.join(path.dirname(__file__), "scans/checkmarx_osa/single_finding_no_url.json")
         )
         parser = CheckmarxOsaParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -183,7 +184,7 @@ class TestCheckmarxOsaParser(TestCase):
     ):
         with self.assertRaises(ValueError) as context:
             my_file_handle, product, engagement, test = self.init(
-                "dojo/unittests/scans/checkmarx_osa/single_finding_no_libraryId.json"
+                path.join(path.dirname(__file__), "scans/checkmarx_osa/single_finding_no_libraryId.json")
             )
             parser = CheckmarxOsaParser()
             parser.get_findings(my_file_handle, test)

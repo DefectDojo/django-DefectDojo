@@ -1,8 +1,8 @@
 import datetime
+from os import path
 
 from django.test import TestCase
-
-from dojo.models import Test, Engagement, Product
+from dojo.models import Engagement, Product, Test
 from dojo.tools.contrast.parser import ContrastParser
 
 
@@ -12,7 +12,7 @@ class TestContrastParser(TestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        testfile = open("dojo/unittests/scans/contrast/contrast-node-goat.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/contrast/contrast-node-goat.csv"))
         parser = ContrastParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(18, len(findings))
@@ -54,7 +54,7 @@ class TestContrastParser(TestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        testfile = open("dojo/unittests/scans/contrast/vulnerabilities2020-09-21.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/contrast/vulnerabilities2020-09-21.csv"))
         parser = ContrastParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(1, len(findings))

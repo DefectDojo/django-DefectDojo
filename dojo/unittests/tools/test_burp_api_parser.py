@@ -2,12 +2,13 @@ from django.test import TestCase
 from dojo.models import Test
 from dojo.tools.burp_api.parser import BurpApiParser
 from dojo.tools.burp_api.parser import convert_severity, convert_confidence
+from os import path
 
 
 class TestParser(TestCase):
 
     def test_example_report(self):
-        testfile = "dojo/unittests/scans/burp_suite_pro/example.json"
+        testfile = path.join(path.dirname(__file__), "scans/burp_suite_pro/example.json")
         with open(testfile) as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
@@ -22,7 +23,7 @@ class TestParser(TestCase):
             self.assertIsNotNone(item.impact)
 
     def test_validate_more(self):
-        testfile = "dojo/unittests/scans/burp_api/many_vulns.json"
+        testfile = path.join(path.dirname(__file__), "scans/burp_api/many_vulns.json")
         with open(testfile) as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
