@@ -1,14 +1,15 @@
+import logging
+from os import path
+
+from django.test import override_settings
+from django.test.client import Client
 from django.urls import reverse
-from dojo.models import User, Test
+from dojo.models import Test, User
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
-from django.test.client import Client
+
 from .dojo_test_case import DojoAPITestCase
 from .test_utils import assertTestImportModelsCreated
-from django.test import override_settings
-# from unittest import skip
-import logging
-
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ logger = logging.getLogger(__name__)
 # test methods to be used both by API Test and UI Test
 class ImportReimportMixin(object):
     def __init__(self, *args, **kwargs):
-        self.scans_path = 'dojo/unittests/scans/'
+        self.scans_path = path.join(path.dirname(__file__), "scans/")
         self.zap_sample0_filename = self.scans_path + 'zap/0_zap_sample.xml'
         self.zap_sample1_filename = self.scans_path + 'zap/1_zap_sample_0_and_new_absent.xml'
         self.zap_sample2_filename = self.scans_path + 'zap/2_zap_sample_0_and_new_endpoint.xml'

@@ -1,7 +1,10 @@
-from dojo.models import Finding
-from .dojo_test_case import DojoAPITestCase
 import logging
 import random
+from os import path
+
+from dojo.models import Finding
+
+from .dojo_test_case import DojoAPITestCase
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +15,7 @@ class TagTests(DojoAPITestCase):
     def setUp(self, *args, **kwargs):
         super().setUp()
         self.login_as_admin()
-        self.scans_path = 'dojo/unittests/scans/zap/'
+        self.scans_path = path.join(path.dirname(__file__), "tools/scans/zap/")
         self.zap_sample5_filename = self.scans_path + '5_zap_sample_one.xml'
 
     def create_finding_with_tags(self, tags):

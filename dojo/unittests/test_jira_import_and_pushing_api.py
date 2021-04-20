@@ -1,13 +1,16 @@
-from dojo.models import User, Finding, JIRA_Instance
+
+import logging
+from os import path
+
+from crum import impersonate
 from dojo.jira_link import helper as jira_helper
+from dojo.models import Finding, JIRA_Instance, User
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
-from .dojo_test_case import DojoVCRAPITestCase
-from crum import impersonate
-# from unittest import skip
-import logging
+
 from vcr import VCR
 
+from .dojo_test_case import DojoVCRAPITestCase
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +66,7 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
         token = Token.objects.get(user=self.testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.scans_path = 'dojo/unittests/scans/zap/'
+        self.scans_path = path.join(path.dirname(__file__), "tools/scans/zap/")
         self.zap_sample5_filename = self.scans_path + '5_zap_sample_one.xml'
 
     def test_import_no_push_to_jira(self):

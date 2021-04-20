@@ -1,3 +1,5 @@
+from os import path
+
 from django.test import TestCase
 from django.utils import timezone
 from dojo.importers import utils as importer_utils
@@ -8,7 +10,7 @@ from dojo.models import Engagement, Product, Product_Type, User
 class TestDojoDefaultImporter(TestCase):
     def test_parse_findings(self):
         scan_type = "Acunetix Scan"
-        scan = open("dojo/unittests/scans/acunetix/one_finding.xml")
+        scan = open(path.join(path.dirname(__file__), "tools/scans/acunetix/one_finding.xml"))
 
         user, created = User.objects.get_or_create(username="admin")
 
