@@ -21,11 +21,13 @@ import os, socket
 # os.environ["DJANGO_SETTINGS_MODULE"] = "dojo.settings"
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 
+# Shouldn't apply to docker-compose dev mode (1 process, 1 thread), but may be needed when enabling debugging in other contexts
 def is_debugger_listening(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     return s.connect_ex(('127.0.0.1', port))
 
 debugpy_port = os.environ.get("DD_DEBUG_PORT") if os.environ.get("DD_DEBUG_PORT") else 3000
+
 # Checking for RUN_MAIN for those that want to run the app locally with the python interpreter instead of uwsgi
 if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_debugger_listening(debugpy_port) != 0:
     print("DD_DEBUG is set to True, setting remote debugging on port {}".format(debugpy_port))
