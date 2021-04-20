@@ -36,20 +36,20 @@ class IntSightsParser(object):
         original_alerts = json.load(json_file)
         for original_alert in original_alerts.get('Alerts', []):
             alert = dict()
-            alert['alert_id'] = original_alert['_id']
-            alert['title'] = original_alert['Details']['Title']
-            alert['description'] = original_alert['Details']['Description']
-            alert['severity'] = original_alert['Details']['Severity']
-            alert['type'] = original_alert['Details']['Type']
-            alert['source_date'] = original_alert['Details']['Source'].get("Date", "None provided")
-            alert['report_date'] = original_alert.get("FoundDate", "None provided")
-            alert['network_type'] = original_alert['Details']['Source'].get('NetworkType')
-            alert['source_url'] = original_alert['Details']['Source'].get('URL')
-            alert['assets'] = ','.join([item.get('Value') for item in original_alert['Assets']])
-            alert['tags'] = original_alert['Details'].get('Tags')
-            alert['status'] = 'Closed' if original_alert['Closed'].get('IsClosed') else 'Open'
+            alert['alert_id']=original_alert['_id']
+            alert['title']=original_alert['Details']['Title']
+            alert['description']=original_alert['Details']['Description']
+            alert['severity']=original_alert['Details']['Severity']
+            alert['type']=original_alert['Details']['Type']
+            alert['source_date']=original_alert['Details']['Source'].get("Date", "None provided")
+            alert['report_date']=original_alert.get("FoundDate", "None provided")
+            alert['network_type']=original_alert['Details']['Source'].get('NetworkType')
+            alert['source_url']=original_alert['Details']['Source'].get('URL')
+            alert['assets']=','.join([item.get('Value') for item in original_alert['Assets']])
+            alert['tags']=original_alert['Details'].get('Tags')
+            alert['status']='Closed' if original_alert['Closed'].get('IsClosed') else 'Open'
             alert[
-                'alert_link'] = f'https://dashboard.intsights.com/#/threat-command/alerts?search=' \
+                'alert_link']=f'https://dashboard.intsights.com/#/threat-command/alerts?search=' \
                                 f'{original_alert["_id"]}'
 
             alerts.append(alert)
@@ -81,24 +81,24 @@ class IntSightsParser(object):
         content = csv_file.read()
         if type(content) is bytes:
             content = content.decode('utf-8')
-        csv_reader = csv.DictReader(io.StringIO(content), delimiter = ',', quotechar = '"')
+        csv_reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
 
         # Don't bother parsing if the keys don't match exactly what's expected
         if collections.Counter(default_keys) == collections.Counter(csv_reader.fieldnames):
             for alert in csv_reader:
-                alert['alert_id'] = alert.pop('Alert ID')
-                alert['title'] = alert.pop('Title')
-                alert['description'] = alert.pop('Description')
-                alert['severity'] = alert.pop('Severity')
-                alert['type'] = alert.pop('Type')
-                alert['source_date'] = alert.pop('Source Date (UTC)')
-                alert['report_date'] = alert.pop('Report Date (UTC)')
-                alert['network_type'] = alert.pop('Network Type')
-                alert['source_url'] = alert.pop('Source URL')
-                alert['assets'] = alert.pop('Assets')
-                alert['tags'] = alert.pop('Tags')
-                alert['status'] = alert.pop('Status')
-                alert['alert_link'] = alert.pop('Alert Link')
+                alert['alert_id']=alert.pop('Alert ID')
+                alert['title']=alert.pop('Title')
+                alert['description']=alert.pop('Description')
+                alert['severity']=alert.pop('Severity')
+                alert['type']=alert.pop('Type')
+                alert['source_date']=alert.pop('Source Date (UTC)')
+                alert['report_date']=alert.pop('Report Date (UTC)')
+                alert['network_type']=alert.pop('Network Type')
+                alert['source_url']=alert.pop('Source URL')
+                alert['assets']=alert.pop('Assets')
+                alert['tags']=alert.pop('Tags')
+                alert['status']=alert.pop('Status')
+                alert['alert_link']=alert.pop('Alert Link')
                 alert.pop('Assignees')
                 alert.pop('Remediation')
                 alert.pop('Closed Reason')
@@ -138,27 +138,27 @@ class IntSightsParser(object):
             else:
                 duplicates[dupe_key] = True
 
-                alert = Finding(title = alert['title'],
-                                test = test,
-                                active = False if alert['status'] == 'Closed' else True,
-                                verified = True,
-                                description = f'{alert["description"]}' \
-                                              f'\n\n----' \
-                                              f'\r\n**Date Found**: {alert["report_date"]}' \
-                                              f'\n\n----' \
-                                              f'\r\n**Type**: {alert["type"]}' \
-                                              f'\r\n**Source**: {alert["source_url"]}' \
-                                              f'\r\n**Source Date**: {alert["source_date"]}' \
-                                              f'\r\n**Source Network Type**: {alert["network_type"]}' \
-                                              f'\n\n----' \
-                                              f'\r\n**Assets Affected**: {alert["assets"]}' \
-                                              f'\n\n----' \
+                alert = Finding(title=alert['title'],
+                                test=test,
+                                active=False if alert['status'] == 'Closed' else True,
+                                verified=True,
+                                description=f'{alert["description"]}' 
+                                              f'\n\n----' 
+                                              f'\r\n**Date Found**: {alert["report_date"]}' 
+                                              f'\n\n----' 
+                                              f'\r\n**Type**: {alert["type"]}' 
+                                              f'\r\n**Source**: {alert["source_url"]}' 
+                                              f'\r\n**Source Date**: {alert["source_date"]}' 
+                                              f'\r\n**Source Network Type**: {alert["network_type"]}' 
+                                              f'\n\n----' 
+                                              f'\r\n**Assets Affected**: {alert["assets"]}' 
+                                              f'\n\n----' 
                                               f'\r\n**Alert Link**: {alert["alert_link"]}',
-                                severity = alert['severity'],
-                                references = alert["alert_link"],
-                                static_finding = False,
-                                dynamic_finding = True,
-                                unique_id_from_tool = alert['alert_id'])
-                duplicates[dupe_key] = alert
+                                severity=alert['severity'],
+                                references=alert["alert_link"],
+                                static_finding=False,
+                                dynamic_finding=True,
+                                unique_id_from_tool=alert['alert_id'])
+                duplicates[dupe_key]=alert
 
         return duplicates.values()
