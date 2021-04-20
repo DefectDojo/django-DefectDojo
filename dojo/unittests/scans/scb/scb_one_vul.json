@@ -1,0 +1,25 @@
+[
+  {
+    "name": "ssh",
+    "description": "Port 22 is open using tcp protocol.",
+    "category": "Open Port",
+    "location": "tcp://45.33.32.156:22",
+    "osi_layer": "NETWORK",
+    "severity": "HIGH",
+    "attributes": {
+      "port": 22,
+      "state": "open",
+      "ip_address": "45.33.32.156",
+      "mac_address": null,
+      "protocol": "tcp",
+      "hostname": "scanme.nmap.org",
+      "method": "table",
+      "operating_system": null,
+      "service": "ssh",
+      "serviceProduct": null,
+      "serviceVersion": null,
+      "scripts": null
+    },
+    "id": "473454f7-14b4-4014-8c2b-d0325b55234e"
+  }
+]

@@ -1,0 +1,104 @@
+[
+  {
+    "name": "WordPress Service",
+    "description": "WordPress Service Information",
+    "category": "WordPress Service",
+    "location": "http://old-wordpress.demo-apps.svc.cluster.local/",
+    "osi_layer": "APPLICATION",
+    "severity": "INFORMATIONAL",
+    "reference": {},
+    "confidence": 100,
+    "attributes": {
+      "ip_address": "10.99.82.140",
+      "wpscan_version": "3.8.7",
+      "wpscan_requests": 4777,
+      "wp_version": "4.0.31",
+      "wp_release_date": "2020-06-10",
+      "wp_release_status": "latest",
+      "wp_interesting_entries": [
+        "http://old-wordpress.demo-apps.svc.cluster.local/, Match: 'WordPress 4.0.31'"
+      ],
+      "wp_found_by": "Meta Generator (Passive Detection)",
+      "wp_confirmed_by": {
+        "Atom Generator (Aggressive Detection)": {
+          "confidence": 80,
+          "interesting_entries": [
+            "http://old-wordpress.demo-apps.svc.cluster.local/?feed=atom, <generator uri=\"https://wordpress.org/\" version=\"4.0.31\">WordPress</generator>"
+          ]
+        }
+      },
+      "wp_vulnerabilities": []
+    },
+    "id": "35e61c23-d525-4509-a024-d1aef37a1623"
+  },
+  {
+    "name": "SSH Service",
+    "description": "SSH Service Information",
+    "category": "SSH Service",
+    "osi_layer": "APPLICATION",
+    "severity": "INFORMATIONAL",
+    "reference": {},
+    "hint": "",
+    "location": "dummy-ssh.demo-apps.svc",
+    "attributes": {
+      "hostname": "dummy-ssh.demo-apps.svc",
+      "ip_address": "10.102.131.102",
+      "server_banner": "SSH-2.0-OpenSSH_7.2p2 Ubuntu-4ubuntu2.8",
+      "ssh_version": 2,
+      "os_cpe": "o:canonical:ubuntu:16.04",
+      "ssh_lib_cpe": "a:openssh:openssh:7.2p2",
+      "compliance_policy": "Mozilla Modern",
+      "compliant": false,
+      "grade": "D",
+      "references": ["https://wiki.mozilla.org/Security/Guidelines/OpenSSH"],
+      "auth_methods": ["publickey", "password"],
+      "key_algorithms": [
+        "curve25519-sha256@libssh.org",
+        "ecdh-sha2-nistp256",
+        "ecdh-sha2-nistp384",
+        "ecdh-sha2-nistp521",
+        "diffie-hellman-group-exchange-sha256",
+        "diffie-hellman-group14-sha1"
+      ],
+      "encryption_algorithms": [
+        "chacha20-poly1305@openssh.com",
+        "aes128-ctr",
+        "aes192-ctr",
+        "aes256-ctr",
+        "aes128-gcm@openssh.com",
+        "aes256-gcm@openssh.com"
+      ],
+      "mac_algorithms": [
+        "umac-64-etm@openssh.com",
+        "umac-128-etm@openssh.com",
+        "hmac-sha2-256-etm@openssh.com",
+        "hmac-sha2-512-etm@openssh.com",
+        "hmac-sha1-etm@openssh.com",
+        "umac-64@openssh.com",
+        "umac-128@openssh.com",
+        "hmac-sha2-256",
+        "hmac-sha2-512",
+        "hmac-sha1"
+      ],
+      "compression_algorithms": ["none", "zlib@openssh.com"]
+    },
+    "id": "17ac9886-d083-4c58-8518-557aa3b38d2d"
+  },
+  {
+    "name": "The anti-clickjacking X-Frame-Options header is not present.",
+    "description": null,
+    "category": "X-Frame-Options Header",
+    "location": "http://bodgeit/",
+    "osi_layer": "NETWORK",
+    "severity": "LOW",
+    "attributes": {
+      "ip_address": "10.105.36.237",
+      "hostname": "bodgeit",
+      "banner": "Apache-Coyote/1.1",
+      "method": "GET",
+      "port": 8080,
+      "niktoId": 999957
+    },
+    "id": "9fc0b231-3a91-4976-ad59-35d59a585a38"
+  }
+]

@@ -1,0 +1,108 @@
+[
+  {
+    "name": "ssh",
+    "description": "Port 22 is open using tcp protocol.",
+    "category": "Open Port",
+    "location": "tcp://45.33.32.156:22",
+    "osi_layer": "NETWORK",
+    "severity": "INFORMATIONAL",
+    "attributes": {
+      "port": 22,
+      "state": "open",
+      "ip_address": "45.33.32.156",
+      "mac_address": null,
+      "protocol": "tcp",
+      "hostname": "scanme.nmap.org",
+      "method": "table",
+      "operating_system": null,
+      "service": "ssh",
+      "serviceProduct": null,
+      "serviceVersion": null,
+      "scripts": null
+    },
+    "id": "473454f7-14b4-4014-8c2b-d0325b55234e"
+  },
+  {
+    "name": "http",
+    "description": "Port 80 is open using tcp protocol.",
+    "category": "Open Port",
+    "location": "tcp://45.33.32.156:80",
+    "osi_layer": "NETWORK",
+    "severity": "INFORMATIONAL",
+    "attributes": {
+      "port": 80,
+      "state": "open",
+      "ip_address": "45.33.32.156",
+      "mac_address": null,
+      "protocol": "tcp",
+      "hostname": "scanme.nmap.org",
+      "method": "table",
+      "operating_system": null,
+      "service": "http",
+      "serviceProduct": null,
+      "serviceVersion": null,
+      "scripts": null
+    },
+    "id": "e93ce9c4-76f6-4c87-afab-2a65e06f063f"
+  },
+  {
+    "name": "nping-echo",
+    "description": "Port 9929 is open using tcp protocol.",
+    "category": "Open Port",
+    "location": "tcp://45.33.32.156:9929",
+    "osi_layer": "NETWORK",
+    "severity": "INFORMATIONAL",
+    "attributes": {
+      "port": 9929,
+      "state": "open",
+      "ip_address": "45.33.32.156",
+      "mac_address": null,
+      "protocol": "tcp",
+      "hostname": "scanme.nmap.org",
+      "method": "table",
+      "operating_system": null,
+      "service": "nping-echo",
+      "serviceProduct": null,
+      "serviceVersion": null,
+      "scripts": null
+    },
+    "id": "659948e0-6314-49a0-8385-520a734d4641"
+  },
+  {
+    "name": "Elite",
+    "description": "Port 31337 is open using tcp protocol.",
+    "category": "Open Port",
+    "location": "tcp://45.33.32.156:31337",
+    "osi_layer": "NETWORK",
+    "severity": "INFORMATIONAL",
+    "attributes": {
+      "port": 31337,
+      "state": "open",
+      "ip_address": "45.33.32.156",
+      "mac_address": null,
+      "protocol": "tcp",
+      "hostname": "scanme.nmap.org",
+      "method": "table",
+      "operating_system": null,
+      "service": "Elite",
+      "serviceProduct": null,
+      "serviceVersion": null,
+      "scripts": null
+    },
+    "id": "372bc761-7bea-47b6-b5e0-264d56e9faf8"
+  },
+  {
+    "name": "Host: scanme.nmap.org",
+    "category": "Host",
+    "description": "Found a host",
+    "location": "scanme.nmap.org",
+    "severity": "INFORMATIONAL",
+    "osi_layer": "NETWORK",
+    "attributes": {
+      "ip_address": "45.33.32.156",
+      "hostname": "scanme.nmap.org",
+      "operating_system": null
+    },
+    "id": "b293f2d4-d39a-409b-b678-e7012d2b2706"
+  }
+]
