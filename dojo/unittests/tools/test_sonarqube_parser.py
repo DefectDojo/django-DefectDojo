@@ -1,6 +1,7 @@
-from django.test import TestCase
+from os import path
 
-from dojo.models import Test, Engagement, Product
+from django.test import TestCase
+from dojo.models import Engagement, Product, Test
 from dojo.tools.sonarqube.parser import SonarQubeParser
 
 
@@ -22,7 +23,7 @@ class TestSonarQubeParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-no-finding.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-no-finding.html")
         )
         parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -31,7 +32,7 @@ class TestSonarQubeParser(TestCase):
     # SonarQube Scan detailed - no finding
     def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-no-finding.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-no-finding.html")
         )
         parser = SonarQubeParser()
         parser.set_mode('detailed')
@@ -43,7 +44,7 @@ class TestSonarQubeParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-single-finding.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-single-finding.html")
         )
         parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -91,7 +92,7 @@ class TestSonarQubeParser(TestCase):
 
     def test_detailed_parse_file_with_single_vulnerability_has_single_finding(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-single-finding.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-single-finding.html")
         )
         parser = SonarQubeParser()
         parser.set_mode('detailed')
@@ -180,7 +181,7 @@ class TestSonarQubeParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-6-findings.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-6-findings.html")
         )
         parser = SonarQubeParser()
         parser.set_mode('detailed')
@@ -192,7 +193,7 @@ class TestSonarQubeParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-6-findings.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-6-findings.html")
         )
         parser = SonarQubeParser()
         parser.set_mode('detailed')
@@ -204,7 +205,7 @@ class TestSonarQubeParser(TestCase):
     def test_detailed_parse_file_with_table_in_table(self):
         """Test parsing when the vulnerability details include a table, with tr and td that should be ignored when looking for list of rules"""
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-table-in-table.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-table-in-table.html")
         )
         parser = SonarQubeParser()
         parser.set_mode('detailed')
@@ -283,7 +284,7 @@ class TestSonarQubeParser(TestCase):
     def test_detailed_parse_file_with_rule_undefined(self):
         """the vulnerability's rule is not in the list of rules"""
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-rule-undefined.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-rule-undefined.html")
         )
         parser = SonarQubeParser()
         parser.set_mode('detailed')
@@ -328,7 +329,7 @@ class TestSonarQubeParser(TestCase):
     # SonarQube Scan - report with aggregations to be made
     def test_file_name_aggregated_parse_file_with_vuln_on_same_filename(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-4-findings-3-to-aggregate.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-4-findings-3-to-aggregate.html")
         )
         parser = SonarQubeParser()
         findings = parser.get_findings(my_file_handle, test)
@@ -390,7 +391,7 @@ class TestSonarQubeParser(TestCase):
     # SonarQube Scan detailed - report with aggregations to be made
     def test_detailed_parse_file_with_vuln_on_same_filename(self):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/sonarqube/sonar-4-findings-3-to-aggregate.html"
+            path.join(path.dirname(__file__), "scans/sonarqube/sonar-4-findings-3-to-aggregate.html")
         )
         parser = SonarQubeParser()
         parser.set_mode('detailed')
@@ -402,7 +403,7 @@ class TestSonarQubeParser(TestCase):
         """SonarQube Scan detailed - report that crash
         see: https://github.com/DefectDojo/django-DefectDojo/issues/3725
         """
-        my_file_handle, product, engagement, test = self.init("dojo/unittests/scans/sonarqube/sonar.html")
+        my_file_handle, product, engagement, test = self.init(path.join(path.dirname(__file__), "scans/sonarqube/sonar.html"))
         parser = SonarQubeParser()
         parser.set_mode('detailed')
         findings = parser.get_findings(my_file_handle, test)

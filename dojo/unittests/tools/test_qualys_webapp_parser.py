@@ -1,12 +1,14 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.qualys_webapp.parser import QualysWebAppParser
 from dojo.models import Test
+from dojo.tools.qualys_webapp.parser import QualysWebAppParser
 
 
 class TestPhpSymfonySecurityCheckerParser(TestCase):
 
     def test_qualys_webapp_parser_with_no_vuln_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/qualys_webapp/qualys_webapp_no_vuln.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/qualys_webapp/qualys_webapp_no_vuln.xml"))
         parser = QualysWebAppParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -15,7 +17,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         self.assertEqual(17, len(findings))
 
     def test_qualys_webapp_parser_with_one_criticle_vuln_has_one_findings(self):
-        testfile = open("dojo/unittests/scans/qualys_webapp/qualys_webapp_one_vuln.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/qualys_webapp/qualys_webapp_one_vuln.xml"))
         parser = QualysWebAppParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -25,7 +27,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
 
     def test_qualys_webapp_parser_with_many_vuln_has_many_findings(self):
         testfile = open(
-            "dojo/unittests/scans/qualys_webapp/qualys_webapp_many_vuln.xml"
+            path.join(path.dirname(__file__), "scans/qualys_webapp/qualys_webapp_many_vuln.xml")
         )
         parser = QualysWebAppParser()
         findings = parser.get_findings(testfile, Test())
@@ -36,7 +38,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
 
     def test_qualys_webapp_parser_info_is_vuln(self):
         testfile = open(
-            "dojo/unittests/scans/qualys_webapp/qualys_webapp_many_vuln.xml"
+            path.join(path.dirname(__file__), "scans/qualys_webapp/qualys_webapp_many_vuln.xml")
         )
         parser = QualysWebAppParser()
         findings = parser.get_findings(testfile, Test(), True)

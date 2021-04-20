@@ -1,12 +1,14 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.skf.parser import SKFParser
 from dojo.models import Test
+from dojo.tools.skf.parser import SKFParser
 
 
 class TestSkfParser(TestCase):
 
     def test_single_has_no_finding(self):
-        testfile = open("dojo/unittests/scans/skf/export.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/skf/export.csv"))
         parser = SKFParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(27, len(findings))

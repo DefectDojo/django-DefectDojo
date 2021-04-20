@@ -1,18 +1,20 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.scantist.parser import ScantistParser
 from dojo.models import Test
+from dojo.tools.scantist.parser import ScantistParser
 
 
 class TestScantistParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/scantist/scantist-no-vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/scantist/scantist-no-vuln.json"))
         parser = ScantistParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
-        testfile = open("dojo/unittests/scans/scantist/scantist-one-vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/scantist/scantist-one-vuln.json"))
         parser = ScantistParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
@@ -30,7 +32,7 @@ class TestScantistParser(TestCase):
         )  # Negligible is translated to Informational
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
-        testfile = open("dojo/unittests/scans/scantist/scantist-many-vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/scantist/scantist-many-vuln.json"))
         parser = ScantistParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(17, len(findings))

@@ -1,3 +1,5 @@
+from os import path
+
 from django.test import TestCase
 from dojo.models import Test
 from dojo.tools.snyk.parser import SnykParser
@@ -6,49 +8,49 @@ from dojo.tools.snyk.parser import SnykParser
 class TestSnykParser(TestCase):
 
     def test_snykParser_single_has_no_finding(self):
-        testfile = open("dojo/unittests/scans/snyk/single_project_no_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/snyk/single_project_no_vulns.json"))
         parser = SnykParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
         testfile.close()
 
     def test_snykParser_allprojects_has_no_finding(self):
-        testfile = open("dojo/unittests/scans/snyk/all-projects_no_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/snyk/all-projects_no_vulns.json"))
         parser = SnykParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
         testfile.close()
 
     def test_snykParser_single_has_one_finding(self):
-        testfile = open("dojo/unittests/scans/snyk/single_project_one_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/snyk/single_project_one_vuln.json"))
         parser = SnykParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         testfile.close()
 
     def test_snykParser_allprojects_has_one_finding(self):
-        testfile = open("dojo/unittests/scans/snyk/all-projects_one_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/snyk/all-projects_one_vuln.json"))
         parser = SnykParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
 
     def test_snykParser_single_has_many_findings(self):
-        testfile = open("dojo/unittests/scans/snyk/single_project_many_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/snyk/single_project_many_vulns.json"))
         parser = SnykParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(41, len(findings))
 
     def test_snykParser_allprojects_has_many_findings(self):
-        testfile = open("dojo/unittests/scans/snyk/all-projects_many_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/snyk/all-projects_many_vulns.json"))
         parser = SnykParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
 
     def test_snykParser_finding_has_fields(self):
-        testfile = open("dojo/unittests/scans/snyk/single_project_one_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/snyk/single_project_one_vuln.json"))
         parser = SnykParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -87,7 +89,7 @@ class TestSnykParser(TestCase):
 
     def test_snykParser_allprojects_issue4277(self):
         """Report to linked to issue 4277"""
-        testfile = open("dojo/unittests/scans/snyk/all_projects_issue4277.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/snyk/all_projects_issue4277.json"))
         parser = SnykParser()
         findings = list(parser.get_findings(testfile, Test()))
         testfile.close()

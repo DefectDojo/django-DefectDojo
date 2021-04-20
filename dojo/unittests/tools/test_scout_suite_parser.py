@@ -1,7 +1,9 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.scout_suite.parser import ScoutSuiteParser
 from django.utils import timezone
-from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
+from dojo.models import Engagement, Product, Product_Type, Test, Test_Type
+from dojo.tools.scout_suite.parser import ScoutSuiteParser
 
 
 class TestScoutSuiteParser(TestCase):
@@ -33,11 +35,11 @@ class TestScoutSuiteParser(TestCase):
         )
 
     def test_scout_suite_parser_with_no_vuln_has_no_findings(self):
-        findings = self.setup("dojo/unittests/scans/scout_suite/no_vuln.js")
+        findings = self.setup(path.join(path.dirname(__file__), "scans/scout_suite/no_vuln.js"))
         self.assertEqual(0, len(findings))
 
     def test_scout_suite_parser_with_two_findings(self):
-        findings = self.setup("dojo/unittests/scans/scout_suite/two_findings.js")
+        findings = self.setup(path.join(path.dirname(__file__), "scans/scout_suite/two_findings.js"))
         self.assertEqual(2, len(findings))
         # finding 0
         finding = findings[0]

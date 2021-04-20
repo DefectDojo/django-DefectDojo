@@ -1,3 +1,5 @@
+from os import path
+
 from django.test import TestCase
 from dojo.models import Test
 from dojo.tools.qualys.parser import QualysParser
@@ -7,7 +9,7 @@ class TestQualysParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open(
-            "dojo/unittests/scans/qualys/empty.xml"
+            path.join(path.dirname(__file__), "scans/qualys/empty.xml")
         )
         parser = QualysParser()
         findings = parser.get_findings(testfile, Test())
@@ -15,7 +17,7 @@ class TestQualysParser(TestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
-            "dojo/unittests/scans/qualys/Qualys_Sample_Report.xml"
+            path.join(path.dirname(__file__), "scans/qualys/Qualys_Sample_Report.xml")
         )
         parser = QualysParser()
         findings = parser.get_findings(testfile, Test())

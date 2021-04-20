@@ -1,7 +1,8 @@
 import datetime
-from django.test import TestCase
+from os import path
 
-from dojo.models import Test, Finding
+from django.test import TestCase
+from dojo.models import Finding, Test
 from dojo.tools.sarif.parser import SarifParser
 
 
@@ -18,7 +19,7 @@ class TestSarifParser(TestCase):
 
     def test_example_report(self):
         testfile = open(
-            "dojo/unittests/scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif"
+            path.join(path.dirname(__file__), "scans/sarif/DefectDojo_django-DefectDojo__2020-12-11_13 42 10__export.sarif")
         )
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
@@ -28,7 +29,7 @@ class TestSarifParser(TestCase):
             self.common_checks(finding)
 
     def test_example2_report(self):
-        testfile = open("dojo/unittests/scans/sarif/appendix_k.sarif")
+        testfile = open(path.join(path.dirname(__file__), "scans/sarif/appendix_k.sarif"))
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
@@ -44,13 +45,13 @@ class TestSarifParser(TestCase):
             self.common_checks(finding)
 
     def test_example_k1_report(self):
-        testfile = open("dojo/unittests/scans/sarif/appendix_k1.sarif")
+        testfile = open(path.join(path.dirname(__file__), "scans/sarif/appendix_k1.sarif"))
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_example_k2_report(self):
-        testfile = open("dojo/unittests/scans/sarif/appendix_k2.sarif")
+        testfile = open(path.join(path.dirname(__file__), "scans/sarif/appendix_k2.sarif"))
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
@@ -68,7 +69,7 @@ class TestSarifParser(TestCase):
             self.common_checks(finding)
 
     def test_example_k3_report(self):
-        testfile = open("dojo/unittests/scans/sarif/appendix_k3.sarif")
+        testfile = open(path.join(path.dirname(__file__), "scans/sarif/appendix_k3.sarif"))
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
@@ -81,7 +82,7 @@ class TestSarifParser(TestCase):
 
     def test_example_report_ms(self):
         """Report file come from Microsoft SARIF sdk on GitHub"""
-        testfile = open("dojo/unittests/scans/sarif/SuppressionTestCurrent.sarif")
+        testfile = open(path.join(path.dirname(__file__), "scans/sarif/SuppressionTestCurrent.sarif"))
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(4, len(findings))
@@ -92,7 +93,7 @@ class TestSarifParser(TestCase):
 
     def test_example_report_semgrep(self):
         testfile = open(
-            "dojo/unittests/scans/sarif/semgrepowasp-benchmark-sample.sarif"
+            path.join(path.dirname(__file__), "scans/sarif/semgrepowasp-benchmark-sample.sarif")
         )
         test = Test()
         parser = SarifParser()
@@ -107,7 +108,7 @@ class TestSarifParser(TestCase):
             self.common_checks(finding)
 
     def test_example_report_scanlift_dependency_check(self):
-        testfile = open("dojo/unittests/scans/sarif/dependency_check.sarif")
+        testfile = open(path.join(path.dirname(__file__), "scans/sarif/dependency_check.sarif"))
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(13, len(findings))
@@ -126,7 +127,7 @@ class TestSarifParser(TestCase):
             self.common_checks(finding)
 
     def test_example_report_scanlift_bash(self):
-        testfile = open("dojo/unittests/scans/sarif/bash-report.sarif")
+        testfile = open(path.join(path.dirname(__file__), "scans/sarif/bash-report.sarif"))
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(27, len(findings))
@@ -150,7 +151,7 @@ class TestSarifParser(TestCase):
             self.common_checks(finding)
 
     def test_example_report_taint_python(self):
-        testfile = open("dojo/unittests/scans/sarif/taint-python-report.sarif")
+        testfile = open(path.join(path.dirname(__file__), "scans/sarif/taint-python-report.sarif"))
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(11, len(findings))
@@ -182,7 +183,7 @@ class TestSarifParser(TestCase):
 
     def test_njsscan(self):
         """Generated with opensecurity/njsscan (https://github.com/ajinabraham/njsscan)"""
-        testfile = open("dojo/unittests/scans/sarif/njsscan.sarif")
+        testfile = open(path.join(path.dirname(__file__), "scans/sarif/njsscan.sarif"))
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(2, len(findings))

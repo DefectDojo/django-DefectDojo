@@ -1,9 +1,11 @@
 import json
+from os import path
 from unittest import mock
 
-from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
 from django.test import TestCase
-from dojo.models import Test, Tool_Configuration, Tool_Type, Engagement, Product
+from dojo.models import (Engagement, Product, Test, Tool_Configuration,
+                         Tool_Type)
+from dojo.tools.sonarqube_api.importer import SonarQubeApiImporter
 
 
 class TestSonarqubeImporter(TestCase):
@@ -19,17 +21,17 @@ class TestSonarqubeImporter(TestCase):
         )
 
     def dummy_product(self, *args, **kwargs):
-        with open('dojo/unittests/scans/sonarqube_api/product.json') as json_file:
+        with open(path.join(path.dirname(__file__), "scans/sonarqube_api/product.json")) as json_file:
             data = json.load(json_file)
             return data
 
     def dummy_issues(self, *args, **kwargs):
-        with open('dojo/unittests/scans/sonarqube_api/issues.json') as json_file:
+        with open(path.join(path.dirname(__file__), "scans/sonarqube_api/issues.json")) as json_file:
             data = json.load(json_file)
             return data
 
     def dummy_rule(self, *args, **kwargs):
-        with open('dojo/unittests/scans/sonarqube_api/rule.json') as json_file:
+        with open(path.join(path.dirname(__file__), "scans/sonarqube_api/rule.json")) as json_file:
             data = json.load(json_file)
             return data
 

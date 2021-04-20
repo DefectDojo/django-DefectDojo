@@ -1,19 +1,21 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.semgrep.parser import SemgrepParser
 from dojo.models import Test
+from dojo.tools.semgrep.parser import SemgrepParser
 
 
 class TestSemgrepParser(TestCase):
 
     def test_parse_empty(self):
-        testfile = open("dojo/unittests/scans/semgrep/empty.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/semgrep/empty.json"))
         parser = SemgrepParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parse_one_finding(self):
-        testfile = open("dojo/unittests/scans/semgrep/one_finding.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/semgrep/one_finding.json"))
         parser = SemgrepParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -27,7 +29,7 @@ class TestSemgrepParser(TestCase):
         self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
 
     def test_parse_many_finding(self):
-        testfile = open("dojo/unittests/scans/semgrep/many_findings.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/semgrep/many_findings.json"))
         parser = SemgrepParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -48,7 +50,7 @@ class TestSemgrepParser(TestCase):
         self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
 
     def test_parse_repeated_finding(self):
-        testfile = open("dojo/unittests/scans/semgrep/repeated_findings.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/semgrep/repeated_findings.json"))
         parser = SemgrepParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -63,7 +65,7 @@ class TestSemgrepParser(TestCase):
         self.assertEqual(2, finding.nb_occurences)
 
     def test_parse_many_vulns(self):
-        testfile = open("dojo/unittests/scans/semgrep/many_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/semgrep/many_vulns.json"))
         parser = SemgrepParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

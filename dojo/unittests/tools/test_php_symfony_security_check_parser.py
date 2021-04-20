@@ -1,13 +1,16 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.php_symfony_security_check.parser import PhpSymfonySecurityCheckParser
 from dojo.models import Test
+from dojo.tools.php_symfony_security_check.parser import \
+    PhpSymfonySecurityCheckParser
 
 
 class TestPhpSymfonySecurityCheckerParser(TestCase):
 
     def test_php_symfony_security_check_parser_with_no_vuln_has_no_findings(self):
         testfile = open(
-            "dojo/unittests/scans/php_symfony_security_check_sample/php_symfony_no_vuln.json"
+            path.join(path.dirname(__file__), "scans/php_symfony_security_check_sample/php_symfony_no_vuln.json")
         )
         parser = PhpSymfonySecurityCheckParser()
         findings = parser.get_findings(testfile, Test())
@@ -19,7 +22,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         self,
     ):
         testfile = open(
-            "dojo/unittests/scans/php_symfony_security_check_sample/php_symfony_one_vuln.json"
+            path.join(path.dirname(__file__), "scans/php_symfony_security_check_sample/php_symfony_one_vuln.json")
         )
         parser = PhpSymfonySecurityCheckParser()
         findings = parser.get_findings(testfile, Test())
@@ -28,7 +31,7 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
 
     def test_php_symfony_security_check_parser_with_many_vuln_has_many_findings(self):
         testfile = open(
-            "dojo/unittests/scans/php_symfony_security_check_sample/php_symfony_many_vuln.json"
+            path.join(path.dirname(__file__), "scans/php_symfony_security_check_sample/php_symfony_many_vuln.json")
         )
         parser = PhpSymfonySecurityCheckParser()
         findings = parser.get_findings(testfile, Test())
