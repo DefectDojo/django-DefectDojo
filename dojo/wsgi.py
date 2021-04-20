@@ -13,7 +13,8 @@ middleware here, or combine a Django application with an application of another
 framework.
 
 """
-import os, socket
+import os
+import socket
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks
 # if running multiple sites in the same mod_wsgi process. To fix this, use
@@ -21,10 +22,12 @@ import os, socket
 # os.environ["DJANGO_SETTINGS_MODULE"] = "dojo.settings"
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dojo.settings.settings")
 
+
 # Shouldn't apply to docker-compose dev mode (1 process, 1 thread), but may be needed when enabling debugging in other contexts
 def is_debugger_listening(port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     return s.connect_ex(('127.0.0.1', port))
+
 
 debugpy_port = os.environ.get("DD_DEBUG_PORT") if os.environ.get("DD_DEBUG_PORT") else 3000
 
@@ -34,11 +37,12 @@ if os.environ.get("DD_DEBUG") == "True" and not os.getenv("RUN_MAIN") and is_deb
     import traceback
     try:
         import debugpy
-        #Required, otherwise debugpy will try to use the uwsgi binary as the python interpreter - https://github.com/microsoft/debugpy/issues/262
+
+        # Required, otherwise debugpy will try to use the uwsgi binary as the python interpreter - https://github.com/microsoft/debugpy/issues/262
         debugpy.configure({
-            "python": "python",
-            "subProcess": True
-            })
+                            "python": "python",
+                            "subProcess": True
+                        })
         debugpy.listen(("0.0.0.0", debugpy_port))
         print("DebugPy listening on port {}".format(debugpy_port))
         if os.environ.get("DD_DEBUG_WAIT_FOR_CLIENT") == "True":
