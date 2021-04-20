@@ -1,6 +1,8 @@
+from os import path
+
 from django.test import TestCase
+from dojo.models import Engagement, Product, Test
 from dojo.tools.nikto.parser import NiktoParser
-from dojo.models import Test, Engagement, Product
 
 
 class TestNiktoParser(TestCase):
@@ -10,13 +12,13 @@ class TestNiktoParser(TestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("dojo/unittests/scans/nikto/nikto-report-old-format.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/nikto/nikto-report-old-format.xml"))
         parser = NiktoParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/nikto/nikto-report-zero-vuln.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/nikto/nikto-report-zero-vuln.xml"))
         parser = NiktoParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
@@ -26,7 +28,7 @@ class TestNiktoParser(TestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("dojo/unittests/scans/nikto/nikto-report-one-vuln.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/nikto/nikto-report-one-vuln.xml"))
         parser = NiktoParser()
         findings = parser.get_findings(testfile, test)
         self.assertEqual(1, len(findings))
@@ -36,13 +38,13 @@ class TestNiktoParser(TestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("dojo/unittests/scans/nikto/nikto-report-many-vuln.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/nikto/nikto-report-many-vuln.xml"))
         parser = NiktoParser()
         findings = parser.get_findings(testfile, test)
         self.assertTrue(len(findings) == 10)
 
     def test_parse_file_json_with_multiple_vuln_has_multiple_findings(self):
-        testfile = open("dojo/unittests/scans/nikto/juice-shop.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/nikto/juice-shop.json"))
         parser = NiktoParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(11, len(findings))

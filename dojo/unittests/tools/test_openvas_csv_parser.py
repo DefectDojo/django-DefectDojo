@@ -1,12 +1,14 @@
+from os import path
+
 from django.test import TestCase
+from dojo.models import Engagement, Product, Test
 from dojo.tools.openvas_csv.parser import OpenVASCsvParser
-from dojo.models import Test, Engagement, Product
 
 
 class TestOpenVASUploadCsvParser(TestCase):
 
     def test_openvas_csv_parser_without_file_has_no_findings(self):
-        with open("dojo/unittests/scans/openvas/report-e2759495-f26d-4089-9c56-12a10dc36c9c.csv") as f:
+        with open(path.join(path.dirname(__file__), "scans/openvas/report-e2759495-f26d-4089-9c56-12a10dc36c9c.csv")) as f:
             test = Test()
             test.engagement = Engagement()
             test.engagement.product = Product()

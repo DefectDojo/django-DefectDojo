@@ -1,12 +1,14 @@
+from os import path
+
 from django.test import TestCase
+from dojo.models import Engagement, Product, Test
 from dojo.tools.nexpose.parser import NexposeParser
-from dojo.models import Test, Engagement, Product
 
 
 class TestNexposeParser(TestCase):
 
     def test_nexpose_parser_has_no_finding(self):
-        testfile = open("dojo/unittests/scans/nexpose/no_vuln.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/nexpose/no_vuln.xml"))
         parser = NexposeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
@@ -15,7 +17,7 @@ class TestNexposeParser(TestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        testfile = open("dojo/unittests/scans/nexpose/many_vulns.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/nexpose/many_vulns.xml"))
         parser = NexposeParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -57,7 +59,7 @@ class TestNexposeParser(TestCase):
         self.assertIsNone(endpoint.protocol)
 
     def test_nexpose_parser_tests_outside_endpoint(self):
-        testfile = open("dojo/unittests/scans/nexpose/report_auth.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/nexpose/report_auth.xml"))
         parser = NexposeParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(4, len(findings))

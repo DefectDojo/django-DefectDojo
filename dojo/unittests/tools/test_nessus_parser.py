@@ -1,6 +1,9 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.nessus.parser import NessusXMLParser, NessusCSVParser, NessusParser
-from dojo.models import Finding, Test, Engagement, Product
+from dojo.models import Engagement, Finding, Product, Test
+from dojo.tools.nessus.parser import (NessusCSVParser, NessusParser,
+                                      NessusXMLParser)
 
 
 class TestNessusParser(TestCase):
@@ -12,7 +15,7 @@ class TestNessusParser(TestCase):
         return test
 
     def test_parse_some_findings(self):
-        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/nessus/nessus_many_vuln.xml"))
         parser = NessusXMLParser()
         findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(6, len(findings))
@@ -22,7 +25,7 @@ class TestNessusParser(TestCase):
 
     def test_parse_some_findings_csv(self):
         """Test one report provided by a user"""
-        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/nessus/nessus_many_vuln.csv"))
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(4, len(findings))
@@ -47,7 +50,7 @@ class TestNessusParser(TestCase):
 
     def test_parse_some_findings_csv2(self):
         """Test that use default columns of Nessus Pro 8.13.1 (#257)"""
-        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-default.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/nessus/nessus_many_vuln2-default.csv"))
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(29, len(findings))
@@ -65,7 +68,7 @@ class TestNessusParser(TestCase):
 
     def test_parse_some_findings_csv2_all(self):
         """Test that use a report with all columns of Nessus Pro 8.13.1 (#257)"""
-        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/nessus/nessus_many_vuln2-all.csv"))
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(29, len(findings))
@@ -83,19 +86,19 @@ class TestNessusParser(TestCase):
 
     def test_parse_some_findings_csv_bytes(self):
         """This tests is designed to test the parser with different read modes"""
-        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv")
+        testfile = open(path.join(path.dirname(__file__), "scans/nessus/nessus_many_vuln2-all.csv"))
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
-        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rt")
+        testfile = open(path.join(path.dirname(__file__), "scans/nessus/nessus_many_vuln2-all.csv", "rt"))
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
-        testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rb")
+        testfile = open(path.join(path.dirname(__file__), "scans/nessus/nessus_many_vuln2-all.csv", "rb"))
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
 
     def test_parse_some_findings_samples(self):
         """Test that come from samples repo"""
-        testfile = open("dojo/unittests/scans/nessus/nessus_v_unknown.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/nessus/nessus_v_unknown.xml"))
         parser = NessusParser()
         findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(32, len(findings))

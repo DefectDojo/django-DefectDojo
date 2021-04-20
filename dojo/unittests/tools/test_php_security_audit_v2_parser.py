@@ -1,12 +1,14 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2Parser
 from dojo.models import Test
+from dojo.tools.php_security_audit_v2.parser import PhpSecurityAuditV2Parser
 
 
 class TestPhpSecurityAuditV2ParserParser(TestCase):
 
     def test_php_symfony_security_check_parser_with_no_vuln_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/php_security_audit_v2/php_security_audit_v2.0.0_unformatted.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/php_security_audit_v2/php_security_audit_v2.0.0_unformatted.json"))
         parser = PhpSecurityAuditV2Parser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -23,7 +25,7 @@ class TestPhpSecurityAuditV2ParserParser(TestCase):
 
     def test_php_symfony_security_check_parser_with_many_vuln(self):
         """New report with latest version"""
-        testfile = open("dojo/unittests/scans/php_security_audit_v2/many_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/php_security_audit_v2/many_vulns.json"))
         parser = PhpSecurityAuditV2Parser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
