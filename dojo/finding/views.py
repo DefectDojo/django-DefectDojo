@@ -1841,9 +1841,11 @@ def finding_bulk_update_all(request, pid=None):
                 skipped_find_count = total_find_count - finds.count()
                 deleted_find_count = finds.count()
 
-                finds.delete()
-                for prod in prods:
-                    calculate_grade(prod)
+                for find in finds:
+                    find.delete()
+
+                # for prod in prods:
+                #     calculate_grade(prod)
 
                 if skipped_find_count > 0:
                     add_error_message_to_response('Skipped deletion of {} findings because you are not authorized.'.format(skipped_find_count))
