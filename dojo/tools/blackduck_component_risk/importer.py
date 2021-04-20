@@ -25,7 +25,7 @@ class BlackduckCRImporter(object):
         :return: ( {component_id:details} , {component_id:[vulns]}, {component_id:[source]} )
         """
         if not issubclass(type(report), Path):
-            report = Path(report.temporary_file_path())
+            report = Path(report.name)
         if zipfile.is_zipfile(str(report)):
             return self._process_zipfile(report)
         else:

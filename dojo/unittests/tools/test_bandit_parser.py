@@ -1,27 +1,29 @@
 import datetime
+from os import path
+
 from dateutil.tz import tzlocal
 from django.test import TestCase
-from dojo.tools.bandit.parser import BanditParser
 from dojo.models import Test
+from dojo.tools.bandit.parser import BanditParser
 
 
 class TestBanditParser(TestCase):
 
     def test_bandit_parser_has_no_finding(self):
-        testfile = open("dojo/unittests/scans/bandit/no_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/bandit/no_vuln.json"))
         parser = BanditParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_bandit_parser_has_one_finding(self):
-        testfile = open("dojo/unittests/scans/bandit/one_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/bandit/one_vuln.json"))
         parser = BanditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(1, len(findings))
 
     def test_bandit_parser_has_many_findings(self):
-        testfile = open("dojo/unittests/scans/bandit/many_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/bandit/many_vulns.json"))
         parser = BanditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -35,7 +37,7 @@ class TestBanditParser(TestCase):
         self.assertEqual("Certain", item.get_scanner_confidence_text())
 
     def test_bandit_parser_has_many_findings_recent(self):
-        testfile = open("dojo/unittests/scans/bandit/dd.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/bandit/dd.json"))
         parser = BanditParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

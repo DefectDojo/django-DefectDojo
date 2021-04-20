@@ -1,7 +1,9 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.aws_prowler.parser import AWSProwlerParser
 from django.utils import timezone
-from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
+from dojo.models import Engagement, Product, Product_Type, Test, Test_Type
+from dojo.tools.aws_prowler.parser import AWSProwlerParser
 
 
 class TestAwsProwlerParser(TestCase):
@@ -36,18 +38,18 @@ class TestAwsProwlerParser(TestCase):
         return findings
 
     def test_aws_prowler_parser_with_no_vuln_has_no_findings(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_prowler/no_vuln.csv"))
+        findings = self.setup(open(path.join(path.dirname(__file__), "scans/aws_prowler/no_vuln.csv")))
         self.assertEqual(0, len(findings))
 
     def test_aws_prowler_parser_with_critical_vuln_has_one_findings(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_prowler/one_vuln.csv"))
+        findings = self.setup(open(path.join(path.dirname(__file__), "scans/aws_prowler/one_vuln.csv")))
         self.assertEqual(1, len(findings))
         self.assertEqual(
             "Avoid the use of the root account (Scored)", findings[0].title
         )
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_prowler/many_vuln.csv"))
+        findings = self.setup(open(path.join(path.dirname(__file__), "scans/aws_prowler/many_vuln.csv")))
         self.assertEqual(5, len(findings))
         self.assertEqual("Vuln A", findings[0].title)
         self.assertEqual("Critical", findings[0].severity)
@@ -61,7 +63,7 @@ class TestAwsProwlerParser(TestCase):
         self.assertEqual("Info", findings[4].severity)
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings2(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_prowler/many_vuln2.csv"))
+        findings = self.setup(open(path.join(path.dirname(__file__), "scans/aws_prowler/many_vuln2.csv")))
         self.assertEqual(183, len(findings))
         self.assertEqual("Show report generation info", findings[0].title)
         self.assertEqual("Info", findings[0].severity)

@@ -1,5 +1,6 @@
-from django.test import TestCase
+from os import path
 
+from django.test import TestCase
 from dojo.models import Finding, Test
 from dojo.tools.anchore_grype.parser import AnchoreGrypeParser
 
@@ -7,14 +8,14 @@ from dojo.tools.anchore_grype.parser import AnchoreGrypeParser
 class TestAnchoreGrypeParser(TestCase):
 
     def test_parser_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/anchore_grype/no_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/anchore_grype/no_vuln.json"))
         parser = AnchoreGrypeParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_parser_has_many_findings(self):
-        testfile = open("dojo/unittests/scans/anchore_grype/many_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/anchore_grype/many_vulns.json"))
         parser = AnchoreGrypeParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -29,7 +30,7 @@ class TestAnchoreGrypeParser(TestCase):
                 self.assertEqual("3.6.7-4+deb10u5", finding.component_version)
 
     def test_grype_parser_with_one_criticle_vuln_has_one_findings(self):
-        testfile = open("dojo/unittests/scans/anchore_grype/many_vulns2.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/anchore_grype/many_vulns2.json"))
         parser = AnchoreGrypeParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -44,7 +45,7 @@ class TestAnchoreGrypeParser(TestCase):
                 self.assertEqual("Info", finding.severity)
 
     def test_grype_parser_with_many_vulns3(self):
-        testfile = open("dojo/unittests/scans/anchore_grype/many_vulns3.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/anchore_grype/many_vulns3.json"))
         parser = AnchoreGrypeParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

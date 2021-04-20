@@ -1,7 +1,9 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.aws_scout2.parser import AWSScout2Parser
 from django.utils import timezone
-from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
+from dojo.models import Engagement, Product, Product_Type, Test, Test_Type
+from dojo.tools.aws_scout2.parser import AWSScout2Parser
 
 
 class TestAwsProwlerParser(TestCase):
@@ -36,7 +38,7 @@ class TestAwsProwlerParser(TestCase):
         return findings
 
     def test_parser_with_critical_vuln_has_one_findings(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_scout2/aws_config.js"))
+        findings = self.setup(open(path.join(path.dirname(__file__), "scans/aws_scout2/aws_config.js")))
         self.assertEqual(21, len(findings))
         self.assertEqual("Global services logging disabled", findings[0].title)
         self.assertEqual("Critical", findings[0].severity)

@@ -1,13 +1,15 @@
 import datetime
+from os import path
+
 from django.test import TestCase
-from dojo.tools.arachni.parser import ArachniParser
 from dojo.models import Test
+from dojo.tools.arachni.parser import ArachniParser
 
 
 class TestAquaParser(TestCase):
 
     def test_parser_has_one_finding(self):
-        with open("dojo/unittests/scans/arachni/arachni.afr.json") as testfile:
+        with open(path.join(path.dirname(__file__), "scans/arachni/arachni.afr.json")) as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
@@ -19,7 +21,7 @@ class TestAquaParser(TestCase):
             self.assertEqual(datetime.datetime(2017, 11, 14, 2, 57, 29, tzinfo=datetime.timezone.utc), finding.date)
 
     def test_parser_has_many_finding(self):
-        with open("dojo/unittests/scans/arachni/dd.com.afr.json") as testfile:
+        with open(path.join(path.dirname(__file__), "scans/arachni/dd.com.afr.json")) as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(3, len(findings))
@@ -47,7 +49,7 @@ class TestAquaParser(TestCase):
             self.assertIn('server', finding.unsaved_tags)
 
     def test_parser_has_many_finding2(self):
-        with open("dojo/unittests/scans/arachni/js.com.afr.json") as testfile:
+        with open(path.join(path.dirname(__file__), "scans/arachni/js.com.afr.json")) as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(10, len(findings))

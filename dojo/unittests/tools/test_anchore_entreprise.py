@@ -1,34 +1,36 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.anchore_enterprise.parser import AnchoreEnterpriseParser
-from dojo.tools.anchore_enterprise.parser import extract_cve, search_filepath
 from dojo.models import Test
+from dojo.tools.anchore_enterprise.parser import (AnchoreEnterpriseParser,
+                                                  extract_cve, search_filepath)
 
 
 class TestAnchoreEnterpriseParser(TestCase):
     def test_anchore_policy_check_parser_has_no_findings(self):
-        with open("dojo/unittests/scans/anchore_enterprise/no_checks.json") as testfile:
+        with open(path.join(path.dirname(__file__), "scans/anchore_enterprise/no_checks.json")) as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
 
     def test_anchore_policy_check_parser_has_one_finding(self):
-        with open("dojo/unittests/scans/anchore_enterprise/one_check.json") as testfile:
+        with open(path.join(path.dirname(__file__), "scans/anchore_enterprise/one_check.json")) as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
 
     def test_anchore_policy_check_parser_has_multiple_findings(self):
         with open(
-            "dojo/unittests/scans/anchore_enterprise/many_checks.json"
-        ) as testfile:
+            path.join(path.dirname(__file__), "scans/anchore_enterprise/many_checks.json"
+        )) as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(57, len(findings))
 
     def test_anchore_policy_check_parser_invalid_format(self):
         with open(
-            "dojo/unittests/scans/anchore_enterprise/invalid_checks_format.json"
-        ) as testfile:
+            path.join(path.dirname(__file__), "scans/anchore_enterprise/invalid_checks_format.json"
+        )) as testfile:
             with self.assertRaises(Exception):
                 parser = AnchoreEnterpriseParser()
                 findings = parser.get_findings(testfile, Test())

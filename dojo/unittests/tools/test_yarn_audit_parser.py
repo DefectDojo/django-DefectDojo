@@ -1,6 +1,8 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.yarn_audit.parser import YarnAuditParser
 from dojo.models import Engagement, Product, Test
+from dojo.tools.yarn_audit.parser import YarnAuditParser
 
 
 class TestYarnAuditParser(TestCase):
@@ -16,14 +18,14 @@ class TestYarnAuditParser(TestCase):
         self.assertEqual(0, len(findings))
 
     def test_yarn_audit_parser_with_no_vuln_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/yarn_audit/yarn_audit_zero_vul.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/yarn_audit/yarn_audit_zero_vul.json"))
         parser = YarnAuditParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_yarn_audit_parser_with_one_criticle_vuln_has_one_findings(self):
-        testfile = open("dojo/unittests/scans/yarn_audit/yarn_audit_one_vul.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/yarn_audit/yarn_audit_one_vul.json"))
         parser = YarnAuditParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
@@ -32,7 +34,7 @@ class TestYarnAuditParser(TestCase):
         self.assertEqual("4.5.2", findings[0].component_version)
 
     def test_yarn_audit_parser_with_many_vuln_has_many_findings(self):
-        testfile = open("dojo/unittests/scans/yarn_audit/yarn_audit_many_vul.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/yarn_audit/yarn_audit_many_vul.json"))
         parser = YarnAuditParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
@@ -40,7 +42,7 @@ class TestYarnAuditParser(TestCase):
 
     def test_yarn_audit_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:
-            testfile = open("dojo/unittests/scans/yarn_audit/empty_with_error.json")
+            testfile = open(path.join(path.dirname(__file__), "scans/yarn_audit/empty_with_error.json"))
             parser = YarnAuditParser()
             findings = parser.get_findings(testfile, self.get_test())
             testfile.close()

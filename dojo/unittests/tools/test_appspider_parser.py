@@ -1,6 +1,8 @@
+from os import path
+
 from django.test import TestCase
+from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.appspider.parser import AppSpiderParser
-from dojo.models import Product, Engagement, Test, Finding
 
 
 class TestAppSpiderParser(TestCase):
@@ -9,7 +11,7 @@ class TestAppSpiderParser(TestCase):
         test = Test()
         test.engagement = Engagement()
         test.engagement.product = Product()
-        testfile = open("dojo/unittests/scans/appspider/one_vuln.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/appspider/one_vuln.xml"))
         parser = AppSpiderParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -17,12 +19,6 @@ class TestAppSpiderParser(TestCase):
         item = findings[0]
         with self.subTest(item=0):
             self.assertEqual(525, item.cwe)
-
-    # def test_aqua_parser_has_many_findings(self):
-    #     testfile = open("dojo/unittests/scans/aqua/many_vulns.json")
-    #     parser = AquaJSONParser(testfile, Test())
-    #     testfile.close()
-    #     self.assertEqual(24, len(findings))
 
     def convert_severity(self):
         with self.subTest(val="0-Safe"):
