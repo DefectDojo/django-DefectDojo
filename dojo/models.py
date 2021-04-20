@@ -905,11 +905,11 @@ class Engagement_Presets(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=False)
 
-    def __str__(self):
-        return self.title
-
     class Meta:
         ordering = ['title']
+
+    def __str__(self):
+        return self.title
 
 
 class Engagement_Type(models.Model):
@@ -1034,6 +1034,13 @@ class Engagement(models.Model):
     @property
     def is_ci_cd(self):
         return self.engagement_type == "CI/CD"
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d engagement delete', self.id)
+        import dojo.finding.helper as helper
+        helper.prepare_duplicates_for_delete(engagement=self)
+        super().delete(*args, **kwargs)
+        calculate_grade(self.product)
 
 
 class CWE(models.Model):
@@ -1320,6 +1327,11 @@ class Test(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_test', args=[str(self.id)])
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d test delete', self.id)
+        super().delete(*args, **kwargs)
+        calculate_grade(self.engagement.product)
 
 
 class Test_Import(TimeStampedModel):
@@ -1764,12 +1776,20 @@ class Finding(models.Model):
             models.Index(fields=['line']),
             models.Index(fields=['component_name']),
             models.Index(fields=['duplicate']),
+            models.Index(fields=['duplicate_finding', 'id']),
             models.Index(fields=['is_Mitigated']),
         ]
 
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_finding', args=[str(self.id)])
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d finding delete', self.id)
+        import dojo.finding.helper as helper
+        helper.finding_delete(self)
+        super().delete(*args, **kwargs)
+        calculate_grade(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
@@ -2108,7 +2128,6 @@ class Finding(models.Model):
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
-            logger.debug('finding.save() getting current user: %s', user)
 
         # Title Casing
         from titlecase import titlecase
@@ -2156,7 +2175,7 @@ class Finding(models.Model):
             finding_helper.update_finding_status(self, user, changed_fields={'id': (None, None)})
 
         else:
-            logger.debug('setting static / dynamic in save')
+            # logger.debug('setting static / dynamic in save')
             # need to have an id/pk before we can access endpoints
             if (self.file_path is not None) and (self.endpoints.count() == 0):
                 self.static_finding = True
@@ -2169,9 +2188,12 @@ class Finding(models.Model):
 
         self.found_by.add(self.test.test_type)
 
-        # postprocessing is done in a celery task
-        finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
-             issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
+        # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
+        if dedupe_option or false_history or issue_updater_option or product_grading_option or push_to_jira:
+            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
+                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
+        else:
+            logger.debug('no options selected that require finding post processing')
 
     # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
@@ -3512,7 +3534,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
-from dojo.utils import get_system_setting, to_str_typed
+from dojo.utils import calculate_grade, get_system_setting, to_str_typed
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
 
 tagulous.admin.register(Product.tags)
