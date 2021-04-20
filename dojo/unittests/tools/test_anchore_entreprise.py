@@ -21,16 +21,16 @@ class TestAnchoreEnterpriseParser(TestCase):
 
     def test_anchore_policy_check_parser_has_multiple_findings(self):
         with open(
-            path.join(path.dirname(__file__), "scans/anchore_enterprise/many_checks.json"
-        )) as testfile:
+            path.join(path.dirname(__file__), "scans/anchore_enterprise/many_checks.json")
+        ) as testfile:
             parser = AnchoreEnterpriseParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(57, len(findings))
 
     def test_anchore_policy_check_parser_invalid_format(self):
         with open(
-            path.join(path.dirname(__file__), "scans/anchore_enterprise/invalid_checks_format.json"
-        )) as testfile:
+            path.join(path.dirname(__file__), "scans/anchore_enterprise/invalid_checks_format.json")
+        ) as testfile:
             with self.assertRaises(Exception):
                 parser = AnchoreEnterpriseParser()
                 findings = parser.get_findings(testfile, Test())

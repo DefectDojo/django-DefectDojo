@@ -44,8 +44,8 @@ class TestZapParser(TestCase):
 
     def test_parse_some_findings_3(self):
         testfile = open(
-            path.join(path.dirname(__file__), "scans/zap/3_zap_sampl_0_and_different_severities.xml"
-        ))
+            path.join(path.dirname(__file__), "scans/zap/3_zap_sampl_0_and_different_severities.xml")
+        )
         parser = ZapParser()
         findings = parser.get_findings(testfile, self.get_test())
         self.assertIsInstance(findings, list)
