@@ -1,6 +1,8 @@
+from os import path
+
 from django.test import TestCase
+from dojo.models import Engagement, Product, Test
 from dojo.tools.microfocus_webinspect.parser import MicrofocusWebinspectParser
-from dojo.models import Test, Engagement, Product
 
 
 class TestMicrofocusWebinspectParser(TestCase):
@@ -10,7 +12,7 @@ class TestMicrofocusWebinspectParser(TestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open(
-            "dojo/unittests/scans/microfocus_webinspect/Webinspect_no_vuln.xml"
+            path.join(path.dirname(__file__), "scans/microfocus_webinspect/Webinspect_no_vuln.xml")
         )
         parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, test)
@@ -21,7 +23,7 @@ class TestMicrofocusWebinspectParser(TestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open(
-            "dojo/unittests/scans/microfocus_webinspect/Webinspect_one_vuln.xml"
+            path.join(path.dirname(__file__), "scans/microfocus_webinspect/Webinspect_one_vuln.xml")
         )
         parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, test)
@@ -38,7 +40,7 @@ class TestMicrofocusWebinspectParser(TestCase):
         test.engagement = Engagement()
         test.engagement.product = Product()
         testfile = open(
-            "dojo/unittests/scans/microfocus_webinspect/Webinspect_many_vuln.xml"
+            path.join(path.dirname(__file__), "scans/microfocus_webinspect/Webinspect_many_vuln.xml")
         )
         parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, test)
@@ -65,7 +67,7 @@ class TestMicrofocusWebinspectParser(TestCase):
             )
 
     def test_parse_file_version_18_20(self):
-        testfile = open("dojo/unittests/scans/microfocus_webinspect/Webinspect_V18_20.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/microfocus_webinspect/Webinspect_V18_20.xml"))
         parser = MicrofocusWebinspectParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(4, len(findings))

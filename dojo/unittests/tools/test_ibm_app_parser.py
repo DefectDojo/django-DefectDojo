@@ -1,3 +1,5 @@
+from os import path
+
 from django.test import TestCase
 from dojo.models import Test
 from dojo.tools.ibm_app.parser import IbmAppParser
@@ -6,7 +8,7 @@ from dojo.tools.ibm_app.parser import IbmAppParser
 class TestIbmAppParser(TestCase):
 
     def test_parse_file(self):
-        testfile = open("dojo/unittests/scans/ibm_app/testfire.xml")
+        testfile = open(path.join(path.dirname(__file__), "scans/ibm_app/testfire.xml"))
         parser = IbmAppParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

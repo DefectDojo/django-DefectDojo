@@ -1,5 +1,7 @@
+from os import path
+
 from django.test import TestCase
-from dojo.models import Test, Engagement, Product
+from dojo.models import Engagement, Product, Test
 from dojo.tools.mobsf.parser import MobSFParser
 
 
@@ -10,7 +12,7 @@ class TestMobSFParser(TestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("dojo/unittests/scans/mobsf/report1.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/mobsf/report1.json"))
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -36,7 +38,7 @@ class TestMobSFParser(TestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("dojo/unittests/scans/mobsf/report2.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/mobsf/report2.json"))
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -48,7 +50,7 @@ class TestMobSFParser(TestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("dojo/unittests/scans/mobsf/android.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/mobsf/android.json"))
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
@@ -60,7 +62,7 @@ class TestMobSFParser(TestCase):
         engagement = Engagement()
         engagement.product = Product()
         test.engagement = engagement
-        testfile = open("dojo/unittests/scans/mobsf/ios.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/mobsf/ios.json"))
         parser = MobSFParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()

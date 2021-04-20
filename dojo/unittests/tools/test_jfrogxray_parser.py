@@ -1,3 +1,5 @@
+from os import path
+
 from django.test import TestCase
 from dojo.models import Test
 from dojo.tools.jfrogxray.parser import JFrogXrayParser, decode_cwe_number
@@ -6,7 +8,7 @@ from dojo.tools.jfrogxray.parser import JFrogXrayParser, decode_cwe_number
 class TestJfrogJFrogXrayParser(TestCase):
 
     def test_parse_file_with_one_vuln(self):
-        testfile = open("dojo/unittests/scans/jfrogxray/one_vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/jfrogxray/one_vuln.json"))
         parser = JFrogXrayParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
@@ -18,14 +20,14 @@ class TestJfrogJFrogXrayParser(TestCase):
         self.assertEquals(787, item.cwe)
 
     def test_parse_file_with_many_vulns(self):
-        testfile = open("dojo/unittests/scans/jfrogxray/many_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/jfrogxray/many_vulns.json"))
         parser = JFrogXrayParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(3, len(findings))
 
     def test_parse_file_with_many_vulns2(self):
-        testfile = open("dojo/unittests/scans/jfrogxray/many_vulns2.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/jfrogxray/many_vulns2.json"))
         parser = JFrogXrayParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()

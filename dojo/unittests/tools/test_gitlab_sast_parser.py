@@ -1,25 +1,27 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from dojo.models import Test
+from dojo.tools.gitlab_sast.parser import GitlabSastParser
 
 
 class TestGitlabSastParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/gitlab_sast/gl-sast-report-0-vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/gitlab_sast/gl-sast-report-0-vuln.json"))
         parser = GitlabSastParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
-        testfile = open("dojo/unittests/scans/gitlab_sast/gl-sast-report-1-vuln.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/gitlab_sast/gl-sast-report-1-vuln.json"))
         parser = GitlabSastParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
-            "dojo/unittests/scans/gitlab_sast/gl-sast-report-many-vuln.json"
+            path.join(path.dirname(__file__), "scans/gitlab_sast/gl-sast-report-many-vuln.json")
         )
         parser = GitlabSastParser()
         findings = parser.get_findings(testfile, Test())
@@ -27,7 +29,7 @@ class TestGitlabSastParser(TestCase):
 
     def test_parse_file_with_various_confidences(self):
         testfile = open(
-            "dojo/unittests/scans/gitlab_sast/gl-sast-report-confidence.json"
+            path.join(path.dirname(__file__), "scans/gitlab_sast/gl-sast-report-confidence.json")
         )
         parser = GitlabSastParser()
         findings = parser.get_findings(testfile, Test())
@@ -41,7 +43,7 @@ class TestGitlabSastParser(TestCase):
             i = i + 1
 
     def test_parse_file_with_various_cwes(self):
-        testfile = open("dojo/unittests/scans/gitlab_sast/gl-sast-report-cwe.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/gitlab_sast/gl-sast-report-cwe.json"))
         parser = GitlabSastParser()
         findings = parser.get_findings(testfile, Test())
         self.assertTrue(len(findings) == 3)

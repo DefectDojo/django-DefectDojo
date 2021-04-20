@@ -1,12 +1,14 @@
+from os import path
+
 from django.test import TestCase
-from dojo.tools.gosec.parser import GosecParser
 from dojo.models import Test
+from dojo.tools.gosec.parser import GosecParser
 
 
 class TestGosecParser(TestCase):
 
     def test_parse_file_with_one_finding(self):
-        testfile = open("dojo/unittests/scans/gosec/many_vulns.json")
+        testfile = open(path.join(path.dirname(__file__), "scans/gosec/many_vulns.json"))
         parser = GosecParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(28, len(findings))
