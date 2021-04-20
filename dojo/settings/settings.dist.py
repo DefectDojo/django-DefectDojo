@@ -843,7 +843,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'DSOP Scan': True,
     'Acunetix Scan': True,
     'Trivy Scan': True,
-    'SpotBugs Scan ': False,
+    'SpotBugs Scan': False,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -901,6 +901,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
+    'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
