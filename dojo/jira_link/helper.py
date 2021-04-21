@@ -1362,7 +1362,6 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
             finding.is_Mitigated = False
             finding.false_p = True
             ra_helper.risk_unaccept(finding)
-            # ra_helper.remove_from_any_risk_acceptance(finding)
             status_changed = True
         else:
             # Mitigated by default as before
@@ -1373,7 +1372,6 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
             finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
             finding.endpoints.clear()
             finding.false_p = False
-            # ra_helper.remove_from_any_risk_acceptance(finding)
             ra_helper.risk_unaccept(finding)
             status_changed = True
     else:
@@ -1383,7 +1381,6 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
         finding.mitigated = None
         finding.is_Mitigated = False
         finding.false_p = False
-        # ra_helper.remove_from_any_risk_acceptance(finding)
         ra_helper.risk_unaccept(finding)
         status_changed = True
 
