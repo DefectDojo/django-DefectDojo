@@ -34,7 +34,7 @@ from django_jsonfield_backport.models import JSONField
 from itertools import groupby
 import hyperlink
 from cvss import CVSS3
-from dojo.settings.settings import USE_BUSDAY_COUNT
+from dojo.settings.settings import SLA_BUSINESS_DAYS
 from numpy import busday_count
 
 logger = logging.getLogger(__name__)
