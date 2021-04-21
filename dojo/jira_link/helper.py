@@ -1349,10 +1349,11 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.mitigated = None
                 finding.is_Mitigated = False
                 finding.false_p = False
-                Risk_Acceptance.objects.create(
+                ra = Risk_Acceptance.objects.create(
                     accepted_by=assignee_name,
                     owner=finding.reporter,
-                ).accepted_findings.set([finding])
+                )
+                ra_helper.add_findings_to_risk_acceptance(ra, [finding])
                 status_changed = True
             elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
                 logger.debug("Marking related finding of {} as false-positive".format(jira_issue.jira_key))
