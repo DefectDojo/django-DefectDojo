@@ -41,7 +41,7 @@ class SpotbugsParser(object):
         for bug in root.findall('BugInstance'):
             desc = ''
             for message in bug.itertext():
-                desc += message
+                desc += message + '\n'
 
             dupe_key = bug.get('instanceHash')
 
@@ -50,8 +50,6 @@ class SpotbugsParser(object):
             severity = SEVERITY[bug.get('priority')]
             description = desc
             mitigation = bug_patterns[bug.get('type')]
-            impact = 'N/A'
-            references = 'N/A'
 
             # find the source line and file on the buginstance
             source_line = None
@@ -71,8 +69,6 @@ class SpotbugsParser(object):
                     severity=severity,
                     description=description,
                     mitigation=mitigation,
-                    impact=impact,
-                    references=references,
                     test=test,
                     static_finding=True,
                     line=source_line,
