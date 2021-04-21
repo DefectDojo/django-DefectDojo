@@ -1067,6 +1067,10 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
     def import_scan_ui(self, engagement, payload):
         logger.debug('import_scan payload %s', payload)
+        # if 'endpoint_to_add' in payload:
+        #     payload['endpoints'] = payload['endpoint_to_add']
+        #     del payload['endpoint_to_add']
+
         # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
         response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), payload)
         # print(vars(response))
@@ -1094,14 +1098,14 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 "file": open(filename),
                 "environment": 1,
                 "version": "1.0.1",
-                # "close_old_findings": close_old_findings,
+                "close_old_findings": close_old_findings,
         }
 
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
 
         if endpoint_to_add is not None:
-            payload['endpoint_to_add'] = endpoint_to_add
+            payload['endpoints'] = [endpoint_to_add]
 
         if tags is not None:
             payload['tags'] = tags
