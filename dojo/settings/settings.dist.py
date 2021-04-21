@@ -471,7 +471,7 @@ SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env('DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY')
 SLA_NOTIFY_WITH_JIRA_ONLY = env('DD_SLA_NOTIFY_WITH_JIRA_ONLY')  # Based on the 2 above, but only with a JIRA link
 SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify between dayofbreach minus this number until dayofbreach
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
-SLA_BUSINESS_DAYS = env('DD_SLA_BUSINESS_DAYS') # Use business days to calculate SLA's and age of a finding instead of calendar days
+SLA_BUSINESS_DAYS = env('DD_SLA_BUSINESS_DAYS')  # Use business days to calculate SLA's and age of a finding instead of calendar days
 
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
