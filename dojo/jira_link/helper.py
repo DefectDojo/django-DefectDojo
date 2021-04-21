@@ -1341,45 +1341,36 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
     resolved = resolution_id is not None
     jira_instance = get_jira_instance(finding)
 
-    if finding.active is resolved:
-        if finding.active:
-            if jira_instance and resolution_name in jira_instance.accepted_resolutions:
-                logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jira_issue.jira_key))
-                finding.active = False
-                finding.mitigated = None
-                finding.is_Mitigated = False
-                finding.false_p = False
-                Risk_Acceptance.objects.create(
-                    accepted_by=assignee_name,
-                    owner=finding.reporter,
-                ).accepted_findings.set([finding])
-                status_changed = True
-            elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
-                logger.debug("Marking related finding of {} as false-positive".format(jira_issue.jira_key))
-                finding.active = False
-                finding.verified = False
-                finding.mitigated = None
-                finding.is_Mitigated = False
-                finding.false_p = True
-                ra_helper.remove_from_any_risk_acceptance(finding)
-                status_changed = True
-            else:
-                # Mitigated by default as before
-                logger.debug("Marking related finding of {} as mitigated (default)".format(jira_issue.jira_key))
-                finding.active = False
-                finding.mitigated = jira_now
-                finding.is_Mitigated = True
-                finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
-                finding.endpoints.clear()
-                finding.false_p = False
-                ra_helper.remove_from_any_risk_acceptance(finding)
-                status_changed = True
-        else:
-            # Reopen / Open Jira issue
-            logger.debug("Re-opening related finding of {}".format(jira_issue.jira_key))
-            finding.active = True
+    if resolved:
+        if jira_instance and resolution_name in jira_instance.accepted_resolutions:
+            logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jira_issue.jira_key))
+            finding.active = False
             finding.mitigated = None
             finding.is_Mitigated = False
+            finding.false_p = False
+            ra = Risk_Acceptance.objects.create(
+                accepted_by=assignee_name,
+                owner=finding.reporter,
+            )
+            ra_helper.add_findings_to_risk_acceptance(ra, [finding])
+            status_changed = True
+        elif jira_instance and resolution_name in jira_instance.false_positive_resolutions:
+            logger.debug("Marking related finding of {} as false-positive".format(jira_issue.jira_key))
+            finding.active = False
+            finding.verified = False
+            finding.mitigated = None
+            finding.is_Mitigated = False
+            finding.false_p = True
+            ra_helper.remove_from_any_risk_acceptance(finding)
+            status_changed = True
+        else:
+            # Mitigated by default as before
+            logger.debug("Marking related finding of {} as mitigated (default)".format(jira_issue.jira_key))
+            finding.active = False
+            finding.mitigated = jira_now
+            finding.is_Mitigated = True
+            finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
+            finding.endpoints.clear()
             finding.false_p = False
             ra_helper.remove_from_any_risk_acceptance(finding)
             status_changed = True
