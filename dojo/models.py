@@ -1982,7 +1982,7 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
-        if USE_BUSDAY_COUNT:
+        if SLA_BUSINESS_DAYS:
             if self.mitigated:
                 days = busday_count(self.date, self.mitigated.date())
             else:
