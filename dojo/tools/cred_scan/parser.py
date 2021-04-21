@@ -1,12 +1,17 @@
 import csv
 import io
-from datetime import datetime
-
-
+from dateutil import parser
 from dojo.models import Finding
 
 
 class CredScanParser(object):
+    """
+    Credential Scanner (aka CredScan) is a tool developed and maintained by
+    Microsoft to identify credential leaks such as those in source code and
+    configuration files. Some of the commonly found types of credentials are
+    default passwords, SQL connection strings and Certificates with private keys.
+    See: https://secdevtools.azurewebsites.net/helpcredscan.html
+    """
 
     def get_scan_types(self):
         return ["CredScan Scan"]
@@ -25,38 +30,30 @@ class CredScanParser(object):
 
         dupes = dict()
         for row in reader:
-            # Severity is not provided in this scanner, so marking all as info
-            severity = 'Info'
-
             # Create the description
             description = row.get('Description', 'Description not provided')
-            is_suppressed = row.get('IsSuppressed', None)
-            supress_justification = row.get('SuppressJustification', None)
-            matching_score = row.get('MatchingScore', None)
-            date = row.get('TimeofDiscovery', None)
-
             # Add contextual details to the description
-            if is_suppressed:
-                description += '\n Is Supressed: ' + str(is_suppressed)
-            if supress_justification:
-                description += '\n Supress Justifcation: ' + str(supress_justification)
-            if matching_score:
-                description += '\n Matching Score: ' + str(matching_score)
+            if 'IsSuppressed' in row:
+                description += '\n Is Supressed: ' + str(row['IsSuppressed'])
+            if 'SuppressJustification' in row:
+                description += '\n Supress Justifcation: ' + str(row['SuppressJustification'])
+            if 'MatchingScore' in row:
+                description += '\n Matching Score: ' + str(row['MatchingScore'])
 
             finding = Finding(
-                    title=row.get('Searcher'),
+                    title=row['Searcher'],
                     description=description,
-                    severity=severity,
+                    severity='Info',
                     nb_occurences=1,
-                    file_path=row.get('Source'),
-                    line=row.get('Line'),
+                    file_path=row['Source'],
+                    line=row['Line'],
             )
             # Update the finding date if it specified
-            if date:
-                finding.date = datetime.strptime(date.replace('Z', ''), '%Y-%m-%dT%H:%M:%S.%f')
+            if 'TimeofDiscovery' in row:
+                finding.date = parser.parse(row['TimeofDiscovery'].replace('Z', ''))
 
             # internal de-duplication
-            dupe_key = row.get('Searcher') + row.get('Source') + str(row.get('Line'))
+            dupe_key = row['Searcher'] + row['Source'] + str(row['Line'])
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
