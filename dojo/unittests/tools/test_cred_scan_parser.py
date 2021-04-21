@@ -1,6 +1,7 @@
 from django.test import TestCase
 from dojo.tools.cred_scan.parser import CredScanParser
 from dojo.models import Test
+import datetime
 
 
 class TestCredScanParser(TestCase):
@@ -16,6 +17,11 @@ class TestCredScanParser(TestCase):
         parser = CredScanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("10", finding.line)
+            self.assertEqual("E:sample/dir/first/App.config", finding.file_path)
+            self.assertEqual(datetime.date(2021, 4, 10), datetime.datetime.date(finding.date))
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         testfile = open("dojo/unittests/scans/cred_scan/cred_scan_many_vuln.csv")
