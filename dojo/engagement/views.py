@@ -765,7 +765,7 @@ def add_risk_acceptance(request, eid, fid=None):
             request,
             messages.ERROR,
             'Cannot process risk acceptance on duplicate findings',
-            extra_tags='alert-danger'
+            extra_tags='alert-warning'
         )
         return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
 
