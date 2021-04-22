@@ -760,7 +760,7 @@ def add_risk_acceptance(request, eid, fid=None):
     if fid:
         finding = get_object_or_404(Finding, id=fid)
 
-    if finding.duplicate:
+    if finding is not None and finding.duplicate:
         messages.add_message(
             request,
             messages.ERROR,
