@@ -990,7 +990,9 @@ class ImportReimportMixin(object):
 
         self.assertEqual(5, count)
 
-    # currenty break when using the parameter endpoint_to_add
+    # import clair scan, testing:
+    # parameter endpoint_to_add: each imported finding should be related to endpoint with id=1
+    # close_old_findings functionality: secony (empty) import should close all findings from the first import
     def test_import_param_close_old_findings_with_additional_endpoint(self):
         logger.debug('importing clair report with additional endpoint')
         with assertTestImportModelsCreated(self, imports=1, affected_findings=24, created=24):
@@ -1004,8 +1006,13 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(24, findings)
 
         # imported findings should be active in the engagement
-        engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_Mitigated=False).count()
-        self.assertEqual(engagement_findings_count, 24)
+        engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_Mitigated=False)
+        self.assertEqual(engagement_findings.count(), 24)
+        
+        # findings should have only one endpoint, added with endpoint_to_add
+        for finding in engagement_findings:
+            self.assertEqual(finding.endpoints.count(), 1)
+            self.assertEqual(finding.endpoints.first().id, 1)
 
         # reimport exact same report
         with assertTestImportModelsCreated(self, imports=1, affected_findings=24, closed=24):
@@ -1067,10 +1074,6 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
 
     def import_scan_ui(self, engagement, payload):
         logger.debug('import_scan payload %s', payload)
-        # if 'endpoint_to_add' in payload:
-        #     payload['endpoints'] = payload['endpoint_to_add']
-        #     del payload['endpoint_to_add']
-
         # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
         response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), payload)
         # print(vars(response))

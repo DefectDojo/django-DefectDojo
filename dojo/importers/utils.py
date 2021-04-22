@@ -71,13 +71,8 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
     if endpoints_to_add:
         import_settings['endpoints'] = [str(endpoint) for endpoint in endpoints_to_add]
 
-    print('import_settings')
-    print(import_settings)
-
     test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=type)
     test_import.save()
-
-    print('saved!')
 
     test_import_finding_action_list = []
     for finding in closed_findings:
