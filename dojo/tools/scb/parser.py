@@ -21,26 +21,23 @@ class SCBParser(object):
     def get_findings(self, file, test):
         if file is None:
             return []
-        dupes = dict()
         try:
-            data = file.read()
-            tree = json.loads(str(data, 'utf-8'))
-        except:
-            try:
-                tree = json.loads(data)
-            except BaseException as exc:
-                raise ValueError("file is not valid json") from exc
-        for idx, content in enumerate(tree):
-            finding = Finding(
-                static_finding=True, dynamic_finding=False, active=False, verified=False)
-            node = tree[idx]
-            self.set_finding_base_info(finding, node, test)
-            dupe_key = hashlib.md5(
-                str(xstr(finding.description) + xstr(finding.title)).encode('utf-8')).hexdigest()
-            if not dupe_key in dupes:
-                self.set_finding_endpoint(finding, node)
-                dupes[dupe_key] = finding
-        return list(dupes.values())
+            tree = json.load(file)
+        except json.JSONDecodeError:
+            raise ValueError("file is not valid json")
+        else:
+            dupes = dict()
+            for idx, content in enumerate(tree):
+                finding = Finding(
+                    static_finding=True, dynamic_finding=False, active=False, verified=False)
+                node = tree[idx]
+                self.set_finding_base_info(finding, node, test)
+                dupe_key = hashlib.md5(
+                    str(xstr(finding.description) + xstr(finding.title)).encode('utf-8')).hexdigest()
+                if not dupe_key in dupes:
+                    self.set_finding_endpoint(finding, node)
+                    dupes[dupe_key] = finding
+            return list(dupes.values())
 
     def set_finding_endpoint(self, finding, node):
         finding.unsaved_endpoints = list()
@@ -65,7 +62,7 @@ class SCBParser(object):
             endpoint.port = attributes.get('port', endpoint.port)
             # override if present in attributes
             endpoint.protocol = attributes.get('protocol', endpoint.protocol)
-        finding.unsaved_endpoints.append(endpoint)
+        finding.unsaved_endpoints = [endpoint]
 
     def set_finding_base_info(self, finding, node, test):
         finding.title = node.get('name')
