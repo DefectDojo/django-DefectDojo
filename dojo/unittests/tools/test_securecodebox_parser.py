@@ -1,9 +1,9 @@
 from django.test import TestCase
-from dojo.tools.scb.parser import SCBParser
+from dojo.tools.securecodebox.parser import SecureCodeBoxParser
 from dojo.models import Engagement, Product, Test
 
 
-class TestSCBParser(TestCase):
+class TestSecureCodeBoxParser(TestCase):
     def get_test(self):
         test = Test()
         test.engagement = Engagement()
@@ -11,20 +11,20 @@ class TestSCBParser(TestCase):
         return test
 
     def test_scb_parser_without_file_has_no_findings(self):
-        parser = SCBParser()
+        parser = SecureCodeBoxParser()
         findings = parser.get_findings(None, self.get_test())
         self.assertEqual(0, len(findings))
 
     def test_scb_parser_with_no_vuln_has_no_findings(self):
         testfile = open("dojo/unittests/scans/scb/scb_zero_vul.json")
-        parser = SCBParser()
+        parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_scb_parser_with_one_criticle_vuln_has_one_findings(self):
         testfile = open("dojo/unittests/scans/scb/scb_one_vul.json")
-        parser = SCBParser()
+        parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
         self.assertEqual(1, len(findings))
@@ -32,7 +32,7 @@ class TestSCBParser(TestCase):
 
     def test_scb_parser_with_many_vuln_has_many_findings(self):
         testfile = open("dojo/unittests/scans/scb/scb_many_vul.json")
-        parser = SCBParser()
+        parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
         self.assertEqual(5, len(findings))
@@ -49,7 +49,7 @@ class TestSCBParser(TestCase):
     def test_scb_parser_handles_multiple_scan_types(self):
         testfile = open(
             "dojo/unittests/scans/scb/scb_multiple_finding_formats.json")
-        parser = SCBParser()
+        parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
         self.assertEqual(3, len(findings))
@@ -65,6 +65,6 @@ class TestSCBParser(TestCase):
     def test_scb_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:
             testfile = open("dojo/unittests/scans/scb/empty_with_error.json")
-            parser = SCBParser()
+            parser = SecureCodeBoxParser()
             findings = parser.get_findings(testfile, self.get_test())
             testfile.close()

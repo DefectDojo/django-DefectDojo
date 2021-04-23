@@ -722,7 +722,7 @@
   },
   {
     "fields": {
-      "name": "SCB Scan"
+      "name": "SecureCodeBox Findings Import"
     },
     "model": "dojo.test_type",
     "pk": 195
