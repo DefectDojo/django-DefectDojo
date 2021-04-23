@@ -1008,7 +1008,7 @@ class ImportReimportMixin(object):
         # imported findings should be active in the engagement
         engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_Mitigated=False)
         self.assertEqual(engagement_findings.count(), 24)
-        
+
         # findings should have only one endpoint, added with endpoint_to_add
         for finding in engagement_findings:
             self.assertEqual(finding.endpoints.count(), 1)
