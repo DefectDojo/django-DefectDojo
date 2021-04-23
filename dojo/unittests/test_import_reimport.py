@@ -66,7 +66,7 @@ class ImportReimportMixin(object):
         self.veracode_different_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_different_hash_code_different_unique_id.xml'
         self.scan_type_veracode = 'Veracode Scan'
 
-        self.clair_many_findings = self.scans_path + 'clair/many_vul.json'
+        self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
         self.clair_empty = self.scans_path + 'clair/empty.json'
         self.scan_type_clair = 'Clair Scan'
 
@@ -995,19 +995,19 @@ class ImportReimportMixin(object):
     # close_old_findings functionality: secony (empty) import should close all findings from the first import
     def test_import_param_close_old_findings_with_additional_endpoint(self):
         logger.debug('importing clair report with additional endpoint')
-        with assertTestImportModelsCreated(self, imports=1, affected_findings=24, created=24):
-            import0 = self.import_scan_with_params(self.clair_many_findings, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
 
         test_id = import0['test']
         test = self.get_test(test_id)
         findings = self.get_test_findings_api(test_id)
         self.log_finding_summary_json_api(findings)
         # imported count must match count in the report
-        self.assert_finding_count_json(24, findings)
+        self.assert_finding_count_json(4, findings)
 
         # imported findings should be active in the engagement
         engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_Mitigated=False)
-        self.assertEqual(engagement_findings.count(), 24)
+        self.assertEqual(engagement_findings.count(), 4)
 
         # findings should have only one endpoint, added with endpoint_to_add
         for finding in engagement_findings:
@@ -1015,7 +1015,7 @@ class ImportReimportMixin(object):
             self.assertEqual(finding.endpoints.first().id, 1)
 
         # reimport exact same report
-        with assertTestImportModelsCreated(self, imports=1, affected_findings=24, closed=24):
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, closed=4):
             self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
 
         # all findings from import0 should be closed now
