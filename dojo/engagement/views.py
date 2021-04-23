@@ -761,6 +761,7 @@ def add_risk_acceptance(request, eid, fid=None):
         finding = get_object_or_404(Finding, id=fid)
 
     if finding is not None and finding.duplicate:
+        logger.info("Cannot add risk acceptance to a duplicate finding")
         messages.add_message(
             request,
             messages.ERROR,
