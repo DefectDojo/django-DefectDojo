@@ -1209,6 +1209,8 @@ class FindingBulkUpdateForm(forms.ModelForm):
     finding_group_add = forms.BooleanField(required=False)
     add_to_finding_group = forms.BooleanField(required=False)
     finding_group_remove = forms.BooleanField(required=False)
+    finding_group_by = forms.BooleanField(required=False)
+    finding_group_by_option = forms.CharField(required=False)
 
     push_to_jira = forms.BooleanField(required=False)
     # unlink_from_jira = forms.BooleanField(required=False)

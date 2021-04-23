@@ -25,7 +25,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
-from dojo.models import Finding, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import
 
 from dojo.tools.factory import get_choices
@@ -189,6 +189,7 @@ def view_test(request, tid):
                    'paged_test_imports': paged_test_imports,
                    'test_import_filter': test_import_filter,
                    'finding_groups': finding_groups,
+                   'finding_group_by_options': Finding_Group.GROUP_BY_OPTIONS,
                    })
 
 

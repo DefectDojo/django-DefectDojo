@@ -1969,6 +1969,23 @@ def finding_bulk_update_all(request, pid=None):
                     # refresh findings from db
                     finds = finds.all()
 
+                if form.cleaned_data['finding_group_by']:
+                    logger.debug('finding_group_by checked!')
+                    logger.debug(form.cleaned_data)
+                    finding_group_by_option = form.cleaned_data['finding_group_by_option']
+                    logger.debug('finding_group_by_option: %s', finding_group_by_option)
+
+                    finding_groups, grouped, skipped, groups_created = finding_helper.group_findings_by(finds, finding_group_by_option)
+
+                    if grouped:
+                        add_success_message_to_response('Grouped %d findings into %d (%d newly created) finding groups' % (grouped, len(finding_groups), groups_created))
+
+                    if skipped:
+                        add_success_message_to_response('Skipped %s findings when grouping by %s as these findings were already in an existing group' % (skipped, finding_group_by_option))
+
+                    # refresh findings from db
+                    finds = finds.all()
+
                 if form.cleaned_data['push_to_github']:
                     logger.info('push selected findings to github')
                     for finding in finds:

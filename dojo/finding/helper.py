@@ -160,7 +160,7 @@ def add_to_finding_group(finding_group, finds):
 def remove_from_finding_group(finds):
     removed = 0
     skipped = 0
-    affected_groups = []
+    affected_groups = set()
     for find in finds:
         groups = find.finding_group_set.all()
         if not groups:
@@ -169,11 +169,53 @@ def remove_from_finding_group(finds):
 
         for group in find.finding_group_set.all():
             group.findings.remove(find)
-            affected_groups.append(group)
+            affected_groups.add(group)
 
         removed += 1
 
     return affected_groups, removed, skipped
+
+
+def get_group_by_group_name(finding, finding_group_by_option):
+    if finding_group_by_option == 'component_name':
+        group_name = finding.component_name if finding.component_name else 'empty_component_name'
+    elif finding_group_by_option == 'component_name+version':
+        group_name = finding.component_name if finding.component_name else 'empty_component_name'
+        group_name = group_name + ":" + finding.component_version if finding.component_versione else 'empty_component_version'
+    elif finding_group_by_option == 'file_path':
+        group_name = finding.file_path if finding.file_path else 'empty_file_path'
+    else:
+        raise ValueError("Invalid group_by option %s" % finding_group_by_option)
+
+    return group_name
+
+
+def group_findings_by(finds, finding_group_by_option):
+    grouped = 0
+    groups_created = 0
+    groups_existing = 0
+    skipped = 0
+    affected_groups = set()
+    for find in finds:
+        if find.finding_group is not None:
+            skipped += 1
+            continue
+
+        group_name = get_group_by_group_name(find, finding_group_by_option)
+        finding_group = Finding_Group.objects.filter(name=group_name).first()
+        if not finding_group:
+            finding_group, added, skipped = create_finding_group([find], group_name)
+            groups_created += 1
+            grouped += added
+            skipped += skipped
+        else:
+            add_to_finding_group(finding_group, [find])
+            groups_existing += 1
+            grouped += 1
+
+        affected_groups.add(finding_group)
+
+    return affected_groups, grouped, skipped, groups_created
 
 
 @dojo_model_to_id
