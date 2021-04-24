@@ -81,7 +81,7 @@ class IntSightsParser(object):
         content = csv_file.read()
         if type(content) is bytes:
             content = content.decode('utf-8')
-        csv_reader = csv.DictReader(io.StringIO(content), delimiter = ',', quotechar = '"')
+        csv_reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
 
         # Don't bother parsing if the keys don't match exactly what's expected
         if collections.Counter(default_keys) == collections.Counter(csv_reader.fieldnames):
@@ -153,16 +153,16 @@ class IntSightsParser(object):
         for alert in alerts:
             dupe_key = alert['alert_id']
 
-            alert = Finding(title = alert['title'],
-                            test = test,
-                            active = False if alert['status'] == 'Closed' else True,
-                            verified = True,
-                            description = self._build_finding_description(alert),
-                            severity = alert['severity'],
-                            references = alert["alert_link"],
-                            static_finding = False,
-                            dynamic_finding = True,
-                            unique_id_from_tool = alert['alert_id'])
+            alert = Finding(title=alert['title'],
+                            test=test,
+                            active=False if alert['status'] == 'Closed' else True,
+                            verified=True,
+                            description=self._build_finding_description(alert),
+                            severity=alert['severity'],
+                            references=alert["alert_link"],
+                            static_finding=False,
+                            dynamic_finding=True,
+                            unique_id_from_tool=alert['alert_id'])
 
             duplicates[dupe_key] = alert
 
