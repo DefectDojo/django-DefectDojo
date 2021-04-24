@@ -147,6 +147,9 @@ class IntSightsParser(object):
         else:
             raise ValueError('IntSights report contains errors: Unknown File Format')
 
+        if not alerts:
+            raise ValueError('IntSights report contains errors: Unknown File Format')
+
         for alert in alerts:
             dupe_key = alert['alert_id']
 
