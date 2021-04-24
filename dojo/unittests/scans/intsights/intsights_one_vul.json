@@ -14,10 +14,10 @@
           "5c80dbfb3b4a3900078b6bea",
           "5c80dbfc4626bd0007bd64db"
         ],
-        "Title": "HTTP headers weakness in elsevier.com web server",
+        "Title": "HTTP headers weakness in initech.com web server",
         "Tags": [],
         "Type": "ExploitableData",
-        "Severity": "Medium",
+        "Severity": "Critical",
         "SubType": "VulnerabilityInTechnologyInUse",
         "Description": "X-XSS-PROTECTION and CONTENT-SECURITY-POLICY headers were not sent by the server, which makes it vulnerable for various attack vectors"
       },

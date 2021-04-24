@@ -22,14 +22,17 @@ class TestIntSightsParser(TestCase):
         testfile.close()
         self.assertEqual(0, len(findings))
 
-    def test_intsights_parser_with_one_criticle_vuln_has_one_findings(self):
+    def test_intsights_parser_with_one_critical_vuln_has_one_findings(self):
         testfile = open("dojo/unittests/scans/intsights/intsights_one_vul.json")
         parser = IntSightsParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
         self.assertEqual(1, len(findings))
-        self.assertEqual("handlebars", findings[0].component_name)
-        self.assertEqual("4.5.2", findings[0].component_version)
+
+        finding = list(findings)[0]
+
+        self.assertEqual("5c80dbf83b4a3900078b6be6", finding.unique_id_from_tool)
+        self.assertEqual("HTTP headers weakness in initech.com web server", finding.title)
 
     def test_intsights_parser_with_many_vuln_has_many_findings(self):
         testfile = open("dojo/unittests/scans/intsights/intsights_many_vul.json")
