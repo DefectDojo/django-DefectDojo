@@ -7,6 +7,7 @@ theme = "learn"
 [outputs]
 home = [ "HTML", "RSS", "JSON"]
 
+# unsafe = true is needed to show superscript text, see https://discourse.gohugo.io/t/footnote-sup-tag-not-working-inside-markdownify-help/25426
 [markup]
     [markup.goldmark]
         [markup.goldmark.renderer]
