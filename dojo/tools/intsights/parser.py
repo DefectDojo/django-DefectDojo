@@ -23,7 +23,7 @@ class IntSightsParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "IntSights report file can be imported in JSON format."
 
-    def _parse_json(self, json_file) -> [{}]:
+    def _parse_json(self, json_file) -> [Finding]:
         """
         Parses entries from the JSON object into a list of alerts
         Args:
@@ -56,7 +56,7 @@ class IntSightsParser(object):
 
         return alerts
 
-    def _parse_csv(self, csv_file):
+    def _parse_csv(self, csv_file) -> [Finding]:
         """
 
         Parses entries from the CSV file object into a list of alerts
@@ -81,7 +81,7 @@ class IntSightsParser(object):
         content = csv_file.read()
         if type(content) is bytes:
             content = content.decode('utf-8')
-        csv_reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
+        csv_reader = csv.DictReader(io.StringIO(content), delimiter = ',', quotechar = '"')
 
         # Don't bother parsing if the keys don't match exactly what's expected
         if collections.Counter(default_keys) == collections.Counter(csv_reader.fieldnames):
@@ -114,10 +114,31 @@ class IntSightsParser(object):
 
         return alerts
 
+    def _build_finding_description(self, alert: dict) -> str:
+        """
+        Builds an IntSights FInding description from various pieces of information.
+        Args:
+            alert: The parsed alert dictionary
+        Returns: A markdown formatted description
+        """
+
+        description = f'{alert["description"]}' \
+                      f'\n\n----' \
+                      f'\r\n**Date Found**: {alert.get("report_date", "None provided")}' \
+                      f'\n\n----' \
+                      f'\r\n**Type**: {alert.get("type", "None provided")}' \
+                      f'\r\n**Source**: {alert.get("source_url", "None provided")}' \
+                      f'\r\n**Source Date**: {alert.get("source_date", "None provided")}' \
+                      f'\r\n**Source Network Type**: {alert.get("network_type", "None provided")}' \
+                      f'\n\n----' \
+                      f'\r\n**Assets Affected**: {alert.get("assets", "None provided")}' \
+                      f'\n\n----' \
+                      f'\r\n**Alert Link**: {alert.get("alert_link", "None provided")}'
+
+        return description
+
     def get_findings(self, file, test):
         duplicates = dict()
-
-        self._LOGGER.error(type(file))
 
         if file.name.lower().endswith('.json'):
             alerts = self._parse_json(file, )
@@ -126,39 +147,23 @@ class IntSightsParser(object):
         else:
             raise ValueError('IntSights report contains errors: Unknown File Format')
 
-        if not alerts:
-            raise ValueError('IntSights report contains errors: No vulnerabilities were found in the data provided')
-
         for alert in alerts:
             dupe_key = alert['alert_id']
 
-            if dupe_key in duplicates:
-                alert = duplicates[dupe_key]
-                duplicates[dupe_key] = alert
-            else:
-                duplicates[dupe_key] = True
+            alert = Finding(title = alert['title'],
+                            test = test,
+                            active = False if alert['status'] == 'Closed' else True,
+                            verified = True,
+                            description = self._build_finding_description(alert),
+                            severity = alert['severity'],
+                            references = alert["alert_link"],
+                            static_finding = False,
+                            dynamic_finding = True,
+                            unique_id_from_tool = alert['alert_id'])
 
-                alert = Finding(title=alert['title'],
-                                test=test,
-                                active=False if alert['status'] == 'Closed' else True,
-                                verified=True,
-                                description=f'{alert["description"]}'
-                                              f'\n\n----'
-                                              f'\r\n**Date Found**: {alert["report_date"]}'
-                                              f'\n\n----'
-                                              f'\r\n**Type**: {alert["type"]}'
-                                              f'\r\n**Source**: {alert["source_url"]}'
-                                              f'\r\n**Source Date**: {alert["source_date"]}'
-                                              f'\r\n**Source Network Type**: {alert["network_type"]}'
-                                              f'\n\n----'
-                                              f'\r\n**Assets Affected**: {alert["assets"]}'
-                                              f'\n\n----'
-                                              f'\r\n**Alert Link**: {alert["alert_link"]}',
-                                severity=alert['severity'],
-                                references=alert["alert_link"],
-                                static_finding=False,
-                                dynamic_finding=True,
-                                unique_id_from_tool=alert['alert_id'])
-                duplicates[dupe_key] = alert
+            duplicates[dupe_key] = alert
+
+            if not dupe_key in duplicates:
+                duplicates[dupe_key] = True
 
         return duplicates.values()
