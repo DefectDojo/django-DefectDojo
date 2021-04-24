@@ -1078,7 +1078,7 @@ class ImportScanSerializer(serializers.Serializer):
 
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
-    auto_group_by = serializers.ChoiceField(choices=Finding_Group.GROUP_BY_OPTIONS)
+    auto_group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1176,7 +1176,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
 
-    auto_group_by = serializers.ChoiceField(choices=Finding_Group.GROUP_BY_OPTIONS)
+    auto_group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def save(self, push_to_jira=False):
         data = self.validated_data

@@ -433,7 +433,7 @@ class ImportScanForm(forms.Form):
                                             required=False, initial=False)
 
     if settings.FEATURE_FINDING_GROUPS:
-        auto_group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group imported findings by the chosen option')
+        auto_group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def __init__(self, *args, **kwargs):
         super(ImportScanForm, self).__init__(*args, **kwargs)
@@ -492,7 +492,7 @@ class ReImportScanForm(forms.Form):
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
 
     if settings.FEATURE_FINDING_GROUPS:
-        auto_group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group imported findings by the chosen option')
+        auto_group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
 
     def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
