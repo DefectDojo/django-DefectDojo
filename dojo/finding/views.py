@@ -721,6 +721,10 @@ def edit_finding(request, fid):
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
 
+            if 'group' in form.cleaned_data:
+                finding_group = form.cleaned_data['group']
+                finding_helper.update_finding_group(new_finding, finding_group)
+
             if 'risk_accepted' in form.cleaned_data and form['risk_accepted'].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
                     ra_helper.simple_risk_accept(new_finding, perform_save=False)

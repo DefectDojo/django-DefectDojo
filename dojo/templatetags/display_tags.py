@@ -234,6 +234,18 @@ def version_num(value):
     return version
 
 
+@register.filter(name='group_sla')
+def group_sla(group):
+    if not get_system_setting('enable_finding_sla'):
+        return ""
+
+    if not group.findings.all():
+        return ""
+
+    # if there is at least 1 finding, there will be date, severity etc to calculate sla
+    return finding_sla(group)
+
+
 @register.filter(name='finding_sla')
 def finding_sla(finding):
     if not get_system_setting('enable_finding_sla'):

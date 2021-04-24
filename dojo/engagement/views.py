@@ -557,6 +557,8 @@ def import_scan_results(request, eid=None, pid=None):
             environment_id = request.POST.get('environment', 'Development')
             environment = Development_Environment.objects.get(id=environment_id)
 
+            auto_group_by = form.cleaned_data.get('auto_group_by', None)
+
             # TODO move to form validation?
             if not any(scan_type in code
                        for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
@@ -599,7 +601,7 @@ def import_scan_results(request, eid=None, pid=None):
                 test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings)
+                            close_old_findings=close_old_findings, auto_group_by=auto_group_by)
 
                 message = scan_type + '%s processed a total of %s findings' % (scan_type, finding_count)
 

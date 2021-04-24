@@ -13,6 +13,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import dojo.notifications.helper as notifications_helper
+import dojo.finding.helper as finding_helper
 import base64
 import logging
 
@@ -54,7 +55,7 @@ class DojoDefaultImporter(object):
         return test
 
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, now=timezone.now()):
+                                endpoints_to_add=None, push_to_jira=None, auto_group_by=None, now=timezone.now()):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
@@ -86,6 +87,9 @@ class DojoDefaultImporter(object):
             item.created = now
             item.updated = now
             item.save(dedupe_option=False)
+
+            if settings.FEATURE_FINDING_GROUPS and auto_group_by:
+                finding_helper.add_finding_to_auto_group(item, auto_group_by)
 
             if (hasattr(item, 'unsaved_req_resp') and
                     len(item.unsaved_req_resp) > 0):
@@ -229,7 +233,9 @@ class DojoDefaultImporter(object):
 
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False):
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, auto_group_by=None):
+
+        logger.debug('IMPORT_SCAN: auto_group_by: %s', auto_group_by)
 
         user = user or get_current_user()
 
@@ -250,7 +256,7 @@ class DojoDefaultImporter(object):
         new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                     verified, minimum_severity=minimum_severity,
                                                     endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                    now=now)
+                                                    auto_group_by=auto_group_by, now=now)
 
         closed_findings = []
         if close_old_findings:

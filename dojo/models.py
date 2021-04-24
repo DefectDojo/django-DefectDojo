@@ -2072,7 +2072,9 @@ class Finding(models.Model):
 
     @cached_property
     def finding_group(self):
-        return self.finding_group_set.all().first()
+        group = self.finding_group_set.all().first()
+        logger.debug('finding.finding_group: %s', group)
+        return group
 
     @cached_property
     def has_jira_group_issue(self):
@@ -2322,7 +2324,7 @@ class Stub_Finding(models.Model):
 
 class Finding_Group(TimeStampedModel):
 
-    GROUP_BY_OPTIONS = (('component_name', 'Component Name'), ('component_name+version', 'Component Name + Version'), ('file_path', 'File path'))
+    GROUP_BY_OPTIONS = [('component_name', 'Component Name'), ('component_name+version', 'Component Name + Version'), ('file_path', 'File path')]
 
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)

@@ -695,6 +695,9 @@ def re_import_scan_results(request, tid):
             endpoints_to_add = None  # not available on reimport UI
 
             close_old_findings = form.cleaned_data.get('close_old_findings', True)
+
+            auto_group_by = form.cleaned_data.get('auto_group_by', None)
+
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
             test.version = version
@@ -716,7 +719,7 @@ def re_import_scan_results(request, tid):
                                                 endpoints_to_add=endpoints_to_add, scan_date=scan_date,
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
-                                                close_old_findings=close_old_findings)
+                                                close_old_findings=close_old_findings, auto_group_by=auto_group_by)
             except Exception as e:
                 logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
