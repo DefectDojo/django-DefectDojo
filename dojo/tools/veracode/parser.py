@@ -90,15 +90,12 @@ class VeracodeParser(object):
         finding = Finding()
         finding.test = test
         finding.mitigation = mitigation_text
-        finding.verified = False
-        finding.active = False
         finding.static_finding = True
         finding.dynamic_finding = False
         finding.unique_id_from_tool = cls.__xml_flaw_to_unique_id(app_id, xml_node)
 
         # Report values
         finding.severity = cls.__xml_flaw_to_severity(xml_node)
-        finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
         finding.cwe = int(xml_node.attrib['cweid'])
         finding.title = xml_node.attrib['categoryname']
         finding.impact = 'CIA Impact: ' + xml_node.attrib['cia_impact'].upper()
@@ -200,7 +197,6 @@ class VeracodeParser(object):
 
         # Report values
         finding.severity = cls.__cvss_to_severity(float(xml_node.attrib['cvss_score']))
-        finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
         finding.cve = xml_node.attrib['cve_id']
         finding.cwe = cls._get_cwe(xml_node.attrib['cwe_id'])
         finding.title = "Vulnerable component: {0}:{1}".format(library, version)

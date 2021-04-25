@@ -206,15 +206,12 @@ def get_item(item_node, test):
         description="URL: " + url_host + path + "\n\n" + detail + "\n",
         mitigation=remediation,
         references=references,
-        active=False,
-        verified=False,
         false_p=False,
         duplicate=False,
         out_of_scope=False,
         mitigated=None,
         dynamic_finding=True,
         impact=background,
-        numerical_severity=Finding.get_numerical_severity(severity),
         unique_id_from_tool=serial_number,
         vuln_id_from_tool=vuln_id_from_tool)
     finding.unsaved_req_resp = unsaved_req_resp

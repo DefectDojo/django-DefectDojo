@@ -210,7 +210,7 @@
                                 </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
-                                    {% if request.user|feature_authorization_v2_or_user_is_staff %}
+                                    {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                         <li><a href="{% url 'engagements_all' %}">All Engagements</a></li>
                                     {% endif %}
                                     {% if request.user.is_staff %}
@@ -220,7 +220,7 @@
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user.is_staff %}
+                            {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <li>
                                     <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                         <i class="fa fa-bug fa-fw"></i>
@@ -240,9 +240,11 @@
                                         <li>
                                             <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
                                         </li>
+                                        {% if request.user.is_staff %}
                                         <li>
                                             <a href="{% url 'templates' %}">Finding Templates</a>
                                         </li>
+                                        {% endif %}
                                     </ul>
                                     <!-- /.nav-second-level -->
                                 </li>
@@ -276,18 +278,23 @@
                                 </li>
                             {% endif %}
                             <li>
+                                {% if 'FEATURE_REPORTS_PDF_LIST'|setting_enabled %}
                                 <a href="{% url 'reports' %}" aria-expanded="false" aria-label="Reports">
 				                    <i class="fa fa-file-text-o fa-fw"></i>
                                     <span>Reports</span>
                                     <span class="glyphicon arrow"></span>
                                 </a>
                                 <ul class="nav nav-second-level">
-                                    {% feature_reports_pdf_list as feature_reports_pdf_list_flag %}
-                                    {% if feature_reports_pdf_list_flag %}
-                                        <li><a href="{% url 'reports' %}"> All Reports </a></li>
-                                    {% endif %}
+                                    <li><a href="{% url 'reports' %}"> All Reports </a></li>
                                     <li><a href="{% url 'report_builder' %}"> Report Builder </a></li>
                                 </ul>
+                                {% else %}
+                                <a href="{% url 'report_builder' %}" aria-expanded="false" aria-label="Reports">
+				                    <i class="fa fa-file-text-o fa-fw"></i>
+                                    <span>Reports</span>
+                                    <span class="glyphicon arrow"></span>
+                                </a>
+                                {% endif %}
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>
@@ -317,7 +324,7 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if request.user|feature_authorization_v2_or_user_is_staff %}
+                            {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <li>
 				                    <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                         <i class="fa fa-calendar fa-fw"></i>
@@ -419,11 +426,8 @@
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'view_engagements' product_tab.product.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
                       {% if product_tab.product|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:product_tab.product %}
-                      <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
-                      {% endif %}
                       <li role="separator" class="divider"></li>
-                      <li><a href="{% url 'view_engagements_cicd' product_tab.product.id %}"><i class="fa fa-calendar"></i> View CI/CD Engagements</a></li>
-                      {% if product_tab.product|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:product_tab.product%}
+                      <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Interactive Engagement</a></li>
                       <li><a href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New CI/CD Engagement</a></li>
                       {% endif %}
                     </ul>
@@ -630,8 +634,8 @@
                         {% dojo_version %} ( {% dojo_current_hash %} )
                     </p>
                     <p>
-                        Detailed DefectDojo documentation can be found at  <a
-                            href="{% dojo_docs_url %}">Read The Docs</a>.
+                        Detailed DefectDojo documentation can be found in our <a
+                            href="{% dojo_docs_url %}">GitHub Pages</a>.
                     </p>
                     <p>
                         DefectDojo is licensed under the <a

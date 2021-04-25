@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load humanize %}
 {% load static %}
 {% load get_endpoint_status %}
@@ -50,14 +51,14 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if user|is_authorized_for_change:finding %}
+                            {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'edit_finding' finding.id %}">
                                         <i class="fa fa-pencil-square-o"></i> Edit Finding
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if user|is_authorized_for_staff:finding %}
+                            {% if user|is_authorized_for_staff:finding or finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'manage_images' finding.id %}">
                                         <i class="fa fa-file-image-o"></i> Manage Images
@@ -83,7 +84,7 @@
                                     </li>
                                 {% endif %}
                             {% endif %}
-                            {% if user|is_authorized_for_change:finding %}
+                            {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'touch_finding' finding.id %}">
                                         <i class="fa fa-clock-o"></i> Touch Finding
@@ -121,7 +122,7 @@
                                 </li>
                                 <li role="separator" class="divider"></li>
                             {% endif %}
-                            {% if user|is_authorized_for_change:finding %}
+                            {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                 {% if finding.mitigated %}
                                     <li role="presentation">
                                         <a href="{% url 'reopen_finding' finding.id %}">
@@ -136,7 +137,7 @@
                                 </li>
                                 {% endif %}
                             {% endif %}
-                            {% if user|is_authorized_for_change:finding %}
+                            {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Risk_Acceptance" %}
                                 {% if finding.risk_accepted %}
                                     <li role="presentation">
                                     <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
@@ -165,7 +166,7 @@
                                     <i class="fa fa-history"></i> View History
                                 </a>
                             </li>
-                            {% if user|is_authorized_for_delete:finding %}
+                            {% if user|is_authorized_for_delete:finding or finding|has_object_permission:"Finding_Delete" %}
                                 <li role="separator" class="divider"></li>
                                 <li role="presentation">
                                     <a class="text-danger delete-finding" href="#">
@@ -248,14 +249,14 @@
                     <th>Found by</th>
                 </tr>
                 <tr>
-                    <td>{{ finding.id }}</td>
+                    <td title="hash_code: {{ finding.hash_code }}">{{ finding.id }}</td>
                     <td>
                         <span class="label severity severity-{{ finding.severity }}">
                             {% if finding.severity %}
                                 {% if finding.cvssv3 %}
                                     <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
                                         data-content="{{ finding.cvssv3 }}">
-                                {% endif %}        
+                                {% endif %}
                                 {{ finding.severity_display }}
                                 {% if finding.cvssv3_score %}
                                     ({{ finding.cvssv3_score }})
@@ -476,6 +477,9 @@
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
                 {% endif %}
+                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                    <th>Group</th>
+                {% endif %}
             </tr>
             <tr>
                 {% if finding.file_path %}
@@ -515,30 +519,38 @@
                     </span>
                 </td>
                 {% endif %}
-                {% if finding.has_jira_configured or finding.jira_issue %}
+                {% if finding.has_jira_configured or finding.has_jira_issue or finding.has_jira_group_issue %}
                     <td id="jira">
-                    {% if finding.jira_issue %}
-                        <a href="{{ finding | jira_issue_url }}"
-                        target="_blank" title="{{ finding | jira_issue_url }}">{{ finding | jira_key }}</a>
-                        <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
-                        <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
-                    {% else %}
-                        {% if can_be_pushed_to_jira %}
-                            None
-                            <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
-                            {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
-                                <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
-                            </a> {% endcomment %}
-                        {% else %}
-                            <i class="fa fa-question-circle has-popover" data-trigger="hover"
-                            data-content="{{ can_be_pushed_to_jira_error }}"
-                             data-placement="bottom" data-container="body">
-                             </i>
+                        {% if finding.has_jira_group_issue %}
+                            <a href="{{ finding.finding_group | jira_issue_url }}"
+                            target="_blank" title="{{ finding.finding_group | jira_issue_url }} (group)">{{ finding.finding_group | jira_key }}</a>
                         {% endif %}
-                    {% endif %}
+                        {% if finding.has_jira_issue %}
+                            <a href="{{ finding | jira_issue_url }}"
+                            target="_blank" title="{{ finding | jira_issue_url }}">{{ finding | jira_key }}</a>
+                            <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
+                            <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
+                        {% else %}
+                            {% if can_be_pushed_to_jira %}
+                                {% if not finding.has_jira_group_issue %}
+                                None
+                                <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
+                                {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
+                                    <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                                </a> {% endcomment %}
+                                {% endif %}
+                            {% else %}
+                                <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                                data-content="{{ can_be_pushed_to_jira_error }}"
+                                data-placement="bottom" data-container="body">
+                                </i>
+                            {% endif %}
+                        {% endif %}
                     </td>
                     <td>
-                        {% if finding.jira_issue %}
+                        {% if finding.has_jira_group_issue %}
+                            <div title="{{ finding.finding_group.jira_issue.jira_change|date:"DATETIME_FORMAT" }} (group)">{{ finding.finding_group.jira_issue.jira_change|naturalday }}</div>
+                        {% elif finding.jira_issue %}
                             <div title="{{ finding.jira_issue.jira_change|date:"DATETIME_FORMAT" }}">{{ finding.jira_issue.jira_change|naturalday }}</div>
                         {% endif %}
                     </td>
@@ -548,6 +560,16 @@
                     {% if finding.github_issue %}
                         <a href="{{ finding.github_issue.issue_url }}" target="_blank" title="{{ finding.github_issue.issue_url }}">#{{ finding.github_issue.issue_id }}</a>
                     {% endif %}
+                    </td>
+                {% endif %}
+                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                    <td>
+                        {% if finding.finding_group %}
+                            {{ finding.finding_group.name }}
+                            <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa fa-share-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
+                        {% else %}
+                            N
+                        {% endif %}
                     </td>
                 {% endif %}
             </tr>
@@ -1119,16 +1141,12 @@
                     jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
                 },
                 success: function (data, textStatus, jqXHR) {
-                    console.log(textStatus)
-                    console.log(data)
                 },
                 error: function (request, status, error) {
                     console.log('error')
                     console.log(request.responseText)
                 },
                 complete: function(e) {
-                    console.log('complete')
-                    console.log(this)
                     location.reload()
                 }
             });
@@ -1140,6 +1158,10 @@
 
         $("#unlink_jira").on('click', function(e) {
             jira_action(this,'{% url 'finding_unlink_jira' finding.id %}')
+        });
+
+        $(".push_group_to_jira").on('click', function(e) {
+            jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/push')
         });
 
         var checkbox_count = 0;
