@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0089_unprotect_jira_project'),
+        ('dojo', '0090_index_duplicate_finding'),
     ]
 
     operations = [
