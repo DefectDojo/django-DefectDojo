@@ -345,9 +345,9 @@ def set_duplicate(new_finding, existing_finding):
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
-    logger.debug('saving new finding')
+    logger.debug('saving new finding: %d', new_finding.id)
     super(Finding, new_finding).save()
-    logger.debug('saving existing finding')
+    logger.debug('saving existing finding: %d', existing_finding.id)
     super(Finding, existing_finding).save()
 
 
@@ -1443,7 +1443,7 @@ def get_system_setting(setting, default=None):
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Product)
-def calculate_grade(product):
+def calculate_grade(product, *args, **kwargs):
     system_settings = System_Settings.objects.get()
     if not product:
         logger.warning('ignoring calculate product for product None!')
@@ -1939,7 +1939,7 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def mass_model_updater(model_type, models, function, fields=None, page_size=1000, order='asc', log_prefix=''):
+def mass_model_updater(model_type, models, function, fields, page_size=1000, order='asc', log_prefix=''):
     """ Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
     this process very well if we can process the models ordered by id.

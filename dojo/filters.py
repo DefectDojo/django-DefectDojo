@@ -853,6 +853,7 @@ class OpenFindingFilter(DojoFilter):
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.none(),
         label="Engagement")
+    file_path = CharFilter(lookup_expr='icontains')
 
     if settings.FEATURE_FINDING_GROUPS:
         finding_group = ModelMultipleChoiceFilter(
@@ -1018,6 +1019,7 @@ class ClosedFindingFilter(DojoFilter):
         label="Product Type")
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
+    file_path = CharFilter(lookup_expr='icontains')
 
     has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
@@ -1150,6 +1152,8 @@ class AcceptedFindingFilter(DojoFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
+
+    file_path = CharFilter(lookup_expr='icontains')
 
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
@@ -1606,6 +1610,7 @@ class MetricsFindingFilter(FilterSet):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
+    file_path = CharFilter(lookup_expr='icontains')
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all().order_by('name'),
         label="Test Type"
@@ -1725,6 +1730,7 @@ class ProductMetricsFindingFilter(FilterSet):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     # date = MetricsDateRangeFilter()
+    file_path = CharFilter(lookup_expr='icontains')
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.none(),
         label="Engagement")
@@ -2069,6 +2075,7 @@ class ReportFindingFilter(DojoFilter):
     )
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+    file_path = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Finding
@@ -2164,6 +2171,7 @@ class ReportAuthedFindingFilter(DojoFilter):
     )
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+    file_path = CharFilter(lookup_expr='icontains')
 
     def __init__(self, *args, **kwargs):
         super(ReportAuthedFindingFilter, self).__init__(*args, **kwargs)

@@ -1,7 +1,7 @@
 import logging
 import re
 
-from defusedxml import ElementTree as etree
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 

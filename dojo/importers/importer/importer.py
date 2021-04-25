@@ -133,32 +133,33 @@ class DojoDefaultImporter(object):
                 item.endpoint_status.add(eps)
                 item.endpoints.add(ep)
 
-                if endpoints_to_add:
-                    for endpoint in endpoints_to_add:
-                        # TODO Not sure what happens here, we get an endpoint model and try to create it again?
-                        try:
-                            ep, created = endpoint_get_or_create(
-                                protocol=endpoint.protocol,
-                                userinfo=endpoint.userinfo,
-                                host=endpoint.host,
-                                fqdn=endpoint.fqdn,
-                                port=endpoint.port,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=test.engagement.product)
-                        except (MultipleObjectsReturned):
-                            pass
-                        try:
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=item,
-                                endpoint=ep)
-                        except (MultipleObjectsReturned):
-                            pass
+            if endpoints_to_add:
+                for endpoint in endpoints_to_add:
+                    logger.debug('adding endpoint %s', endpoint)
+                    # TODO Not sure what happens here, we get an endpoint model and try to create it again?
+                    try:
+                        ep, created = endpoint_get_or_create(
+                            protocol=endpoint.protocol,
+                            userinfo=endpoint.userinfo,
+                            host=endpoint.host,
+                            fqdn=endpoint.fqdn,
+                            port=endpoint.port,
+                            path=endpoint.path,
+                            query=endpoint.query,
+                            fragment=endpoint.fragment,
+                            product=test.engagement.product)
+                    except (MultipleObjectsReturned):
+                        pass
+                    try:
+                        eps, created = Endpoint_Status.objects.get_or_create(
+                            finding=item,
+                            endpoint=ep)
+                    except (MultipleObjectsReturned):
+                        pass
 
-                        ep.endpoint_status.add(eps)
-                        item.endpoints.add(ep)
-                        item.endpoint_status.add(eps)
+                    ep.endpoint_status.add(eps)
+                    item.endpoints.add(ep)
+                    item.endpoint_status.add(eps)
 
             if item.unsaved_tags:
                 item.tags = item.unsaved_tags
