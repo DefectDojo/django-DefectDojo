@@ -31,7 +31,7 @@ def npm_censor_hashes(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0089_unprotect_jira_project'),
+        ('dojo', '0090_index_duplicate_finding'),
     ]
 
     operations = [
