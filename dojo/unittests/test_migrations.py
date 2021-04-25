@@ -5,8 +5,8 @@ from django.core.exceptions import FieldError
 
 
 class TestEndpointMigrationBroken(TransactionTestCase):
-    migrate_from = ('dojo', '0090_endpoint_userinfo_creation')
-    migrate_to = ('dojo', '0091_endpoint_host_migration')
+    migrate_from = ('dojo', '0091_endpoint_userinfo_creation')
+    migrate_to = ('dojo', '0092_endpoint_host_migration')
 
     def setUp(self):
         super().setUp()
@@ -46,8 +46,8 @@ class TestEndpointMigrationBroken(TransactionTestCase):
 
 
 class TestEndpointMigration(MigratorTestCase):
-    migrate_from = ('dojo', '0090_endpoint_userinfo_creation')
-    migrate_to = ('dojo', '0091_endpoint_host_migration')
+    migrate_from = ('dojo', '0091_endpoint_userinfo_creation')
+    migrate_to = ('dojo', '0092_endpoint_host_migration')
 
     def prepare(self):
         Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
