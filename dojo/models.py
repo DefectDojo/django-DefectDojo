@@ -481,7 +481,7 @@ class Product_Type(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        return Finding.objects.filter(risk_accepted=False, active=True, verified=False, duplicate=False, test__engagement__product__prod_type=self)
+        return Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement__product__prod_type=self)
 
     class Meta:
         ordering = ('name',)
