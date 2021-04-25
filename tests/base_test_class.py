@@ -3,8 +3,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoAlertPresentException
-
+from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
 import unittest
 import os
 import re
@@ -177,6 +176,13 @@ class BaseTestCase(unittest.TestCase):
 
         # print('text mismatch!')
         return False
+
+    def is_element_by_id_present(self, id):
+        try:
+            self.driver.find_element_by_id(id)
+            return True
+        except NoSuchElementException:
+            return False
 
     def is_success_message_present(self, text=None):
         return self.is_element_by_css_selector_present('.alert-success', text=text)

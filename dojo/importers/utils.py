@@ -69,7 +69,7 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
 
     # tags=tags TODO no tags field in api for reimport it seems
     if endpoints_to_add:
-        import_settings['endpoints'] = endpoints_to_add
+        import_settings['endpoints'] = [str(endpoint) for endpoint in endpoints_to_add]
 
     test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=type)
     test_import.save()

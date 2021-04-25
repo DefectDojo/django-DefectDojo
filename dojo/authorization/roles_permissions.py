@@ -3,7 +3,7 @@ from enum import IntEnum
 
 class Roles(IntEnum):
     Reader = 0
-    Scan_User = 1
+    API_Importer = 1
     Writer = 2
     Maintainer = 3
     Owner = 4
@@ -152,7 +152,7 @@ def get_roles_with_permissions():
 
             Permissions.Component_View
         },
-        Roles.Scan_User: {
+        Roles.API_Importer: {
             Permissions.Import_Scan_Result
         },
         Roles.Writer: {
