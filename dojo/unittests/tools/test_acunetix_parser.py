@@ -30,7 +30,7 @@ class TestAcunetixParser(TestCase):
             self.assertEqual('https', endpoint.protocol)
             self.assertEqual(443, endpoint.port)
             self.assertEqual('vijaytest.com', endpoint.host)
-            self.assertEqual('/some/path', endpoint.path)
+            self.assertEqual('some/path', endpoint.path)
 
     def test_parse_file_with_multiple_finding(self):
         testfile = open("dojo/unittests/scans/acunetix/many_findings.xml")
@@ -54,7 +54,7 @@ class TestAcunetixParser(TestCase):
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('www.itsecgames.com', endpoint.host)
-            self.assertEqual('/', endpoint.path)
+            self.assertIsNone(endpoint.path)
             # check req/resp
             self.assertEqual(1, len(finding.unsaved_req_resp))
             req_resp = finding.unsaved_req_resp[0]
@@ -84,7 +84,7 @@ class TestAcunetixParser(TestCase):
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('www.itsecgames.com', endpoint.host)
-            self.assertEqual('/', endpoint.path)
+            self.assertIsNone(endpoint.path)
             # check req/resp
             self.assertEqual(1, len(finding.unsaved_req_resp))
             req_resp = finding.unsaved_req_resp[0]
@@ -113,7 +113,7 @@ class TestAcunetixParser(TestCase):
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('www.itsecgames.com', endpoint.host)
-            self.assertEqual('/', endpoint.path)
+            self.assertIsNone(endpoint.path)
             # check req/resp
             self.assertEqual(1, len(finding.unsaved_req_resp))
             req_resp = finding.unsaved_req_resp[0]
@@ -149,12 +149,12 @@ class TestAcunetixParser(TestCase):
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('example.co.id', endpoint.host)
-            self.assertEqual('/h/search', endpoint.path)
+            self.assertEqual('h/search', endpoint.path)
             endpoint = finding.unsaved_endpoints[1]
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('example.co.id', endpoint.host)
-            self.assertEqual('/m/zmain', endpoint.path)
+            self.assertEqual('m/zmain', endpoint.path)
             # check req/resp
             self.assertEqual(3, len(finding.unsaved_req_resp))
             for req_resp in finding.unsaved_req_resp:
@@ -182,7 +182,7 @@ class TestAcunetixParser(TestCase):
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('example.co.id', endpoint.host)
-            self.assertEqual('/', endpoint.path)
+            self.assertIsNone(endpoint.path)
             # check req/resp
             self.assertEqual(1, len(finding.unsaved_req_resp))
             req_resp = finding.unsaved_req_resp[0]
