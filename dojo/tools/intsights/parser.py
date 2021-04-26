@@ -23,7 +23,7 @@ class IntSightsParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "IntSights report file can be imported in JSON format."
 
-    def _parse_json(self, json_file) -> [Finding]:
+    def _parse_json(self, json_file) -> [dict]:
         """
         Parses entries from the JSON object into a list of alerts
         Args:
@@ -56,7 +56,7 @@ class IntSightsParser(object):
 
         return alerts
 
-    def _parse_csv(self, csv_file) -> [Finding]:
+    def _parse_csv(self, csv_file) -> [dict]:
         """
 
         Parses entries from the CSV file object into a list of alerts
@@ -85,19 +85,20 @@ class IntSightsParser(object):
 
         # Don't bother parsing if the keys don't match exactly what's expected
         if collections.Counter(default_keys) == collections.Counter(csv_reader.fieldnames):
+            default_valud = 'None provided'
             for alert in csv_reader:
                 alert['alert_id'] = alert.pop('Alert ID')
                 alert['title'] = alert.pop('Title')
                 alert['description'] = alert.pop('Description')
                 alert['severity'] = alert.pop('Severity')
-                alert['type'] = alert.pop('Type')
-                alert['source_date'] = alert.pop('Source Date (UTC)')
-                alert['report_date'] = alert.pop('Report Date (UTC)')
-                alert['network_type'] = alert.pop('Network Type')
-                alert['source_url'] = alert.pop('Source URL')
-                alert['assets'] = alert.pop('Assets')
-                alert['tags'] = alert.pop('Tags')
-                alert['status'] = alert.pop('Status')
+                alert['type'] = alert.pop('Type', )
+                alert['source_date'] = alert.pop('Source Date (UTC)', default_valud)
+                alert['report_date'] = alert.pop('Report Date (UTC)', default_valud)
+                alert['network_type'] = alert.pop('Network Type', default_valud)
+                alert['source_url'] = alert.pop('Source URL', default_valud)
+                alert['assets'] = alert.pop('Assets', default_valud)
+                alert['tags'] = alert.pop('Tags', default_valud)
+                alert['status'] = alert.pop('Status', default_valud)
                 alert['alert_link'] = alert.pop('Alert Link')
                 alert.pop('Assignees')
                 alert.pop('Remediation')
@@ -116,25 +117,23 @@ class IntSightsParser(object):
 
     def _build_finding_description(self, alert: dict) -> str:
         """
-        Builds an IntSights FInding description from various pieces of information.
+        Builds an IntSights Finding description from various pieces of information.
         Args:
             alert: The parsed alert dictionary
         Returns: A markdown formatted description
         """
 
-        description = f'{alert["description"]}' \
-                      f'\n\n----' \
-                      f'\r\n**Date Found**: {alert.get("report_date", "None provided")}' \
-                      f'\n\n----' \
-                      f'\r\n**Type**: {alert.get("type", "None provided")}' \
-                      f'\r\n**Source**: {alert.get("source_url", "None provided")}' \
-                      f'\r\n**Source Date**: {alert.get("source_date", "None provided")}' \
-                      f'\r\n**Source Network Type**: {alert.get("network_type", "None provided")}' \
-                      f'\n\n----' \
-                      f'\r\n**Assets Affected**: {alert.get("assets", "None provided")}' \
-                      f'\n\n----' \
-                      f'\r\n**Alert Link**: {alert.get("alert_link", "None provided")}'
-
+        description = "\n".join([
+            ' ',
+            alert["description"],
+            f'**Date Found**: `{alert.get("report_date", "None provided")} `',
+            f'**Type**: `{alert.get("type", "None provided")} `',
+            f'**Source**: `{alert.get("source_url", "None provided")} `',
+            f'**Source Date**: ` {alert.get("source_date", "None provided")} `',
+            f'**Source Network Type**: `{alert.get("network_type", "None provided")} `',
+            f'**Assets Affected**: `{alert.get("assets", "None provided")} `',
+            f'**Alert Link**: {alert.get("alert_link", "None provided")}'
+        ])
         return description
 
     def get_findings(self, file, test):
