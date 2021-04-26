@@ -59,6 +59,9 @@ class DojoDefaultReImporter(object):
             component_name = item.component_name if hasattr(item, 'component_name') else None
             component_version = item.component_version if hasattr(item, 'component_version') else None
 
+            if not hasattr(item, 'test'):
+                item.test = test
+
             item.hash_code = item.compute_hash_code()
             deduplicationLogger.debug("item's hash_code: %s", item.hash_code)
 
@@ -114,7 +117,6 @@ class DojoDefaultReImporter(object):
                     update_endpoint_status(finding, item, user)
             else:
                 # no existing finding found
-                item.test = test
                 item.reporter = user
                 item.last_reviewed = timezone.now()
                 item.last_reviewed_by = user
