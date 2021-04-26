@@ -12,6 +12,7 @@ from django.conf import settings
 from django.utils import timezone
 import dojo.notifications.helper as notifications_helper
 import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
 import base64
 import logging
 
@@ -208,10 +209,19 @@ class DojoDefaultReImporter(object):
                 finding.component_name = finding.component_name if finding.component_name else component_name
                 finding.component_version = finding.component_version if finding.component_version else component_version
 
-                finding.save(push_to_jira=push_to_jira)
+                # finding = new finding or existing finding still in the upload report
+                # to avoid pushing a finding group multiple times, we push those outside of the loop
+                if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                    finding.save()
+                else:
+                    finding.save(push_to_jira=push_to_jira)
 
         to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
         untouched = set(unchanged_items) - set(to_mitigate)
+
+        if settings.FEATURE_FINDING_GROUPS:
+            for finding_group in [finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]:
+                jira_helper.push_to_jira(finding_group)
 
         return new_items, reactivated_items, to_mitigate, untouched
 
@@ -235,12 +245,22 @@ class DojoDefaultReImporter(object):
                     status.save()
 
                 # don't try to dedupe findings that we are closing
-                finding.save(push_to_jira=push_to_jira, dedupe_option=False)
+                # finding = new finding or existing finding still in the upload report
+                # to avoid pushing a finding group multiple times, we push those outside of the loop
+                if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                    finding.save(dedupe_option=False)
+                else:
+                    finding.save(push_to_jira=push_to_jira, dedupe_option=False)
+
                 note = Notes(entry="Mitigated by %s re-upload." % test.test_type,
                             author=user)
                 note.save()
                 finding.notes.add(note)
                 mitigated_findings.append(finding)
+
+        if settings.FEATURE_FINDING_GROUPS:
+            for finding_group in [finding.finding_group for finding in to_mitigate if finding.finding_group is not None]:
+                jira_helper.push_to_jira(finding_group)
 
         return mitigated_findings
 

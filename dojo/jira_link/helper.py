@@ -512,6 +512,9 @@ def jira_environment(obj):
 
 
 def push_to_jira(obj, *args, **kwargs):
+    if obj is None:
+        raise ValueError('Cannot push None to JIRA')
+
     if isinstance(obj, Finding):
         finding = obj
         if finding.has_jira_issue:

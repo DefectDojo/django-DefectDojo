@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 import dojo.notifications.helper as notifications_helper
 import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
 import base64
 import logging
 
@@ -162,7 +163,15 @@ class DojoDefaultImporter(object):
                 item.tags = item.unsaved_tags
 
             new_findings.append(item)
-            item.save(push_to_jira=push_to_jira)
+            # to avoid pushing a finding group multiple times, we push those outside of the loop
+            if settings.FEATURE_FINDING_GROUPS and item.finding_group:
+                item.save()
+            else:
+                item.save(push_to_jira=push_to_jira)
+
+        if settings.FEATURE_FINDING_GROUPS:
+            for finding_group in [finding.finding_group for finding in new_findings if finding.finding_group is not None]:
+                jira_helper.push_to_jira(finding_group)
 
         return new_findings
 
@@ -235,8 +244,6 @@ class DojoDefaultImporter(object):
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, auto_group_by=None):
-
-        logger.debug('IMPORT_SCAN: auto_group_by: %s', auto_group_by)
 
         user = user or get_current_user()
 
