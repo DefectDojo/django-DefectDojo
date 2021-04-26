@@ -12,26 +12,18 @@ class TestIntSightsParser(TestCase):
         return test
 
     def test_intsights_parser_with_no_vuln_has_no_findings_json(self):
-        with self.assertRaises(ValueError) as context:
-            testfile = open("dojo/unittests/scans/intsights/intsights_zero_vul.json")
-            parser = IntSightsParser()
-            findings = parser.get_findings(testfile, self.get_test())
-            testfile.close()
-            self.assertTrue(
-                "IntSights report contains errors:" in str(context.exception)
-            )
-            self.assertTrue("ECONNREFUSED" in str(context.exception))
+        testfile = open("dojo/unittests/scans/intsights/intsights_zero_vul.json")
+        parser = IntSightsParser()
+        findings = parser.get_findings(testfile, self.get_test())
+        testfile.close()
+        self.assertEqual(0, len(findings))
 
     def test_intsights_parser_with_no_vuln_has_no_findings_csv(self):
-        with self.assertRaises(ValueError) as context:
-            testfile = open("dojo/unittests/scans/intsights/intsights_zero_vuln.csv")
-            parser = IntSightsParser()
-            findings = parser.get_findings(testfile, self.get_test())
-            testfile.close()
-            self.assertTrue(
-                "IntSights report contains errors:" in str(context.exception)
-            )
-            self.assertTrue("ECONNREFUSED" in str(context.exception))
+        testfile = open("dojo/unittests/scans/intsights/intsights_zero_vuln.csv")
+        parser = IntSightsParser()
+        findings = parser.get_findings(testfile, self.get_test())
+        testfile.close()
+        self.assertEqual(0, len(findings))
 
     def test_intsights_parser_with_one_critical_vuln_has_one_findings_json(self):
         testfile = open("dojo/unittests/scans/intsights/intsights_one_vul.json")
@@ -76,23 +68,15 @@ class TestIntSightsParser(TestCase):
         self.assertEqual(9, len(findings))
 
     def test_intsights_parser_invalid_text_with_error_csv(self):
-        with self.assertRaises(ValueError) as context:
-            testfile = open("dojo/unittests/scans/intsights/intsights_invalid_file.txt")
-            parser = IntSightsParser()
-            findings = parser.get_findings(testfile, self.get_test())
-            testfile.close()
-            self.assertTrue(
-                "IntSights report contains errors: Unknown File Format" in str(context.exception)
-            )
-            self.assertTrue("ECONNREFUSED" in str(context.exception))
+        testfile = open("dojo/unittests/scans/intsights/intsights_invalid_file.txt")
+        parser = IntSightsParser()
+        findings = parser.get_findings(testfile, self.get_test())
+        testfile.close()
+        self.assertEqual(0, len(findings))
 
     def test_intsights_parser_empty_with_error_json(self):
-        with self.assertRaises(ValueError) as context:
-            testfile = open("dojo/unittests/scans/intsights/empty_with_error.json")
-            parser = IntSightsParser()
-            findings = parser.get_findings(testfile, self.get_test())
-            testfile.close()
-            self.assertTrue(
-                "IntSights report contains errors:" in str(context.exception)
-            )
-            self.assertTrue("ECONNREFUSED" in str(context.exception))
+        testfile = open("dojo/unittests/scans/intsights/empty_with_error.json")
+        parser = IntSightsParser()
+        findings = parser.get_findings(testfile, self.get_test())
+        testfile.close()
+        self.assertEqual(0, len(findings))

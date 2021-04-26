@@ -145,10 +145,10 @@ class IntSightsParser(object):
         elif file.name.lower().endswith('.csv'):
             alerts = self._parse_csv(file)
         else:
-            raise ValueError('IntSights report contains errors: Unknown File Format')
+            return []
 
         if not alerts:
-            raise ValueError('IntSights report contains errors: Unknown File Format')
+            return []
 
         for alert in alerts:
             dupe_key = alert['alert_id']
