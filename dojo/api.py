@@ -1388,6 +1388,7 @@ class ImportScanResource(MultipartResource, Resource):
                     sev = 'Info'
 
                 item.severity = sev
+                item.numerical_severity = Finding.get_numerical_severity(sev)
 
                 if Finding.SEVERITIES[sev] > Finding.SEVERITIES[bundle.data['minimum_severity']]:
                     continue
@@ -1584,9 +1585,7 @@ class ReImportScanResource(MultipartResource, Resource):
                 if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
                     continue
 
-                from titlecase import titlecase
-                item.title = titlecase(item.title)
-                if scan_type == 'Veracode Scan' or scan_type == 'Arachni Scan':
+                if scan_type == 'Veracode Scan':
                     find = Finding.objects.filter(title=item.title,
                                                   test__id=test.id,
                                                   severity=sev,

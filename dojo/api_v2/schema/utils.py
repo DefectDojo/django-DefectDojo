@@ -1,4 +1,4 @@
-from drf_yasg2.openapi import SchemaRef, Schema
+from drf_yasg.openapi import SchemaRef, Schema
 
 
 class LazySchemaRef:

@@ -40,7 +40,7 @@ class ReportBuilderTest(BaseTestCase):
         self.enter_values(driver)
         Select(driver.find_element_by_id("id_report_type")).select_by_visible_text("HTML")
         driver.find_element_by_id("id_report_name").send_keys('Test Report')
-        driver.find_elements_by_class_name("run_report")[1].click()
+        driver.find_element_by_class_name("run_report").click()
         self.assertTrue(driver.current_url == self.base_url + "reports/custom")
 
     def generate_AsciiDoc_report(self):
@@ -50,7 +50,7 @@ class ReportBuilderTest(BaseTestCase):
         self.enter_values(driver)
         Select(driver.find_element_by_id("id_report_type")).select_by_visible_text("AsciiDoc")
         driver.find_element_by_id("id_report_name").send_keys('Test Report')
-        driver.find_elements_by_class_name("run_report")[1].click()
+        driver.find_element_by_class_name("run_report").click()
         self.assertTrue(driver.current_url == self.base_url + "reports/custom")
 
     def test_product_type_report(self):

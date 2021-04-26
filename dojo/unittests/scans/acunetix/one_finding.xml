@@ -17,7 +17,7 @@
                 <Name>VijayReportItem1</Name>
                 <ModuleName>VijayTestModule</ModuleName>
                 <Details>Vijay Test</Details>
-                <Affects>Vijay Affects</Affects>
+                <Affects><![CDATA[/some/path]]></Affects>
                 <Parameter></Parameter>
                 <AOP_SourceFile></AOP_SourceFile>
                 <AOP_SourceLine></AOP_SourceLine>

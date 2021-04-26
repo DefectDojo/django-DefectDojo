@@ -185,11 +185,8 @@ class SSLlabsParser(object):
                     find = Finding(title=title,
                                    cwe=310,  # Cryptographic Issues
                                    test=test,
-                                   active=False,
-                                   verified=False,
                                    description=description,
                                    severity=sev,
-                                   numerical_severity=Finding.get_numerical_severity(sev),
                                    mitigation=mitigation,
                                    impact=impact,
                                    references=references,

@@ -57,7 +57,7 @@ class Outpost24Parser(object):
             cvss_vector = detail.findtext('cvss_v3_vector') or detail.findtext('cvss_vector')
             severity_justification = "{}\n{}".format(cvss_score, cvss_description)
             finding = Finding(title=title, test=test, cve=cve, url=url, description=description, mitigation=mitigation,
-                              impact=impact, severity=severity, numerical_severity=cvss_score,
+                              impact=impact, severity=severity,
                               severity_justification=severity_justification)
             # endpoint details
             host = detail.findtext('ip')

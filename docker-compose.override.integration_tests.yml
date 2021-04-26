@@ -42,6 +42,8 @@ services:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/test_defectdojo}
       DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-AdminsLoveIntegrationtests!}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-.}
+    volumes:
+      - '.:/app:z'
   mysql:
     ports:
       - target: 3306
@@ -51,7 +53,7 @@ services:
     environment:
       MYSQL_DATABASE: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
     volumes:
-       - defectdojo_data_unittest:/var/lib/mysql
+       - defectdojo_data_integration_tests:/var/lib/mysql
 volumes:
-  defectdojo_data_unittest: {}
+  defectdojo_data_integration_tests: {}
   defectdojo_media_unittest: {}

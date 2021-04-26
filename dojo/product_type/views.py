@@ -11,7 +11,7 @@ from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
     Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm
 from dojo.models import Product_Type, Product_Type_Member
-from dojo.utils import get_page_items, add_breadcrumb
+from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
@@ -19,7 +19,7 @@ from django.conf import settings
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_members
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type
 from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,6 @@ def product_type(request):
     add_breadcrumb(title="Product Type List", top_level=True, request=request)
     return render(request, 'dojo/product_type.html', {
         'name': 'Product Type List',
-        'Permissions': Permissions,
         'pts': pts,
         'ptl': ptl,
         'name_words': name_words})
@@ -76,7 +75,7 @@ def add_product_type(request):
         form = Product_TypeForm(request.POST)
         if form.is_valid():
             product_type = form.save()
-            if settings.FEATURE_NEW_AUTHORIZATION:
+            if settings.FEATURE_AUTHORIZATION_V2:
                 member = Product_Type_Member()
                 member.user = request.user
                 member.product_type = product_type
@@ -87,6 +86,7 @@ def add_product_type(request):
                                  'Product type added successfully.',
                                  extra_tags='alert-success')
             create_notification(event='product_type_added', title=product_type.name,
+                                product_type=product_type,
                                 url=reverse('view_product_type', args=(product_type.id,)))
             return HttpResponseRedirect(reverse('product_type'))
     add_breadcrumb(title="Add Product Type", top_level=False, request=request)
@@ -96,21 +96,20 @@ def add_product_type(request):
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid', 'view')
 def view_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
-    members = get_authorized_members(pt, Permissions.Product_Type_View)
+    members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_View)
     products = get_authorized_products(Permissions.Product_View).filter(prod_type=pt)
     add_breadcrumb(title="View Product Type", top_level=False, request=request)
     return render(request, 'dojo/view_product_type.html', {
         'name': 'View Product Type',
-        'Permissions': Permissions,
         'pt': pt,
         'products': products,
         'members': members})
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Delete, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Delete, 'ptid', 'delete')
 def delete_product_type(request, ptid):
     product_type = get_object_or_404(Product_Type, pk=ptid)
     form = Delete_Product_TypeForm(instance=product_type)
@@ -126,6 +125,7 @@ def delete_product_type(request, ptid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                 title='Deletion of %s' % product_type.name,
+                                no_users=True,
                                 description='The product type "%s" was deleted by %s' % (product_type.name, request.user),
                                 url=request.build_absolute_uri(reverse('product_type')),
                                 icon="exclamation-triangle")
@@ -143,16 +143,16 @@ def delete_product_type(request, ptid):
                    })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Edit, 'ptid', 'staff')
 def edit_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     authed_users = pt.authorized_users.all()
-    members = get_authorized_members(pt, Permissions.Product_Type_Manage_Members)
+    members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_Manage_Members)
     pt_form = Product_TypeForm(instance=pt, initial={'authorized_users': authed_users})
     if request.method == "POST" and request.POST.get('edit_product_type'):
         pt_form = Product_TypeForm(request.POST, instance=pt)
         if pt_form.is_valid():
-            if not settings.FEATURE_NEW_AUTHORIZATION:
+            if not settings.FEATURE_AUTHORIZATION_V2:
                 pt.authorized_users.set(pt_form.cleaned_data['authorized_users'])
             pt = pt_form.save()
             messages.add_message(
@@ -214,9 +214,12 @@ def edit_product_type_member(request, memberid):
                 if owners < 1:
                     messages.add_message(request,
                                         messages.SUCCESS,
-                                        'There must be at least one owner.',
+                                        'There must be at least one owner for Product Type {}.'.format(member.product_type.name),
                                         extra_tags='alert-warning')
-                    return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
+                    if is_title_in_breadcrumbs('View User'):
+                        return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                    else:
+                        return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
             if member.role == Roles.Owner and not user_has_permission(request.user, member.product_type, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
@@ -228,7 +231,10 @@ def edit_product_type_member(request, memberid):
                                     messages.SUCCESS,
                                     'Product type member updated successfully.',
                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
+                if is_title_in_breadcrumbs('View User'):
+                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
     add_breadcrumb(title="Edit Product Type Member", top_level=False, request=request)
     return render(request, 'dojo/edit_product_type_member.html', {
         'memberid': memberid,
@@ -236,7 +242,7 @@ def edit_product_type_member(request, memberid):
     })
 
 
-@user_is_authorized(Product_Type_Member, Permissions.Product_Type_Remove_Member, 'memberid')
+@user_is_authorized(Product_Type_Member, Permissions.Product_Type_Member_Delete, 'memberid')
 def delete_product_type_member(request, memberid):
     member = get_object_or_404(Product_Type_Member, pk=memberid)
     memberform = Delete_Product_Type_MemberForm(instance=member)
@@ -258,10 +264,13 @@ def delete_product_type_member(request, memberid):
                             messages.SUCCESS,
                             'Product type member deleted successfully.',
                             extra_tags='alert-success')
-        if user == request.user:
-            return HttpResponseRedirect(reverse('product_type'))
+        if is_title_in_breadcrumbs('View User'):
+            return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
         else:
-            return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
+            if user == request.user:
+                return HttpResponseRedirect(reverse('product_type'))
+            else:
+                return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
     add_breadcrumb(title="Delete Product Type Member", top_level=False, request=request)
     return render(request, 'dojo/delete_product_type_member.html', {
         'memberid': memberid,

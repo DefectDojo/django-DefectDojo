@@ -65,11 +65,8 @@ class NetsparkerParser(object):
 
                 find = Finding(title=title,
                                test=test,
-                               active=False,
-                               verified=False,
                                description=findingdetail,
                                severity=sev.title(),
-                               numerical_severity=Finding.get_numerical_severity(sev),
                                mitigation=mitigation,
                                impact=impact,
                                references=references,
@@ -79,4 +76,4 @@ class NetsparkerParser(object):
                 dupes[dupe_key] = find
                 findingdetail = ''
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
