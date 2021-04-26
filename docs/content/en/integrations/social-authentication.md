@@ -144,9 +144,9 @@ README and actually authorize.
 
 If during the login process you get the following error: *The
 \'redirect\_uri\' parameter must be an absolute URI that is whitelisted
-in the client app settings.* and the [redirect\_uri]{.title-ref} HTTP
-GET parameter starts with [http://]{.title-ref} instead of
-[https://]{.title-ref} you need to add
+in the client app settings.* and the `redirect\_uri` HTTP
+GET parameter starts with `http://` instead of
+`https://` you need to add
 **SOCIAL\_AUTH\_REDIRECT\_IS\_HTTPS = True** in the **Authentication**
 section of settings.py.
 

@@ -5,20 +5,16 @@ draft: false
 ---
 
 
-::: {.warning}
-::: {.admonition-title}
-Warning
-:::
-
+{{% alert title="Warning" color="warning" %}}
 API v1 is deprecated and will be no longer maintained after 12-31-2020.
 API v1 will be removed on 06-30-2021. Please move to API v2 and raise
 issues for any unsupported operations.
-:::
+{{% /alert %}}
 
 DefectDojo\'s API is created using
 [Tastypie](https://django-tastypie.readthedocs.org). The documentation
 of each endpoint is available within each DefectDojo installation at
-[/api/v1/doc/]{.title-ref} and can be accessed by choosing the API Docs
+`/api/v1/doc/` and can be accessed by choosing the API Docs
 link on the user drop down menu in the header.
 
 ![image](../../images/api_1.png)
@@ -28,13 +24,13 @@ Swagger](http://django-tastypie-swagger.readthedocs.org/), and is
 interactive.
 
 To interact with the documentation, a valid Authorization header value
-is needed. Visit the [/api/key/]{.title-ref} view to generate your API
+is needed. Visit the `/api/key/` view to generate your API
 Key and copy the header value provided.
 
 ![image](../../images/api_3.png)
 
-Return to the [/api/v1/doc/]{.title-ref} view to paste your key in the
-form field and click [Explore]{.title-ref}. Your authorization header
+Return to the `/api/v1/doc/` view to paste your key in the
+form field and click `Explore`. Your authorization header
 value will be captured and used for all requests.
 
 Each section allows you to make calls to the API and view the Request
@@ -66,7 +62,7 @@ Sample Code
 -----------
 
 Here are some simple python examples and their results produced against
-the [/users]{.title-ref} endpoint: :
+the `/users` endpoint: :
 
     import requests
 
@@ -121,7 +117,7 @@ The json object result of the above code is: :
       ]
     }
 
-Here is another example against the [/users]{.title-ref} endpoint,we
+Here is another example against the `/users` endpoint,we
 apply the condition(username\_\_contains=jay) which will filter and
 display the list of the users whose username includes \`jay\`: :
 

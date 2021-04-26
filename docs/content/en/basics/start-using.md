@@ -94,10 +94,10 @@ Click the \"New Engagement\" button on the right.
 
 Enter the details of your Engagement.
 
-The [Deduplication Level]{.title-ref} specifies weather to perform
+The `Deduplication Level` specifies weather to perform
 deduplication only for tests in the engagement or to perform
 deduplication on all tests in the product which have an engagement also
-on [Deduplication Level]{.title-ref} product. Enabled deduplication is
+on `Deduplication Level` product. Enabled deduplication is
 mandatory.
 
 Adding Tests to an Engagement

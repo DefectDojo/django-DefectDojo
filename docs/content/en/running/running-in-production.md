@@ -73,7 +73,7 @@ worker container.
 -   `DD_CELERY_WORKER_POOL_TYPE` will let you switch to `prefork`.
     (default `solo`)
 
-As you\'ve enabled [prefork]{.title-ref}, the following variables have
+As you\'ve enabled `prefork`, the following variables have
 to be used. The default are working fairly well, see the
 Dockerfile.django for in-file references.
 

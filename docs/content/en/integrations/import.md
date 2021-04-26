@@ -52,9 +52,7 @@ download.
 AWS Security Hub
 ----------------
 
-The JSON output from AWS Security Hub exported with the \[[aws
-securityhub
-get-findings]{.title-ref}\](<https://docs.aws.amazon.com/cli/latest/reference/securityhub/get-findings.html>)
+The JSON output from AWS Security Hub exported with the `aws securityhub get-findings` (<https://docs.aws.amazon.com/cli/latest/reference/securityhub/get-findings.html>)
 command.
 
 AWS Scout2 Scanner
@@ -539,7 +537,7 @@ ScoutSuite
 
 Multi-Cloud security auditing tool. It uses APIs exposed by cloud
 providers. Scan results are located at
-[scan-reports/scoutsuite-results/scoutsuite\_\*.json]{.title-ref} files.
+`scan-reports/scoutsuite-results/scoutsuite\_\*.json` files.
 Multiple scans will create multiple files if they are runing agains
 different Cloud projects. See <https://github.com/nccgroup/ScoutSuite>
 

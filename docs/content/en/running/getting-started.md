@@ -12,7 +12,7 @@ weight: 1
 -   Go to <https://github.com/DefectDojo/django-DefectDojo>
 -   Select the appropriate branch you\'re working on
 -   Instructions in the
-    \[[DOCKER.md]{.title-ref}\](<https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md>)
+    `DOCKER.md` (<https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md>)
     file at the root of the repository.
 
 ### Kubernetes
@@ -21,7 +21,7 @@ weight: 1
 -   Go to <https://github.com/DefectDojo/django-DefectDojo>
 -   Select the appropriate branch you\'re working on
 -   Instructions in the
-    \[[KUBERNETES.md]{.title-ref}\](<https://github.com/DefectDojo/django-DefectDojo/blob/master/KUBERNETES.md>)
+    `KUBERNETES.md` (<https://github.com/DefectDojo/django-DefectDojo/blob/master/KUBERNETES.md>)
     file at the root of the repository.
 
 Setup.bash Install (no longer maintained)

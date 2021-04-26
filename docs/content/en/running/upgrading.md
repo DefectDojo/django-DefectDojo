@@ -59,17 +59,13 @@ Replace the first step above with this one: - `docker-compose build`
 Setup.bash
 ----------
 
-::: {.warning}
-::: {.admonition-title}
-Warning
-:::
-
+{{% alert title="Warning" color="warning" %}}
 This installation method will is EOL and will be removed on 2020-12-31
-:::
+{{% /alert %}}
 
 The easiest way to upgrade to a new version of DefectDojo is to pull
 from Github. Assuming the source code lives in a directory named
-[defect-dojo]{.title-ref} you can complete the following steps to
+`defect-dojo` you can complete the following steps to
 upgrade to the latest DefectDojo release.:
 
     cd defect-dojo
@@ -136,7 +132,7 @@ The jira template settings introduced in 1.13 have been changed. You now have to
 
 If you're using docker:
 
-    `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`
+`docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`
 
 This can take a while depending on your instance size.
 
@@ -194,15 +190,15 @@ Upgrading to DefectDojo Version 1.10.x
 
 -   See release notes:
     <https://github.com/DefectDojo/django-DefectDojo/releases>
--   Defect Dojo now provides a [settings.py]{.title-ref} file
+-   Defect Dojo now provides a `settings.py` file
     out-of-the-box. Custom settings need to go into
-    [local\_settings.py]{.title-ref}. See
+    `local\_settings.py`. See
     <https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/settings/settings.py>
     and
     <https://github.com/DefectDojo/django-DefectDojo/blob/master/docker/extra_settings/README.md>
 -   A quickfix is to rename your own / customized
-    [settings.py]{.title-ref} or [settings.dist.py]{.title-ref} to
-    [local\_settings.py]{.title-ref}. Details of that PR:
+    `settings.py` or `settings.dist.py` to
+    `local\_settings.py`. Details of that PR:
     <https://github.com/DefectDojo/django-DefectDojo/pull/3136>
 -   Major JIRA integration refactoring, for which you should at least
     use 1.10.1 and not 1.10.0 for many bug fixes.
@@ -245,12 +241,11 @@ Upgrading to DefectDojo Version 1.9.3
 
 When upgrading from before 1.9.2, a corrective script may need to be ran
 
-[./manage.py create\_endpoint\_status]{.title-ref}
+`./manage.py create\_endpoint\_status`
 
 If you\'re using docker:
 
-[docker-compose exec uwsgi ./manage.py
-create\_endpoint\_status]{.title-ref}
+`docker-compose exec uwsgi ./manage.py create\_endpoint\_status`
 
 This can take a while depending on your hardware and the number of
 findings in your instance.
@@ -260,11 +255,11 @@ findings in your instance.
 This requires a (one-time) rebuild of the Django-Watson search index.
 Execute the django command from the defect dojo installation directory:
 
-[./manage.py buildwatson]{.title-ref}
+`./manage.py buildwatson]`
 
 If you\'re using docker:
 
-[docker-compose exec uwsgi ./manage.py buildwatson]{.title-ref}
+`docker-compose exec uwsgi ./manage.py buildwatson`
 
 This can take a while depending on your hardware and the number of
 findings in your instance.
@@ -282,11 +277,11 @@ Upgrading to DefectDojo Version 1.8.0
 This requires a (one-time) rebuild of the Django-Watson search index.
 Execute the django command from the defect dojo installation directory:
 
-[./manage.py buildwatson]{.title-ref}
+`./manage.py buildwatson`
 
 If you\'re using docker:
 
-[docker-compose exec uwsgi ./manage.py buildwatson]{.title-ref}
+`docker-compose exec uwsgi ./manage.py buildwatson`
 
 This can take a while depending on your hardware and the number of
 findings in your instance.
@@ -300,12 +295,11 @@ imported through either API version.
 The script can be found
 [here](https://github.com/DefectDojo/django-DefectDojo/blob/dev/dojo/management/commands/create_endpoint_status.py)
 
-[./manage.py create\_endpoint\_status]{.title-ref}
+`./manage.py create\_endpoint\_status`
 
 If you\'re using docker:
 
-[docker-compose exec uwsgi ./manage.py
-create\_endpoint\_status]{.title-ref}
+`docker-compose exec uwsgi ./manage.py create\_endpoint\_status`
 
 This can take a while depending on your hardware and the number of
 findings in your instance.
@@ -326,12 +320,11 @@ Upgrading to DefectDojo Version 1.7.0
 This requires a (one-time) rebuild of the Django-Watson search index.
 Execute the django command from the defect dojo installation directory:
 
-[./manage.py buildwatson dojo.Finding]{.title-ref}
+`./manage.py buildwatson dojo.Finding`
 
 If you\'re using docker:
 
-[docker-compose exec uwsgi ./manage.py buildwatson
-dojo.Finding]{.title-ref}
+`docker-compose exec uwsgi ./manage.py buildwatson dojo.Finding`
 
 Upgrading to DefectDojo Version 1.5.0
 -------------------------------------
