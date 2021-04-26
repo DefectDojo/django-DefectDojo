@@ -3,13 +3,11 @@ __author__ = 'Chris Fort'
 import json
 import logging
 import re
+from json import JSONDecodeError
 from typing import Union, List
 from urllib.parse import urlparse
 
-
 from dojo.models import Finding, Endpoint
-
-logger = logging.getLogger(__name__)
 
 
 class WhiteHatSentinelParser(object):
@@ -17,6 +15,8 @@ class WhiteHatSentinelParser(object):
     A class to parse WhiteHat Sentinel vulns from the WhiteHat Sentinel API vuln?query_site=[
     SITE_ID]&format=json&display_attack_vectors=all&display_custom_risk=1&display_risk=1&display_description=custom
     """
+
+    _LOGGER = logging.getLogger(__name__)
 
     def get_scan_types(self):
         return ["WhiteHat Sentinel"]
@@ -33,24 +33,18 @@ class WhiteHatSentinelParser(object):
         if file is None:
             return []
 
-        # Load the contents of the JSON file into a dictionary
-        data = file.read()
-
         try:
-            findings_collection = json.loads(str(data, 'utf-8'))
-        except:
-            findings_collection = json.loads(data)
+            findings_collection = json.load(file)
+        except JSONDecodeError:
+            return []
 
-        # Exit if file is an empty JSON dictionary
         if not findings_collection.keys():
             return list()
 
         # Make sure the findings key exists in the dictionary and that it is not null or an empty list
-        # If it is null or an empty list then exit
-        if 'collection' not in findings_collection or not findings_collection['collection']:
+        if 'collection' not in findings_collection.keys() or not findings_collection['collection']:
             return list()
 
-        # Start with an empty list of findings
         dojo_findings = []
 
         # Loop through each vuln from WhiteHat
@@ -65,8 +59,9 @@ class WhiteHatSentinelParser(object):
     def _convert_whitehat_severity_id_to_dojo_severity(self, whitehat_severity_id: int) -> Union[str, None]:
         """
         Converts a WhiteHat Sentinel numerical severity to a DefectDojo severity.
-        :param whitehat_severity_id: The WhiteHat Severity ID
-        :return A DefectDojo severity if a mapping can be found; otherwise a null value is returned
+        Args:
+            whitehat_severity_id: The WhiteHat Severity ID (called risk_id in the API)
+        Returns: A DefectDojo severity if a mapping can be found; otherwise a null value is returned
         """
         severities = ['Informational', 'Informational', 'Low', 'Medium', 'High', 'Critical', 'Critical']
 
@@ -76,21 +71,29 @@ class WhiteHatSentinelParser(object):
             return None
 
     def _parse_cwe_from_tags(self, whitehat_sentinel_tags) -> str:
-
+        """
+        Some Vulns include the CWE ID as a tag. This is used to pull it out of that list and return only the ID.
+        Args:
+            whitehat_sentinel_tags: The Tags list from the WhiteHat vuln
+        Returns: The first CWE ID in the list, if it exists
+        """
         for tag in whitehat_sentinel_tags:
             if tag.startswith('CWE-'):
                 return tag.split('-')[1]
 
-    def _parse_description(self, whitehat_sentinel_description: str):
+    def _parse_description(self, whitehat_sentinel_description: dict):
         """
-        Converts the HTML description to a DefectDojo-friendly format
-        :param whitehat_sentinel_description: The description section of the WhiteHat Sentinel JSON
-        :returns: A dict with description and reference link
+        Manually converts the HTML description to a DefectDojo-friendly format.
+        Args:
+            whitehat_sentinel_description: The description section of the WhiteHat Sentinel vulnerability dict
+        Returns: A dict with description and reference link
         """
 
         description_ref = {'description': '', 'reference_link': ''}
 
-        reference_heading_regex = '<h\d>References<\/h\d>'
+        # The references section is either
+        reference_heading_regex = '<.+>References<.+>'
+
         description_chunks = re.split(reference_heading_regex, whitehat_sentinel_description['description'])
 
         description = description_chunks[0]
@@ -102,45 +105,66 @@ class WhiteHatSentinelParser(object):
 
         return description_ref
 
-    def _parse_mitigation(self, whitehat_sentinel_solution: str) -> str:
+    def _parse_solution(self, whitehat_sentinel_vuln_solution):
         """
-        :param whitehat_sentinel_solution:
-        :returns:
-        """
+        Manually converts the solution HTML to Markdown to avoid importing yet-another-library like Markdownify
+        Args:
+            whitehat_sentinel_vuln_solution:
 
-        solution_ref = dict()
-
-        reference_heading_regex = '<h\d>References<\/h\d>'
-
-        solution_chunks = re.split(reference_heading_regex, whitehat_sentinel_solution)
-
-        solution_ref['solution'] = self.__remove_paragraph_tags(solution_chunks[0])
-
-        if len(solution_chunks) > 1:
-            solution_ref['reference_link'] = self.__get_href_url(solution_chunks[1])
-
-
-    def _parse_references(self, whitehat_sentinel_description: str) -> str:
-        """
+        Returns:
 
         """
-        pass
+        solution_html = whitehat_sentinel_vuln_solution['solution']
+
+        solution_text = re.sub(r'<.+>', '', solution_html)
+
+        solution_text = solution_text.split('References')[0]
+
+        if whitehat_sentinel_vuln_solution.get('solution_prepend'):
+            solution_text = f"{solution_text}" \
+                            f"\n {whitehat_sentinel_vuln_solution.get('solution_prepend')}"
+
+        return solution_text
 
     def __get_href_url(self, text_to_search):
-        return re.search(r'(<a href=")(https://\S+)">', text_to_search)
+        """
+        Searches for the anchor targets within a string that includes an anchor tag.
+        Args:
+            text_to_search: The text string to search for an anchor tag
+        Returns:
+        """
 
-    def __remove_paragraph_tags(self, text):
+        links = ''
 
-        return re.sub(r'<p>|</p>', '', text)
+        for match in re.findall(r'(<a href=")(https://\S+)">', text_to_search):
+            links = f'{match[1]}\n{links}'
+        return links
 
+    def __remove_paragraph_tags(self, html_string):
+        """
+        Manually remove <p> tags from HTML strings to avoid importing yet-another-library.
+        Args:
+            html_string: The HMTL string to remove <p> </p> tags from
+        Returns: The original string stipped of paragraph tags
+        """
 
-    def _convert_attack_vectors_to_endpoints(self, attack_vectors: List['str']) -> List['Endpoint']:
+        return re.sub(r'<p>|</p>', '', html_string)
+
+    def _convert_attack_vectors_to_endpoints(self, attack_vectors: List[dict]) -> List['Endpoint']:
+        """
+        Takes a list of Attack Vectors dictionaries from the WhiteHat vuln API and converts them to Defect Dojo
+        Endpoints
+        Args:
+            attack_vectors: The list of Attack Vector dictionaries
+        Returns: A list of Defect Dojo Endpoints
+        """
 
         endpoints_list = []
 
+        # This should be in the Endpoint class should it not?
         for attack_vector in attack_vectors:
             try:
-                url = attack_vector['url']
+                url = attack_vector['request']['url']
                 parsed_url = urlparse(url)
                 protocol = parsed_url.scheme
                 query = parsed_url.query
@@ -152,89 +176,64 @@ class WhiteHatSentinelParser(object):
                 except ValueError:
                     host = parsed_url.netloc
 
-                endpoints_list.append(Endpoint(host = host,
-                                               port = port,
-                                               path = path,
-                                               protocol = protocol,
-                                               query = query,
-                                               fragment = fragment)
+                endpoints_list.append(Endpoint(host=host,
+                                               port=port,
+                                               path=path,
+                                               protocol=protocol,
+                                               query=query,
+                                               fragment=fragment)
                                       )
-            except:
-                url = None
+            except Exception:
+                pass
 
         return endpoints_list
-
-    def _parse_solution(self, whitehat_sentinel_vuln_solution):
-        """
-        Manually converts the solution HTML to Markdown to avoid importing yet-another-library.
-        """
-
-        solution_html = whitehat_sentinel_vuln_solution['solution']
-
-        solution_text = re.sub(r'<.+>','',solution_html)
-
-        solution_text = solution_text.split('References')[0]
-
-        if whitehat_sentinel_vuln_solution.get('solution_prepend'):
-            solution_text = f"{solution_text}" \
-                            f"\n {whitehat_sentinel_vuln_solution.get('solution_prepend')}"
-
-        return solution_text
 
     def _convert_whitehat_sentinel_vuln_to_dojo_finding(self, whitehat_sentinel_vuln, test):
         """
         Converts a WhiteHat Sentinel vuln to a DefectDojo finding
 
-        :param whitehat_sentinel_vuln:
-        :param test: The test that the DefectDojo finding should be associated to
-        :return: A DefectDojo Finding model
+        Args:
+            whitehat_sentinel_vuln: The vuln dictionary from WhiteHat Sentinel vuln API
+            test: The test ID that the DefectDojo finding should be associated with
+        Returns: A DefectDojo Finding object
         """
 
-        # Out of scope is considered Active because the issue is valid, just not for the asset in question.
+        # Out of scope is considered Active because the issue is valid, just not for the asset in question. If the
+        # issue belongs to another Product, it should be filtered before importing.
         active = whitehat_sentinel_vuln.get('status') in ('open', 'out of scope')
-
         date_created = whitehat_sentinel_vuln['found'].split('T')[0]
-
         mitigated_ts = whitehat_sentinel_vuln.get('closed'.split('T')[0], None)
-
         cwe = self._parse_cwe_from_tags(whitehat_sentinel_vuln['attack_vectors'][0]['scanner_tags'])
-
         description_ref = self._parse_description(whitehat_sentinel_vuln['description'])
-
         description = description_ref['description']
         references = description_ref['reference_link']
-
         steps = whitehat_sentinel_vuln['description'].get('description_prepend', '')
-
         solution = self._parse_solution(whitehat_sentinel_vuln['solution'])
-
         risk_id = whitehat_sentinel_vuln.get('custom_risk') if whitehat_sentinel_vuln.get(
             'custom_risk') else whitehat_sentinel_vuln.get('risk')
-
         severity = self._convert_whitehat_severity_id_to_dojo_severity(risk_id)
-
         false_positive = whitehat_sentinel_vuln.get('status') == 'invalid'
 
-        finding = Finding(title = whitehat_sentinel_vuln['class'],
-                          test = test,
-                          cwe = cwe,
-                          active = active,
-                          verified = True,
-                          description = description,
-                          steps_to_reproduce = steps,
-                          mitigation = solution,
-                          references = references,
-                          severity = severity,
-                          numerical_severity = Finding.get_numerical_severity(severity),
-                          false_p = false_positive,
-                          date = date_created,
-                          is_Mitigated = whitehat_sentinel_vuln.get('mitigated', False),
-                          mitigated = mitigated_ts,
-                          last_reviewed = whitehat_sentinel_vuln.get('lastRetested', None),
-                          dynamic_finding = True,
-                          created = date_created,
-                          unique_id_from_tool = whitehat_sentinel_vuln['id'],
-                          url = whitehat_sentinel_vuln.get('')
+        finding = Finding(title=whitehat_sentinel_vuln['class'],
+                          test=test,
+                          cwe=cwe,
+                          active=active,
+                          verified=True,
+                          description=description,
+                          steps_to_reproduce=steps,
+                          mitigation=solution,
+                          references=references,
+                          severity=severity,
+                          numerical_severity=Finding.get_numerical_severity(severity),
+                          false_p=false_positive,
+                          date=date_created,
+                          is_Mitigated=whitehat_sentinel_vuln.get('mitigated', False),
+                          mitigated=mitigated_ts,
+                          last_reviewed=whitehat_sentinel_vuln.get('lastRetested', None),
+                          dynamic_finding=True,
+                          created=date_created,
+                          unique_id_from_tool=whitehat_sentinel_vuln['id'],
+                          url=whitehat_sentinel_vuln.get('')
                           )
 
         # Get Endpoints from Attack Vectors

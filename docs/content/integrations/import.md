@@ -676,6 +676,19 @@ Wapiti Scan
 
 Import XML report.
 
+WhiteHat Sentinel Dynamic Scan
+----------------
+WhiteHat Sentinel Dynamic is a commercial cloud-based DAST platform. All Findings are verified by security engineers 
+and thus 
+there is an extremely low false-positive rate.
+
+Use the WhiteHat Sentinel *vuln* API and query below to fetch vulnerabilities for the site in question.
+
+    vuln?query_site={site_id}&format=json&display_attack_vectors=all&display_custom_risk=1&display_risk=1&display_description=custom
+
+The JSON output from this API can be saved to a file for manual import, or be imported directly via the Defect Dojo API.
+
+
 Whitesource Scan
 ----------------
 
