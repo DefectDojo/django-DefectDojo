@@ -1,22 +1,22 @@
 __author__ = 'jankuehl'
 
 import re
+
 from defusedxml import ElementTree as ET
+
 from dojo.models import Finding
 
 
 class XanitizerXMLParser(object):
-
-    def __init__(self, filename, test):
-        self.items = []
-
+    def get_findings(self, filename, test):
         if filename is None:
-            return
+            return list()
 
         root = self.parse_xml(filename)
-
         if root is not None:
-            self.items = self.get_findings(root, test)
+            return self.get_findings_internal(root, test)
+        else:
+            return list()
 
     def parse_xml(self, filename):
         try:
@@ -30,7 +30,7 @@ class XanitizerXMLParser(object):
 
         return root
 
-    def get_findings(self, root, test):
+    def get_findings_internal(self, root, test):
         items = list()
 
         globalDate = root.get('timeStamp', default=None)

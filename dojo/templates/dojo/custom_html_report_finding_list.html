@@ -63,8 +63,11 @@
                         <td>{{ finding.status }}</td>
                         {% if finding.risk_acceptance_set.all %}
                             <td>
-                                <a href="{% url 'view_risk' finding.test.engagement.id finding.risk_acceptance_set.all.0.id %}">
-                                    View Risk Acceptance</a>
+                                {% comment %} for some reason the font-awesome icons don't work with the report template{% endcomment %}
+                                {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
+                                    <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
+                                    class="{% if ra.is_expired %}lightgrey{% endif%}">acceptance</a>&nbsp;
+                                {% endfor %}
                             </td>
                         {% endif %}
                         <td>{{ finding.date }}</td>
@@ -89,7 +92,7 @@
         </div>
 
         {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
-        
+
         {% if finding.cvssv3 %}
             <h6>CVSSv3</h6>
             <pre>{{ finding.cvssv3|markdown_render }}</pre>

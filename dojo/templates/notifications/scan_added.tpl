@@ -12,7 +12,7 @@ Hello {{ user.get_full_name }},
 {% url 'view_product' test.engagement.product.id as product_url %}
 {% url 'view_engagement' test.engagement.id as engagement_url %}
 {% url 'view_test' test.id as test_url %}
-{{ finding_count }} findings have been updated for while a scan was uploaded: 
+{{ finding_count }} findings have been updated for while a scan was uploaded:
 <a href="{{product_url|full_url}}">{{product}}</a> / <a href="{{engagement_url|full_url}}">{{ engagement.name }}</a> / <a href="{{ test_url|full_url }}">{{ test }}</a><br/>
 <br/>
 <p>

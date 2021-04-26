@@ -1,4 +1,16 @@
 {% extends "base.html" %}
+{% load static %}
+{% block add_css %}
+    <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
+{% endblock %}
+{% block add_styles %}
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+    .chosen-container.chosen-container-multi {
+    width: 70% !important;
+    }
+{% endblock %}
 {% block content %}
     <h3> Register a new Product Type </h3>
     <form class="form-horizontal" action="{%  url 'add_product_type' %}" method="post">{% csrf_token %}
@@ -11,8 +23,29 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="application/javascript">
         $(function () {
+            $("textarea").each(function (index, elem) {
+                if (elem.hasAttribute("required")) {
+                    elem.removeAttribute("required");
+                    elem.id = "req"
+                }
+
+                var mde = new EasyMDE({
+                    spellChecker: false,
+                    element: elem,
+                    autofocus: false,
+                    forceSync: true,
+                    toolbar: ["bold", "italic", "heading", "|",
+                        "quote", "unordered-list", "ordered-list", "|",
+                        "link", "image", "|",
+                        "table", "horizontal-rule", "code", "|",
+                        "guide"
+                    ]
+                });
+            mde.render();
+            });
             $('#id_authorized_users').chosen({'placeholder_text_multiple': 'Select some users...'});
         });
     </script>

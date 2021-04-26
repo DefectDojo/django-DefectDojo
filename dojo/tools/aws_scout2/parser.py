@@ -1,17 +1,20 @@
 __author__ = 'Aaron Weaver'
 
-from dojo.models import Finding
-from datetime import datetime
 import json
-from django.utils.text import Truncator
+from datetime import datetime
+
 from django.utils.html import strip_tags
+from django.utils.text import Truncator
+
+from dojo.models import Finding
 
 
 class AWSScout2Parser(object):
+    # FIXME bad very bad
     item_data = ""
     pdepth = 0
 
-    def __init__(self, filename, test):
+    def get_findings(self, filename, test):
         # filename is instance of class 'django.core.files.uploadedfile.TemporaryUploadedFile'>
         with open(filename.temporary_file_path(), "r") as fileobj:
             raw_data = fileobj.read()

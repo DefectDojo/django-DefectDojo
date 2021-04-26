@@ -5,11 +5,11 @@ from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, System_Settings
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
+    System_Settings, FileUpload
 
 from dojo.forms import ImportScanForm, SEVERITY_CHOICES
-from dojo.tools import requires_file
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import import_parser_factory, requires_file
 from dojo.utils import max_safe, is_scan_file_too_large
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
@@ -354,6 +354,14 @@ class NoteTypeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FileSerializer(serializers.ModelSerializer):
+    file = serializers.FileField(required=True)
+
+    class Meta:
+        model = FileUpload
+        fields = '__all__'
+
+
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -402,12 +410,19 @@ class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
     def build_relational_field(self, field_name, relation_info):
         if field_name == 'notes':
             return NoteSerializer, {'many': True, 'read_only': True}
+        if field_name == 'files':
+            return FileSerializer, {'many': True, 'read_only': True}
         return super().build_relational_field(field_name, relation_info)
 
 
 class EngagementToNotesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(queryset=Engagement.objects.all(), many=False, allow_null=True)
     notes = NoteSerializer(many=True)
+
+
+class EngagementToFilesSerializer(serializers.Serializer):
+    engagement_id = serializers.PrimaryKeyRelatedField(queryset=Engagement.objects.all(), many=False, allow_null=True)
+    files = FileSerializer(many=True)
 
 
 class AppAnalysisSerializer(serializers.ModelSerializer):
@@ -623,6 +638,8 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
     def build_relational_field(self, field_name, relation_info):
         if field_name == 'notes':
             return NoteSerializer, {'many': True, 'read_only': True}
+        if field_name == 'files':
+            return FileSerializer, {'many': True, 'read_only': True}
         return super().build_relational_field(field_name, relation_info)
 
 
@@ -652,6 +669,11 @@ class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
 class TestToNotesSerializer(serializers.Serializer):
     test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
     notes = NoteSerializer(many=True)
+
+
+class TestToFilesSerializer(serializers.Serializer):
+    test_id = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all(), many=False, allow_null=True)
+    files = FileSerializer(many=True)
 
 
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
@@ -809,17 +831,29 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             is_verified = data.get('verified', self.instance.verified)
             is_duplicate = data.get('duplicate', self.instance.duplicate)
             is_false_p = data.get('false_p', self.instance.false_p)
+            is_risk_accepted = data.get('risk_accepted', self.instance.risk_accepted)
         else:
             is_active = data.get('active', True)
             is_verified = data.get('verified', True)
             is_duplicate = data.get('duplicate', False)
             is_false_p = data.get('false_p', False)
+            is_risk_accepted = data.get('risk_accepted', False)
+
         if ((is_active or is_verified) and is_duplicate):
             raise serializers.ValidationError('Duplicate findings cannot be'
                                               ' verified or active')
         if is_false_p and is_verified:
             raise serializers.ValidationError('False positive findings cannot '
                                               'be verified.')
+
+        if is_risk_accepted and not self.instance.risk_accepted:
+            if not self.instance.test.engagement.product.enable_simple_risk_acceptance:
+                raise serializers.ValidationError('Simple risk acceptance is disabled for this product, use the UI to accept this finding.')
+
+        if is_active and is_risk_accepted:
+            raise serializers.ValidationError('Active findings cannot '
+                                        'be risk accepted.')
+
         return data
 
     def build_relational_field(self, field_name, relation_info):
@@ -900,6 +934,17 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         if data['false_p'] and data['verified']:
             raise serializers.ValidationError('False positive findings cannot '
                                               'be verified.')
+
+        if 'risk_accepted' in data and data['risk_accepted']:
+            test = data['test']
+            # test = Test.objects.get(id=test_id)
+            if not test.engagement.product.enable_simple_risk_acceptance:
+                raise serializers.ValidationError('Simple risk acceptance is disabled for this product, use the UI to accept this finding.')
+
+        if data['active'] and 'risk_accepted' in data and data['risk_accepted']:
+            raise serializers.ValidationError('Active findings cannot '
+                                        'be risk accepted.')
+
         return data
 
 
@@ -980,7 +1025,7 @@ class ImportScanSerializer(serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SCAN_TYPE_CHOICES)
+        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
                                                          default=None)
@@ -1057,6 +1102,7 @@ class ImportScanSerializer(serializers.Serializer):
                                            active,
                                            verified,
                                            data['scan_type'],)
+            parser_findings = parser.get_findings(data.get('file', None), test)
         except ValueError:
             raise Exception('FileParser ValueError')
         except:
@@ -1065,7 +1111,7 @@ class ImportScanSerializer(serializers.Serializer):
         new_findings = []
         skipped_hashcodes = []
         try:
-            items = parser.items
+            items = parser_findings
             logger.debug('starting import of %i items.', len(items))
             i = 0
             for item in items:
@@ -1221,7 +1267,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SCAN_TYPE_CHOICES)
+        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)
@@ -1247,20 +1293,24 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
         verified = data['verified']
         active = data['active']
+        version = None
+        if 'version' in data:
+            version = data['version']
 
         try:
             parser = import_parser_factory(data.get('file', None),
                                            test,
                                            active,
                                            verified,
-                                           data['scan_type'],)
+                                           data['scan_type'])
+            parser_findings = parser.get_findings(data.get('file', None), test)
         except ValueError:
             raise Exception("Parser ValueError")
         except:
             raise Exception('Error while parsing the report, did you specify the correct scan type ?')
 
         try:
-            items = parser.items
+            items = parser_findings
             original_items = list(test.finding_set.all())
             new_items = []
             mitigated_count = 0
@@ -1465,13 +1515,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                 test.target_end = max_safe([scan_date_time, test.target_end])
                 test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
 
+            if version:
+                test.version = version
             test.save()
             test.engagement.save()
-
-            # print(len(new_items))
-            # print(reactivated_count)
-            # print(mitigated_count)
-            # print(unchanged_count - mitigated_count)
 
             updated_count = mitigated_count + reactivated_count + len(new_items)
             if updated_count > 0:
@@ -1510,6 +1557,13 @@ class AddNewNoteOptionSerializer(serializers.ModelSerializer):
         fields = ['entry', 'private', 'note_type']
 
 
+class AddNewFileOptionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FileUpload
+        fields = '__all__'
+
+
 class FindingToFindingImagesSerializer(serializers.Serializer):
     finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
     images = FindingImageSerializer(many=True)
@@ -1518,6 +1572,11 @@ class FindingToFindingImagesSerializer(serializers.Serializer):
 class FindingToNotesSerializer(serializers.Serializer):
     finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
     notes = NoteSerializer(many=True)
+
+
+class FindingToFilesSerializer(serializers.Serializer):
+    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
+    files = FileSerializer(many=True)
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):

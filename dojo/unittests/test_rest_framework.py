@@ -3,7 +3,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
-    BurpRawRequestResponse, DojoMeta
+    BurpRawRequestResponse, DojoMeta, FileUpload
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
@@ -17,17 +17,23 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from .dojo_test_case import DojoAPITestCase
+from dojo.api_v2.prefetch.utils import _get_prefetchable_fields
+from rest_framework.mixins import \
+    ListModelMixin, RetrieveModelMixin, CreateModelMixin, \
+    DestroyModelMixin, UpdateModelMixin
+from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 import logging
-# from unittest import skip
+import pathlib
+
 
 logger = logging.getLogger(__name__)
 
 
-def skipIfNotSubclass(baseclass_name):
+def skipIfNotSubclass(baseclass):
     def decorate(f):
         def wrapper(self, *args, **kwargs):
-            if baseclass_name not in self.view_mixins:
-                self.skipTest('This view is not %s' % baseclass_name)
+            if not issubclass(self.viewset, baseclass):
+                self.skipTest('This view does not inherit from %s' % baseclass)
             else:
                 f(self, *args, **kwargs)
         return wrapper
@@ -38,8 +44,6 @@ class BaseClass():
     class RESTEndpointTest(DojoAPITestCase):
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
-            self.view_mixins = list(map(
-                (lambda x: x.__name__), self.viewset.__bases__))
 
         def setUp(self):
             testuser = User.objects.get(username='admin')
@@ -48,14 +52,16 @@ class BaseClass():
             self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
             self.url = reverse(self.viewname + '-list')
 
-        @skipIfNotSubclass('ListModelMixin')
+        @skipIfNotSubclass(ListModelMixin)
         def test_list(self):
             check_for_tags = False
             if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
                 logger.debug('creating model with endpoints: %s', self.payload)
                 response = self.client.post(self.url, self.payload)
-                # print('response:', response.data)
+                self.assertEqual(201, response.status_code, response.content[:1000])
+
+                # print('response:', response.content[:1000])
                 check_for_id = response.data['id']
                 # print('id: ', check_for_id)
                 check_for_tags = self.payload.get('tags', None)
@@ -74,16 +80,16 @@ class BaseClass():
                         tags_found = True
                 self.assertTrue(tags_found)
 
-            self.assertEqual(200, response.status_code)
+            self.assertEqual(200, response.status_code, response.content[:1000])
 
-        @skipIfNotSubclass('CreateModelMixin')
+        @skipIfNotSubclass(CreateModelMixin)
         def test_create(self):
             length = self.endpoint_model.objects.count()
             response = self.client.post(self.url, self.payload)
             logger.debug('test_create_response:')
             logger.debug(response)
             logger.debug(response.data)
-            self.assertEqual(201, response.status_code, response.data)
+            self.assertEqual(201, response.status_code, response.content[:1000])
             self.assertEqual(self.endpoint_model.objects.count(), length + 1)
 
             if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
@@ -92,30 +98,32 @@ class BaseClass():
                     # logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
                     self.assertTrue(tag in response.data['tags'])
 
-        @skipIfNotSubclass('RetrieveModelMixin')
+        @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.get(relative_url)
-            self.assertEqual(200, response.status_code)
+            self.assertEqual(200, response.status_code, response.content[:1000])
             # sensitive data must be set to write_only so those are not returned in the response
             # https://github.com/DefectDojo/django-DefectDojo/security/advisories/GHSA-8q8j-7wc4-vjg5
             self.assertFalse('password' in response.data)
             self.assertFalse('ssh' in response.data)
             self.assertFalse('api_key' in response.data)
 
-        @skipIfNotSubclass('DestroyModelMixin')
+        @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.delete(relative_url)
-            self.assertEqual(204, response.status_code)
+            self.assertEqual(204, response.status_code, response.content[:1000])
 
-        @skipIfNotSubclass('UpdateModelMixin')
+        @skipIfNotSubclass(UpdateModelMixin)
         def test_update(self):
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.patch(relative_url, self.update_fields)
+
+            self.assertEqual(200, response.status_code, response.content[:1000])
 
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
@@ -135,7 +143,60 @@ class BaseClass():
 
             response = self.client.put(
                 relative_url, self.payload)
+            self.assertEqual(200, response.status_code, response.content[:1000])
+
+        @skipIfNotSubclass(PrefetchRetrieveMixin)
+        def test_detail_prefetch(self):
+            print("=======================================================")
+            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
+
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            response = self.client.get(relative_url, data={
+                "prefetch": ','.join(prefetchable_fields)
+            })
+
             self.assertEqual(200, response.status_code)
+            obj = response.data
+            self.assertTrue("prefetch" in obj)
+
+            for field in prefetchable_fields:
+                field_value = obj.get(field, None)
+                if field_value is None:
+                    continue
+
+                self.assertTrue(field in obj["prefetch"])
+                values = field_value if type(field_value) is list else [field_value]
+
+                for value in values:
+                    self.assertTrue(value in obj["prefetch"][field])
+
+        @skipIfNotSubclass(PrefetchListMixin)
+        def test_list_prefetch(self):
+            prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
+
+            response = self.client.get(self.url, data={
+                "prefetch": ','.join(prefetchable_fields)
+            })
+
+            self.assertEqual(200, response.status_code)
+            objs = response.data
+            self.assertTrue("results" in objs)
+            self.assertTrue("prefetch" in objs)
+
+            for obj in objs["results"]:
+                for field in prefetchable_fields:
+                    field_value = obj.get(field, None)
+                    if field_value is None:
+                        continue
+
+                    self.assertTrue(field in objs["prefetch"])
+                    values = field_value if type(field_value) is list else [field_value]
+
+                    for value in values:
+                        if type(value) is not int:
+                            value = value['id']
+                        self.assertTrue(value in objs["prefetch"][field])
 
 
 class AppAnalysisTest(BaseClass.RESTEndpointTest):
@@ -239,12 +300,50 @@ class FindingRequestResponseTest(DojoAPITestCase):
             "req_resp": [{"request": "POST", "response": "200"}]
         }
         response = self.client.post('/api/v2/findings/7/request_response/', dumps(payload), content_type='application/json')
-        self.assertEqual(200, response.status_code, response.data)
+        self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertEqual(BurpRawRequestResponse.objects.count(), length + 1)
 
     def test_request_response_get(self):
         response = self.client.get('/api/v2/findings/7/request_response/', format='json')
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+
+class FindingFilesTest(DojoAPITestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+
+    def test_request_response_post(self):
+        url_levels = [
+            'findings/7',
+            'tests/3',
+            'engagements/1'
+        ]
+        path = pathlib.Path(__file__).parent.absolute()
+        print(path)
+        for level in url_levels:
+            length = FileUpload.objects.count()
+            payload = {
+                "title": level,
+                "file": open(str(path) + '/scans/acunetix/one_finding.xml')
+            }
+            response = self.client.post('/api/v2/' + level + '/files/', payload)
+            self.assertEqual(200, response.status_code, response.data)
+            self.assertEqual(FileUpload.objects.count(), length + 1)
+
+    def test_request_response_get(self):
+        url_levels = [
+            'findings/7',
+            'tests/3',
+            'engagements/1'
+        ]
+        for level in url_levels:
+            response = self.client.get('/api/v2/' + level + '/files/')
+            self.assertEqual(200, response.status_code)
 
 
 class FindingsTest(BaseClass.RESTEndpointTest):
@@ -286,7 +385,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "dynamic_finding": False,
             "endpoints": [1, 2],
             "images": [],
-            "tags": ['tag1', 'tag_2']
+            "tags": ['tag1', 'tag_2'],
         }
         self.update_fields = {'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -814,4 +913,4 @@ class ReimportScanTest(DojoAPITestCase):
                 "version": "1.0.1",
             })
         self.assertEqual(length, Test.objects.all().count())
-        self.assertEqual(201, response.status_code)
+        self.assertEqual(201, response.status_code, response.content[:1000])

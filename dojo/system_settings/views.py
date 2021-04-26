@@ -43,7 +43,7 @@ def system_settings(request):
         except:
             messages.add_message(request,
                                  messages.ERROR,
-                                 'Unable to authenticate. Please check the URL, username, and password.',
+                                 'Unable to authenticate to JIRA. Please check the URL, username, and password.',
                                  extra_tags='alert-danger')
 
     """

@@ -9,9 +9,10 @@
 
 import argparse
 import csv
-import logging
 import datetime
-from dojo.models import Finding, Endpoint
+import logging
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 ################################################################
@@ -268,5 +269,5 @@ if __name__ == "__main__":
 
 
 class QualysParser(object):
-    def __init__(self, file, test):
+    def get_findings(self, file, test):
         self.items = qualys_parser(file)
