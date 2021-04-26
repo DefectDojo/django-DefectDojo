@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<NexposeReport version="1.0">
+	<scans>
+		<scan id="1" name="Localhost" startTime="20131127T050242739" endTime="20131127T115513233" status="stopped"/>
+	</scans>
+	<nodes>
+		<node address="192.168.1.1" status="alive" device-id="7">
+			<fingerprints>
+				<os certainty="0.70" device-class="General" vendor="Linux" family="Linux" product="Linux" version="2.6.9"/>
+			</fingerprints>
+			<tests>
+				<test id="tcp-seq-num-approximation" status="vulnerable-exploited">
+					<Paragraph>
+						<Paragraph>TCP reset with incorrect sequence number triggered this fault on 192.168.1.1:21: Connection reset by peer</Paragraph>
+					</Paragraph>
+				</test>
+			</tests>
+			<nodes></nodes>
+			<VulnerabilityDefinitions>
+				<vulnerability id="udp-ipid-zero" title="UDP IP ID Zero" severity="1" pciSeverity="1" cvssScore="0.0" cvssVector="(AV:N/AC:L/Au:N/C:N/I:N/A:N)" published="20020812T000000000" added="20110523T000000000" modified="20120712T000000000">
+					<description>
+						<ContainerBlockElement>
+							<Paragraph>
+      The remote host responded with a UDP packet whose IP ID was zero.
+      Normally the IP ID should be set to a unique value and is used in the
+      reconstruction of fragmented packets.  Generally this behavior is only
+      seen with systems derived from a Linux kernel, which may allow an
+      attacker to fingerprint the target&#39;s operating system.
+              </Paragraph>
+						</ContainerBlockElement>
+					</description>
+					<references></references>
+					<tags>
+						<tag>Network</tag>
+					</tags>
+					<solution>
+						<ContainerBlockElement>
+							<Paragraph>
+      Many vendors do not consider this to be a vulnerability,
+        or a vulnerability worth fixing, so there are no vendor-provided
+        solutions aside from putting a firewall or other filtering device
+        between the target and hostile attackers that is capable of
+        randomizing IP IDs.
+              </Paragraph>
+						</ContainerBlockElement>
+					</solution>
+				</vulnerability>
+			</VulnerabilityDefinitions>
+		</node>
+	</nodes>
+</NexposeReport>

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load humanize %}
 {% load static %}
 {% load get_endpoint_status %}
@@ -27,10 +28,13 @@
                         </sup>
                     {% endif %}
                     {% if finding.last_reviewed %}
-                        <small>Last Reviewed {{ finding.last_reviewed | naturalday }},
-                            by {{ finding.last_reviewed_by }}</small>
+                        <small>Last Reviewed {{ finding.last_reviewed | naturalday }}
+                            by {{ finding.last_reviewed_by }}, </small>
                     {% else %}
                         <small>Last Reviewed {{ finding.date | naturalday }} by {{ finding.reporter }}, </small>
+                    {% endif %}
+                    {% if finding.last_status_update %}
+                        <small>Last Status Update {{ finding.last_status_update | naturalday }}, </small>
                     {% endif %}
                     <small>Created
                     {% if finding.last_reviewed > finding.created %}
@@ -47,14 +51,14 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if user|is_authorized_for_change:finding %}
+                            {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'edit_finding' finding.id %}">
                                         <i class="fa fa-pencil-square-o"></i> Edit Finding
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if user|is_authorized_for_staff:finding %}
+                            {% if user|is_authorized_for_staff:finding or finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'manage_images' finding.id %}">
                                         <i class="fa fa-file-image-o"></i> Manage Images
@@ -80,7 +84,7 @@
                                     </li>
                                 {% endif %}
                             {% endif %}
-                            {% if user|is_authorized_for_change:finding %}
+                            {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'touch_finding' finding.id %}">
                                         <i class="fa fa-clock-o"></i> Touch Finding
@@ -118,7 +122,7 @@
                                 </li>
                                 <li role="separator" class="divider"></li>
                             {% endif %}
-                            {% if user|is_authorized_for_change:finding %}
+                            {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                 {% if finding.mitigated %}
                                     <li role="presentation">
                                         <a href="{% url 'reopen_finding' finding.id %}">
@@ -133,7 +137,7 @@
                                 </li>
                                 {% endif %}
                             {% endif %}
-                            {% if user|is_authorized_for_change:finding %}
+                            {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Risk_Acceptance" %}
                                 {% if finding.risk_accepted %}
                                     <li role="presentation">
                                     <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
@@ -162,7 +166,7 @@
                                     <i class="fa fa-history"></i> View History
                                 </a>
                             </li>
-                            {% if user|is_authorized_for_delete:finding %}
+                            {% if user|is_authorized_for_delete:finding or finding|has_object_permission:"Finding_Delete" %}
                                 <li role="separator" class="divider"></li>
                                 <li role="presentation">
                                     <a class="text-danger delete-finding" href="#">
@@ -209,6 +213,7 @@
                     </tr>
                 {% endif %}
                 <tr>
+                    <th>ID</th>
                     <th>Severity</th>
                     {% if system_settings.enable_finding_sla %}
                     <th>SLA</th>
@@ -231,6 +236,9 @@
                     <th>Type</th>
                     <th>Date discovered</th>
                     <th>Age</th>
+                    {% if finding.publish_date %}
+                        <th>Vuln Publish date</th>
+                    {% endif %}
                     <th>Reporter</th>
                     {% if finding.mitigated %}
                         <th>Date Mitigated</th>
@@ -241,10 +249,21 @@
                     <th>Found by</th>
                 </tr>
                 <tr>
+                    <td title="hash_code: {{ finding.hash_code }}">{{ finding.id }}</td>
                     <td>
                         <span class="label severity severity-{{ finding.severity }}">
                             {% if finding.severity %}
+                                {% if finding.cvssv3 %}
+                                    <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" title="" href="#"
+                                        data-content="{{ finding.cvssv3 }}">
+                                {% endif %}
                                 {{ finding.severity_display }}
+                                {% if finding.cvssv3_score %}
+                                    ({{ finding.cvssv3_score }})
+                                {% endif %}
+                                {% if finding.cvssv3 %}
+                                    </i>
+                                {% endif %}
                             {% else %}
                                 Unknown
                             {% endif %}
@@ -258,8 +277,7 @@
                     {% if finding.scanner_confidence %}
                     <td> {{finding.get_scanner_confidence_text}}</td>
                     {% endif %}
-                    <td>
-                        <div class="align-top">
+                    <td class="nowrap, align-top">
                             {% comment %}
                             {% if finding.duplicate %}
                                 {% include "dojo/finding_related_actions.html" with similar_finding=finding finding_context=finding intro=finding|finding_display_status|safe %}
@@ -268,7 +286,7 @@
                             {% endif %}
                             {% endcomment %}
                             {{ finding|finding_display_status|safe }}
-                        </div>
+                        &nbsp;{{ finding|import_history }}
                     </td>
                     {% if finding.risk_acceptance_set.all %}
                         <td>
@@ -341,6 +359,9 @@
                     </td>
                     <td>{{ finding.date }}</td>
                     <td>{{ finding.age }} days</td>
+                    {% if finding.publish_date %}
+                        <td>{{ finding.publish_date }}</td>
+                    {% endif %}
                     <td>{{ finding.reporter }}</td>
                     {% if finding.mitigated %}
                         <td>{{ finding.mitigated }}</td>
@@ -451,9 +472,13 @@
                 {% endif %}
                 {% if finding.has_jira_configured or finding.jira_issue %}
                 <th>JIRA</th>
+                <th>JIRA Change</th>
                 {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
+                {% endif %}
+                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                    <th>Group</th>
                 {% endif %}
             </tr>
             <tr>
@@ -494,20 +519,40 @@
                     </span>
                 </td>
                 {% endif %}
-                {% if finding.has_jira_configured or finding.jira_issue %}
+                {% if finding.has_jira_configured or finding.has_jira_issue or finding.has_jira_group_issue %}
                     <td id="jira">
-                    {% if finding.jira_issue %}
-                        <a href="{{ finding | jira_issue_url }}"
-                        target="_blank" title="{{ finding | jira_issue_url }}">{{ finding | jira_key }}</a>
-                        <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
-                        <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
-                    {% else %}
-                        None
-                        <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
-                        {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
-                            <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
-                        </a> {% endcomment %}
-                    {% endif %}
+                        {% if finding.has_jira_group_issue %}
+                            <a href="{{ finding.finding_group | jira_issue_url }}"
+                            target="_blank" title="{{ finding.finding_group | jira_issue_url }} (group)">{{ finding.finding_group | jira_key }}</a>
+                        {% endif %}
+                        {% if finding.has_jira_issue %}
+                            <a href="{{ finding | jira_issue_url }}"
+                            target="_blank" title="{{ finding | jira_issue_url }}">{{ finding | jira_key }}</a>
+                            <i id="unlink_jira" class="fa fa-trash" title="Unlink JIRA issue from this finding."></i>
+                            <i id="push_to_jira" class="fa fa-share-square" title="Push finding data to linked JIRA issue."></i>
+                        {% else %}
+                            {% if can_be_pushed_to_jira %}
+                                {% if not finding.has_jira_group_issue %}
+                                None
+                                <i id="push_to_jira" class="fa fa-share-square" title="Create JIRA issue for this finding"></i>
+                                {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
+                                    <i class="fa fa-asterisk" title="Link existing JIRA issue to finding."></i>
+                                </a> {% endcomment %}
+                                {% endif %}
+                            {% else %}
+                                <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                                data-content="{{ can_be_pushed_to_jira_error }}"
+                                data-placement="bottom" data-container="body">
+                                </i>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if finding.has_jira_group_issue %}
+                            <div title="{{ finding.finding_group.jira_issue.jira_change|date:"DATETIME_FORMAT" }} (group)">{{ finding.finding_group.jira_issue.jira_change|naturalday }}</div>
+                        {% elif finding.jira_issue %}
+                            <div title="{{ finding.jira_issue.jira_change|date:"DATETIME_FORMAT" }}">{{ finding.jira_issue.jira_change|naturalday }}</div>
+                        {% endif %}
                     </td>
                 {% endif %}
                 {% if finding.github_conf_new or finding.github_issue %}
@@ -515,6 +560,16 @@
                     {% if finding.github_issue %}
                         <a href="{{ finding.github_issue.issue_url }}" target="_blank" title="{{ finding.github_issue.issue_url }}">#{{ finding.github_issue.issue_id }}</a>
                     {% endif %}
+                    </td>
+                {% endif %}
+                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                    <td>
+                        {% if finding.finding_group %}
+                            {{ finding.finding_group.name }}
+                            <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa fa-share-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
+                        {% else %}
+                            N
+                        {% endif %}
                     </td>
                 {% endif %}
             </tr>
@@ -559,9 +614,9 @@
             </div>
             <div id="duplicate_tree" class="panel-body collapse">
                 {% if finding.duplicate_finding %}
-                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding.duplicate_finding finding_list=duplicate_cluster prefix='duplicate' %}
                 {% else %}
-                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding finding_list=duplicate_cluster %}
+                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_first_related=finding finding_list=duplicate_cluster prefix='duplicate' %}
                 {% endif %}
             </div>
         </div>
@@ -569,20 +624,33 @@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4 class="has-filters">Similar Findings ({{ similar_findings.count }})
-                    <span class="pull-right"><a data-toggle="collapse" href=".similar_findings"><i class="glyphicon glyphicon-chevron-down"></i></a></span>
-                    {% comment %} <span class="pull-right similar_findings collapse" aria-expanded="false"><button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary dropdown" aria-expanded="false"> <i class="fa fa-filter"></i> <i class="caret"></i> </button></span> {% endcomment %}
-                    <div class="similar_findings dropdown pull-right collapse"></div>
+                <h4 class="has-filters">Similar Findings ({{ similar_findings.paginator.count }})
+                    <i class="fa fa-question-circle has-popover" data-trigger="hover"
+                       data-content="Opening this panel shows findings that are not exact duplicates,
+                        but have similar values for CVE, CWE, file_path, line number, unique_id_from_tool.
+                        It has a filter panel where filtering can be made less or more strict, and across
+                        product boundaries. The resulting findings can be view, marked as duplicate or original.
+                        Clear filters will empty all filters. Restart will start over by matching against the fields
+                        mentioned above."
+                        data-placement="bottom" data-container="body">
+                    </i>
+                    <span class="pull-right">
+                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters-wrapper" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        <a data-toggle="collapse" href="#the-filters-wrapper"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                    </span>
                 </h4>
             </div>
-            <div id="the-filters" class="panel-body collapse">
-                {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form %}
-            </div>
-            {% if similar_findings_filter %}
-                <div id="similar_findings" class="panel-body similar_findings collapse">
-                    {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings %}
+            <span id="the-filters-wrapper" class="collapse {% if similar_findings_filter.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body similar-filters">
+                    {% url 'view_finding' finding.id as finding_url %}
+                    {% include "dojo/filter_snippet.html" with form=similar_findings_filter.form form_id="similar" clear_js=True restart_link=finding_url %}
                 </div>
-            {% endif %}
+                {% if similar_findings_filter %}
+                    <div id="similar_findings" class="panel-body">
+                        {% include "dojo/finding_related_list.html" with finding_context=finding finding_list=similar_findings prefix='similar' %}
+                    </div>
+                {% endif %}
+            </span>
         </div>
 
     {% comment %} Add a form to (ab)use to submit any actions related to similar/duplicates as POST requests {% endcomment %}
@@ -744,17 +812,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4>CVSS 3.0<span class="pull-right"><a data-toggle="collapse" href="#vuln_cvss"><i
-                        class="glyphicon glyphicon-chevron-{% if finding.cvssv3 %}up{%else%}down{%endif%}"></i></a></span></h4>
-            </div>
-            <div id="vuln_cvss" class="panel-body collapse {% if finding.cvssv3 %}in{%endif%}">
-                <pre>{{ finding.cvssv3|markdown_render|default_if_none:"" }}</pre>
-            </div>
-        </div>
-
 
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -1084,16 +1141,12 @@
                     jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
                 },
                 success: function (data, textStatus, jqXHR) {
-                    console.log(textStatus)
-                    console.log(data)
                 },
                 error: function (request, status, error) {
                     console.log('error')
                     console.log(request.responseText)
                 },
                 complete: function(e) {
-                    console.log('complete')
-                    console.log(this)
                     location.reload()
                 }
             });
@@ -1105,6 +1158,10 @@
 
         $("#unlink_jira").on('click', function(e) {
             jira_action(this,'{% url 'finding_unlink_jira' finding.id %}')
+        });
+
+        $(".push_group_to_jira").on('click', function(e) {
+            jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/push')
         });
 
         var checkbox_count = 0;
@@ -1276,6 +1333,102 @@
 
         $(".dojo-filter-set :input").not("button").addClass("form-control input-sm"); {% endcomment %}
 
+    </script>
+
+    <script type="application/javascript">
+        // DataTables Setup
+        $(document).ready(function() {
+            date =  new Date().toISOString().slice(0, 10);
+            var fileDated = 'Findings_List_' + date;
+            var columns = [
+                { "data": "relationship" },
+                { "data": "severity" },
+                { "data": "finding" , render: function (data, type, row) {
+                        return type === 'export' ? getDojoExportValueFromTag(data, 'a') :  data;
+                }},
+                { "data": "found_date" },
+                { "data": "status" },
+                { "data": "test" },
+                { "data": "engagement" },
+                { "data": "product" },
+                { "data": "cwe" },
+                { "data": "cve" },
+                { "data": "file_path" },
+                {% if system_settings.enable_jira %}
+                    { "data": "jira_id" },
+                {% endif %}
+                { "data": "action" },
+              ];
+
+            // Filter the list of items to display based on what is shown.
+            var disallowed_entries = new Set(["checkbox", "action"]);
+            var data_column_list = [];
+            for (var i = 0; i < columns.length; i++) {
+                if (!disallowed_entries.has(columns[i]["data"])) {
+                    data_column_list.push(i);
+                }
+            }
+
+            var buttonCommon = {
+                exportOptions: {
+                    columns: data_column_list,
+                    stripHtml: true,
+                    stripNewlines: true,
+                    trim: true,
+                    orthogonal: 'export'
+                },
+                filename: fileDated,
+                title: 'Similar Findings List'
+            };
+
+            // Mapping of table columns to objects for proper cleanup and data formatting
+            var dojoTable = $('#similar_findings_table').DataTable({
+                drawCallback: function(){
+                      $('.has-popover').popover({'trigger':'hover'});
+                },
+                colReorder: true,
+                "columns": columns,
+                order: [],
+                columnDefs: [
+                    {
+                        "orderable": false,
+                        "targets": [0, 1]
+                    },
+                    {
+                        targets: [0, 1],
+                        className: 'noVis'
+                    }
+                ],
+                dom: 'Bfrtip',
+                paging: false,
+                info: false,
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        columns: ':not(.noVis)'
+                    },
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'copy'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'excel',
+                        autoFilter: true,
+                        sheetName: 'Exported data',
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'csv'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'pdf',
+                        orientation: 'landscape',
+                        pageSize: 'LETTER'
+                    }),
+                    $.extend( true, {}, buttonCommon, {
+                        extend: 'print'
+                    }),
+                ],
+            });
+        });
     </script>
 
     {% include "dojo/filter_js_snippet.html" %}

@@ -1,4 +1,4 @@
-from drf_yasg2 import openapi, utils
+from drf_yasg import openapi, utils
 from .prefetcher import _Prefetcher
 from .utils import _get_prefetchable_fields
 from ..schema import extra_schema

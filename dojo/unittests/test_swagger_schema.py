@@ -5,9 +5,9 @@ from rest_framework.test import APITestCase, force_authenticate, APIClient
 from rest_framework.mixins import \
     RetrieveModelMixin, ListModelMixin, CreateModelMixin, UpdateModelMixin
 from rest_framework import status
-from drf_yasg2.generators import OpenAPISchemaGenerator
-from drf_yasg2.openapi import Info, SchemaRef
-from drf_yasg2.openapi import \
+from drf_yasg.generators import OpenAPISchemaGenerator
+from drf_yasg.openapi import Info, SchemaRef
+from drf_yasg.openapi import \
     TYPE_ARRAY, TYPE_BOOLEAN, TYPE_INTEGER, TYPE_NUMBER, TYPE_OBJECT, TYPE_STRING
 from collections import OrderedDict
 
@@ -16,7 +16,7 @@ from dojo.api_v2.views import \
     EngagementViewSet, FindingTemplatesViewSet, FindingViewSet, \
     JiraInstanceViewSet, DojoMetaViewSet, NoteTypeViewSet, NotesViewSet, \
     ProductTypeViewSet, ProductViewSet, RegulationsViewSet, \
-    ScanSettingsViewSet, ScansViewSet, SonarqubeIssueViewSet, SonarqubeProductViewSet, \
+    SonarqubeIssueViewSet, SonarqubeProductViewSet, \
     SonarqubeIssueTransitionViewSet, StubFindingsViewSet, SystemSettingsViewSet, \
     TestTypesViewSet, TestsViewSet, ToolConfigurationsViewSet, ToolProductSettingsViewSet, \
     ToolTypesViewSet, UsersViewSet, JiraIssuesViewSet, JiraProjectViewSet, AppAnalysisViewSet
@@ -24,7 +24,7 @@ from dojo.api_v2.views import \
 from dojo.models import \
     Development_Environment, Endpoint_Status, Endpoint, Engagement, Finding_Template, \
     Finding, JIRA_Instance, JIRA_Issue, DojoMeta, Note_Type, Notes, Product_Type, Product, Regulation, \
-    ScanSettings, Scan, Sonarqube_Issue, Sonarqube_Product, Sonarqube_Issue_Transition, \
+    Sonarqube_Issue, Sonarqube_Product, Sonarqube_Issue_Transition, \
     Stub_Finding, System_Settings, Test_Type, Test, Tool_Configuration, Tool_Product_Settings, \
     Tool_Type, Dojo_User, JIRA_Project, App_Analysis
 
@@ -32,8 +32,8 @@ from dojo.api_v2.serializers import \
     DevelopmentEnvironmentSerializer, EndpointStatusSerializer, EndpointSerializer, \
     EngagementSerializer, FindingTemplateSerializer, FindingSerializer, \
     JIRAInstanceSerializer, JIRAIssueSerializer, JIRAProjectSerializer, MetaSerializer, NoteTypeSerializer, \
-    ProductSerializer, RegulationSerializer, ScanSettingsSerializer,  \
-    ScanSerializer, SonarqubeIssueSerializer, SonarqubeProductSerializer, SonarqubeIssueTransitionSerializer, \
+    ProductSerializer, RegulationSerializer, \
+    SonarqubeIssueSerializer, SonarqubeProductSerializer, SonarqubeIssueTransitionSerializer, \
     StubFindingSerializer, SystemSettingsSerializer, TestTypeSerializer, TestSerializer, ToolConfigurationSerializer, \
     ToolProductSettingsSerializer, ToolTypeSerializer, UserSerializer, NoteSerializer, ProductTypeSerializer, \
     AppAnalysisSerializer
@@ -580,24 +580,6 @@ class RegulationTest(BaseClass.SchemaTest):
         self.viewset = RegulationsViewSet
         self.model = Regulation
         self.serializer = RegulationSerializer
-
-
-class ScanSettingsTest(BaseClass.SchemaTest):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.viewname = "scan_settings"
-        self.viewset = ScanSettingsViewSet
-        self.model = ScanSettings
-        self.serializer = ScanSettingsSerializer
-
-
-class ScanTest(BaseClass.SchemaTest):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.viewname = "scans"
-        self.viewset = ScansViewSet
-        self.model = Scan
-        self.serializer = ScanSerializer
 
 
 class SonarqubeIssuesTest(BaseClass.SchemaTest):

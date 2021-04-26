@@ -89,12 +89,9 @@ class NessusCSVParser(object):
                     description = description + str(row.get('Plugin Output'))
                 find = Finding(title=title,
                                 test=test,
-                                active=False,
                                 cve=cve,
-                                verified=False,
                                 description=description,
                                 severity=severity,
-                                numerical_severity=Finding.get_numerical_severity(severity),
                                 mitigation=mitigation,
                                 impact=impact,
                                 references=references)
@@ -204,11 +201,8 @@ class NessusXMLParser(object):
                     else:
                         find = Finding(title=title,
                                        test=test,
-                                       active=False,
-                                       verified=False,
                                        description=description,
                                        severity=severity,
-                                       numerical_severity=Finding.get_numerical_severity(severity),
                                        mitigation=mitigation,
                                        impact=impact,
                                        references=references,
@@ -241,11 +235,20 @@ class NessusXMLParser(object):
 
 class NessusParser(object):
 
+    def get_scan_types(self):
+        return ["Nessus Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Nessus Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Reports can be imported as CSV or .nessus (XML) report formats."
+
     def get_findings(self, filename, test):
 
         if filename.name.lower().endswith('.xml'):
-            return list(NessusXMLParser().parse(filename, test).values())
+            return NessusXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith('.csv'):
-            return list(NessusCSVParser().parse(filename, test).values())
+            return NessusCSVParser().get_findings(filename, test)
         else:
             raise ValueError('Unknown File Format')

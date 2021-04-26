@@ -41,6 +41,11 @@ spec:
       volumes:
       - name: run
         emptyDir: {}
+      {{- if  .Values.django.uwsgi.certificates.enabled }}
+      - name: cert-mount
+        configMap:
+          name: {{ .Values.django.uwsgi.certificates.configName }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -80,6 +85,10 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        {{- if  .Values.django.uwsgi.certificates.enabled }}
+        - name: cert-mount
+          mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
+        {{- end }}
         ports:
         - name: http
           protocol: TCP

@@ -9,7 +9,17 @@ from dojo.models import Endpoint, Finding
 __author__ = 'properam'
 
 
-class ImmuniwebXMLParser(object):
+class ImmuniwebParser(object):
+
+    def get_scan_types(self):
+        return ["Immuniweb Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "XML Scan Result File from Imuniweb Scan."
+
     def get_findings(self, file, test):
 
         ImmuniScanTree = ElementTree.parse(file)
@@ -68,14 +78,11 @@ class ImmuniwebXMLParser(object):
             else:  # finding is not a duplicate
                 # create finding
                 finding = Finding(title=title,
-                    test=test, active=False,
-                    verified=False, cve=cve,
+                    test=test,
+                    cve=cve,
                     description=description,
                     severity=severity,
                     steps_to_reproduce=steps_to_reproduce,
-                    numerical_severity=Finding.get_numerical_severity(
-                        severity
-                    ),
                     cwe=cwe,
                     mitigation=mitigation,
                     impact=impact,

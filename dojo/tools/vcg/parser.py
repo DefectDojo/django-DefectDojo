@@ -37,11 +37,8 @@ class VCGFinding(object):
         return Finding(
                 title=self.title,
                 test=test,
-                active=False,
-                verified=False,
                 description=self.get_finding_detail(),
                 severity=self.get_finding_severity(),
-                numerical_severity=Finding.get_numerical_severity(self.get_finding_severity())
         )
 
     def __init__(self):
@@ -184,6 +181,16 @@ class VCGCsvParser(object):
 
 class VCGParser(object):
     """VCG (VisualCodeGrepper) support CSV and XML"""
+
+    def get_scan_types(self):
+        return ["VCG Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "VCG Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "VCG output can be imported in CSV or Xml formats."
+
     def get_findings(self, filename, test):
 
         if filename is None:

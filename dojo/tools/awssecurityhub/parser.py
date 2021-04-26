@@ -4,7 +4,17 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class AwsSecurityFindingFormatParser:
+class AwsSecurityHubParser(object):
+
+    def get_scan_types(self):
+        return ["AWS Security Hub Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "AWS Security Hub Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "AWS Security Hub exports in JSON format."
+
     def get_findings(self, filehandle, test):
         tree = json.load(filehandle)
         return self.get_items(tree, test)
@@ -33,8 +43,6 @@ def get_item(finding, test):
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
     cve = None
     cwe = None
-    active = False
-    verified = False
     false_p = False
     duplicate = False
     out_of_scope = False
@@ -59,8 +67,6 @@ def get_item(finding, test):
                       references=references,
                       cve=cve,
                       cwe=cwe,
-                      active=active,
-                      verified=verified,
                       false_p=false_p,
                       duplicate=duplicate,
                       out_of_scope=out_of_scope,

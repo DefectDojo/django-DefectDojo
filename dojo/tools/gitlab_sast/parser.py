@@ -3,7 +3,17 @@ import json
 from dojo.models import Finding
 
 
-class GitlabSastReportParser(object):
+class GitlabSastParser(object):
+
+    def get_scan_types(self):
+        return ["GitLab SAST Report"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import GitLab SAST Report vulnerabilities in JSON format."
+
     def get_findings(self, json_output, test):
 
         if json_output is None:
@@ -86,7 +96,6 @@ def get_item(vuln, test):
         # In that case we set it as Info and specify the initial severity in the title
         title = '[{} severity] {}'.format(severity, title)
         severity = 'Info'
-    numerical_severity = Finding.get_numerical_severity(severity)
     scanner_confidence = get_confidence_numeric(vuln.get('confidence', 'Unkown'))
 
     mitigation = ''
@@ -115,11 +124,8 @@ def get_item(vuln, test):
 
     finding = Finding(title=title,
                       test=test,
-                      active=False,
-                      verified=False,
                       description=description,
                       severity=severity,
-                      numerical_severity=numerical_severity,
                       scanner_confidence=scanner_confidence,
                       mitigation=mitigation,
                       unique_id_from_tool=unique_id_from_tool,

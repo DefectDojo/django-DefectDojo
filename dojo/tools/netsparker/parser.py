@@ -17,6 +17,16 @@ def cleantags(text=''):
 
 
 class NetsparkerParser(object):
+
+    def get_scan_types(self):
+        return ["Netsparker Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Netsparker Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Netsparker JSON format."
+
     def get_findings(self, filename, test):
         tree = filename.read()
         try:
@@ -55,11 +65,8 @@ class NetsparkerParser(object):
 
                 find = Finding(title=title,
                                test=test,
-                               active=False,
-                               verified=False,
                                description=findingdetail,
                                severity=sev.title(),
-                               numerical_severity=Finding.get_numerical_severity(sev),
                                mitigation=mitigation,
                                impact=impact,
                                references=references,
@@ -69,4 +76,4 @@ class NetsparkerParser(object):
                 dupes[dupe_key] = find
                 findingdetail = ''
 
-        self.items = list(dupes.values())
+        return list(dupes.values())

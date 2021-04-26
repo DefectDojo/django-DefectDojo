@@ -1,19 +1,19 @@
 from django.test import TestCase
-from dojo.tools.scantist.parser import ScantistJSONParser
+from dojo.tools.scantist.parser import ScantistParser
 from dojo.models import Test
 
 
-class TestScantistJSONParser(TestCase):
+class TestScantistParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("dojo/unittests/scans/scantist/scantist-no-vuln.json")
-        parser = ScantistJSONParser()
+        parser = ScantistParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
         testfile = open("dojo/unittests/scans/scantist/scantist-one-vuln.json")
-        parser = ScantistJSONParser()
+        parser = ScantistParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
 
@@ -31,7 +31,7 @@ class TestScantistJSONParser(TestCase):
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("dojo/unittests/scans/scantist/scantist-many-vuln.json")
-        parser = ScantistJSONParser()
+        parser = ScantistParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(17, len(findings))
         finding = findings[0]

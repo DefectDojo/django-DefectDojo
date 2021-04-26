@@ -1,0 +1,6 @@
+{% spaceless %}
+    {% for widget in widget.subwidgets %}
+        {% include widget.template_name %}
+    {% endfor %}
+    <small class="form-text text-muted">Leave empty to set current time.</small>
+{% endspaceless %}

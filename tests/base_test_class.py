@@ -3,8 +3,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoAlertPresentException
-
+from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
 import unittest
 import os
 import re
@@ -122,6 +121,12 @@ class BaseTestCase(unittest.TestCase):
         driver.get(self.base_url + "components")
         return driver
 
+    def goto_google_sheets_configuration_form(self, driver):
+        # if something is terribly wrong, it may still fail, even if system_settings is disabled.
+        # See https://github.com/DefectDojo/django-DefectDojo/issues/3742 for reference.
+        driver.get(self.base_url + "configure_google_sheets")
+        return driver
+
     def goto_active_engagements_overview(self, driver):
         # return self.goto_engagements_internal(driver, 'engagement')
         # engagement overview doesn't seem to have the datatables yet modifying the DOM
@@ -171,6 +176,13 @@ class BaseTestCase(unittest.TestCase):
 
         # print('text mismatch!')
         return False
+
+    def is_element_by_id_present(self, id):
+        try:
+            self.driver.find_element_by_id(id)
+            return True
+        except NoSuchElementException:
+            return False
 
     def is_success_message_present(self, text=None):
         return self.is_element_by_css_selector_present('.alert-success', text=text)
@@ -277,18 +289,14 @@ class BaseTestCase(unittest.TestCase):
 
         for entry in WebdriverOnlyNewLogFacade(self.driver).get_log('browser'):
             """
-            images are not working in current docker/travis deployment, so ignore those 404s
-            see: https://github.com/DefectDojo/django-DefectDojo/issues/2045
-            examples:
-            http://localhost:8080/static/dojo/img/zoom-in.cur - Failed to load resource: the server responded with a status of 404 (Not Found)
-            http://localhost:8080/media/CACHE/images/finding_images/1bf9c0b1-5ed1-4b4e-9551-bcbfd198b90a/7d8d9af058566b8f2fe6548d96c63237.jpg - Failed to load resource: the server responded with a status of 404 (Not Found)
+            Images are now working after https://github.com/DefectDojo/django-DefectDojo/pull/3954,
+            but http://localhost:8080/static/dojo/img/zoom-in.cur still produces a 404
 
             The addition of the trigger exception is due to the Report Builder tests. All of the moving objects are from javascrip
             Tooltips are attached to each object and operate fine at human speeds. Selenium moves too fast for tooltips to be
             cleaned up, edited, and displayed, so the issue is only present in the test
             """
-            accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*)||(uploaded_files\/.*))404\ \(Not\ Found\)|Cannot read property \'trigger\' of null'
-            # accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)|(bootstrap\-chosen\.css\.map)'
+            accepted_javascript_messages = r'(zoom\-in\.cur.*)404\ \(Not\ Found\)|Cannot read property \'trigger\' of null'
 
             if (entry['level'] == 'SEVERE'):
                 # print(self.driver.current_url)  # TODO actually this seems to be the previous url

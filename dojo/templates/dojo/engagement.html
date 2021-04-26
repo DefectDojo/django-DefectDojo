@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load dict_key %}
+
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -9,78 +11,83 @@
                     <h3 class="has-filters">
                         Active Engagements
                         <div class="dropdown pull-right">
-
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
-                    {% include "dojo/filter_snippet.html" with form=filtered.form %}
+                <div id="the-filters" class="is-filters panel-body collapse {% if filter_form.has_changed %}in{% endif %}">
+                    {% include "dojo/filter_snippet.html" with form=filter_form %}
                 </div>
             </div>
-            {% if products %}
+            {% if engagements %}
 
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                    {% include "dojo/paging_snippet.html" with page=engagements page_size=True %}
                 </div>
 
                 <div class="table-responsive panel panel-default">
                     <table id="engagements"
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
-                            <th class="prod_name">{% dojo_sort request 'Product' 'name' 'asc' %}</th>
-                            <th class="prod_name">{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
-                            <th>Active Engagements</th>
-                            {% if user.is_staff %}
-                                <th> Engagement</th>
+                            <th>{% dojo_sort request 'Engagement' 'name' 'asc' %}</th>
+                            <th class="prod_name">{% dojo_sort request 'Product' 'product__name' 'asc' %}</th>
+                            <th class="prod_name">{% dojo_sort request 'Product Type' 'product__prod_type__name' %}</th>
+                            <th>{% dojo_sort request 'Lead' 'lead__first_name' %}</th>
+                            <th>Tests</th>
+                            {% if system_settings.enable_jira %}
+                                <th>Jira</th>
                             {% endif %}
                         </tr>
 
-                        {% for p in products %}
+                        {% for e in engagements %}
                             <tr>
-                                <td class="prod_name"><a href="{% url 'view_product' p.id %}">{{ p.name }}</a>
-                                    {{ p|jira_project_tag }}
-                                  <sup>
-                                   {% for tag in p.tags.all %}
-                                        <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                    {% endfor %}
-                                  </sup>
+                                <td style="white-space: normal">
+                                    {% if e.is_overdue %}
+                                        <span style="float: right" class="tag-label warning-color">
+                                             {{ e.target_end|overdue }} overdue
+                                         </span>
+                                     {% endif %}
+                                     <a class="eng_link" href="{%url 'view_engagement' e.id %}">
+                                        {% if e.name %}{{ e.name }}{% endif %}
+                                        {{ e.target_start|date }} - {{ e.target_end|date }}
+                                    </a>
+                                    <div>
+                                        {% for tag in e.tags.all %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">
+                                                {{ tag }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
                                 </td>
-                                <td class="prod_name"><a
-                                        href="{% url 'product_type_metrics' p.prod_type.id %}">{{ p.prod_type.name }}</a>
+                                <td class="prod_name">
+                                    <a href="{% url 'view_product' e.product.id %}">
+                                        {{ e.product.name }}
+                                    </a>
+                                    {{ e.product|jira_project_tag }}
+                                    {% if e.product.tags.all %}
+                                        <div>
+                                            {% for tag in e.product.tags.all %}
+                                                <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </td>
+                                <td class="prod_name">
+                                    <a href="{% url 'product_type_metrics' e.product.prod_type.id %}">
+                                        {{ e.product.prod_type.name }}
+                                    </a>
+                                </td>
+                                <td>{{ e.lead.first_name }}</td>
                                 <td>
-                                    {% for e in p.engagement_set.all %}
-                                        {% if e.active %}
-                                            <div class="lineContainer">
-                                                <a  style="display: inline" class="eng_link" href="{% url 'view_engagement' e.id %}">
-                                                {% if e.name %}{{ e.name }} {% endif %}{{ e.target_start|date }} - {{ e.target_end|date }}</a>
-                                                <sup>
-                                                    {% for tag in e.tags.all %}
-                                                         <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=engagement-tag:{{ tag }}">{{ tag }}</a>
-                                                     {% endfor %}
-                                                </sup>                                                
-                                                {% if e.is_overdue %}
-                                                <sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
-                                                {% endif %}                                                
-							                    | Lead: {{ e.lead.first_name }}
-                                                | 
-                                                {% for test in e.test_set.all %}
-								                    {% if test.lead %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test }}: {{ test.lead.first_name }} ({{ test.updated|date}})</a> |
-								                    {% else %}
-                                                                <a href="{% url 'view_test' test.id %}"> {{ test }} ({{ test.updated|date}})</a> |
-								                    {% endif %}
-                                                {% endfor %}
-                                                {{ e|jira_project_tag }}
-						                    </div>
-                                        {% endif %}
-                                    {% endfor %}
+                                    <a class="eng_link" href="{%url 'view_engagement' e.id %}#tests">
+                                        {% with test_count=engagement_test_counts|dict_key:e.pk|default_if_none:0 %}
+                                            {{ test_count }} Test{{ test_count|pluralize }}
+                                        {% endwith %}
+                                    </a>
                                 </td>
-                                {% if user.is_staff %}
+                                {% if system_settings.enable_jira %}
                                     <td>
-                                        <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
-                                            <i class="fa fa-plus"></i> Add
-                                        </a>
+                                        {{ e|jira_project_tag }}
                                     </td>
                                 {% endif %}
                             </tr>
@@ -91,7 +98,7 @@
                     {% include "dojo/paging_snippet.html" with page=products page_size=True %}
                 </div>
             {% else %}
-                <div id="no_engagements"><h5 class="text-center"> No active engagements </h5></div>                
+                <div id="no_engagements"><h5 class="text-center"> No active engagements </h5></div>
             {% endif %}
         </div>
     </div>
@@ -100,20 +107,20 @@
 {% block postscript %}
     <script>
         $(function () {
-            var availableTags = [
-                {% for word in name_words %}
+            var prodWords = [
+                {% for word in product_name_words %}
                     "{{word}}",
                 {% endfor %}
             ];
             var engWords = [
-                {% for word in eng_words %}
+                {% for word in engagement_name_words %}
                     "{{word}}",
                 {% endfor %}
             ];
-            $("#id_name").autocomplete({
-                source: availableTags
+            $("#id_product__name").autocomplete({
+                source: prodWords
             });
-            $("#id_engagement__name").autocomplete({
+            $("#id_name").autocomplete({
                 source: engWords
             });
         });

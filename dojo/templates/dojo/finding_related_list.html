@@ -1,6 +1,9 @@
 {% load navigation_tags %}
 {% load static %}
-<table class="table table-striped table-hover centered no-bottom-margin">
+<div class="clearfix">
+    {% include "dojo/paging_snippet.html" with page=finding_list prefix=prefix page_size=True %}
+</div>
+<table id="{{prefix}}_findings_table" class="table table-striped table-hover centered no-bottom-margin">
     <tr>
         <th>Relationship</th>
         <th>Severity</th>

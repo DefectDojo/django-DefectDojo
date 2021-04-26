@@ -9,6 +9,26 @@ For development purposes,
 and [Helm](https://helm.sh/) can be installed locally by following
 this [guide](https://helm.sh/docs/using_helm/#installing-helm).
 
+## Helm chart
+Starting with version 1.14.0, a helm chart will be pushed onto the `helm-charts` branch during the release process. Don't look for a chart museum, we're leveraging the "raw" capabilities of GitHub at this time.
+
+To use it, you can add our repo.
+
+```
+$ helm repo add helm-charts 'https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/helm-charts'
+"helm-charts" has been added to your repositories
+
+$ helm repo update
+```
+
+You should now be able to see the chart.
+
+```
+$ helm search repo defectdojo
+NAME                      	CHART VERSION	APP VERSION	DESCRIPTION                                      
+helm-charts/defectdojo	    1.5.1        	1.14.0-dev 	A Helm chart for Kubernetes to install DefectDojo
+```
+
 ## Kubernetes Local Quickstart
 
 Requirements:

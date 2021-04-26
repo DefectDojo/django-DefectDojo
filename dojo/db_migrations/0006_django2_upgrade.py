@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jira_conf',
             name='close_status_key',
-            field=models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields"),
+            field=models.IntegerField(verbose_name="Close Transition ID", help_text="Transition ID to Close JIRA issues, visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to find the ID for your JIRA instance"),
         ),
         migrations.AlterField(
             model_name='jira_conf',
@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='jira_conf',
             name='open_status_key',
-            field=models.IntegerField(help_text="To obtain the 'open status key' visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields"),
+            field=models.IntegerField(verbose_name="Reopen Transition ID", help_text="Transition ID to Re-Open JIRA issues, visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to find the ID for your JIRA instance"),
         ),
         migrations.AlterField(
             model_name='jira_pkey',

@@ -10,7 +10,17 @@ from dojo.models import Endpoint, Finding
 LOGGER = logging.getLogger(__name__)
 
 
-class IbmAppScanDASTXMLParser(object):
+class IbmAppParser(object):
+
+    def get_scan_types(self):
+        return ["IBM AppScan DAST"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "XML file from IBM App Scanner."
+
     def get_findings(self, file, test):
 
         ibm_scan_tree = ElementTree.parse(file)
@@ -85,13 +95,10 @@ class IbmAppScanDASTXMLParser(object):
                     else:  # finding is not a duplicate
                         # create finding
                         finding = Finding(title=name,
-                                          test=test, active=False,
-                                          verified=False, cve=cve,
+                                          test=test,
+                                          cve=cve,
                                           description=issue_description,
                                           severity=severity,
-                                          numerical_severity=Finding.get_numerical_severity(
-                                              severity
-                                          ),
                                           mitigation=recommendation_data,
                                           impact=impact,
                                           references=ref_link,

@@ -13,7 +13,16 @@ from dojo.models import Finding
 logger = logging.getLogger(__name__)
 
 
-class FortifyXMLParser(object):
+class FortifyParser(object):
+
+    def get_scan_types(self):
+        return ["Fortify Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Findings from XML file format."
 
     def get_findings(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
@@ -21,7 +30,7 @@ class FortifyXMLParser(object):
 
         language_list = []
         # Get Date
-        date_string = root.getchildren()[5].getchildren()[1].getchildren()[2].text
+        date_string = root[5][1][2].text
         date_list = date_string.split()[1:4]
         date_list = [item.replace(',', '') for item in date_list]
         date_act = ".".join(date_list)
@@ -107,13 +116,10 @@ class FortifyXMLParser(object):
                 items.append(Finding(
                     title=title,
                     severity=issue["Friority"],
-                    numerical_severity=Finding.get_numerical_severity(issue["Friority"]),
                     file_path=issue['FilePath'],
                     line_number=int(issue['LineStart']),
                     line=int(issue['LineStart']),
                     static_finding=True,
-                    active=False,
-                    verified=False,
                     test=test,
                     date=find_date,
                     description=self.format_description(issue, cat_meta),

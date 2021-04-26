@@ -12,6 +12,7 @@
               <h3 class="has-filters">
                   Metrics Overview
                 <div class="dropdown pull-right ">
+                    <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
                         <span class="fa fa-bars"></span>
@@ -31,12 +32,12 @@
                     </ul>
                 </div>
               </h3>
-                
-                
-                  
+
+
+
             </div>
         </div>
-        <div id="the-filters" class="panel-body collapse">
+        <div id="the-filters" class="is-filters panel-body collapse">
             {% include "dojo/filter_snippet.html" with form=form clear_link=reset_link %}
         </div>
         <div class="panel-body product-graphs-overview">
@@ -220,7 +221,7 @@
                                 <div class="text-right pull-right">
                                     <span class="fa-2x">{{ all_objs|length }}</span>
                                     <span><a href="{% url 'product_all_findings' prod.id %}?test__engagement__product={{ prod.id }}"
-                                            title="All findings.">Total 
+                                            title="All findings.">Total
                                         {{ view }}{{ all_objs|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>

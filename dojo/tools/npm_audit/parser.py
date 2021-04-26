@@ -8,6 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 class NpmAuditParser(object):
+
+    def get_scan_types(self):
+        return ["NPM Audit Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "NPM Audit Scan json output up to v6 can be imported in JSON format."
+
     def get_findings(self, json_output, test):
         tree = self.parse_json(json_output)
         return self.get_items(tree, test)
@@ -96,8 +106,6 @@ def get_item(item_node, test):
                       references=item_node['url'],
                       component_name=item_node['module_name'],
                       component_version=component_version,
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,

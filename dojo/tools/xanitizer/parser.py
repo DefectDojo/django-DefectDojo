@@ -7,7 +7,17 @@ from defusedxml import ElementTree as ET
 from dojo.models import Finding
 
 
-class XanitizerXMLParser(object):
+class XanitizerParser(object):
+
+    def get_scan_types(self):
+        return ["Xanitizer Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Xanitizer Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import XML findings list report, preferably with parameter 'generateDetailsInFindingsListReport=true'."
+
     def get_findings(self, filename, test):
         if filename is None:
             return list()
@@ -60,8 +70,6 @@ class XanitizerXMLParser(object):
                 file_path=self.generate_file_path(finding),
                 line=line,
                 date=date,
-                active=False,
-                verified=False,
                 static_finding=True)
 
             items.append(dojofinding)
