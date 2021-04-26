@@ -121,20 +121,9 @@ class TestNiktoParser(TestCase):
         testfile = open("dojo/unittests/scans/nikto/tdh.xml")
         parser = NiktoParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(8, len(findings))
+        self.assertEqual(6, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
-            self.assertEqual("Uncommon header 'x-cacheable' found, with contents: YES", finding.title)
-            self.assertEqual("999100", finding.vuln_id_from_tool)
-            self.assertEqual(1, finding.nb_occurences)
-            self.assertEqual("Info", finding.severity)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual(443, endpoint.port)
-            self.assertEqual("www.tdh.com", endpoint.host)
-            self.assertEqual("/", endpoint.path)
-        with self.subTest(i=1):
-            finding = findings[1]
             self.assertEqual("Uncommon header 'x-cache' found, with contents: HIT", finding.title)
             self.assertEqual("999100", finding.vuln_id_from_tool)
             self.assertEqual(1, finding.nb_occurences)
@@ -142,5 +131,27 @@ class TestNiktoParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(443, endpoint.port)
-            self.assertEqual("www.tdh.com", endpoint.host)
-            self.assertEqual("/", endpoint.path)
+            self.assertEqual("64.220.43.153", endpoint.host)
+            self.assertEqual("", endpoint.path)
+        with self.subTest(i=1):
+            finding = findings[1]
+            self.assertEqual("Uncommon header 'x-cacheable' found, with contents: YES", finding.title)
+            self.assertEqual("999100", finding.vuln_id_from_tool)
+            self.assertEqual(1, finding.nb_occurences)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual("64.220.43.153", endpoint.host)
+            self.assertEqual("", endpoint.path)
+        with self.subTest(i=5):
+            finding = findings[5]
+            self.assertEqual("The Content-Encoding header is set to \"deflate\" this may mean that the server is vulnerable to the BREACH attack.", finding.title)
+            self.assertEqual("999966", finding.vuln_id_from_tool)
+            self.assertEqual(1, finding.nb_occurences)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual(443, endpoint.port)
+            self.assertEqual("64.220.43.153", endpoint.host)
+            self.assertEqual("", endpoint.path)
