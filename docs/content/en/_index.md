@@ -2,9 +2,18 @@
 title: "DefectDojo\'s Documentation"
 date: 2021-02-02T20:46:29+01:00
 draft: false
----
+type: docs
 
-# DefectDojo\'s Documentation
+cascade:
+- type: "blog"
+  # set to false to include a blog section in the section nav along with docs
+  toc_root: true
+  _target:
+    path: "/blog/**"
+- type: "docs"
+  _target:
+    path: "/**"
+---
 
 ![image](images/dashboard.png)
 
@@ -44,7 +53,3 @@ github](https://github.com/DefectDojo/django-DefectDojo) and a running
 example is available on [the demo server](https://demo.defectdojo.org)
 using the credentials `admin` / `defectdojo@demo#appsec`. Note: The demo
 server is refreshed regularly and provisioned some sample data.
-
-Our documentation is organized in the following sections:
-
-{{% children depth="2" %}}

@@ -5,17 +5,17 @@ weight: 4
 draft: false
 ---
 
-{{% notice warning %}}
+{{% alert title="Warning" color="warning" %}}
 The permissions described on this page only become active if you set the ``FEATURE_AUTHORIZATION_V2`` feature flag to ``True``. This feature is currently in beta, you should not use it in production environments.
-{{% /notice %}}
+{{% /alert %}}
 
 Users have different functionality available to them, depending on their system-wide permissions and on the role they have as a member of a particular Product or Product Type.
 
 ## System-wide permissions
 
 * Administrators (aka super users) have no limitations in the system. They can change all settings, manage users  and have read and write access to all data.
-* Staff users can add Product Types and Products, and have access to data according to their role in a Product or Product Type. There is a parameter in the settings (AUTHORIZATION_STAFF_OVERRIDE) to give staff users full access to all Products and Product Types.
-* Guest users have limited functionality available. They cannot add Product Types or Products and have only read permission for Products or Product Types.
+* Staff users can add Product Types, and have access to data according to their role in a Product or Product Type. There is the parameter `AUTHORIZATION_STAFF_OVERRIDE` in the settings to give staff users full access to all Products and Product Types.
+* Guest users have limited functionality available. They cannot add Product Types but have access to data according to their role in a Product or Product Type
 
 ## Product and Product Type permissions
 
@@ -25,20 +25,20 @@ Users can be assigned as members to Products and Product Types, giving them one 
 
 |                             | Reader | Writer | Maintainer | Owner | API Importer |
 |-----------------------------|:------:|:------:|:----------:|:-----:|:------------:|
-| Add Product Type <sup>1)</sup>         |        |        |            |       |              |
+| Add Product Type <sup>1)</sup> |     |        |            |       |              |
 | View Product Type           | x      | x      | x          | x     |              |
 | Remove yourself as a member | x      | x      | x          | x     |              |
-| Manage Product Type members |        | x          | x     |              |
-| Add Product Type member as Owner         |        |        |            | x     |              |
+| Manage Product Type members |        |        | x          | x     |              |
 | Edit Product Type           |        |        | x          | x     |              |
 | Add Product                 |        |        | x          | x     |              |
+| Add Product Type member as Owner |   |        |            | x     |              |
 | Delete Product Type         |        |        |            | x     |              |
 |                             |        |        |            |       |              |
 | View Product                | x      | x      | x          | x     |              |
 | Remove yourself as a member | x      | x      | x          | x     |              |
 | Manage Product members      |        |        | x          | x     |              |
-| Add Product member as Owner |        |        |            | x     |              |
 | Edit Product                |        |        | x          | x     |              |
+| Add Product member as Owner |        |        |            | x     |              |
 | Delete Product              |        |        |            | x     |              |
 |                             |        |        |            |       |              |
 | View Engagement             | x      | x      | x          | x     |              |

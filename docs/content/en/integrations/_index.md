@@ -6,5 +6,3 @@ chapter = true
 +++
 
 # Integrations
-
-{{% children depth="3" %}}

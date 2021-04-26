@@ -25,9 +25,9 @@ Media files for uploaded files, including threat models and risk acceptance, are
 
 ## Instance size
 
-{{% notice note %}}
+{{% alert title="Information" color="info" %}}
 Please read the paragraphs below about key processes tweaks.
-{{% /notice %}}
+{{% /alert %}}
 
 
 Having taken the database to run elsewhere, the minimum recommendation
@@ -91,9 +91,9 @@ and see what is in effect.
 Production with setup.bash
 --------------------------
 
-{{% notice warning %}}
+{{% alert title="Warning" color="warning" %}}
 From this point down, this page is slated to get a revamp
-{{% /notice %}}
+{{% /alert %}}
 
 
 This guide will walk you through how to setup DefectDojo for running in
@@ -123,9 +123,9 @@ source ./bin/activate
 
 **Install Dojo**
 
-{{% notice warning %}}
+{{% alert title="Warning" color="warning" %}}
 The setup.bash installation method will be EOL on 2020-12-31
-{{% /notice %}}
+{{% /alert %}}
 
 
 ``` {.sourceCode .console}

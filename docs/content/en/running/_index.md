@@ -8,5 +8,3 @@ chapter = true
 # Running DefectDojo
 
 Running DefectDojo.
-
-{{% children depth="3" %}}

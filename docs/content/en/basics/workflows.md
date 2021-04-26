@@ -5,7 +5,6 @@ draft: false
 weight: 5
 ---
 
-=
 
 Example 1 - Bill the security engineer
 --------------------------------------

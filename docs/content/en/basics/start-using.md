@@ -10,7 +10,7 @@ intuitive. The `models`{.interpreted-text role="doc"} page will help you
 understand the terminology we use below, so we recommend taking a look
 at that first.
 
-Create a new Product Type {#create-new-product-type}
+Create a new Product Type
 -------------------------
 
 The first step to using DefectDojo is to create a Product Type. Some
@@ -32,7 +32,7 @@ Click the \"New Product Type\" button at the top.
 
 Enter a name for your new Product Type.
 
-Create a new Test Type {#Create a new Test Type}
+Create a new Test Type
 ----------------------
 
 Test Types will help you differentiate the scope of your work. For
@@ -52,7 +52,7 @@ Click the \"New Test Type\" button at the top.
 
 Enter a name for your new Test Type.
 
-Create a new Development Environment {#Create a new Development Environment}
+Create a new Development Environment
 ------------------------------------
 
 Development Environments are for tracking distinct deployments of a
@@ -73,7 +73,7 @@ Click the \"New Development Environment\" button at the top.
 
 Enter a name for your new Development Environment.
 
-Create a new Engagement {#Create a new Engagement}
+Create a new Engagement
 -----------------------
 
 Engagements are useful for tracking the time spent testing a Product.
@@ -100,7 +100,7 @@ deduplication on all tests in the product which have an engagement also
 on [Deduplication Level]{.title-ref} product. Enabled deduplication is
 mandatory.
 
-Adding Tests to an Engagement {#Adding Tests to an Engagement}
+Adding Tests to an Engagement
 -----------------------------
 
 From the Engagement creation page, you can add a new Test to the
@@ -112,7 +112,7 @@ Type, a time, and an Environment.
 
 Enter the details of your Test.
 
-Adding Findings to a Test {#Adding Findings to a Test}
+Adding Findings to a Test
 -------------------------
 
 Findings are the defects or interesting things that you want to keep
@@ -142,7 +142,7 @@ Define what kind of Finding this is. Is it a false positive? A
 duplicate? If you want to save this finding as a template, check the
 \"Is template\" box.
 
-Accepting a Finding Risk {#Accepting a Finding Risk}
+Accepting a Finding Risk
 ------------------------
 
 Findings cannot always be remediated or addressed for various reasons. A
@@ -150,23 +150,23 @@ finding status can change to accepted by doing the following. Findings
 are accepted in the engagement view. To locate the engagement from the
 finding click the link to engagement as shown below.
 
-![Select an engagement](../../images/select_engagement.png){width="400px"}
+![Select an engagement](../../images/select_engagement.png)
 
 Then, in the engagement view click the plus icon in the \'Risk
 Acceptance\' box and fill in the details to support the risk acceptance.
 
-![Creating a risk acceptance](../../images/risk_exception.png){width="400px"}
+![Creating a risk acceptance](../../images/risk_exception.png)
 
 The engagement view is now updated with the risk.
 
-![Risk Acceptance engagement view](../../images/engagement_risk_acceptance.png){width="400px"}
+![Risk Acceptance engagement view](../../images/engagement_risk_acceptance.png)
 
 The finding status changes to \'Accepted\' with a link to the risk
 acceptance.
 
-![Risk acceptance on finding](../../images/finding_accepted.png){width="400px"}
+![Risk acceptance on finding](../../images/finding_accepted.png)
 
-Viewing an Engagement {#Viewing an Engagement}
+Viewing an Engagement
 ---------------------
 
 Most of the work of an Engagement can be done from that Engagement\'s
@@ -179,7 +179,7 @@ the security Check List, or close the Engagement.
 This page lets you do most of the common tasks that are associated with
 an Engagement.
 
-Tracking your Engagements in the calendar {#Tracking your Engagements in the calendar}
+Tracking your Engagements in the calendar
 -----------------------------------------
 
 The calendar can help you keep track of what Engagements your team is
@@ -194,7 +194,7 @@ Select \"Calendar\" in the main menu.
 Here you can view the current engagements for the month, or go back in
 time.
 
-Tracking metrics for your Products {#Tracking metrics for your Products}
+Tracking metrics for your Products
 ----------------------------------
 
 Tracking metrics for your Products can help you identify Products that

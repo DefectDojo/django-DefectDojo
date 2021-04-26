@@ -14,10 +14,10 @@ should not lose any data.
 
 ### Using docker images provided in DockerHub
 
-{{% notice note %}}
+{{% alert title="Information" color="info" %}}
 If you\'re using `latest`, then you need to pre pull the `latest` from
 DockerHub to update.
-{{% /notice %}}
+{{% /alert %}}
 
 
 The generic upgrade method for docker-compose follows these steps:

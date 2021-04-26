@@ -8,5 +8,3 @@ chapter = true
 # Basics
 
 Basics about DefectDojo.
-
-{{% children depth="3" %}}

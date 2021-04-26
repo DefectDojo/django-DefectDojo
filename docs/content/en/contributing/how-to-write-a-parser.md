@@ -4,9 +4,9 @@ date: 2021-02-02T20:46:28+01:00
 draft: false
 ---
 
-{{% notice info %}}
+{{% alert title="Information" color="info" %}}
 All commands assume that you're located at the root of the django-DefectDojo cloned repo.
-{{% /notice %}}
+{{% /alert %}}
 
 ## Pre-requisites
 - You have forked https://github.com/DefectDojo/django-DefectDojo and cloned locally.
@@ -80,9 +80,9 @@ Example for the blackduck hub parser:
 
 `$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.test_blackduck_csv_parser.TestBlackduckHubParser -v2'`
 
-{{% notice info %}}
+{{% alert title="Information" color="info" %}}
 If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests -v2'`
-{{% /notice %}}
+{{% /alert %}}
 
 ## Other files that could be involved
 

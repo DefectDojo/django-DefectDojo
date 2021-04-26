@@ -6,5 +6,3 @@ chapter = true
 +++
 
 # Contributing
-
-{{% children depth="3" %}}

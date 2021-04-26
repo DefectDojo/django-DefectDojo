@@ -27,9 +27,9 @@ weight: 1
 Setup.bash Install (no longer maintained)
 -----------------------------------------
 
-{{% notice warning %}}
+{{% alert title="Warning" color="warning" %}}
 This installation method will is EOL and will be removed on 2020-12-31
-{{% /notice %}}
+{{% /alert %}}
 
 
 -   Go to <https://github.com/DefectDojo/django-DefectDojo>

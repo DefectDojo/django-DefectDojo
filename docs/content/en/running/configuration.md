@@ -11,9 +11,9 @@ documentation\](<https://github.com/DefectDojo/django-DefectDojo/blob/master/doj
 and \[extra
 settings\](<https://github.com/DefectDojo/django-DefectDojo/blob/master/docker/extra_settings/README.md>)
 
-{{% notice note %}}
+{{% alert title="Warning" color="warning" %}}
 To complete
-{{% /notice %}}
+{{% /alert %}}
 
 
 
