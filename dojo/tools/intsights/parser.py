@@ -124,7 +124,6 @@ class IntSightsParser(object):
         """
 
         description = "\n".join([
-            ' ',
             alert["description"],
             f'**Date Found**: `{alert.get("report_date", "None provided")} `',
             f'**Type**: `{alert.get("type", "None provided")} `',
