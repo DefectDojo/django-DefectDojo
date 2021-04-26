@@ -219,7 +219,7 @@ class DojoDefaultReImporter(object):
         to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
         untouched = set(unchanged_items) - set(to_mitigate)
 
-        if settings.FEATURE_FINDING_GROUPS:
+        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
             for finding_group in [finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]:
                 jira_helper.push_to_jira(finding_group)
 
@@ -244,10 +244,9 @@ class DojoDefaultReImporter(object):
                     status.last_modified = timezone.now()
                     status.save()
 
-                # don't try to dedupe findings that we are closing
-                # finding = new finding or existing finding still in the upload report
                 # to avoid pushing a finding group multiple times, we push those outside of the loop
                 if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                    # don't try to dedupe findings that we are closing
                     finding.save(dedupe_option=False)
                 else:
                     finding.save(push_to_jira=push_to_jira, dedupe_option=False)
@@ -258,7 +257,7 @@ class DojoDefaultReImporter(object):
                 finding.notes.add(note)
                 mitigated_findings.append(finding)
 
-        if settings.FEATURE_FINDING_GROUPS:
+        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
             for finding_group in [finding.finding_group for finding in to_mitigate if finding.finding_group is not None]:
                 jira_helper.push_to_jira(finding_group)
 

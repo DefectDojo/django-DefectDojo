@@ -169,7 +169,7 @@ class DojoDefaultImporter(object):
             else:
                 item.save(push_to_jira=push_to_jira)
 
-        if settings.FEATURE_FINDING_GROUPS:
+        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
             for finding_group in [finding.finding_group for finding in new_findings if finding.finding_group is not None]:
                 jira_helper.push_to_jira(finding_group)
 
@@ -213,7 +213,13 @@ class DojoDefaultImporter(object):
                 status.save()
 
             old_finding.tags.add('stale')
-            old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
+
+            # to avoid pushing a finding group multiple times, we push those outside of the loop
+            if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+                # don't try to dedupe findings that we are closing
+                old_finding.save(dedupe_option=False)
+            else:
+                old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
 
         return old_findings
 
