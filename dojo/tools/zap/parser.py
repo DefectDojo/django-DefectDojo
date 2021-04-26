@@ -41,19 +41,19 @@ class ZapParser(object):
                 for ref in item.ref:
                     references += ref + "\n"
 
-                find = Finding(
-                    title=item.name,
-                    cwe=item.cwe,
-                    description=strip_tags(item.desc),
-                    test=test,
-                    severity=severity,
-                    mitigation=strip_tags(item.resolution),
-                    references=references,
-                    false_p=False,
-                    duplicate=False,
-                    out_of_scope=False,
-                    nb_occurences=1,
-                )
+                find = Finding(title=item.name,
+                               cwe=item.cwe,
+                               description=strip_tags(item.desc),
+                               test=test,
+                               severity=severity,
+                               mitigation=strip_tags(item.resolution),
+                               references=references,
+                               false_p=False,
+                               duplicate=False,
+                               out_of_scope=False,
+                               mitigated=None,
+                               impact="No impact provided",
+                               )
 
                 find.unsaved_endpoints = [main_host]
                 for i in item.items:
