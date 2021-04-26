@@ -48,8 +48,11 @@ your test tracking needs.
 
 ![image](images/DD-Hierarchy.png)
 
+### Where to find DefectDojo?
+
 The code is open source, and [available on
-github](https://github.com/DefectDojo/django-DefectDojo) and a running
-example is available on [the demo server](https://demo.defectdojo.org)
+GitHub](https://github.com/DefectDojo/django-DefectDojo).
+
+A running example is available on [the demo server](https://demo.defectdojo.org),
 using the credentials `admin` / `defectdojo@demo#appsec`. Note: The demo
-server is refreshed regularly and provisioned some sample data.
+server is refreshed regularly and provisioned with some sample data.

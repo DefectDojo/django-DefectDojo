@@ -5,39 +5,33 @@ draft: false
 weight: 1
 ---
 
-
-
-## Docker Compose Install (recommended)
+## Docker Compose install (recommended)
 
 -   Go to <https://github.com/DefectDojo/django-DefectDojo>
 -   Select the appropriate branch you\'re working on
 -   Instructions in the
-    `DOCKER.md` (<https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md>)
+    [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md>)
     file at the root of the repository.
 
-### Kubernetes
-
+## Kubernetes install
 
 -   Go to <https://github.com/DefectDojo/django-DefectDojo>
 -   Select the appropriate branch you\'re working on
 -   Instructions in the
-    `KUBERNETES.md` (<https://github.com/DefectDojo/django-DefectDojo/blob/master/KUBERNETES.md>)
+    [KUBERNETES.md](<https://github.com/DefectDojo/django-DefectDojo/blob/master/KUBERNETES.md>)
     file at the root of the repository.
 
-Setup.bash Install (no longer maintained)
------------------------------------------
+## Setup.bash Install (no longer maintained)
 
 {{% alert title="Warning" color="warning" %}}
 This installation method will is EOL and will be removed on 2020-12-31
 {{% /alert %}}
-
 
 -   Go to <https://github.com/DefectDojo/django-DefectDojo>
 -   Select the appropriate branch you\'re working on
 -   Under \"Installation Options\" click \"Setup.bash\"
 -   Follow the instructions
 
-Customizing settings
---------------------
+## Customizing settings
 
-See \[Settings\](settings-docs.rst)
+See [Configuration](../configuration)

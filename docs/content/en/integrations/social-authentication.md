@@ -1,21 +1,20 @@
 ---
-title: "Setting up Social Authentication via OAuth2 Providers"
+title: "Authentication via OAuth2 Providers"
 date: 2021-02-02T20:46:28+01:00
 draft: false
 ---
 
-Auth0 OAuth2 Configuration
---------------------------
+## Auth0
 
-In the same way as with other Identiy-Providers, it\'s now possible to
+In the same way as with other Identiy-Providers, it's now possible to
 leverage Auth0 to authenticate users on DefectDojo.
 
 1.  Inside your Auth0 dashboard create a new application (Applications /
     Create Application / Single Page Web Application).
 2.  On the new application set the following fields:
-    -   Name: \"Defectdojo\"
+    -   Name: "Defectdojo"
     -   Allowed Callback URLs:
-        \"[https://the\_hostname\_you\_have\_dojo\_deployed:your\_server\_port/complete/auth0/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/auth0/)\"
+        [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/auth0/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/auth0/)
 3.  Copy the following info from the application:
     -   Domain
     -   Client ID
@@ -23,19 +22,17 @@ leverage Auth0 to authenticate users on DefectDojo.
 4.  Now, edit the `dojo/settings/settings.dist.py` file and edit/replace the following
     information:
 
-> -   DD\_SOCIAL\_AUTH\_AUTH0\_OAUTH2\_ENABLED=True
-> -   DD\_SOCIAL\_AUTH\_AUTH0\_KEY=(str,
->     \'**YOUR\_CLIENT\_ID\_FROM\_STEP\_ABOVE**\'),
-> -   DD\_SOCIAL\_AUTH\_AUTH0\_SECRET=(str,
->     \'**YOUR\_CLIENT\_SECRET\_FROM\_STEP\_ABOVE**\'),
-> -   DD\_SOCIAL\_AUTH\_AUTH0\_DOMAIN=(str,
->     \'**YOUR\_AUTH0\_DOMAIN\_FROM\_STEP\_ABOVE**\'),
+{{< highlight python >}}
+DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=True
+DD_SOCIAL_AUTH_AUTH0_KEY=(str, '**YOUR_CLIENT_ID_FROM_STEP_ABOVE**'),
+DD_SOCIAL_AUTH_AUTH0_SECRET=(str,'**YOUR_CLIENT_SECRET_FROM_STEP_ABOVE**'),
+DD_SOCIAL_AUTH_AUTH0_DOMAIN=(str, '**YOUR_AUTH0_DOMAIN_FROM_STEP_ABOVE**'),
+{{< /highlight >}}
 
 5.  Restart DefectDojo, and you should now see a **Login with Auth0**
     button on the login page.
 
-Google
-------
+## Google
 
 New to DefectDojo, a Google account can now be used for Authentication,
 Authorization, and a DefectDojo user. Upon login with a Google account,
@@ -79,20 +76,22 @@ values as shown below:
 ![image](../../images/google_4.png)
 
 In the **Authentication** section of settings.py, set
-**DD\_GOOGLE\_OAUTH\_ENABLED** to **True** to redirect away from this
+**DD_GOOGLE_OAUTH_ENABLED** to **True** to redirect away from this
 README and actually authorize.
 
 ![image](../../images/google_5.png)
 
 To authorize users you will need to set the following:
 
-> -   SOCIAL\_AUTH\_GOOGLE\_OAUTH2\_WHITELISTED\_DOMAINS =
->     \[\'example.com\', \'example.org\'\]
+{{< highlight python >}}
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com', 'example.org']
+{{< /highlight >}}
 
 or
 
-> -   SOCIAL\_AUTH\_GOOGLE\_OAUTH2\_WHITELISTED\_EMAILS =
->     \[\'<email@example.com>\'\]
+{{< highlight python >}}
+SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
+{{< /highlight >}}
 
 OKTA
 ----
@@ -137,21 +136,20 @@ values as shown below:
 ![image](../../images/okta_6.png)
 
 In the **Authentication** section of settings.py, set
-**DD\_OKTA\_OAUTH\_ENABLED** to **True** to redirect away from this
+**DD_OKTA_OAUTH_ENABLED** to **True** to redirect away from this
 README and actually authorize.
 
 ![image](../../images/okta_7.png)
 
 If during the login process you get the following error: *The
-\'redirect\_uri\' parameter must be an absolute URI that is whitelisted
-in the client app settings.* and the `redirect\_uri` HTTP
+'redirect_uri' parameter must be an absolute URI that is whitelisted
+in the client app settings.* and the `redirect_uri` HTTP
 GET parameter starts with `http://` instead of
 `https://` you need to add
-**SOCIAL\_AUTH\_REDIRECT\_IS\_HTTPS = True** in the **Authentication**
+**SOCIAL_AUTH_REDIRECT_IS_HTTPS = True** in the **Authentication**
 section of settings.py.
 
-Azure Active Directory Tenant Configuration
--------------------------------------------
+## Azure Active Directory
 
 You can now use your corporate Azure Active Directory to authenticate
 users to Defect Dojo. Users will be using your corporate Azure AD
@@ -167,37 +165,35 @@ user, such as 'staff' or 'superuser'
 1.  Navigate to the following address and follow instructions to create
     a new app registration
 
-> -   <https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app>
+    -   <https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app>
 
 2.  Once you register an app, take note of the following information:
 
-> -   **Application (client) ID**
-> -   **Directory (tenant) ID**
-> -   Under Certificates & Secrets, create a new **Client Secret**
+    -   **Application (client) ID**
+    -   **Directory (tenant) ID**
+    -   Under Certificates & Secrets, create a new **Client Secret**
 
-3.  Under Authentication \> Redirect URIs, add a *WEB* type of uri where
+3.  Under Authentication > Redirect URIs, add a *WEB* type of uri where
     the redirect points to
 
-> -   <http://localhost:8080/complete/azuread-tenant-oauth2/>
-> -   **OR**
-> -   [https://the\_hostname\_you\_have\_dojo\_deployed:your\_server\_port/complete/azuread-tenant-oauth2/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/azuread-tenant-oauth2/)
+    -   <http://localhost:8080/complete/azuread-tenant-oauth2/>
+    -   **OR**
+    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/azuread-tenant-oauth2/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/azuread-tenant-oauth2/)
 
 4.  Now, edit the dojo/settings.py file and edit/replace the following
     information:
 
-> -   DD\_SOCIAL\_AUTH\_AZUREAD\_TENANT\_OAUTH2\_KEY=(str,
->     \'**YOUR\_APPLICATION\_ID\_FROM\_STEP\_ABOVE**\'),
-> -   DD\_SOCIAL\_AUTH\_AZUREAD\_TENANT\_OAUTH2\_SECRET=(str,
->     \'**YOUR\_CLIENT\_SECRET\_FROM\_STEP\_ABOVE**\'\'),
-> -   DD\_SOCIAL\_AUTH\_AZUREAD\_TENANT\_OAUTH2\_TENANT\_ID=(str,
->     \'**YOUR\_DIRECTORY\_ID\_FROM\_STEP\_ABOVE**\'\'),
-> -   DD\_SOCIAL\_AUTH\_AZUREAD\_TENANT\_OAUTH2\_ENABLED = **True**
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, 'YOUR_APPLICATION_ID_FROM_STEP_ABOVE'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, 'YOUR_CLIENT_SECRET_FROM_STEP_ABOVE'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, 'YOUR_DIRECTORY_ID_FROM_STEP_ABOVE'),
+    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED = True
+    {{< /highlight >}}
 
 5.  Restart your Dojo, and you should now see a **Login with Azure AD**
     button on the login page which should *magically* work
 
-Gitlab OAuth2 Configuration
----------------------------
+## Gitlab
 
 In a similar fashion to that of Google and OKTA, using Gitlab as a
 OAuth2 provider carries the same attributes and a similar procedure.
@@ -206,31 +202,32 @@ Follow along below.
 1.  Navigate to your Gitlab settings page and got to the Applications
     section
 
-> -   <https://gitlab.com/profile/applications>
-> -   **OR**
-> -   [https://the\_hostname\_you\_have\_gitlab\_deployed:your\_gitlab\_port/profile/applications](https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications)
+    -   <https://gitlab.com/profile/applications>
+    -   **OR**
+    -   [https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications](https://the_hostname_you_have_gitlab_deployed:your_gitlab_port/profile/applications)
 
 2.  Choose a name for your application
 3.  For the Redirect URI, enter the DefectDojo URL with the following
     format
 
-> -   [https://the\_hostname\_you\_have\_dojo\_deployed:your\_server\_port/complete/gitlab/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/)
+    -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/)
 
 4.  Now, edit the dojo/settings.py file and edit/replace the following
     information:
 
-> -   DD\_SOCIAL\_AUTH\_GITLAB\_KEY=(str,
->     \'**YOUR\_APPLICATION\_ID\_FROM\_STEP\_ABOVE**\'),
-> -   DD\_SOCIAL\_AUTH\_GITLAB\_SECRET=(str,
->     \'**YOUR\_SECRET\_FROM\_STEP\_ABOVE**\'),
-> -   DD\_SOCIAL\_AUTH\_GITLAB\_API\_URL=(str,
->     \'**https://gitlab.com**\'),
-> -   DD\_SOCIAL\_AUTH\_GITLAB\_OAUTH2\_ENABLED = **True**
->
-> Additionally, if you want to import your Gitlab projects as DefectDojo
-> products, add the following line, still in dojo/settings.py:
->
-> -   DD\_SOCIAL\_AUTH\_GITLAB\_PROJECT\_AUTO\_IMPORT = **True**
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_GITLAB_KEY=(str, 'YOUR_APPLICATION_ID_FROM_STEP_ABOVE'),
+    DD_SOCIAL_AUTH_GITLAB_SECRET=(str, 'YOUR_SECRET_FROM_STEP_ABOVE'),
+    DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
+    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED = True
+    {{< /highlight >}}
+
+    Additionally, if you want to import your Gitlab projects as DefectDojo
+    products, add the following line, still in dojo/settings.py:
+
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT = True
+    {{< /highlight >}}
 
 5.  Restart DefectDojo, and you should now see a **Login with Gitlab**
     button on the login page.
@@ -238,9 +235,11 @@ Follow along below.
 SAML 2.0
 --------
 
-WARNING: The SAML integration below is based on [https://github.com/fangli/django-saml2-auth](django-saml2-auth) which is no longer maintained, see #3890
+{{% alert title="Warning" color="warning" %}}
+The SAML integration below is based on [https://github.com/fangli/django-saml2-auth](django-saml2-auth) which is no longer maintained, see #3890
+{{% /alert %}}
 
-In a similar direction OAuth, this SAML addition provides a more secure
+In a similar direction to OAuth, this SAML addition provides a more secure
 perogative to SSO. For definitions of terms used and more information,
 see the plugin [plugin
 homepage](https://github.com/fangli/django-saml2-auth)
@@ -248,45 +247,45 @@ homepage](https://github.com/fangli/django-saml2-auth)
 1.  Navigate to your SAML IdP and find your metadata
 2.  Edit the dojo/settings.py file:
 
-> -   DD\_SAML2\_ENABLED=(bool, **True**),
-> -   If the metadata can be accessed from a url, try the
->     DD\_SAML2\_METADATA\_AUTO\_CONF\_URL
-> -   DD\_SAML2\_METADATA\_AUTO\_CONF\_URL=(str,
->     \'<https://your_IdP.com/metadata.xml>\'),
-> -   Otherwise, downlaod a copy of the metadata into an xml file, and
->     list the path in DD\_SAML2\_METADATA\_LOCAL\_FILE\_PATH
-> -   DD\_SAML2\_METADATA\_LOCAL\_FILE\_PATH=(str,
->     \'/path/to/your/metadata.xml\'),
-> -   Fill in DD\_SAML2\_ASSERTION\_URL and DD\_SAML2\_ENTITY\_ID to
->     match the specs of you IdP.
-> -   Configure the remaining optional fields to your desire.
+    {{< highlight python >}}
+    DD_SAML2_ENABLED=(bool, **True**),
+    # If the metadata can be accessed from a url, try the
+    DD_SAML2_METADATA_AUTO_CONF_URL
+    DD_SAML2_METADATA_AUTO_CONF_URL=(str, '<https://your_IdP.com/metadata.xml>'),
+    # Otherwise, downlaod a copy of the metadata into an xml file, and
+    # list the path in DD_SAML2_METADATA_LOCAL_FILE_PATH
+    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, '/path/to/your/metadata.xml'),
+    # Fill in DD_SAML2_ASSERTION_URL and DD_SAML2_ENTITY_ID to
+    # match the specs of you IdP.
+    # Configure the remaining optional fields to your desire.
+    {{< /highlight >}}
 
-4.  In the \"Authentication\" section of the settings.py, do the
+4.  In the "Authentication" section of the settings.py, do the
     following
 
-> -   Find the \"SAML\_2\_AUTH\" dictionary
-> -   Comment out the metadata collection method that was not used.
-> -   For example, if METADATA\_AUTO\_CONF\_URL was used, comment the
->     METADATA\_LOCAL\_FILE\_PATH line.
+    - Find the "SAML_2_AUTH" dictionary
+    - Comment out the metadata collection method that was not used.
+    - For example, if METADATA_AUTO_CONF_URL was used, comment the
+      METADATA_LOCAL_FILE_PATH line.
 
 5.  Restart DefectDojo, and you should now see a **Login with SAML**
     button on the login page.
 
 NOTE: In the case when IDP is configured to use self signed certificate,
 than CA needs to be specified by define environments variable
-REQUESTS\_CA\_BUNDLE that points to the path of public CA certificate.
+REQUESTS_CA_BUNDLE that points to the path of public CA certificate.
 
 User Permissions
 ----------------
 
-When a new user is created via the social-auth, the default permissions are only active. This means that the newly created user does not have access to add, edit, nor delete anything within DefectDojo. To circumvent that, a custom pipeline was added (dojo/pipline.py/modify\_permissions) to elevate new users to staff. This can be disabled by setting 'is\_staff' equal to False. Similarly, for an admin account, simply add the following to the modify\_permissions pipeline:
+When a new user is created via the social-auth, the default permissions are only active. This means that the newly created user does not have access to add, edit, nor delete anything within DefectDojo. To circumvent that, a custom pipeline was added (dojo/pipline.py/modify_permissions) to elevate new users to staff. This can be disabled by setting 'is_staff' equal to False. Similarly, for an admin account, simply add the following to the modify_permissions pipeline:
 
-:   is\_superuser = True
+:   is_superuser = True
 
 Exception for Gitlab OAuth2: with
-DD\_SOCIAL\_AUTH\_GITLAB\_PROJECT\_AUTO\_IMPORT set to True in
+DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT set to True in
 dojo/settings.py, where a new user is created via the Gitlab
-social-auth, he has one permission: add\_engagement. It allows him to
+social-auth, he has one permission: add_engagement. It allows him to
 create further engagements on his products via API v1.
 
 Other Providers

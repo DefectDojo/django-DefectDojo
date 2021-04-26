@@ -59,15 +59,18 @@ Configurations in DefectDojo
     a.  Upload the downloaded json file into the **Upload
         Credentials file** field.
     b.  Drive Folder Id
+
         a.  Create a folder inside the Google drive of the same
             gmail account used to create the service account.
+
         b.  Get the **client\_email** from the downloaded json file
             and share the created drive folder with client\_email
             giving **edit access**.
+
         c.  Extract the folder id from the URL and insert it as the
             **Drive Folder Id**.
 
-            ![Extracting Drive Folder ID](../../images/google_sheets_sync_2.png)
+    ![Extracting Drive Folder ID](../../images/google_sheets_sync_2.png)
 
     c.  Tick the **Enable Service** check box. (**Optional** as this
         has no impact on the configuration, but you must set it to

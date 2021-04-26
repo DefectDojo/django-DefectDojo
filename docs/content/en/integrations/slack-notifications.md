@@ -5,13 +5,13 @@ draft: false
 ---
 
 
-### Scopes
+## Scopes
 
 The following scopes have to be granted.
 
 ![Slack OAuth scopes](../../images/slack_scopes.png)
 
-### Token
+## Token
 
 The bot token has to be chosen and put in your System Settings
 

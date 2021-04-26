@@ -777,18 +777,18 @@ settings.dist.py (or settings.py after install) by configuring the
 
 The available algorithms are:
 
-`DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL`
-:   the deduplication occurs based on
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
+:   The deduplication occurs based on
     finding.unique_id_from_tool which is a unique technical
     id existing in the source tool. Few scanners populate this
     field currently. If you want to use this algorithm, you may
-    need to update the scanner code beforehand
+    need to update the scanner code beforehand.
 
     Advantages:
     :   -   If your source tool has a reliable means of tracking
             a unique vulnerability across scans, this
             configuration will allow defectDojo to use this
-            ability
+            ability.
 
     Drawbacks:
     :   -   Using this algorithm will not allow cross-scanner
@@ -799,14 +799,14 @@ The available algorithms are:
             able to recognise that findings found in previous
             scans are actually the same as the new findings.
 
-`DEDUPE_ALGO_HASH_CODE`
-:   the deduplication occurs based on finding.hash_code. The
+DEDUPE_ALGO_HASH_CODE
+:   The deduplication occurs based on finding.hash_code. The
     hash_code itself is configurable for each scanner in
-    parameter `HASHCODE_FIELDS_PER_SCANNER`
+    parameter `HASHCODE_FIELDS_PER_SCANNER`.
 
-`DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE`
-:   a finding is a duplicate with another if they have the same
-    unique_id_from_tool OR the same hash_code
+DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE
+:   A finding is a duplicate with another if they have the same
+    unique_id_from_tool OR the same hash_code.
 
     Allows to use both
     :   -   a technical deduplication (based on
@@ -817,8 +817,7 @@ The available algorithms are:
             cross-parser deduplication
 
 
-`DEDUPE_ALGO_LEGACY`
-
+DEDUPE_ALGO_LEGACY
 :   This is algorithm that was in place before the configuration
     per parser was made possible, and also the default one for
     backward compatibility reasons.

@@ -22,7 +22,7 @@ or
 
 Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md) for more details.
 
-### docker images
+### Docker images
 You'd want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:
 
 `$ docker-compose build --build-arg uid=1000`
@@ -108,6 +108,4 @@ If you want to take a look at previous parsers that are now part of DefectDojo, 
 
 ## Update the github pages documentation
 
-The DefectDojo official documentation lives in the docs folder, https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs
-
-Please update the `docs/integration.rst` with the details of your new parser and create a PR in that repo. Reference the PR in the main DefectDojo repository to establish an automatic link between the two.
+The DefectDojo official documentation lives in the docs folder, https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs Please update the `docs/content/en/import.md` with the details of your new parser.
