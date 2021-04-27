@@ -62,20 +62,16 @@ class TestZapParser(TestCase):
             finding = findings[0]
             self.assertEqual("X-Frame-Options Header Not Set", finding.title)
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual(1, finding.nb_occurences)
             self.assertEqual(12, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual("172.17.0.2:80", endpoint.host)
-            self.assertEqual(80, endpoint.port)
             endpoint = finding.unsaved_endpoints[1]
             self.assertEqual("http", endpoint.protocol)
             self.assertEqual("172.17.0.2:80", endpoint.host)
-            self.assertEqual(80, endpoint.port)
             self.assertEqual('vulnerabilities/brute/', endpoint.path)
         with self.subTest(i=18):
             finding = findings[18]
             self.assertEqual("Private IP Disclosure", finding.title)
             self.assertEqual("Low", finding.severity)
-            self.assertEqual(1, finding.nb_occurences)
             self.assertEqual(4, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]

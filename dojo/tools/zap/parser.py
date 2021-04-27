@@ -32,9 +32,7 @@ class ZapParser(object):
         items = list()
         for node in tree.findall('site'):
             site = Site(node)
-            main_host = Endpoint(host=site.host + (":" + site.port) if site.port is not None else "")
-            if site.port and site.port.isdigit():
-                main_host.port = int(site.port)
+            main_host = Endpoint(host=site.name + (":" + site.port) if site.port is not None else "")
             for item in site.items:
                 severity = item.riskdesc.split(' ', 1)[0]
                 references = ''
@@ -57,16 +55,13 @@ class ZapParser(object):
 
                 find.unsaved_endpoints = [main_host]
                 for i in item.items:
-                    parts = hyperlink.parse(i['uri'])
-                    endpoint = Endpoint(
-                        protocol=parts.scheme,
-                        host=parts.host + (":" + str(parts.port) if parts.port is not None else ""),
-                        port=parts.port,
-                        path="/".join(parts.path),
-                        query=parts.query,
-                        fragment=parts.fragment,
-                    )
-                    find.unsaved_endpoints.append(endpoint)
+                    parts = urlparse(i['uri'])
+                    find.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
+                                                           host=parts.netloc[:500],
+                                                           path=parts.path[:500],
+                                                           query=parts.query[:1000],
+                                                           fragment=parts.fragment[:500],
+                                                           product=test.engagement.product))
                 items.append(find)
         return items
 
