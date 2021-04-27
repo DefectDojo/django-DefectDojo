@@ -6,24 +6,23 @@ draft: false
 
 
 
-Production with docker-compose
-------------------------------
+## Production with docker-compose
 
 The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment. 
 
 Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation.
 
-## Database performance and backup
+### Database performance and backup
 
 It is recommended to use a dedicated database server and not the preconfigured MySQL database. This will improve the performance of DefectDojo 
 
 In both case, if you use a dedicated database server or if you should decide to use the preconfigured MySQL database, make sure to make regular backups of the data. For a dedicated database server follow the instructions that come with the database server. For the preconfigured MySQL you can use mysqldump, e.g. as described in [How to backup a Docker MySQL database](https://dev.to/grant_bartlett/how-to-backup-a-docker-mysql-database-3nd8).
 
-## Backup of Media files
+### Backup of Media files
 
 Media files for uploaded files, including threat models and risk acceptance, are stored in a docker volume. This volume needs to be backed up regularly.
 
-## Instance size
+### Instance size
 
 {{% alert title="Information" color="info" %}}
 Please read the paragraphs below about key processes tweaks.
@@ -40,7 +39,7 @@ is:
     a different disk than your OS\'s for potential performance
     improvements.
 
-## Key processes
+### Key processes
 
 Per <https://github.com/DefectDojo/django-DefectDojo/pull/2813>, it is
 now easy to somewhat improve the uWSGI and celery worker performance.
@@ -88,8 +87,7 @@ You can execute the following command to see the configuration:
 and see what is in effect.
 
 
-Production with setup.bash
---------------------------
+## Production with setup.bash
 
 {{% alert title="Warning" color="warning" %}}
 From this point down, this page is slated to get a revamp
