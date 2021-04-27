@@ -332,6 +332,83 @@ cipher	arcfour]]></RESULT>
           <TIMES_FOUND>1</TIMES_FOUND>
           <VULN_STATUS>New</VULN_STATUS>
         </VULN_INFO>
+        <VULN_INFO>
+          <QID id="qid_370876">370876</QID>
+          <TYPE>Practice</TYPE>
+          <SSL>false</SSL>
+          <RESULT><![CDATA[Vulnerable AMD processor detected: 
+
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor]]></RESULT>
+          <FIRST_FOUND>2020-10-15T12:16:23Z</FIRST_FOUND>
+          <LAST_FOUND>2021-04-19T02:35:28Z</LAST_FOUND>
+          <TIMES_FOUND>950</TIMES_FOUND>
+          <VULN_STATUS>Active</VULN_STATUS>
+          <CVSS_FINAL>-</CVSS_FINAL>
+          <CVSS3_FINAL>-</CVSS3_FINAL>
+        </VULN_INFO>
       </VULN_INFO_LIST>
     </HOST>
     <HOST>

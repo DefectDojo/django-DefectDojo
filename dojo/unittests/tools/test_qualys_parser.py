@@ -19,7 +19,7 @@ class TestQualysParser(TestCase):
         )
         parser = QualysParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(300, len(findings))
+        self.assertEqual(301, len(findings))
 
         finding = findings[0]
         self.assertEqual(
@@ -31,17 +31,21 @@ class TestQualysParser(TestCase):
         self.assertEqual(
             finding.unsaved_endpoints[0].host, "demo13.s02.sjc01.qualys.com"
         )
-
         for finding in findings:
-            if finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
-                break
-        self.assertEqual(
-            finding.unsaved_endpoints[0].host, "demo14.s02.sjc01.qualys.com"
-        )
+            if finding.unsaved_endpoints[0].host == "demo14.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+                finding_cvssv3_score = finding
+            if finding.unsaved_endpoints[0].host == "demo13.s02.sjc01.qualys.com" and finding.title == "QID-370876 | AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)":
+                finding_cvssv3_vector = finding
         self.assertEqual(
             # CVSS_FINAL is defined without a cvssv3 vector
-            finding.cvssv3, None
+            finding_cvssv3_score.cvssv3, None
         )
         self.assertEqual(
-            finding.severity, "High"
+            finding_cvssv3_score.severity, "High"
+        )
+        self.assertEqual(
+            finding_cvssv3_vector.cvssv3, "AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H"
+        )
+        self.assertEqual(
+            finding_cvssv3_vector.severity, "Critical"
         )

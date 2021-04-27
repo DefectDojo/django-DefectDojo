@@ -1,6 +1,5 @@
 import datetime
 import logging
-import re
 import html2text
 from defusedxml import ElementTree as etree
 
@@ -59,12 +58,8 @@ def split_cvss(value, _temp):
     if len(value) > 4:
         split = value.split(" (")
         _temp['CVSS_value'] = float(split[0])
-        # remove ")" at the end and validate
-        cvssv3_regex = regex = re.compile('^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', re.I)
-        if cvssv3_regex.match(split[1][:-1]):
-            _temp['CVSS_vector'] = split[1][:-1]
-        else:
-            logger.warn("%s does not match cvssv3 regex", split[1][:-1])
+        # remove ")" at the end
+        _temp['CVSS_vector'] = split[1][:-1]
     else:
         _temp['CVSS_value'] = float(value)
 
@@ -125,6 +120,8 @@ def parse_finding(host, tree):
             cvss2 = vuln_details.findtext('CVSS_FINAL')
             if cvss2 is not None and cvss2 != "-":
                 split_cvss(cvss2, _temp)
+                # DefectDojo does not support cvssv2
+                _temp['CVSS_vector'] = None
 
         search = ".//GLOSSARY/VULN_DETAILS_LIST/VULN_DETAILS[@id='{}']".format(_gid)
         vuln_item = tree.find(search)
@@ -154,14 +151,16 @@ def parse_finding(host, tree):
 
             # read cvss value if present and not already read from vuln
             if _temp.get('CVSS_value') is None:
-                cvss3 = vuln_details.findtext('CVSS3_SCORE/CVSS3_BASE')
-                cvss2 = vuln_details.findtext('CVSS_SCORE/CVSS_BASE')
+                cvss3 = vuln_item.findtext('CVSS3_SCORE/CVSS3_BASE')
+                cvss2 = vuln_item.findtext('CVSS_SCORE/CVSS_BASE')
                 if cvss3 is not None and cvss3 != "-":
                     split_cvss(cvss3, _temp)
                 else:
-                    cvss2 = vuln_details.findtext('CVSS_FINAL')
+                    cvss2 = vuln_item.findtext('CVSS_FINAL')
                     if cvss2 is not None and cvss2 != "-":
                         split_cvss(cvss2, _temp)
+                        # DefectDojo does not support cvssv2
+                        _temp['CVSS_vector'] = None
 
             # CVE and LINKS
             _temp_cve_details = vuln_item.iterfind('CVE_ID_LIST/CVE_ID')
