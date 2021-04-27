@@ -9,7 +9,17 @@ from dojo.models import Endpoint, Finding
 __author__ = 'dr3dd589'
 
 
-class SslscanXMLParser(object):
+class SslscanParser(object):
+
+    def get_scan_types(self):
+        return ["Sslscan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import XML output of sslscan report."
+
     def get_findings(self, file, test):
         tree = ET.parse(file)
         # get root of tree.
@@ -46,7 +56,7 @@ class SslscanXMLParser(object):
                                 "**sslversion** : " + target.attrib['sslversion'] + "\n"
 
                 if title and description is not None:
-                    dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
+                    dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
                     if dupe_key in dupes:
                         finding = dupes[dupe_key]
                         if finding.references:
@@ -58,11 +68,8 @@ class SslscanXMLParser(object):
                         finding = Finding(
                             title=title,
                             test=test,
-                            active=False,
-                            verified=False,
                             description=description,
                             severity=severity,
-                            numerical_severity=Finding.get_numerical_severity(severity),
                             dynamic_finding=True,)
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding

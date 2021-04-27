@@ -16,7 +16,7 @@ on:
         required: true
 
 jobs:
-  create_pr:
+  create_pr_for_merge_back_into_dev:
     runs-on: ubuntu-latest
     steps:
       - name: Login to DockerHub
@@ -30,7 +30,7 @@ jobs:
           ref: master
       - name: Create merge back branch
         run: |
-          echo "NEW_BRANCH=master-into-dev/${{ github.event.inputs.release_number_dev }}" >> $GITHUB_ENV
+          echo "NEW_BRANCH=master-into-dev/${{ github.event.inputs.release_number_new }}-${{ github.event.inputs.release_number_dev }}" >> $GITHUB_ENV
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
@@ -54,7 +54,7 @@ jobs:
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v4.8.0
+        uses: stefanzweifel/git-auto-commit-action@v4.10.0
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"
@@ -66,7 +66,7 @@ jobs:
       - name: Create Pull Request
         env:
           REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
-        uses: actions/github-script@v3
+        uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

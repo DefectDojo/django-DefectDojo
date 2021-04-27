@@ -15,6 +15,7 @@ env = environ.Env(
     DD_LOG_LEVEL=(str, ''),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
+    DD_LOGIN_URL=(str, '/login'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
@@ -22,6 +23,8 @@ env = environ.Env(
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
+    DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
+    DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
@@ -30,10 +33,6 @@ env = environ.Env(
     DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
-    DD_PORT_SCAN_CONTACT_EMAIL=(str, 'email@localhost'),
-    DD_PORT_SCAN_RESULT_EMAIL_FROM=(str, 'email@localhost'),
-    DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=(str, ['email@localhost']),
-    DD_PORT_SCAN_SOURCE_IP=(str, '127.0.0.1'),
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, False),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
@@ -158,13 +157,36 @@ env = environ.Env(
     # to disable deleting alerts per user set value to -1
     DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
-
+    DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
     # APIv1 is depreacted and will be removed at 2021-06-30
     DD_LEGACY_API_V1_ENABLE=(bool, False),
+    # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
+    DD_EDITABLE_MITIGATED_DATA=(bool, False),
+    # new experimental feature that tracks history across multiple reimports for the same test
+    DD_TRACK_IMPORT_HISTORY=(bool, False),
+
+    # Feature toggle for new authorization, which is incomplete at the moment.
+    # Don't set it to True for productive environments!
+    DD_FEATURE_AUTHORIZATION_V2=(bool, False),
+    # When enabled, staff users have full access to all product types and products
+    DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
+
+    # Feature toggle to show legacy list of PDF reports
+    # You need to have wkhtmltopdf installed on your system to generate PDF reports
+    DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
+
+    DD_FEATURE_FINDING_GROUPS=(bool, False),
+    DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
+    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
+
+    # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
+    # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
+    # Set to True to revert to the old behaviour where all duplicates are deleted
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False)
 )
 
 
@@ -344,7 +366,7 @@ URL_PREFIX = env('DD_URL_PREFIX')
 # ------------------------------------------------------------------------------
 
 LOGIN_REDIRECT_URL = env('DD_LOGIN_REDIRECT_URL')
-LOGIN_URL = '/login'
+LOGIN_URL = env('DD_LOGIN_URL')
 
 # These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
@@ -508,6 +530,9 @@ if env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS'):
     SECURE_HSTS_SECONDS = env('DD_SECURE_HSTS_SECONDS')
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS')
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = env('DD_SESSION_EXPIRE_AT_BROWSER_CLOSE')
+SESSION_COOKIE_AGE = env('DD_SESSION_COOKIE_AGE')
+
 # ------------------------------------------------------------------------------
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
@@ -518,11 +543,6 @@ DB_KEY = env('DD_CREDENTIAL_AES_256_KEY')
 
 # wkhtmltopdf settings
 WKHTMLTOPDF_PATH = env('DD_WKHTMLTOPDF')
-
-PORT_SCAN_CONTACT_EMAIL = env('DD_PORT_SCAN_CONTACT_EMAIL')
-PORT_SCAN_RESULT_EMAIL_FROM = env('DD_PORT_SCAN_RESULT_EMAIL_FROM')
-PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
-PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
@@ -634,8 +654,9 @@ INSTALLED_APPS = (
     'dbbackup',
     'django_celery_results',
     'social_django',
-    'drf_yasg2',
+    'drf_yasg',
     'tagulous',
+    'django_jsonfield_backport',
 )
 
 # ------------------------------------------------------------------------------
@@ -655,6 +676,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
+    'dojo.request_cache.middleware.RequestCacheMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -722,13 +744,24 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(hours=3),
     },
     'compute-sla-age-and-notify': {
-        'task': 'dojo.tasks.async_sla_compute_and_notify',
+        'task': 'dojo.tasks.async_sla_compute_and_notify_task',
         'schedule': crontab(hour=7, minute=30),
     },
     'risk_acceptance_expiration_handler': {
         'task': 'dojo.risk_acceptance.helper.expiration_handler',
         'schedule': crontab(minute=0, hour='*/3'),  # every 3 hours
     },
+    # 'jira_status_reconciliation': {
+    #     'task': 'dojo.tasks.jira_status_reconciliation_task',
+    #     'schedule': timedelta(hours=12),
+    #     'kwargs': {'mode': 'reconcile', 'dryrun': True, 'daysback': 10, 'product': None, 'engagement': None}
+    # },
+    # 'fix_loop_duplicates': {
+    #     'task': 'dojo.tasks.fix_loop_duplicates_task',
+    #     'schedule': timedelta(hours=12)
+    # },
+
+
 }
 
 # ------------------------------------
@@ -758,24 +791,26 @@ if env('DD_DJANGO_METRICS_ENABLED'):
 # If not present, default is the legacy behavior: see models.py, compute_hash_code_legacy function
 # legacy is:
 #   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
-#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
+#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description']
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
+    'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'Dependency Check Scan': ['cve', 'file_path'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component', 'vuln_id_from_tool'],
-    'Nessus Scan': ['title', 'severity', 'cve', 'cwe', 'endpoints'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
+    'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
+    'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
-    'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
-    'Qualys Scan': ['title', 'endpoints', 'severity'],
+    'ZAP Scan': ['title', 'cwe', 'severity'],
+    'Qualys Scan': ['title', 'severity'],
     'PHP Symfony Security Check': ['title', 'cve'],
     'Clair Scan': ['title', 'cve', 'description', 'severity'],
     'Clair Klar Scan': ['title', 'description', 'severity'],
@@ -785,6 +820,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Acunetix Scan': ['title', 'description'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
+    'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
+    'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -793,9 +830,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
     'Checkmarx Scan': False,
+    'Checkmarx OSA': True,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
     'Nessus Scan': True,
+    'Nexpose Scan': True,
     'NPM Audit Scan': True,
     'Yarn Audit Scan': True,
     'Whitesource Scan': True,
@@ -804,6 +843,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'DSOP Scan': True,
     'Acunetix Scan': True,
     'Trivy Scan': True,
+    'SpotBugs Scan': False,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -830,13 +870,17 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
+    'anchore_grype': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
+    'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
@@ -853,11 +897,18 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
+    'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
+    'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
+    'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
+    'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
 
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
+
+TRACK_IMPORT_HISTORY = env('DD_TRACK_IMPORT_HISTORY')
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -958,13 +1009,16 @@ LOGGING = {
             'propagate': False,
         },
         'titlecase': {
-            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
+            # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
         },
     }
 }
+
+# override filter to ensure sensitive variables are also hidden when DEBUG = True
+DEFAULT_EXCEPTION_REPORTER_FILTER = 'dojo.settings.exception_filter.CustomExceptionReporterFilter'
 
 # As we require `innodb_large_prefix = ON` for MySQL, we can silence the
 # warning about large varchar with unique indices.
@@ -975,6 +1029,9 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = 100
+
+# Apply a severity level to "Security Weaknesses" in Qualys WAS
+QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',
@@ -994,3 +1051,23 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
+
+# Feature toggle for new authorization, which is incomplete at the moment.
+# Don't set it to True for productive environments!
+FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
+# When enabled, staff users have full access to all product types and products
+AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
+
+# Feature toggle to show legacy list of PDF reports
+# You need to have wkhtmltopdf installed on your system to generate PDF reports
+FEATURE_REPORTS_PDF_LIST = env('DD_FEATURE_REPORTS_PDF_LIST')
+
+EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
+
+USE_L10N = True
+
+FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
+JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
+TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
+
+DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')

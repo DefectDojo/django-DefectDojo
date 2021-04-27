@@ -131,10 +131,17 @@
       "enable_msteams_notifications": false,
       "time_zone": "UTC",
       "enable_deduplication": true,
-      "delete_dupulicates": false,
+      "delete_duplicates": false,
       "slack_channel": "",
       "mail_notifications_to": "",
-      "enable_jira": false
+      "enable_jira": false,
+      "enable_product_grade": true,
+      "product_grade": "def grade_product(crit, high, med, low):\r\n    health=100\r\n    if crit > 0:\r\n        health = 40\r\n        health = health - ((crit - 1) * 5)\r\n    if high > 0:\r\n        if health == 100:\r\n            health = 60\r\n        health = health - ((high - 1) * 3)\r\n    if med > 0:\r\n        if health == 100:\r\n            health = 80\r\n        health = health - ((med - 1) * 2)\r\n    if low > 0:\r\n        if health == 100:\r\n            health = 95\r\n        health = health - low\r\n\r\n    if health < 5:\r\n        health = 5\r\n\r\n    return health",
+      "product_grade_a": 90,
+      "product_grade_b": 80,
+      "product_grade_c": 70,
+      "product_grade_d": 60,
+      "product_grade_f": 59
     }
   },
   {
@@ -364,78 +371,6 @@
   },
   {
     "pk": 1,
-    "model": "dojo.scansettings",
-    "fields": {
-      "product": 1,
-      "protocol": "UDP",
-      "addresses": "127.0.0.1",
-      "frequency": "Weekly",
-      "user": 1,
-      "date": "2018-04-13T06:28:48.661Z",
-      "email": "test@example.com"
-    }
-  },
-  {
-    "pk": 2,
-    "model": "dojo.scansettings",
-    "fields": {
-      "product": 2,
-      "protocol": "TCP",
-      "addresses": "127.0.0.1",
-      "frequency": "Weekly",
-      "user": 2,
-      "date": "2018-04-13T06:28:11.843Z",
-      "email": "test@example.com"
-    }
-  },
-  {
-    "pk": 3,
-    "model": "dojo.scansettings",
-    "fields": {
-      "product": 3,
-      "protocol": "TCP",
-      "addresses": "127.0.0.1",
-      "frequency": "Monthly",
-      "user": 1,
-      "date": "2018-04-13T06:28:32.767Z",
-      "email": "test@example.com"
-    }
-  },
-  {
-    "pk": 2,
-    "model": "dojo.scan",
-    "fields": {
-      "scan_settings": 1,
-      "date": "2018-04-13T06:33:55.548Z",
-      "status": "Pending",
-      "baseline": false,
-      "protocol": "TCP"
-    }
-  },
-  {
-    "pk": 3,
-    "model": "dojo.scan",
-    "fields": {
-      "scan_settings": 3,
-      "date": "2018-04-13T06:34:09.127Z",
-      "status": "Pending",
-      "baseline": true,
-      "protocol": "SSH"
-    }
-  },
-  {
-    "pk": 4,
-    "model": "dojo.scan",
-    "fields": {
-      "scan_settings": 1,
-      "date": "2018-04-13T06:34:19.385Z",
-      "status": "Pending",
-      "baseline": false,
-      "protocol": "UDP"
-    }
-  },
-  {
-    "pk": 1,
     "model": "dojo.engagement_type",
     "fields": {
       "name": "Type 1",
@@ -454,7 +389,7 @@
     "pk": 3,
     "model": "dojo.engagement_type",
     "fields": {
-      "name": "Type 3",
+      "name": "CI/CD",
       "id": 3
     }
   },
@@ -493,7 +428,7 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
+      "eng_type": 3,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -919,7 +854,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf",
+      "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -933,14 +868,14 @@
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
-      "date": "2018-01-01",
+      "date": "2021-01-01",
       "references": "",
       "images": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
       "false_p": false,
-      "verified": true,
+      "verified": false,
       "severity": "High",
       "title": "High Impact Test Finding",
       "sourcefilepath": null,
@@ -961,7 +896,7 @@
       "reporter": 1,
       "sourcefile": null,
       "mitigated": null,
-      "active": true,
+      "active": false,
       "line": null,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -970,7 +905,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf",
+      "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -991,7 +926,7 @@
       "under_defect_review": false,
       "impact": "High",
       "false_p": false,
-      "verified": true,
+      "verified": false,
       "severity": "High",
       "title": "High Impact Test Finding",
       "sourcefilepath": null,
@@ -1012,7 +947,7 @@
       "reporter": 1,
       "sourcefile": null,
       "mitigated": null,
-      "active": true,
+      "active": false,
       "line": null,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1021,7 +956,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf",
+      "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1042,7 +977,7 @@
       "under_defect_review": false,
       "impact": "High",
       "false_p": false,
-      "verified": true,
+      "verified": false,
       "severity": "High",
       "title": "High Impact Test Finding",
       "sourcefilepath": null,
@@ -1063,7 +998,7 @@
       "reporter": 1,
       "sourcefile": null,
       "mitigated": null,
-      "active": true,
+      "active": false,
       "line": null,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1072,7 +1007,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf",
+      "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1093,7 +1028,7 @@
       "under_defect_review": false,
       "impact": "High",
       "false_p": false,
-      "verified": true,
+      "verified": false,
       "severity": "High",
       "title": "High Impact Test Finding",
       "sourcefilepath": null,
@@ -1114,7 +1049,7 @@
       "reporter": 1,
       "sourcefile": null,
       "mitigated": null,
-      "active": true,
+      "active": false,
       "line": null,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1123,7 +1058,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf",
+      "hash_code": "5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1228,7 +1163,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba",
+      "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1242,14 +1177,14 @@
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
-      "date": "2018-01-01",
+      "date": "2021-01-01",
       "references": "",
       "images": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
       "false_p": false,
-      "verified": true,
+      "verified": false,
       "severity": "Low",
       "title": "Low Impact Test Finding",
       "sourcefilepath": null,
@@ -1270,7 +1205,7 @@
       "reporter": 1,
       "sourcefile": null,
       "mitigated": null,
-      "active": true,
+      "active": false,
       "line": 123,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1279,7 +1214,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba",
+      "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1300,7 +1235,7 @@
       "under_defect_review": false,
       "impact": "Low",
       "false_p": false,
-      "verified": true,
+      "verified": false,
       "severity": "Low",
       "title": "Low Impact Test Finding",
       "sourcefilepath": null,
@@ -1321,7 +1256,7 @@
       "reporter": 1,
       "sourcefile": null,
       "mitigated": null,
-      "active": true,
+      "active": false,
       "line": 123,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1330,7 +1265,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba",
+      "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1382,7 +1317,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba",
+      "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1404,7 +1339,7 @@
       "under_defect_review": false,
       "impact": "Low",
       "false_p": false,
-      "verified": true,
+      "verified": false,
       "severity": "Low",
       "title": "Low Impact Test Finding",
       "sourcefilepath": null,
@@ -1425,7 +1360,7 @@
       "reporter": 1,
       "sourcefile": null,
       "mitigated": null,
-      "active": true,
+      "active": false,
       "line": 123,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1434,7 +1369,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "5f272ec29b29d56ca08eba26435bdb225ae4956812c10fce872a6143b73474ba",
+      "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1486,7 +1421,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "3c5e9d1ec77aea19dd2bbf3aa51f585fc0da876174be8cac885966db1271f147",
+      "hash_code": "6f8d0bf970c14175e597843f4679769a4775742549d90f902ff803de9244c7e1",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1508,7 +1443,7 @@
       "under_defect_review": false,
       "impact": "Low",
       "false_p": false,
-      "verified": true,
+      "verified": false,
       "severity": "Low",
       "title": "UID Impact Test Finding",
       "sourcefilepath": null,
@@ -1529,7 +1464,7 @@
       "reporter": 1,
       "sourcefile": null,
       "mitigated": null,
-      "active": true,
+      "active": false,
       "line": 123,
       "under_review": false,
       "defect_review_requested_by": 1,
@@ -1538,7 +1473,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "3c5e9d1ec77aea19dd2bbf3aa51f585fc0da876174be8cac885966db1271f147",
+      "hash_code": "6f8d0bf970c14175e597843f4679769a4775742549d90f902ff803de9244c7e1",
       "is_template": false,
       "endpoints": [],
       "last_reviewed": null
@@ -1636,8 +1571,8 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "<your username>",
-        "password": "<your password>",
+        "username": "YOUR USERNAME HERE",
+        "password": "YOU API TOKEN HERE",
         "default_issue_type": "Task",
         "epic_name_id": 10011,
         "open_status_key": 11,
@@ -1735,6 +1670,19 @@
     "fields": {
       "push_notes": true,
       "product": 2,
+      "push_all_issues": false,
+      "component": "",
+      "enable_engagement_epic_mapping": false,
+      "jira_instance": 2,
+      "project_key": "NTEST"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "dojo.jira_project",
+    "fields": {
+      "push_notes": true,
+      "engagement": 3,
       "push_all_issues": false,
       "component": "",
       "enable_engagement_epic_mapping": true,
@@ -1993,7 +1941,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "2",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 2
     }
@@ -2008,7 +1956,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "3",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 3
     }
@@ -2023,7 +1971,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "4",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 4
     }
@@ -2038,7 +1986,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "5",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 5
     }
@@ -2053,7 +2001,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "6",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 6
     }
@@ -2158,7 +2106,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "2",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 2
     }
@@ -2173,7 +2121,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "3",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 3
     }
@@ -2188,7 +2136,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "4",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 4
     }
@@ -2203,7 +2151,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "5",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 5
     }
@@ -2218,7 +2166,7 @@
       "title": "High Impact Test Finding",
       "url": "",
       "object_id": "6",
-      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 8cba854f0b70f8a25064952402fbe30c728c0017b83c245d786366956044e0bf ",
+      "content": "High Impact Test Finding None High test finding test mitigation High  S0 None None None None None 5d368a051fdec959e08315a32ef633ba5711bed6e8e75319ddee2cab4d4608c7 ",
       "content_type": 33,
       "object_id_int": 6
     }

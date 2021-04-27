@@ -7,7 +7,17 @@ from dojo.models import Endpoint, Finding
 logger = logging.getLogger(__name__)
 
 
-class Outpost24Parser:
+class Outpost24Parser(object):
+
+    def get_scan_types(self):
+        return ["Outpost24 Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Outpost24 Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Outpost24 endpoint vulnerability scan in XML format."
+
     def get_findings(self, file, test):
         tree = ElementTree.parse(file)
         items = list()
@@ -47,7 +57,7 @@ class Outpost24Parser:
             cvss_vector = detail.findtext('cvss_v3_vector') or detail.findtext('cvss_vector')
             severity_justification = "{}\n{}".format(cvss_score, cvss_description)
             finding = Finding(title=title, test=test, cve=cve, url=url, description=description, mitigation=mitigation,
-                              impact=impact, severity=severity, numerical_severity=cvss_score,
+                              impact=impact, severity=severity,
                               severity_justification=severity_justification)
             # endpoint details
             host = detail.findtext('ip')

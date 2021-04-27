@@ -4,12 +4,12 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='1.13.0-dev',
+    version='2.0.0-dev',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
         'defusedxml',
-        'Django==2.2.17',
+        'Django==2.2.20',
         'django-auditlog==0.4.7',
         'django-custom-field',
         'django-filter==2.4.0',
@@ -24,7 +24,7 @@ setup(
         'django-tastypie-swagger',
         'django-tastypie>=0.12.2',
         'django-rest-swagger==2.1.2',
-        'djangorestframework==3.12.2',
+        'djangorestframework==3.12.4',
         'django-environ==0.4.5',
         'django-axes',
         'gunicorn>=19.1.1',
@@ -35,7 +35,6 @@ setup(
         'Pillow',
         'psycopg2-binary',
         'pycrypto',
-        'python-nmap>=0.3.4',
         'pytz>=2013.9',
         'requests>=2.2.1',
         'sqlalchemy',  # Required by Celery broker transport
@@ -58,13 +57,13 @@ setup(
         'pbr',
         'django-slack',
         'asteval',
-        'Markdown==3.3.3',
+        'Markdown==3.3.4',
         'pandas>=0.22.0',
         'django-dbbackup>=3.2.0',
         'whitenoise==4.1.4',
         'django-environ==0.4.5',
         'titlecase',
-        'json-lines==1.2.0'  # requred by yarn audit parser
+        'jsonlines==2.0.0'  # requred by yarn audit parser
     ],
 
     extras_require={'mysql': ['mysqlclient==2.0.3']},

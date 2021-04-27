@@ -7,6 +7,16 @@ from dojo.models import Finding
 
 
 class BundlerAuditParser(object):
+
+    def get_scan_types(self):
+        return ["Bundler-Audit Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Bundler-Audit Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "'bundler-audit check' output (in plain text)"
+
     def get_findings(self, filename, test):
         if filename is None:
             return ()
@@ -58,11 +68,8 @@ class BundlerAuditParser(object):
                 find = Finding(
                     title=title,
                     test=test,
-                    active=False,
-                    verified=False,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
                     references=references,
                     url='N/A',

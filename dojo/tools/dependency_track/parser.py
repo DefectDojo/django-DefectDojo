@@ -201,11 +201,8 @@ class DependencyTrackParser(object):
             test=test,
             cwe=cwe,
             cve=cve,
-            active=False,
-            verified=False,
             description=vulnerability_description,
             severity=vulnerability_severity,
-            numerical_severity=Finding.get_numerical_severity(vulnerability_severity),
             false_p=is_false_positive,
             component_name=component_name,
             component_version=component_version,
@@ -213,6 +210,15 @@ class DependencyTrackParser(object):
             vuln_id_from_tool=vuln_id_from_tool,
             static_finding=True,
             dynamic_finding=False)
+
+    def get_scan_types(self):
+        return ["Dependency Track Finding Packaging Format (FPF) Export"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "The Finding Packaging Format (FPF) from OWASP Dependency Track can be imported in JSON format. See here for more info on this JSON format."
 
     def get_findings(self, file, test):
 

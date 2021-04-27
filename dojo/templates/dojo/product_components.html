@@ -7,12 +7,14 @@
         <div class="panel panel-default">
             <div class="panel-heading tight">
                     <h3 class="has-filters">
-                    Components
-                    <div class="dropdown pull-right">
+                        Components
+                        <div class="dropdown pull-right">
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        </div>
                     </h3>
             </div>
         </div>
-        <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+        <div id="the-filters" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
             {% include "dojo/filter_snippet.html" with form=filter.form %}
         </div>
         <div class="clearfix">
@@ -24,9 +26,9 @@
                     <tr>
                         <th>Name</th>
                         <th>Version</th>
-                        <th>Active</th>
-                        <th>Duplicate</th>
-                        <th>Total</th>
+                        <th class="text-center">Active</th>
+                        <th class="text-center">Duplicate</th>
+                        <th class="text-center">Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,7 +42,7 @@
                             {% endif %}
                         </td>
                         <td>{{result.component_version}} </td>
-                        <td>
+                        <td class="text-center">
                             {% if result.active and result.component_name == none %}
                             <a href="{% url 'open_findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.active }}</b></a>
                             {% elif result.active %}
@@ -49,7 +51,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td>
+                        <td class="text-center">
                             {% if result.duplicate and result.component_name == none %}
                             <a href="{% url 'findings' %}?has_component=false&test__engagement__product={{prod.id}}&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% elif result.duplicate %}
@@ -58,7 +60,7 @@
                             0
                             {% endif %}
                         </td>
-                        <td>
+                        <td class="text-center">
                             {% if result.total and result.component_name == none %}
                             <a href="{% url 'findings' %}?has_component=false&test__engagement__product={{prod.id}}"><b>{{ result.total }}</b></a>
                             {% elif result.total %}
@@ -129,12 +131,13 @@
             ],
             order: [],
             columnDefs: [
-                { 
+                {
                     "orderable": false,
                 },
             ],
             dom: 'Bfrtip',
             paging: false,
+            info: false,
             buttons: [
                 {
                     extend: 'colvis',

@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from dojo.models import Test, Engagement, Product
-from dojo.tools.checkmarx.parser import CheckmarxXMLParser
+from dojo.tools.checkmarx.parser import CheckmarxParser
 import datetime
 
 
@@ -31,7 +31,7 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/no_finding.xml"
         )
-        parser = CheckmarxXMLParser()
+        parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(0, len(findings))
@@ -41,8 +41,9 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/no_finding.xml"
         )
-        parser = CheckmarxXMLParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(0, len(findings))
 
@@ -52,7 +53,7 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/single_finding.xml"
         )
-        parser = CheckmarxXMLParser()
+        parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
@@ -83,8 +84,9 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/single_finding.xml"
         )
-        parser = CheckmarxXMLParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_single_vulnerability_has_single_finding(findings)
@@ -196,8 +198,6 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("High", item.severity)
-        self.assertEqual(str, type(item.numerical_severity))
-        self.assertEqual("S1", item.numerical_severity)
         self.assertEqual(str, type(item.mitigation))
         self.assertEqual("N/A", item.mitigation)
         self.assertEqual(str, type(item.references))
@@ -224,7 +224,7 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
         )
-        parser = CheckmarxXMLParser()
+        parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
@@ -234,8 +234,9 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
         )
-        parser = CheckmarxXMLParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_false_positive_is_false_positive(findings)
@@ -262,7 +263,7 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml"
         )
-        parser = CheckmarxXMLParser()
+        parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(1, len(findings))
@@ -286,7 +287,7 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings.xml"
         )
-        parser = CheckmarxXMLParser()
+        parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # checkmarx says 3 but we're down to 2 due to the aggregation on sink filename rather than source filename + source line number + sink filename + sink line number
@@ -298,8 +299,9 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings.xml"
         )
-        parser = CheckmarxXMLParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(3, len(findings))
 
@@ -312,7 +314,7 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
         )
-        parser = CheckmarxXMLParser()
+        parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # aggregation is on sink filename so all vuln with different source filenames are aggregated
@@ -327,8 +329,9 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
         )
-        parser = CheckmarxXMLParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(2, len(findings))
         self.assertIsNone(findings[0].nb_occurences)
@@ -343,7 +346,7 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
         )
-        parser = CheckmarxXMLParser()
+        parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # aggregation is on sink filename but sink filename differ -> not aggregated
@@ -355,8 +358,9 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
         )
-        parser = CheckmarxXMLParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(2, len(findings))
 
@@ -367,7 +371,7 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/utf8_replacement_char.xml"
         )
-        parser = CheckmarxXMLParser()
+        parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
@@ -398,8 +402,9 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/utf8_replacement_char.xml"
         )
-        parser = CheckmarxXMLParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_utf8_replacement_char(findings)
@@ -495,8 +500,6 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("High", item.severity)
-        self.assertEqual(str, type(item.numerical_severity))
-        self.assertEqual("S1", item.numerical_severity)
         self.assertEqual(str, type(item.mitigation))
         self.assertEqual("N/A", item.mitigation)
         self.assertEqual(str, type(item.references))
@@ -521,7 +524,7 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml"
         )
-        parser = CheckmarxXMLParser()
+        parser = CheckmarxParser()
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
@@ -552,8 +555,9 @@ class TestCheckmarxParser(TestCase):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml"
         )
-        parser = CheckmarxXMLParser()
-        findings = parser.get_findings(my_file_handle, test, "detailed")
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         # Verifications common to both parsers
         self.check_parse_file_with_utf8_various_non_ascii_char(findings)
@@ -652,8 +656,6 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("High", item.severity)
-        self.assertEqual(str, type(item.numerical_severity))
-        self.assertEqual("S1", item.numerical_severity)
         self.assertEqual(str, type(item.mitigation))
         self.assertEqual("N/A", item.mitigation)
         self.assertEqual(str, type(item.references))

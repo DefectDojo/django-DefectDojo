@@ -1,7 +1,6 @@
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
 import unittest
@@ -66,11 +65,11 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("dropdownMenu1").click()
         # Click on `Edit Finding`
         driver.find_element_by_link_text("Edit Finding").click()
-        # Change: 'Severity' and 'Mitigation'
+        # Change: 'Severity' and 'cvssv3'
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("Critical")
-        # finding Description
-        driver.find_element_by_id("id_severity").send_keys(Keys.TAB, "This is a crucial update to finding description.")
+        # cvssv3
+        driver.find_element_by_id("id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # "Click" the Done button to Edit the finding
         driver.find_element_by_xpath("//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
@@ -318,9 +317,9 @@ class FindingTest(BaseTestCase):
             driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
         # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
-        # print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
+        # print("Checking for '.*ZAP Scan processed a total of 4 findings.*'")
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed, a total of 4 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed a total of 4 findings'))
 
     def test_delete_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'

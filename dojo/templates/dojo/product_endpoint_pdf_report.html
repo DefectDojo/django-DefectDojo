@@ -8,15 +8,15 @@
 {% load event_tags %}
 {% block content %}
     <div class="container">
-    {% if include_table_of_contents%}
-			<div class="row">
-				<div class="col-lg-12" id="toc">
-					<h3 id="table_of_contents">Table of Contents for {{ product.name }}</h3>
-				</div>
-			</div>
+        {% if include_table_of_contents%}
+            <div class="row">
+                <div class="col-lg-12" id="toc">
+                    <h3 id="table_of_contents">Table of Contents for {{ product.name }}</h3>
+                </div>
+            </div>
 
-			<div id="contents">
-		{% endif %}
+            <div id="contents">
+        {% endif %}
         {% if include_executive_summary %}
             <div class="row pretty-graphs">
                 <div class="col-lg-12">
@@ -115,6 +115,12 @@
 
             </div>
         {% endif %}
+        {% if include_disclaimer%}
+            <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
+                <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
+                <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer }}</p>
+            </div>
+        {% endif %}
         <div class="row">
             <div class="col-lg-12">
                 {% if endpoints %}
@@ -211,7 +217,7 @@
 
                         {% include "dojo/snippets/endpoints.html" with finding=finding destination="Report" %}
 
-                        <h6>CVSSv3</h6>
+                        <h6>CVSS v3</h6>
                         <pre>{{ finding.cvssv3 }}</pre>
 
                         <h6>Description</h6>

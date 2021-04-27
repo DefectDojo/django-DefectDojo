@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from dojo.utils import get_system_setting, get_full_url
 from dateutil.relativedelta import relativedelta
@@ -5,7 +6,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.jira_link.helper import escape_for_jira
 from dojo.notifications.helper import create_notification
 from django.urls import reverse
-from celery.decorators import task
+from dojo.celery import app
 from dojo.models import System_Settings, Risk_Acceptance
 import logging
 
@@ -25,9 +26,6 @@ def expire_now(risk_acceptance):
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
-
-                if finding.has_jira_issue:
-                    jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
 
                 finding.save(dedupe_option=False)
                 reactivated_findings.append(finding)
@@ -121,7 +119,7 @@ def add_findings_to_risk_acceptance(risk_acceptance, findings):
     post_jira_comments(risk_acceptance, findings, accepted_message_creator)
 
 
-@task(name='risk_acceptance_expiration_handler')
+@app.task
 def expiration_handler(*args, **kwargs):
     """
     Creates a notification upon risk expiration and X days beforehand if configured.

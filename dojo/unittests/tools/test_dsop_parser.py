@@ -16,3 +16,6 @@ class TestDsopParser(TestCase):
         parser = DsopParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEquals(len(findings), 4)
+        finding = findings[0]
+        self.assertEqual("CVE-2019-15587", finding.cve)
+        self.assertEqual("Low", finding.severity)

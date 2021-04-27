@@ -1,0 +1,15 @@
+{
+  "banner": {
+    "description": "WordPress Security Scanner by the WPScan Team",
+    "version": "3.8.17",
+    "authors": [
+      "@_WPScan_",
+      "@ethicalhack3r",
+      "@erwan_lr",
+      "@firefart"
+    ],
+    "sponsor": "Sponsored by Automattic - https://automattic.com/"
+  },
+  "scan_aborted": "The url supplied 'https://www.sample-owasp-wp.com/' seems to be down (Couldn't resolve host name)",
+  "target_url": "https://www.sample-owasp-wp.com/"
+}

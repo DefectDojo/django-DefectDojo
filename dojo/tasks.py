@@ -10,7 +10,6 @@ from django.template.loader import render_to_string
 from django.utils.http import urlencode
 from dojo.celery import app
 from celery.utils.log import get_task_logger
-from celery.decorators import task
 from dojo.models import Alerts, Product, Finding, Engagement, System_Settings, User
 from django.utils import timezone
 from dojo.utils import calculate_grade
@@ -239,7 +238,7 @@ def async_custom_pdf_report(self,
 def async_dupe_delete(*args, **kwargs):
     try:
         system_settings = System_Settings.objects.get()
-        enabled = system_settings.delete_dupulicates
+        enabled = system_settings.delete_duplicates
         dupe_max = system_settings.max_dupes
         total_duplicate_delete_count_max_per_run = settings.DUPE_DELETE_MAX_PER_RUN
     except System_Settings.DoesNotExist:
@@ -290,12 +289,12 @@ def async_dupe_delete(*args, **kwargs):
         logger.info('total number of excess duplicates deleted: %s', total_deleted_count)
 
 
-@task(name='celery_status', ignore_result=False)
+@app.task(ignore_result=False)
 def celery_status():
     return True
 
 
-@app.task(name='dojo.tasks.async_sla_compute_and_notify')
+@app.task
 def async_sla_compute_and_notify_task(*args, **kwargs):
     logger.debug("Computing SLAs and notifying as needed")
     try:
@@ -304,3 +303,15 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
             sla_compute_and_notify(*args, **kwargs)
     except Exception as e:
         logger.error("An unexpected error was thrown calling the SLA code: {}".format(e))
+
+
+@app.task
+def jira_status_reconciliation_task(*args, **kwargs):
+    from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
+    return jira_status_reconciliation(*args, **kwargs)
+
+
+@app.task
+def fix_loop_duplicates_task(*args, **kwargs):
+    from dojo.finding.helper import fix_loop_duplicates
+    return fix_loop_duplicates()

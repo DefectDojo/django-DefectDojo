@@ -15,15 +15,14 @@ from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
-from django.template.defaultfilters import pluralize
 from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.db.models.query import QuerySet
 import calendar as tcalendar
 from dojo.github import add_external_issue_github, update_external_issue_github, close_external_issue_github, reopen_external_issue_github
-from dojo.models import Finding, Engagement, Finding_Template, Product, \
-    Dojo_User, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
+from dojo.models import Finding, Engagement, Finding_Group, Finding_Template, Product, \
+    Dojo_User, Test, User, System_Settings, Notifications, Endpoint, Benchmark_Type, \
     Language_Type, Languages, Rule
 from asteval import Interpreter
 from dojo.notifications.helper import create_notification
@@ -32,7 +31,7 @@ import itertools
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 import crum
-from celery.decorators import task
+from dojo.celery import app
 from dojo.decorators import dojo_async_task, dojo_model_from_id, dojo_model_to_id
 
 
@@ -45,10 +44,6 @@ Helper functions for DefectDojo
 """
 
 
-@dojo_model_to_id
-@dojo_async_task
-@task
-@dojo_model_from_id
 def do_false_positive_history(new_finding, *args, **kwargs):
     logger.debug('%s: sync false positive history', new_finding.id)
     if new_finding.endpoints.count() == 0:
@@ -104,8 +99,12 @@ def is_deduplication_on_engagement_mismatch(new_finding, to_duplicate_finding):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
+def do_dedupe_finding_task(new_finding, *args, **kwargs):
+    return do_dedupe_finding(new_finding, *args, **kwargs)
+
+
 def do_dedupe_finding(new_finding, *args, **kwargs):
     try:
         enabled = System_Settings.objects.get(no_cache=True).enable_deduplication
@@ -113,7 +112,7 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
         logger.warning("system settings not found")
         enabled = False
     if enabled:
-        deduplicationLogger.debug('sync_dedupe for: ' + str(new_finding.id) +
+        deduplicationLogger.debug('dedupe for: ' + str(new_finding.id) +
                     ":" + str(new_finding.title))
         # TODO use test.dedupe_algo and case statement
         if hasattr(settings, 'DEDUPLICATION_ALGORITHM_PER_PARSER'):
@@ -139,7 +138,7 @@ def do_dedupe_finding(new_finding, *args, **kwargs):
             deduplicationLogger.debug("no configuration per parser found; using legacy algorithm")
             deduplicate_legacy(new_finding)
     else:
-        deduplicationLogger.debug("sync_dedupe: skipping dedupe because it's disabled in system settings get()")
+        deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
 
 
 def deduplicate_legacy(new_finding):
@@ -172,7 +171,7 @@ def deduplicate_legacy(new_finding):
         str(len(total_findings)) + " findings with either same title or same cwe")
 
     # total_findings = total_findings.order_by('date')
-    for find in total_findings:
+    for find in total_findings.order_by('id'):
         flag_endpoints = False
         flag_line_path = False
         flag_hash = False
@@ -201,6 +200,11 @@ def deduplicate_legacy(new_finding):
             else:
                 deduplicationLogger.debug("no endpoints on one of the findings and file_path doesn't match; Deduplication will not occur")
         else:
+            deduplicationLogger.debug('find.static/dynamic: %s/%s', find.static_finding, find.dynamic_finding)
+            deduplicationLogger.debug('new_finding.static/dynamic: %s/%s', new_finding.static_finding, new_finding.dynamic_finding)
+            deduplicationLogger.debug('find.file_path: %s', find.file_path)
+            deduplicationLogger.debug('new_finding.file_path: %s', new_finding.file_path)
+
             deduplicationLogger.debug("no endpoints on one of the findings and the new finding is either dynamic or doesn't have a file_path; Deduplication will not occur")
 
         if find.hash_code == new_finding.hash_code:
@@ -232,7 +236,7 @@ def deduplicate_unique_id_from_tool(new_finding):
             unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     else:
         existing_findings = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
@@ -241,7 +245,7 @@ def deduplicate_unique_id_from_tool(new_finding):
             unique_id_from_tool=new_finding.unique_id_from_tool).exclude(
                 id=new_finding.id).exclude(
                     unique_id_from_tool=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
 
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same unique_id_from_tool")
@@ -265,14 +269,14 @@ def deduplicate_hash_code(new_finding):
             hash_code=new_finding.hash_code).exclude(
                 id=new_finding.id).exclude(
                     hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     else:
         existing_findings = Finding.objects.filter(
             test__engagement__product=new_finding.test.engagement.product,
             hash_code=new_finding.hash_code).exclude(
                 id=new_finding.id).exclude(
                     hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
 
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with same hash_code")
@@ -292,20 +296,19 @@ def deduplicate_hash_code(new_finding):
 def deduplicate_uid_or_hash_code(new_finding):
     if new_finding.test.engagement.deduplication_on_engagement:
         existing_findings = Finding.objects.filter(
-            Q(hash_code=new_finding.hash_code) |
-            (Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
+            # unique_id_from_tool can only apply to the same test_type because it is parser dependent
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
             test__engagement=new_finding.test.engagement).exclude(
                 id=new_finding.id).exclude(
-                    hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     else:
+        # same without "test__engagement=new_finding.test.engagement" condition
         existing_findings = Finding.objects.filter(
-            Q(hash_code=new_finding.hash_code) |
-            (Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
-            test__engagement__product=new_finding.test.engagement.product).exclude(
+            (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type))).exclude(
                 id=new_finding.id).exclude(
-                    hash_code=None).exclude(
-                        duplicate=True)
+                        duplicate=True).order_by('id')
     deduplicationLogger.debug("Found " +
         str(len(existing_findings)) + " findings with either the same unique_id_from_tool or hash_code")
     for find in existing_findings:
@@ -323,23 +326,28 @@ def deduplicate_uid_or_hash_code(new_finding):
 
 def set_duplicate(new_finding, existing_finding):
     if existing_finding.duplicate:
+        logger.debug('existing finding: %s:%s:duplicate=%s;duplicate_finding=%s', existing_finding.id, existing_finding.title, existing_finding.duplicate, existing_finding.duplicate_finding.id if existing_finding.duplicate_finding else 'None')
         raise Exception("Existing finding is a duplicate")
     if existing_finding.id == new_finding.id:
         raise Exception("Can not add duplicate to itself")
     deduplicationLogger.debug('Setting new finding ' + str(new_finding.id) + ' as a duplicate of existing finding ' + str(existing_finding.id))
     if is_duplicate_reopen(new_finding, existing_finding):
-        set_duplicate_reopen_(new_finding, existing_finding)
+        set_duplicate_reopen(new_finding, existing_finding)
     new_finding.duplicate = True
     new_finding.active = False
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
-    for find in new_finding.original_finding.all():
+
+    # Make sure transitive duplication is flattened
+    # if A -> B and B is made a duplicate of C here, aferwards:
+    # A -> C and B -> C should be true
+    for find in new_finding.original_finding.all().order_by('-id'):
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
-    logger.debug('saving new finding')
+    logger.debug('saving new finding: %d', new_finding.id)
     super(Finding, new_finding).save()
-    logger.debug('saving existing finding')
+    logger.debug('saving existing finding: %d', existing_finding.id)
     super(Finding, existing_finding).save()
 
 
@@ -351,6 +359,7 @@ def is_duplicate_reopen(new_finding, existing_finding):
 
 
 def set_duplicate_reopen(new_finding, existing_finding):
+    logger.debug('duplicate reopen existing finding')
     existing_finding.mitigated = new_finding.mitigated
     existing_finding.is_Mitigated = new_finding.is_Mitigated
     existing_finding.active = new_finding.active
@@ -360,10 +369,6 @@ def set_duplicate_reopen(new_finding, existing_finding):
     existing_finding.save()
 
 
-@dojo_model_to_id
-@dojo_async_task
-@task
-@dojo_model_from_id
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
     for rule in rules:
@@ -490,8 +495,7 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
         for f in findings:
             if f.mitigated is not None and end_of_period >= f.mitigated >= start_of_period:
                 o_count['closed'] += 1
-            elif f.mitigated is not None and f.mitigated > end_of_period and f.date <= end_of_period.date(
-            ):
+            elif f.mitigated is not None and f.mitigated > end_of_period and f.date <= end_of_period.date():
                 if f.severity == 'Critical':
                     o_count['zero'] += 1
                 elif f.severity == 'High':
@@ -503,20 +507,15 @@ def findings_this_period(findings, period_type, stuff, o_stuff, a_stuff):
             elif f.mitigated is None and f.date <= end_of_period.date():
                 if f.severity == 'Critical':
                     o_count['zero'] += 1
-                elif f.severity == 'High':
-                    o_count['one'] += 1
-                elif f.severity == 'Medium':
-                    o_count['two'] += 1
-                elif f.severity == 'Low':
-                    o_count['three'] += 1
-            elif f.mitigated is None and f.date <= end_of_period.date():
-                if f.severity == 'Critical':
                     a_count['zero'] += 1
                 elif f.severity == 'High':
+                    o_count['one'] += 1
                     a_count['one'] += 1
                 elif f.severity == 'Medium':
+                    o_count['two'] += 1
                     a_count['two'] += 1
                 elif f.severity == 'Low':
+                    o_count['three'] += 1
                     a_count['three'] += 1
 
         total = sum(o_count.values()) - o_count['closed']
@@ -623,6 +622,22 @@ def add_breadcrumb(parent=None,
         crumbs += obj_crumbs
 
     request.session['dojo_breadcrumbs'] = crumbs
+
+
+def is_title_in_breadcrumbs(title):
+    request = crum.get_current_request()
+    if request is None:
+        return False
+
+    breadcrumbs = request.session.get('dojo_breadcrumbs')
+    if breadcrumbs is None:
+        return False
+
+    for breadcrumb in breadcrumbs:
+        if breadcrumb.get('title') == title:
+            return True
+
+    return False
 
 
 def get_punchcard_data(objs, start_date, weeks, view='Finding'):
@@ -1087,11 +1102,6 @@ def opened_in_period(start_date, end_date, pt):
     return oip
 
 
-def message(count, noun, verb):
-    return ('{} ' + noun + '{} {} ' + verb).format(
-        count, pluralize(count), pluralize(count, 'was,were'))
-
-
 class FileIterWrapper(object):
     def __init__(self, flo, chunk_size=1024**2):
         self.flo = flo
@@ -1177,22 +1187,27 @@ def template_search_helper(fields=None, query_string=None):
     return found_entries
 
 
-def get_page_items(request, items, page_size, param_name='page'):
-    size = request.GET.get('page_size', page_size)
+def get_page_items(request, items, page_size, prefix=''):
+    return get_page_items_and_count(request, items, page_size, prefix=prefix, do_count=False)
+
+
+def get_page_items_and_count(request, items, page_size, prefix='', do_count=True):
+    page_param = prefix + 'page'
+    page_size_param = prefix + 'page_size'
+
+    page = request.GET.get(page_param, 1)
+    size = request.GET.get(page_size_param, page_size)
     paginator = Paginator(items, size)
-    page = request.GET.get(param_name)
 
     # new get_page method will handle invalid page value, out of bounds pages, etc
-    return paginator.get_page(page)
+    page = paginator.get_page(page)
 
+    # we add the total_count here which is usually before prefetching
+    # which is goog in this case because for counting we don't want to join too many tables
+    if do_count:
+        page.total_count = paginator.count
 
-def get_page_items_and_count(request, items, page_size, param_name='page'):
-    size = request.GET.get('page_size', page_size)
-    paginator = Paginator(items, size)
-    page = request.GET.get(param_name)
-
-    # new get_page method will handle invalid page value, out of bounds pages, etc
-    return paginator.get_page(page), paginator.count
+    return page
 
 
 def handle_uploaded_threat(f, eng):
@@ -1219,7 +1234,7 @@ def handle_uploaded_selenium(f, cred):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def add_external_issue(find, external_issue_provider):
     eng = Engagement.objects.get(test=find.test)
@@ -1232,7 +1247,7 @@ def add_external_issue(find, external_issue_provider):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def update_external_issue(find, old_status, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1244,7 +1259,7 @@ def update_external_issue(find, old_status, external_issue_provider):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def close_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1256,7 +1271,7 @@ def close_external_issue(find, note, external_issue_provider):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def reopen_external_issue(find, note, external_issue_provider):
     prod = Product.objects.get(engagement=Engagement.objects.get(test=find.test))
@@ -1424,9 +1439,17 @@ def get_system_setting(setting, default=None):
     return getattr(system_settings, setting, (default if default is not None else None))
 
 
-def calculate_grade(product):
+@dojo_model_to_id
+@dojo_async_task
+@app.task
+@dojo_model_from_id(model=Product)
+def calculate_grade(product, *args, **kwargs):
     system_settings = System_Settings.objects.get()
+    if not product:
+        logger.warning('ignoring calculate product for product None!')
+
     if system_settings.enable_product_grade:
+        logger.debug('calculating product grade for %s:%s', product.id, product.name)
         severity_values = Finding.objects.filter(
             ~Q(severity='Info'),
             active=True,
@@ -1778,7 +1801,13 @@ def sla_compute_and_notify(*args, **kwargs):
                     continue
 
                 do_jira_sla_comment = False
+                jira_issue = None
                 if finding.has_jira_issue:
+                    jira_issue = finding.jira_issue
+                elif finding.grouped:
+                    jira_issue = finding.finding_group.jira_issue
+
+                if jira_issue:
                     jira_count += 1
                     jira_instance = jira_helper.get_jira_instance(finding)
                     if jira_instance is not None:
@@ -1799,7 +1828,6 @@ def sla_compute_and_notify(*args, **kwargs):
                                 product_jira_sla_comment_enabled
                             ))
                             do_jira_sla_comment = True
-                            jira_issue = finding.jira_issue
                             logger.debug("JIRA issue is {}".format(jira_issue.jira_key))
 
                 logger.debug("Finding {} has {} days left to breach SLA.".format(finding.id, sla_age))
@@ -1882,3 +1910,118 @@ def get_object_or_none(klass, *args, **kwargs):
         return queryset.get(*args, **kwargs)
     except queryset.model.DoesNotExist:
         return None
+
+
+def add_success_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.SUCCESS,
+                            message,
+                            extra_tags='alert-success')
+
+
+def add_error_message_to_response(message):
+    if get_current_request():
+        messages.add_message(get_current_request(),
+                            messages.ERROR,
+                            message,
+                            extra_tags='alert-danger')
+
+
+def add_field_errors_to_response(form):
+    if form and get_current_request():
+        for field, error in form.errors.items():
+            add_error_message_to_response(error)
+
+
+def mass_model_updater(model_type, models, function, fields, page_size=1000, order='asc', log_prefix=''):
+    """ Using the default for model in queryset can be slow for large querysets. Even
+    when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
+    this process very well if we can process the models ordered by id.
+    In that case we don't need LIMIT or OFFSET, but can keep track of the latest id that
+    was processed and continue from there on the next page. This is fast because
+    it results in an index seek instead of executing the whole query again and skipping
+    the first X items.
+    """
+    # force ordering by id to make our paging work
+    last_id = None
+    models = models.order_by()
+    if order == 'asc':
+        logger.debug('ordering ascending')
+        models = models.order_by('id')
+        last_id = 0
+    elif order == 'desc':
+        logger.debug('ordering descending')
+        models = models.order_by('-id')
+        # get maximum, which is the first due to descending order
+        last_id = models.first().id + 1
+    else:
+        raise ValueError('order must be ''asc'' or ''desc''')
+    # use filter to make count fast on mysql
+    total_count = models.filter(id__gt=0).count()
+    logger.debug('%s found %d models for mass update:', log_prefix, total_count)
+
+    i = 0
+    batch = []
+    total_pages = (total_count // page_size) + 2
+    # logger.info('pages to process: %d', total_pages)
+    logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+    for p in range(1, total_pages):
+        # logger.info('page: %d', p)
+        if order == 'asc':
+            page = models.filter(id__gt=last_id)[:page_size]
+        else:
+            page = models.filter(id__lt=last_id)[:page_size]
+
+        # logger.info('page query: %s', page.query)
+        # if p == 23:
+        #     raise ValueError('bla')
+        for model in page:
+            i += 1
+            last_id = model.id
+            # logger.info('last_id: %s', last_id)
+
+            function(model)
+
+            batch.append(model)
+
+            if (i > 0 and i % page_size == 0):
+                if fields:
+                    model_type.objects.bulk_update(batch, fields)
+                batch = []
+                logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+
+    if fields:
+        model_type.objects.bulk_update(batch, fields)
+    batch = []
+    logger.info('%s%s out of %s models processed ...', log_prefix, i, total_count)
+
+
+def to_str_typed(obj):
+    """ for code that handles multiple types of objects, print not only __str__ but prefix the type of the object"""
+    return '%s: %s' % (type(obj), obj)
+
+
+def get_product(obj):
+    logger.debug('getting product for %s:%s', type(obj), obj)
+    if not obj:
+        return None
+
+    if type(obj) == Finding or type(obj) == Finding_Group:
+        return obj.test.engagement.product
+
+    if type(obj) == Test:
+        return obj.engagement.product
+
+    if type(obj) == Engagement:
+        return obj.product
+
+    if type(obj) == Product:
+        return obj
+
+
+def prod_name(obj):
+    if not obj:
+        return 'Unknown'
+
+    return get_product(obj).name
