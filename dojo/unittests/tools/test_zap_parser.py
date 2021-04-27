@@ -64,11 +64,11 @@ class TestZapParser(TestCase):
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(12, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual("172.17.0.2:80", endpoint.host)
+            self.assertEqual("http://172.17.0.2:80", endpoint.host)
             endpoint = finding.unsaved_endpoints[1]
             self.assertEqual("http", endpoint.protocol)
-            self.assertEqual("172.17.0.2:80", endpoint.host)
-            self.assertEqual('vulnerabilities/brute/', endpoint.path)
+            self.assertEqual("172.17.0.2", endpoint.host)
+            self.assertEqual('/vulnerabilities/brute/', endpoint.path)
         with self.subTest(i=18):
             finding = findings[18]
             self.assertEqual("Private IP Disclosure", finding.title)
