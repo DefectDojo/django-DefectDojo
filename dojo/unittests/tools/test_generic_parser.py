@@ -23,6 +23,21 @@ class TestGenericParser(TestCase):
                                      product=self.product)
         self.test = Test(engagement=self.engagement)
 
+    def test_parse_report1(self):
+        file = open("dojo/unittests/scans/generic/generic_report1.csv")
+        parser = GenericParser()
+        findings = parser.get_findings(file, self.test, True, True)
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual(5, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual("vulnerable.endpoint.com:443", endpoint.host)
+        self.assertEqual("resource1/asdf", endpoint.path)
+        endpoint = finding.unsaved_endpoints[1]
+        self.assertEqual("vulnerable.endpoint.com:443", endpoint.host)
+        self.assertEqual("resource2/qwerty", endpoint.path)
+        self.assertEqual("https", endpoint.protocol)
+
     def test_parse_no_csv_content_no_findings(self):
         findings = ""
         file = TestFile("findings.csv", findings)
