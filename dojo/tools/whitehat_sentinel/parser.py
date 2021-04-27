@@ -198,9 +198,7 @@ class WhiteHatSentinelParser(object):
         Returns: A DefectDojo Finding object
         """
 
-        # Out of scope is considered Active because the issue is valid, just not for the asset in question. If the
-        # issue belongs to another Product, it should be filtered before importing.
-        active = whitehat_sentinel_vuln.get('status') in ('open', 'out of scope')
+
         date_created = whitehat_sentinel_vuln['found'].split('T')[0]
         mitigated_ts = whitehat_sentinel_vuln.get('closed'.split('T')[0], None)
         cwe = self._parse_cwe_from_tags(whitehat_sentinel_vuln['attack_vectors'][0]['scanner_tags'])
@@ -217,14 +215,13 @@ class WhiteHatSentinelParser(object):
         finding = Finding(title=whitehat_sentinel_vuln['class'],
                           test=test,
                           cwe=cwe,
-                          active=active,
+                          active= not whitehat_sentinel_vuln.get('mitigated', True),
                           verified=True,
                           description=description,
                           steps_to_reproduce=steps,
                           mitigation=solution,
                           references=references,
                           severity=severity,
-                          numerical_severity=Finding.get_numerical_severity(severity),
                           false_p=false_positive,
                           date=date_created,
                           is_Mitigated=whitehat_sentinel_vuln.get('mitigated', False),
@@ -232,8 +229,7 @@ class WhiteHatSentinelParser(object):
                           last_reviewed=whitehat_sentinel_vuln.get('lastRetested', None),
                           dynamic_finding=True,
                           created=date_created,
-                          unique_id_from_tool=whitehat_sentinel_vuln['id'],
-                          url=whitehat_sentinel_vuln.get('')
+                          unique_id_from_tool=whitehat_sentinel_vuln['id']
                           )
 
         # Get Endpoints from Attack Vectors
