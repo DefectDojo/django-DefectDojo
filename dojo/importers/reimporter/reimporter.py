@@ -220,7 +220,7 @@ class DojoDefaultReImporter(object):
         untouched = set(unchanged_items) - set(to_mitigate)
 
         if settings.FEATURE_FINDING_GROUPS and push_to_jira:
-            for finding_group in [finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]:
+            for finding_group in set([finding.finding_group for finding in reactivated_items + unchanged_items + new_items if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 
         return new_items, reactivated_items, to_mitigate, untouched
@@ -258,7 +258,7 @@ class DojoDefaultReImporter(object):
                 mitigated_findings.append(finding)
 
         if settings.FEATURE_FINDING_GROUPS and push_to_jira:
-            for finding_group in [finding.finding_group for finding in to_mitigate if finding.finding_group is not None]:
+            for finding_group in set([finding.finding_group for finding in to_mitigate if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 
         return mitigated_findings
@@ -266,6 +266,8 @@ class DojoDefaultReImporter(object):
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=True, auto_group_by=None):
+
+        logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
 
         user = user or get_current_user()
 

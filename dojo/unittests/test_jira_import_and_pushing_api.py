@@ -1,3 +1,4 @@
+from django.test.utils import override_settings
 from dojo.models import User, Finding, JIRA_Instance
 from dojo.jira_link import helper as jira_helper
 from rest_framework.authtoken.models import Token
@@ -40,12 +41,12 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         DojoVCRAPITestCase.__init__(self, *args, **kwargs)
 
     def assert_cassette_played(self):
-        if True:  # set to True when committing. set to False when recording new test cassettes
+        if False:  # set to True when committing. set to False when recording new test cassettes
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
         my_vcr = super(JIRAImportAndPushTestApi, self)._get_vcr(**kwargs)
-        my_vcr.record_mode = 'none'
+        my_vcr.record_mode = 'once'
         my_vcr.path_transformer = VCR.ensure_suffix('.yaml')
         my_vcr.filter_headers = ['Authorization', 'X-Atlassian-Token']
         my_vcr.cassette_library_dir = 'dojo/unittests/vcr/jira/'
@@ -63,25 +64,41 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         token = Token.objects.get(user=self.testuser)
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-        self.scans_path = 'dojo/unittests/scans/zap/'
-        self.zap_sample5_filename = self.scans_path + '5_zap_sample_one.xml'
+        self.scans_path = 'dojo/unittests/scans/'
+        self.zap_sample5_filename = self.scans_path + 'zap/5_zap_sample_one.xml'
+        self.npm_groups_sample_filename = self.scans_path + 'npm_audit_sample/many_vuln_with_groups.json'
 
     def test_import_no_push_to_jira(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         return test_id
 
     def test_import_with_push_to_jira_is_false(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=False)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         return test_id
 
     def test_import_with_push_to_jira(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+        return test_id
+
+    @override_settings(FEATURE_FINDING_GROUPS=True)
+    def test_import_with_groups_push_to_jira(self):
+        # 7 findings, 5 unique component_name+component_version
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version', push_to_jira=True)
+        test_id = import0['test']
+        # all findings should be in a group, so no JIRA issues for individual findings
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -95,6 +112,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -104,6 +122,18 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+        return test_id
+
+    @override_settings(FEATURE_FINDING_GROUPS=True)
+    def test_import_with_groups_no_push_to_jira_but_push_all(self):
+        self.set_jira_push_all_issues(self.get_engagement(1))
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version')
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -113,6 +143,18 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=False)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+        return test_id
+
+    @override_settings(FEATURE_FINDING_GROUPS=True)
+    def test_import_with_groups_with_push_to_jira_is_false_but_push_all(self):
+        self.set_jira_push_all_issues(self.get_engagement(1))
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version', push_to_jira=False)
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -121,27 +163,47 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename)
         self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         return test_id
 
     def test_import_no_push_to_jira_reimport_push_to_jira_false(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, push_to_jira=False)
         self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         return test_id
 
     def test_import_no_push_to_jira_reimport_with_push_to_jira(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+        return test_id
+
+    @override_settings(FEATURE_FINDING_GROUPS=True)
+    def test_import_with_groups_no_push_to_jira_reimport_with_push_to_jira(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version')
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        reimport = self.reimport_scan_with_params(test_id, self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version', push_to_jira=True)
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -151,9 +213,26 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename)
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+        return test_id
+
+    @override_settings(FEATURE_FINDING_GROUPS=True)
+    def test_import_with_groups_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues(self):
+        self.set_jira_push_all_issues(self.get_engagement(1))
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version')
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+
+        reimport = self.reimport_scan_with_params(test_id, self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version')
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -163,9 +242,32 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        updated_map = self.get_jira_issue_updated_map(test_id)
 
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, push_to_jira=False)
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        self.assert_jira_updated_map_changed(test_id, updated_map)
+        # by asserting full cassette is played we know issues have been updated in JIRA
+        self.assert_cassette_played()
+        return test_id
+
+    @override_settings(FEATURE_FINDING_GROUPS=True)
+    def test_import_with_groups_no_push_to_jira_reimport_push_to_jira_is_false_but_push_all_issues(self):
+        self.set_jira_push_all_issues(self.get_engagement(1))
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version')
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+        updated_map = self.get_jira_issue_updated_map(test_id)
+
+        reimport = self.reimport_scan_with_params(test_id, self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version', push_to_jira=False)
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+        # when sending in identical data to JIRA, JIRA does NOT update the updated timestamp....
+        # self.assert_jira_updated_map_changed(test_id, updated_map)
+        self.assert_jira_updated_map_unchanged(test_id, updated_map)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -174,14 +276,16 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         # Get one of the findings from the test
         finding_id = Finding.objects.filter(test__id=test_id).first().id
-        pre_jira_status = self.get_jira_issue_severity(finding_id)
+        pre_jira_status = self.get_jira_issue_updated(finding_id)
         # re-import and see status change
         reimport = self.reimport_scan_with_params(test_id, self.zap_sample5_filename, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 2)
-        post_jira_status = self.get_jira_issue_severity(finding_id)
-        self.assert_jira_status_change(pre_jira_status, post_jira_status)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        post_jira_status = self.get_jira_issue_updated(finding_id)
+        self.assert_jira_updated_change(pre_jira_status, post_jira_status)
         # by asserting full cassette is played we know issues have been updated in JIRA
         self.assert_cassette_played()
         return test_id
@@ -190,27 +294,45 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         import1 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
         test_id1 = import1['test']
         # duplicates shouldn't be sent to JIRA
         self.assert_jira_issue_count_in_test(test_id1, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+    @override_settings(FEATURE_FINDING_GROUPS=True)
+    def test_import_with_groups_twice_push_to_jira(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version', push_to_jira=True)
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 3)
+
+        import1 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version', push_to_jira=True)
+        test_id1 = import1['test']
+        # duplicates shouldn't be sent to JIRA
+        self.assert_jira_issue_count_in_test(test_id1, 0)
+        self.assert_jira_group_issue_count_in_test(test_id1, 0)
 
     def test_import_twice_push_to_jira_push_all_issues(self):
         self.set_jira_push_all_issues(self.get_engagement(1))
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         import1 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id1 = import1['test']
         # duplicates shouldn't be sent to JIRA
         self.assert_jira_issue_count_in_test(test_id1, 0)
+        self.assert_jira_group_issue_count_in_test(test_id1, 0)
 
-    def test_create_edit_update_finding_no_push_to_jira(self):
+    def test_create_edit_update_finding(self):
         import0 = self.import_scan_with_params(self.zap_sample5_filename)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         findings = self.get_test_findings_api(test_id)
 
@@ -225,27 +347,33 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         finding_details['title'] = 'jira api test 1'
         self.post_new_finding_api(finding_details)
         self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         finding_details['title'] = 'jira api test 2'
         self.post_new_finding_api(finding_details, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         finding_details['title'] = 'jira api test 3'
         new_finding_json = self.post_new_finding_api(finding_details)
         self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         self.patch_finding_api(new_finding_json['id'], {"push_to_jira": False})
         self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True})
         self.assert_jira_issue_count_in_test(test_id, 2)
-        pre_jira_status = self.get_jira_issue_severity(new_finding_json['id'])
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        pre_jira_status = self.get_jira_issue_status(new_finding_json['id'])
 
         self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True,
                                                         "is_Mitigated": True,
                                                         "active": False})
         self.assert_jira_issue_count_in_test(test_id, 2)
-        post_jira_status = self.get_jira_issue_severity(new_finding_json['id'])
-        self.assert_jira_status_change(pre_jira_status, post_jira_status)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+        post_jira_status = self.get_jira_issue_status(new_finding_json['id'])
+        self.assertNotEqual(pre_jira_status, post_jira_status)
 
         finding_details['title'] = 'jira api test 4'
         new_finding_json = self.post_new_finding_api(finding_details)
@@ -253,12 +381,16 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         del new_finding_json['id']
 
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=False)
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 3)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 3)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         self.assert_cassette_played()
 
@@ -266,6 +398,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         import0 = self.import_scan_with_params(self.zap_sample5_filename, push_to_jira=True)
         test_id = import0['test']
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
 
         findings = self.get_test_findings_api(test_id)
 
@@ -295,6 +428,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         test_id = import0['test']
         # Correct number of issues are pushed to jira
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         # Correct number of issues are in the epic
         self.assert_epic_issue_count(eng, 2)
         # Ensure issue are actually in the correct epic
@@ -311,6 +445,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         test_id = import0['test']
         # Correct number of issues are pushed to jira
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         # Correct number of issues are in the epic
         self.assert_epic_issue_count(eng, 0)
         # Ensure issue are actually not in the correct epic
@@ -328,6 +463,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         test_id = import0['test']
         # Correct number of issues are pushed to jira
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         # Correct number of issues are in the epic
         self.assert_epic_issue_count(eng, 0)
         # Ensure issue are actually in the correct epic
@@ -344,6 +480,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         test_id = import0['test']
         # Correct number of issues are pushed to jira
         self.assert_jira_issue_count_in_test(test_id, 2)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
         # Correct number of issues are in the epic
         self.assert_epic_issue_count(eng, 0)
         # Ensure issue are actually not in the correct epic

@@ -170,7 +170,7 @@ class DojoDefaultImporter(object):
                 item.save(push_to_jira=push_to_jira)
 
         if settings.FEATURE_FINDING_GROUPS and push_to_jira:
-            for finding_group in [finding.finding_group for finding in new_findings if finding.finding_group is not None]:
+            for finding_group in set([finding.finding_group for finding in new_findings if finding.finding_group is not None]):
                 jira_helper.push_to_jira(finding_group)
 
         return new_findings
@@ -221,6 +221,10 @@ class DojoDefaultImporter(object):
             else:
                 old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
 
+        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+            for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
+                jira_helper.push_to_jira(finding_group)
+
         return old_findings
 
     def update_timestamps(self, test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time):
@@ -250,6 +254,8 @@ class DojoDefaultImporter(object):
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, auto_group_by=None):
+
+        logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
         user = user or get_current_user()
 

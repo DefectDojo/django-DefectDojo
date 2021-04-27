@@ -414,9 +414,26 @@ def jira_transition(jira, issue, transition_id):
 
 
 # Used for unit testing so geting all the connections is manadatory
+def get_jira_updated(finding):
+    if finding.has_jira_issue:
+        j_issue = finding.jira_issue.jira_id
+    elif finding.finding_group and finding.finding_group.has_jira_issue:
+        j_issue = finding.finding_group.jira_issue.jira_id
+
+    if j_issue:
+        project = get_jira_project(finding)
+        issue = jira_get_issue(project, j_issue)
+        return issue.fields.updated
+
+
+# Used for unit testing so geting all the connections is manadatory
 def get_jira_status(finding):
     if finding.has_jira_issue:
         j_issue = finding.jira_issue.jira_id
+    elif finding.finding_group and finding.finding_group.has_jira_issue:
+        j_issue = finding.finding_group.jira_issue.jira_id
+
+    if j_issue:
         project = get_jira_project(finding)
         issue = jira_get_issue(project, j_issue)
         return issue.fields.status

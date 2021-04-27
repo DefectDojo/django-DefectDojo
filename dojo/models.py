@@ -1962,10 +1962,7 @@ class Finding(models.Model):
     @staticmethod
     def get_severity(num_severity):
         severities = {0: 'Info', 1: 'Low', 2: 'Medium', 3: 'High', 4: 'Critical'}
-        logger.debug(severities.keys())
-        logger.debug(num_severity in severities.keys())
         if num_severity in severities.keys():
-            logger.debug('returning severity: %s', severities[num_severity])
             return severities[num_severity]
 
         return None
@@ -2324,7 +2321,7 @@ class Stub_Finding(models.Model):
 
 class Finding_Group(TimeStampedModel):
 
-    GROUP_BY_OPTIONS = [('component_name', 'Component Name'), ('component_name+version', 'Component Name + Version'), ('file_path', 'File path')]
+    GROUP_BY_OPTIONS = [('component_name', 'Component Name'), ('component_name+component_version', 'Component Name + Version'), ('file_path', 'File path')]
 
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
@@ -2344,7 +2341,6 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
         max_number_severity = max([Finding.get_number_severity(find.severity) for find in self.findings.all()])
-        logger.debug('MAX:%s', max_number_severity)
         return Finding.get_severity(max_number_severity)
 
     @cached_property
@@ -2760,7 +2756,6 @@ class JIRA_Instance(models.Model):
         return self.configuration_name + " | " + self.url + " | " + self.username
 
     def get_priority(self, status):
-        logger.debug('get_priority for: %s', status)
         if status == 'Info':
             return self.info_mapping_severity
         elif status == 'Low':

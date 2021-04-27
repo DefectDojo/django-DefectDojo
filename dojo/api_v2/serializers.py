@@ -1179,6 +1179,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     auto_group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def save(self, push_to_jira=False):
+        logger.debug('push_to_jira: %s', push_to_jira)
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
