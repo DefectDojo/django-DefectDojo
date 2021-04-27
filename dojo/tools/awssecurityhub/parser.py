@@ -36,41 +36,27 @@ class AwsSecurityHubParser(object):
 
 
 def get_item(finding, test):
+    finding_id = finding.get('Id', "").split('/')[-1]
     title = finding.get('Title', "")
     severity = finding.get('Severity', {}).get('Label', 'INFORMATIONAL').title()
     description = finding.get('Description', "")
+    resources = finding.get('Resources', "")
+    resource_id = resources[0]['Id'].split(':')[-1]
     mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
-    cve = None
-    cwe = None
     false_p = False
-    duplicate = False
-    out_of_scope = False
-    impact = None
 
-    if finding.get('Compliance', {}).get('Status', "PASSED"):
-        if finding.get('LastObservedAt', None):
-            try:
-                mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
-            except:
-                mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
-        else:
-            mitigated = datetime.utcnow()
-    else:
-        mitigated = None
-
-    finding = Finding(title=title,
+    finding = Finding(title=f"Resource: {resource_id} - {title}",
                       test=test,
-                      severity=severity,
                       description=description,
                       mitigation=mitigation,
                       references=references,
-                      cve=cve,
-                      cwe=cwe,
+                      severity=severity,
+                      active=False,
+                      verified=False,
                       false_p=false_p,
-                      duplicate=duplicate,
-                      out_of_scope=out_of_scope,
-                      mitigated=mitigated,
-                      impact="No impact provided")
+                      impact="No impact provided",
+                      unique_id_from_tool=finding_id,
+                      )
 
     return finding
