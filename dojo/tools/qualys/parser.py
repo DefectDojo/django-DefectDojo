@@ -51,6 +51,7 @@ def htmltext(blob):
     h.ignore_links = False
     return h.handle(blob)
 
+
 def split_cvss(value, _temp):
     # Check if CVSS field contains the CVSS vector
     if value is None or len(value) == 0 or value == "-":
@@ -66,6 +67,7 @@ def split_cvss(value, _temp):
             logger.warn("%s does not match cvssv3 regex", split[1][:-1])
     else:
         _temp['CVSS_value'] = float(value)
+
 
 def parse_finding(host, tree):
     ret_rows = []
