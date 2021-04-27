@@ -78,7 +78,7 @@ class DojoTestUtilsMixin(object):
         return data
 
     def log_model_instance(self, instance):
-        logger.debug(pprint.pprint(self.model_to_dict(instance)))
+        logger.debug('model instance: %s', pprint.pprint(self.model_to_dict(instance)))
 
     def log_model_instances(self, instances):
         for instance in instances:
@@ -120,7 +120,7 @@ class DojoTestUtilsMixin(object):
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_product_with_jira_project_data(self, product):
@@ -156,7 +156,7 @@ class DojoTestUtilsMixin(object):
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_expected_redirect_product(self, product):
@@ -216,6 +216,7 @@ class DojoTestUtilsMixin(object):
         return self.add_product_jira_with_data(self.get_new_product_with_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def add_product_without_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+        logger.debug('adding product without jira project')
         return self.add_product_jira_with_data(self.get_new_product_without_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def edit_product_jira(self, product, data, expect_redirect_to=None, expect_200=False):
@@ -258,6 +259,7 @@ class DojoTestUtilsMixin(object):
         return self.edit_jira_project_for_product_with_data(product, self.get_product_with_jira_project_data2(product), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def empty_jira_project_for_product(self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+        logger.debug('empty jira project for product')
         jira_project_count_before = self.db_jira_project_count()
         # print('before: ' + str(jira_project_count_before))
 
@@ -348,7 +350,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -363,6 +365,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
+
+        if endpoint_to_add is not None:
+            payload['endpoint_to_add'] = endpoint_to_add
 
         if tags is not None:
             payload['tags'] = tags
@@ -462,13 +467,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def get_finding_tags_api(self, finding_id):
         response = self.do_finding_tags_api(self.client.get, finding_id)
-        print(response.data)
+        # print(response.data)
         return response.data
 
     def get_finding_api_filter_tags(self, tags):
         response = self.client.get(reverse('finding-list') + '?tags=%s' % tags, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
-        print(response.data)
+        # print(response.data)
         return response.data
 
     def post_finding_tags_api(self, finding_id, tags):
@@ -481,8 +486,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             data = {'tags': tags}
 
         response = http_method(reverse('finding-remove-tags', args=(finding_id,)), data, format='json')
-        print(response)
-        print(response.content)
+        # print(response)
+        # print(response.content)
         self.assertEqual(expected_response_status_code, response.status_code, response.content[:1000])
         return response.data
 
@@ -499,11 +504,11 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if note:
             data = {'entry': note}
 
-        print('data:' + str(data))
+        # print('data:' + str(data))
 
         response = http_method(reverse('finding-notes', args=(finding_id,)), data, format='json')
-        print(vars(response))
-        print(response.content)
+        # print(vars(response))
+        # print(response.content)
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response
 

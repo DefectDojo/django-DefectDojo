@@ -207,7 +207,7 @@ class Command(BaseCommand):
     """
 
     help = 'Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. \
-        Risk Accepted findings are skipped.'
+        Risk Accepted findings are skipped. Findings created before 1.14.0 are skipped.'
 
     mode_help = \
         '- reconcile: (default)reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status change timestamp in both systems to determine which one is the correct status' \

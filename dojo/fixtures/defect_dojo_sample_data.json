@@ -24211,7 +24211,6 @@
         "username": "user3",
         "password": "user3",
         "default_issue_type": "Spike",
-        "issue_template": "issue-trackers/jira-description.tpl",
         "epic_name_id": 333,
         "open_status_key": 333,
         "close_status_key": 334,

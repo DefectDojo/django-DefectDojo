@@ -30,3 +30,8 @@ class TestAnchoreEngineParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(51, len(findings))
+        finding = findings[50]
+        self.assertEqual("CVE-2020-13776", finding.unique_id_from_tool)
+        self.assertEqual('systemd-pam', finding.component_name)
+        self.assertEqual('239-41.el8_3.1', finding.component_version)
+        self.assertEqual(6.7, finding.cvssv3_score)

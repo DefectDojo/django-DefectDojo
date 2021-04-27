@@ -30,13 +30,14 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    SonarqubeProductViewSet, RegulationsViewSet
+    SonarqubeProductViewSet, RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
+from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.home.urls import urlpatterns as home_urls
 from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.product.urls import urlpatterns as prod_urls
@@ -112,6 +113,9 @@ v2_api.register(r'jira_product_configurations', JiraProjectViewSet)  # backwards
 v2_api.register(r'jira_projects', JiraProjectViewSet)
 v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
+if settings.FEATURE_AUTHORIZATION_V2:
+    v2_api.register(r'product_type_members', ProductTypeMemberViewSet)
+    v2_api.register(r'product_members', ProductMemberViewSet)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
 v2_api.register(r'sonarqube_product_configurations', SonarqubeProductViewSet)
@@ -136,6 +140,7 @@ ur += dev_env_urls
 ur += endpoint_urls
 ur += eng_urls
 ur += finding_urls
+ur += finding_group_urls
 ur += home_urls
 ur += metrics_urls
 ur += prod_urls
