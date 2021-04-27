@@ -1,6 +1,7 @@
 
 import re
 import socket
+from urllib.parse import urlparse
 
 import hyperlink
 from defusedxml import ElementTree as ET
