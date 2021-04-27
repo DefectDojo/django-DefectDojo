@@ -16,14 +16,14 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual(0, len(findings))
 
     def test_scb_parser_with_no_vuln_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/scb/scb_zero_vul.json")
+        testfile = open("dojo/unittests/scans/securecodebox/scb_zero_vul.json")
         parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
         self.assertEqual(0, len(findings))
 
     def test_scb_parser_with_one_criticle_vuln_has_one_findings(self):
-        testfile = open("dojo/unittests/scans/scb/scb_one_vul.json")
+        testfile = open("dojo/unittests/scans/securecodebox/scb_one_vul.json")
         parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
@@ -31,7 +31,7 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual("High", findings[0].severity)
 
     def test_scb_parser_with_many_vuln_has_many_findings(self):
-        testfile = open("dojo/unittests/scans/scb/scb_many_vul.json")
+        testfile = open("dojo/unittests/scans/securecodebox/scb_many_vul.json")
         parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
@@ -46,9 +46,17 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].path, "")
         self.assertEqual(findings[0].unsaved_endpoints[0].port, 22)
 
+    def test_scb_parser_with_many_vuln_has_many_findings_nikto(self):
+        testfile = open(
+            "dojo/unittests/scans/securecodebox/scb_nikto_multiple_findings.json")
+        parser = SecureCodeBoxParser()
+        findings = parser.get_findings(testfile, self.get_test())
+        self.assertEqual(202, len(findings))
+        testfile.close()
+
     def test_scb_parser_handles_multiple_scan_types(self):
         testfile = open(
-            "dojo/unittests/scans/scb/scb_multiple_finding_formats.json")
+            "dojo/unittests/scans/securecodebox/scb_multiple_finding_formats.json")
         parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
@@ -68,3 +76,19 @@ class TestSecureCodeBoxParser(TestCase):
             parser = SecureCodeBoxParser()
             findings = parser.get_findings(testfile, self.get_test())
             testfile.close()
+
+    def test_scb_parser_nikto_multiple(self):
+        testfile = open(
+            "dojo/unittests/scans/securecodebox/scb_multiple_finding_formats.json")
+        parser = SecureCodeBoxParser()
+        findings = parser.get_findings(testfile, self.get_test())
+        testfile.close()
+        self.assertEqual(3, len(findings))
+        self.assertEqual(findings[0].title, "WordPress Service")
+        self.assertEqual(findings[0].description,
+                         "WordPress Service Information")
+        self.assertEqual(findings[1].title, "SSH Service")
+        self.assertEqual(findings[1].description, "SSH Service Information")
+        self.assertEqual(
+            findings[2].title, "The anti-clickjacking X-Frame-Options header is not present.")
+        self.assertEqual(findings[2].description, None)

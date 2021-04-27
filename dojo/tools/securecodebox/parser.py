@@ -65,8 +65,11 @@ class SecureCodeBoxParser(object):
         finding.unsaved_endpoints = [endpoint]
 
     def set_finding_base_info(self, finding, node, test):
-        finding.title = node.get('name')
-        finding.description = node.get('description')
+        na = "N/A"
+        finding.title = node.get('name', na)
+        finding.description = node.get('description', na)
+        finding.mitigation = na
+        finding.impact = na
         finding.severity = self.get_severity(node.get('severity'))
         finding.numerical_severity = Finding.get_numerical_severity(
             finding.severity)

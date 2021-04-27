@@ -1,0 +1,1719 @@
+[
+    {
+       "name":"Retrieved access-control-allow-origin header: *",
+       "description":null,
+       "category":"Nikto Finding",
+       "location":"http://juice-shop/",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"GET",
+          "port":3000,
+          "niktoId":999986
+       },
+       "id":"ece342b3-307d-4c4f-b20d-e65d2f11f1ee"
+    },
+    {
+       "name":"Entry '/ftp/' in robots.txt returned a non-forbidden or redirect HTTP code (200)",
+       "description":null,
+       "category":"Nikto Finding",
+       "location":"http://juice-shop/ftp/",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"GET",
+          "port":3000,
+          "niktoId":999997
+       },
+       "id":"48e1839d-bad8-475f-aad8-ca402f7940b3"
+    },
+    {
+       "name":"\"robots.txt\" contains 1 entry which should be manually viewed.",
+       "description":null,
+       "category":"robots.txt",
+       "location":"http://juice-shop/robots.txt",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"GET",
+          "port":3000,
+          "niktoId":999996
+       },
+       "id":"7332d472-4242-46e6-ac9b-2d8818d4b39d"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.zip",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"9daffe52-a3ea-40a4-8c84-f0c81c409045"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.war",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"6b06ce47-4cfe-4737-9ec1-1f0355efc0a8"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.jks",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"4bd3acb0-e4a5-4758-8ce1-eae64b4ee102"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.egg",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"8d7a0914-2f5c-49ed-8846-59f144b5e51e"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.tgz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"1dbe36e9-4389-4e14-8708-41473021bf54"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.tar.lzma",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"1e9e8183-c912-4ab8-bbfb-26dd829e44bb"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.war",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"1ef4df6e-562b-4e76-95ad-a49896402f56"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.zip",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"7d27732f-bcc0-40fa-9536-c21af8ca03ac"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.cer",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"2918f563-b9f1-4191-a88b-94d48945a71f"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.tar.lzma",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"0929d5bd-2ef6-4986-9568-22ea88f234ae"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.zip",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"761a7ea2-27c3-404c-b368-347fd4b7662c"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.tar",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"4311c9a8-8f6e-43c1-84c7-e64ca3b728ce"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.pem",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"a5cf3350-becb-452d-b7e2-f978427a5ab8"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.sql",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"ac8e5c7b-cbfc-4abc-8347-1a4fe8f2ec81"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.cer",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"2e321f5b-61f3-499e-9964-46b120af4a0d"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.tgz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"8c444719-94b4-4fad-ad86-be8acbdb5f3e"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.cer",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"1be0c563-2445-45fc-a829-e6d0fe103feb"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.sql",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"2d0af194-1d9c-4941-a7ee-ad068b378f56"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"3d1ae70e-6baa-4581-9520-50609fde0a98"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.alz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"4b288d0b-2558-4be6-9ae7-6938b13f1df9"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.tar",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"2c1fc251-80ac-4ccc-86d3-b2df9763a703"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.zip",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"8fac36f2-6515-4b1a-99c9-058bccd88bcf"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.sql",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"5233cd21-8d9f-43e1-97cb-55c76abcbbb5"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.sql",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"607bcc6d-5cf9-4b6a-aeff-a991e490feb1"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.alz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"df40aaa9-bef8-4bf9-992a-73cf3c7fa14f"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.tar.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"b8180cbe-d369-410f-8f05-61cad0349093"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.jks",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"dd6aeb16-705a-45f0-936b-534cd6c4028b"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"23e30e83-8655-4c8d-8ae2-ac41a13046ee"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.tar.bz2",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"a327edc3-649a-41a2-bd2f-e7981607b031"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.egg",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"0667c05b-25c3-415e-936a-2e8db2f73b99"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.tar.lzma",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"3dfc664d-1f67-4381-96c6-8dd77195793f"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.alz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"a3099f62-e97f-4344-8f63-fd5dd17153e5"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.pem",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"b69c66da-3afb-494c-87ed-e6e8748c3bed"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.tar",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"070ab3b7-1bf3-4c60-91e3-ac488fec8713"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.tar.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"899be710-61b9-4583-8514-c1464bb0255d"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.pem",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"0520bd80-3fd4-4d0b-ab22-1ad87e51d358"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.tar.bz2",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"24d96793-44eb-4488-8db9-ef071aaeec28"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.cer",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"2b94ca50-4e98-4dd6-9d13-fbf19cd1942d"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.tar.lzma",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"802ee8b0-a133-411e-bd62-162c3a318208"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.jks",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"ffd93eb8-d05c-45ec-9231-34ae2d061faf"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.tar.bz2",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"e3b9c5a0-341c-4066-a41c-98831d2f873d"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.alz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"e1affe76-25a0-4f68-8b8b-012483b9d8fc"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.tar.bz2",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"b3c9c1dd-e9f1-4766-bb3c-c2f5210a8d80"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.war",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"5b995d84-0ed8-4b6a-a5d3-ff5669d69830"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.jks",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"0b47fe28-b0b2-4227-a219-1b52e1892671"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.war",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"86ebae9c-ce5e-4a74-a6c8-2341c3be6ce9"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.tgz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"a68c6a62-67a7-402a-b75a-a6c1fdde649a"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.cer",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"7dd73dc1-c5c9-4ff8-a61b-2de74765a6ab"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"53d3e815-a281-44da-80a2-ad2f332e9b26"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.zip",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"12bb7011-d0b1-4e7b-a121-27cd7ae3fceb"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.war",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"6cef5ef4-0b3c-4b5c-919d-6186d650e6b3"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.tar",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"d5fe3909-3b45-47ec-a360-47a1e57259de"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.egg",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"d70859ac-903a-4683-a292-28543892a216"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.tgz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"200ba31b-fbde-4d14-9383-ee6d633b302d"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.sql",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"681796be-5ca4-4c14-a5d0-f336ad004a04"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.tgz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"84ff72aa-6a7f-45fc-b0f4-00e443414098"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"d526bf4a-a3a3-4250-9c12-b404478a7e42"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.pem",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"c2aadad4-12e7-4285-9c5f-603c0eadba77"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"de769230-bfdb-4f98-bf85-c40923136f0f"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.jks",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"e2120a97-180f-4bce-9a08-bca047360ad7"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.alz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"f7b2f0da-1495-48e9-9034-1807d7b0c9af"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"971658f0-9d00-4cdb-a563-9e5334fe3bf5"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.tar.bz2",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"91456d62-5be1-444c-8716-0a8089b41b39"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.cer",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"5a925c78-08b4-40ec-9df5-cc5adb983d4d"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.war",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"4848d13c-2e48-4223-979a-545685379447"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.tgz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"a9132d55-a17f-44cd-8272-ac8f9046b681"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.zip",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"00a98d39-a509-4eb0-9531-fd0835d8ae94"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.jks",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"11ef75b7-e4bb-4a73-931d-b6db5d4e3c00"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.war",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"a093760e-0da4-44cf-ad08-9a8587040ece"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.tar.bz2",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"53f7c14f-3597-4c58-8ce7-d515de0afb9e"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.tar.lzma",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"a2db0c2a-93ea-4917-8d58-390d55109c67"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.tar",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"fb248a42-2704-4ede-a61f-8730eb6cccf9"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.pem",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"f560a406-067a-4d13-aa33-863069ad18c0"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.pem",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"fd7b3710-cc71-432f-859b-53774a29ed21"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.alz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"da13ba92-0c9b-4002-9c98-9eb806ad485a"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.sql",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"395c73d7-f263-4c84-bc09-698dad84afcf"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.tar.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"cdc6fcc6-fae6-46f9-96a9-1ccee4c6cc6e"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.cer",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"b1736a3f-ba22-4347-998d-109b9e5defa2"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"8f9242da-bcec-42e5-8d75-503aa92bfc27"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.egg",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"4e6b83b6-86aa-429e-af32-515b2edd2315"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.zip",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"f18fac46-9fea-412e-b782-fc09c7e91d83"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/site.tar.bz2",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"bea8e22f-e0c9-45b2-8100-6d51c78720a0"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.sql",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"b6c9083d-69d6-4053-ab4f-c99fa9fded59"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.egg",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"a04fb7f1-57f4-4cb4-b5fb-c9a0fa7e0236"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.tar.lzma",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"b3c1d402-eebb-4f0b-9ebd-a72a1c5d1c59"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.tar.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"d2f7758a-2e96-447a-a018-1be557545954"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.pem",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"2e587d86-47ea-4c13-aba5-05cd72de8288"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.tar",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"0fa27969-e41a-4c06-a349-374937389ac6"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/database.egg",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"2b9d9eb0-1277-4d99-872a-74d1ecc92d78"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.tar.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"d0734c00-c4c3-4a2b-b05f-e2a6be475ad8"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/juice-shop.tgz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"041dc43f-9858-43bc-8ae0-557a24f4cb24"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.egg",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"4947aa96-c561-48ae-9da6-3d6aac3d2a37"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.tar.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"29a7999a-c522-4f23-b68f-98907e66c57c"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.tar",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"917e6fae-7ee1-4ec2-b434-f7a9913fc247"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/dump.tar.lzma",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"08142b73-41f9-46fa-ac8e-e31c64f919d5"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/archive.alz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"4f2578c1-3a7e-492e-897e-01cd3cd4a1a6"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/10.96.193.17.jks",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"650ade70-72c8-44a5-9c53-0eb69202eb97"
+    },
+    {
+       "name":"Potentially interesting backup/cert file found.",
+       "description":null,
+       "category":"Potential Backup File",
+       "location":"http://juice-shop/backup.tar.gz",
+       "osi_layer":"NETWORK",
+       "severity":"INFORMATIONAL",
+       "attributes":{
+          "ip_address":"10.96.193.17",
+          "hostname":"juice-shop",
+          "banner":"",
+          "method":"HEAD",
+          "port":3000,
+          "niktoId":740001
+       },
+       "id":"f744809e-851b-402c-9b92-5b4a9a593dfb"
+    }
+ ]
