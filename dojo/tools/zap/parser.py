@@ -62,7 +62,7 @@ class ZapParser(object):
                                                            path=parts.path[:500],
                                                            query=parts.query[:1000],
                                                            fragment=parts.fragment[:500],
-                                                           product=test.engagement.product))
+                                                           ))
                 items.append(find)
         return items
 
