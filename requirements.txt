@@ -55,7 +55,7 @@ gitpython==3.1.14
 ptvsd==4.3.2
 python-gitlab==2.6.0
 google-auth==1.30.0
-google-api-python-client==1.12.8
+google-api-python-client==2.2.0
 google-auth-oauthlib==0.4.4
 drf_yasg==1.20.0
 django-saml2-auth==2.2.1
