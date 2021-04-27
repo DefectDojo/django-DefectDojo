@@ -141,6 +141,11 @@ Crashtest Security
 
 Import JSON Report Import XML Report in JUnit Format
 
+CredScan Report
+---------------
+
+Import CSV credential scanner reports
+
 Contrast Scanner
 ----------------
 
@@ -161,6 +166,31 @@ Choctaw Hog parser
 ------------------
 
 From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
+
+CycloneDX
+---------
+
+CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security contexts and supply chain component analysis.
+
+From: https://www.cyclonedx.org/
+
+Example with Anchore Grype:
+```
+./grype defectdojo/defectdojo-django:1.13.1 -o cyclonedx > report.xml
+```
+
+Example with `cyclonedx-bom` tool:
+```
+pip install cyclonedx-bom
+cyclonedx-py
+```
+```
+  Usage:  cyclonedx-py [OPTIONS]
+  Options:
+    -i <path> - the alternate filename to a frozen requirements.txt
+    -o <path> - the bom file to create
+    -j        - generate JSON instead of XML
+```
 
 DawnScanner
 -----------

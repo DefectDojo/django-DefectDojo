@@ -2,7 +2,7 @@ import logging
 import re
 from urllib.parse import urlparse
 
-from defusedxml import ElementTree as etree
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -177,13 +177,10 @@ class BurpEnterpriseParser(object):
                            references=details.get('References'),
                            impact=details.get('Impact'),
                            cwe=int(details.get('CWE')),
-                           active=False,
-                           verified=False,
                            false_p=False,
                            duplicate=False,
                            out_of_scope=False,
                            mitigated=None,
-                           numerical_severity=Finding.get_numerical_severity(details.get('Severity')),
                            static_finding=False,
                            dynamic_finding=True,
                            nb_occurences=1)

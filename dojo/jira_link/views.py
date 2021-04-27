@@ -17,7 +17,7 @@ from django.core.exceptions import PermissionDenied
 # Local application/library imports
 from dojo.forms import JIRAForm, DeleteJIRAInstanceForm, ExpressJIRAForm
 from dojo.models import User, JIRA_Instance, JIRA_Issue, Notes
-from dojo.utils import add_breadcrumb, get_system_setting
+from dojo.utils import add_breadcrumb, add_error_message_to_response, get_system_setting
 from dojo.notifications.helper import create_notification
 from django.views.decorators.http import require_POST
 import dojo.jira_link.helper as jira_helper
@@ -58,33 +58,14 @@ def webhook(request, secret=None):
                 # xml examples at the end of file
                 jid = parsed['issue']['id']
                 jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
-                logging.info("Received issue update for {}".format(jissue.jira_key))
+
+                findings = None
                 if jissue.finding:
-                    finding = jissue.finding
-
-                    assignee = parsed['issue']['fields'].get('assignee')
-                    assignee_name = assignee['name'] if assignee else None
-
-                    resolution = parsed['issue']['fields']['resolution']
-
-                    #         "resolution":{
-                    #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
-                    #             "id":"11",
-                    #             "description":"Cancelled by the customer.",
-                    #             "name":"Cancelled"
-                    #         },
-
-                    # or
-                    #         "resolution": null
-
-                    # or
-                    #         "resolution": "None"
-
-                    resolution = resolution if resolution and resolution != "None" else None
-                    resolution_id = resolution['id'] if resolution else None
-                    resolution_name = resolution['name'] if resolution else None
-                    jira_now = parse_datetime(parsed['issue']['fields']['updated'])
-                    jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now)
+                    logging.info("Received issue update for {} for finding {}".format(jissue.jira_key, jissue.finding.id))
+                    findings = [jissue.finding]
+                elif jissue.finding_group:
+                    logging.info("Received issue update for {} for finding group {}".format(jissue.jira_key, jissue.finding_group))
+                    findings = jissue.finding_group.findings.all()
                 elif jissue.engagement:
                     # if parsed['issue']['fields']['resolution'] != None:
                     #     eng.active = False
@@ -92,7 +73,35 @@ def webhook(request, secret=None):
                     #     eng.save()
                     return HttpResponse('Update for engagement ignored')
                 else:
-                    raise Http404('No finding or engagement found for JIRA issue {}'.format(jissue.jira_key))
+                    logging.info("Received issue update for {} for unknown object".format(jissue.jira_key))
+                    raise Http404('No finding, finding_group or engagement found for JIRA issue {}'.format(jissue.jira_key))
+
+                assignee = parsed['issue']['fields'].get('assignee')
+                assignee_name = assignee['name'] if assignee else None
+
+                resolution = parsed['issue']['fields']['resolution']
+
+                #         "resolution":{
+                #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
+                #             "id":"11",
+                #             "description":"Cancelled by the customer.",
+                #             "name":"Cancelled"
+                #         },
+
+                # or
+                #         "resolution": null
+
+                # or
+                #         "resolution": "None"
+
+                resolution = resolution if resolution and resolution != "None" else None
+                resolution_id = resolution['id'] if resolution else None
+                resolution_name = resolution['name'] if resolution else None
+                jira_now = parse_datetime(parsed['issue']['fields']['updated'])
+
+                if findings:
+                    for finding in findings:
+                        jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue)
 
             if parsed.get('webhookEvent') == 'comment_created':
                 """
@@ -152,16 +161,29 @@ def webhook(request, secret=None):
                 jissue = get_object_or_404(JIRA_Issue, jira_id=jid)
                 logging.info("Received issue comment for {}".format(jissue.jira_key))
                 logger.debug('jissue: %s', vars(jissue))
+
+                jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
+                for jira_userid in jira_usernames:
+                    # logger.debug('incoming username: %s jira config username: %s', commentor.lower(), jira_userid.lower())
+                    if jira_userid.lower() == commentor.lower():
+                        logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in DefectDojo (%s)', commentor.lower(), jira_userid.lower())
+                        return HttpResponse('')
+                        break
+
+                findings = None
                 if jissue.finding:
+                    findings = [jissue.finding]
+                    create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
+                elif jissue.finding_group:
+                    findings = [jissue.finding_group.findings.all()]
+                    create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id, )), icon='check')
+                elif jissue.engagement:
+                    return HttpResponse('Comment for engagement ignored')
+                else:
+                    raise Http404('No finding or engagement found for JIRA issue {}'.format(jissue.jira_key))
+
+                for finding in findings:
                     # logger.debug('finding: %s', vars(jissue.finding))
-                    jira_usernames = JIRA_Instance.objects.values_list('username', flat=True)
-                    for jira_userid in jira_usernames:
-                        # logger.debug('incoming username: %s jira config username: %s', commentor.lower(), jira_userid.lower())
-                        if jira_userid.lower() == commentor.lower():
-                            logger.debug('skipping incoming JIRA comment as the user id of the comment in JIRA (%s) matches the JIRA username in DefectDojo (%s)', commentor.lower(), jira_userid.lower())
-                            return HttpResponse('')
-                            break
-                    finding = jissue.finding
                     new_note = Notes()
                     new_note.entry = '(%s (%s)): %s' % (commentor_display_name, commentor, comment_text)
                     new_note.author, created = User.objects.get_or_create(username='JIRA')
@@ -170,11 +192,6 @@ def webhook(request, secret=None):
                     finding.jira_issue.jira_change = timezone.now()
                     finding.jira_issue.save()
                     finding.save()
-                    create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
-                elif jissue.engagement:
-                    return HttpResponse('Comment for engagement ignored')
-                else:
-                    raise Http404('No finding or engagement found for JIRA issue {}'.format(jissue.jira_key))
 
             if parsed.get('webhookEvent') not in ['comment_created', 'jira:issue_updated']:
                 logger.info('Unrecognized JIRA webhook event received: {}'.format(parsed.get('webhookEvent')))
@@ -393,17 +410,20 @@ def delete_jira(request, tid):
         if 'id' in request.POST and str(jira_instance.id) == request.POST['id']:
             form = DeleteJIRAInstanceForm(request.POST, instance=jira_instance)
             if form.is_valid():
-                jira_instance.delete()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'JIRA Conf and relationships removed.',
-                                     extra_tags='alert-success')
-                create_notification(event='other',
-                                    title='Deletion of JIRA: %s' % jira_instance.configuration_name,
-                                    description='JIRA "%s" was deleted by %s' % (jira_instance.configuration_name, request.user),
-                                    url=request.build_absolute_uri(reverse('jira')),
-                                    )
-                return HttpResponseRedirect(reverse('jira'))
+                try:
+                    jira_instance.delete()
+                    messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'JIRA Conf and relationships removed.',
+                                        extra_tags='alert-success')
+                    create_notification(event='other',
+                                        title='Deletion of JIRA: %s' % jira_instance.configuration_name,
+                                        description='JIRA "%s" was deleted by %s' % (jira_instance.configuration_name, request.user),
+                                        url=request.build_absolute_uri(reverse('jira')),
+                                        )
+                    return HttpResponseRedirect(reverse('jira'))
+                except Exception as e:
+                    add_error_message_to_response('Unable to delete JIRA Instance, probably because it is used by JIRA Issues: %s' % str(e))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([jira_instance])

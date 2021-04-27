@@ -179,8 +179,14 @@ env = environ.Env(
     # You need to have wkhtmltopdf installed on your system to generate PDF reports
     DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
 
-    DD_JIRA_TEMPLATE_DIR=(str, 'dojo/templates/issue-trackers'),
-    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/')
+    DD_FEATURE_FINDING_GROUPS=(bool, False),
+    DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
+    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
+
+    # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
+    # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
+    # Set to True to revert to the old behaviour where all duplicates are deleted
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False)
 )
 
 
@@ -670,6 +676,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
+    'dojo.request_cache.middleware.RequestCacheMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -749,6 +756,11 @@ CELERY_BEAT_SCHEDULE = {
     #     'schedule': timedelta(hours=12),
     #     'kwargs': {'mode': 'reconcile', 'dryrun': True, 'daysback': 10, 'product': None, 'engagement': None}
     # },
+    # 'fix_loop_duplicates': {
+    #     'task': 'dojo.tasks.fix_loop_duplicates_task',
+    #     'schedule': timedelta(hours=12)
+    # },
+
 
 }
 
@@ -787,7 +799,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'Dependency Check Scan': ['cve', 'file_path'],
+    'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
@@ -809,7 +821,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
-    'SpotBugs Scan': ['cwe', 'severity', 'file_path'],
+    'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -831,7 +843,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'DSOP Scan': True,
     'Acunetix Scan': True,
     'Trivy Scan': True,
-    'SpotBugs Scan ': False,
+    'SpotBugs Scan': False,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -889,6 +901,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
+    'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -996,7 +1009,7 @@ LOGGING = {
             'propagate': False,
         },
         'titlecase': {
-            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
+            # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
@@ -1053,5 +1066,8 @@ EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
 
-JIRA_TEMPLATE_DIR = env('DD_JIRA_TEMPLATE_DIR')
+FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
+JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
+
+DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')

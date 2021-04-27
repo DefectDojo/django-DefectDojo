@@ -176,7 +176,6 @@ def get_item(result, rules, artifacts, run_date):
 
     finding = Finding(title=textwrap.shorten(title, 150),
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     description=description,
                     mitigation=mitigation,
                     references=references,

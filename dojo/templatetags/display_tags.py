@@ -776,6 +776,15 @@ def jiraencode(value):
 
 
 @register.filter
+def jiraencode_component(value):
+    if not value:
+        return value
+    # component names can be long and won't wrap causing everything to look messy
+    # add some spaces around semicolon
+    return value.replace("|", "").replace(":", " : ").replace("@", " @ ").replace("?", " ? ").replace("#", " # ")
+
+
+@register.filter
 def jira_project(obj, use_inheritance=True):
     return jira_helper.get_jira_project(obj, use_inheritance)
 
@@ -921,14 +930,14 @@ def import_settings_tag(test_import, autoescape=True):
     <i class="fa %s has-popover %s"
         title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
         data-content="
+            <b>ID:</b> %s<br/>
             <b>Active:</b> %s<br/>
             <b>Verified:</b> %s<br/>
             <b>Minimum Severity:</b> %s<br/>
             <b>Close Old Findings:</b> %s<br/>
             <b>Push to jira:</b> %s<br/>
             <b>Tags:</b> %s<br/>
-            <b>Endpoint:</b> %s<br/>
-            <b>Version:</b> %s<br/>
+            <b>Endpoints:</b> %s<br/>
         "
     </i>
     """
@@ -937,14 +946,14 @@ def import_settings_tag(test_import, autoescape=True):
     color = ''
 
     return mark_safe(html % (icon, color, icon,
+                                esc(test_import.id),
                                 esc(test_import.import_settings.get('active', None)),
                                 esc(test_import.import_settings.get('verified', None)),
                                 esc(test_import.import_settings.get('minimum_severity', None)),
                                 esc(test_import.import_settings.get('close_old_findings', None)),
                                 esc(test_import.import_settings.get('push_to_jira', None)),
                                 esc(test_import.import_settings.get('tags', None)),
-                                esc(test_import.import_settings.get('endpoint', None)),
-                                esc(test_import.import_settings.get('version', None))))
+                                esc(test_import.import_settings.get('endpoints', test_import.import_settings.get('endpoint', None)))))
 
 
 @register.filter(needs_autoescape=True)
@@ -976,8 +985,3 @@ def import_history(finding, autoescape=True):
         list_of_status_changes += '<b>' + status_change.created.strftime('%b %d, %Y, %H:%M:%S') + '</b>: ' + status_change.get_action_display() + '<br/>'
 
     return mark_safe(html % (list_of_status_changes))
-
-
-@register.simple_tag
-def feature_reports_pdf_list():
-    return settings.FEATURE_REPORTS_PDF_LIST
