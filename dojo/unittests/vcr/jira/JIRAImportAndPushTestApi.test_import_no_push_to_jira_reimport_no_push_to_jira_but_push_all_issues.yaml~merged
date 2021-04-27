@@ -20,6 +20,15 @@ interactions:
     body:
       string: !!binary |
 <<<<<<< HEAD
+        H4sIAAAAAAAAA1SPwUrEMBCG3yVX2+4kaRObm+hBRVZhuycRSdIpVtKktKmwLPvuprioexv++b75
+        mSMxesb95IgiHzGOs9psWuzQxjZ8hkJHp+e5177wGElGvnCa++ATTAFoAQXku+3Ny+7+ufnbbpfB
+        pImo1xXKIIO3jLQ4unAY0MfmMGI6cOvC0ibJLL1rfxSiVqGS5/BOxxVkwGgOZc5EQ4WqSsXLAgCu
+        gAEkf8Yp9Tb9cMHKhlJVUsV5UV+zX9YOD74LCZQCDTXC1lhVsjayErxGy5FTDtzqlguma8npv4Lo
+        1obHftJkfafTi4tPweo1PhJ3ngj69/2OnE7fAAAA//8DAGE0MBhaAQAA
+    headers:
+      ATL-TraceId:
+      - 5a8fd1210b247151
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
         H4sIAAAAAAAAA1SPTUvEMBCG/0uuttlJ0w+bm+hBRVZhuycRyccUK2lS2lRYlv3vJrioexveeZ55
         mSNRcsH9bIkgHyFMi9hsDPaog/Gfnspg5bIM0lGHgWTkC+dl8C7CDIBRoJDvtjcvu/vn7m+7XUcV
@@ -39,15 +48,6 @@ interactions:
       ATL-TraceId:
       - e3f477775de0e9ca
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-        H4sIAAAAAAAAA1SPTUvEMBCG/8tcbbuTNG22uYkeVGQVtnsSkbRJsJImpUmFZdn/boqLH7fhneeZ
-        lzlBJ4M+zBYEvMc4BbHZKG10H5X/8IWMVoYwSFc4HSGDTz2HwbsEE0RSYIH5fnf9vL97an+3u2Xs
-        0gTiZYUyzPA1A6Un64+jdrE9TjoduLF+UUnqlsGqbwXEKlT8Et7KuIIUKcmR5bRskQrKBU21iFdI
-        EZMf9Jx622H8x9YtaQTjAquCMfbD9uO9Mz6BHa2lrOm2Yk3ZN8g1Kioro4jipqdm20nKDanKPwXR
-        rg0PwyxhfcfIxcZH38s1PoG9TKDd22EP5/MXAAAA//8DALdlPbBaAQAA
-    headers:
-      ATL-TraceId:
-      - a17fc580a0fd5f81
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -55,13 +55,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:33 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:00 GMT
 =======
       - Mon, 26 Apr 2021 17:47:37 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:05 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -88,6 +88,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - b106afd1-d467-448e-a8c9-6f1092a81eaf
+      x-envoy-upstream-service-time:
+      - '39'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 6ae9b7d8-b78f-488d-8332-1eb4831f4675
       x-envoy-upstream-service-time:
@@ -97,10 +101,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '33'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 8421e33d-c255-484a-8537-a4fbb4602c38
-      x-envoy-upstream-service-time:
-      - '37'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -182,13 +182,13 @@ interactions:
     headers:
       ATL-TraceId:
 <<<<<<< HEAD
+      - 7d50b4c11d003444
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 0b27b4ed992f3249
 =======
       - cdd4bf5e1642c9ac
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 981b3d3fdbcb19dc
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -196,13 +196,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:34 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:00 GMT
 =======
       - Mon, 26 Apr 2021 17:47:38 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:05 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -229,6 +229,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 847a1915-9c39-466b-bbbb-a9dd1f65f7cc
+      x-envoy-upstream-service-time:
+      - '90'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 096a9f62-2bbf-417c-ae06-a51584722129
 =======
@@ -236,21 +240,19 @@ interactions:
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
       x-envoy-upstream-service-time:
       - '84'
-=======
-      - 81768e6a-bd2c-47d2-a25f-490a5ae09677
-      x-envoy-upstream-service-time:
-      - '70'
 >>>>>>> upstream/dev
     status:
       code: 200
       message: OK
 - request:
 <<<<<<< HEAD
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     body: '{"fields": {"project": {"key": "NTEST"}, "summary": "weekly engagement",
       "description": "weekly engagement", "issuetype": {"name": "Epic"}, "customfield_10011":
       "weekly engagement"}}'
 =======
+>>>>>>> upstream/dev
     body: null
     headers:
       Accept:
@@ -293,13 +295,21 @@ interactions:
         DwAAAP//AwBBtKXIPhUAAA==
     headers:
       ATL-TraceId:
+<<<<<<< HEAD
+      - 69d3a5f7ed5189ec
+=======
       - 2abfef6743fd7de8
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:34 GMT
+=======
       - Mon, 26 Apr 2021 17:47:38 GMT
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -324,19 +334,32 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
+      - be855c8e-f8cf-4be5-b9b8-9b798c20ced0
+      x-envoy-upstream-service-time:
+      - '95'
+=======
       - 109bff23-0f3a-4aa7-8e6c-a398ba2cf036
       x-envoy-upstream-service-time:
       - '77'
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Zap1: Cookie Without
       Secure Flag", "description": "\n\n\n\n\n\n*Title*: [Zap1: Cookie Without Secure
+<<<<<<< HEAD
+      Flag|http://localhost:8080/finding/2499]\n\n*Defect Dojo link:* http://localhost:8080/finding/2499
+      (2499)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/606]\n\n*Branch/Tag:* None\n\n*BuildID:*
+=======
       Flag|http://localhost:8080/finding/2115]\n\n*Defect Dojo link:* http://localhost:8080/finding/2115
       (2115)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
       [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
       / [ZAP Scan|http://localhost:8080/test/485]\n\n*Branch/Tag:* None\n\n*BuildID:*
+>>>>>>> upstream/dev
       None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
       https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
       cookie has been set without the secure flag, which means that the cookie can
@@ -350,11 +373,9 @@ interactions:
       such sensitive information.\n\n*Impact*:\nNo impact provided\n\n*Steps to reproduce*:\nNone\n\n*References*:\nCWE-614\nWASC-13\n\n\n*Reporter:*
       [(admin) ()|mailto:]\n", "issuetype": {"name": "Task"}, "priority": {"name":
       "Low"}}}'
->>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
+<<<<<<< HEAD
 =======
-    body: '{"fields": {"project": {"key": "NTEST"}, "summary": "weekly engagement",
-      "description": "weekly engagement", "issuetype": {"name": "Epic"}, "customfield_10011":
-      "weekly engagement"}}'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
 >>>>>>> upstream/dev
     headers:
       Accept:
@@ -367,13 +388,13 @@ interactions:
       - keep-alive
       Content-Length:
 <<<<<<< HEAD
+      - '1671'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - '182'
 =======
       - '1671'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - '182'
 >>>>>>> upstream/dev
       Content-Type:
       - application/json
@@ -384,6 +405,11 @@ interactions:
   response:
     body:
 <<<<<<< HEAD
+      string: '{"id":"10936","key":"NTEST-747","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10936"}'
+    headers:
+      ATL-TraceId:
+      - 8b00272ca5523185
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       string: '{"id":"10929","key":"NTEST-740","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10929"}'
     headers:
@@ -395,11 +421,6 @@ interactions:
       ATL-TraceId:
       - a2dd5210ff56d3ab
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      string: '{"id":"10728","key":"NTEST-539","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10728"}'
-    headers:
-      ATL-TraceId:
-      - 5bf873cf4d409f1b
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -407,13 +428,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:35 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:01 GMT
 =======
       - Mon, 26 Apr 2021 17:47:38 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:06 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -436,6 +457,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 76624125-2472-412f-ab06-3cb1015fb2e1
+      x-envoy-upstream-service-time:
+      - '545'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 4d8eb9ea-1e00-4435-8d68-3daf2d0821d3
       x-envoy-upstream-service-time:
@@ -445,10 +470,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '442'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 8867b5ff-e919-437d-b2d0-4edc99fa39cd
-      x-envoy-upstream-service-time:
-      - '497'
 >>>>>>> upstream/dev
     status:
       code: 201
@@ -470,6 +491,52 @@ interactions:
       - python-requests/2.25.1
     method: GET
 <<<<<<< HEAD
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-747
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - aafc2ed6641e9962
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-740
   response:
@@ -552,42 +619,6 @@ interactions:
     headers:
       ATL-TraceId:
       - 07ff48fc6c56fc1f
-=======
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-539
-  response:
-    body:
-      string: !!binary |
-        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
-        +gEAAP//AwA4GlZm2hYAAA==
-    headers:
-      ATL-TraceId:
-      - 5ada28d86fd8dd10
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -595,9 +626,9 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
-      - Mon, 26 Apr 2021 17:47:39 GMT
+      - Tue, 27 Apr 2021 09:41:35 GMT
 =======
-      - Mon, 26 Apr 2021 17:47:06 GMT
+      - Mon, 26 Apr 2021 17:47:39 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -624,9 +655,14 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 40f71983-2c64-4a37-82ae-88891f21a8fb
+      x-envoy-upstream-service-time:
+      - '174'
+=======
       - 854efea8-a772-4ee6-93cd-10fb40f395c6
       x-envoy-upstream-service-time:
       - '140'
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
@@ -646,6 +682,53 @@ interactions:
       User-Agent:
       - python-requests/2.25.1
     method: GET
+<<<<<<< HEAD
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10936
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6RWa2/bNhT9K4Q+DF1mWw9rji2gGFLH7bKlaWY7DdC0MGjpWmYskQJJWfba/Pdd
+        6hGnTp21aQIk4iXv+9xDfrZgk1EeWYElgUcgIXrNIIlUi9MUVEuFS0hpS2QgqWaCqxZETKegaStc
+        Uh5DIuLWGqTCPYjGkElQwHV11mpZzFh2nUG3hwsFyQKXS60zFdh2BAsIdSRuRYfqhCrFKO9w0Dba
+        0DbNmO3ZTKkc7MbACraofzEdTabtY/8YJYsyWCv4bCl0mquQaoiF3FbBRbhCBc/x3Lbjt73jqesG
+        vht0/c5g0P/N8RzHxGh86G0GpZlnxmj0MU7H8XZZV4sIVChZZiqC0hOiUpokLRIxpRkPNckYhEDE
+        ghRCrjpGOxT8SibfE4WCMJdgrxkUdE01lX8o9i+8TLFJefpLJTqLXrpO1+3XyykG+nKXcssyjUZf
+        U6pWpkf5XJuvYEETBS2rsWEFpZG7lqUZAiPDJlsBzzETK5PiFsN7ZvVq7bJ2ZTea2pnFg4bvIr3i
+        TGs0YPBVa5uk/i7PKrHQBZUmMcXSLGGIkGgvGyxuCRm/v/H73xNuXebaWV3pjJnC4s/DOvuOQaXn
+        bzz/2YbLFpYo+UXV/5/w5fY2bu/nfG0aZ/XHE9663qbr/Zy3Gpyq+Tjo7e7OzPfmfcUu2LGbT9jB
+        OJYQ41w/giFiSiR5NWaVJMyVFmlJETP04B0f2ug/tlFRRyU1g1nSnxW03ZaFaer3OHEGV/UBqpEn
+        Kxr68QmoOO6e1ezKmjTwLj+HIjdZuoapro2A8dgKtMzhriYvY0yysMr98yOZCQyPqqXIk+iUqSyh
+        23okUBxKwFzN1H2LJ3ter+HJ/ao5h8rpHtrwdpTBhGR6+8yKNeq2/2N0yVIag7KNhmqMMBQkouio
+        dbyjmHNRNFTkW6ZGe4l0m0QSOgdDJgaae4fMVH6zDO4hHLp9U48lVaOMheeMr8qr+BQyczPzsOlZ
+        2cmi3LuXcMFHeDHTeQJjoKrCgay/rMvzqzdnF7Pzs+HoYjKajcbjd2PMDwdIYUHwwHQJ5BJZk2ti
+        /BKmiODJluBEssQYJVqQv5ik5FJCilNLcoUI7ZQzup/FAA06X5jj/D64Day9kcWSx4zTBJuJ3djN
+        mNnbl9Xvirq8JaoTjK5hAuxrzOH+dJ6Zmf0OHFcvhWdCr1K+v62+vtx/DI07uL2i4QofUg3kGuOV
+        r2H9pPmpgJt3kd08T7zmcuVgoB6KRMiLKpp5kkM7lsgRu8eBIKeiarZIM3zqcV134amefl2cj3z3
+        ezRlOoGjgNx8oJkbkKEQKwbkmmnkKE0m5eVBXic0/mJyxVQTEdJkKZQO+k7fsReMR0iDtucPBp9K
+        i6dlLTDMW0EMSoIj8v+q5IX5+2tpYAKINyQVVMTxL0XD6xGurviKi2IX+/D9I+nRpRRRjq+YEY9x
+        olKsjz3FcuC5mzIZtEv+FEVbiwMJZbUB7xOxyY2rNPknp1KDJDuTB1Rh59MttT+cXJJJSPmB8+bt
+        ZPecXlW3V5LycGlPaYzBXmBrK2nOkujs9KFoKNKUaYL0tHwgNoXbKg2pwtyjTDBExlFQysv6G5im
+        lHHFNHQQPIHvdw/tHZLbEfqcCyqjpgf3vTjdQcx4PSFhhSSMkswBOFGgSVHDSiPLVe8SskBotUix
+        ZOGSpEC5wk1anagtYP3QAqFhiCwJEVkzSnIEfii3GdIMHuMcquu1Y0IZI/6QQEMIGtwVRdERBVVZ
+        R8jYRtTBppMtsxIYCMDZQshZ5UzNqMbLep5ja2Yv3l2fTC7bk7dtvGhKaF6NzyujTxXmLWCSUUDe
+        jKYfOXI5Di6iJyAiW4cf+WjNzBWCwU1At6txq/f+AwAA///sWW1r2zAQ/ismUGhL7VhOnJfB6MJe
+        YB82ygob9Jtiq42Z37DsdKPLf99zkqImTp2NbpR8CJSiRNLdSbp77rnLvyqIsyTuUqDn9ijoFksr
+        lgn+S31HXSp21ynH+ITMfqfKUPKLbwuRU3g73D5vgSoVdsAhyJhkKZwkx4tkao9TVJQDOWYlpSCk
+        v+8ivyD/yB0EgaZSDk/v+U9yNKfkykkaiYd14DkbfoJKNBephziW5HnWzzY8kXSRo0K/sU+uDSR5
+        soGXPmmn8rzzj1nJo5rO+blwEvXBAZ7QdanbP7+uRSkphVdC44zQi01kW9dVkQvQc0dsiEubXb91
+        2cBcKGr7gvCIIO2U42HzM+f07BceM62LV8CSXYbIuhgiG26m/bpC+lOcllhqe2nYIcPvnOjiXb7l
+        XerqFf18eqGtB9oT0/XEFqdp5z0EM48WBMg6R8omyzgl8N6fsh3dIdHxonpmtidadgnMopIBhVR4
+        y4eDmM0nQz+c4wDj8ZQFwYjIhV0EDXuWCXrgWRxDBzJ+79EG15R2byzEkdC99bX2eA/UQi1TAKOH
+        /ZAFbCiYLwZBPB1Fgygcs2gSxrHPR7dMTC7j10rKyWB2EnzAn97nZjw3uc919VfSa6R7jxtxA4+c
+        3SubeZpEdGVuybmkG8N+RFadgDtj+O7KHXllTva3C/fDt7hd/h++xe0WwqFbDEyKdc1s+PEm07wy
+        vS+KJwJnXZdrXLsBvmL5+6YqStG/AeJEi8fAo5YVZm0kkx7TfDPUujKIe4SCl3/0IxS8hMVHKOiE
+        AkswYOKdjrgH6nabsQ+5Rc1TjHY5kw/e1XtY9XYnujpzvu3MtSdsp6s9YSmcyJdJVeSa7pjCvzE/
+        veiPf3OEZVH/twaqlmVlQhHKwa+Fag7ZrieqWWXxw3poUPfZ+tWPVP213Itexn98EbJJSfDGWVVb
+        p6pntT439Zap9UMnt99vbw62dpsNytrVavUbAAD//wMAAxY/58EbAAA=
+    headers:
+      ATL-TraceId:
+      - b7f46b823b357d80
+=======
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/10735
   response:
     body:
@@ -692,16 +775,21 @@ interactions:
       ATL-TraceId:
       - f451a26ddf99b4b3
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:35 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:01 GMT
 =======
       - Mon, 26 Apr 2021 17:47:39 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -726,6 +814,11 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
+      - 2c38c2c3-7622-4f1d-94de-cf0609841bef
+      x-envoy-upstream-service-time:
+      - '163'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 4fe18850-8b29-4be6-88a5-f6ab41070a43
       x-envoy-upstream-service-time:
@@ -735,10 +828,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '105'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 950165f4-51ef-4c7c-8900-ae398850df2a
-      x-envoy-upstream-service-time:
-      - '145'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -764,6 +853,15 @@ interactions:
     body:
       string: !!binary |
 <<<<<<< HEAD
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J06Q0N9GDiqxCuycRSdIpVtKmNKmwLPvfTXDx4za88zzz
+        MieilcfDaokk7yEsXu52PQ5oQu8+XKGCVd6Pai5mDCQjn7j60c0RpgC0gALydn/93N49db/b/Tbp
+        OBH5kqAMMnjNSI+LdccJ59AdF4wHbqzb+ijpbbT9t0JkEnh9CW9VSGAJJc2hykvRUSF5JVlVAMAV
+        lADR97jG3m6c/rF1R6msqGSioJz/sGa6nwcXwVqgplqYBjmvG11zwRo0DBllwIzqmShVUzP6pyDY
+        1PAwroqkdwa12fDojErxidjLRHB+O7TkfP4CAAD//wMAI/GjXloBAAA=
+    headers:
+      ATL-TraceId:
+      - d01ffcd63789561e
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
         H4sIAAAAAAAAA1SPTUvEMBCG/0uuttlJ0yQ0N9GDiqxCuycRSdopVtKktKmwLPvfTXHx4za88zzz
         MidizYKH2RFN3mOcFr3bddhjG7vwEaiJzizLYDz1GElGPnFehuATzAAYBQp5vb9+ru+emt/tfh1t
@@ -783,15 +881,6 @@ interactions:
       ATL-TraceId:
       - 11da35d2356b804d
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-        H4sIAAAAAAAAA1SPTUvEMBCG/0uutt3J9CNtbqIHFVmFdk8ikjYJVtKkNKmwLPvfTXHx4za88zzz
-        MifSC68OiyGcvIcwe77bSaXVEKT7cJkIRng/CptZFUhCPtXiR2cjTAFoBhmk7f76ub176n63+3Xq
-        40T4ywYlkMBrQqSajTtOyobuOKt44Ma4VUapX0cjvxXCN6Fkl/BWhA1EQJpCkWLeAXJkHGMtwBUg
-        QPS9WmJvN07/2KqjDS8YB5ZRrH/YYbq32kWwx0qICuuyaPKhAaZAoii1pJLpAXXdC2SalvmfgmC2
-        hodxEWR7R4vVhEc3iC0+EXOZiLJvh5acz18AAAD//wMA41tkpFoBAAA=
-    headers:
-      ATL-TraceId:
-      - d51195daea0ed725
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -799,13 +888,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:36 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:02 GMT
 =======
       - Mon, 26 Apr 2021 17:47:39 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:07 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -832,6 +921,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 1eb95098-604e-4344-b3cb-5243ddf42565
+      x-envoy-upstream-service-time:
+      - '38'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 9a609d9c-1c35-41ba-958b-a0b222c65598
       x-envoy-upstream-service-time:
@@ -841,10 +934,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '37'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 65bebb86-dc35-4fc3-9b99-6287eb61e39f
-      x-envoy-upstream-service-time:
-      - '36'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -926,13 +1015,13 @@ interactions:
     headers:
       ATL-TraceId:
 <<<<<<< HEAD
+      - be1fac919964c2cc
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 3646c838220d2705
 =======
       - 7852409cbddf4cf2
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 1287e046015cd751
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -940,13 +1029,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:36 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:02 GMT
 =======
       - Mon, 26 Apr 2021 17:47:39 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:07 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -973,6 +1062,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 30c87234-d577-483e-9ca2-00954446c3a7
+      x-envoy-upstream-service-time:
+      - '78'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 4fdacc9d-9dec-49e9-bd82-532d4574966d
       x-envoy-upstream-service-time:
@@ -982,10 +1075,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '56'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - c1672226-a544-49e8-9e30-8654e2b67006
-      x-envoy-upstream-service-time:
-      - '58'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -1034,13 +1123,13 @@ interactions:
     headers:
       ATL-TraceId:
 <<<<<<< HEAD
+      - 307884f3895d622e
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 7a05216c02bb2cba
 =======
       - a576d612a4a44556
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - fdd0299e72efe094
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -1048,13 +1137,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:36 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:02 GMT
 =======
       - Mon, 26 Apr 2021 17:47:40 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:07 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -1081,6 +1170,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - b051ac68-ca69-41e7-aba7-54ce67ac882e
+      x-envoy-upstream-service-time:
+      - '102'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 5690bd2a-e268-4214-8849-8f22aca31079
       x-envoy-upstream-service-time:
@@ -1090,16 +1183,19 @@ interactions:
       x-envoy-upstream-service-time:
       - '89'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 1876ee54-4b29-493f-86a8-c319b4c3346b
-      x-envoy-upstream-service-time:
-      - '69'
 >>>>>>> upstream/dev
     status:
       code: 200
       message: OK
 - request:
 <<<<<<< HEAD
+    body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Zap2: Cookie Without
+      Secure Flag", "description": "\n\n\n\n\n\n*Title*: [Zap2: Cookie Without Secure
+      Flag|http://localhost:8080/finding/2500]\n\n*Defect Dojo link:* http://localhost:8080/finding/2500
+      (2500)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/606]\n\n*Branch/Tag:* None\n\n*BuildID:*
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Zap1: Cookie Without
       Secure Flag", "description": "\n\n\n\n\n\n*Title*: [Zap1: Cookie Without Secure
@@ -1115,13 +1211,6 @@ interactions:
       [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
       / [ZAP Scan|http://localhost:8080/test/485]\n\n*Branch/Tag:* None\n\n*BuildID:*
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-    body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Zap1: Cookie Without
-      Secure Flag", "description": "\n\n\n\n\n\n*Title*: [Zap1: Cookie Without Secure
-      Flag|http://localhost:8080/finding/2105]\n\n*Defect Dojo link:* http://localhost:8080/finding/2105
-      (2105)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
-      [Security How-to|http://localhost:8080/product/2] / [weekly engagement|http://localhost:8080/engagement/3]
-      / [ZAP Scan|http://localhost:8080/test/480]\n\n*Branch/Tag:* None\n\n*BuildID:*
 >>>>>>> upstream/dev
       None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
       https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
@@ -1147,13 +1236,13 @@ interactions:
       - keep-alive
       Content-Length:
 <<<<<<< HEAD
+      - '1671'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - '1666'
 =======
       - '1671'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - '1666'
 >>>>>>> upstream/dev
       Content-Type:
       - application/json
@@ -1164,6 +1253,11 @@ interactions:
   response:
     body:
 <<<<<<< HEAD
+      string: '{"id":"10937","key":"NTEST-748","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10937"}'
+    headers:
+      ATL-TraceId:
+      - b68abd6a14e38d08
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       string: '{"id":"10930","key":"NTEST-741","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10930"}'
     headers:
@@ -1175,11 +1269,6 @@ interactions:
       ATL-TraceId:
       - 8b7cf55ee7276c3d
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      string: '{"id":"10729","key":"NTEST-540","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10729"}'
-    headers:
-      ATL-TraceId:
-      - 76b25db706ed689a
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -1187,13 +1276,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:36 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:03 GMT
 =======
       - Mon, 26 Apr 2021 17:47:40 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:07 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -1216,6 +1305,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 43b97ceb-a981-4bb0-ba4c-fd9492acd2a6
+      x-envoy-upstream-service-time:
+      - '390'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 47ab9301-cc5b-432c-b892-93fa9da7269f
       x-envoy-upstream-service-time:
@@ -1225,10 +1318,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '461'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 91302cd0-6fbb-4b78-8e13-a52fadb488f8
-      x-envoy-upstream-service-time:
-      - '458'
 >>>>>>> upstream/dev
     status:
       code: 201
@@ -1250,6 +1339,52 @@ interactions:
       - python-requests/2.25.1
     method: GET
 <<<<<<< HEAD
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-748
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - 4b2510c0196f0c29
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-741
   response:
@@ -1343,52 +1478,6 @@ interactions:
       ATL-TraceId:
       - 86a888fdc94ab9b2
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-540
-  response:
-    body:
-      string: !!binary |
-        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
-    headers:
-      ATL-TraceId:
-      - a702775d39b1de4b
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -1396,13 +1485,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:37 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:03 GMT
 =======
       - Mon, 26 Apr 2021 17:47:40 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:08 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -1429,6 +1518,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 84e25120-a914-4841-b3fd-18ed017d5a77
+      x-envoy-upstream-service-time:
+      - '151'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 6557a910-a525-4f96-bfd3-7ef515cea096
       x-envoy-upstream-service-time:
@@ -1438,20 +1531,14 @@ interactions:
       x-envoy-upstream-service-time:
       - '141'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 951eb3f0-fc48-4e7d-ab33-ce6351960fbd
-      x-envoy-upstream-service-time:
-      - '112'
 >>>>>>> upstream/dev
     status:
       code: 200
       message: OK
 - request:
 <<<<<<< HEAD
-    body: '{"issueKeys": ["10930"], "ignoreEpics": true}'
 =======
-    body: '{"issueKeys": ["10729"], "ignoreEpics": true}'
->>>>>>> upstream/dev
+    body: '{"issueKeys": ["10930"], "ignoreEpics": true}'
     headers:
       Accept:
       - application/json,*.*;q=0.9
@@ -1467,20 +1554,14 @@ interactions:
       - application/json
       User-Agent:
       - python-requests/2.25.1
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     method: PUT
     uri: https://defectdojo.atlassian.net/rest/greenhopper/1.0/epics/10929/add
-=======
-    method: PUT
-    uri: https://defectdojo.atlassian.net/rest/greenhopper/1.0/epics/10728/add
->>>>>>> upstream/dev
   response:
     body:
       string: ''
     headers:
       ATL-TraceId:
-<<<<<<< HEAD
       - b7ac1ad0233b57ff
 =======
     method: GET
@@ -1530,23 +1611,16 @@ interactions:
       ATL-TraceId:
       - fef251e56fbdab8b
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - d0ce13c1a05fda7b
->>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:04 GMT
 =======
       - Mon, 26 Apr 2021 17:47:41 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:08 GMT
->>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -1560,20 +1634,16 @@ interactions:
       - 1; mode=block
       cache-control:
       - no-cache, no-store, no-transform
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
 =======
       content-encoding:
       - gzip
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
->>>>>>> upstream/dev
       timing-allow-origin:
       - '*'
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 901b0e63-9004-4a19-8bb2-3c8231e157bd
       x-envoy-upstream-service-time:
@@ -1583,18 +1653,11 @@ interactions:
       x-envoy-upstream-service-time:
       - '220'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - f4a8f282-9529-4e08-bc9a-b7bf3ca764aa
-      x-envoy-upstream-service-time:
-      - '278'
->>>>>>> upstream/dev
     status:
       code: 204
       message: No Content
 - request:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
-=======
 >>>>>>> upstream/dev
     body: null
     headers:
@@ -1612,6 +1675,52 @@ interactions:
       - python-requests/2.25.1
     method: GET
 <<<<<<< HEAD
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10937
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - 3ae9b8e711cb2727
+=======
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/10930
   response:
     body:
@@ -1657,52 +1766,6 @@ interactions:
     headers:
       ATL-TraceId:
       - d52f96e22289bc38
-=======
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10729
-  response:
-    body:
-      string: !!binary |
-        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
-    headers:
-      ATL-TraceId:
-      - a420cf2666ca4b78
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -1710,9 +1773,9 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
-      - Tue, 27 Apr 2021 09:41:04 GMT
+      - Tue, 27 Apr 2021 09:41:37 GMT
 =======
-      - Mon, 26 Apr 2021 17:47:08 GMT
+      - Tue, 27 Apr 2021 09:41:04 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -1739,13 +1802,13 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 45fcba9e-9988-4fab-b46b-79df641b9091
+      x-envoy-upstream-service-time:
+      - '135'
+=======
       - b2d8a2a1-72bf-424c-a24c-c27fdd58b5d2
       x-envoy-upstream-service-time:
       - '171'
-=======
-      - 12482b52-b0d5-4476-ab15-1e22f2ca69f0
-      x-envoy-upstream-service-time:
-      - '196'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -1753,8 +1816,8 @@ interactions:
 - request:
 <<<<<<< HEAD
 =======
->>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
 =======
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
 >>>>>>> upstream/dev
     body: null
     headers:
@@ -1776,6 +1839,15 @@ interactions:
     body:
       string: !!binary |
 <<<<<<< HEAD
+        H4sIAAAAAAAAA1SPQUvEMBCF/0uutt1J0iY0N9GDiqxCuycRSdopVtKmNKmwLPvfTXBhFebwePO9
+        ecyJGO3xsFqiyGcIi1e7XY8DdqF3X67QwWrvRz0XMwaSkW9c/ejmCFMAWkABebO/fW0eXtrrdr9N
+        Jiqi3hKUQQbvGelxse444Rza44LxwJ11Wx9DZhtt/xshKgUqeTHvdUggA0ZzKHMmWipUVSpeFgBw
+        Awwg5j2usbcdp3+sbClVZRwoWH1lu+lxHlwEpUBDjehqrCpZG1kJXmPHkVMOvNM9F0zXktM/BcGm
+        hqdx1SS9M+jNhmfX6WSfiL0ogvPHoSHn8w8AAAD//wMAqAjeQ1oBAAA=
+    headers:
+      ATL-TraceId:
+      - 8745ffda6c9eeebb
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
         H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J06Q0N9GDiqxCuycRSdIpVtKmNKmwLPvfTXDx4za88zzz
         MieilcfDaokk7yEsXu52PQ5oQu8+XKGCVd6Pai5mDCQjn7j60c0RpgC0gALydn/93N49db/b/Tbp
@@ -1795,15 +1867,6 @@ interactions:
       ATL-TraceId:
       - e634fe6b2c34cc29
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-        H4sIAAAAAAAAA1SPTUvEMBCG/8tcbbuT9CPb3EQPKrIK2z2JSNokWEmT0qTCsux/N8HFj9vwzvPM
-        y5ygF14dFgMc3kOYPd9spNJqCNJ9uEIEI7wfhS2sCpDBp1r86GyECSIpsMB8v7t+3t89db/b3Tr1
-        cQL+kqAMM3zNQKrZuOOkbOiOs4oHboxbZZT6dTTyWwGehJpdwlsREkiRkhyrnJYdUk4Zp7EW8Qop
-        YvS9WmJvN07/2KYjLa8Yx7YoW/LDDtO91S6CPW2EaOi2rtpyaJEplFTUWhLJ9ED1theUaVKXfwqC
-        SQ0P4yIgvaPFasKjG0SKT2AuEyj7dtjD+fwFAAD//wMAOVrRuloBAAA=
-    headers:
-      ATL-TraceId:
-      - 9568e3fdecbcf80a
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -1811,13 +1874,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:40 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:05 GMT
 =======
       - Mon, 26 Apr 2021 17:47:43 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:09 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -1844,6 +1907,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - d5c44490-06fa-42d5-b87b-4e34daa9b30a
+      x-envoy-upstream-service-time:
+      - '44'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 1f84636c-8a2f-40e6-b6d8-f96e17eb13d1
       x-envoy-upstream-service-time:
@@ -1853,10 +1920,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '30'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - fea236e1-9562-451a-b351-2966a3314e75
-      x-envoy-upstream-service-time:
-      - '31'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -1938,13 +2001,13 @@ interactions:
     headers:
       ATL-TraceId:
 <<<<<<< HEAD
+      - 658c33ffcc8a76aa
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 63ca53acab062d96
 =======
       - c75ef2e11c2844b7
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - cf8efc6c11e0f6d3
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -1952,13 +2015,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:40 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:05 GMT
 =======
       - Mon, 26 Apr 2021 17:47:44 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:09 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -1985,6 +2048,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - ee72ddde-6d03-4f4e-9f2c-cf8ca65c6fed
+      x-envoy-upstream-service-time:
+      - '74'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 26b97fa2-d046-4839-9a16-637e6db1ad63
       x-envoy-upstream-service-time:
@@ -1994,10 +2061,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '64'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 56c304bb-3685-4081-9c5e-d4d0d796890f
-      x-envoy-upstream-service-time:
-      - '65'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -2019,9 +2082,53 @@ interactions:
       - python-requests/2.25.1
     method: GET
 <<<<<<< HEAD
-<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10936
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - d6aaa513577990bc
 =======
->>>>>>> upstream/dev
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
   response:
     body:
@@ -2049,7 +2156,6 @@ interactions:
         DwAAAP//AwBBtKXIPhUAAA==
     headers:
       ATL-TraceId:
-<<<<<<< HEAD
       - 92fa164efb7e7ee7
 =======
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/10735
@@ -2098,8 +2204,6 @@ interactions:
       ATL-TraceId:
       - c136b5e34585a2de
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 3141f4ccda82e460
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -2107,13 +2211,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:40 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:05 GMT
 =======
       - Mon, 26 Apr 2021 17:47:44 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:09 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -2140,6 +2244,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 52736cf3-7954-4a7b-9feb-991ca8e590a9
+      x-envoy-upstream-service-time:
+      - '154'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 72a1f0cf-e38f-4d57-bc07-bc68b1940fce
       x-envoy-upstream-service-time:
@@ -2149,28 +2257,20 @@ interactions:
       x-envoy-upstream-service-time:
       - '152'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - dc2119b4-4955-4cec-9752-6fb7454955be
-      x-envoy-upstream-service-time:
-      - '102'
 >>>>>>> upstream/dev
     status:
       code: 200
       message: OK
 - request:
+<<<<<<< HEAD
+    body: null
+=======
     body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Zap2: Cookie Without
       Secure Flag", "description": "\n\n\n\n\n\n*Title*: [Zap2: Cookie Without Secure
-<<<<<<< HEAD
       Flag|http://localhost:8080/finding/2490]\n\n*Defect Dojo link:* http://localhost:8080/finding/2490
       (2490)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
       [Security How-to|http://localhost:8080/product/2] / [weekly engagement|http://localhost:8080/engagement/3]
       / [ZAP Scan|http://localhost:8080/test/601]\n\n*Branch/Tag:* None\n\n*BuildID:*
-=======
-      Flag|http://localhost:8080/finding/2106]\n\n*Defect Dojo link:* http://localhost:8080/finding/2106
-      (2106)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
-      [Security How-to|http://localhost:8080/product/2] / [weekly engagement|http://localhost:8080/engagement/3]
-      / [ZAP Scan|http://localhost:8080/test/480]\n\n*Branch/Tag:* None\n\n*BuildID:*
->>>>>>> upstream/dev
       None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
       https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
       cookie has been set without the secure flag, which means that the cookie can
@@ -2184,6 +2284,7 @@ interactions:
       such sensitive information.\n\n*Impact*:\nNo impact provided\n\n*Steps to reproduce*:\nNone\n\n*References*:\nCWE-614\nWASC-13\n\n\n*Reporter:*
       [(admin) ()|mailto:]\n", "issuetype": {"name": "Task"}, "priority": {"name":
       "Low"}}}'
+>>>>>>> upstream/dev
     headers:
       Accept:
       - application/json,*.*;q=0.9
@@ -2193,23 +2294,32 @@ interactions:
       - no-cache
       Connection:
       - keep-alive
+<<<<<<< HEAD
+=======
       Content-Length:
       - '1666'
+>>>>>>> upstream/dev
       Content-Type:
       - application/json
       User-Agent:
       - python-requests/2.25.1
+<<<<<<< HEAD
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+=======
     method: POST
     uri: https://defectdojo.atlassian.net/rest/api/2/issue
   response:
     body:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       string: '{"id":"10931","key":"NTEST-742","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10931"}'
     headers:
       ATL-TraceId:
       - 21fae82bd8e0b548
 =======
+>>>>>>> upstream/dev
       string: !!binary |
         H4sIAAAAAAAAA+xWS0/jMBD+K1EOnCpCS8WiShVCy66EdoWQKFxWHEwyoaaOHfxo00X89/UkTuxC
         lw3lsgd6qWcyj28envFTDFVJeBZP4lKKB0i1igf+OPn15AWoUgb0ugQUUcByy5trXapJkmSQW4VM
@@ -2234,13 +2344,11 @@ interactions:
         DwAAAP//AwBBtKXIPhUAAA==
     headers:
       ATL-TraceId:
+<<<<<<< HEAD
+      - e52c10cff5443053
+=======
       - de147f836ed172f8
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      string: '{"id":"10730","key":"NTEST-541","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10730"}'
-    headers:
-      ATL-TraceId:
-      - f7c27ecc33c02866
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -2248,13 +2356,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:40 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:06 GMT
 =======
       - Mon, 26 Apr 2021 17:47:44 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:10 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -2272,19 +2380,38 @@ interactions:
       cache-control:
       - no-cache, no-store, no-transform
 <<<<<<< HEAD
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - e4a5a194-39b6-4ba0-bad8-74beea261b60
+      x-envoy-upstream-service-time:
+      - '109'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"fields": {"description": "\n\n\n\n\n\n*Title*: [Zap1: Cookie Without
+      Secure Flag|http://localhost:8080/finding/2499]\n\n*Defect Dojo link:* http://localhost:8080/finding/2499
+      (2499)\n\n*Severity:* Low\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+      Unknown\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
+      / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/606]\n\n*Branch/Tag:*
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
 =======
       content-encoding:
       - gzip
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
->>>>>>> upstream/dev
       timing-allow-origin:
       - '*'
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 446a34dc-3750-4507-aded-ca4c3a5bf770
       x-envoy-upstream-service-time:
@@ -2294,16 +2421,10 @@ interactions:
       x-envoy-upstream-service-time:
       - '100'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - ae88904e-8ed0-48e5-8dcf-1ca265f2b7da
-      x-envoy-upstream-service-time:
-      - '400'
->>>>>>> upstream/dev
     status:
       code: 201
       message: Created
 - request:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     body: null
 =======
@@ -2312,6 +2433,7 @@ interactions:
       (2115)\n\n*Severity:* Low\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
       Unknown\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
       / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/485]\n\n*Branch/Tag:*
+>>>>>>> upstream/dev
       None\n\n*BuildID:* None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n*
       https://mainsite.com:443\n* https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
       cookie has been set without the secure flag, which means that the cookie can
@@ -2325,9 +2447,9 @@ interactions:
       such sensitive information.\n\n*Impact*:\nNo impact provided\n\n*Steps to reproduce*:\nNone\n\n*References*:\nCWE-614\nWASC-13\n\n\n*Reporter:*
       [(admin) ()|mailto:]\n", "priority": {"name": "Low"}, "summary": "Zap1: Cookie
       Without Secure Flag"}, "update": {}}'
->>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
+<<<<<<< HEAD
 =======
-    body: null
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
 >>>>>>> upstream/dev
     headers:
       Accept:
@@ -2339,18 +2461,18 @@ interactions:
       Connection:
       - keep-alive
 <<<<<<< HEAD
+      Content-Length:
+      - '1675'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
 =======
       Content-Length:
       - '1675'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
->>>>>>> upstream/dev
       Content-Type:
       - application/json
       User-Agent:
       - python-requests/2.25.1
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     method: GET
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-742
@@ -2406,68 +2528,16 @@ interactions:
 =======
       - fcec4d6ff4bafad1
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-    method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-541
-  response:
-    body:
-      string: !!binary |
-        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
-    headers:
-      ATL-TraceId:
-      - 033a471d5022fb50
->>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:06 GMT
 =======
       - Mon, 26 Apr 2021 17:47:44 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:10 GMT
->>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -2483,16 +2553,11 @@ interactions:
       - 1; mode=block
       cache-control:
       - no-cache, no-store, no-transform
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       content-encoding:
       - gzip
 =======
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      content-encoding:
-      - gzip
->>>>>>> upstream/dev
       timing-allow-origin:
       - '*'
       vary:
@@ -2500,7 +2565,6 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 443394aa-5af8-46f4-b3d2-2333bc3f6e00
       x-envoy-upstream-service-time:
@@ -2510,20 +2574,11 @@ interactions:
       x-envoy-upstream-service-time:
       - '297'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - edba1152-bb8c-4f0b-bbf6-7c4f341faefa
-      x-envoy-upstream-service-time:
-      - '139'
->>>>>>> upstream/dev
     status:
       code: 200
       message: OK
 - request:
-<<<<<<< HEAD
     body: '{"issueKeys": ["10931"], "ignoreEpics": true}'
-=======
-    body: '{"issueKeys": ["10730"], "ignoreEpics": true}'
->>>>>>> upstream/dev
     headers:
       Accept:
       - application/json,*.*;q=0.9
@@ -2535,17 +2590,18 @@ interactions:
       - keep-alive
       Content-Length:
       - '45'
+>>>>>>> upstream/dev
       Content-Type:
       - application/json
       User-Agent:
       - python-requests/2.25.1
 <<<<<<< HEAD
+    method: PUT
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10936
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     method: PUT
     uri: https://defectdojo.atlassian.net/rest/greenhopper/1.0/epics/10929/add
-=======
-    method: PUT
-    uri: https://defectdojo.atlassian.net/rest/greenhopper/1.0/epics/10728/add
 >>>>>>> upstream/dev
   response:
     body:
@@ -2553,6 +2609,8 @@ interactions:
     headers:
       ATL-TraceId:
 <<<<<<< HEAD
+      - b4ab46401d788009
+=======
       - 2aea8ac39195e5ad
 =======
     method: GET
@@ -2603,8 +2661,6 @@ interactions:
       ATL-TraceId:
       - 1dbb35aa80fa12eb
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 8c9c5e1d849c28c2
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -2612,13 +2668,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:41 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:06 GMT
 =======
       - Mon, 26 Apr 2021 17:47:49 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:10 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -2634,12 +2690,12 @@ interactions:
       cache-control:
       - no-cache, no-store, no-transform
 <<<<<<< HEAD
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
 =======
       content-encoding:
       - gzip
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
 >>>>>>> upstream/dev
       timing-allow-origin:
       - '*'
@@ -2647,6 +2703,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - d5678cbd-f6d3-4feb-aa9d-5c14bd3e6c70
+      x-envoy-upstream-service-time:
+      - '303'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 871f1aa2-edc8-45af-9871-1d3b91eb8503
       x-envoy-upstream-service-time:
@@ -2656,18 +2716,14 @@ interactions:
       x-envoy-upstream-service-time:
       - '144'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - dff854dc-ef21-4058-9eac-2aa3c5375d5e
-      x-envoy-upstream-service-time:
-      - '347'
 >>>>>>> upstream/dev
     status:
       code: 204
       message: No Content
 - request:
 <<<<<<< HEAD
-<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
 =======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
 >>>>>>> upstream/dev
     body: null
     headers:
@@ -2685,6 +2741,53 @@ interactions:
       - python-requests/2.25.1
     method: GET
 <<<<<<< HEAD
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10936
+  response:
+    body:
+      string: !!binary |
+        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
+        a1er1W8AAAD//wMAv+WYevMbAAA=
+    headers:
+      ATL-TraceId:
+      - be21158eadd30b8e
+=======
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/10931
   response:
     body:
@@ -2731,52 +2834,6 @@ interactions:
     headers:
       ATL-TraceId:
       - db555349a24678f1
-=======
-    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10730
-  response:
-    body:
-      string: !!binary |
-        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
-    headers:
-      ATL-TraceId:
-      - cfa9e06843b47eaa
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -2784,9 +2841,9 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
-      - Tue, 27 Apr 2021 09:41:06 GMT
+      - Tue, 27 Apr 2021 09:41:45 GMT
 =======
-      - Mon, 26 Apr 2021 17:47:11 GMT
+      - Tue, 27 Apr 2021 09:41:06 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -2813,13 +2870,13 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - d619ede7-d621-49cb-a1a6-06c8a309bb99
+      x-envoy-upstream-service-time:
+      - '166'
+=======
       - d6dd21f6-1f92-454d-9927-db85d736841f
       x-envoy-upstream-service-time:
       - '210'
-=======
-      - 20eccfef-402f-462a-83de-036a345129f2
-      x-envoy-upstream-service-time:
-      - '157'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -2827,8 +2884,8 @@ interactions:
 - request:
 <<<<<<< HEAD
 =======
->>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
 =======
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
 >>>>>>> upstream/dev
     body: null
     headers:
@@ -2850,6 +2907,15 @@ interactions:
     body:
       string: !!binary |
 <<<<<<< HEAD
+        H4sIAAAAAAAAA1SPT0vEMBDFv0uutt1J06Q0N9GDiqxCuycRSdopVtKkNKmwLPvdTXDxD8zh8eb3
+        5jEnopXHw2qIJO8hLF7udgOO2IfBfbhCBaO8n5QtLAaSkU9c/eRshCkALaCAvN1fP7d3T93vdr/N
+        OioiXxKUQQavGRlwMe44ow3dccF44Ma4bYghvU1m+I4QmQK8vpi3KiSwhJLmUOWl6KiQvJKsKgDg
+        CkqAmPe4xt5umv+xdUeprOKIgnL2w/bzvR1dBGuBmmrRN8h53eiaC9Zgz5BRBqxXAxOlampG/xQE
+        kxoeplWR9M6oNhMeXa+SfSLmogjat0NLzucvAAAA//8DALH0+1JaAQAA
+    headers:
+      ATL-TraceId:
+      - a644c2492498e639
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
         H4sIAAAAAAAAA1SPwUrEMBCG32Wutt1J06Y2N9GDiqzCdk8ikjRTrKRNaVNhWfbdTXBR9zb8833z
         M0fQaqH9bEHCh/fTIjcbQx213rhPlylv1bL0asxG8pDAF81L78YAM0SWYYbpbnvzsrt/bv6223XQ
@@ -2869,15 +2935,6 @@ interactions:
       ATL-TraceId:
       - 4bde434b00065439
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-        H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J+pE2N9GDiqxCuycRmTYJVtKktKmwLPvfTXDx4za88zzz
-        MifS46oOiyGCvHs/r2K3k0qrwUv34TL0Btd1RJtZ5UlCPtWyjs4GmALQDDJI2/31c3v31P1u99vU
-        h4mIlwglkMBrQqSajTtOyvruOKtw4Ma4TQap30YjvxUiolDyS3iLPoIMGE2hSFneAROMCxZqAa6A
-        AQR/VUvo7cbpH1t1tBEFFzTPirz+YYfp3moXwJ5ViBWry6LJhwa4Asmw1JJKrgem6x4Z17TM/xR4
-        ExsexgVJfEfjZvyjGzDGJ2IuE1H27dCS8/kLAAD//wMAGamSHVoBAAA=
-    headers:
-      ATL-TraceId:
-      - 24c31bd3cc27cf2f
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -2885,13 +2942,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:46 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:08 GMT
 =======
       - Mon, 26 Apr 2021 17:47:49 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:13 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -2918,6 +2975,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 467abbdb-7815-481a-af35-ae6e333f6b00
+      x-envoy-upstream-service-time:
+      - '35'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 6223497c-209a-437b-b91d-71640e230e2c
       x-envoy-upstream-service-time:
@@ -2927,10 +2988,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '35'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - f72bdaaa-aef2-42f1-8c41-7f65983db829
-      x-envoy-upstream-service-time:
-      - '41'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -3012,13 +3069,13 @@ interactions:
     headers:
       ATL-TraceId:
 <<<<<<< HEAD
+      - f6fdbb4bee457e19
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - ec0a75df02cb01ed
 =======
       - bed503f5e2d04432
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 7f2d4aa3f7f30465
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -3026,13 +3083,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:46 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:09 GMT
 =======
       - Mon, 26 Apr 2021 17:47:49 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:13 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -3059,6 +3116,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 564b690b-1936-497d-81ec-e4c2edc38d23
+      x-envoy-upstream-service-time:
+      - '79'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 763c70c4-66e3-4afe-8408-9cd0b154fca2
       x-envoy-upstream-service-time:
@@ -3068,10 +3129,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '67'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - d17e616e-82ca-402a-83aa-696c6d61d2c1
-      x-envoy-upstream-service-time:
-      - '61'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -3093,6 +3150,52 @@ interactions:
       - python-requests/2.25.1
     method: GET
 <<<<<<< HEAD
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10937
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - c64f84e96b0132bb
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     uri: https://defectdojo.atlassian.net/rest/agile/1.0/epic/NTEST-740/issue
   response:
@@ -3193,60 +3296,6 @@ interactions:
       ATL-TraceId:
       - b3b4c331bc2fa0d5
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-    uri: https://defectdojo.atlassian.net/rest/agile/1.0/epic/NTEST-539/issue
-  response:
-    body:
-      string: !!binary |
-        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
-        AF4GUjmQOQAA
-    headers:
-      ATL-TraceId:
-      - f530463fc3355c4d
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -3254,13 +3303,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:46 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:09 GMT
 =======
       - Mon, 26 Apr 2021 17:47:50 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:13 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -3287,6 +3336,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 592b37d6-49aa-4897-a3cb-4228aa639537
+      x-envoy-upstream-service-time:
+      - '141'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - e9a291ae-2e65-4590-8bd0-9605d9deb078
       x-envoy-upstream-service-time:
@@ -3296,10 +3349,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '146'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 9c767fc6-0d7b-4194-8e99-dae3ae5e0d56
-      x-envoy-upstream-service-time:
-      - '232'
 >>>>>>> upstream/dev
     status:
       code: 200
@@ -3320,11 +3369,16 @@ interactions:
       User-Agent:
       - python-requests/2.25.1
     method: GET
+<<<<<<< HEAD
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: !!binary |
+=======
     uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
   response:
     body:
       string: !!binary |
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
         H4sIAAAAAAAAA1SPTUvEMBCG/0uuttlJ0iY0N9GDiqxCuycRSdopVtKktKmwLPvfTXHx4za88zzz
         MidizYKH2RFN3mOcFr3bddhjG7vwEaiJzizLYDz1GElGPnFehuATzAAYBQp5vb9+ru+emt/tfh1t
@@ -3335,6 +3389,7 @@ interactions:
       ATL-TraceId:
       - eb912098a9c176df
 =======
+>>>>>>> upstream/dev
         H4sIAAAAAAAAA+xWS0/jMBD+K1EOnCpCS8WiShVCy66EdoWQKFxWHEwyoaaOHfxo00X89/UkTuxC
         lw3lsgd6qWcyj28envFTDFVJeBZP4lKKB0i1igf+OPn15AWoUgb0ugQUUcByy5trXapJkmSQW4VM
         PIh9ohlRihK+z0EnEpROSEmTUeKsJsMD+7MmKBptiQWsLXUx+3Y1sxQnBVjymlOtrQF0SJZEE3kt
@@ -3358,17 +3413,11 @@ interactions:
         DwAAAP//AwBBtKXIPhUAAA==
     headers:
       ATL-TraceId:
+<<<<<<< HEAD
+      - 242aac7d5c71494c
+=======
       - 5ae14148fbed64af
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-        H4sIAAAAAAAAA1SPTUvEMBCG/8tcbbuT9CPb3EQPKrIK2z2JSNokWEmT0qTCsux/N8HFj9vwzvPM
-        y5ygF14dFgMc3kOYPd9spNJqCNJ9uEIEI7wfhS2sCpDBp1r86GyECSIpsMB8v7t+3t89db/b3Tr1
-        cQL+kqAMM3zNQKrZuOOkbOiOs4oHboxbZZT6dTTyWwGehJpdwlsREkiRkhyrnJYdUk4Zp7EW8Qop
-        YvS9WmJvN07/2KYjLa8YJ2XRsvaHHaZ7q10Ee9oI0dBtXbXl0CJTKKmotSSS6YHqbS8o06Qu/xQE
-        kxoexkVAekeL1YRHN4gUn8BcJlD27bCH8/kLAAD//wMAtBySg1oBAAA=
-    headers:
-      ATL-TraceId:
-      - 25ad99e22dd5508b
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -3376,13 +3425,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:46 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:09 GMT
 =======
       - Mon, 26 Apr 2021 17:47:50 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:13 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -3409,6 +3458,10 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - 34d1e5a6-71a5-47d7-aaa0-e3e47dddbcd1
+      x-envoy-upstream-service-time:
+      - '109'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 781877e1-c560-4ba2-a146-ac473b9a45c2
       x-envoy-upstream-service-time:
@@ -3418,16 +3471,18 @@ interactions:
       x-envoy-upstream-service-time:
       - '79'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - a72817c6-6215-456f-849d-13edf5545f42
-      x-envoy-upstream-service-time:
-      - '31'
 >>>>>>> upstream/dev
     status:
       code: 200
       message: OK
 - request:
 <<<<<<< HEAD
+    body: '{"fields": {"description": "\n\n\n\n\n\n*Title*: [Zap2: Cookie Without
+      Secure Flag|http://localhost:8080/finding/2500]\n\n*Defect Dojo link:* http://localhost:8080/finding/2500
+      (2500)\n\n*Severity:* Low\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
+      Unknown\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
+      / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/606]\n\n*Branch/Tag:*
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     body: null
 =======
@@ -3436,6 +3491,7 @@ interactions:
       (2116)\n\n*Severity:* Low\n\n*CWE:* [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:*
       Unknown\n\n\n*Product/Engagement/Test:* [Security How-to|http://localhost:8080/product/2]
       / [1st Quarter Engagement|http://localhost:8080/engagement/1] / [ZAP Scan|http://localhost:8080/test/485]\n\n*Branch/Tag:*
+>>>>>>> upstream/dev
       None\n\n*BuildID:* None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n*
       https://mainsite.com:443\n* https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
       cookie has been set without the secure flag, which means that the cookie can
@@ -3449,9 +3505,9 @@ interactions:
       such sensitive information.\n\n*Impact*:\nNo impact provided\n\n*Steps to reproduce*:\nNone\n\n*References*:\nCWE-614\nWASC-13\n\n\n*Reporter:*
       [(admin) ()|mailto:]\n", "priority": {"name": "Low"}, "summary": "Zap2: Cookie
       Without Secure Flag"}, "update": {}}'
->>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
+<<<<<<< HEAD
 =======
-    body: null
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
 >>>>>>> upstream/dev
     headers:
       Accept:
@@ -3463,18 +3519,29 @@ interactions:
       Connection:
       - keep-alive
 <<<<<<< HEAD
+      Content-Length:
+      - '1675'
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
 =======
       Content-Length:
       - '1675'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
 >>>>>>> upstream/dev
       Content-Type:
       - application/json
       User-Agent:
       - python-requests/2.25.1
 <<<<<<< HEAD
+    method: PUT
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10937
+  response:
+    body:
+      string: ''
+    headers:
+      ATL-TraceId:
+      - 62fea65c46c65fb1
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
     method: GET
     uri: https://defectdojo.atlassian.net/rest/api/2/field
@@ -3482,10 +3549,6 @@ interactions:
     method: PUT
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/10736
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-    method: GET
-    uri: https://defectdojo.atlassian.net/rest/api/2/field
->>>>>>> upstream/dev
   response:
     body:
       string: !!binary |
@@ -3545,14 +3608,11 @@ interactions:
         wKGuu74AAAD//wMANYTZQH1HAAA=
     headers:
       ATL-TraceId:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 33f576e25e9a60e6
 =======
       - 2f3b528a633b499c
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 5b5a99ade94c022c
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -3560,13 +3620,13 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
+      - Tue, 27 Apr 2021 09:41:47 GMT
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:09 GMT
 =======
       - Mon, 26 Apr 2021 17:47:50 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:14 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -3575,8 +3635,11 @@ interactions:
       - AtlassianProxy/1.15.8.1
       Strict-Transport-Security:
       - max-age=315360000; includeSubDomains; preload
+<<<<<<< HEAD
+=======
       Transfer-Encoding:
       - chunked
+>>>>>>> upstream/dev
       X-Content-Type-Options:
       - nosniff
       X-XSS-Protection:
@@ -3584,15 +3647,23 @@ interactions:
       cache-control:
       - no-cache, no-store, no-transform
 <<<<<<< HEAD
+      timing-allow-origin:
+      - '*'
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 398f7464-6551-4adb-ae8e-180e282f2146
+      x-envoy-upstream-service-time:
+      - '307'
+    status:
+      code: 204
+      message: No Content
+=======
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       content-encoding:
       - gzip
 =======
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      content-encoding:
-      - gzip
->>>>>>> upstream/dev
       timing-allow-origin:
       - '*'
       vary:
@@ -3600,7 +3671,6 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - 06483690-a9fa-465c-b153-dff1629bb322
       x-envoy-upstream-service-time:
@@ -3610,11 +3680,6 @@ interactions:
       x-envoy-upstream-service-time:
       - '262'
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - e6fe50aa-5c1f-416e-89e6-43ce1f6c6776
-      x-envoy-upstream-service-time:
-      - '68'
->>>>>>> upstream/dev
     status:
       code: 200
       message: OK
@@ -3634,10 +3699,7 @@ interactions:
       User-Agent:
       - python-requests/2.25.1
     method: GET
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
-=======
->>>>>>> upstream/dev
     uri: https://defectdojo.atlassian.net/rest/api/2/field
   response:
     body:
@@ -3698,7 +3760,6 @@ interactions:
         wKGuu74AAAD//wMANYTZQH1HAAA=
     headers:
       ATL-TraceId:
-<<<<<<< HEAD
       - 118df926ed822293
 =======
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/10736
@@ -3748,23 +3809,16 @@ interactions:
       ATL-TraceId:
       - 8365c8579393eb10
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - dad04222aa1d3f63
->>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - Tue, 27 Apr 2021 09:41:09 GMT
 =======
       - Mon, 26 Apr 2021 17:47:54 GMT
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - Mon, 26 Apr 2021 17:47:14 GMT
->>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -3789,19 +3843,14 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
-<<<<<<< HEAD
 <<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_engagement_epic_mapping_enabled_create_epic_and_push_findings.yaml
       - e4c83bcf-dc68-4311-9012-51d3af1d62ee
       x-envoy-upstream-service-time:
       - '78'
-=======
-      - 646e2180-875c-4427-a802-26eda2da8cff
-      x-envoy-upstream-service-time:
-      - '74'
->>>>>>> upstream/dev
     status:
       code: 200
       message: OK
+>>>>>>> upstream/dev
 - request:
     body: null
     headers:
@@ -3819,6 +3868,53 @@ interactions:
       - python-requests/2.25.1
     method: GET
 <<<<<<< HEAD
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10937
+  response:
+    body:
+      string: !!binary |
+        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
+        s1qtfgMAAP//AwBdxy1v8xsAAA==
+    headers:
+      ATL-TraceId:
+      - aa6b83ace2648afe
+=======
     uri: https://defectdojo.atlassian.net/rest/api/latest/issue/NTEST-741
   response:
     body:
@@ -3864,52 +3960,6 @@ interactions:
     headers:
       ATL-TraceId:
       - 70d2f08d4d48627c
-=======
-    uri: https://defectdojo.atlassian.net/rest/api/latest/issue/NTEST-540
-  response:
-    body:
-      string: !!binary |
-        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
-    headers:
-      ATL-TraceId:
-      - 9e34de70230ed432
 >>>>>>> upstream/dev
       Connection:
       - keep-alive
@@ -3917,9 +3967,9 @@ interactions:
       - application/json;charset=UTF-8
       Date:
 <<<<<<< HEAD
-      - Tue, 27 Apr 2021 09:41:10 GMT
+      - Tue, 27 Apr 2021 09:41:51 GMT
 =======
-      - Mon, 26 Apr 2021 17:47:14 GMT
+      - Tue, 27 Apr 2021 09:41:10 GMT
 >>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
@@ -3946,6 +3996,13 @@ interactions:
       - 5fa43d1b8405b10077912260
       x-arequestid:
 <<<<<<< HEAD
+      - f838dd31-e34f-47ef-9f6e-74b3a3cab6e3
+      x-envoy-upstream-service-time:
+      - '119'
+    status:
+      code: 200
+      message: OK
+=======
       - c16157e9-bd04-44b4-a424-d61b420bef26
       x-envoy-upstream-service-time:
       - '171'
@@ -3960,12 +4017,5 @@ interactions:
       code: 200
       message: OK
 >>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_no_push_to_jira_reimport_no_push_to_jira_but_push_all_issues.yaml
-=======
-      - 2ad527e4-23e8-408e-851e-023918926b3e
-      x-envoy-upstream-service-time:
-      - '189'
-    status:
-      code: 200
-      message: OK
 >>>>>>> upstream/dev
 version: 1

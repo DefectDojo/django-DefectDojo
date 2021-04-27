@@ -90,7 +90,7 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
 
 def construct_imported_message(scan_type, finding_count=0, new_finding_count=0, closed_finding_count=0, reactivated_finding_count=0, untouched_finding_count=0):
     if finding_count:
-        message = scan_type + '%s processed a total of %s findings' % (scan_type, finding_count)
+        message = f'{scan_type} processed a total of {finding_count} findings'
 
         if new_finding_count:
             message = message + ' created %d findings' % (new_finding_count)

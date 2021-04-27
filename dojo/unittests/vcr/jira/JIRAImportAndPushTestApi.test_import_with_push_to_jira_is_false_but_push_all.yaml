@@ -19,6 +19,7 @@ interactions:
   response:
     body:
       string: !!binary |
+<<<<<<< HEAD
         H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J0zQkN9GDiqxCuycRSZMpVtKmtKmwLPvfTXDx4za88zzz
         MifS6RUPiyOKvIcwr2q3s9ijCdZ/+EIHp9d10FMxYSAZ+cRlHfwUYQpACyggb/bXz83dU/u73W9j
         FyeiXhKUQQavGbE4O38ccQrtccZ44Mb5zUap2wZnvxWiksDFJbzVIYEllDSHKi/rltaKV4pVBQBc
@@ -27,12 +28,41 @@ interactions:
     headers:
       ATL-TraceId:
       - ffd2a22ce110d03d
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J0yQkN9GDiqxCuycRSdopVtKmtKmwLPvfTXDx4za88zzz
+        MidizYqHxRFN3kOYV73bddhjGzr/4QsTnFnXwUzFhIFk5BOXdfBThCkALaCAvN5fP9d3T83vdr+N
+        Nk5EvyQogwxeM9Lh7PxxxCk0xxnjgRvnty5Kdhtc960QnQQuL+GtCQksoaQ5VHkpGio0rzSrCgC4
+        ghIg+isusbcZxn+sbCjVFdeMFUpVP2w73k+9j6AUaKkVrULOpbKSC6awZcgoA9aajonSKMnon4Lg
+        UsPDsBiS3unN5sKjb02KT8RdJoLT26Em5/MXAAAA//8DAA9ELHFaAQAA
+    headers:
+      ATL-TraceId:
+      - b5882b5a7eb5edc7
+=======
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J+p2b6EFFVqHdk4hMmwQraVKaVFiW/e8muPhxG955nnmZ
+        ExnQycOqCSfv3i+O73ZCKjl6YT9shl6jcxOazEhPEvIpVzdZE2AKQDPIIO3218/d3VP/u91v8xAm
+        wl8ilEACrwkRctH2OEvj++Miw4EbbTcRpGGbtPhWCI9CWV/CW/QRZMBoCkXK8h4YZzVnoRbgChhA
+        8J1cQ28/zf/YqqctL1qeN1lb0B92nO+NsgEcWIVYsaYs2nxsoZYgGJZKUFGrkalmQFYrWuZ/CryO
+        DQ/TiiS+o3DT/tGOGOMT0ZeJSPN26Mj5/AUAAP//AwDVEYhDWgEAAA==
+    headers:
+      ATL-TraceId:
+      - 3f578bb5041a1617
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:00 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:34 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:38 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -57,9 +87,19 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - ed8dd5a6-c527-41a0-93cb-2ab91a9c590f
       x-envoy-upstream-service-time:
       - '35'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 253f4ad0-10a1-47c5-b2fb-d5543dc1f68b
+=======
+      - 6884d101-9beb-46b0-9bfd-3536e9597093
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+      x-envoy-upstream-service-time:
+      - '38'
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
@@ -139,13 +179,29 @@ interactions:
         wKGuu74AAAD//wMANYTZQH1HAAA=
     headers:
       ATL-TraceId:
+<<<<<<< HEAD
       - 756cfb350f115eea
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - dffc5992aa7401f8
+=======
+      - 3ebc61aa7c3d922d
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:00 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:34 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:39 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -170,9 +226,21 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - bd11168d-c334-4afa-ba7b-3cfa0d5a241e
       x-envoy-upstream-service-time:
       - '68'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 887e18fa-745f-468c-b624-8940e9b80034
+      x-envoy-upstream-service-time:
+      - '69'
+=======
+      - d740377a-8417-4039-82b9-903d7cb239f8
+      x-envoy-upstream-service-time:
+      - '76'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
@@ -219,13 +287,29 @@ interactions:
         DwAAAP//AwBBtKXIPhUAAA==
     headers:
       ATL-TraceId:
+<<<<<<< HEAD
       - 993a0dd50d85e717
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - a1f72e1f526bba95
+=======
+      - 31d6b8e7d7541706
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:00 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:34 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:39 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -250,19 +334,45 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - 69df2544-fa89-4569-b074-3df339ac0aa0
       x-envoy-upstream-service-time:
       - '114'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - c2acc78e-25ea-4e53-8d5a-c6e56ee5335c
+      x-envoy-upstream-service-time:
+      - '86'
+=======
+      - 05d196b6-1e27-438e-a7b3-e5038a572c96
+      x-envoy-upstream-service-time:
+      - '99'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Zap1: Cookie Without
       Secure Flag", "description": "\n\n\n\n\n\n*Title*: [Zap1: Cookie Without Secure
+<<<<<<< HEAD
       Flag|http://localhost:8080/finding/2565]\n\n*Defect Dojo link:* http://localhost:8080/finding/2565
       (2565)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
       [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
       / [ZAP Scan|http://localhost:8080/test/627]\n\n*Branch/Tag:* None\n\n*BuildID:*
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      Flag|http://localhost:8080/finding/2557]\n\n*Defect Dojo link:* http://localhost:8080/finding/2557
+      (2557)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/623]\n\n*Branch/Tag:* None\n\n*BuildID:*
+=======
+      Flag|http://localhost:8080/finding/2141]\n\n*Defect Dojo link:* http://localhost:8080/finding/2141
+      (2141)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/498]\n\n*Branch/Tag:* None\n\n*BuildID:*
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
       https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
       cookie has been set without the secure flag, which means that the cookie can
@@ -295,16 +405,38 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue
   response:
     body:
+<<<<<<< HEAD
       string: '{"id":"10975","key":"NTEST-786","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10975"}'
     headers:
       ATL-TraceId:
       - 746a31ce2fe373ee
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      string: '{"id":"10969","key":"NTEST-780","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10969"}'
+    headers:
+      ATL-TraceId:
+      - bf339a5baae12f5b
+=======
+      string: '{"id":"10753","key":"NTEST-564","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10753"}'
+    headers:
+      ATL-TraceId:
+      - fefa93b10d36d2a1
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:00 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:34 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:39 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -325,9 +457,21 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - 7bc8bba5-89c6-4872-83d3-bb65fd227041
       x-envoy-upstream-service-time:
       - '555'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 21b0fcce-a6de-44d5-8157-cfccbead888e
+      x-envoy-upstream-service-time:
+      - '412'
+=======
+      - 44b49923-0927-42e7-ab0e-6fb30cfdb442
+      x-envoy-upstream-service-time:
+      - '530'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 201
       message: Created
@@ -347,6 +491,7 @@ interactions:
       User-Agent:
       - python-requests/2.25.1
     method: GET
+<<<<<<< HEAD
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-786
   response:
     body:
@@ -392,12 +537,115 @@ interactions:
     headers:
       ATL-TraceId:
       - c57b6a9b1eeba640
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-780
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6RWbVPbOBD+Kxp/6PS4JH4hgdQznRsKaY87SrkklJnSTkbYG0fFljySHCfX8t9v
+        JdmEQsO1FGbAXkv78uyzj/TFg1VJeerFngSegoT0NYM8VR1OC1AdlSygoB1RgqSaCa46kDJdgKad
+        ZEF5BrnIOkuQCr9BOoZSggKu3Vqv4zHjOQxe7L3AFwX5HF8XWpcq9v0U5pDoVHwWPapzqhSjvMdB
+        ++hD+7RkfuQzpSrwWwfXsMb9p9PRZNrdHwZomdtkvfiLpzBopRKqIRNy7ZJL8Q03REEUdoN+N9qf
+        hmHcH8S7/d5wMPg9iALjw8bQ6xKsmyfmaPZjnkEQbap2LymoRLLSIILWA6IKmucdkjKlGU80KRkk
+        QMSc1EJe98zuRPBzmf9IFgqSSoK/ZFDTJdVU/qHYv/CywCZVxTNnOk5fhsFuOGxep5joy03JHc80
+        GmNNqbo2PaqutHmK5zRX0PFaH15sndx0PM2QGCU22Yt5hZV4pRSfMb0notfsttjZbrTYmZc7Dd9k
+        es6Z1ujA8KvZbYr6265VYq5rKk1hihVlzpAh6b1qEFxLmf5w1R/+SLoNzE2wBumSGWDx5y7O/WAf
+        I0f9VdR/smPbQsuSZ6r5/0iscG8V7v1arFUbrHl4JNputNqNfi1aQ07VPmyNdnNj5nv13qkLduzy
+        E3YwyyRkONcPaIicEnnlxsxZkkppUViJmGGEaH/bh+FDH046nNUMppU/L+6GjV4YBkuWuHBfHtgM
+        vzB9tRBVnh4xVeZ03bAQzTXVqKtOtn5+Ypwm3qqg77xJMw728VBUBhWb6YUxMJ55sZaVCY0+9XuU
+        CzMUDRgSsFYzdd/TycHeXquT91ELtsEZbvsQbSSDCcn0+okItNv9/s/JJStoBso3O1TrhKEhF3VP
+        LbONxJyIupWivnfzsJDdtpCcXoERE0PNe4vMVH4XhnAbD8OhwWNB1ahkyQnj1/YoPoLSnMw8aQlk
+        aVXbb7cWLvgID2Z6lcMYqHKklM2Td3Zy/ub4dHZyfDg6nYxmo/H43RjrwwFSCAgumC6AnKFqck1M
+        XMIUETxfE5xIlhunRAvyF5OUnEkocGpJpZBxPTuj96t4gQ6DrywIBtky9tyBgb1D8Dcj9c0YYxsy
+        xml+f1Fzr2jgtbTPMbtWCbCvGYfb1VVpZvYHeOxuCk+kntt8e1p9e7j/HBs3dHtFk2u8SLWUa527
+        WIfNleaXEm7vRX57PYnaw5WDoXoiciFPXTZXeQXdTKJgbS4HghwJ12xRlHjV47rpwmP9+xacj3zz
+        uzNlOoedmFx+oGUYk0MhrhmQC6ZRMDWZ2MODvM5p9tXUiqXmIqH5QigdDwPUvDnjKcqaHw0G+5+s
+        xyOLBab5WRDDkniH/P9W8tz8/c06mADyDUUFN+L4W9PhxQjfzvk1F/Um98P3D6w7Z1KkFd5iRjzD
+        iSoQH3+KcOC6S1sM+iV/irqrxZaCysZB9In45DJUmvxTUalBko3LLVthEzO0uz8cnJFJQvmW9ebu
+        5O9Fuw63V5LyZOFPaYbJnmJrnbVieXp8dNd0KIqCaYLytLhjNsCtlYZCYe1pKRgyYye2dou/oWlB
+        GVdMQw/JE/f7u9u+bbP7Kca8ElSmbQ9ue3G0oZiJekASxyTMklwBcKJAk7qhlUaVc/cSMkdqdUi9
+        YMmCFEC5wo/UrWg8IH7ogdAkQZWElCwZJRUSP5HrEmUGl3EO7qzvmVTGyD8U0ATilnd1XfdETVXZ
+        EzLzkXWw6pWL0hIDCTibCzlzwdSMarw5XFXYmtnzdxcHk7Pu5G0XDxpLzfPxiXP6GDBvAYtMY/Jm
+        NP3IUctxcJE9MRHlMvnIR0tmjhBMbgK668at+fYfAAAA///sWdtq20AQ/RVhCCQhkrWy5UuhpKYX
+        6ENLaKCBvK2lTSyqG7o4La7/vWd2VxtbsZySluAHQwiyd3ZnNDtz5sz4XxWESRR2KVBrexR0H0sS
+        ywj/S+WjLhVP5WRgfEFlv5dtKMXFzUKklN4WN9eboUuFHQgIMiZaCitKcSOJ3GNlBdVAjtWSShDK
+        3w+RXlB8pBaSQPE6i8cP/BcFmpVzGSR1iYu1EDkbcYJONBWxgzwuKfJMnG1EIumiQIV+bV/ZGEjn
+        lTWidKedMvLOPyc5Dyp6z6+ZFckPFvCE3CW9f35dibykEl4IhTNCCevMNqErMxegZ4/YEE6bXb+3
+        2UA7FL19RnhEkHbKcbHpmXV69huXGVfZG2DJU4bIuhgiG3Yt+M0C1ZWqQF2U5JW4dEvUNaLtBcO7
+        pIcly9wt2MXDXNMPbNGUdnlDzvJgQbi7k/+5U2NHnSScCnjvuWpHPiQ6nhUvrPZEyy6BWdQCoJHy
+        7/hwELL5ZOj6c9g0Hk+Z542IXBghaNgjJuiCZ2EIHaj4vUcbbN3avTMQR4fu7a9VxDugFlJMAox6
+        7PvMY0PBXDHwwukoGAT+mAUTPwxdPrpjYnIZvpWnnAxmJ94n/Kl9dsJTXftsW31VOnVpP8AjtudQ
+        sDt5PY+jgFxm55yX5DHsR2ZVEbgzHj9c2SMnT8n+duN++Ba32//Dt7g9Qjh0iwE9oWrgNT/eZJpX
+        evZF+UTgrPpsBV+3wFeIf6yLLBf9W0BRsHhMPBpZYdVkMunRwzdNrQuNuEcoeP1LP0LBa1h8hIJO
+        KGiTCVCp3mpNexpKAtvvVSquaAyun10ozCoe42nHKV2TOddM5toLZtLVXjAUTqTLqMhSxYN041/r
+        n17Ux7+xdJlV/20gqs4yZ0IR2sHvmRwONSNYhJayeNU8atR9sX75I1W/Ofeil/Cf30RZx3TwxrvK
+        sU5RzSr13jRbptEPvbn5fnuzt7Vbb5DWrtfrPwAAAP//AwA+l+NiwRsAAA==
+    headers:
+      ATL-TraceId:
+      - 4e661284c5b558b1
+=======
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-564
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - 540e025bc5df0bf7
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:01 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:35 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:40 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -422,9 +670,21 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - a3bdacef-a811-47bc-a046-be6c8bf92a7e
       x-envoy-upstream-service-time:
       - '158'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 28933d35-ef07-4cc4-b920-b7771d95084f
+      x-envoy-upstream-service-time:
+      - '174'
+=======
+      - c64631f2-7cde-4d32-b5f1-30d847180e3e
+      x-envoy-upstream-service-time:
+      - '108'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
@@ -444,6 +704,7 @@ interactions:
       User-Agent:
       - python-requests/2.25.1
     method: GET
+<<<<<<< HEAD
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/10975
   response:
     body:
@@ -489,12 +750,115 @@ interactions:
     headers:
       ATL-TraceId:
       - 68f0fe5439b4b59c
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10969
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - da03b43fce473724
+=======
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10753
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - 3e91a0772a7678c9
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:01 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:35 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:40 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -519,9 +883,21 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - 9dd574b8-e831-4a6c-a59a-f620db211091
       x-envoy-upstream-service-time:
       - '110'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 81a3b379-ffbe-403b-b2dc-9e2cad16f7e1
+      x-envoy-upstream-service-time:
+      - '147'
+=======
+      - db0ef862-ed29-4458-875b-36e36d5c95e7
+      x-envoy-upstream-service-time:
+      - '144'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
@@ -545,6 +921,7 @@ interactions:
   response:
     body:
       string: !!binary |
+<<<<<<< HEAD
         H4sIAAAAAAAAA1SPTUvEMBCG/0uuttlJ0iY0N9GDiqxCuycRSZspVtKktKmwLPvfTXHx4za88zzz
         MifSmgUPsyOavMc4LXq3s9hjF234CNREZ5ZlMJ56jCQjnzgvQ/AJZgCMAoW83l8/13dPze92v45t
         moh+2aAMMnjNiMXJheOIPjbHCdOBGxdWm6R2HZz9VojehFJdwlsTN5ADZzkUOZcNk7ostCgoAFwB
@@ -553,12 +930,41 @@ interactions:
     headers:
       ATL-TraceId:
       - b197c54ed0a4f91e
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uuttlJ06Q0N9GDiqxCuycRSdopVtKkNKmwLPvfTXHx4za88zzz
+        MididMDDYoki7zHOQe12PQ7Yxd5/eKqj1SGM2lGHkWTkE5cwepdgBsAoUMib/fVzc/fU/m7362TS
+        RNTLBmWQwWtGepytP07oYnucMR24sX7tk2TW0fbfClGbIKpLeKvjBhZQsBzKvJAtk0qUipcUAK6g
+        AEh+wCX1tuP0j61axlQpFJcUyvqH7aZ7N/gEVhINM7KrUYiqNpWQvMaOI2cceKd7LgtdV5z9KYh2
+        a3gYF022dwa92vjoO73FJ2IvE0H3dmjI+fwFAAD//wMAvbc9rVoBAAA=
+    headers:
+      ATL-TraceId:
+      - 08c75605b33c9792
+=======
+        H4sIAAAAAAAAA1SPW0vEMBCF/0tebbuT6SVt3kQfVGQV2n0SkbRJsJImpUmFZdn/boqLF5iHw5nv
+        zGFOpBdeHRZDOHkPYfZ8t5NKqyFI9+EyEYzwfhQ2syqQhHyqxY/ORpgC0AwySNv99XN799T9bvfr
+        1EdF+MsGJZDAa0Kkmo07TsqG7jireODGuFXGUL+ORn5HCN8CJbuYtyJsIALSFIoU8w6QI+MYawGu
+        AAFi3qsl9nbj9I+tOtrwIg5kNWt+2GG6t9pFsMdKiArrsmjyoQGmQKIotaSS6QF13Qtkmpb5n4Jg
+        toaHcRFke0eL1YRHN4jNPhFzUUTZt0NLzucvAAAA//8DALPbSl9aAQAA
+    headers:
+      ATL-TraceId:
+      - 899f4a583cebbace
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:02 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:36 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:40 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -583,9 +989,21 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - 45445cfb-69c4-4153-a0a5-fe4ab70fc4a2
       x-envoy-upstream-service-time:
       - '34'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - c2d4363d-2602-4410-8563-a87655401ecb
+      x-envoy-upstream-service-time:
+      - '34'
+=======
+      - eb040d50-70a3-4c86-a635-c621df424358
+      x-envoy-upstream-service-time:
+      - '33'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
@@ -665,13 +1083,29 @@ interactions:
         wKGuu74AAAD//wMANYTZQH1HAAA=
     headers:
       ATL-TraceId:
+<<<<<<< HEAD
       - 4b196f0a1905e885
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 12a75756bffdaf06
+=======
+      - b47ad8654a028f53
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:02 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:36 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:41 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -696,9 +1130,21 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - 1aa16726-4c74-4a2f-b40d-46c17a70b0c8
       x-envoy-upstream-service-time:
       - '80'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 46b3472d-d948-4e8e-a6df-05e41775a98e
+      x-envoy-upstream-service-time:
+      - '79'
+=======
+      - a9765842-eb2e-499a-8054-45f244347e76
+      x-envoy-upstream-service-time:
+      - '64'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
@@ -745,13 +1191,29 @@ interactions:
         DwAAAP//AwBBtKXIPhUAAA==
     headers:
       ATL-TraceId:
+<<<<<<< HEAD
       - ba2ac07b3d8809d6
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 9180fcabd687f3bc
+=======
+      - 5dedab5d14fbbf31
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:02 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:36 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:41 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -776,19 +1238,45 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - 498557b1-6b7b-4c0d-8c67-acbc4d23053f
       x-envoy-upstream-service-time:
       - '89'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 6153870a-4a9b-485e-9c41-22d74d613a2a
+      x-envoy-upstream-service-time:
+      - '79'
+=======
+      - 9c3b3488-aaab-48f3-85bf-f92531bb0e62
+      x-envoy-upstream-service-time:
+      - '207'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
 - request:
     body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Zap2: Cookie Without
       Secure Flag", "description": "\n\n\n\n\n\n*Title*: [Zap2: Cookie Without Secure
+<<<<<<< HEAD
       Flag|http://localhost:8080/finding/2566]\n\n*Defect Dojo link:* http://localhost:8080/finding/2566
       (2566)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
       [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
       / [ZAP Scan|http://localhost:8080/test/627]\n\n*Branch/Tag:* None\n\n*BuildID:*
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      Flag|http://localhost:8080/finding/2558]\n\n*Defect Dojo link:* http://localhost:8080/finding/2558
+      (2558)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/623]\n\n*Branch/Tag:* None\n\n*BuildID:*
+=======
+      Flag|http://localhost:8080/finding/2142]\n\n*Defect Dojo link:* http://localhost:8080/finding/2142
+      (2142)\n\n*Severity:* Low\n\n*CWE:* Unknown\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/498]\n\n*Branch/Tag:* None\n\n*BuildID:*
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
       https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
       cookie has been set without the secure flag, which means that the cookie can
@@ -821,16 +1309,38 @@ interactions:
     uri: https://defectdojo.atlassian.net/rest/api/2/issue
   response:
     body:
+<<<<<<< HEAD
       string: '{"id":"10976","key":"NTEST-787","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10976"}'
     headers:
       ATL-TraceId:
       - 69b3e2bf8d5a1b3c
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      string: '{"id":"10970","key":"NTEST-781","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10970"}'
+    headers:
+      ATL-TraceId:
+      - 74f81029c575bb3d
+=======
+      string: '{"id":"10754","key":"NTEST-565","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10754"}'
+    headers:
+      ATL-TraceId:
+      - 69671892d3ea2322
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:03 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:36 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:41 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -851,9 +1361,21 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - 7d76595a-cc10-4090-a50b-6ef97914b7af
       x-envoy-upstream-service-time:
       - '526'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 97cfdc5a-ab0b-4115-af15-8e29389d9189
+      x-envoy-upstream-service-time:
+      - '507'
+=======
+      - 794345d6-5a6f-4588-ab51-9f461e62c4b3
+      x-envoy-upstream-service-time:
+      - '372'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 201
       message: Created
@@ -873,6 +1395,7 @@ interactions:
       User-Agent:
       - python-requests/2.25.1
     method: GET
+<<<<<<< HEAD
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-787
   response:
     body:
@@ -918,12 +1441,115 @@ interactions:
     headers:
       ATL-TraceId:
       - 0eafd98f7a7e0c28
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-781
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - b3a1361c45d42c27
+=======
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-565
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - 1760fda00142d3bf
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:03 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:37 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:41 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -948,9 +1574,21 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - f68fa6a4-fc60-4202-81ee-e4021ac1db7a
       x-envoy-upstream-service-time:
       - '173'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - 195b6a29-cf9a-4c33-80ae-730cb2ad5dde
+      x-envoy-upstream-service-time:
+      - '124'
+=======
+      - f68f2934-706f-4f74-9baf-c8a3aba819fb
+      x-envoy-upstream-service-time:
+      - '101'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK
@@ -970,6 +1608,7 @@ interactions:
       User-Agent:
       - python-requests/2.25.1
     method: GET
+<<<<<<< HEAD
     uri: https://defectdojo.atlassian.net/rest/api/2/issue/10976
   response:
     body:
@@ -1015,12 +1654,115 @@ interactions:
     headers:
       ATL-TraceId:
       - f253adcae2a7824a
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10970
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - 68642b70a87a2eee
+=======
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10754
+  response:
+    body:
+      string: !!binary |
+        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
+    headers:
+      ATL-TraceId:
+      - b5e9e76b662dfd4e
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Connection:
       - keep-alive
       Content-Type:
       - application/json;charset=UTF-8
       Date:
+<<<<<<< HEAD
       - Tue, 27 Apr 2021 09:46:03 GMT
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - Tue, 27 Apr 2021 09:45:37 GMT
+=======
+      - Mon, 26 Apr 2021 17:49:42 GMT
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
       Expect-CT:
       - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
         enforce, max-age=86400
@@ -1045,9 +1787,21 @@ interactions:
       x-aaccountid:
       - 5fa43d1b8405b10077912260
       x-arequestid:
+<<<<<<< HEAD
       - 3af246dc-a15e-4903-ae56-4ffe6eebde4d
       x-envoy-upstream-service-time:
       - '111'
+=======
+<<<<<<< HEAD:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira.yaml
+      - a5c40055-5570-4fd8-8616-4a85bb38e1b4
+      x-envoy-upstream-service-time:
+      - '168'
+=======
+      - cad3d6fb-c5db-4aba-b285-82dd3ecf9268
+      x-envoy-upstream-service-time:
+      - '157'
+>>>>>>> upstream/dev:dojo/unittests/vcr/jira/JIRAImportAndPushTestApi.test_import_with_push_to_jira_is_false_but_push_all.yaml
+>>>>>>> upstream/dev
     status:
       code: 200
       message: OK

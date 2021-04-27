@@ -1,0 +1,3242 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J0zQ0N9GDiqxCuycRSZMpVtKmNKmwLPvfTXDx4za88zzz
+        MifSK4+H1RJJ3kNYvNztDA6og3EfrlDBKu9HNRczBpKRT1z96OYIUwBaQAF5u79+bu+eut/tfpv6
+        OBH5kqAMMnjNiMHFuuOEc+iOC8YDN9ZtJkr9NlrzrRCZBC4u4a0KCSyhpDlUeVl3tJa8kqwqAOAK
+        SoDoe1xjbzdO/1jRUSorkLQqGsp/WD3dz4OLoKixp32tG+RcNL3gNWtQM2SUAdPKsLpUjWD0T0Gw
+        qeFhXBVJ7wxqs+HRaZXiE7GXieD8dmjJ+fwFAAD//wMAbMzN8loBAAA=
+    headers:
+      ATL-TraceId:
+      - d6d29d1175960d7c
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:14 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - a1c50e65-fb50-4d85-980f-b0108aa0f576
+      x-envoy-upstream-service-time:
+      - '87'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/field
+  response:
+    body:
+      string: !!binary |
+        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
+        wKGuu74AAAD//wMANYTZQH1HAAA=
+    headers:
+      ATL-TraceId:
+      - 3499e843debbf1fa
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:15 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - e01d4c5f-cfa2-491b-a2b7-a1d0bc9e06e1
+      x-envoy-upstream-service-time:
+      - '219'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA+xWS0/jMBD+K1EOnCpCS8WiShVCy66EdoWQKFxWHEwyoaaOHfxo00X89/UkTuxC
+        lw3lsgd6qWcyj28envFTDFVJeBZP4lKKB0i1igf+OPn15AWoUgb0ugQUUcByy5trXapJkmSQW4VM
+        PIh9ohlRihK+z0EnEpROSEmTUeKsJsMD+7MmKBptiQWsLXUx+3Y1sxQnBVjymlOtrQF0SJZEE3kt
+        mUX1FI+Pq/FxH/8KUiOh9d0YOSlpNq0d7zWMcyTHB1+sm9G4Go13Nqzob5iqgjC2p9z/G76GR9Xw
+        6GO+qtaZO7zh7XBUHY4+5q2AjJrCenOHv3p7HoTdgl20Q790FuqOGYUdg0QGKpW01FRwyz2N6gQM
+        oowqTXmqo5JCCpHIo5WQi33UTgW3/dMHhUvBksJqS/xBsIfDY0fOLNBpB9n38IyohaUM15JwxYiG
+        7GLjizJ3Gk+TnDAFA3/fcgosw9Z3B9v2yhQFkWs8Sng0VIIV1NJYNZXOoSD4pfY/iZWWlN+jg7XS
+        UCDHaT934K4cp71/rcQgnhN1BjkxTN8QZqBDJ0qQBHOOZbVV1fFtWOxeyMIsdeA808M7R16Eme0Q
+        hrq9MN7a0cGYWEFWC31247aea23Ek9rIM9Y0FUUpOHBcA2FRncqrqhIpCXYOtfW0Kl4/rHJg1Jf5
+        q2e2ZQ7ketY5JlmGngD9SSjEEuIttcfIiNYknRcIbafIAv0gtIDrQzsNRZvQNrT7hdZes40m64P8
+        9QwITXiYZwG3xRlKvheo2x29pkErG4BsWR7gZSfUgPNK7wD2uht2mgQfe8c4bbygP5qZK3K9IrIe
+        hrQoGbXj3pf089mzzdf/+uypB2c9dhnlix0HZ6D/cj82XH8tfloasqjek354bhggRgscsAw09Nw3
+        L7deUtJ0AfLE5kfaseXuoo16T83F6src4Va5JPhtipc8ZKuG41RroLbtp9zYqj0akOtp7zuMAx7z
+        m9PqBqRq2LskeNloh9kNbfr0fqdV5IR9dkPRvtCbrdRsqH/sJluGew7QLzKjQIZhdNrBBmpZ3f7x
+        jK43/gAAAP//vJfNbsMgDMdfZcq9sKzpZdLU06QdukeoJlohwtQ2VUj3cci7z8ZAk5JNaYl2dcD+
+        EYz/9k25gcE5eRObnYQHJOptuXQP6MnWwGvv+Cwguqp1c9Hp/vYbwuqehjhbV0TCMq8iwRDhkVoN
+        0MX3dqOKUGyeY2aObwb1XihpOO4w3okGQ6lVCd6Z+UC9dyd+ISNGsCIFPyMN1va908DGpB7zIRlz
+        Pg0m1fs+6Ku1edR5MmoxDSpkZJ9zVX16yCIZcjEZZJSiK2vzqIusXWOf232Jaej/mQpQarYn01R7
+        O7G/QY+QF+MqmDhgEaLNmR1/2PH7SxumaikPZXWEOsTedS0eVTmToMcz1PewhSY3iHYuds+w6A77
+        gyzMVBHaQNn7syrvxEZSIzriRBeiG48izlunmyGD53Xf02QqZ/ecHHFzUnC1zfJKSRqaK1vs9Nbt
+        DwAAAP//AwBBtKXIPhUAAA==
+    headers:
+      ATL-TraceId:
+      - 79fce73062415d7c
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:15 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - f8015eae-6c19-4513-a456-47c9ba9fc2b6
+      x-envoy-upstream-service-time:
+      - '175'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Jira Api Test 2",
+      "description": "\n\n\n\n\n\n*Title*: [Jira Api Test 2|http://localhost:8080/finding/2482]\n\n*Defect
+      Dojo link:* http://localhost:8080/finding/2482 (2482)\n\n*Severity:* Low\n\n*CWE:*
+      [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/598]\n\n*Branch/Tag:* None\n\n*BuildID:*
+      None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
+      https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
+      cookie has been set without the secure flag, which means that the cookie can
+      be accessed via unencrypted connections.\n\nReference: http://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\nURL:
+      https://mainsite.com/dashboard\nMethod: GET\nParameter: opvc\nEvidence: Set-Cookie:
+      opvc\n\nURL: https://mainsite.com/dashboard\nMethod: GET\nParameter: dmid\nEvidence:
+      Set-Cookie: dmid\n\nURL: https://mainsite.com\nMethod: GET\nParameter: sitevisitscookie\nEvidence:
+      Set-Cookie: sitevisitscookie\n\n*Mitigation*:\nWhenever a cookie contains sensitive
+      information or is a session token, then it should always be passed using an
+      encrypted channel. Ensure that the secure flag is set for cookies containing
+      such sensitive information.\n\n*Impact*:\nNo impact provided\n\n*Steps to reproduce*:\nNone\n\n*References*:\nCWE-614\nWASC-13\n\n*Reporter:*
+      [(admin) ()|mailto:]\n", "issuetype": {"name": "Task"}, "priority": {"name":
+      "Low"}}}'
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1683'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: POST
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue
+  response:
+    body:
+      string: '{"id":"10921","key":"NTEST-732","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10921"}'
+    headers:
+      ATL-TraceId:
+      - 1a24fe154414db04
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:16 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      timing-allow-origin:
+      - '*'
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 545de885-b15e-4c33-9278-dd0acab83323
+      x-envoy-upstream-service-time:
+      - '731'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-732
+  response:
+    body:
+      string: !!binary |
+        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
+        AA==
+    headers:
+      ATL-TraceId:
+      - 21bc61e1eff61a6d
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:16 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 5c9bfe9f-fcc8-48fc-91b1-4709630fb3f7
+      x-envoy-upstream-service-time:
+      - '151'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10921
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6RWbW/bNhD+K4Q+DF1m6y1K4goohjTxumxpmtlOCywtDFo6S6wlUiCpyF7b/74j
+        JcVpMmdtmgCJeOS9PffckZ8cWFeUp07sSOApSEh/Y1CkasBpCWqgkhxKOhAVSKqZ4GoAKdMlaDpI
+        csozKEQ2uAGpcA/SCVQSFHDdnnUGDjOWA/95GOBCQbHEZa51pWLPS2EJiU7FR+FSXVClGOUuB+2h
+        De3Rinmhx5SqwesNrGCD+hez8XQ2PNoPUbK0wTrxJ0eh01olVEMm5KYNLsUVKoR+GAz9aBgezYIg
+        jvw4OHSjcP8XP/R9E6PxoTcVWDNPjNHoY5y+b6Lqsm4XKahEssoggtJjokpaFAOSMqUZTzSpGCRA
+        xJI0Qq5co50IfiWLb4lCQVJL8G4YNPSGaip/VewfeFFikeryp1Z0lr4I/P1g1C1nGOiLbcoDxxQa
+        fc2oWpka1QttvuIlLRQMnN6GE1sjXwaOZkiMCovsxLzGTJxKio8Y3hPR67QtdrYaPXZmcafg20iv
+        ONMaDRh+ddomqT/tWSWWuqHSJKZYWRUMGZLeywbBtZSJRuto9C3hdjB3zjqkK2aAxZ+7OEf+EXoO
+        o3UYPdmwLaFlyU+q+/+Ir+BwHRz+mK9176z7eMTbfrjGvvshbx05Vf+x09uXL6a/12/b6YIVu/6A
+        FcwyCRn29QMaIqdEUbdt1kqSWmlR2hExRw/h0a6N0UMb7ehopaYx7fhz4mHQzQvDYMmS1t2nBzLD
+        Lwxf5aIu0lOmqoJuOhaiuKEa52o7tr6/Y9qZeDsFvdaaNO1gP09EbVCxkb4zAsYzJ9ayNq7Rpn6L
+        48I0RQeGBMzVdN3DOXngjg4O+zl5HzV/F5zBro1w18b+dpYwIZnePBGaXt2Lvm+OspJmoDyjoXoj
+        DAWFaFx1k21nz7lo+hkVORbOBZhhYqh5LynTlf+ZbbCLh8HIpJ1TNa5Ycs74yl7Fp1CZm5knPYEs
+        rRq7dyvhgo/xYqaLAiZAVUtK2X05l+dXr84u5udnJ+OL6Xg+nkzeTDANbCCFeeOBWQ7kEqcm18T4
+        JUwRwYsNwY5khTFKtCB/MEnJpYQSu5bUChnn2h69n8VzNOh/Zr5/cHgUO+2FgSVCjLct9VUbI9oZ
+        47S4f6h7V3TwWtoXGF0/CbB8GYfb03VlevYbeNy+FJ7IsFb59rb6+nL/PtJtWfWSJit8SPXM6o23
+        vk66J80PBdy/i7z+eRL2lysHw+hEFEJetNEsihqGmcSBtX0cCHIq2mKLssKnHtddFR6r39fgvOfb
+        370Z0wXsxeTakuq4YmSG2iT8bFLDzAqR0CIXSscjf+R7S8ZTnGJeGI3CD9bAqU0do/ooiCFFvEf+
+        X5U8M39/tgamgPTCUYGK2NRWdPJujKtr/Dc8DCIbikE5acAtmZbgCpl5SDJqgGf4CjHk9PCom+uy
+        sHG1dt4aO1d8xUXTyy6lSGt85ox5hi1XIoCeydj4m5qrEiMhv4tmqMUOCKrOQPiBeOQ6QLD+qqnU
+        IMnW5A5V2PoMrPbfx5dkmlC+47x5XHkHz0ct0i8l5UnuzWiGwV5g7VtpzYr07PSu6ESUCBPB+ZXf
+        ERuoN0pDqTD3tBIMqbMXW7mtmEG4pIwrpsFFdsVRtL9rb5cci6LyhaAy7WtwW4vTLQeN12OSCLFi
+        YKIkCwBOFGjSMI0XtSYax2D7cCHLgmYD0uQsyUkJlCvcpO2JzgLihxYITRIco5CSG0ZJjZ2RyE2F
+        cwiPcQ7tY8A1oUyQsThhE4h7pjZN44qGqsoSC3kKa7fKK0sMpOx8KeS8dabmVOPTYlFjaebP3rw7
+        nl4Op6+HeHNaMl9NzlujjwHzGjDJNCavxrP3HIc9djayJyb/AgAA///sWW1r2zAQ/ismUGhLndhO
+        nJfB6ELXwT5slAU2KPui2GpjZlvGb93I8t/3nCSrqRuH0Y2SD4FSlOp0d5XunnvuIrI6+J5e1xHV
+        GDi34KV9Ja02e/9oIEyisMuA2ttjoFstSdQRfhfqjrpMPJdDWHxC8t7LLpWi4tuKpwQHFjOPK9DE
+        wguEA7kS1dyKUrxHIs9YIqcSybBbUIVCdfzB0wuKjtRCCijaZ7H4gf2iMLMyJkOkKvCsFuJmK0rQ
+        qKY87iOLC4o7E2VbcUi2KExhX/tXNA6SvqJCjO70U8bd+cckY0FJ/+dnYUXygwU0ocuSd3++KHlW
+        UIXPuUIZroR1XpvAlXmr0RGXNl9c2e5Qi2SCsIjg7JThUdMz6/TsNx4yLsUb4Mhz+uh20Ud31LXh
+        NxtUdMocRVMyWyLaLVHHiLY3ukiZY0iZvHhJQXcLmmahvTHbSW7aRRGJzIIVgbEqoEWVJIyqe69V
+        CunKiJqL/IWVnyjaJeCJ2gE0Vf4dGw1DdzkdOf4S/k4mM9fzxkQ0jBAs7BHj9J7zMIQNVP/eow+2
+        bvPeGTQjpXt7bRXefdAMKSaxRC0Hvuu5I+46fOiFs3EwDPyJG0z9MHTY+M7l08vwrdRyMpyfeB/w
+        o87ZCUt1mbNt9aeiXxX2A27E9voU2f2sWsZRQFdmZ4wVdGM4L0s5eDSW72/scT9Lyf92E3/4HrdH
+        AYfvcXuccOgeA2lC1cxrrrxNQ2/0HIzyiZBY9dwKrW4BphC/rnKR8cEtACZYPSYeja+wazKZ7OhB
+        nKbZuQbYIxS8/qMfoeA1PD5CQScUtIkGmFNvvaEzDdGA7/cqFdc0EtdrBwZFyWKsdmjpmtI5XVM6
+        x0zp2huGsfG0jnKRKnajhwCV/hpGffwrT9FISg3rZqlR8AXIt/UF0qDRe9FL2M8vvKhiUrxlW45c
+        8nJeKj9qUf63Ia3SZXTCFDrQr0IOrMxYWORyDEQWjR9PnfWeeKsPyNvZbDZ/AAAA//8DAH26I4bN
+        GwAA
+    headers:
+      ATL-TraceId:
+      - b55a5b2851143f6a
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:16 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 592c365d-1c47-4387-8167-794bfd626286
+      x-envoy-upstream-service-time:
+      - '160'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uuttlJ0jQ0N9GDiqxCuycRSdspVtKktKmwLPvfTXDx4za88zzz
+        MifSmhUPiyWavIcwr3q363HALvT+w1MTrFnX0TjqMJCMfOKyjt5FmAEwChTyen/9XN89Nb/b/Ta1
+        cSL6JUEZZPCakR5n648TutAcZ4wHbqzf+ii122j7b4XoJEh1CW9NSCAHznIocl42rNSy0KKgAHAF
+        HCD6Ky6xtxmnf6xqGNMFaM6oqOQP2033bvARVCW2rC27CqVUVatkKSrsBAomQHSmFyU3lRLsT0Gw
+        qeFhXAxJ7wxms+HRdybFJ2IvE0H3dqjJ+fwFAAD//wMAYvWjAFoBAAA=
+    headers:
+      ATL-TraceId:
+      - e43399beaaf05482
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:21 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - b0114787-45b3-4c48-a601-c3c3f9912193
+      x-envoy-upstream-service-time:
+      - '36'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/field
+  response:
+    body:
+      string: !!binary |
+        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
+        wKGuu74AAAD//wMANYTZQH1HAAA=
+    headers:
+      ATL-TraceId:
+      - 9334e678c7b6cb7e
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:21 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - ae0fcb36-425a-4ef6-b480-6e68ac6868c3
+      x-envoy-upstream-service-time:
+      - '125'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA+xWS0/jMBD+K1EOnCpCS8WiShVCy66EdoWQKFxWHEwyoaaOHfxo00X89/UkTuxC
+        lw3lsgd6qWcyj28envFTDFVJeBZP4lKKB0i1igf+OPn15AWoUgb0ugQUUcByy5trXapJkmSQW4VM
+        PIh9ohlRihK+z0EnEpROSEmTUeKsJsMD+7MmKBptiQWsLXUx+3Y1sxQnBVjymlOtrQF0SJZEE3kt
+        mUX1FI+Pq/FxH/8KUiOh9d0YOSlpNq0d7zWMcyTHB1+sm9G4Go13Nqzob5iqgjC2p9z/G76GR9Xw
+        6GO+qtaZO7zh7XBUHY4+5q2AjJrCenOHv3p7HoTdgl20Q790FuqOGYUdg0QGKpW01FRwyz2N6gQM
+        oowqTXmqo5JCCpHIo5WQi33UTgW3/dMHhUvBksJqS/xBsIfDY0fOLNBpB9n38IyohaUM15JwxYiG
+        7GLjizJ3Gk+TnDAFA3/fcgosw9Z3B9v2yhQFkWs8Sng0VIIV1NJYNZXOoSD4pfY/iZWWlN+jg7XS
+        UCDHaT934K4cp71/rcQgnhN1BjkxTN8QZqBDJ0qQBHOOZbVV1fFtWOxeyMIsdeA808M7R16Eme0Q
+        hrq9MN7a0cGYWEFWC31247aea23Ek9rIM9Y0FUUpOHBcA2FRncqrqhIpCXYOtfW0Kl4/rHJg1Jf5
+        q2e2ZQ7ketY5JlmGngD9SSjEEuIttcfIiNYknRcIbafIAv0gtIDrQzsNRZvQNrT7hdZes40m64P8
+        9QwITXiYZwG3xRlKvheo2x29pkErG4BsWR7gZSfUgPNK7wD2uht2mgQfe8c4bbygP5qZK3K9IrIe
+        hrQoGbXj3pf089mzzdf/+uypB2c9dhnlix0HZ6D/cj82XH8tfloasqjek354bhggRgscsAw09Nw3
+        L7deUtJ0AfLE5kfaseXuoo16T83F6src4Va5JPhtipc8ZKuG41RroLbtp9zYqj0akOtp7zuMAx7z
+        m9PqBqRq2LskeNloh9kNbfr0fqdV5IR9dkPRvtCbrdRsqH/sJluGew7QLzKjQIZhdNrBBmpZ3f7x
+        jK43/gAAAP//vJfNbsMgDMdfZcq9sKzpZdLU06QdukeoJlohwtQ2VUj3cci7z8ZAk5JNaYl2dcD+
+        EYz/9k25gcE5eRObnYQHJOptuXQP6MnWwGvv+Cwguqp1c9Hp/vYbwuqehjhbV0TCMq8iwRDhkVoN
+        0MX3dqOKUGyeY2aObwb1XihpOO4w3okGQ6lVCd6Z+UC9dyd+ISNGsCIFPyMN1va908DGpB7zIRlz
+        Pg0m1fs+6Ku1edR5MmoxDSpkZJ9zVX16yCIZcjEZZJSiK2vzqIusXWOf232Jaej/mQpQarYn01R7
+        O7G/QY+QF+MqmDhgEaLNmR1/2PH7SxumaikPZXWEOsTedS0eVTmToMcz1PewhSY3iHYuds+w6A77
+        gyzMVBHaQNn7syrvxEZSIzriRBeiG48izlunmyGD53Xf02QqZ/ecHHFzUnC1zfJKSRqaK1vs9Nbt
+        DwAAAP//AwBBtKXIPhUAAA==
+    headers:
+      ATL-TraceId:
+      - b84df1e23ff1d795
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:21 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 14e1cfc1-35f6-4e21-b9a5-27d284748a6e
+      x-envoy-upstream-service-time:
+      - '117'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Jira Api Test 3",
+      "description": "\n\n\n\n\n\n*Title*: [Jira Api Test 3|http://localhost:8080/finding/2483]\n\n*Defect
+      Dojo link:* http://localhost:8080/finding/2483 (2483)\n\n*Severity:* Low\n\n*CWE:*
+      [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/598]\n\n*Branch/Tag:* None\n\n*BuildID:*
+      None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
+      https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
+      cookie has been set without the secure flag, which means that the cookie can
+      be accessed via unencrypted connections.\n\nReference: http://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\nURL:
+      https://mainsite.com/dashboard\nMethod: GET\nParameter: opvc\nEvidence: Set-Cookie:
+      opvc\n\nURL: https://mainsite.com/dashboard\nMethod: GET\nParameter: dmid\nEvidence:
+      Set-Cookie: dmid\n\nURL: https://mainsite.com\nMethod: GET\nParameter: sitevisitscookie\nEvidence:
+      Set-Cookie: sitevisitscookie\n\n*Mitigation*:\nWhenever a cookie contains sensitive
+      information or is a session token, then it should always be passed using an
+      encrypted channel. Ensure that the secure flag is set for cookies containing
+      such sensitive information.\n\n*Impact*:\nNo impact provided\n\n*Steps to reproduce*:\nNone\n\n*References*:\nCWE-614\nWASC-13\n\n*Reporter:*
+      [(admin) ()|mailto:]\n", "issuetype": {"name": "Task"}, "priority": {"name":
+      "Low"}}}'
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1683'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: POST
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue
+  response:
+    body:
+      string: '{"id":"10922","key":"NTEST-733","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10922"}'
+    headers:
+      ATL-TraceId:
+      - 387d3743ef83e027
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:22 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      timing-allow-origin:
+      - '*'
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 5683bf66-4748-413c-b313-bc55acef6417
+      x-envoy-upstream-service-time:
+      - '501'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-733
+  response:
+    body:
+      string: !!binary |
+        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
+        jR3NGwAA
+    headers:
+      ATL-TraceId:
+      - 25354c38a5ca45f3
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:22 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 890f57cb-a435-4acc-b024-e6d052f9a9a8
+      x-envoy-upstream-service-time:
+      - '163'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10922
+  response:
+    body:
+      string: !!binary |
+        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
+        qfP/Gs0bAAA=
+    headers:
+      ATL-TraceId:
+      - ca879f9cbd831d27
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:22 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 898203ad-a137-4b11-9850-09c3d8b0bfb9
+      x-envoy-upstream-service-time:
+      - '165'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J06Y0N9GDiqxCuycRyccUK2lSmlRYlv3vprj4cRveeZ55
+        mRNRMuBhsUSQ9xjnIHY7gwPqaPyHL2S0MoRRusJhJBn5xCWM3iWYAtACCsi7/fVzd/fU/27366TS
+        RMTLBmWQwWtGDM7WHyd0sT/OmA7cWL+aJKl1tOZbIWIT6uYS3sq4gSWUNIcqL3lPuagrwaoCAK6g
+        BEh+wCX19uP0j216SkUFoqwKxvkPq6d7N/gENhwVVVy3WNdNq5qasxY1Q0YZMC0N46VsG0b/FES7
+        NTyMiyTbO4NcbXz0Wm7xidjLRNC9HTpyPn8BAAD//wMAgzT9FloBAAA=
+    headers:
+      ATL-TraceId:
+      - 7a33d9a499b51c6e
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:24 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 4f5151a2-2b22-4412-8747-126ba0f680ba
+      x-envoy-upstream-service-time:
+      - '37'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/field
+  response:
+    body:
+      string: !!binary |
+        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
+        wKGuu74AAAD//wMANYTZQH1HAAA=
+    headers:
+      ATL-TraceId:
+      - 4ac57abe4231090c
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:24 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - d12b2690-2a9e-43f1-af5f-f729dcadcef8
+      x-envoy-upstream-service-time:
+      - '94'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10922
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6RWbW/bNhD+K4Q+FF1mWy9WE1dAMaSJ12VL08x2WmBpYdDSWWYjkQJJRfba/Pcd
+        SSlO0zpr0wRIxCPv7bnnjvzkwbqiPPMSTwLPQEL2O4MiUz1OS1A9la6gpD1RgaSaCa56kDFdgqa9
+        dEV5DoXIe9cgFe5BNoFKggKu3Vmv5zFjOQyeRxEuFBRLXK60rlTi+xksIdWZ+CgGVBdUKUb5gIP2
+        0Yb2acX8yGdK1eB3Bq5gg/pns/F01j8YDlGytMF6ySdPodNapVRDLuTGBZfhChWiIAr7QdyPDmZh
+        mMRBEkWD4X78axAFgYnR+NCbCqyZR8Zo9DHOIDBxtlm7RQYqlawyiKD0kKiSFkWPZExpxlNNKgYp
+        ELEkjZBXA6OdCn4hi++JQkFaS/CvGTT0mmoqf1PsX3hRYpHq8okTnWQvwmAYjtrlDAN9sU2555lC
+        o68ZVVemRvVCm69kSQsFPa+z4SXWyE3P0wyJUWGRvYTXmIlXSfERw3skeq22xc5Wo8POLO4UfBvp
+        BWdaowHDr1bbJPWXPavEUjdUmsQUK6uCIUOye9kguJYy8Wgdj74n3Bbm1lmLdMUMsPhzF+c4OEDP
+        UbyO4kcbtiW0LHmi2v8P+Ar31+H+z/lad87ajwe8DaP1MPo5by05Vfex09vNjenv9Vs3XbBilx+w
+        gnkuIce+/oqGyClR1K7NnCStlRalHRFz9BAd7NoYfW3DjQ4nNY1px5+X9MOeh2nqt9hxhlfugG0n
+        w2nJUhfAp69khnGYkFqJusiOmaoKuml5ieKGapy0bpD9eA+5KXk7F31nTZoGsZ9HojY4hSbSd0bA
+        eO4lWtbGdSoBczVd9605GQz3uzl5H7VgF5zhro1o18ZwO0uYkExvHglEp+7HPzZHWUlzUL7RUJ0R
+        hoJCNAN1nW9nz6louhkVezeGCwsww8RQ815Spiu/mW24i4fhyKS9ompcsfSU8St7FR9DZW5mnnZ0
+        sSRq7N6thAs+xouZLgqYAFWOgrL98s5PL16dnM1PT47GZ9PxfDyZvJlgGthACvPGA7MVkHOcmlwT
+        45cwRQQvNgQ7khXGKNGC/MkkJecSSuxaUivk18D26P0snqPB4DMLgmf7y8S717KIbM44LbBmCPq2
+        x8zefVn7rmjhtSQvMLpuEmD5cg63p+vK9Ox38Ni9FB7JMKd8e1t9ebn/GOm2rHpJ0yt8SHXM6ow7
+        X0ftk+anAu7eRX73PIm6y5WDYXQqCiHPXDSLooZ+LnE8bR8HghwLV2xRVvjU47qtwkM1/RKc93z7
+        uzdjuoC9hFxaUh1WjMxQmww/m9Qws0KktFgJpZNRMAr8JeMZziw/ikfDD9bAsU0do/ooiCFFskf+
+        X5U8NX9/sQamgPTCUYGK2NRWdPRujKtL/NffD2MbikE5bWBQMi1hIGTuI8moAZ7hK8SQ08ejg5Uu
+        CxuXs/PW2LngV1w0nexciqzGZ86Y59hyJQLom4yNv6m5KjES8odo+lrsgKBqDUQfiE8uQwTr75pK
+        DZJsTe5Qha3P0Gr/c3hOpinlO86bx5X/7PnIIf1SUp6u/BnNMdgzrL2T1qzITo7vio5EiTARnF+r
+        O2ID9UZpKBXmnlWCIXX2Eiu3FTMIl5RxxTQMkF1JHA937e2SY1HUaiGozLoa3NbieMtB4/WQpEJc
+        MTBRkgUAJwo0aZjGa1kTjWPQPVzIsqB5jzQrlq5ICZQr3KTuRGsB8UMLhKYpjlHIyDWjpMbOSOWm
+        wjmExzgHd/UPTCgTZCxO2BSSjqlN0wxEQ1VliYU8hfWgWlWWGEjZ+VLIuXOm5lTjQ2JRY2nmT9+8
+        O5ye96ev+3hzWjJfTE6d0YeAeQ2YZJaQV+PZe47DHjsb2ZOQ/wAAAP//7Flta9swEP4rJlBoS+3Y
+        TpyXwehC18E+bJQFNij7othqY2Zbxi/pRpf/vuckWU3cOIxulHwIlOJEp7uzdPfccxeRr8Lv2fUq
+        phoD5+a8sq+k1WbtHw1EaRx1GVBrewx0qyWJVYz/pTqjLhPP5RAWn5C897JLpaj4tuQZwYHFzOUK
+        NLHwAuFArsQrbsUZ7iOVeyxRUIlkWC2pQqE6/uDZBUVHZiEFFMmzWPLAflGYWTmTIVKXuFYLcbMR
+        JWhUM544yOKS4s5E2UYcki0KU9jX/pWNg6SvrBGjO/2UcXf+Mc1ZWNF7fhZWLD9YQBM6LHn25/OK
+        5yVV+IIrlOFKWOe1CVyZtxodcWiz+ZXtDbRILgiLCM5OGS41O7NOz37jIpNKvAGOPKePXhd99Iab
+        nKAqUBslXSX23BYNOnS4nQtdpMw1pEwevKSguwVNs7DFa9q1D/nKwiVh7k5y6E6NuTpNGVX3XqsU
+        0pERNRfFCys/UbRLwBORfzRVwR0bDiJvMRm6wQIujMdTz/dHRDSMECzsEeN0n7Mogg1U/96TD7Zu
+        894ZNCOle3ttFd4OaIYUk1iiHvuB53tD7rl84EfTUTgIg7EXToIoctnozuOTy+it1HIymJ34H/Cn
+        9tkpy3SZs231VenUpf2AE7F9hyLbyetFEod0ZHbOWEknhv2ylINH4/H9jT1y8oz8bzfxh+9xexRw
+        +B63xwmH7jEgKFKtu+bKmzT0Rs/BKJ8IiVWHrWDsFmAK8eu6EDnv3wJgwuVT4tH4Cqsmk8mOHsRp
+        ml1ogD1Cwetf+hEKXsPjIxR0QkGbO4A59R7XtKdhIPD9XqXiI43E9bMLg6JiCZ52aOma0rldUzrX
+        TOnaC4ax8WwVFyJTtEcPAWr9M4z6+DeerkT130ahSpfRCUPo/L4KOShqhq8ILeXxY/OoUffF9uUP
+        Vv1G70UvZT+/8LJOSPHGu8oRT1HNKvXeNGemMRC9ufl+e7O/tVtvkN6u1+s/AAAA//8DAFfntfHN
+        GwAA
+    headers:
+      ATL-TraceId:
+      - d5c540009d953200
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:24 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 9f4132b6-389c-4789-aedb-d7f11719a10e
+      x-envoy-upstream-service-time:
+      - '127'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J0qQ0N9GDiqxCuycRSdopVtKktKmwLPvfTXDx4za88zzz
+        Midi9IqHxRJF3kOYV7Xb9ThgF3r/4QsdrF7XUbvCYSAZ+cRlHb2LMAWgBRSQN/vr5+buqf3d7rfJ
+        xImolwRlkMFrRnqcrT9O6EJ7nDEeuLF+66NkttH23wpRSRDVJbzVIYEMGM2hzJlsqVSiVLwsAOAK
+        GED0V1xibztO/9iqpVSVoJgoOJQ/bDfdu8FHsJJoqJFdjUJUtamE5DV2HDnlwDvdc8l0XXH6pyDY
+        1PAwLpqkdwa92fDoO53iE7GXiaB7OzTkfP4CAAD//wMANKLo0VoBAAA=
+    headers:
+      ATL-TraceId:
+      - ec237d3a3fa3456c
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:25 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - b72c0b5f-9e1c-49f4-95a0-a2307ae25f34
+      x-envoy-upstream-service-time:
+      - '37'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/field
+  response:
+    body:
+      string: !!binary |
+        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
+        wKGuu74AAAD//wMANYTZQH1HAAA=
+    headers:
+      ATL-TraceId:
+      - ff6c603de3f97f78
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:25 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 0aa970eb-c24c-470b-a08a-4ca31706d392
+      x-envoy-upstream-service-time:
+      - '56'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10922
+  response:
+    body:
+      string: !!binary |
+        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
+        GwAA
+    headers:
+      ATL-TraceId:
+      - a3a9ebb468359499
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:25 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - f7a46eac-e9cc-4f6b-9ea1-b904c46145d3
+      x-envoy-upstream-service-time:
+      - '120'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA+xWS0/jMBD+K1EOnCpCS8WiShVCy66EdoWQKFxWHEwyoaaOHfxo00X89/UkTuxC
+        lw3lsgd6qWcyj28envFTDFVJeBZP4lKKB0i1igf+OPn15AWoUgb0ugQUUcByy5trXapJkmSQW4VM
+        PIh9ohlRihK+z0EnEpROSEmTUeKsJsMD+7MmKBptiQWsLXUx+3Y1sxQnBVjymlOtrQF0SJZEE3kt
+        mUX1FI+Pq/FxH/8KUiOh9d0YOSlpNq0d7zWMcyTHB1+sm9G4Go13Nqzob5iqgjC2p9z/G76GR9Xw
+        6GO+qtaZO7zh7XBUHY4+5q2AjJrCenOHv3p7HoTdgl20Q790FuqOGYUdg0QGKpW01FRwyz2N6gQM
+        oowqTXmqo5JCCpHIo5WQi33UTgW3/dMHhUvBksJqS/xBsIfDY0fOLNBpB9n38IyohaUM15JwxYiG
+        7GLjizJ3Gk+TnDAFA3/fcgosw9Z3B9v2yhQFkWs8Sng0VIIV1NJYNZXOoSD4pfY/iZWWlN+jg7XS
+        UCDHaT934K4cp71/rcQgnhN1BjkxTN8QZqBDJ0qQBHOOZbVV1fFtWOxeyMIsdeA808M7R16Eme0Q
+        hrq9MN7a0cGYWEFWC31247aea23Ek9rIM9Y0FUUpOHBcA2FRncqrqhIpCXYOtfW0Kl4/rHJg1Jf5
+        q2e2ZQ7ketY5JlmGngD9SSjEEuIttcfIiNYknRcIbafIAv0gtIDrQzsNRZvQNrT7hdZes40m64P8
+        9QwITXiYZwG3xRlKvheo2x29pkErG4BsWR7gZSfUgPNK7wD2uht2mgQfe8c4bbygP5qZK3K9IrIe
+        hrQoGbXj3pf089mzzdf/+uypB2c9dhnlix0HZ6D/cj82XH8tfloasqjek354bhggRgscsAw09Nw3
+        L7deUtJ0AfLE5kfaseXuoo16T83F6src4Va5JPhtipc8ZKuG41RroLbtp9zYqj0akOtp7zuMAx7z
+        m9PqBqRq2LskeNloh9kNbfr0fqdV5IR9dkPRvtCbrdRsqH/sJluGew7QLzKjQIZhdNrBBmpZ3f7x
+        jK43/gAAAP//vJfNbsMgDMdfZcq9sKzpZdLU06QdukeoJlohwtQ2VUj3cci7z8ZAk5JNaYl2dcD+
+        EYz/9k25gcE5eRObnYQHJOptuXQP6MnWwGvv+Cwguqp1c9Hp/vYbwuqehjhbV0TCMq8iwRDhkVoN
+        0MX3dqOKUGyeY2aObwb1XihpOO4w3okGQ6lVCd6Z+UC9dyd+ISNGsCIFPyMN1va908DGpB7zIRlz
+        Pg0m1fs+6Ku1edR5MmoxDSpkZJ9zVX16yCIZcjEZZJSiK2vzqIusXWOf232Jaej/mQpQarYn01R7
+        O7G/QY+QF+MqmDhgEaLNmR1/2PH7SxumaikPZXWEOsTedS0eVTmToMcz1PewhSY3iHYuds+w6A77
+        gyzMVBHaQNn7syrvxEZSIzriRBeiG48izlunmyGD53Xf02QqZ/ecHHFzUnC1zfJKSRqaK1vs9Nbt
+        DwAAAP//AwBBtKXIPhUAAA==
+    headers:
+      ATL-TraceId:
+      - a041809a665c98c4
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:25 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - cf2027b1-69f4-4e82-a549-9852c3468cd6
+      x-envoy-upstream-service-time:
+      - '98'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"fields": {"description": "\n\n\n\n\n\n*Title*: [Jira Api Test 3|http://localhost:8080/finding/2483]\n\n*Defect
+      Dojo link:* http://localhost:8080/finding/2483 (2483)\n\n*Severity:* Low\n\n*CWE:*
+      [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/598]\n\n*Branch/Tag:* None\n\n*BuildID:*
+      None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
+      https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
+      cookie has been set without the secure flag, which means that the cookie can
+      be accessed via unencrypted connections.\n\nReference: http://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\nURL:
+      https://mainsite.com/dashboard\nMethod: GET\nParameter: opvc\nEvidence: Set-Cookie:
+      opvc\n\nURL: https://mainsite.com/dashboard\nMethod: GET\nParameter: dmid\nEvidence:
+      Set-Cookie: dmid\n\nURL: https://mainsite.com\nMethod: GET\nParameter: sitevisitscookie\nEvidence:
+      Set-Cookie: sitevisitscookie\n\n*Mitigation*:\nWhenever a cookie contains sensitive
+      information or is a session token, then it should always be passed using an
+      encrypted channel. Ensure that the secure flag is set for cookies containing
+      such sensitive information.\n\n*Impact*:\nNo impact provided\n\n*Steps to reproduce*:\nNone\n\n*References*:\nCWE-614\nWASC-13\n\n*Reporter:*
+      [(admin) ()|mailto:]\n", "priority": {"name": "Low"}, "summary": "Jira Api Test
+      3"}, "update": {}}'
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1637'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: PUT
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10922
+  response:
+    body:
+      string: ''
+    headers:
+      ATL-TraceId:
+      - 64600787c0d1d885
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:25 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      timing-allow-origin:
+      - '*'
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - a3b025da-a968-4ac8-b09b-5c376cf5ff1c
+      x-envoy-upstream-service-time:
+      - '88'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10922
+  response:
+    body:
+      string: !!binary |
+        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
+        AwCQjqpbzRsAAA==
+    headers:
+      ATL-TraceId:
+      - 24b9898b4c8e4163
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:30 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 4c1f8653-dd14-4d01-83cb-2d36f9a02fdc
+      x-envoy-upstream-service-time:
+      - '118'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"transition": {"id": 41}, "fields": {}}'
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: POST
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-733/transitions
+  response:
+    body:
+      string: ''
+    headers:
+      ATL-TraceId:
+      - 461a6ba6f40460b0
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:30 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      timing-allow-origin:
+      - '*'
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - d9ef7c07-de4a-4dbc-9a9e-574ff34645ae
+      x-envoy-upstream-service-time:
+      - '248'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SPwUrEMBCG3yVX2+ykaVObm+hBRVZhuycRSdIpVtKktKmwLPvuJrioexv++b75
+        mSPRasH9bIkkHyFMi9xsOuzRhM5/eqqCVcsyKEcdBpKRL5yXwbsIMwBGgUK+29687O6f27/tdh11
+        nIh8TVAGGbxlpMPJ+sOILrSHCeOBW+vXLkp6HWz3oxCZhKo+h3cqJLCAguVQ5oVomZBVKXlJAeAK
+        CoDoLzjH3nYYL9i6ZUyWIDmj1yB+WTM+uN5HsBaomRamwaqqG11XgjdoOHLGgRvVcVGopubsX0Gw
+        qeFxmBVJ7/RqteHJG5XiI7HniaB73+/I6fQNAAD//wMA0UM0mloBAAA=
+    headers:
+      ATL-TraceId:
+      - 7afd0d84a6a4bb11
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:31 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - b95f4e0c-6a62-4261-85c5-ff2d6904ed70
+      x-envoy-upstream-service-time:
+      - '37'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/field
+  response:
+    body:
+      string: !!binary |
+        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
+        wKGuu74AAAD//wMANYTZQH1HAAA=
+    headers:
+      ATL-TraceId:
+      - 262befe0c95c0a78
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:31 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - c5a8f6d5-0e2b-444b-95d5-ad222a619477
+      x-envoy-upstream-service-time:
+      - '56'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10922
+  response:
+    body:
+      string: !!binary |
+        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
+        AZ0cAAA=
+    headers:
+      ATL-TraceId:
+      - 35966f739fde9b35
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:32 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 97c09c1a-bf19-413a-803d-aa9ad1a53f3e
+      x-envoy-upstream-service-time:
+      - '123'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uuttlJ0yQ0N9GDiqxCuycRSZspVtKktKmwLPvfTXHx4za88zzz
+        MifSmgUPsyOavMc4LXq3s9hjF234CNREZ5ZlMJ56jCQjnzgvQ/AJZgCMAoW83l8/13dPze92v45t
+        moh+2aAMMnjNiMXJheOIPjbHCdOBGxdWm6R2HZz9VojeBKEu4a2JG1hAwXIo80I2TGpRal5SALiC
+        AiD5C86ptxnGf6xqGNMlaC6oEPyH7cZ734cEKokta2VXoRCqapWQvMKOI2cceGcsl4WpFGd/CqLb
+        Gh6G2ZDtnd6sLj6GzmzxibjLRNC/HWpyPn8BAAD//wMAvHe75VoBAAA=
+    headers:
+      ATL-TraceId:
+      - fe85c7ae66d3a0a6
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:35 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 550853fb-eb41-4106-9692-99e2eacaf548
+      x-envoy-upstream-service-time:
+      - '36'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/field
+  response:
+    body:
+      string: !!binary |
+        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
+        wKGuu74AAAD//wMANYTZQH1HAAA=
+    headers:
+      ATL-TraceId:
+      - 69fa40301988e663
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:35 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 0cbcaa70-fef3-423f-a2dc-75a67010ad95
+      x-envoy-upstream-service-time:
+      - '73'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA+xWS0/jMBD+K1EOnCpCS8WiShVCy66EdoWQKFxWHEwyoaaOHfxo00X89/UkTuxC
+        lw3lsgd6qWcyj28envFTDFVJeBZP4lKKB0i1igf+OPn15AWoUgb0ugQUUcByy5trXapJkmSQW4VM
+        PIh9ohlRihK+z0EnEpROSEmTUeKsJsMD+7MmKBptiQWsLXUx+3Y1sxQnBVjymlOtrQF0SJZEE3kt
+        mUX1FI+Pq/FxH/8KUiOh9d0YOSlpNq0d7zWMcyTHB1+sm9G4Go13Nqzob5iqgjC2p9z/G76GR9Xw
+        6GO+qtaZO7zh7XBUHY4+5q2AjJrCenOHv3p7HoTdgl20Q790FuqOGYUdg0QGKpW01FRwyz2N6gQM
+        oowqTXmqo5JCCpHIo5WQi33UTgW3/dMHhUvBksJqS/xBsIfDY0fOLNBpB9n38IyohaUM15JwxYiG
+        7GLjizJ3Gk+TnDAFA3/fcgosw9Z3B9v2yhQFkWs8Sng0VIIV1NJYNZXOoSD4pfY/iZWWlN+jg7XS
+        UCDHaT934K4cp71/rcQgnhN1BjkxTN8QZqBDJ0qQBHOOZbVV1fFtWOxeyMIsdeA808M7R16Eme0Q
+        hrq9MN7a0cGYWEFWC31247aea23Ek9rIM9Y0FUUpOHBcA2FRncqrqhIpCXYOtfW0Kl4/rHJg1Jf5
+        q2e2ZQ7ketY5JlmGngD9SSjEEuIttcfIiNYknRcIbafIAv0gtIDrQzsNRZvQNrT7hdZes40m64P8
+        9QwITXiYZwG3xRlKvheo2x29pkErG4BsWR7gZSfUgPNK7wD2uht2mgQfe8c4bbygP5qZK3K9IrIe
+        hrQoGbXj3pf089mzzdf/+uypB2c9dhnlix0HZ6D/cj82XH8tfloasqjek354bhggRgscsAw09Nw3
+        L7deUtJ0AfLE5kfaseXuoo16T83F6src4Va5JPhtipc8ZKuG41RroLbtp9zYqj0akOtp7zuMAx7z
+        m9PqBqRq2LskeNloh9kNbfr0fqdV5IR9dkPRvtCbrdRsqH/sJluGew7QLzKjQIZhdNrBBmpZ3f7x
+        jK43/gAAAP//vJfNbsMgDMdfZcq9sKzpZdLU06QdukeoJlohwtQ2VUj3cci7z8ZAk5JNaYl2dcD+
+        EYz/9k25gcE5eRObnYQHJOptuXQP6MnWwGvv+Cwguqp1c9Hp/vYbwuqehjhbV0TCMq8iwRDhkVoN
+        0MX3dqOKUGyeY2aObwb1XihpOO4w3okGQ6lVCd6Z+UC9dyd+ISNGsCIFPyMN1va908DGpB7zIRlz
+        Pg0m1fs+6Ku1edR5MmoxDSpkZJ9zVX16yCIZcjEZZJSiK2vzqIusXWOf232Jaej/mQpQarYn01R7
+        O7G/QY+QF+MqmDhgEaLNmR1/2PH7SxumaikPZXWEOsTedS0eVTmToMcz1PewhSY3iHYuds+w6A77
+        gyzMVBHaQNn7syrvxEZSIzriRBeiG48izlunmyGD53Xf02QqZ/ecHHFzUnC1zfJKSRqaK1vs9Nbt
+        DwAAAP//AwBBtKXIPhUAAA==
+    headers:
+      ATL-TraceId:
+      - 4f668e93e876f249
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:35 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - f9915fe4-a3dd-4a3e-8a47-413f703b4118
+      x-envoy-upstream-service-time:
+      - '116'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"fields": {"project": {"key": "NTEST"}, "summary": "Jira Api Test 4",
+      "description": "\n\n\n\n\n\n*Title*: [Jira Api Test 4|http://localhost:8080/finding/2484]\n\n*Defect
+      Dojo link:* http://localhost:8080/finding/2484 (2484)\n\n*Severity:* Low\n\n*CWE:*
+      [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/598]\n\n*Branch/Tag:* None\n\n*BuildID:*
+      None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
+      https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
+      cookie has been set without the secure flag, which means that the cookie can
+      be accessed via unencrypted connections.\n\nReference: http://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\nURL:
+      https://mainsite.com/dashboard\nMethod: GET\nParameter: opvc\nEvidence: Set-Cookie:
+      opvc\n\nURL: https://mainsite.com/dashboard\nMethod: GET\nParameter: dmid\nEvidence:
+      Set-Cookie: dmid\n\nURL: https://mainsite.com\nMethod: GET\nParameter: sitevisitscookie\nEvidence:
+      Set-Cookie: sitevisitscookie\n\n*Mitigation*:\nWhenever a cookie contains sensitive
+      information or is a session token, then it should always be passed using an
+      encrypted channel. Ensure that the secure flag is set for cookies containing
+      such sensitive information.\n\n*Impact*:\nNo impact provided\n\n*Steps to reproduce*:\nNone\n\n*References*:\nCWE-614\nWASC-13\n\n*Reporter:*
+      [(admin) ()|mailto:]\n", "issuetype": {"name": "Task"}, "priority": {"name":
+      "Low"}}}'
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1683'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: POST
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue
+  response:
+    body:
+      string: '{"id":"10923","key":"NTEST-734","self":"https://defectdojo.atlassian.net/rest/api/2/issue/10923"}'
+    headers:
+      ATL-TraceId:
+      - 5d9324ecf774ab21
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:36 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      timing-allow-origin:
+      - '*'
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - c2fe609f-eefd-42b9-802f-d6fec22ba563
+      x-envoy-upstream-service-time:
+      - '549'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/NTEST-734
+  response:
+    body:
+      string: !!binary |
+        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
+        GwAA
+    headers:
+      ATL-TraceId:
+      - 9f361bc02f9fa31d
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:36 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 8d1264b1-6b99-4a7d-b10d-e302bdb516a0
+      x-envoy-upstream-service-time:
+      - '116'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10923
+  response:
+    body:
+      string: !!binary |
+        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
+        zRsAAA==
+    headers:
+      ATL-TraceId:
+      - 97974a94eaef5ab7
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:36 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 5b5aee40-0fd2-4b01-8af5-c58e714306de
+      x-envoy-upstream-service-time:
+      - '149'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/serverInfo
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA1SPTUvEMBCG/0uutt1J0jbb3EQPKrIK2z2JSJpMsZImpU2FZdn/boKLH7fhneeZ
+        lzmRTi14mC2R5D2EaZGbjcEedTD+wxcqWLUsg3KFw0Ay8onzMngXYQpACygg3++un/d3T+3vdreO
+        XZyIfElQBhm8ZsTgZP1xRBfa44TxwI31q4lStw7WfCtEJqESl/BWhQQyYDSHMmd1S2tZlZKXBQBc
+        AQOI/oJz7G2H8R8rWkplCZJviy1rflg93rveR1DU2NGu1g1WlWg6UdW8Qc2RUw5cK8NrphrB6Z+C
+        YFPDwzArkt7p1WrDo9cqxSdiLxNB93bYk/P5CwAA//8DAJ5oeJBaAQAA
+    headers:
+      ATL-TraceId:
+      - ac3aa4060f90c9b1
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:38 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 9dcc5572-8b61-4e4a-bb45-afa06c8fe93e
+      x-envoy-upstream-service-time:
+      - '36'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/field
+  response:
+    body:
+      string: !!binary |
+        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
+        wKGuu74AAAD//wMANYTZQH1HAAA=
+    headers:
+      ATL-TraceId:
+      - 7f9f8c56e2b150d2
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:38 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 67ef5d06-ea66-4220-81d0-4eb8e85a545b
+      x-envoy-upstream-service-time:
+      - '65'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10923
+  response:
+    body:
+      string: !!binary |
+        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
+        GwAA
+    headers:
+      ATL-TraceId:
+      - 201ff29ec9085aac
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:39 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 26ef5d28-e110-4356-8486-391314065647
+      x-envoy-upstream-service-time:
+      - '174'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/createmeta?projectKeys=NTEST&issuetypeNames=Task&expand=projects.issuetypes.fields
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA+xWS0/jMBD+K1EOnCpCS8WiShVCy66EdoWQKFxWHEwyoaaOHfxo00X89/UkTuxC
+        lw3lsgd6qWcyj28envFTDFVJeBZP4lKKB0i1igf+OPn15AWoUgb0ugQUUcByy5trXapJkmSQW4VM
+        PIh9ohlRihK+z0EnEpROSEmTUeKsJsMD+7MmKBptiQWsLXUx+3Y1sxQnBVjymlOtrQF0SJZEE3kt
+        mUX1FI+Pq/FxH/8KUiOh9d0YOSlpNq0d7zWMcyTHB1+sm9G4Go13Nqzob5iqgjC2p9z/G76GR9Xw
+        6GO+qtaZO7zh7XBUHY4+5q2AjJrCenOHv3p7HoTdgl20Q790FuqOGYUdg0QGKpW01FRwyz2N6gQM
+        oowqTXmqo5JCCpHIo5WQi33UTgW3/dMHhUvBksJqS/xBsIfDY0fOLNBpB9n38IyohaUM15JwxYiG
+        7GLjizJ3Gk+TnDAFA3/fcgosw9Z3B9v2yhQFkWs8Sng0VIIV1NJYNZXOoSD4pfY/iZWWlN+jg7XS
+        UCDHaT934K4cp71/rcQgnhN1BjkxTN8QZqBDJ0qQBHOOZbVV1fFtWOxeyMIsdeA808M7R16Eme0Q
+        hrq9MN7a0cGYWEFWC31247aea23Ek9rIM9Y0FUUpOHBcA2FRncqrqhIpCXYOtfW0Kl4/rHJg1Jf5
+        q2e2ZQ7ketY5JlmGngD9SSjEEuIttcfIiNYknRcIbafIAv0gtIDrQzsNRZvQNrT7hdZes40m64P8
+        9QwITXiYZwG3xRlKvheo2x29pkErG4BsWR7gZSfUgPNK7wD2uht2mgQfe8c4bbygP5qZK3K9IrIe
+        hrQoGbXj3pf089mzzdf/+uypB2c9dhnlix0HZ6D/cj82XH8tfloasqjek354bhggRgscsAw09Nw3
+        L7deUtJ0AfLE5kfaseXuoo16T83F6src4Va5JPhtipc8ZKuG41RroLbtp9zYqj0akOtp7zuMAx7z
+        m9PqBqRq2LskeNloh9kNbfr0fqdV5IR9dkPRvtCbrdRsqH/sJluGew7QLzKjQIZhdNrBBmpZ3f7x
+        jK43/gAAAP//vJfNbsMgDMdfZcq9sKzpZdLU06QdukeoJlohwtQ2VUj3cci7z8ZAk5JNaYl2dcD+
+        EYz/9k25gcE5eRObnYQHJOptuXQP6MnWwGvv+Cwguqp1c9Hp/vYbwuqehjhbV0TCMq8iwRDhkVoN
+        0MX3dqOKUGyeY2aObwb1XihpOO4w3okGQ6lVCd6Z+UC9dyd+ISNGsCIFPyMN1va908DGpB7zIRlz
+        Pg0m1fs+6Ku1edR5MmoxDSpkZJ9zVX16yCIZcjEZZJSiK2vzqIusXWOf232Jaej/mQpQarYn01R7
+        O7G/QY+QF+MqmDhgEaLNmR1/2PH7SxumaikPZXWEOsTedS0eVTmToMcz1PewhSY3iHYuds+w6A77
+        gyzMVBHaQNn7syrvxEZSIzriRBeiG48izlunmyGD53Xf02QqZ/ecHHFzUnC1zfJKSRqaK1vs9Nbt
+        DwAAAP//AwBBtKXIPhUAAA==
+    headers:
+      ATL-TraceId:
+      - 569b6444ffd97858
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:39 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - bedf400a-185e-461a-84bb-0ca9b2db4b5c
+      x-envoy-upstream-service-time:
+      - '100'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"fields": {"description": "\n\n\n\n\n\n*Title*: [Jira Api Test 4|http://localhost:8080/finding/2484]\n\n*Defect
+      Dojo link:* http://localhost:8080/finding/2484 (2484)\n\n*Severity:* Low\n\n*CWE:*
+      [CWE-614|https://cwe.mitre.org/data/definitions/614.html]\n\n\n\n*CVE:* Unknown\n\n\n*Product/Engagement/Test:*
+      [Security How-to|http://localhost:8080/product/2] / [1st Quarter Engagement|http://localhost:8080/engagement/1]
+      / [ZAP Scan|http://localhost:8080/test/598]\n\n*Branch/Tag:* None\n\n*BuildID:*
+      None\n\n*Commit hash:* None\n\n\n*Systems/Endpoints*:\n\n* https://mainsite.com:443\n*
+      https://mainsite.com\n* https://mainsite.com/dashboard\n\n\n\n\n\n\n\n*Description*:\nA
+      cookie has been set without the secure flag, which means that the cookie can
+      be accessed via unencrypted connections.\n\nReference: http://www.owasp.org/index.php/Testing_for_cookies_attributes_(OWASP-SM-002)\n\nURL:
+      https://mainsite.com/dashboard\nMethod: GET\nParameter: opvc\nEvidence: Set-Cookie:
+      opvc\n\nURL: https://mainsite.com/dashboard\nMethod: GET\nParameter: dmid\nEvidence:
+      Set-Cookie: dmid\n\nURL: https://mainsite.com\nMethod: GET\nParameter: sitevisitscookie\nEvidence:
+      Set-Cookie: sitevisitscookie\n\n*Mitigation*:\nWhenever a cookie contains sensitive
+      information or is a session token, then it should always be passed using an
+      encrypted channel. Ensure that the secure flag is set for cookies containing
+      such sensitive information.\n\n*Impact*:\nNo impact provided\n\n*Steps to reproduce*:\nNone\n\n*References*:\nCWE-614\nWASC-13\n\n*Reporter:*
+      [(admin) ()|mailto:]\n", "priority": {"name": "Low"}, "summary": "Jira Api Test
+      4"}, "update": {}}'
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1637'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: PUT
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10923
+  response:
+    body:
+      string: ''
+    headers:
+      ATL-TraceId:
+      - 35bc4fa64746233f
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:39 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      timing-allow-origin:
+      - '*'
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - 4683dcf0-efd6-43c5-b8af-4650efdc4492
+      x-envoy-upstream-service-time:
+      - '142'
+    status:
+      code: 204
+      message: No Content
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json,*.*;q=0.9
+      Accept-Encoding:
+      - gzip, deflate
+      Cache-Control:
+      - no-cache
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.25.1
+    method: GET
+    uri: https://defectdojo.atlassian.net/rest/api/2/issue/10923
+  response:
+    body:
+      string: !!binary |
+        H4sIAAAAAAAAA6RWbW/bNhD+K4Q+FF1mWy9WE1dAMaSJ12VL08x2WmBpYdDSWWYjkQJJRfba/Pcd
+        SSlO0zpr0wRIxCPv/bmH/OTBuqI88xJPAs9AQvY7gyJTPU5LUD2VrqCkPVGBpJoJrnqQMV2Cpr10
+        RXkOhch71yAV7kE2gUqCAq7dWa/nMWM5DJ5HQ1woKJa4XGldqcT3M1hCqjPxUQyoLqhSjPIBB+2j
+        De3TivmRz5Sqwe8MXMEG9c9m4+msfzCMUbK0wXrJJ0+h01qlVEMu5MYFl+EKFaIgCvtB3I8OZmGY
+        xEEy3B882x/9GkRBYGI0PvSmAmvmkTEafYwzCKJt1m6RgUolq0xFUHpIVEmLokcypjTjqSYVgxSI
+        WJJGyKuB0U4Fv5DF90ShIK0l+NcMGnpNNZW/KfYvvCixSXX5xIlOshdhMAxH7XKGgb7YptzzTKPR
+        14yqK9OjeqHNV7KkhYKe19nwEmvkpudphsCosMlewmvMxKuk+IjhPbJ6rbatne1GVzuzuNPwbaQX
+        nGmNBgy+Wm2T1F/2rBJL3VBpElOsrAqGCMnuZYPFtZCJR+t49D3htmVunbWVrpgpLP7crXMcHKDn
+        KF5H8aMN2xZalDxR7f8HfIX763D/53ytO2ftxwPehtF6GP2ctxacqvvY6e3mxsz3+q1jF+zY5Qfs
+        YJ5LyHGuv4IhYkoUtRszJ0lrpUVpKWKOHqKDXRujr2046nBSM5iW/rykH/Y8TFO/xYkzuGoPUI08
+        6WjoxyfAcdwtq/nOmjTwtp9HojZZhoap3hkB47mXaFnDTUtexphkqcv901cyExgeVStRF9kxU1VB
+        N+1IoDiVgLmaqfsWT4ajg44n71ct2FXOcNdGtGtjuOUSJiTTm0eWslP3zd3wAzzKSpqD8o2G6oww
+        FBSiGajrfMs9p6LpOCr2bgwWFmDIxEDzXlJmKr+ZbbgLh+HIpL2ialyx9JTxK3sVH0Nlbmaedj2z
+        nWzs3q2ECz7Gi5kuCpgAVQ4Hsv3yzk8vXp2czU9PjsZn0/F8PJm8mWAaOEAK88YDsxWQc2RNronx
+        S5gighcbghPJCmOUaEH+ZJKScwklTi2pFSJ0YGf0fhbP0WDwmQXBs32eeO7CwBZhjbcj9cUYY7Vz
+        xmlx/1D7rmjLa1FdYHQdE2D7cg63p+vKzOx34Ni9FB6JMKd8e1t9ebn/GOi2qHpJ0yt8SHXI6ow7
+        X0ftk+anAu7eRX73PIm6y5WDQXQqCiHPXDSLooZ+LpEjto8DQY6Fa7YoK3zqcd124aH+fVmc93z7
+        uzdjuoC9hFxaUB1WjMxQm8SfTWqYWSFSWqyE0skoGAX+kvEMWc+P4lH8wRo4tqljVB8FMaBI9sj/
+        q5Kn5u8v1sAUEF5IFaiIQ21FR+/GuLrEf/390IViqpw2MCiZljAQMvcRZNQUnuErxIDTx6ODlS4L
+        G5ez89bYueBXXDSd7FyKrMZnzpjnOHIlFtA3GRt/U3NVYiTkD9H0tdhRgqo1EH0gPrkMsVh/11Rq
+        kGRrcocqbH2GVvufw3MyTSnfcd48rvxnz0eu0i8l5enKn9Ecgz3D3jtpzYrs5Piu6EiUWCaC/LW6
+        Izal3igNpcLcs0owhM5eYuW2Y6bCJWVcMQ0DRFcSx8Nde7vk2BS1Wggqs64Ht7043mLQeD0kqRBX
+        DEyUZAHAiQJNGqbxbtREIw26hwtZFjTvkWbF0hUpgXKFm9SdaC1g/dACoWmKNAoZuWaU1DgZqdxU
+        yEN4jHNw9+/AhDJBxCLDppB0SG2aZiAaqioLLMQprAfVqrLAQMjOl0LOnTM1pxpv80WNrZk/ffPu
+        cHren77u481pwXwxOXVGHyrMa8Aks4S8Gs/ecyR7nGxET0L+AwAA///sWW1r2zAQ/ismUGhL7dhO
+        nJfB6ELXwT5slAU2KPui2GpjZlvGL+lGl/++5yRZTZ04jG6UfAiEoETnu4t099xzF5Gvwu/Z9Sqm
+        GgPn5ryyr6TVZu8fDURpHHUZUHt7DHSrJYlVjPdSnVGXiW05hMUnJO+97FIpKr4teUZwYDFzuQJN
+        LLxAOJAr8YpbcYb7SOUzliioRDLsllShUB1/8OyCoiOzkAKKaVkseWC/KMysnMkQqUtcq4W42YgS
+        NKoZTxxkcUlxZ6JsIw7JFoUp7Gv/ysZB0lfWiNGdfsq4O/+Y5iys6Hd+FlYsP1hAEzosefbn84rn
+        JVX4giuU4UpY57UJXJm3Gh1xaLP5le0NtEguCIsIzk4ZLjU7s07PfuMik0q8AY5s00eviz56w66N
+        oNmgolMVKJqSCRO3bYm6RrS9YUiZPF/JNHcLdpE01zQLSEkWLglWd7Qm7VrY1jI1ftRpyqi691ql
+        kI6MqLkoXlj5iaJdAp6ofUBTFdyx4SDyFpOhGyzgwng89Xx/RETDCMHCHjFO9zmLIthA9e89+WDr
+        Nu+dQTNSurfXVuHtgGZIMYklatkPPN8bcs/lAz+ajsJBGIy9cBJEkctGdx6fXEZvpZaTwezE/4CX
+        es5OWabLnG2rr0qnLu0HnIjtOxTZTl4vkjikI7Nzxko6MTwvSzl4NJbvb+yRk2fkf7uJP3yP26OA
+        w/e4PU44dI+BNJHqnzVX3qShN3oORvlESKx6dIVWtwBTiF/Xhch5/xbIEy6fEo/GV9g1mUx29CBO
+        0+xCA+wRCl7/0o9Q8BoeH6GgEwoMsYCL9yrjHmnyrdcu9IqKJVjtYEKgWb3HdW97o2tK53ZN6Vwz
+        pWtvGMbGs1VciExxIj0EqPXfMOrjX/0ENJJSw2Oz1Cj4AuTb+AOp3+i96KXs5xde1gkp3rAtRy5F
+        NauUHytR/behrtJldMIUOtCvQg6smkkszZlpDEQWjR/PnfWfeasfkKezXq//AAAA//8DACglBxjN
+        GwAA
+    headers:
+      ATL-TraceId:
+      - 2eab21375f04c965
+      Connection:
+      - keep-alive
+      Content-Type:
+      - application/json;charset=UTF-8
+      Date:
+      - Tue, 27 Apr 2021 09:40:43 GMT
+      Expect-CT:
+      - report-uri="https://web-security-reports.services.atlassian.com/expect-ct-report/global-proxy",
+        enforce, max-age=86400
+      Server:
+      - AtlassianProxy/1.15.8.1
+      Strict-Transport-Security:
+      - max-age=315360000; includeSubDomains; preload
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      X-XSS-Protection:
+      - 1; mode=block
+      cache-control:
+      - no-cache, no-store, no-transform
+      content-encoding:
+      - gzip
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      x-aaccountid:
+      - 5fa43d1b8405b10077912260
+      x-arequestid:
+      - ca09c9f6-8978-4423-8e1e-32030bc5c09f
+      x-envoy-upstream-service-time:
+      - '142'
+    status:
+      code: 200
+      message: OK
+version: 1

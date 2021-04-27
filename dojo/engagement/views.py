@@ -603,7 +603,7 @@ def import_scan_results(request, eid=None, pid=None):
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
                             close_old_findings=close_old_findings, auto_group_by=auto_group_by)
 
-                message = scan_type + '%s processed a total of %s findings' % (scan_type, finding_count)
+                message = f'{scan_type} processed a total of {finding_count} findings'
 
                 if close_old_findings:
                     message = message + ' and closed %d findings' % (closed_finding_count)
