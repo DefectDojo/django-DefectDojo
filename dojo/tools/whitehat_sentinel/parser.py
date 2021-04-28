@@ -1,4 +1,3 @@
-__author__ = 'Chris Fort'
 
 import json
 import logging
