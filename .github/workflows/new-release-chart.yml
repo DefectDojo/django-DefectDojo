@@ -46,7 +46,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ github.event.inputs.upload_url }}
           asset_path: ./build/defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
           asset_name: defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
           asset_content_type: application/tar+gzip
