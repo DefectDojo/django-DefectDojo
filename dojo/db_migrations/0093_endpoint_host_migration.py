@@ -102,7 +102,7 @@ def clean_hosts(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0091_endpoint_userinfo_creation'),
+        ('dojo', '0092_endpoint_userinfo_creation'),
     ]
 
     operations = [
