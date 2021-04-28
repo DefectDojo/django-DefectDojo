@@ -129,6 +129,8 @@ django:
         memory: 256Mi
   nodeSelector: {}
   replicas: 1
+  # Set custom service type (NodePort, LoadBalancer) - ClusterIP by default
+  # serviceType: NodePort
   tolerations: []
   uwsgi:
     livenessProbe:
