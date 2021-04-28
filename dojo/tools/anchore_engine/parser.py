@@ -30,6 +30,7 @@ class AnchoreEngineParser(object):
             findingdetail += '**Feed**: ' + item['feed'] + '/' + item['feed_group'] + '\n\n'
             findingdetail += '**CVE**: ' + cve + '\n\n'
             findingdetail += '**CPE**: ' + item['package_cpe'] + '\n\n'
+            findingdetail += '**Description**: ' + item.get('description', '') + '\n\n'
 
             sev = item['severity']
             if sev == "Negligible" or sev == "Unknown":
