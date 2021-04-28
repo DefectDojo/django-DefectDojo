@@ -95,6 +95,7 @@ def can_be_pushed_to_jira(obj, form=None):
         return True, None, None
 
     if obj.has_jira_issue:
+        # findings or groups already having an existing jira issue can always be pushed
         return True, None, None
 
     if type(obj) == Finding:

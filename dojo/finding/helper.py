@@ -181,13 +181,13 @@ def update_finding_group(finding, finding_group):
     if finding_group is not None:
         if finding_group != finding.finding_group:
             if finding.finding_group:
-                logger.debug('removing finding %d from findin_group %s', finding.id, finding.finding_group)
+                logger.debug('removing finding %d from finding_group %s', finding.id, finding.finding_group)
                 finding.finding_group.findings.remove(finding)
-            logger.debug('adding finding %d to findin_group %s', finding.id, finding_group)
+            logger.debug('adding finding %d to finding_group %s', finding.id, finding_group)
             finding_group.findings.add(finding)
     else:
         if finding.finding_group:
-            logger.debug('removing finding %d from findin_group %s', finding.id, finding.finding_group)
+            logger.debug('removing finding %d from finding_group %s', finding.id, finding.finding_group)
             finding.finding_group.findings.remove(finding)
 
 
@@ -285,7 +285,14 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
     if push_to_jira:
         logger.debug('pushing finding %s to jira from finding.save()', finding.pk)
         import dojo.jira_link.helper as jira_helper
-        jira_helper.push_to_jira(finding)
+
+        # current approach is that whenever a finding is in a group, the group will be pushed to JIRA
+        # based on feedback we could introduct another push_group_to_jira boolean everywhere
+        # but what about the push_all boolean? Let's see how this works for now and get some feedback.
+        if finding.has_jira_issue or not finding.finding_group:
+            jira_helper.push_to_jira(finding)
+        elif finding.finding_group:
+            jira_helper.push_to_jira(finding.finding_group)
 
 
 @receiver(pre_delete, sender=Finding)

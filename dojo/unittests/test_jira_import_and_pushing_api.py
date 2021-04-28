@@ -1,5 +1,5 @@
 from django.test.utils import override_settings
-from dojo.models import User, Finding, JIRA_Instance
+from dojo.models import Finding_Group, User, Finding, JIRA_Instance
 from dojo.jira_link import helper as jira_helper
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
@@ -337,6 +337,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         findings = self.get_test_findings_api(test_id)
 
         finding_id = findings['results'][0]['id']
+
         # logger.debug('finding_id: %s', finding_id)
 
         # use existing finding as template, but change some fields to make it not a duplicate
@@ -391,6 +392,85 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.put_finding_api(new_finding_id, new_finding_json, push_to_jira=True)
         self.assert_jira_issue_count_in_test(test_id, 3)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        self.assert_cassette_played()
+
+    @override_settings(FEATURE_FINDING_GROUPS=True)
+    def test_groups_create_edit_update_finding(self):
+        import0 = self.import_scan_with_params(self.npm_groups_sample_filename, scan_type='NPM Audit Scan', auto_group_by='component_name+component_version')
+        test_id = import0['test']
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 0)
+
+        findings = self.get_test_findings_api(test_id, component_name='negotiator')
+
+        self.assertEqual(len(findings['results']), 2)
+
+        finding_id = findings['results'][0]['id']
+
+        # push a finding should result in pushing the group instead
+
+        self.patch_finding_api(findings['results'][0]['id'], {"push_to_jira": True})
+
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 1)
+
+        # push second finding from the same group should not result in a new jira issue
+
+        finding_id = findings['results'][1]['id']
+        self.patch_finding_api(findings['results'][1]['id'], {"push_to_jira": True})
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 1)
+
+        pre_jira_status = self.get_jira_issue_status(findings['results'][0]['id'])
+
+        # close both findings
+        self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_Mitigated": True, "push_to_jira": True})
+        self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_Mitigated": True, "push_to_jira": True})
+
+        post_jira_status = self.get_jira_issue_status(findings['results'][0]['id'])
+
+        # both findings inactive -> should update status in JIRA
+        self.assertNotEqual(pre_jira_status, post_jira_status)
+
+        # new finding, not pushed to JIRA
+
+        # use existing finding as template, but change some fields to make it not a duplicate
+        finding_details = self.get_finding_api(finding_id)
+        del finding_details['id']
+        del finding_details['push_to_jira']
+
+        finding_details['title'] = 'jira api test 1'
+        self.post_new_finding_api(finding_details)
+        self.assert_jira_issue_count_in_test(test_id, 0)
+        self.assert_jira_group_issue_count_in_test(test_id, 1)
+
+        # another new finding, pushed to JIRA
+        # same component_name, but not yet in a group, so finding pushed to JIRA
+
+        finding_details['title'] = 'jira api test 2'
+        finding_details = self.post_new_finding_api(finding_details, push_to_jira=True)
+        self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 1)
+
+        print(finding_details)
+        finding_group_id = [finding_details['finding_groups'][0]['jira_issue']['finding_group']]
+
+        # no way to set finding group easily via API yet
+        Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=finding_details['id']))
+
+        self.patch_finding_api(finding_details['id'], {"push_to_jira": True})
+
+        self.assert_jira_issue_count_in_test(test_id, 1)
+        self.assert_jira_group_issue_count_in_test(test_id, 1)
+
+        # another new finding, pushed to JIRA, different component_name
+
+        # finding_details['title'] = 'jira api test 3'
+        # finding_details['component_name'] = 'brokenlib'
+        # new_finding_json = self.post_new_finding_api(finding_details, push_to_jira=True)
+        # self.assert_jira_issue_count_in_test(test_id, 0)
+        # self.assert_jira_group_issue_count_in_test(test_id, 2)
 
         self.assert_cassette_played()
 

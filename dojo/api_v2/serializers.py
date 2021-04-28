@@ -968,6 +968,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         default=None)
     tags = TagListSerializerField(required=False)
     push_to_jira = serializers.BooleanField(default=False)
+    finding_groups = FindingGroupSerializer(source='finding_group_set', many=True)
 
     class Meta:
         model = Finding

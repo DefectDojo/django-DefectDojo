@@ -215,7 +215,7 @@ class DojoDefaultImporter(object):
             old_finding.tags.add('stale')
 
             # to avoid pushing a finding group multiple times, we push those outside of the loop
-            if settings.FEATURE_FINDING_GROUPS and finding.finding_group:
+            if settings.FEATURE_FINDING_GROUPS and old_finding.finding_group:
                 # don't try to dedupe findings that we are closing
                 old_finding.save(dedupe_option=False)
             else:
