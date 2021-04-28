@@ -760,16 +760,6 @@ def add_risk_acceptance(request, eid, fid=None):
     if fid:
         finding = get_object_or_404(Finding, id=fid)
 
-    if finding is not None and finding.duplicate:
-        logger.info("Cannot add risk acceptance to a duplicate finding")
-        messages.add_message(
-            request,
-            messages.ERROR,
-            'Cannot process risk acceptance on duplicate findings',
-            extra_tags='alert-warning'
-        )
-        return redirect_to_return_url_or_else(request, reverse('view_engagement', args=(eid, )))
-
     if not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied()
 

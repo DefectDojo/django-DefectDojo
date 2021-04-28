@@ -153,11 +153,13 @@
                                         </li>
                                     {% endif %}
                                     {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                        {% if not finding.duplicate %}
                                         <li role="presentation">
                                             <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                 <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
                                             </a>
                                         </li>
+                                        {% endif %}
                                     {% endif %}
                                 {% endif %}
                             {% endif %}
