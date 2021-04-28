@@ -111,6 +111,19 @@ Upgrade Celery to the latest version:
 
 > `pip install --upgrade celery`
 
+Upgrading to DefectDojo Version 2.0.x
+--------------------------------------
+- See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.0.0
+- Hashcode calculation logic has changed in #4307 to update existing findings run:
+
+    `./manage.py dedupe --hash_code_only`
+
+If you're using docker:
+
+    `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`
+
+This can take a while depending on your instance size.
+
 
 Upgrading to DefectDojo Version 1.15.x
 --------------------------------------
@@ -119,14 +132,13 @@ Upgrading to DefectDojo Version 1.15.x
 The jira template settings introduced in 1.13 have been changed. You now have to select a subfolder instead of a sinlge template file. If you have chosen a non-default template here, you have to reapply that to all products / engagements. Also you have to move your custom templates into the correct subfolder in `dojo/templates/issue-trackers/`.
 - Hashcode calculation logic has changed in #4134, #4308 and #4310 to update existing findings run:
 
-
     `./manage.py dedupe --hash_code_only`
 
 If you're using docker:
 
     `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`
 
-This can take a while depeneding on your instance size.
+This can take a while depending on your instance size.
 
 
 

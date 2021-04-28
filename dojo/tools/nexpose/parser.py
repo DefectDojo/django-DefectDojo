@@ -232,7 +232,9 @@ class NexposeParser(object):
                     endpoint = Endpoint(
                         host=host['name'],
                         port=service['port'],
-                        protocol=service['name'].lower() if service['name'] != "<unknown>" else None
+                        protocol=service['name'].lower() if service['name'] != "<unknown>" else None,
+                        fragment=service['protocol'].lower() if service['name'].lower() == "dns" else None
+                        # A little dirty hack but in case of DNS it is important to know if vulnerability is on TCP or UDP
                     )
                     find.unsaved_endpoints.append(endpoint)
                     find.unsaved_tags = vuln['tags']
