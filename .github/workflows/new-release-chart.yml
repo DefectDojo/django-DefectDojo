@@ -6,6 +6,10 @@ env:
   workflow_name: 'release 2 tag release docker push' # needed in cache key, which doesn't support comma's
 on:
   workflow_dispatch:
+    inputs:
+      upload_url:
+        description: 'Where to upload the artifact (i.e. https://uploads.github.com/repos/octocat/Hello-World/releases/1/assets{?name,label})'
+        required: true
 
 jobs:
   release-chart:
