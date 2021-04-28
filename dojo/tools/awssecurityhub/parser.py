@@ -50,10 +50,9 @@ def get_item(finding, test):
                       mitigation=mitigation,
                       references=references,
                       severity=severity,
-                      active=False,
+                      active=True,
                       verified=False,
                       false_p=false_p,
-                      impact="No impact provided",
                       unique_id_from_tool=finding_id,
                       )
 
