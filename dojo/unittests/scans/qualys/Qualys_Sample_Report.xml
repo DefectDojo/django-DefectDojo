@@ -332,6 +332,83 @@ cipher	arcfour]]></RESULT>
           <TIMES_FOUND>1</TIMES_FOUND>
           <VULN_STATUS>New</VULN_STATUS>
         </VULN_INFO>
+        <VULN_INFO>
+          <QID id="qid_370876">370876</QID>
+          <TYPE>Practice</TYPE>
+          <SSL>false</SSL>
+          <RESULT><![CDATA[Vulnerable AMD processor detected: 
+
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor]]></RESULT>
+          <FIRST_FOUND>2020-10-15T12:16:23Z</FIRST_FOUND>
+          <LAST_FOUND>2021-04-19T02:35:28Z</LAST_FOUND>
+          <TIMES_FOUND>950</TIMES_FOUND>
+          <VULN_STATUS>Active</VULN_STATUS>
+          <CVSS_FINAL>-</CVSS_FINAL>
+          <CVSS3_FINAL>-</CVSS3_FINAL>
+        </VULN_INFO>
       </VULN_INFO_LIST>
     </HOST>
     <HOST>
@@ -635,6 +712,83 @@ jitter=0.001, noise=0.001, stability=0.000, tai=0]]></RESULT>
           <LAST_FOUND>2019-07-31T21:57:10Z</LAST_FOUND>
           <TIMES_FOUND>1</TIMES_FOUND>
           <VULN_STATUS>New</VULN_STATUS>
+        </VULN_INFO>
+        <VULN_INFO>
+          <QID id="qid_370876">370876</QID>
+          <TYPE>Practice</TYPE>
+          <SSL>false</SSL>
+          <RESULT><![CDATA[Vulnerable AMD processor detected: 
+
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor
+model  : 8
+model name : AMD Ryzen Threadripper 2950X 16-Core Processor]]></RESULT>
+          <FIRST_FOUND>2020-10-15T12:16:23Z</FIRST_FOUND>
+          <LAST_FOUND>2021-04-19T02:35:28Z</LAST_FOUND>
+          <TIMES_FOUND>950</TIMES_FOUND>
+          <VULN_STATUS>Active</VULN_STATUS>
+          <CVSS_FINAL>-</CVSS_FINAL>
+          <CVSS3_FINAL>8.2</CVSS3_FINAL>
         </VULN_INFO>
       </VULN_INFO_LIST>
     </HOST>
@@ -9858,6 +10012,122 @@ Virtual Patch #1005910: 1005910 - Identified ntpd 'monlist' Query Reflected Deni
             <URL><![CDATA[http://www.securityfocus.com/bid/64692]]></URL>
           </BUGTRAQ_ID>
         </BUGTRAQ_ID_LIST>
+      </VULN_DETAILS>
+      <VULN_DETAILS id="qid_370876">
+        <QID id="qid_370876">370876</QID>
+        <TITLE><![CDATA[AMD Processors Multiple Security Vulnerabilities (RYZENFALL/MASTERKEY/CHIMERA-FW/FALLOUT)]]></TITLE>
+        <SEVERITY>4</SEVERITY>
+        <CATEGORY>Local</CATEGORY>
+        <THREAT><![CDATA[AMD processors contain the following vulnerabilities:<BR>
+CVE-2018-8936: The AMD EPYC Server, Ryzen, Ryzen Pro, and Ryzen Mobile processor chips allow Platform Security Processor (PSP) privilege escalation.<BR>
+CVE-2018-8935: The Promontory chipset, as used in AMD Ryzen and Ryzen Pro platforms, has a backdoor in the ASIC, aka CHIMERA-HW.<BR>
+CVE-2018-8934: The Promontory chipset, as used in AMD Ryzen and Ryzen Pro platforms, has a backdoor in firmware, aka CHIMERA-FW.<BR>
+CVE-2018-8933: The AMD EPYC Server processor chips have insufficient access control for protected memory regions, aka FALLOUT-1, FALLOUT-2, and FALLOUT-3.<BR>
+CVE-2018-8932:	 The AMD Ryzen and Ryzen Pro processor chips have insufficient access control for the Secure Processor, aka RYZENFALL-2, RYZENFALL-3, and RYZENFALL-4.<BR>
+CVE-2018-8931:	 The AMD Ryzen, Ryzen Pro, and Ryzen Mobile processor chips have insufficient access control for the Secure Processor, aka RYZENFALL-1.<BR>
+CVE-2018-8930: The AMD EPYC Server, Ryzen, Ryzen Pro, and Ryzen Mobile processor chips have insufficient enforcement of Hardware Validated Boot, aka MASTERKEY-1, MASTERKEY-2, and MASTERKEY-3.<P>
+Affected Versions:<BR>
+AMD EPYC Server, Ryzen, Ryzen Pro, and Ryzen Mobile<P>
+QID Detection Logic:<BR>
+This potential detection detects processor models based on the HKLM\HARDWARE\DESCRIPTION\System\CentralProcessor\0\ProcessorNameString key.]]></THREAT>
+        <IMPACT><![CDATA[Depending on the vulnerability being exploited, an attacker could bypass security restrictions or execute arbitrary code on a targeted system.<P>]]></IMPACT>
+        <SOLUTION><![CDATA[AMD has confirmed the vulnerability. However, updates are awaited.<P>
+
+
+
+
+Workaround:<BR>
+Customers are advised to maintain physical security for affected devices as most of these vulnerabilities need physical access.]]></SOLUTION>
+        <PCI_FLAG>1</PCI_FLAG>
+        <LAST_UPDATE>2018-06-27T17:08:15Z</LAST_UPDATE>
+        <CVSS_SCORE>
+          <CVSS_BASE>9.3 (AV:N/AC:M/Au:N/C:C/I:C/A:C)</CVSS_BASE>
+          <CVSS_TEMPORAL>7.9 (E:U/RL:U/RC:C)</CVSS_TEMPORAL>
+        </CVSS_SCORE>
+        <CVSS3_SCORE>
+          <CVSS3_BASE>9.0 (AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H)</CVSS3_BASE>
+          <CVSS3_TEMPORAL>8.2 (E:U/RL:U/RC:C)</CVSS3_TEMPORAL>
+        </CVSS3_SCORE>
+        <VENDOR_REFERENCE_LIST>
+          <VENDOR_REFERENCE>
+            <ID><![CDATA[AMD]]></ID>
+            <URL><![CDATA[https://community.amd.com/community/amd-corporate/blog/2018/03/21/initial-amd-technical-assessment-of-cts-labs-research]]></URL>
+          </VENDOR_REFERENCE>
+        </VENDOR_REFERENCE_LIST>
+        <CVE_ID_LIST>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2018-8930]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8930]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2018-8931]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8931]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2018-8932]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8932]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2018-8933]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8933]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2018-8934]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8934]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2018-8935]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8935]]></URL>
+          </CVE_ID>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2018-8936]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-8936]]></URL>
+          </CVE_ID>
+        </CVE_ID_LIST>
+      </VULN_DETAILS>
+      <VULN_DETAILS id="qid_375397">
+        <QID id="qid_375397">375397</QID>
+        <TITLE><![CDATA[Squid HTTP Request Smuggling Vulnerability (SQUID-2020:11)]]></TITLE>
+        <SEVERITY>3</SEVERITY>
+        <CATEGORY>Local</CATEGORY>
+        <THREAT><![CDATA[Squid is a caching proxy for the Web supporting HTTP, HTTPS, FTP, and more. It reduces bandwidth and improves response times by caching and reusing frequently-requested web pages. <P>
+
+Affected Versions: <BR>
+Squid version 2.0 to 4.13<BR>
+Squid version 5.0.1 to 5.0.4<P>
+
+QID Detection Logic:<BR>
+This QID checks for vulnerable version of Squid.<P>]]></THREAT>
+        <IMPACT><![CDATA[Successful exploitation could allow a trusted client to perform HTTP Request Smuggling and access services otherwise forbidden by Squid security controls.<P>]]></IMPACT>
+        <SOLUTION><![CDATA[Customers are advised to upgrade to a fixed version of 
+<A HREF="http://www.squid-cache.org/Versions/v4/changesets/SQUID-2020_11.patch" TARGET="_blank">Squid versions 4.14 and 5.0.5</A> to remediate this vulnerability.<BR>
+
+
+<P>Patch:<BR>
+Following are links for downloading patches to fix the vulnerabilities:
+<P> <A HREF="http://www.squid-cache.org/Versions/v4/changesets/SQUID-2020_11.patch" TARGET="_blank">SQUID-2020:11</A>]]></SOLUTION>
+        <PCI_FLAG>1</PCI_FLAG>
+        <LAST_UPDATE>2021-03-24T12:47:00Z</LAST_UPDATE>
+        <CVSS_SCORE>
+          <CVSS_BASE>5.0 (AV:N/AC:L/Au:N/C:P/I:N/A:N)</CVSS_BASE>
+          <CVSS_TEMPORAL>3.7 (E:U/RL:OF/RC:C)</CVSS_TEMPORAL>
+        </CVSS_SCORE>
+        <CVSS3_SCORE>
+          <CVSS3_BASE>8.6 (AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:N/A:N)</CVSS3_BASE>
+          <CVSS3_TEMPORAL>7.5 (E:U/RL:O/RC:C)</CVSS3_TEMPORAL>
+        </CVSS3_SCORE>
+        <VENDOR_REFERENCE_LIST>
+          <VENDOR_REFERENCE>
+            <ID><![CDATA[SQUID-2020:11]]></ID>
+            <URL><![CDATA[https://github.com/squid-cache/squid/security/advisories/GHSA-jvf6-h9gj-pmj6]]></URL>
+          </VENDOR_REFERENCE>
+        </VENDOR_REFERENCE_LIST>
+        <CVE_ID_LIST>
+          <CVE_ID>
+            <ID><![CDATA[CVE-2020-25097]]></ID>
+            <URL><![CDATA[http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-25097]]></URL>
+          </CVE_ID>
+        </CVE_ID_LIST>
       </VULN_DETAILS>
     </VULN_DETAILS_LIST>
   </GLOSSARY>
