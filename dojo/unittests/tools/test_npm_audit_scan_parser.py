@@ -1,5 +1,5 @@
 from django.test import TestCase
-from dojo.tools.npm_audit.parser import NpmAuditParser
+from dojo.tools.npm_audit.parser import NpmAuditParser, censor_path_hashes
 from dojo.models import Test
 
 
@@ -27,6 +27,13 @@ class TestNpmAuditParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(5, len(findings))
+
+        for find in findings:
+            if find.cve == 'CVE-2017-16138':
+                self.assertEqual(find.file_path, 'censored_by_npm_audit>send>mime')
+            elif find.cve == 'CVE-2017-16119':
+                self.assertEqual(find.file_path, 'express>fresh')
+
         # TODO ordering seems to be different in ci compared to local, so disable for now
         # self.assertEqual('mime', findings[4].component_name)
         # self.assertEqual('1.3.4', findings[4].component_version)
@@ -55,3 +62,12 @@ class TestNpmAuditParser(TestCase):
                 in str(context.exception)
             )
             self.assertEqual(findings, None)
+
+    def test_npm_audit_censored_hash(self):
+        path = '77d76e075ae87483063c4c74885422f98300f9fc0ecbd3b8dfb60152a36e5269>axios'
+        censored_path = censor_path_hashes(path)
+        self.assertEqual(censored_path, 'censored_by_npm_audit>axios')
+
+        path = '7f888b06cc55dd893be344958d300da5ca1d84eebd0928d8bcb138b4029eff9f>c748e76b6a1b63450590f72e14f9b53ad357bc64632ff0bda73d00799c4a0a91>lodash'
+        censored_path = censor_path_hashes(path)
+        self.assertEqual(censored_path, 'censored_by_npm_audit>censored_by_npm_audit>lodash')
