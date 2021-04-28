@@ -104,7 +104,7 @@ class TestNiktoParser(TestCase):
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(443, endpoint.port)
             self.assertEqual("www.tdh.com", endpoint.host)
-            self.assertEqual("/", endpoint.path)
+            self.assertIsNone(endpoint.path)
         with self.subTest(i=1):
             finding = findings[1]
             self.assertEqual("Uncommon header 'x-cache' found, with contents: HIT", finding.title)
@@ -115,7 +115,7 @@ class TestNiktoParser(TestCase):
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(443, endpoint.port)
             self.assertEqual("www.tdh.com", endpoint.host)
-            self.assertEqual("/", endpoint.path)
+            self.assertIsNone(endpoint.path)
 
     def test_parse_file_xml_another(self):
         testfile = open("dojo/unittests/scans/nikto/tdh.xml")
@@ -132,7 +132,7 @@ class TestNiktoParser(TestCase):
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
-            self.assertEqual("", endpoint.path)
+            self.assertIsNone(endpoint.path)
         with self.subTest(i=1):
             finding = findings[1]
             self.assertEqual("Uncommon header 'x-cacheable' found, with contents: YES", finding.title)
@@ -143,7 +143,7 @@ class TestNiktoParser(TestCase):
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
-            self.assertEqual("", endpoint.path)
+            self.assertIsNone(endpoint.path)
         with self.subTest(i=5):
             finding = findings[5]
             self.assertEqual("The Content-Encoding header is set to \"deflate\" this may mean that the server is vulnerable to the BREACH attack.", finding.title)
@@ -154,4 +154,4 @@ class TestNiktoParser(TestCase):
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
-            self.assertEqual("", endpoint.path)
+            self.assertIsNone(endpoint.path)

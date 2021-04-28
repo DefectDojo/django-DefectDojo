@@ -5,6 +5,8 @@ import re
 import json
 
 from defusedxml import ElementTree as ET
+from django.core.exceptions import ValidationError
+
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
@@ -142,9 +144,9 @@ class NiktoParser(object):
             # endpoint
             try:
                 ip = item.findtext("iplink")
-                endpoint = endpoint = Endpoint.from_uri(ip)
+                endpoint = Endpoint.from_uri(ip)
                 finding.unsaved_endpoints = [endpoint]
-            except ValueError as exce:
+            except ValidationError:
                 logger.warn("Invalid iplink in the report")
 
             dupe_key = hashlib.sha256(description.encode("utf-8")).hexdigest()

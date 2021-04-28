@@ -31,10 +31,12 @@ class TestGenericParser(TestCase):
         finding = findings[0]
         self.assertEqual(5, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
-        self.assertEqual("vulnerable.endpoint.com:443", endpoint.host)
+        self.assertEqual("vulnerable.endpoint.com", endpoint.host)
+        self.assertEqual(443, endpoint.port)
         self.assertEqual("resource1/asdf", endpoint.path)
         endpoint = finding.unsaved_endpoints[1]
-        self.assertEqual("vulnerable.endpoint.com:443", endpoint.host)
+        self.assertEqual("vulnerable.endpoint.com", endpoint.host)
+        self.assertEqual(443, endpoint.port)
         self.assertEqual("resource2/qwerty", endpoint.path)
         self.assertEqual("https", endpoint.protocol)
 

@@ -32,7 +32,7 @@ class TestMicrofocusWebinspectParser(TestCase):
         endpoint = item.unsaved_endpoints[0]
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
-        self.assertEqual("", endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
+        self.assertIsNone(endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         test = Test()
@@ -54,7 +54,7 @@ class TestMicrofocusWebinspectParser(TestCase):
         endpoint = item.unsaved_endpoints[0]
         self.assertEqual("php.vulnweb.com", endpoint.host)
         self.assertEqual(80, endpoint.port)
-        self.assertEqual("", endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
+        self.assertIsNone(endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
 
     def test_convert_severity(self):
         with self.subTest("convert info", val="0"):
@@ -80,7 +80,7 @@ class TestMicrofocusWebinspectParser(TestCase):
         endpoint = item.unsaved_endpoints[0]
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
-        self.assertEqual("", endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
+        self.assertIsNone(endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
         endpoint = item.unsaved_endpoints[1]
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)

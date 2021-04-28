@@ -40,6 +40,12 @@ class TestEndpointModel(TestCase):
         self.assertIsNone(endpoint.fragment)
         self.assertIsNone(endpoint.product)
 
+    def test_paths(self):
+        endpoint = Endpoint.from_uri('https://foo.bar')
+        self.assertIsNone(endpoint.path)
+        endpoint = Endpoint.from_uri('https://foo.bar/')
+        self.assertIsNone(endpoint.path)
+
     def test_ip(self):
         endpoint = Endpoint.from_uri('http://127.0.0.1/')
         self.assertEqual(endpoint.host, '127.0.0.1')
