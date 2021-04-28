@@ -233,9 +233,9 @@ def group_findings_by(finds, finding_group_by_option):
     return affected_groups, grouped, skipped, groups_created
 
 
-def add_finding_to_auto_group(finding, auto_group_by):
+def add_finding_to_auto_group(finding, group_by):
     test = finding.test
-    name = get_group_by_group_name(finding, auto_group_by)
+    name = get_group_by_group_name(finding, group_by)
     finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=get_current_user(), name=name)
     if created:
         logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)

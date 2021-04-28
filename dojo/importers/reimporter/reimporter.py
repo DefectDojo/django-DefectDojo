@@ -23,7 +23,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 class DojoDefaultReImporter(object):
 
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, auto_group_by=None, now=timezone.now()):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now()):
 
         items = parsed_findings
         original_items = list(test.finding_set.all())
@@ -128,8 +128,8 @@ class DojoDefaultReImporter(object):
                 logger.debug('%i: reimport created new finding as no existing finding match: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
 
                 # only new items get auto grouped to avoid confusion around already existing items that are already grouped
-                if settings.FEATURE_FINDING_GROUPS and auto_group_by:
-                    finding_helper.add_finding_to_auto_group(item, auto_group_by)
+                if settings.FEATURE_FINDING_GROUPS and group_by:
+                    finding_helper.add_finding_to_auto_group(item, group_by)
 
                 finding_added_count += 1
                 new_items.append(item)
@@ -265,7 +265,7 @@ class DojoDefaultReImporter(object):
 
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, auto_group_by=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None):
 
         logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
 
@@ -284,7 +284,7 @@ class DojoDefaultReImporter(object):
         new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
             self.process_parsed_findings(test, parsed_findings, scan_type, user, active, verified,
                                          minimum_severity=minimum_severity, endpoints_to_add=endpoints_to_add,
-                                         push_to_jira=push_to_jira, auto_group_by=auto_group_by, now=now)
+                                         push_to_jira=push_to_jira, group_by=group_by, now=now)
 
         closed_findings = []
         if close_old_findings:

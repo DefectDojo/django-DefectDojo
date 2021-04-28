@@ -56,7 +56,7 @@ class DojoDefaultImporter(object):
         return test
 
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, auto_group_by=None, now=timezone.now()):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now()):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
@@ -89,8 +89,8 @@ class DojoDefaultImporter(object):
             item.updated = now
             item.save(dedupe_option=False)
 
-            if settings.FEATURE_FINDING_GROUPS and auto_group_by:
-                finding_helper.add_finding_to_auto_group(item, auto_group_by)
+            if settings.FEATURE_FINDING_GROUPS and group_by:
+                finding_helper.add_finding_to_auto_group(item, group_by)
 
             if (hasattr(item, 'unsaved_req_resp') and
                     len(item.unsaved_req_resp) > 0):
@@ -253,7 +253,7 @@ class DojoDefaultImporter(object):
 
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, auto_group_by=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
@@ -276,7 +276,7 @@ class DojoDefaultImporter(object):
         new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                     verified, minimum_severity=minimum_severity,
                                                     endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                    auto_group_by=auto_group_by, now=now)
+                                                    group_by=group_by, now=now)
 
         closed_findings = []
         if close_old_findings:

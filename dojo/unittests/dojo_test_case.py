@@ -382,7 +382,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         return json.loads(response.content)
 
     def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
-                                push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, auto_group_by=None):
+                                push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -404,13 +404,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if tags is not None:
             payload['tags'] = tags
 
-        if auto_group_by is not None:
-            payload['auto_group_by'] = auto_group_by
+        if group_by is not None:
+            payload['group_by'] = group_by
 
         return self.import_scan(payload)
 
     def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None,
-                                  tags=None, close_old_findings=True, auto_group_by=None):
+                                  tags=None, close_old_findings=True, group_by=None):
         payload = {
                 "test": test_id,
                 "scan_date": '2020-06-04',
@@ -430,8 +430,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if tags is not None:
             payload['tags'] = tags
 
-        if auto_group_by is not None:
-            payload['auto_group_by'] = auto_group_by
+        if group_by is not None:
+            payload['group_by'] = group_by
 
         return self.reimport_scan(payload)
 

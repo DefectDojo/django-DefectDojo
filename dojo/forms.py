@@ -433,16 +433,16 @@ class ImportScanForm(forms.Form):
                                             required=False, initial=False)
 
     if settings.FEATURE_FINDING_GROUPS:
-        auto_group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+        group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def __init__(self, *args, **kwargs):
         super(ImportScanForm, self).__init__(*args, **kwargs)
 
         # couldn't find a cleaner way to add empty default
-        if 'auto_group_by' in self.fields:
-            choices = self.fields['auto_group_by'].choices
+        if 'group_by' in self.fields:
+            choices = self.fields['group_by'].choices
             choices.insert(0, ('', '---------'))
-            self.fields['auto_group_by'].choices = choices
+            self.fields['group_by'].choices = choices
 
     def clean(self):
         cleaned_data = super().clean()
@@ -492,7 +492,7 @@ class ReImportScanForm(forms.Form):
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
 
     if settings.FEATURE_FINDING_GROUPS:
-        auto_group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
+        group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
 
     def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
@@ -502,10 +502,10 @@ class ReImportScanForm(forms.Form):
             self.fields['tags'].initial = test.tags.all()
 
         # couldn't find a cleaner way to add empty default
-        if 'auto_group_by' in self.fields:
-            choices = self.fields['auto_group_by'].choices
+        if 'group_by' in self.fields:
+            choices = self.fields['group_by'].choices
             choices.insert(0, ('', '---------'))
-            self.fields['auto_group_by'].choices = choices
+            self.fields['group_by'].choices = choices
 
     def clean(self):
         cleaned_data = super().clean()

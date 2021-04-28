@@ -1078,7 +1078,7 @@ class ImportScanSerializer(serializers.Serializer):
 
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
-    auto_group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1108,7 +1108,7 @@ class ImportScanSerializer(serializers.Serializer):
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
-        auto_group_by = data.get('auto_group_by', None)
+        group_by = data.get('group_by', None)
 
         importer = Importer()
         try:
@@ -1121,7 +1121,7 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              commit_hash=commit_hash,
                                                                              push_to_jira=push_to_jira,
                                                                              close_old_findings=close_old_findings,
-                                                                             auto_group_by=auto_group_by)
+                                                                             group_by=group_by)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -1176,7 +1176,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
 
-    auto_group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def save(self, push_to_jira=False):
         logger.debug('push_to_jira: %s', push_to_jira)
@@ -1197,7 +1197,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
-        auto_group_by = data.get('auto_group_by', None)
+        group_by = data.get('group_by', None)
 
         reimporter = ReImporter()
         try:
@@ -1208,7 +1208,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             version=version, branch_tag=branch_tag, build_id=build_id,
                                             commit_hash=commit_hash, push_to_jira=push_to_jira,
                                             close_old_findings=close_old_findings,
-                                            auto_group_by=auto_group_by)
+                                            group_by=group_by)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
