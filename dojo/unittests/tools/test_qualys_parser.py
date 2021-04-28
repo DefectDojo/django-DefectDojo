@@ -44,7 +44,7 @@ class TestQualysParser(TestCase):
             finding_cvssv3_score.severity, "High"
         )
         self.assertEqual(
-            finding_cvssv3_vector.cvssv3, "AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H"
+            finding_cvssv3_vector.cvssv3, "CVSS:3.0/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:H/A:H"
         )
         self.assertEqual(
             finding_cvssv3_vector.severity, "Critical"

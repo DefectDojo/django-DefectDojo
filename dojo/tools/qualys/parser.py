@@ -2,6 +2,7 @@ import datetime
 import logging
 import html2text
 from defusedxml import ElementTree as etree
+from cvss import CVSS3
 
 from dojo.models import Endpoint, Finding
 
@@ -59,7 +60,7 @@ def split_cvss(value, _temp):
         split = value.split(" (")
         _temp['CVSS_value'] = float(split[0])
         # remove ")" at the end
-        _temp['CVSS_vector'] = split[1][:-1]
+        _temp['CVSS_vector'] = CVSS3("CVSS:3.0/" + split[1][:-1]).clean_vector()
     else:
         _temp['CVSS_value'] = float(value)
 
