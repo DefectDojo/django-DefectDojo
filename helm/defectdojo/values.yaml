@@ -107,6 +107,8 @@ django:
   annotations: {}
   affinity: {}
   ingress:
+    # Set custom path (useful for alb ingress controller)
+    # path: /*
     enabled: true
     activateTLS: true
     secretName: defectdojo-tls
