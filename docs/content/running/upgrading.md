@@ -111,6 +111,19 @@ Upgrade Celery to the latest version:
 
 > `pip install --upgrade celery`
 
+Upgrading to DefectDojo Version 2.0.x
+--------------------------------------
+- See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.0.0
+- Hashcode calculation logic has changed in #4307 to update existing findings run:
+
+    `./manage.py dedupe --hash_code_only`
+
+If you're using docker:
+
+    `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`
+
+This can take a while depending on your instance size.
+
 
 Upgrading to DefectDojo Version 1.15.x
 --------------------------------------
@@ -125,7 +138,7 @@ If you're using docker:
 
     `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`
 
-This can take a while depeneding on your instance size.
+This can take a while depending on your instance size.
 
 
 
