@@ -3,13 +3,15 @@ name: "[OOB] Release helm chart"
 env:
   GIT_USERNAME: "DefectDojo release bot"
   GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
-  workflow_name: 'release 2 tag release docker push' # needed in cache key, which doesn't support comma's
 on:
   workflow_dispatch:
     inputs:
       upload_url:
         description: 'Where to upload the artifact (i.e. https://uploads.github.com/repos/octocat/Hello-World/releases/1/assets{?name,label})'
         required: true
+      release_number:
+        description: 'Release number'
+        required: true  
 
 jobs:
   release-chart:
@@ -60,9 +62,9 @@ jobs:
           git checkout helm-charts
           git pull
           if [ ! -f ./index.yaml ]; then
-            helm repo index ./build --url "${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/releases/download/${{ github.event.inputs.release_number }}/"
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ github.event.inputs.release_number }}/"
           else
-            helm repo index ./build --url "${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}/releases/download/${{ github.event.inputs.release_number }}/" --merge ./index.yaml
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ github.event.inputs.release_number }}/" --merge ./index.yaml
           fi
           cp -f ./build/index.yaml ./index.yaml
           git add ./index.yaml
