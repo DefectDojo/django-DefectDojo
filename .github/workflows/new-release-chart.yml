@@ -3,7 +3,6 @@ name: "[OOB] Release helm chart"
 env:
   GIT_USERNAME: "DefectDojo release bot"
   GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
-  workflow_name: 'release 2 tag release docker push' # needed in cache key, which doesn't support comma's
 on:
   workflow_dispatch:
     inputs:
