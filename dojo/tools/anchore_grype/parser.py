@@ -53,6 +53,7 @@ class AnchoreGrypeParser(object):
                     dynamic_finding=False,
                     component_name=purl.name,
                     component_version=purl.version,
+                    vuln_id_from_tool=cve,
                     nb_occurences=1,
                 )
         return list(dupes.values())
