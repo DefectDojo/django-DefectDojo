@@ -1,0 +1,120 @@
+# This docker-compose.yml file  is fully functional to evaluate DefectDojo
+# in your local environment.
+#
+# Although Docker Compose is one of the supported installation methods to
+# deploy a containerized DefectDojo in a production environment, the
+# docker-compose.yml file is not intended for production use without first
+# customizing it to your particular situation.
+---
+version: '3.7'
+services:
+  nginx:
+    build:
+      context: ./
+      dockerfile: Dockerfile.nginx
+    image: defectdojo/defectdojo-nginx:${NGINX_VERSION:-latest}
+    depends_on:
+      - uwsgi
+    environment:
+      NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
+    volumes:
+      - defectdojo_media:/usr/share/nginx/html/media
+    ports:
+      - target: 8080
+        published: ${DD_PORT:-8080}
+        protocol: tcp
+        mode: host
+      - target: 8443
+        published: ${DD_TLS_PORT:-8443}
+        protocol: tcp
+        mode: host
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-group: /aws/defect-dojo
+        awslogs-stream: dojo-nginx
+    restart: unless-stopped
+  uwsgi:
+    build:
+      context: ./
+      dockerfile: Dockerfile.django
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
+    env_file:
+      - prod.env
+    entrypoint: [ '/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi.sh' ]
+    volumes:
+      - type: bind
+        source: ./docker/extra_settings
+        target: /app/docker/extra_settings
+      - defectdojo_media:${DD_MEDIA_ROOT:-/app/media}
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-group: /aws/defect-dojo
+        awslogs-stream: dojo-uwsgi
+    restart: unless-stopped
+  celerybeat:
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
+    depends_on:
+      - rabbitmq
+    entrypoint: [ '/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-beat.sh' ]
+    env_file:
+      - prod.env
+    volumes:
+      - type: bind
+        source: ./docker/extra_settings
+        target: /app/docker/extra_settings
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-group: /aws/defect-dojo
+        awslogs-stream: dojo-celery-beat
+    restart: unless-stopped
+  celeryworker:
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
+    depends_on:
+      - rabbitmq
+    entrypoint: [ '/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-celery-worker.sh' ]
+    env_file:
+      - prod.env
+    volumes:
+      - type: bind
+        source: ./docker/extra_settings
+        target: /app/docker/extra_settings
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-group: /aws/defect-dojo
+        awslogs-stream: dojo-celery-worker
+    restart: unless-stopped
+  initializer:
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
+    entrypoint: [ '/wait-for-it.sh', 'mysql:3306', '--', '/entrypoint-initializer.sh' ]
+    env_file:
+      - prod.env
+    volumes:
+      - type: bind
+        source: ./docker/extra_settings
+        target: /app/docker/extra_settings
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-group: /aws/defect-dojo
+        awslogs-stream: dojo-initializer
+  rabbitmq:
+    image: rabbitmq:3.8.14@sha256:b8c2a55dd4af3db0affb1c89ac1ea9c89f4d71a1fe46cf53884dd35bc73db6c6
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: us-east-1
+        awslogs-group: /aws/defect-dojo
+        awslogs-stream: dojo-rabbitmq
+    restart: unless-stopped
+volumes:
+  defectdojo_data: { }
+  defectdojo_media: { }
