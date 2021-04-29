@@ -118,6 +118,18 @@ client.
 
 CSV Report
 
+### Coverity API
+
+Export Coverity API view data in JSON format (`/api/viewContents/issues` endpoint).
+
+Currently these columns are mandatory:
+ * `displayType` (`Type` in the UI)
+ * `displayImpact` (`Impact` in the UI)
+ * `status` (`Status` in the UI)
+ * `firstDetected` (`First Detected` in the UI)
+
+Other supported attributes: `cwe`, `displayFile`, `occurrenceCount` and `firstDetected`
+
 ### Crashtest Security
 
 Import JSON Report Import XML Report in JUnit Format
