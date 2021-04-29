@@ -1,4 +1,3 @@
-__author__ = 'Chris Fort'
 
 import json
 import logging
@@ -195,7 +194,6 @@ class WhiteHatSentinelParser(object):
         Returns: A DefectDojo Finding object
         """
 
-
         date_created = whitehat_sentinel_vuln['found'].split('T')[0]
         mitigated_ts = whitehat_sentinel_vuln.get('closed'.split('T')[0], None)
         cwe = self._parse_cwe_from_tags(whitehat_sentinel_vuln['attack_vectors'][0]['scanner_tags'])
@@ -212,7 +210,7 @@ class WhiteHatSentinelParser(object):
         finding = Finding(title=whitehat_sentinel_vuln['class'],
                           test=test,
                           cwe=cwe,
-                          active= not whitehat_sentinel_vuln.get('mitigated', True),
+                          active=not whitehat_sentinel_vuln.get('mitigated', True),
                           verified=True,
                           description=description,
                           steps_to_reproduce=steps,
