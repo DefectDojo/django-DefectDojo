@@ -128,7 +128,7 @@
                         <!-- /input-group -->
                     </li>
                     <li class="dropdown">
-                        <a class="dropdown-toggle dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
+                        <a class="dropdown-toggle dropdown-toggle-alerts dropdown-toggle-h{{ alert_count }}" data-toggle="dropdown" href="#" aria-expanded="false" aria-label="{{ alert_count }} Alerts">
                             <i class="fa fa-bell fa-fw"></i>
                             <span id="alert_count" class="badge badge-count badge-count{{ alert_count }}">{{ alert_count }}</span>
                             <i class="fa fa-caret-down"></i>
@@ -210,15 +210,17 @@
                                 </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
-                                    {% if request.user.is_staff %}
+                                    {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                         <li><a href="{% url 'engagements_all' %}">All Engagements</a></li>
+                                    {% endif %}
+                                    {% if request.user.is_staff %}
                                         <li><a href="{% url 'test_type' %}">Test Types</a></li>
                                         <li><a href="{% url 'dev_env' %}">Environments</a></li>
                                     {% endif %}
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user.is_staff %}
+                            {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <li>
                                     <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                         <i class="fa fa-bug fa-fw"></i>
@@ -238,9 +240,11 @@
                                         <li>
                                             <a href="{% url 'accepted_findings' %}">Risk Accepted Findings</a>
                                         </li>
+                                        {% if request.user.is_staff %}
                                         <li>
                                             <a href="{% url 'templates' %}">Finding Templates</a>
                                         </li>
+                                        {% endif %}
                                     </ul>
                                     <!-- /.nav-second-level -->
                                 </li>
@@ -274,6 +278,7 @@
                                 </li>
                             {% endif %}
                             <li>
+                                {% if 'FEATURE_REPORTS_PDF_LIST'|setting_enabled %}
                                 <a href="{% url 'reports' %}" aria-expanded="false" aria-label="Reports">
 				                    <i class="fa fa-file-text-o fa-fw"></i>
                                     <span>Reports</span>
@@ -283,6 +288,13 @@
                                     <li><a href="{% url 'reports' %}"> All Reports </a></li>
                                     <li><a href="{% url 'report_builder' %}"> Report Builder </a></li>
                                 </ul>
+                                {% else %}
+                                <a href="{% url 'report_builder' %}" aria-expanded="false" aria-label="Reports">
+				                    <i class="fa fa-file-text-o fa-fw"></i>
+                                    <span>Reports</span>
+                                    <span class="glyphicon arrow"></span>
+                                </a>
+                                {% endif %}
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>
@@ -311,12 +323,16 @@
                                         <span>Users</span>
                                     </a>
                                 </li>
+                            {% endif %}
+                            {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <li>
 				                    <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                         <i class="fa fa-calendar fa-fw"></i>
                                         <span>Calendar</span>
                                     </a>
                                 </li>
+                            {% endif %}
+                            {% if request.user.is_staff %}
                                 <li>
                                     <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Questionnaires</span><span
                                             class="glyphicon arrow"></span></a>
@@ -410,11 +426,8 @@
                     <ul class="dropdown-menu">
                       <li><a href="{% url 'view_engagements' product_tab.product.id %}"><i class="fa fa-calendar"></i> View Engagements</a></li>
                       {% if product_tab.product|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:product_tab.product %}
-                      <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
-                      {% endif %}
                       <li role="separator" class="divider"></li>
-                      <li><a href="{% url 'view_engagements_cicd' product_tab.product.id %}"><i class="fa fa-calendar"></i> View CI/CD Engagements</a></li>
-                      {% if product_tab.product|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:product_tab.product%}
+                      <li><a href="{% url 'new_eng_for_prod' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New Interactive Engagement</a></li>
                       <li><a href="{% url 'new_eng_for_prod_cicd' product_tab.product.id %}"><i class="fa fa-plus"></i> Add New CI/CD Engagement</a></li>
                       {% endif %}
                     </ul>
@@ -459,8 +472,8 @@
                     </ul>
                   </li>
                   <!-- Benchmarks Tab -->
-                  {% if system_settings.enable_benchmark %}                  
-                  {% if product_tab.product|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:product_tab.product %}                  
+                  {% if system_settings.enable_benchmark %}
+                  {% if product_tab.product|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:product_tab.product %}
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'benchmarks' %} active{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-balance-scale" aria-hidden="true"></span>
                     <span class="hidden-xs"> Benchmarks</span>
@@ -621,8 +634,8 @@
                         {% dojo_version %} ( {% dojo_current_hash %} )
                     </p>
                     <p>
-                        Detailed DefectDojo documentation can be found at  <a
-                            href="{% dojo_docs_url %}">Read The Docs</a>.
+                        Detailed DefectDojo documentation can be found in our <a
+                            href="{% dojo_docs_url %}">GitHub Pages</a>.
                     </p>
                     <p>
                         DefectDojo is licensed under the <a
@@ -656,10 +669,8 @@
 
         $('.has-popover').popover({'trigger':'hover'});
         {% if request.user.is_authenticated %}
-            $('.dropdown-toggle').click(function() {
-                if (disable_count == "False" || refresh == 'True') {
-                    get_alerts();
-                }
+            $('.dropdown-toggle-alerts').click(function() {
+                get_alerts();
             });
 
             if (disable_count == "False") {
@@ -713,6 +724,7 @@
                 $('.dropdown-alerts').append('<li><a class="text-center" href="{% url "delete_alerts" %}"><strong>Clear All Alerts </strong>' +
                                            '<i class="fa fa-angle-right"></i></a></li>');
             });
+            update_alertcount()
         }
 
         $("#id_jiraform-jira_issue").on('paste', function(e) {
@@ -734,7 +746,8 @@
 
     });
 </script>
-
+{% block extra_javascript %}
+{% endblock %}
 {% block postscript %}
 {% endblock %}
 </body>

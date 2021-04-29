@@ -2,11 +2,9 @@
 import logging
 from datetime import datetime
 import operator
-import base64
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, Count
@@ -17,30 +15,27 @@ from django.utils import timezone
 from time import strftime
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
-from django.core.exceptions import MultipleObjectsReturned
 
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.filters import EngagementFilter, EngagementTestFilter
+from dojo.filters import EngagementFilter, EngagementDirectFilter, EngagementTestFilter
 from dojo.forms import CheckForm, \
     UploadThreatForm, RiskAcceptanceForm, NoteForm, DoneForm, \
     EngForm, TestForm, ReplaceRiskAcceptanceProofForm, AddFindingsRiskAcceptanceForm, DeleteEngagementForm, ImportScanForm, \
     CredMappingForm, JIRAEngagementForm, JIRAImportScanForm, TypedNoteForm, JIRAProjectForm, \
     EditRiskAcceptanceForm
 
-from dojo.models import Finding, IMPORT_CREATED_FINDING, Product, Engagement, Test, \
-    Check_List, Test_Import, Test_Import_Finding_Action, Test_Type, Notes, \
-    Risk_Acceptance, Development_Environment, BurpRawRequestResponse, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Endpoint_Status
-from dojo.tools.factory import handles_active_verified_statuses
-from dojo.tools.factory import import_parser_factory, get_choices
-from dojo.utils import get_page_items, add_breadcrumb, handle_uploaded_threat, \
-    FileIterWrapper, get_cal_event, message, Product_Tab, is_scan_file_too_large, \
+from dojo.models import Finding, Product, Engagement, Test, \
+    Check_List, Test_Import, Notes, \
+    Risk_Acceptance, Development_Environment, Endpoint, \
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type
+from dojo.tools.factory import get_choices
+from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
+    FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
     get_system_setting, redirect_to_return_url_or_else, get_return_url
 from dojo.notifications.helper import create_notification
 from dojo.finding.views import find_available_notetypes
 from functools import reduce
-from django.db.models.query import QuerySet
-from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
+from django.db.models.query import Prefetch, QuerySet
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.helper import prefetch_for_expiration
@@ -49,18 +44,20 @@ from django.views.decorators.vary import vary_on_cookie
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product.queries import get_authorized_products
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.importers.importer.importer import DojoDefaultImporter as Importer
+import dojo.notifications.helper as notifications_helper
 
 
 logger = logging.getLogger(__name__)
-parse_logger = logging.getLogger('dojo')
 
 
-@user_passes_test(lambda u: u.is_staff)
 @cache_page(60 * 5)  # cache for 5 minutes
 @vary_on_cookie
 def engagement_calendar(request):
     if 'lead' not in request.GET or '0' in request.GET.getlist('lead'):
-        engagements = Engagement.objects.all()
+        engagements = get_authorized_engagements(Permissions.Engagement_View)
     else:
         filters = []
         leads = request.GET.getlist('lead', '')
@@ -68,7 +65,7 @@ def engagement_calendar(request):
             leads.remove('-1')
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
-        engagements = Engagement.objects.filter(reduce(operator.or_, filters))
+        engagements = get_authorized_engagements(Permissions.Engagement_View).filter(reduce(operator.or_, filters))
 
     engagements = engagements.select_related('lead')
     engagements = engagements.prefetch_related('product')
@@ -86,46 +83,72 @@ def engagement_calendar(request):
 
 def engagement(request):
     products = get_authorized_products(Permissions.Engagement_View).distinct()
-    if request.user.is_staff:
-        engagements = Engagement.objects.all()
-    else:
-        engagements = Engagement.objects\
-            .filter(Q(product__authorized_users=request.user) | Q(product__prod_type__authorized_users=request.user))\
-            .distinct()
+    engagements = Engagement.objects.filter(
+        product__in=products
+    ).select_related(
+        'product',
+        'product__prod_type',
+    ).prefetch_related(
+        'lead',
+        'tags',
+        'product__tags',
+    )
 
-    products_with_engagements = products.filter(~Q(engagement=None), engagement__active=True).distinct()
-    filtered = EngagementFilter(
+    # Get the test counts per engagments. As a separate query, this is much
+    # faster than annotating the above `engagements` query.
+    engagement_test_counts = {
+        test['engagement']: test['test_count']
+        for test in Test.objects.filter(
+            engagement__in=engagements
+        ).values(
+            'engagement'
+        ).annotate(
+            test_count=Count('engagement')
+        )
+    }
+
+    if System_Settings.objects.get().enable_jira:
+        engagements = engagements.prefetch_related(
+            'jira_project__jira_instance',
+            'product__jira_project_set__jira_instance'
+        )
+
+    filtered_engagements = EngagementDirectFilter(
         request.GET,
-        queryset=products_with_engagements.prefetch_related('engagement_set', 'prod_type', 'engagement_set__lead',
-                                                            'engagement_set__test_set__lead', 'engagement_set__test_set__test_type'))
-    prods = get_page_items(request, filtered.qs, 25)
-    name_words = products_with_engagements.values_list('name', flat=True)
-    eng_words = engagements.filter(active=True).values_list('name', flat=True).distinct()
+        queryset=engagements
+    )
+
+    engs = get_page_items(request, filtered_engagements.qs, 25)
+    product_name_words = sorted(products.values_list('name', flat=True))
+    engagement_name_words = sorted(engagements.values_list('name', flat=True).distinct())
 
     add_breadcrumb(
         title="Active Engagements",
         top_level=not len(request.GET),
         request=request)
 
-    prods.object_list = prefetch_for_products_with_engagments(prods.object_list)
-
     return render(
         request, 'dojo/engagement.html', {
-            'products': prods,
-            'filtered': filtered,
-            'name_words': sorted(set(name_words)),
-            'eng_words': sorted(set(eng_words)),
+            'engagements': engs,
+            'engagement_test_counts': engagement_test_counts,
+            'filter_form': filtered_engagements.form,
+            'product_name_words': product_name_words,
+            'engagement_name_words': engagement_name_words,
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
 def engagements_all(request):
 
     products_with_engagements = get_authorized_products(Permissions.Engagement_View)
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
+    # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
     filter_qs = products_with_engagements.prefetch_related(
-        'engagement_set',
+        Prefetch('engagement_set', queryset=Engagement.objects.all().annotate(test_count=Count('test__id')))
+    )
+
+    filter_qs = filter_qs.prefetch_related(
+        'engagement_set__tags',
         'prod_type',
         'engagement_set__lead',
         'tags',
@@ -144,7 +167,7 @@ def engagements_all(request):
     prods = get_page_items(request, filtered.qs, 25)
 
     name_words = products_with_engagements.values_list('name', flat=True)
-    eng_words = Engagement.objects.all().values_list('name', flat=True).distinct()
+    eng_words = get_authorized_engagements(Permissions.Engagement_View).values_list('name', flat=True).distinct()
 
     add_breadcrumb(
         title="All Engagements",
@@ -160,30 +183,17 @@ def engagements_all(request):
         })
 
 
-def prefetch_for_products_with_engagments(products_with_engagements):
-    if isinstance(products_with_engagements, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        return products_with_engagements.prefetch_related(
-            'tags',
-            'engagement_set__tags',
-            'engagement_set__test_set__tags',
-            'engagement_set__jira_project__jira_instance',
-            'jira_project_set__jira_instance'
-        )
-
-    logger.debug('unable to prefetch because query was already executed')
-    return products_with_engagements
-
-
-@user_must_be_authorized(Engagement, 'change', 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'change')
 def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
     is_ci_cd = engagement.engagement_type == "CI/CD"
+    jira_project_form = None
     jira_epic_form = None
     jira_project = None
     jira_error = False
 
     if request.method == 'POST':
-        form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product.id, user=request.user)
+        form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
         jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
 
         if form.is_valid():
@@ -207,7 +217,7 @@ def edit_engagement(request, eid):
                 'Engagement updated successfully.',
                 extra_tags='alert-success')
 
-            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, engagement=engagement)
+            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, target='engagement', engagement=engagement, product=engagement.product)
             error = not success
 
             success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
@@ -223,21 +233,26 @@ def edit_engagement(request, eid):
         else:
             logger.debug(form.errors)
 
-    form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
+    else:
+        form = EngForm(initial={'product': engagement.product}, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
 
-    jira_project_form = None
-    jira_epic_form = None
-    if get_system_setting('enable_jira'):
-        jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
-        jira_project_form = JIRAProjectForm(instance=jira_project, target='engagement', product=engagement.product)
-        logger.debug('showing jira-epic-form')
-        jira_epic_form = JIRAEngagementForm(instance=engagement)
+        jira_epic_form = None
+        if get_system_setting('enable_jira'):
+            jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
+            jira_project_form = JIRAProjectForm(instance=jira_project, target='engagement', product=engagement.product)
+            logger.debug('showing jira-epic-form')
+            jira_epic_form = JIRAEngagementForm(instance=engagement)
 
-    title = ' CI/CD' if is_ci_cd else ''
-    product_tab = Product_Tab(engagement.product.id, title="Edit" + title + " Engagement", tab="engagements")
+    if is_ci_cd:
+        title = 'Edit CI/CD Engagement'
+    else:
+        title = 'Edit Interactive Engagement'
+
+    product_tab = Product_Tab(engagement.product.id, title=title, tab="engagements")
     product_tab.setEngagement(engagement)
     return render(request, 'dojo/new_eng.html', {
         'product_tab': product_tab,
+        'title': title,
         'form': form,
         'edit': True,
         'jira_epic_form': jira_epic_form,
@@ -246,7 +261,7 @@ def edit_engagement(request, eid):
     })
 
 
-@user_must_be_authorized(Engagement, 'delete', 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Delete, 'eid', 'delete')
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
     product = engagement.product
@@ -256,6 +271,7 @@ def delete_engagement(request, eid):
         if 'id' in request.POST and str(engagement.id) == request.POST['id']:
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
+                product = engagement.product
                 engagement.delete()
                 messages.add_message(
                     request,
@@ -264,15 +280,13 @@ def delete_engagement(request, eid):
                     extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
+                                    product=product,
                                     description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
                                     url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
                                     recipients=[engagement.lead],
                                     icon="exclamation-triangle")
 
-                if engagement.engagement_type == 'CI/CD':
-                    return HttpResponseRedirect(reverse("view_engagements_cicd", args=(product.id, )))
-                else:
-                    return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
+                return HttpResponseRedirect(reverse("view_engagements", args=(product.id, )))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([engagement])
@@ -288,7 +302,7 @@ def delete_engagement(request, eid):
     })
 
 
-@user_must_be_authorized(Engagement, 'view', 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
 def view_engagement(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     tests = eng.test_set.all().order_by('test_type__name', '-updated')
@@ -323,7 +337,12 @@ def view_engagement(request, eid):
         available_note_types = find_available_notetypes(notes)
     form = DoneForm()
     files = eng.files.all()
-    if request.method == 'POST' and request.user.is_staff:
+    if request.method == 'POST':
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
+        else:
+            if not request.user.is_staff:
+                raise PermissionDenied
         eng.progress = 'check_list'
         eng.save()
 
@@ -407,7 +426,7 @@ def prefetch_for_view_tests(tests):
     return prefetched
 
 
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Test_Add, 'eid', 'staff')
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
     cred_form = CredMappingForm()
@@ -454,12 +473,7 @@ def add_tests(request, eid):
                 'Test added successfully.',
                 extra_tags='alert-success')
 
-            create_notification(
-                event='test_added',
-                title=new_test.test_type.name + " for " + eng.product.name,
-                test=new_test,
-                engagement=eng,
-                url=reverse('view_engagement', args=(eng.id, )))
+            notifications_helper.notify_test_created(new_test)
 
             if '_Add Another Test' in request.POST:
                 return HttpResponseRedirect(
@@ -527,12 +541,38 @@ def import_scan_results(request, eid=None, pid=None):
             logger.debug('jform errors: %s', jform.errors)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
-            # Allows for a test to be imported with an engagement created on the fly
+            scan = request.FILES.get('file', None)
+            scan_date = form.cleaned_data['scan_date']
+            minimum_severity = form.cleaned_data['minimum_severity']
+            active = form.cleaned_data['active']
+            verified = form.cleaned_data['verified']
+            scan_type = request.POST['scan_type']
+            tags = form.cleaned_data['tags']
             version = form.cleaned_data['version']
+            branch_tag = form.cleaned_data.get('branch_tag', None)
+            build_id = form.cleaned_data.get('build_id', None)
+            commit_hash = form.cleaned_data.get('commit_hash', None)
+            close_old_findings = form.cleaned_data.get('close_old_findings', None)
+            # Will save in the provided environment or in the `Development` one if absent
+            environment_id = request.POST.get('environment', 'Development')
+            environment = Development_Environment.objects.get(id=environment_id)
 
+            # TODO move to form validation?
+            if not any(scan_type in code
+                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
+                raise Http404()
+
+            # TODO move to form validation?
+            if scan and is_scan_file_too_large(scan):
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
+                                     extra_tags='alert-danger')
+                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
+
+            # Allows for a test to be imported with an engagement created on the fly
             if engagement is None:
                 engagement = Engagement()
-                # product = get_object_or_404(Product, id=pid)
                 engagement.name = "AdHoc Import - " + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
                 engagement.threat_model = False
                 engagement.api_test = False
@@ -544,43 +584,36 @@ def import_scan_results(request, eid=None, pid=None):
                 engagement.active = True
                 engagement.status = 'In Progress'
                 engagement.version = version
+                engagement.branch_tag = branch_tag
+                engagement.build_id = build_id
+                engagement.commit_hash = commit_hash
                 engagement.save()
-            file = request.FILES.get('file', None)
-            scan_date = form.cleaned_data['scan_date']
-            min_sev = form.cleaned_data['minimum_severity']
-            active = form.cleaned_data['active']
-            verified = form.cleaned_data['verified']
-            scan_type = request.POST['scan_type']
-            tags = form.cleaned_data['tags']
 
-            if not any(scan_type in code
-                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
-                raise Http404()
-            if file and is_scan_file_too_large(file):
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     "Report file is too large. Maximum supported size is {} MB".format(settings.SCAN_FILE_MAX_SIZE),
-                                     extra_tags='alert-danger')
-                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement,)))
+            # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
+            # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
+            push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
+            error = False
 
-            tt, t_created = Test_Type.objects.get_or_create(name=scan_type)
+            try:
+                importer = Importer()
+                test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
+                            minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
+                            version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
+                            close_old_findings=close_old_findings)
 
-            # Will save in the provided environment or in the `Development` one if absent
-            environment_id = request.POST.get('environment', 'Development')
-            environment = Development_Environment.objects.get(id=environment_id)
+                message = f'{scan_type} processed a total of {finding_count} findings'
 
-            t = Test(
-                engagement=engagement,
-                test_type=tt,
-                target_start=scan_date,
-                target_end=scan_date,
-                environment=environment,
-                percent_complete=100,
-                version=version,
-                tags=tags)
-            t.lead = user
-            t.full_clean()
-            t.save()
+                if close_old_findings:
+                    message = message + ' and closed %d findings' % (closed_finding_count)
+
+                message = message + "."
+
+                add_success_message_to_response(message)
+
+            except Exception as e:
+                logger.exception(e)
+                add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
+                error = True
 
             # Save the credential to the test
             if cred_form.is_valid():
@@ -591,181 +624,14 @@ def import_scan_results(request, eid=None, pid=None):
                         engagement=eid).first()
 
                     new_f = cred_form.save(commit=False)
-                    new_f.test = t
+                    new_f.test = test
                     new_f.cred_id = cred_user.cred_id
                     new_f.save()
 
-            try:
-                parser = import_parser_factory(file, t, active, verified, scan_type)
-                parser_findings = parser.get_findings(file, t)
-            except Exception as e:
-                messages.add_message(request,
-                                     messages.ERROR,
-                                     "An error has occurred in the parser, please see error "
-                                     "log for details.",
-                                     extra_tags='alert-danger')
-                parse_logger.exception(e)
-                parse_logger.error("Error in parser: {}".format(str(e)))
-                return HttpResponseRedirect(reverse('import_scan_results', args=(engagement.id,)))
-
-            try:
-                # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
-                # push_to_jira = jira_helper.is_push_to_jira(new_finding, jform.cleaned_data.get('push_to_jira'))
-                push_to_jira = push_all_jira_issues or (jform and jform.cleaned_data.get('push_to_jira'))
-
-                items = parser_findings
-                logger.debug('starting reimport of %i items.', len(items))
-                i = 0
-                new_findings = []
-                for item in items:
-                    sev = item.severity
-                    if sev == 'Information' or sev == 'Informational':
-                        sev = 'Info'
-
-                    item.severity = sev
-
-                    if Finding.SEVERITIES[sev] > Finding.SEVERITIES[min_sev]:
-                        continue
-
-                    item.test = t
-                    item.reporter = user
-                    item.last_reviewed = timezone.now()
-                    item.last_reviewed_by = user
-                    if not handles_active_verified_statuses(form.get_scan_type()):
-                        item.active = active
-                        item.verified = verified
-
-                    item.save(dedupe_option=False, false_history=True)
-                    logger.debug('%i: creating new finding: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
-
-                    if hasattr(item, 'unsaved_req_resp') and len(
-                            item.unsaved_req_resp) > 0:
-                        for req_resp in item.unsaved_req_resp:
-                            if form.get_scan_type() == "Arachni Scan":
-                                burp_rr = BurpRawRequestResponse(
-                                    finding=item,
-                                    burpRequestBase64=req_resp["req"],
-                                    burpResponseBase64=req_resp["resp"],
-                                )
-                            else:
-                                burp_rr = BurpRawRequestResponse(
-                                    finding=item,
-                                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
-                                )
-                            burp_rr.clean()
-                            burp_rr.save()
-
-                    if item.unsaved_request is not None and item.unsaved_response is not None:
-                        burp_rr = BurpRawRequestResponse(
-                            finding=item,
-                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
-                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()),
-                        )
-                        burp_rr.clean()
-                        burp_rr.save()
-
-                    for endpoint in item.unsaved_endpoints:
-                        try:
-                            ep, created = Endpoint.objects.get_or_create(
-                                protocol=endpoint.protocol,
-                                host=endpoint.host,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=t.engagement.product)
-                        except (MultipleObjectsReturned):
-                            pass
-                        try:
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=item,
-                                endpoint=ep)
-                        except (MultipleObjectsReturned):
-                            pass
-
-                        ep.endpoint_status.add(eps)
-                        item.endpoints.add(ep)
-                        item.endpoint_status.add(eps)
-
-                    for endpoint in form.cleaned_data['endpoints']:
-                        try:
-                            ep, created = Endpoint.objects.get_or_create(
-                                protocol=endpoint.protocol,
-                                host=endpoint.host,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=t.engagement.product)
-                        except (MultipleObjectsReturned):
-                            pass
-                        try:
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=item,
-                                endpoint=ep)
-                        except (MultipleObjectsReturned):
-                            pass
-
-                        ep.endpoint_status.add(eps)
-                        item.endpoints.add(ep)
-                        item.endpoint_status.add(eps)
-
-                    if item.unsaved_tags:
-                        item.tags = item.unsaved_tags
-
-                    item.save(false_history=True, push_to_jira=push_to_jira)
-                    new_findings.append(item)
-
-                    finding_count += 1
-                    i += 1
-
-                if settings.TRACK_IMPORT_HISTORY:
-                    import_settings = {}  # json field
-                    import_settings['active'] = active
-                    import_settings['verified'] = verified
-                    import_settings['minimum_severity'] = min_sev
-                    import_settings['close_old_findings'] = None  # not implemented via UI
-                    import_settings['push_to_jira'] = push_to_jira
-                    import_settings['version'] = version
-                    import_settings['tags'] = tags
-                    # if endpoint_to_add:    # not implemented via UI
-                    #     import_settings['endpoint'] = endpoint_to_add
-
-                    test_import = Test_Import(test=t, import_settings=import_settings, version=version, type=Test_Import.IMPORT_TYPE)
-                    test_import.save()
-
-                    test_import_finding_action_list = []
-                    # for finding in old_findings:  # not implemented via UI
-                    #     logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                    #     test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
-                    for finding in new_findings:
-                        logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                        test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
-
-                    Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
-
-                messages.add_message(
-                    request,
-                    messages.SUCCESS,
-                    scan_type + ' processed, a total of ' + message(
-                        finding_count, 'finding', 'processed'),
-                    extra_tags='alert-success')
-
-                create_notification(
-                    event='scan_added',
-                    title=str(finding_count) + " findings for " + engagement.product.name,
-                    finding_count=finding_count,
-                    test=t,
-                    engagement=engagement,
-                    url=reverse('view_test', args=(t.id, )))
-
+            if not error:
                 return HttpResponseRedirect(
-                    reverse('view_test', args=(t.id, )))
-            except SyntaxError:
-                messages.add_message(
-                    request,
-                    messages.ERROR,
-                    'There appears to be an error in the XML report, please check and try again.',
-                    extra_tags='alert-danger')
+                    reverse('view_test', args=(test.id, )))
+
     prod_id = None
     custom_breadcrumb = None
     title = "Import Scan Results"
@@ -795,7 +661,7 @@ def import_scan_results(request, eid=None, pid=None):
          })
 
 
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     close_engagement(eng)
@@ -808,13 +674,10 @@ def close_eng(request, eid):
                         title='Closure of %s' % eng.name,
                         description='The engagement "%s" was closed' % (eng.name),
                         engagement=eng, url=reverse('engagment_all_findings', args=(eng.id, ))),
-    if eng.engagement_type == 'CI/CD':
-        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
-    else:
-        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     reopen_engagement(eng)
@@ -825,12 +688,10 @@ def reopen_eng(request, eid):
         extra_tags='alert-success')
     create_notification(event='other',
                         title='Reopening of %s' % eng.name,
+                        engagement=eng,
                         description='The engagement "%s" was reopened' % (eng.name),
                         url=reverse('view_engagement', args=(eng.id, ))),
-    if eng.engagement_type == 'CI/CD':
-        return HttpResponseRedirect(reverse("view_engagements_cicd", args=(eng.product.id, )))
-    else:
-        return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
+    return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
 """
@@ -840,7 +701,7 @@ method to complete checklists from the engagement view
 """
 
 
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     try:
@@ -892,7 +753,7 @@ def complete_checklist(request, eid):
     })
 
 
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     finding = None
@@ -962,16 +823,17 @@ def add_risk_acceptance(request, eid, fid=None):
                   })
 
 
-@user_must_be_authorized(Engagement, 'view', 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
 def view_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
 
 
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def edit_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
 
 
+# will only be called by view_risk_acceptance and edit_risk_acceptance
 def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1130,7 +992,7 @@ def view_edit_risk_acceptance(request, eid, raid, edit_mode=False):
         })
 
 
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1140,7 +1002,7 @@ def expire_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1153,7 +1015,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Risk_Acceptance, 'eid', 'staff')
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement, pk=eid)
@@ -1168,17 +1030,13 @@ def delete_risk_acceptance(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
 def download_risk_acceptance(request, eid, raid):
     import mimetypes
 
     mimetypes.init()
 
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    en = get_object_or_404(Engagement, pk=eid)
-    if request.user.is_staff or check_auth_users_list(request.user, en):
-        pass
-    else:
-        raise PermissionDenied
 
     response = StreamingHttpResponse(
         FileIterWrapper(
@@ -1198,8 +1056,7 @@ under media folder
 """
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid', 'staff')
 def upload_threatmodel(request, eid):
     eng = Engagement.objects.get(id=eid)
     add_breadcrumb(
@@ -1232,16 +1089,14 @@ def upload_threatmodel(request, eid):
     })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'staff')
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
     response = FileResponse(open(eng.tmodel_path, 'rb'))
     return response
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Engagement, 'staff', 'eid')
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'staff')
 def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())

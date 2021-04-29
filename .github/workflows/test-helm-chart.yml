@@ -40,13 +40,20 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --config ct.yaml)
+          if [ ! -z ${GITHUB_BASE_REF} ]; then
+            echo "pull_request: ct list-changed --config ct.yaml --target-branch ${GITHUB_BASE_REF}"
+            changed=$(ct list-changed --config ct.yaml --target-branch ${GITHUB_BASE_REF})
+          else
+            echo "push: ct list-changed --config ct.yaml --target-branch ${GITHUB_REF#refs/heads/}"
+            changed=$(ct list-changed --config ct.yaml --target-branch ${GITHUB_REF#refs/heads/})
+          fi
           if [[ -n "$changed" ]]; then
             echo "::set-output name=changed::true"
           fi
 
       - name: Run chart-testing (lint)
         run: ct lint --config ct.yaml
+        if: steps.list-changed.outputs.changed == 'true'
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.1.0
@@ -54,3 +61,4 @@ jobs:
 
       - name: Run chart-testing (install)
         run: ct install
+        if: steps.list-changed.outputs.changed == 'true'

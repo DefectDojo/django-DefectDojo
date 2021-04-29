@@ -1,5 +1,5 @@
 from django.urls import reverse
-from dojo.models import User, Test
+from dojo.models import User, Test, Finding
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from django.test.client import Client
@@ -53,6 +53,9 @@ class ImportReimportMixin(object):
         self.anchore_file_name = self.scans_path + 'anchore/one_vuln_many_files.json'
         self.scan_type_anchore = 'Anchore Engine Scan'
 
+        self.gitlab_dep_scan_components_filename = self.scans_path + 'gitlab_dep_scan/gl-dependency-scanning-report-many-vuln.json'
+        self.scan_type_gtlab_dep_scan = 'GitLab Dependency Scanning Report'
+
         self.sonarqube_file_name1 = self.scans_path + 'sonarqube/sonar-6-findings.html'
         self.sonarqube_file_name2 = self.scans_path + 'sonarqube/sonar-6-findings-1-unique_id_changed.html'
         self.scan_type_sonarqube_detailed = 'SonarQube Scan detailed'
@@ -62,6 +65,10 @@ class ImportReimportMixin(object):
         self.veracode_same_unique_id_different_hash_code = self.scans_path + 'veracode/many_findings_same_unique_id_different_hash_code.xml'
         self.veracode_different_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_different_hash_code_different_unique_id.xml'
         self.scan_type_veracode = 'Veracode Scan'
+
+        self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
+        self.clair_empty = self.scans_path + 'clair/empty.json'
+        self.scan_type_clair = 'Clair Scan'
 
     # import zap scan, testing:
     # - import
@@ -85,6 +92,44 @@ class ImportReimportMixin(object):
 
         test_id = import0['test']
         findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+
+        # imported count must match count in xml report
+        self.assert_finding_count_json(4, findings)
+
+        # the zap scan contains 3 endpoints (mainsite with pot + uris from findings)
+        self.assertEqual(endpoint_count_before + 3, self.db_endpoint_count())
+        # 4 findings, total 11 endpoint statuses
+        self.assertEqual(endpoint_status_count_before_active + 11, self.db_endpoint_status_count(mitigated=False))
+        self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
+
+        # no notes expected
+        self.assertEqual(notes_count_before, self.db_notes_count())
+
+        return test_id
+
+    # import zap scan, testing:
+    # - import
+    # - active/verifed = False
+    def test_zap_scan_base_not_active_not_verified(self):
+        logger.debug('importing original zap xml report')
+        endpoint_count_before = self.db_endpoint_count()
+        endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
+        endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
+        notes_count_before = self.db_notes_count()
+
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
+            import0 = self.import_scan_with_params(self.zap_sample0_filename, active=False, verified=False)
+
+        # 0_zap_sample.xml: basic file with 4 out of 5 findings reported, zap4 absent
+        # 1 inactive
+        # 2 inactive
+        # 3 inactive
+        # 4 absent
+        # 5 inactive
+
+        test_id = import0['test']
+        findings = self.get_test_findings_api(test_id, active=False, verified=False)
         self.log_finding_summary_json_api(findings)
 
         # imported count must match count in xml report
@@ -883,6 +928,100 @@ class ImportReimportMixin(object):
                 self.assertFalse(finding['risk_accepted'])
                 self.assertFalse(finding['is_Mitigated'])
 
+    # import gitlab_dep_scan_components_filename with 6 findings
+    # findings 1, 2 and 3 have the same component_name (golang.org/x/crypto) and the same CVE (CVE-2020-29652), but different component_version
+    # findings 4 and 5 have the same component_name (golang.org/x/text) and the same CVE (CVE-2020-14040), but different component_version
+    # finding 6 is different ("unique") from the others
+    #
+    # reimport gitlab_dep_scan_components_filename and the same 6 finding must be active
+    #
+    # the previous hashcode calculation for GitLab Dependency Scanning would ignore component_name and component_version,
+    # which during the reimport would close findings 2, 3 and 5, because it would only check the finding's title and CVE
+    #
+    # since a project can have multiples versions (component_version) of the same dependency (component_name),
+    # we must consider each finding unique, otherwise we would lose valid information
+    def test_import_6_reimport_6_gitlab_dep_scan_component_name_and_version(self):
+
+        import0 = self.import_scan_with_params(self.gitlab_dep_scan_components_filename,
+                                               scan_type=self.scan_type_gtlab_dep_scan,
+                                               minimum_severity='Info')
+
+        test_id = import0['test']
+
+        active_findings_before = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(6, active_findings_before)
+
+        with assertTestImportModelsCreated(self, reimports=1, affected_findings=0, created=0):
+            reimport0 = self.reimport_scan_with_params(test_id,
+                                                       self.gitlab_dep_scan_components_filename,
+                                                       scan_type=self.scan_type_gtlab_dep_scan,
+                                                       minimum_severity='Info')
+
+        active_findings_after = self.get_test_findings_api(test_id, active=True)
+        self.assert_finding_count_json(6, active_findings_after)
+
+        count = 0
+        for finding in active_findings_after['results']:
+            if 'v0.0.0-20190219172222-a4c6cb3142f2' == finding['component_version']:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
+                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+                count = count + 1
+            elif 'v0.0.0-20190308221718-c2843e01d9a2' == finding['component_version']:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
+                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+                count = count + 1
+            elif 'v0.0.0-20200302210943-78000ba7a073' == finding['component_version']:
+                self.assertEqual("CVE-2020-29652: Nil Pointer Dereference", finding['title'])
+                self.assertEqual("CVE-2020-29652", finding['cve'])
+                self.assertEqual("golang.org/x/crypto", finding['component_name'])
+                count = count + 1
+            elif 'v0.3.0' == finding['component_version']:
+                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
+                self.assertEqual("CVE-2020-14040", finding['cve'])
+                self.assertEqual("golang.org/x/text", finding['component_name'])
+                count = count + 1
+            elif 'v0.3.2' == finding['component_version']:
+                self.assertEqual("CVE-2020-14040: Loop With Unreachable Exit Condition (Infinite Loop)", finding['title'])
+                self.assertEqual("CVE-2020-14040", finding['cve'])
+                self.assertEqual("golang.org/x/text", finding['component_name'])
+                count = count + 1
+
+        self.assertEqual(5, count)
+
+    # import clair scan, testing:
+    # parameter endpoint_to_add: each imported finding should be related to endpoint with id=1
+    # close_old_findings functionality: secony (empty) import should close all findings from the first import
+    def test_import_param_close_old_findings_with_additional_endpoint(self):
+        logger.debug('importing clair report with additional endpoint')
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
+
+        test_id = import0['test']
+        test = self.get_test(test_id)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+        # imported count must match count in the report
+        self.assert_finding_count_json(4, findings)
+
+        # imported findings should be active in the engagement
+        engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_Mitigated=False)
+        self.assertEqual(engagement_findings.count(), 4)
+
+        # findings should have only one endpoint, added with endpoint_to_add
+        for finding in engagement_findings:
+            self.assertEqual(finding.endpoints.count(), 1)
+            self.assertEqual(finding.endpoints.first().id, 1)
+
+        # reimport exact same report
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, closed=4):
+            self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
+
+        # all findings from import0 should be closed now
+        engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_Mitigated=False).count()
+        self.assertEqual(engagement_findings_count, 0)
+
 
 @override_settings(TRACK_IMPORT_HISTORY=True)
 class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
@@ -938,7 +1077,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         # response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), urlencode(payload), content_type='application/x-www-form-urlencoded')
         response = self.client_ui.post(reverse('import_scan_results', args=(engagement, )), payload)
         # print(vars(response))
-        print('url: ' + response.url)
+        # print('url: ' + response.url)
         test = Test.objects.get(id=response.url.split('/')[-1])
         # f = open('response.html', 'w+')
         # f.write(str(response.content, 'utf-8'))
@@ -952,7 +1091,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         test = Test.objects.get(id=response.url.split('/')[-1])
         return {'test': test.id}
 
-    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -962,11 +1101,14 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 "file": open(filename),
                 "environment": 1,
                 "version": "1.0.1",
-                # "close_old_findings": close_old_findings,
+                "close_old_findings": close_old_findings,
         }
 
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
+
+        if endpoint_to_add is not None:
+            payload['endpoints'] = [endpoint_to_add]
 
         if tags is not None:
             payload['tags'] = tags

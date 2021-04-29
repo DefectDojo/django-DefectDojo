@@ -12,16 +12,6 @@ def role_as_string(id):
     return Roles(id).name
 
 
-@register.simple_tag
-def feature_authorization_v2():
-    return settings.FEATURE_AUTHORIZATION_V2
-
-
-@register.filter
-def feature_authorization_v2_or_user_is_staff(user):
-    return settings.FEATURE_AUTHORIZATION_V2 or user.is_staff
-
-
 @register.filter
 def has_object_permission(obj, permission):
 

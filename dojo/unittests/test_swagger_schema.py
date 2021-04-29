@@ -5,9 +5,9 @@ from rest_framework.test import APITestCase, force_authenticate, APIClient
 from rest_framework.mixins import \
     RetrieveModelMixin, ListModelMixin, CreateModelMixin, UpdateModelMixin
 from rest_framework import status
-from drf_yasg2.generators import OpenAPISchemaGenerator
-from drf_yasg2.openapi import Info, SchemaRef
-from drf_yasg2.openapi import \
+from drf_yasg.generators import OpenAPISchemaGenerator
+from drf_yasg.openapi import Info, SchemaRef
+from drf_yasg.openapi import \
     TYPE_ARRAY, TYPE_BOOLEAN, TYPE_INTEGER, TYPE_NUMBER, TYPE_OBJECT, TYPE_STRING
 from collections import OrderedDict
 
