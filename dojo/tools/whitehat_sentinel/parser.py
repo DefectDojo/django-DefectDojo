@@ -33,17 +33,14 @@ class WhiteHatSentinelParser(object):
         if file is None:
             return []
 
-        try:
-            findings_collection = json.load(file)
-        except JSONDecodeError:
-            return []
+        findings_collection = json.load(file)
 
         if not findings_collection.keys():
             return list()
 
         # Make sure the findings key exists in the dictionary and that it is not null or an empty list
         if 'collection' not in findings_collection.keys() or not findings_collection['collection']:
-            return list()
+            raise ValueError('collection key not present or there were not findings present.')
 
         dojo_findings = []
 

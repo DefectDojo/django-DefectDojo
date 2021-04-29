@@ -85,20 +85,20 @@ class IntSightsParser(object):
 
         # Don't bother parsing if the keys don't match exactly what's expected
         if collections.Counter(default_keys) == collections.Counter(csv_reader.fieldnames):
-            default_valud = 'None provided'
+            default_value = 'None provided'
             for alert in csv_reader:
                 alert['alert_id'] = alert.pop('Alert ID')
                 alert['title'] = alert.pop('Title')
                 alert['description'] = alert.pop('Description')
                 alert['severity'] = alert.pop('Severity')
                 alert['type'] = alert.pop('Type', )
-                alert['source_date'] = alert.pop('Source Date (UTC)', default_valud)
-                alert['report_date'] = alert.pop('Report Date (UTC)', default_valud)
-                alert['network_type'] = alert.pop('Network Type', default_valud)
-                alert['source_url'] = alert.pop('Source URL', default_valud)
-                alert['assets'] = alert.pop('Assets', default_valud)
-                alert['tags'] = alert.pop('Tags', default_valud)
-                alert['status'] = alert.pop('Status', default_valud)
+                alert['source_date'] = alert.pop('Source Date (UTC)', default_value)
+                alert['report_date'] = alert.pop('Report Date (UTC)', default_value)
+                alert['network_type'] = alert.pop('Network Type', default_value)
+                alert['source_url'] = alert.pop('Source URL', default_value)
+                alert['assets'] = alert.pop('Assets', default_value)
+                alert['tags'] = alert.pop('Tags', default_value)
+                alert['status'] = alert.pop('Status', default_value)
                 alert['alert_link'] = alert.pop('Alert Link')
                 alert.pop('Assignees')
                 alert.pop('Remediation')
