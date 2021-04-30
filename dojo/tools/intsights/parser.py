@@ -143,10 +143,10 @@ class IntSightsParser(object):
         elif file.name.lower().endswith('.csv'):
             alerts = self._parse_csv(file)
         else:
-            return []
+            raise ValueError('Filename extension not recognized. Use .json or .csv')
 
         if not alerts:
-            return []
+            raise ValueError('No alert in the report')
 
         for alert in alerts:
             dupe_key = alert['alert_id']
