@@ -1,17 +1,26 @@
 import json
+
 from dojo.models import Finding
 
 
-class GitlabDepScanReportParser(object):
-    def __init__(self, json_output, test):
-        self.items = []
+class GitlabDepScanParser(object):
 
+    def get_scan_types(self):
+        return ["GitLab Dependency Scanning Report"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import GitLab SAST Report vulnerabilities in JSON format."
+
+    def get_findings(self, json_output, test):
         if json_output is None:
             return
 
         tree = self.parse_json(json_output)
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return self.get_items(tree, test)
 
     def parse_json(self, json_output):
         try:
@@ -67,21 +76,13 @@ def get_item(vuln, test):
 
     location = vuln['location']
     file_path = location['file'] if 'file' in location else None
-    sourcefile = location['file'] if 'file' in location else None
 
-    line = location['start_line'] if 'start_line' in location else None
-    if 'end_line' in location:
-        line = location['end_line']
-
-    sast_source_line = location['start_line'] if 'start_line' in location else None
-
-    sast_object = None
-    if 'class' in location and 'method' in location:
-        sast_object = '{}#{}'.format(location['class'], location['method'])
-    elif 'class' in location:
-        sast_object = location['class']
-    elif 'method' in location:
-        sast_object = location['method']
+    component_name = None
+    component_version = None
+    if 'dependency' in location:
+        component_version = location['dependency']['version'] if 'version' in location['dependency'] else None
+        if 'package' in location['dependency']:
+            component_name = location['dependency']['package']['name'] if 'name' in location['dependency']['package'] else None
 
     severity = vuln['severity']
     if severity == 'Undefined' or severity == 'Unknown':
@@ -89,7 +90,7 @@ def get_item(vuln, test):
         # In that case we set it as Info and specify the initial severity in the title
         title = '[{} severity] {}'.format(severity, title)
         severity = 'Info'
-    numerical_severity = Finding.get_numerical_severity(severity)
+
     # Dependency Scanning analyzers doesn't provide confidence property
     # See https://docs.gitlab.com/ee/user/application_security/dependency_scanning/analyzers.html#analyzers-data
     scanner_confidence = False
@@ -117,22 +118,15 @@ def get_item(vuln, test):
 
     finding = Finding(title=cve + ": " + title if cve else title,
                       test=test,
-                      active=False,
-                      verified=False,
                       description=description,
                       severity=severity,
-                      numerical_severity=numerical_severity,
                       scanner_confidence=scanner_confidence,
                       mitigation=mitigation,
                       unique_id_from_tool=unique_id_from_tool,
                       references=references,
                       file_path=file_path,
-                      sourcefile=sourcefile,
-                      line=line,
-                      sast_source_object=sast_object,
-                      sast_sink_object=sast_object,
-                      sast_source_file_path=file_path,
-                      sast_source_line=sast_source_line,
+                      component_name=component_name,
+                      component_version=component_version,
                       cwe=cwe,
                       cve=cve,
                       static_finding=True,

@@ -1,22 +1,38 @@
 {% load humanize %}
 {% load display_tags %}
+{% load authorization_tags %}
 <div class="col-md-12">
     <div class="panel panel-default table-responsive">
         <div class="panel-heading">
-            <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} {% if type == "CI/CD" %}CI/CD{% endif %} Engagements ({{ count }})
-              {% if user|is_authorized_for_staff:prod %}
-                {% if type == "CI/CD" %}
-                <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod_cicd' prod.id %}"><span
-                      class="fa fa-plus"></span> </a>
-                {% else %}
-                <a title="Add New Engagement" class="pull-right btn btn-sm btn-primary" href="{% url 'new_eng_for_prod' prod.id %}"><span
-                      class="fa fa-plus"></span> </a>
-                {% endif %}
-              {% endif %}
+            <h4> {% if status == "open" %}Active{% elif status == "paused" %}Paused {% else %}Closed{% endif %} Engagements ({{ count }})
+                <div class="dropdown pull-right">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1" aria-label="Add Engagement"
+                    data-toggle="dropdown" aria-expanded="true">
+                <span class="fa fa-bars"></span>
+                <span class="caret"></span>
+            </button>
+          <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            <li role="presentation">
+                                <a class="" href="{% url 'new_eng_for_prod' prod.id %}">
+                                    <i class="fa fa-plus"></i> Add New Interactive Engagement
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a class="" href="{% url 'new_eng_for_prod_cicd' prod.id %}">
+                                    <i class="fa fa-plus"></i> Add New CI/CD Engagement
+                                </a>
+                            </li>
+                    </ul>
+                </div>
               </h4>
         </div>
-        <div class="clearfix">
-            {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
+        <div id="the-filters-{{status}}" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
+            {% include "dojo/filter_snippet.html" with form=filter.form %}
+        </div>
+    </div>
+
+    <div class="clearfix">
+            {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
         </div>
         {% if engs %}
             <table id={{ status }} class="tablesorter-bootstrap table table-condensed table-striped table-hover">
@@ -24,6 +40,7 @@
                 <tr>
                     <th></th>
                     <th>Name</th>
+                    <th>Type</th>
                     <th>Lead</th>
                     <th class="text-left">Date</th>
                     <th class="text-left">Length</th>
@@ -36,7 +53,6 @@
                     <th class="text-center">Accepted</th>
                     <th class="text-center">All</th>
                     <th class="text-center">Duplicates</th>
-                    <th class="text-left">Updated</th>
                     {% if status == "paused" or status == "closed" %}
                       <th class="text-left">Status</th>
                     {% endif %}
@@ -54,6 +70,7 @@
                                <a class="" href="{% url 'view_engagement' eng.id %}">
                                  <i class="fa fa-list-alt"></i> View
                              </li>
+                             {% if eng|has_object_permission:"Engagement_Edit" or user|is_authorized_for_change:eng %}
                              <li>
                                <a class="" href="{% url 'edit_engagement' eng.id %}">
                                  <i class="fa fa-pencil-square-o"></i> Edit
@@ -72,16 +89,21 @@
                               </a>
                             </li>
                             <li class="divider"></li>
+                            {% endif %}
+                            {% if eng|has_object_permission:"Test_Add" or user|is_authorized_for_change:eng %}
                             <li role="presentation">
                                 <a class="" href="{% url 'add_tests' eng.id %}">
                                     <i class="fa fa-plus"></i> Add Tests
                                 </a>
                             </li>
+                            {% endif %}
+                            {% if eng|has_object_permission:"Import_Scan_Result" or user|is_authorized_for_change:eng %}
                             <li role="presentation">
                                 <a class="" href="{% url 'import_scan_results' eng.id %}">
                                     <i class="fa fa-upload"></i> Import Scan Results
                                 </a>
                             </li>
+                            {% endif %}
                             <li class="divider"></li>
                             <li role="presentation">
                               <a href="{% url 'engagment_open_findings' eng.id %}?active=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
@@ -99,7 +121,7 @@
                               </a>
                             </li>
                             <li role="presentation">
-                                <a href="{% url 'engagment_open_findings' eng.id %}?test__engagement__risk_acceptance=1&test__engagement={{ eng.id }}">
+                                <a href="{% url 'engagment_open_findings' eng.id %}?risk_acceptance=1&test__engagement={{ eng.id }}">
                                     <i class="fa fa-file-text-o"></i> View Accepted Findings
                                 </a>
                               </li>
@@ -114,17 +136,19 @@
                                   <i class="fa fa-file-text-o"></i> Engagement Report
                               </a>
                             </li>
+                            {% if eng|has_object_permission:"Engagement_Delete" or user|is_authorized_for_delete:eng %}
                             <li class="divider"></li>
                             <li>
                               <a class="text-danger" href="{% url 'delete_engagement' eng.id %}">
                                   <i class="fa fa-trash-o"></i> Delete Engagement
                               </a>
                             </li>
+                            {% endif %}
                            </ul>
                          </li>
                      </ul>
                     </td>
-                    <td class="text-center" style="width: 250px;">
+                    <td style="width: 250px;">
                     <a href="{% url 'view_engagement' eng.id %}" data-toggle="tooltip" data-placement="bottom" title="{{ eng.name|default:"N/A" }}">
                     {{ eng.name|truncatechars_html:35|default:"N/A" }}</a>
                     {% if eng.version %}
@@ -141,6 +165,7 @@
                         </sup>
                     {% endif %}
                     </td>
+                    <td>{{ eng.engagement_type }}</td>
                     <td style="width: 150px;">
                       {% if eng.lead.get_full_name and eng.lead.get_full_name.strip %}
                           {{ eng.lead.get_full_name }}
@@ -162,7 +187,7 @@
                           </div>
                         </sup>
                         {% endif %}
-                        {% if eng.test_set.all|length == 0 %}
+                        {% if eng.count_tests == 0 %}
                         &nbsp;<sup>
                           <div class="tag-label amber-color">
                             no tests
@@ -185,21 +210,38 @@
                     {% endif %}
                     <td class="text-center" class="nowrap">
                       <div class="align-top">
-                      {% if eng.test_set.all|length %}
+                      {% if eng.count_tests %}
                       <div class="dropdown">
-                        <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                        <a href="{% url 'view_engagement' eng.id %}#tests">{{ eng.count_tests }}</a>
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<i class="fa fa-ellipsis-v"></i>&nbsp;</a>
                         <ul class="dropdown-menu">
+                          <li>
+                            <a>
+                              <i class="fa fa-info"></i>
+                              {% if eng.test_set.all|length %}
+                                Recent tests
+                              {% else %}
+                                No recent tests
+                              {% endif %}
+                              (last {{recent_test_day_count}} day{{recent_test_day_count|pluralize}})
+                            </a>
+                          </li>
                           {% for test in eng.test_set.all %}
-                               <li>
-                                 <a class="" href="{% url 'view_test' test.id %}">
-                                   <i class="fa fa-list-alt"></i> {{test}}, {{test.updated}}
-                               </li>
-                            {% endfor %}
+                            <li>
+                              <a href="{% url 'view_test' test.id %}">
+                                <i class="fa fa-list-alt"></i> {{test}}, {{test.updated}}
+                              </a>
+                            </li>
+                          {% endfor %}
+                          <li>
+                            <a href="{% url 'view_engagement' eng.id %}#tests">
+                              <i class="fa fa-globe"></i> View all {{ eng.count_tests }} tests...
+                            </a>
+                          </li>
                         </ul>
                       </div>
                       {% else %}
-                      <a class="" href="{% url 'view_engagement' eng.id %}">{{ eng.test_set.all|length }}</a>
+                      <a href="{% url 'view_engagement' eng.id %}">{{ eng.count_tests }}</a>
                       {% endif %}
                       </div>
                     </td>
@@ -208,9 +250,6 @@
                     <td class="text-center">{{ eng.count_findings_accepted }}</td>
                     <td class="text-center">{{ eng.count_findings_all }}</td>
                     <td class="text-center">{{ eng.count_findings_duplicate }}</td>
-                    <td class="text-left"><a target="_blank" data-toggle="tooltip" data-placement="bottom" title="{{ eng.updated|default_if_none:"" }}">
-                    {{ eng.updated|naturaltime|default_if_none:"" }}</a>
-                    </td>
                     {% if status == "paused" or status == "closed" %}
                     <td class="text-left">
                       {% if eng.status == "Blocked" %}
@@ -232,9 +271,9 @@
                 <p class="text-muted">No {% if status == "open" %}active{% elif status == "paused" %}paused{% else %}closed{% endif %} engagements found.</p>
             </div>
         {% endif %}
-    </div>
+
     <div class="clearfix">
-        {% include "dojo/paging_snippet.html" with page=engs parm_name=parm_name page_size=True %}
+        {% include "dojo/paging_snippet.html" with page=engs prefix=prefix page_size=True %}
     </div>
 </div>
 {% block postscript %}
@@ -261,6 +300,7 @@
                 "columns": [
                     { "data": "action" },
                     { "data": "eng_name" },
+                    { "data": "engagement_type" },
                     { "data": "lead" },
                     { "data": "date" },
                     { "data": "length" },
@@ -273,9 +313,8 @@
                     { "data": "accepted" },
                     { "data": "all" },
                     { "data": "dups" },
-                    { "data": "updated" },
                     {% if status == "paused" or status == "closed" %}
-                      { "data": "updated" },
+                      { "data": "status" },
                     {% endif %}
                 ],
                 columnDefs: [
@@ -286,6 +325,7 @@
                 ],
                 dom: 'Bfrtip',
                 paging: false,
+                info: false,
                 buttons: [
                     {
                         extend: 'colvis',
@@ -315,4 +355,3 @@
         });
     </script>
     {% endblock %}
-    {% include "dojo/filter_js_snippet.html" %}

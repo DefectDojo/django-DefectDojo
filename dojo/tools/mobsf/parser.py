@@ -1,14 +1,24 @@
-__author__ = 'Aaron Weaver'
+
+import json
+from datetime import datetime
+
+from html2text import html2text
 
 from dojo.models import Finding
-from datetime import datetime
-import json
-from django.utils.text import Truncator
-from django.utils.html import strip_tags
 
 
 class MobSFParser(object):
-    def __init__(self, filename, test):
+
+    def get_scan_types(self):
+        return ["MobSF Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "MobSF Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Export a JSON file using the API, api/v1/report_json."
+
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))
@@ -72,7 +82,7 @@ class MobSFParser(object):
             if "bin_anal" in data:
                 test_description = "%s  \n**Binary Analysis:** %s\n" % (test_description, data["bin_anal"])
 
-        test.description = strip_tags(test_description)
+        test.description = html2text(test_description)
 
         mobsf_findings = []
         # Mobile Permissions
@@ -216,35 +226,37 @@ class MobSFParser(object):
                 mobsf_findings.append(mobsf_item)
 
         for mobsf_finding in mobsf_findings:
-            title = strip_tags(mobsf_finding["title"])
+            title = mobsf_finding["title"]
             sev = self.getCriticalityRating(mobsf_finding["severity"])
             description = ""
             file_path = None
             if mobsf_finding["category"]:
-                description = "**Category:** " + mobsf_finding["category"] + "\n\n"
-            description = description + strip_tags(mobsf_finding["description"])
+                description += "**Category:** " + mobsf_finding["category"] + "\n\n"
+            description = description + html2text(mobsf_finding["description"])
+            finding = Finding(
+                title=title,
+                cwe=919,  # Weaknesses in Mobile Applications
+                test=test,
+                description=description,
+                severity=sev,
+                references=None,
+                date=find_date,
+                static_finding=True,
+                dynamic_finding=False,
+                nb_occurences=1,
+            )
             if mobsf_finding["file_path"]:
-                file_path = mobsf_finding["file_path"]
+                finding.file_path = mobsf_finding["file_path"]
+
             dupe_key = sev + title
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if description is not None:
                     find.description += description
+                find.nb_occurences += 1
             else:
-                find = Finding(title=Truncator(title).words(5),
-                               cwe=919,  # Weaknesses in Mobile Applications
-                               test=test,
-                               active=False,
-                               verified=False,
-                               description=description,
-                               severity=sev,
-                               numerical_severity=Finding.get_numerical_severity(sev),
-                               references=None,
-                               date=find_date,
-                               file_path=file_path,
-                               static_finding=True)
-                dupes[dupe_key] = find
-        self.items = list(dupes.values())
+                dupes[dupe_key] = finding
+        return list(dupes.values())
 
     def getSeverityForPermission(self, status):
         """Convert status for permission detection to severity

@@ -8,7 +8,8 @@
                     <h3 class="has-filters">
                         Note Type List
                         <div class="dropdown pull-right">
-                          <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                   data-toggle="dropdown" aria-expanded="true">
                               <span class="fa fa-wrench"></span>
                               <span class="caret"></span>
@@ -27,7 +28,7 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if ntl.form.has_changed %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=ntl.form %}
                 </div>
             </div>

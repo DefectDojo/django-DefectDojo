@@ -1,125 +1,71 @@
-import io
 import csv
 import hashlib
-import re
-from urllib.parse import urlparse
-from dojo.models import Finding, Endpoint
+import io
 
-__author__ = 'dr3dd589'
-
-SEV = ['INFO', 'LOW', 'HIGH', 'WARN']
+from dojo.models import Endpoint, Finding
 
 
-class TestsslCSVParser(object):
-    def __init__(self, filename, test):
-        self.dupes = dict()
-        self.items = ()
+class TestsslParser(object):
 
-        if filename is None:
-            self.items = ()
-            return
+    def get_scan_types(self):
+        return ["Testssl Scan"]
 
+    def get_label_for_scan_types(self, scan_type):
+        return "Testssl Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import CSV output of testssl scan report."
+
+    def get_findings(self, filename, test):
         content = filename.read()
         if type(content) is bytes:
             content = content.decode('utf-8')
         reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"')
-        csvarray = []
 
+        dupes = dict()
         for row in reader:
-            csvarray.append(row)
+            # filter 'OK'
+            # possible values: LOW|MEDIUM|HIGH|CRITICAL + WARN|OK|INFO
+            if row['severity'] in ['OK']:
+                continue
+            # convert severity
+            severity = row['severity'].lower().capitalize()
+            if severity == 'Warn':
+                severity = 'Info'
+            # detect CVEs
+            cves = row['cve'].split(' ')
+            if len(cves) == 0:
+                cves = [None]
 
-        for row in csvarray:
-            if row['severity'] in SEV:
-                url = row['fqdn/ip'].split('/')[0]
-                title = row['id']
-                severity = row['severity'].lower().capitalize()
-                if severity == 'Warn':
-                    severity = 'Info'
-                cves = row['cve'].split(' ')
-                description = "**Finding** : " + row['finding'] + "\n\n"
-                if len(cves) > 1:
-                    cve_desc = ""
-                    cve = cves[0]
-                    for cve_ in cves:
-                        cve_desc += '[{0}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={0})'.format(cve_) + ", "
+            for cve in cves:
+                finding = Finding(
+                    title=row['id'],
+                    description=row['finding'],
+                    severity=severity,
+                    nb_occurences=1,
+                )
+                # manage CVE
+                if cve:
+                    finding.cve = cve
+                    finding.references = '* [{0}](https://cve.mitre.org/cgi-bin/cvename.cgi?name={0})'.format(cve)
+                # manage CWE
+                if '-' in row['cwe']:
+                    finding.cwe = int(row['cwe'].split('-')[1].strip())
+                # manage endpoint
+                finding.unsaved_endpoints = [Endpoint(host=row['fqdn/ip'].split("/")[-1])]
+                if row.get('port') and row['port'].isdigit():
+                    finding.unsaved_endpoints[0].port = int(row['port'])
 
-                    description += "**Releted CVE's** : " + cve_desc[:-2]
+                # internal de-duplication
+                dupe_key = hashlib.sha256("|".join([
+                    finding.description,
+                    finding.title,
+                    str(finding.cve)
+                ]).encode('utf-8')).hexdigest()
+                if dupe_key in dupes:
+                    dupes[dupe_key].unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    dupes[dupe_key].nb_occurences += finding.nb_occurences
                 else:
-                    try:
-                        cve = cves[0]
-                    except:
-                        cve = None
-                try:
-                    cwe = re.findall(r'\d+', row['cwe'])[0]
-                except:
-                    cwe = None
-                if title and description is not None:
-                    dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
-                    if dupe_key in self.dupes:
-                        finding = self.dupes[dupe_key]
-                        self.process_endpoints(finding, url)
-                        self.dupes[dupe_key] = finding
-                    else:
-                        self.dupes[dupe_key] = True
+                    dupes[dupe_key] = finding
 
-                        finding = Finding(
-                            title=title,
-                            test=test,
-                            active=False,
-                            verified=False,
-                            description=description,
-                            severity=severity,
-                            cve=cve,
-                            cwe=cwe,
-                            numerical_severity=Finding.get_numerical_severity(severity))
-                        finding.unsaved_endpoints = list()
-                        self.dupes[dupe_key] = finding
-                        self.process_endpoints(finding, url)
-                self.items = self.dupes.values()
-
-    def process_endpoints(self, finding, host):
-        protocol = "http"
-        query = ""
-        fragment = ""
-        path = ""
-        url = urlparse(host)
-
-        if url:
-            path = url.path
-            if path == host:
-                path = ""
-
-        rhost = re.search(
-            r"(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-            host)
-        try:
-            protocol = rhost.group(1)
-            host = rhost.group(4)
-        except:
-            pass
-        try:
-            dupe_endpoint = Endpoint.objects.get(protocol=protocol,
-                                                 host=host,
-                                                 query=query,
-                                                 fragment=fragment,
-                                                 path=path
-                                                 )
-        except Endpoint.DoesNotExist:
-            dupe_endpoint = None
-
-        if not dupe_endpoint:
-            endpoint = Endpoint(protocol=protocol,
-                                host=host,
-                                query=query,
-                                fragment=fragment,
-                                path=path
-                                )
-        else:
-            endpoint = dupe_endpoint
-
-        if not dupe_endpoint:
-            endpoints = [endpoint]
-        else:
-            endpoints = [endpoint, dupe_endpoint]
-
-        finding.unsaved_endpoints = finding.unsaved_endpoints + endpoints
+        return list(dupes.values())

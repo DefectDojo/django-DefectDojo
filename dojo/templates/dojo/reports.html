@@ -8,11 +8,11 @@
                     <h3 class="has-filters">
                         Report List
                         <div class="dropdown pull-right">
-
+                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="panel-body collapse {% if request.META.QUERY_STRING %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if report_list.form.has_changed %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=report_list.form %}
                 </div>
             </div>
@@ -140,7 +140,7 @@
                     }
                     else {
                         $('span#'+data.id).removeClass('requested').addClass('alert-error');
-                        
+
                         $('span#'+data.id).html("<a class='btn btn-sm btn-warning'>" + data.status.charAt(0).toUpperCase() + data.status.slice(1) + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i class='fa fa-exclamation-triangle'></i></a> <form method='post' action='/reports/[id]/delete' style='display: inline' class='form-inline form'>{% csrf_token %}<input type='hidden' name='id' value='[id]'/><button type='submit' class='btn btn-danger btn-sm report-delete'>Delete <span class='fa fa-trash'></span></button></form>".replace(/\[id\]/g, data.id));
                     }
                 });

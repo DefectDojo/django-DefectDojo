@@ -1,6 +1,10 @@
 {{- if .Values.django.ingress.enabled -}}
 {{- $fullName := include "defectdojo.fullname" . -}}
-apiVersion: extensions/v1beta1
+{{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
+apiVersion: networking.k8s.io/v1
+{{ else }}
+apiVersion: networking.k8s.io/v1beta1
+{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -10,9 +14,18 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ include "defectdojo.chart" . }}
-{{- with .Values.django.ingress.annotations }}
+{{- if or .Values.django.ingress.annotations .Values.gke.useGKEIngress }}
   annotations:
+{{- with .Values.django.ingress.annotations }}
 {{ toYaml . | indent 4 }}
+{{- end }}
+  {{- if .Values.gke.useGKEIngress }}
+    kubernetes.io/ingress.class: gce
+    {{- if .Values.gke.useManagedCertificate }}
+    kubernetes.io/ingress.allow-http: "false"
+    networking.gke.io/managed-certificates: {{ $fullName }}-django
+    {{- end }}
+  {{- end }}
 {{- end }}
 spec:
 {{- if .Values.django.ingress.activateTLS }}
@@ -27,8 +40,18 @@ spec:
   - host: {{ .Values.host }}
     http:
       paths:
+        {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
+        - pathType: Prefix
+          path: "/"
+          backend:
+            service:
+              name: {{ $fullName }}-django
+              port:
+                name: http
+        {{- else }}
         - path: /
           backend:
             serviceName: {{ $fullName }}-django
             servicePort: http
+        {{- end }}
 {{- end }}

@@ -29,8 +29,16 @@ Fixed version: {fixed_version}
 
 class TrivyParser:
 
-    def __init__(self, scan_file, test):
-        self.items = []
+    def get_scan_types(self):
+        return ["Trivy Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Trivy Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import trivy JSON scan report."
+
+    def get_findings(self, scan_file, test):
 
         scan_data = scan_file.read()
 
@@ -40,8 +48,9 @@ class TrivyParser:
             data = json.loads(scan_data)
 
         if not isinstance(data, list):
-            return
+            return list()
 
+        items = list()
         for target_data in data:
             if not isinstance(target_data, dict) or 'Target' not in target_data:
                 continue
@@ -51,17 +60,18 @@ class TrivyParser:
                 if not isinstance(vuln, dict):
                     continue
                 try:
-                    vuln_id = vuln['VulnerabilityID']
+                    vuln_id = vuln.get('VulnerabilityID', '0')
                     package_name = vuln['PkgName']
                     severity = TRIVY_SEVERITIES[vuln['Severity']]
                 except KeyError as exc:
+                    print(vuln)
                     logger.warning('skip vulnerability due %r', exc)
                     continue
                 package_version = vuln.get('InstalledVersion', '')
                 references = '\n'.join(vuln.get('References', []))
                 mitigation = vuln.get('FixedVersion', '')
                 if len(vuln.get('CweIDs', [])) > 0:
-                    cwe = vuln['CweIDs'][0].split("-")[1]
+                    cwe = int(vuln['CweIDs'][0].split("-")[1])
                 else:
                     cwe = 0
                 title = ' '.join([
@@ -76,7 +86,7 @@ class TrivyParser:
                     fixed_version=mitigation,
                     description_text=vuln.get('Description', ''),
                 )
-                self.items.append(
+                items.append(
                     Finding(
                         test=test,
                         title=title,
@@ -92,3 +102,4 @@ class TrivyParser:
                         dynamic_finding=False,
                     )
                 )
+        return items

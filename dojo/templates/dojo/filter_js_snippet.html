@@ -2,32 +2,36 @@
 <script type="application/javascript" src="{% static "chosen-js/chosen.jquery.min.js" %}"></script>
 <script type="application/javascript">
     $(function () {
-        $(".{{ request.path|slugify }}-filters :input").not("button").addClass("form-control input-sm");
-        $(".{{ request.path|slugify }}-filters label").css("display", "block");
+        $(function () {
 
-        $(".{{ request.path|slugify }}-filters input[type=text]").each(function () {
-            var id = this.id;
-            var label = $("label[for=" + id + "]");
-            $(this).attr("placeholder", label.html().replace(':', "..."));
-        });
+        })
 
-        var toggle = $(' <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>')
-        $(".has-filters .dropdown.pull-right").first().prepend(toggle);
-        toggle.on('click', function () {
+        $(function () {
+            $('.similar-filters select[multiple]').not('[data-tagulous]').each(function () {
+                $(this).select2(
+                )
+            })
+            $('input[data-tagulous]').each(function () {
+                Tagulous.select2($(this))
+            })
+        })
+
+
+        $('.toggle-filters').on('click', function () {
             $(this).toggleClass("dropup");
         })
 
-        $('.select2-selection').addClass("form-control input-sm")
-
-        $('.{{ request.path|slugify }}-filters select[multiple=multiple]').each(function () {
-            var id = this.id
-            var label = $("label[for=" + id + "]");
-            $(this).chosen({
-                'placeholder_text_multiple': label.html().replace(':', "..."),
-                'width': '200px !important'
-            });
+        <!-- what works on every other page with the 'e' keydown, conflicts here with the input fields in the filter div, stoppropagation 'fixes' this -->
+        $('.is-filters').keydown( function(e) {
+            e.stopPropagation();
         })
 
+        $('#clear_js').on('click', function() {
+            clear_form($(this).closest('form'))
+        })
+    })
+
+    {% if title_words %}
         var title_words = [
                 {% for word in title_words %}
                     "{{word}}",
@@ -37,16 +41,17 @@
             $("#id_title, #id_finding-title").autocomplete({
                 source: title_words
             });
+    {% endif %}
 
+    {% if component_words %}
             var component_words = [
                 {% for word in component_words %}
                     "{{word}}",
                 {% endfor %}
             ];
-            
-            $("#id_component_name, #id_finding-component_name").autocomplete({
-                source: component_words 
-            });
 
-    })
+            $("#id_component_name, #id_finding-component_name").autocomplete({
+                source: component_words
+            });
+    {% endif %}
 </script>

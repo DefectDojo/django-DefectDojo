@@ -3,15 +3,25 @@ __maintainer__ = "Igor Bakalo"
 __email__ = "bigorigor.ua@gmail.com"
 __status__ = "Development"
 
-from defusedxml import ElementTree as ET
-
 import re
+
+from defusedxml import ElementTree as ET
 
 from dojo.models import Finding
 
 
-class SpotbugsXMLParser(object):
-    def __init__(self, filename, test):
+class SpotbugsParser(object):
+
+    def get_scan_types(self):
+        return ["SpotBugs Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "XML report of textui cli."
+
+    def get_findings(self, filename, test):
         bug_patterns = dict()
         dupes = dict()
 
@@ -31,7 +41,7 @@ class SpotbugsXMLParser(object):
         for bug in root.findall('BugInstance'):
             desc = ''
             for message in bug.itertext():
-                desc += message
+                desc += message + '\n'
 
             dupe_key = bug.get('instanceHash')
 
@@ -40,8 +50,15 @@ class SpotbugsXMLParser(object):
             severity = SEVERITY[bug.get('priority')]
             description = desc
             mitigation = bug_patterns[bug.get('type')]
-            impact = 'N/A'
-            references = 'N/A'
+
+            # find the source line and file on the buginstance
+            source_line = None
+            source_file = "N/A"
+
+            source_extract = bug.find('SourceLine')
+            if source_extract is not None:
+                source_file = source_extract.get("sourcepath")
+                source_line = int(source_extract.get("start"))
 
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
@@ -52,14 +69,13 @@ class SpotbugsXMLParser(object):
                     severity=severity,
                     description=description,
                     mitigation=mitigation,
-                    impact=impact,
-                    references=references,
                     test=test,
-                    active=False,
-                    verified=False,
-                    numerical_severity=Finding.get_numerical_severity(severity),
-                    static_finding=True
+                    static_finding=True,
+                    line=source_line,
+                    file_path=source_file,
+                    sast_source_line=source_line,
+                    sast_source_file_path=source_file
                 )
                 dupes[dupe_key] = finding
 
-        self.items = list(dupes.values())
+        return list(dupes.values())

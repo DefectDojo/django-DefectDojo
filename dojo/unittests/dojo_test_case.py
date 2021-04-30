@@ -1,5 +1,5 @@
 from vcr_unittest import VCRTestCase
-from dojo.models import User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
+from dojo.models import Product_Type, User, Endpoint, Notes, Finding, Endpoint_Status, Test, JIRA_Issue, JIRA_Project, \
                         Product
 from dojo.models import System_Settings, Engagement
 from django.urls import reverse
@@ -9,6 +9,7 @@ import json
 from django.test import TestCase
 from itertools import chain
 from dojo.jira_link import helper as jira_helper
+from dojo.jira_link.views import get_custom_field
 import logging
 import pprint
 import copy
@@ -36,6 +37,12 @@ class DojoTestUtilsMixin(object):
         product = Product(name=name, description=description, prod_type=prod_type)
         product.save()
 
+    def patch_product_api(self, product_id, product_details):
+        payload = copy.deepcopy(product_details)
+        response = self.client.patch(reverse('product-list') + '%s/' % product_id, payload, format='json')
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
+
     def create_engagement(self, name, product, *args, description=None, **kwargs):
         engagement = Engagement(name=name, description=description, product=product)
         engagement.save()
@@ -43,8 +50,18 @@ class DojoTestUtilsMixin(object):
     def get_test(self, id):
         return Test.objects.get(id=id)
 
+    def get_test_api(self, test_id):
+        response = self.client.patch(reverse('engagement-list') + '%s/' % test_id)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
+
     def get_engagement(self, id):
         return Engagement.objects.get(id=id)
+
+    def get_engagement_api(self, engagement_id):
+        response = self.client.patch(reverse('engagement-list') + '%s/' % engagement_id)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        return response.data
 
     def assert_jira_issue_count_in_test(self, test_id, count):
         test = self.get_test(test_id)
@@ -61,7 +78,7 @@ class DojoTestUtilsMixin(object):
         return data
 
     def log_model_instance(self, instance):
-        logger.debug(pprint.pprint(self.model_to_dict(instance)))
+        logger.debug('model instance: %s', pprint.pprint(self.model_to_dict(instance)))
 
     def log_model_instances(self, instances):
         for instance in instances:
@@ -103,7 +120,7 @@ class DojoTestUtilsMixin(object):
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_product_with_jira_project_data(self, product):
@@ -139,7 +156,7 @@ class DojoTestUtilsMixin(object):
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_expected_redirect_product(self, product):
@@ -148,7 +165,7 @@ class DojoTestUtilsMixin(object):
     def add_product_jira(self, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse('new_product'))
 
-        logger.debug('before: JIRA_Project last')
+        # logger.debug('before: JIRA_Project last')
         self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
@@ -156,7 +173,7 @@ class DojoTestUtilsMixin(object):
 
         response = self.client.post(reverse('new_product'), urlencode(data), content_type='application/x-www-form-urlencoded')
 
-        logger.debug('after: JIRA_Project last')
+        # logger.debug('after: JIRA_Project last')
         self.log_model_instance(JIRA_Project.objects.last())
 
         product = None
@@ -199,6 +216,7 @@ class DojoTestUtilsMixin(object):
         return self.add_product_jira_with_data(self.get_new_product_with_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def add_product_without_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+        logger.debug('adding product without jira project')
         return self.add_product_jira_with_data(self.get_new_product_without_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def edit_product_jira(self, product, data, expect_redirect_to=None, expect_200=False):
@@ -241,6 +259,7 @@ class DojoTestUtilsMixin(object):
         return self.edit_jira_project_for_product_with_data(product, self.get_product_with_jira_project_data2(product), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def empty_jira_project_for_product(self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+        logger.debug('empty jira project for product')
         jira_project_count_before = self.db_jira_project_count()
         # print('before: ' + str(jira_project_count_before))
 
@@ -253,6 +272,46 @@ class DojoTestUtilsMixin(object):
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
+
+    def get_jira_issue_severity(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        status = jira_helper.get_jira_status(finding)
+        return status
+
+    # Toggle epic mapping on jira product
+    def toggle_jira_project_epic_mapping(self, obj, value):
+        project = jira_helper.get_jira_project(obj)
+        project.enable_engagement_epic_mapping = value
+        project.save()
+
+    # Return a list of jira issue in json format.
+    def get_epic_issues(self, engagement):
+        instance = jira_helper.get_jira_instance(engagement)
+        jira = jira_helper.get_jira_connection(instance)
+        epic_id = jira_helper.get_jira_issue_key(engagement)
+        response = {}
+        if epic_id:
+            url = instance.url.strip('/') + '/rest/agile/1.0/epic/' + epic_id + '/issue'
+            response = jira._session.get(url).json()
+        return response.get('issues', [])
+
+    # Determine whether an issue is in an epic
+    def assert_jira_issue_in_epic(self, finding, engagement, issue_in_epic=True):
+        instance = jira_helper.get_jira_instance(engagement)
+        jira = jira_helper.get_jira_connection(instance)
+        epic_id = jira_helper.get_jira_issue_key(engagement)
+        issue_id = jira_helper.get_jira_issue_key(finding)
+        epic_link_field = 'customfield_' + str(get_custom_field(jira, 'Epic Link'))
+        url = instance.url.strip('/') + '/rest/api/latest/issue/' + issue_id
+        response = jira._session.get(url).json().get('fields', {})
+        epic_link = response.get(epic_link_field, None)
+        if epic_id is None and epic_link is None or issue_in_epic:
+            self.assertTrue(epic_id == epic_link)
+        else:
+            self.assertTrue(epic_id != epic_link)
+
+    def assert_jira_status_change(self, old_status, new_status):
+        self.assertFalse(old_status == new_status)
 
 
 class DojoTestCase(TestCase, DojoTestUtilsMixin):
@@ -291,7 +350,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -306,6 +365,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
+
+        if endpoint_to_add is not None:
+            payload['endpoint_to_add'] = endpoint_to_add
 
         if tags is not None:
             payload['tags'] = tags
@@ -359,6 +421,11 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
+    def delete_finding_api(self, finding_id):
+        response = self.client.delete(reverse('finding-list') + '%s/' % finding_id)
+        self.assertEqual(204, response.status_code, response.content[:1000])
+        return response.data
+
     def patch_finding_api(self, finding_id, finding_details, push_to_jira=None):
         payload = copy.deepcopy(finding_details)
         if push_to_jira is not None:
@@ -368,23 +435,17 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
-    def get_jira_issue_severity(self, finding_id):
-        finding = Finding.objects.get(id=finding_id)
-        status = jira_helper.get_jira_status(finding)
-        return status
-
-    def assert_jira_status_change(self, old_status, new_status):
-        self.assertFalse(old_status == new_status)
-
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_Mitigated=None):
         payload = {'test': test_id}
         if active is not None:
             payload['active'] = active
         if verified is not None:
             payload['verified'] = verified
+        if is_Mitigated is not None:
+            payload['is_Mitigated'] = is_Mitigated
 
         response = self.client.get(reverse('finding-list'), payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
@@ -406,13 +467,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def get_finding_tags_api(self, finding_id):
         response = self.do_finding_tags_api(self.client.get, finding_id)
-        print(response.data)
+        # print(response.data)
         return response.data
 
     def get_finding_api_filter_tags(self, tags):
         response = self.client.get(reverse('finding-list') + '?tags=%s' % tags, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
-        print(response.data)
+        # print(response.data)
         return response.data
 
     def post_finding_tags_api(self, finding_id, tags):
@@ -425,8 +486,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             data = {'tags': tags}
 
         response = http_method(reverse('finding-remove-tags', args=(finding_id,)), data, format='json')
-        print(response)
-        print(response.content)
+        # print(response)
+        # print(response.content)
         self.assertEqual(expected_response_status_code, response.status_code, response.content[:1000])
         return response.data
 
@@ -443,11 +504,11 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if note:
             data = {'entry': note}
 
-        print('data:' + str(data))
+        # print('data:' + str(data))
 
         response = http_method(reverse('finding-notes', args=(finding_id,)), data, format='json')
-        print(vars(response))
-        print(response.content)
+        # print(vars(response))
+        # print(response.content)
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response
 
@@ -477,7 +538,29 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             logger.debug(str(eps.id) + ': ' + str(eps.endpoint) + ': ' + str(eps.endpoint.id) + ': ' + str(eps.mitigated))
 
 
-class DojoVCRAPITestCase(DojoAPITestCase, VCRTestCase):
+class DojoVCRTestCase(DojoTestCase, VCRTestCase):
+    def __init__(self, *args, **kwargs):
+        DojoTestCase.__init__(self, *args, **kwargs)
+        VCRTestCase.__init__(self, *args, **kwargs)
+
+    # filters headers doesn't seem to work for cookies, so use callbacks to filter cookies from being recorded
+    # https://github.com/kevin1024/vcrpy/issues/569
+    def before_record_request(self, request):
+        if 'Cookie' in request.headers:
+            del request.headers['Cookie']
+        if 'cookie' in request.headers:
+            del request.headers['cookie']
+        return request
+
+    def before_record_response(self, response):
+        if 'Set-Cookie' in response['headers']:
+            del response['headers']['Set-Cookie']
+        if 'set-cookie' in response['headers']:
+            del response['headers']['set-cookie']
+        return response
+
+
+class DojoVCRAPITestCase(DojoAPITestCase, DojoVCRTestCase):
     def __init__(self, *args, **kwargs):
         DojoAPITestCase.__init__(self, *args, **kwargs)
-        VCRTestCase.__init__(self, *args, **kwargs)
+        DojoVCRTestCase.__init__(self, *args, **kwargs)

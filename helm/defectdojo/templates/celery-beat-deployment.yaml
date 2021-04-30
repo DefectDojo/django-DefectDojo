@@ -41,6 +41,7 @@ spec:
           runAsNonRoot: true
         command: ["/cloud_sql_proxy"]
         args:
+        - "-verbose={{ .Values.cloudsql.verbose }}"
         {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
         {{- else if eq .Values.database "mysql" }}

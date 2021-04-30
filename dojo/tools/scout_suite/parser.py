@@ -1,11 +1,11 @@
-__author__ = 'Hasan Tayyar Besik'
 
-# Cloned form aws_scout2 scanner
-from dojo.models import Finding
-from datetime import datetime
 import json
-from django.utils.text import Truncator
-from django.utils.html import strip_tags
+import textwrap
+from datetime import datetime
+
+from html2text import html2text
+
+from dojo.models import Finding
 
 
 class ScoutSuiteParser(object):
@@ -14,10 +14,20 @@ class ScoutSuiteParser(object):
     item_data = ""
     pdepth = 0
 
-    def __init__(self, filename, test):
-        with open(filename.temporary_file_path(), "r") as fileobj:
-            raw_data = fileobj.read()
-            raw_data = raw_data.replace("scoutsuite_results =", "")
+    def get_scan_types(self):
+        return ["Scout Suite Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "JS file in scoutsuite-results/scoutsuite_results_*.js."
+
+    def get_findings(self, filename, test):
+        content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        raw_data = content.replace("scoutsuite_results =", "")
         data = json.loads(raw_data)
         find_date = datetime.now()
         dupes = {}
@@ -78,7 +88,7 @@ class ScoutSuiteParser(object):
                             scoutsuite_findings.append(mobsf_item)
 
         for scoutsuite_finding in scoutsuite_findings:
-            title = strip_tags(scoutsuite_finding["title"])
+            title = html2text(scoutsuite_finding["title"])
             sev = self.getCriticalityRating(scoutsuite_finding["severity"])
             description = scoutsuite_finding["description"]
             references = scoutsuite_finding["references"]
@@ -88,19 +98,16 @@ class ScoutSuiteParser(object):
                 if description is not None:
                     find.description += description
             else:
-                find = Finding(title=Truncator(title).words(6),
+                find = Finding(title=textwrap.shorten(title, 150),
                                 cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                                 test=test,
-                                active=False,
-                                verified=False,
                                 description="**Account:** " + account_id + "\n" + description,
                                 severity=sev,
-                                numerical_severity=Finding.get_numerical_severity(sev),
                                 references=references,
                                 date=find_date,
                                 dynamic_finding=True)
                 dupes[dupe_key] = find
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     def formatview(self, depth):
         if depth > 1:

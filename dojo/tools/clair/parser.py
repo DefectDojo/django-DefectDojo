@@ -4,27 +4,27 @@ from dojo.models import Finding
 
 
 class ClairParser(object):
-    def __init__(self, json_output, test):
 
+    def get_scan_types(self):
+        return ["Clair Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON reports of Docker image vulnerabilities."
+
+    def get_findings(self, json_output, test):
         tree = self.parse_json(json_output)
-
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+        return self.get_items(tree, test)
 
     def parse_json(self, json_output):
+        data = json_output.read()
         try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-            subtree = tree.get('vulnerabilities')
+            tree = json.loads(str(data, 'utf-8'))
         except:
-            raise Exception("Invalid format")
-
-        return subtree
+            tree = json.loads(data)
+        return tree.get('vulnerabilities')
 
     def get_items(self, tree, test):
         items = {}
@@ -57,8 +57,6 @@ def get_item(item_node, test):
                       component_name=item_node['featurename'],
                       component_version=item_node['featureversion'],
                       cve=item_node['vulnerability'],
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,

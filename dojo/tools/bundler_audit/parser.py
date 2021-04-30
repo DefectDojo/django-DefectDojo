@@ -2,11 +2,25 @@ __author__ = 'jaguasch'
 
 import hashlib
 from datetime import datetime
+
 from dojo.models import Finding
 
 
 class BundlerAuditParser(object):
-    def __init__(self, filename, test):
+
+    def get_scan_types(self):
+        return ["Bundler-Audit Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Bundler-Audit Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "'bundler-audit check' output (in plain text)"
+
+    def get_findings(self, filename, test):
+        if filename is None:
+            return ()
+
         lines = filename.read().decode('utf8')
         dupes = dict()
         find_date = datetime.now()
@@ -54,11 +68,8 @@ class BundlerAuditParser(object):
                 find = Finding(
                     title=title,
                     test=test,
-                    active=False,
-                    verified=False,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
                     references=references,
                     url='N/A',
@@ -67,4 +78,4 @@ class BundlerAuditParser(object):
 
                 dupes[dupe_key] = find
 
-        self.items = list(dupes.values())
+        return list(dupes.values())

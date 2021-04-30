@@ -2,16 +2,17 @@ from abc import ABC, abstractmethod
 from typing import NamedTuple, List
 
 from django.db.models import QuerySet
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from drf_yasg2.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema
 
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
-from dojo.models import Engagement, Risk_Acceptance, User
+from dojo.models import Risk_Acceptance, User
 from django.utils import timezone
+from dojo.authorization.roles_permissions import Permissions
+from dojo.engagement.queries import get_authorized_engagements
 
 
 AcceptedRisk = NamedTuple('AcceptedRisk', (('cve', str), ('justification', str), ('accepted_by', str)))
@@ -39,7 +40,7 @@ class AcceptedRisksMixin(ABC):
     )
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
-        model = get_object_or_404(self.risk_application_model_class, pk=pk)
+        model = self.get_object()
         serializer = AcceptedRiskSerializer(data=request.data, many=True)
         if serializer.is_valid():
             accepted_risks = serializer.save()
@@ -68,7 +69,7 @@ class AcceptedFindingsMixin(ABC):
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         owner = request.user
         accepted_result = []
-        for engagement in Engagement.objects.all():
+        for engagement in get_authorized_engagements(Permissions.Engagement_View):
             base_findings = engagement.unaccepted_open_findings
             accepted = _accept_risks(accepted_risks, base_findings, owner)
             engagement.accept_risks(accepted)

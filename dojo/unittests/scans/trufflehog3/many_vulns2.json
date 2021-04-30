@@ -1,0 +1,1097 @@
+[
+  {
+    "date": "2021-01-30 19:50:09",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Fixed since_commit and tests (#219)\n\n* Fixed since_commit and tests\r\n\r\n* Updated testing comment\r\n\r\nCo-authored-by: Dylan Ayrey <dxa4481@rit.edu>",
+    "commitHash": "288f35ed2e73145e3578207e896a4cf1600bea45",
+    "reason": "High entropy",
+    "stringsFound": [
+      "+        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'",
+      "+        # https://github.com/dxa4481/truffleHog/commit/9ed54617547cfca783e0f81f8dc5c927e3d1e345",
+      "+        # Start at commit d15627104d07846ac2914a976e8e347a663bbd9b, which",
+      "-        # Start at commit 202564cf776b402800a4aab8bb14fa4624888475, which",
+      "+        since_commit = 'd15627104d07846ac2914a976e8e347a663bbd9b'",
+      "-        since_commit = '202564cf776b402800a4aab8bb14fa4624888475'",
+      "-        # https://github.com/dxa4481/truffleHog/commit/d15627104d07846ac2914a976e8e347a663bbd9b",
+      "-        commit_w_secret = 'd15627104d07846ac2914a976e8e347a663bbd9b'"
+    ]
+  },
+  {
+    "date": "2021-01-30 19:50:09",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Fixed since_commit and tests (#219)\n\n* Fixed since_commit and tests\r\n\r\n* Updated testing comment\r\n\r\nCo-authored-by: Dylan Ayrey <dxa4481@rit.edu>",
+    "commitHash": "288f35ed2e73145e3578207e896a4cf1600bea45",
+    "reason": "Generic Secret",
+    "stringsFound": [
+      "+        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'",
+      "-        commit_w_secret = 'd15627104d07846ac2914a976e8e347a663bbd9b'"
+    ]
+  },
+  {
+    "date": "2021-01-30 19:38:57",
+    "path": "README.md",
+    "branch": "origin/dev",
+    "commit": "Add allow list for known secrets (#223)\n\n* Include allow list\r\n\r\n* Make newlines in allow list flexible\r\n\r\n* Allow literals as well as regex in allow list\r\n\r\n* Fix flexible newline regex\r\n\r\n* Escape ALL THE THINGS\r\n\r\n* Detect \"\\<cr>\" and \"\\<lf>\", simplify newline regex, allow diff chars after newlines\r\n\r\n- re.escape also puts `\\` in front of `<cr>` and `<lf>`, so account for that in the replacement.\r\n- simplify newline replacement regex (and make slightly more flexible)\r\n- detect leading + / - at start of diff lines",
+    "commitHash": "caa709db5b599dbe67afbad2eee4ae632cc3c12e",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"local self signed test key\": \"-----BEGIN EC PRIVATE KEY-----\\nfoobar123\\n-----END EC PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2019-05-06 07:47:40",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "resolving merge conflicts\n",
+    "commitHash": "466cdc94b4fcb0acd1904726a9b4de5c26e9125d",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "-    \"RSA private key\": \"-----BEGIN RSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2019-05-06 07:47:40",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "resolving merge conflicts\n",
+    "commitHash": "466cdc94b4fcb0acd1904726a9b4de5c26e9125d",
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "-    \"SSH (DSA) private key\": \"-----BEGIN DSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2019-05-06 07:47:40",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "resolving merge conflicts\n",
+    "commitHash": "466cdc94b4fcb0acd1904726a9b4de5c26e9125d",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"SSH (EC) private key\": \"-----BEGIN EC PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2019-05-06 07:47:40",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "resolving merge conflicts\n",
+    "commitHash": "466cdc94b4fcb0acd1904726a9b4de5c26e9125d",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "-    \"PGP private key block\": \"-----BEGIN PGP PRIVATE KEY BLOCK-----\","
+    ]
+  },
+  {
+    "date": "2018-12-17 07:21:16",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "Merge pull request #135 from max-sixty/patch-1\n\nBenifit -> Benefit",
+    "commitHash": "a4c69fa2f6b256bfe824ac82b96c77eb8c06b2d0",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "+    \"RSA private key\": \"-----BEGIN RSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-12-17 07:21:16",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "Merge pull request #135 from max-sixty/patch-1\n\nBenifit -> Benefit",
+    "commitHash": "a4c69fa2f6b256bfe824ac82b96c77eb8c06b2d0",
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "+    \"SSH (DSA) private key\": \"-----BEGIN DSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-12-17 07:21:16",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "Merge pull request #135 from max-sixty/patch-1\n\nBenifit -> Benefit",
+    "commitHash": "a4c69fa2f6b256bfe824ac82b96c77eb8c06b2d0",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "+    \"SSH (EC) private key\": \"-----BEGIN EC PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-12-17 07:21:16",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "Merge pull request #135 from max-sixty/patch-1\n\nBenifit -> Benefit",
+    "commitHash": "a4c69fa2f6b256bfe824ac82b96c77eb8c06b2d0",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "+    \"PGP private key block\": \"-----BEGIN PGP PRIVATE KEY BLOCK-----\","
+    ]
+  },
+  {
+    "date": "2018-12-17 07:17:41",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "bumping requirements\n",
+    "commitHash": "355502852332d5efe3d9ec94682c77c662da8609",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "-    \"RSA private key\": \"-----BEGIN RSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-12-17 07:17:41",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "bumping requirements\n",
+    "commitHash": "355502852332d5efe3d9ec94682c77c662da8609",
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "-    \"SSH (DSA) private key\": \"-----BEGIN DSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-12-17 07:17:41",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "bumping requirements\n",
+    "commitHash": "355502852332d5efe3d9ec94682c77c662da8609",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"SSH (EC) private key\": \"-----BEGIN EC PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-12-17 07:17:41",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "bumping requirements\n",
+    "commitHash": "355502852332d5efe3d9ec94682c77c662da8609",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "-    \"PGP private key block\": \"-----BEGIN PGP PRIVATE KEY BLOCK-----\","
+    ]
+  },
+  {
+    "date": "2018-12-07 00:27:58",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "typo",
+    "commitHash": "fc24b2567fb71e51345b3f611ed6eeb815440407",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "+    \"RSA private key\": \"-----BEGIN RSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-12-07 00:27:58",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "typo",
+    "commitHash": "fc24b2567fb71e51345b3f611ed6eeb815440407",
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "+    \"SSH (DSA) private key\": \"-----BEGIN DSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-12-07 00:27:58",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "typo",
+    "commitHash": "fc24b2567fb71e51345b3f611ed6eeb815440407",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "+    \"SSH (EC) private key\": \"-----BEGIN EC PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-12-07 00:27:58",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "typo",
+    "commitHash": "fc24b2567fb71e51345b3f611ed6eeb815440407",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "+    \"PGP private key block\": \"-----BEGIN PGP PRIVATE KEY BLOCK-----\","
+    ]
+  },
+  {
+    "date": "2018-09-29 18:21:15",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "modifying search org\n",
+    "commitHash": "3048c6429d80094b42fd44919e3d6768536178ce",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "-    \"RSA private key\": \"-----BEGIN RSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-09-29 18:21:15",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "modifying search org\n",
+    "commitHash": "3048c6429d80094b42fd44919e3d6768536178ce",
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "-    \"SSH (DSA) private key\": \"-----BEGIN DSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-09-29 18:21:15",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "modifying search org\n",
+    "commitHash": "3048c6429d80094b42fd44919e3d6768536178ce",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"SSH (EC) private key\": \"-----BEGIN EC PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2018-09-29 18:21:15",
+    "path": "scripts/searchOrg.py",
+    "branch": "origin/dev",
+    "commit": "modifying search org\n",
+    "commitHash": "3048c6429d80094b42fd44919e3d6768536178ce",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "-    \"PGP private key block\": \"-----BEGIN PGP PRIVATE KEY BLOCK-----\","
+    ]
+  },
+  {
+    "date": "2018-08-28 05:08:51",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Update README.md",
+    "commitHash": "fe0d53753c8df41e7aef6083684f0e4bc9e94016",
+    "reason": "High entropy",
+    "stringsFound": [
+      "-        since_commit = 'd15627104d07846ac2914a976e8e347a663bbd9b'",
+      "-        # https://github.com/dxa4481/truffleHog/commit/9ed54617547cfca783e0f81f8dc5c927e3d1e345",
+      "-        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'",
+      "-        # Start at commit d15627104d07846ac2914a976e8e347a663bbd9b, which"
+    ]
+  },
+  {
+    "date": "2018-08-28 05:08:51",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Update README.md",
+    "commitHash": "fe0d53753c8df41e7aef6083684f0e4bc9e94016",
+    "reason": "Generic Secret",
+    "stringsFound": [
+      "-        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'"
+    ]
+  },
+  {
+    "date": "2018-08-25 05:33:23",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Merge pull request #114 from jwilk-forks/spelling\n\nFix typos",
+    "commitHash": "d768edc419bda068aaf50406dc35ed8ffa3b25c6",
+    "reason": "High entropy",
+    "stringsFound": [
+      "+        # Start at commit d15627104d07846ac2914a976e8e347a663bbd9b, which",
+      "+        since_commit = 'd15627104d07846ac2914a976e8e347a663bbd9b'",
+      "+        # https://github.com/dxa4481/truffleHog/commit/9ed54617547cfca783e0f81f8dc5c927e3d1e345",
+      "+        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'"
+    ]
+  },
+  {
+    "date": "2018-08-25 05:33:23",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Merge pull request #114 from jwilk-forks/spelling\n\nFix typos",
+    "commitHash": "d768edc419bda068aaf50406dc35ed8ffa3b25c6",
+    "reason": "Generic Secret",
+    "stringsFound": [
+      "+        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'"
+    ]
+  },
+  {
+    "date": "2018-08-25 05:32:36",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Merge branch 'dev' into bugfix/wrong-commit-hash",
+    "commitHash": "2e064ae3275a44f9b382c3d0cb5fedff72105942",
+    "reason": "High entropy",
+    "stringsFound": [
+      "-        since_commit = 'd15627104d07846ac2914a976e8e347a663bbd9b'",
+      "-        # https://github.com/dxa4481/truffleHog/commit/9ed54617547cfca783e0f81f8dc5c927e3d1e345",
+      "-        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'",
+      "-        # Start at commit d15627104d07846ac2914a976e8e347a663bbd9b, which"
+    ]
+  },
+  {
+    "date": "2018-08-25 05:32:36",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Merge branch 'dev' into bugfix/wrong-commit-hash",
+    "commitHash": "2e064ae3275a44f9b382c3d0cb5fedff72105942",
+    "reason": "Generic Secret",
+    "stringsFound": [
+      "-        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'"
+    ]
+  },
+  {
+    "date": "2018-07-29 22:01:10",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "updating regexes\n",
+    "commitHash": "37f962034a57768db3b581b6a2d969015d673a1b",
+    "reason": "High entropy",
+    "stringsFound": [
+      "+        # Start at commit d15627104d07846ac2914a976e8e347a663bbd9b, which",
+      "+        since_commit = 'd15627104d07846ac2914a976e8e347a663bbd9b'",
+      "+        # https://github.com/dxa4481/truffleHog/commit/9ed54617547cfca783e0f81f8dc5c927e3d1e345",
+      "+        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'"
+    ]
+  },
+  {
+    "date": "2018-07-29 22:01:10",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "updating regexes\n",
+    "commitHash": "37f962034a57768db3b581b6a2d969015d673a1b",
+    "reason": "Generic Secret",
+    "stringsFound": [
+      "+        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'"
+    ]
+  },
+  {
+    "date": "2018-06-11 18:16:34",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Added a test case to ensure the correct commitHash is returned (includes a commit comment cross-validation)\n",
+    "commitHash": "59b59ef81ce6efb9f96edce07cd3fc0e2f5e7003",
+    "reason": "High entropy",
+    "stringsFound": [
+      "-        since_commit = 'd15627104d07846ac2914a976e8e347a663bbd9b'",
+      "-        # https://github.com/dxa4481/truffleHog/commit/9ed54617547cfca783e0f81f8dc5c927e3d1e345",
+      "-        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'",
+      "-        # Start at commit d15627104d07846ac2914a976e8e347a663bbd9b, which"
+    ]
+  },
+  {
+    "date": "2018-06-11 18:16:34",
+    "path": "test_all.py",
+    "branch": "origin/dev",
+    "commit": "Added a test case to ensure the correct commitHash is returned (includes a commit comment cross-validation)\n",
+    "commitHash": "59b59ef81ce6efb9f96edce07cd3fc0e2f5e7003",
+    "reason": "Generic Secret",
+    "stringsFound": [
+      "-        commit_w_secret = '9ed54617547cfca783e0f81f8dc5c927e3d1e345'"
+    ]
+  },
+  {
+    "date": "2018-05-13 19:52:22",
+    "path": "README.md",
+    "branch": "origin/dev",
+    "commit": "Merge branch 'dev' of github.com:dxa4481/truffleHog into dev\n",
+    "commitHash": "1e1974b2eb888cdf876623973301e2e1a0faf8cc",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"RSA private key\": \"-----BEGIN EC PRIVATE KEY-----\""
+    ]
+  },
+  {
+    "date": "2018-05-13 19:52:07",
+    "path": "README.md",
+    "branch": "origin/dev",
+    "commit": "surpressing output\n",
+    "commitHash": "09824b0c9f512c548a3de1d564453e092d5d7077",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "+    \"RSA private key\": \"-----BEGIN EC PRIVATE KEY-----\""
+    ]
+  },
+  {
+    "date": "2018-05-06 19:07:07",
+    "path": "README.md",
+    "branch": "origin/dev",
+    "commit": "Update README.md",
+    "commitHash": "9def4f5eb76dc43c8d68b40940a473546b71c97a",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"RSA private key\": \"-----BEGIN EC PRIVATE KEY-----\""
+    ]
+  },
+  {
+    "date": "2018-04-14 19:26:10",
+    "path": "truffleHog/defaultRegexes/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Changing regexes to install regex package\n",
+    "commitHash": "58690fe2e89d0aef28ae313c8554941104071bb1",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "+    \"RSA private key\": re.compile('-----BEGIN RSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2018-04-14 19:26:10",
+    "path": "truffleHog/defaultRegexes/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Changing regexes to install regex package\n",
+    "commitHash": "58690fe2e89d0aef28ae313c8554941104071bb1",
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "+    \"SSH (DSA) private key\": re.compile('-----BEGIN DSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2018-04-14 19:26:10",
+    "path": "truffleHog/defaultRegexes/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Changing regexes to install regex package\n",
+    "commitHash": "58690fe2e89d0aef28ae313c8554941104071bb1",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "+    \"SSH (EC) private key\": re.compile('-----BEGIN EC PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2018-04-14 19:26:10",
+    "path": "truffleHog/defaultRegexes/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Changing regexes to install regex package\n",
+    "commitHash": "58690fe2e89d0aef28ae313c8554941104071bb1",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "+    \"PGP private key block\": re.compile('-----BEGIN PGP PRIVATE KEY BLOCK-----'),"
+    ]
+  },
+  {
+    "date": "2018-01-14 23:56:27",
+    "path": "testRules.json",
+    "branch": "origin/dev",
+    "commit": "adding configurable rules and making the library import better\n",
+    "commitHash": "5717db6fa94ea13244edfa37f9f62d1856db8aca",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"RSA private key\": \"-----BEGIN EC PRIVATE KEY-----\""
+    ]
+  },
+  {
+    "date": "2017-12-10 21:56:38",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "updating regex checks\n",
+    "commitHash": "94c6d085bc2db0ab0ed7d8c13a4401001ed00777",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "\"RSA private key\": re.compile('-----BEGIN RSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 21:56:38",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "updating regex checks\n",
+    "commitHash": "94c6d085bc2db0ab0ed7d8c13a4401001ed00777",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "\"SSH (EC) private key\": re.compile('-----BEGIN EC PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 21:56:38",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "updating regex checks\n",
+    "commitHash": "94c6d085bc2db0ab0ed7d8c13a4401001ed00777",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "\"PGP private key block\": re.compile('-----BEGIN PGP PRIVATE KEY BLOCK-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 21:49:19",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Merge https://github.com/carnal0wnage/truffleHog-1 into dev\n",
+    "commitHash": "4e1884de29ccc5ca2a9a6c3c19fe912a4ae60ea1",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "\"RSA private key\": re.compile('-----BEGIN RSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 21:49:19",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Merge https://github.com/carnal0wnage/truffleHog-1 into dev\n",
+    "commitHash": "4e1884de29ccc5ca2a9a6c3c19fe912a4ae60ea1",
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "-    \"SSH (DSA) private key\": re.compile('-----BEGIN DSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 21:49:19",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Merge https://github.com/carnal0wnage/truffleHog-1 into dev\n",
+    "commitHash": "4e1884de29ccc5ca2a9a6c3c19fe912a4ae60ea1",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"SSH (EC) private key\": re.compile('-----BEGIN EC PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 21:49:19",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Merge https://github.com/carnal0wnage/truffleHog-1 into dev\n",
+    "commitHash": "4e1884de29ccc5ca2a9a6c3c19fe912a4ae60ea1",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "-    \"PGP private key block\": re.compile('-----BEGIN PGP PRIVATE KEY BLOCK-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 20:25:01",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Add coverage\n",
+    "commitHash": "bbb1392f94ddf21ae18bce19f63f5abb309657c7",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "\"RSA private key\": re.compile('-----BEGIN RSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 20:25:01",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Add coverage\n",
+    "commitHash": "bbb1392f94ddf21ae18bce19f63f5abb309657c7",
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "+    \"SSH (DSA) private key\": re.compile('-----BEGIN DSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 20:25:01",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Add coverage\n",
+    "commitHash": "bbb1392f94ddf21ae18bce19f63f5abb309657c7",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "+    \"SSH (EC) private key\": re.compile('-----BEGIN EC PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-10 20:25:01",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Add coverage\n",
+    "commitHash": "bbb1392f94ddf21ae18bce19f63f5abb309657c7",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "+    \"PGP private key block\": re.compile('-----BEGIN PGP PRIVATE KEY BLOCK-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-08 17:38:45",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Update regexChecks.py",
+    "commitHash": "b6073aafed119255301571cf8ff1ea43ede87c95",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "\"RSA private key\": re.compile('-----BEGIN RSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-08 17:38:45",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Update regexChecks.py",
+    "commitHash": "b6073aafed119255301571cf8ff1ea43ede87c95",
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "-    \"SSH (DSA) private key\": re.compile('-----BEGIN DSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-08 17:38:45",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Update regexChecks.py",
+    "commitHash": "b6073aafed119255301571cf8ff1ea43ede87c95",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"SSH (EC) private key\": re.compile('-----BEGIN EC PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-12-08 17:38:45",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "Update regexChecks.py",
+    "commitHash": "b6073aafed119255301571cf8ff1ea43ede87c95",
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "-    \"PGP private key block\": re.compile('-----BEGIN PGP PRIVATE KEY BLOCK-----'),"
+    ]
+  },
+  {
+    "date": "2017-10-31 03:06:22",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "tweaking regex\n",
+    "commitHash": "0653620019e670ac1fe2565ca87eb2297f3cc01a",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "\"RSA private key\": re.compile('-----BEGIN RSA PRIVATE KEY-----'),"
+    ]
+  },
+  {
+    "date": "2017-10-11 06:15:41",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "adding some more signals\n",
+    "commitHash": "e1d329e58ae387b1b9a2599a9b418ed0aa71a73e",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "-    \"RSA private key\": re.compile('-----BEGIN RSA PRIVATE KEY-----'),",
+      "+    \"RSA private key\": re.compile('-----BEGIN RSA PRIVATE KEY-----')"
+    ]
+  },
+  {
+    "date": "2017-10-08 10:25:35",
+    "path": "truffleHog/regexChecks.py",
+    "branch": "origin/dev",
+    "commit": "adding regex support\n",
+    "commitHash": "8ab1422ed7e109b9fc1dd012bfd844e8e0293fbb",
+    "reason": "RSA private key",
+    "stringsFound": [
+      "-    \"RSA private key\": re.compile('-----BEGIN RSA PRIVATE KEY-----')"
+    ]
+  },
+  {
+    "date": "2017-10-08 10:25:35",
+    "path": "truffleHog/truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "adding regex support\n",
+    "commitHash": "8ab1422ed7e109b9fc1dd012bfd844e8e0293fbb",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-09-29 05:59:47",
+    "path": "tests.py",
+    "branch": "origin/dev",
+    "commit": "adding some tests\n",
+    "commitHash": "e986c5ed6a0f0b357953c854bdc56f16914eb2ba",
+    "reason": "High entropy",
+    "stringsFound": [
+      "-        random_stringHex = \"b3A0a1FDfe86dcCE945B72\"",
+      "-        random_stringB64 = \"ZWVTjPQSdhwRgl204Hc51YCsritMIzn8B=/p9UyeX7xu6KkAGqfm3FJ+oObLDNEva\""
+    ]
+  },
+  {
+    "date": "2017-02-28 03:37:25",
+    "path": "truffleHog/truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "fixing merge conflicts\n",
+    "commitHash": "a10b8d227b1a7bd3378501a4fde10318fe64badb",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-02-26 01:10:06",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "Merge pull request #14 from jaguasch/jsonoutput\n\nJSON Output support",
+    "commitHash": "b42e4df9b20be95935c92f8c4d22922f7d6091e8",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-02-07 00:43:35",
+    "path": "truffleHog/truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "Leverage replacement character when decode of unrecognized character encoding encontered and stream-line Python 2+ header encoding\n",
+    "commitHash": "664a8dde9f58569cf6e9cff6bedfb027cc16e34e",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-01-09 11:10:30",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "Merge branch 'master' into jsonoutput",
+    "commitHash": "64ee4a7bb18233a450234f1e72c08de0228fd565",
+    "reason": "High entropy",
+    "stringsFound": [
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-01-04 20:12:04",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "Merge pull request #15 from bandrel/dev\n\nfix for windows access denied issue",
+    "commitHash": "6b6a791a98c160db50371f6a587c5f1d77b6eafa",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-01-03 23:13:46",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "Added language describing how to check git repos on the local filesystem.\n",
+    "commitHash": "8d2b2c73c97347be0675e7e548115930eeaabac6",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-01-03 22:22:30",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "fix for windows access denied issue\n",
+    "commitHash": "96a4866465607b8ab01c4a131322a6e96facd956",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-01-03 19:21:04",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "added support for JSON output\n",
+    "commitHash": "3c4b64b3f4dc386234817955a8b7f77b0c13d4b5",
+    "reason": "High entropy",
+    "stringsFound": [
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-01-02 19:21:17",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "adding python3 compatability\n",
+    "commitHash": "bc3bc5bc2f3099ced0a400b254728a78d6f6fa5c",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2017-01-02 18:44:30",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "adding attribution\n",
+    "commitHash": "a3e22c9423c95c961824bb5b02616b97fa81a90f",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "@@ -8,9 +8,6 @@ BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+    ]
+  },
+  {
+    "date": "2017-01-02 02:53:49",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "fixing unicode commit message problem\n",
+    "commitHash": "7147cc7525c27d459152548e3284e03a73688907",
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2016-12-31 06:21:09",
+    "path": "temp/nothing",
+    "branch": "origin/dev",
+    "commit": "Nothing to see here\n",
+    "commitHash": "94ba3861069f8533989bc6d570021c3d92caf821",
+    "reason": "High entropy",
+    "stringsFound": [
+      "+iZNOIPugKnpjh6D6tyNmeGmU7lyPfhIIqGeKYOoyFN9WUB9ZaDPQmv3sPi3g5wFY3UxmhowWYD1GYVq7E54xJYMvrLH6yJt8UlN4."
+    ]
+  },
+  {
+    "date": "2016-12-31 06:20:50",
+    "path": "temp/nothing",
+    "branch": "origin/dev",
+    "commit": "OH no a secret\n",
+    "commitHash": "9ed54617547cfca783e0f81f8dc5c927e3d1e345",
+    "reason": "High entropy",
+    "stringsFound": [
+      "-iZNOIPugKnpjh6D6tyNmeGmU7lyPfhIIqGeKYOoyFN9WUB9ZaDPQmv3sPi3g5wFY3UxmhowWYD1GYVq7E54xJYMvrLH6yJt8UlN4."
+    ]
+  },
+  {
+    "date": "2016-12-31 06:19:51",
+    "path": "secretFile.txt",
+    "branch": "origin/dev",
+    "commit": "removing secret\n",
+    "commitHash": "709f22821820a7815106f82a03e8d90f50b2b653",
+    "reason": "High entropy",
+    "stringsFound": [
+      "+iZNOIPugKnpjh6D6tyNmeGmU7lyPfhIIqGeKYOoyFN9WUB9ZaDPQmv3sPi3g5wFY3UxmhowWYD1GYVq7E54xJYMvrLH6yJt8UlN4"
+    ]
+  },
+  {
+    "date": "2016-12-31 06:19:39",
+    "path": "secretFile.txt",
+    "branch": "origin/dev",
+    "commit": "Oh no a secret file\n",
+    "commitHash": "d15627104d07846ac2914a976e8e347a663bbd9b",
+    "reason": "High entropy",
+    "stringsFound": [
+      "-iZNOIPugKnpjh6D6tyNmeGmU7lyPfhIIqGeKYOoyFN9WUB9ZaDPQmv3sPi3g5wFY3UxmhowWYD1GYVq7E54xJYMvrLH6yJt8UlN4"
+    ]
+  },
+  {
+    "date": "2016-12-31 06:10:07",
+    "path": "truffleHog.py",
+    "branch": "origin/dev",
+    "commit": "adding initial files\n",
+    "commitHash": "2ead44894dd97c874ae8113809a7102c7d05fd5d",
+    "reason": "High entropy",
+    "stringsFound": [
+      "-BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\"",
+      "-HEX_CHARS = \"1234567890abcdefABCDEF\""
+    ]
+  },
+  {
+    "date": "2018-01-14 23:56:27",
+    "path": "testRules.json",
+    "branch": "origin/paths",
+    "commit": "adding configurable rules and making the library import better\n",
+    "commitHash": "5717db6fa94ea13244edfa37f9f62d1856db8aca",
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "-    \"RSA private key\": \"-----BEGIN EC PRIVATE KEY-----\""
+    ]
+  },
+  {
+    "date": "2018-01-14 23:56:27",
+    "path": "test_all.py",
+    "branch": "origin/paths",
+    "commit": "adding configurable rules and making the library import better\n",
+    "commitHash": "5717db6fa94ea13244edfa37f9f62d1856db8aca",
+    "reason": "High entropy",
+    "stringsFound": [
+      "+        random_stringB64 = \"ZWVTjPQSdhwRgl204Hc51YCsritMIzn8B=/p9UyeX7xu6KkAGqfm3FJ+oObLDNEva\"",
+      "+        random_stringHex = \"b3A0a1FDfe86dcCE945B72\""
+    ]
+  },
+  {
+    "date": "2018-01-14 23:56:27",
+    "path": "tests.py",
+    "branch": "origin/paths",
+    "commit": "adding configurable rules and making the library import better\n",
+    "commitHash": "5717db6fa94ea13244edfa37f9f62d1856db8aca",
+    "reason": "High entropy",
+    "stringsFound": [
+      "-        random_stringHex = \"b3A0a1FDfe86dcCE945B72\"",
+      "-        random_stringB64 = \"ZWVTjPQSdhwRgl204Hc51YCsritMIzn8B=/p9UyeX7xu6KkAGqfm3FJ+oObLDNEva\""
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": "test_all.py",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "High entropy",
+    "stringsFound": [
+      "# Start at commit 202564cf776b402800a4aab8bb14fa4624888475, which",
+      "random_stringHex = \"b3A0a1FDfe86dcCE945B72\"",
+      "# https://github.com/dxa4481/truffleHog/commit/d15627104d07846ac2914a976e8e347a663bbd9b",
+      "commit_w_secret = 'd15627104d07846ac2914a976e8e347a663bbd9b'",
+      "random_stringB64 = \"ZWVTjPQSdhwRgl204Hc51YCsritMIzn8B=/p9UyeX7xu6KkAGqfm3FJ+oObLDNEva\"",
+      "since_commit = '202564cf776b402800a4aab8bb14fa4624888475'"
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": "test_all.py",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "Generic Secret",
+    "stringsFound": [
+      "commit_w_secret = 'd15627104d07846ac2914a976e8e347a663bbd9b'"
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": "testRules.json",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "\"RSA private key\": \"-----BEGIN EC PRIVATE KEY-----\""
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": "README.md",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "\"RSA private key\": \"-----BEGIN EC PRIVATE KEY-----\"",
+      "\"local self signed test key\": \"-----BEGIN EC PRIVATE KEY-----\\nfoobar123\\n-----END EC PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": "truffleHog/truffleHog.py",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "High entropy",
+    "stringsFound": [
+      "HEX_CHARS = \"1234567890abcdefABCDEF\"",
+      "BASE64_CHARS = \"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=\""
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": "scripts/searchOrg.py",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "RSA private key",
+    "stringsFound": [
+      "\"RSA private key\": \"-----BEGIN RSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": "scripts/searchOrg.py",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "SSH (DSA) private key",
+    "stringsFound": [
+      "\"SSH (DSA) private key\": \"-----BEGIN DSA PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": "scripts/searchOrg.py",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "SSH (EC) private key",
+    "stringsFound": [
+      "\"SSH (EC) private key\": \"-----BEGIN EC PRIVATE KEY-----\","
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": "scripts/searchOrg.py",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "PGP private key block",
+    "stringsFound": [
+      "\"PGP private key block\": \"-----BEGIN PGP PRIVATE KEY BLOCK-----\","
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": ".git/FETCH_HEAD",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "High entropy",
+    "stringsFound": [
+      "0f223225d6efc8c64504d9381eececb06b14c0e6\t\tbranch 'dev' of ssh://github.com/dxa4481/truffleHog",
+      "5d85bfb7a860b66cd94d03f9609a83bf6cbbf9c0\tnot-for-merge\tbranch 'master' of ssh://github.com/dxa4481/truffleHog",
+      "be24d1d5661e66aabc9917edebd3f63e228f281b\tnot-for-merge\tbranch 'paths' of ssh://github.com/dxa4481/truffleHog"
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": ".git/packed-refs",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "High entropy",
+    "stringsFound": [
+      "3048c6429d80094b42fd44919e3d6768536178ce refs/tags/2.0.97",
+      "be24d1d5661e66aabc9917edebd3f63e228f281b refs/remotes/origin/paths",
+      "5d85bfb7a860b66cd94d03f9609a83bf6cbbf9c0 refs/remotes/origin/master",
+      "0f223225d6efc8c64504d9381eececb06b14c0e6 refs/remotes/origin/dev"
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": ".git/logs/HEAD",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "High entropy",
+    "stringsFound": [
+      "0000000000000000000000000000000000000000 0f223225d6efc8c64504d9381eececb06b14c0e6 damiencarol <damien.carol@gmail.com> 1614331690 +0100\tclone: from https://github.com/dxa4481/truffleHog.git"
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": ".git/logs/refs/heads/dev",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "High entropy",
+    "stringsFound": [
+      "0000000000000000000000000000000000000000 0f223225d6efc8c64504d9381eececb06b14c0e6 damiencarol <damien.carol@gmail.com> 1614331690 +0100\tclone: from https://github.com/dxa4481/truffleHog.git"
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": ".git/logs/refs/remotes/origin/HEAD",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "High entropy",
+    "stringsFound": [
+      "0000000000000000000000000000000000000000 0f223225d6efc8c64504d9381eececb06b14c0e6 damiencarol <damien.carol@gmail.com> 1614331690 +0100\tclone: from https://github.com/dxa4481/truffleHog.git"
+    ]
+  },
+  {
+    "date": "2021-02-26 10:28:08",
+    "path": ".git/refs/heads/dev",
+    "branch": null,
+    "commit": null,
+    "commitHash": null,
+    "reason": "High entropy",
+    "stringsFound": [
+      "0f223225d6efc8c64504d9381eececb06b14c0e6"
+    ]
+  }
+]

@@ -1,5 +1,4 @@
 from itertools import chain
-import random
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import stringfilter
@@ -16,7 +15,6 @@ from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 import dateutil.relativedelta
 import datetime
-from ast import literal_eval
 from urllib.parse import urlparse
 import bleach
 import git
@@ -81,14 +79,6 @@ def markdown_render(value):
                                                       'markdown.extensions.toc',
                                                       'markdown.extensions.tables'])
         return mark_safe(bleach.clean(markdown_text, markdown_tags, markdown_attrs))
-
-
-@register.filter(name='ports_open')
-def ports_open(value):
-    count = 0
-    for ipscan in value.ipscan_set.all():
-        count += len(literal_eval(ipscan.services))
-    return count
 
 
 @register.filter(name='url_shortner')
@@ -244,42 +234,6 @@ def version_num(value):
     return version
 
 
-@register.filter(name='count_findings_test_all')
-def count_findings_test_all(test):
-    open_findings = Finding.objects.filter(test=test).count()
-    return open_findings
-
-
-@register.filter(name='count_findings_test_duplicate')
-def count_findings_test_duplicate(test):
-    duplicate_findings = Finding.objects.filter(test=test, duplicate=True).count()
-    return duplicate_findings
-
-
-@register.filter(name='paginator')
-def paginator(page):
-    page_value = paginator_value(page)
-    if page_value:
-        page_value = "&page=" + page_value
-    return page_value
-
-
-@register.filter(name='paginator_form')
-def paginator_form(page):
-    return paginator_value(page)
-
-
-def paginator_value(page):
-    page_value = ""
-    # isinstance(page, int):
-    try:
-        if int(page):
-            page_value = str(page)
-    except:
-        pass
-    return page_value
-
-
 @register.filter(name='finding_sla')
 def finding_sla(finding):
     if not get_system_setting('enable_finding_sla'):
@@ -343,21 +297,6 @@ def display_index(data, index):
     return data[index]
 
 
-@register.filter
-def finding_status(finding, duplicate):
-    findingFilter = None
-    if finding:
-        findingFilter = finding.filter(duplicate=duplicate)
-    return findingFilter
-
-
-@register.simple_tag
-def random_html():
-    def r(): return random.randint(0, 255)
-
-    return ('#%02X%02X%02X' % (r(), r(), r()))
-
-
 @register.filter(is_safe=True, needs_autoescape=False)
 @stringfilter
 def action_log_entry(value, autoescape=None):
@@ -375,13 +314,6 @@ def action_log_entry(value, autoescape=None):
 def dojo_body_class(context):
     request = context['request']
     return request.COOKIES.get('dojo-sidebar', 'min')
-
-
-@register.simple_tag
-def random_value():
-    import string
-    import random
-    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
 
 
 @register.filter(name='datediff_time')
@@ -775,7 +707,6 @@ def finding_display_status(finding):
             url = reverse('view_risk_acceptance', args=(finding.test.engagement.id, ra.id, ))
             info = ra.name_and_expiration_info
             link = '<a href="' + url + '" class="has-popover" data-trigger="hover" data-placement="right" data-content="' + escape(info) + '" data-container="body" data-original-title="Risk Acceptance">Risk Accepted</a>'
-            # print(link)
             display_status = display_status.replace('Risk Accepted', link)
 
     if finding.under_review:
@@ -800,21 +731,26 @@ def finding_display_status(finding):
 
 @register.filter
 def is_authorized_for_change(user, obj):
-    # print('filter: is_authorized_for_change')
-    return user_is_authorized(user, 'change', obj)
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        return user_is_authorized(user, 'change', obj)
+    else:
+        return False
 
 
 @register.filter
 def is_authorized_for_delete(user, obj):
-    # print('filter: is_authorized_for_delete')
-    return user_is_authorized(user, 'delete', obj)
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        return user_is_authorized(user, 'delete', obj)
+    else:
+        return False
 
 
 @register.filter
 def is_authorized_for_staff(user, obj):
-    result = user_is_authorized(user, 'staff', obj)
-    # print('filter: is_authorized_for_staff: ' + str(result))
-    return result
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        return user_is_authorized(user, 'staff', obj)
+    else:
+        return False
 
 
 @register.filter
@@ -837,6 +773,15 @@ def jiraencode(value):
         return value
     # jira can't handle some characters inside [] tag for urls https://jira.atlassian.com/browse/CONFSERVER-4009
     return value.replace("|", "").replace("@", "")
+
+
+@register.filter
+def jiraencode_component(value):
+    if not value:
+        return value
+    # component names can be long and won't wrap causing everything to look messy
+    # add some spaces around semicolon
+    return value.replace("|", "").replace(":", " : ").replace("@", " @ ").replace("?", " ? ").replace("#", " # ")
 
 
 @register.filter
@@ -926,7 +871,6 @@ def jira_project_tag(product_or_engagement, autoescape=True):
     jira_project = jira_helper.get_jira_project(product_or_engagement)
 
     if not jira_project:
-        logger.debug('no JIRA project!: %s', product_or_engagement)
         return ''
 
     html = """
@@ -969,3 +913,75 @@ def full_name(user):
     # not in all templates we have access to a Dojo_User instance, so we use a filter
     # see https://github.com/DefectDojo/django-DefectDojo/pull/3278
     return Dojo_User.generate_full_name(user)
+
+
+@register.filter(needs_autoescape=True)
+def import_settings_tag(test_import, autoescape=True):
+    if not test_import or not test_import.import_settings:
+        return ''
+
+    if autoescape:
+        esc = conditional_escape
+    else:
+        esc = lambda x: x
+
+    html = """
+
+    <i class="fa %s has-popover %s"
+        title="<i class='fa %s'></i> <b>Import Settings</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+        data-content="
+            <b>ID:</b> %s<br/>
+            <b>Active:</b> %s<br/>
+            <b>Verified:</b> %s<br/>
+            <b>Minimum Severity:</b> %s<br/>
+            <b>Close Old Findings:</b> %s<br/>
+            <b>Push to jira:</b> %s<br/>
+            <b>Tags:</b> %s<br/>
+            <b>Endpoints:</b> %s<br/>
+        "
+    </i>
+    """
+
+    icon = 'fa-info-circle'
+    color = ''
+
+    return mark_safe(html % (icon, color, icon,
+                                esc(test_import.id),
+                                esc(test_import.import_settings.get('active', None)),
+                                esc(test_import.import_settings.get('verified', None)),
+                                esc(test_import.import_settings.get('minimum_severity', None)),
+                                esc(test_import.import_settings.get('close_old_findings', None)),
+                                esc(test_import.import_settings.get('push_to_jira', None)),
+                                esc(test_import.import_settings.get('tags', None)),
+                                esc(test_import.import_settings.get('endpoints', test_import.import_settings.get('endpoint', None)))))
+
+
+@register.filter(needs_autoescape=True)
+def import_history(finding, autoescape=True):
+    if not finding or not settings.TRACK_IMPORT_HISTORY:
+        return ''
+
+    if autoescape:
+        esc = conditional_escape
+    else:
+        esc = lambda x: x
+
+    status_changes = finding.test_import_finding_action_set.all()
+
+    if not status_changes or len(status_changes) < 2:
+        # assumption is that the first status_change is the initial import
+        return ''
+
+    html = """
+
+    <i class="fa fa-history has-popover"
+        title="<i class='fa fa-history'></i> <b>Import History</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="right"
+        data-content="%s<br/>Currently only showing status changes made by import/reimport."
+    </i>
+    """
+
+    list_of_status_changes = ''
+    for status_change in status_changes:
+        list_of_status_changes += '<b>' + status_change.created.strftime('%b %d, %Y, %H:%M:%S') + '</b>: ' + status_change.get_action_display() + '<br/>'
+
+    return mark_safe(html % (list_of_status_changes))

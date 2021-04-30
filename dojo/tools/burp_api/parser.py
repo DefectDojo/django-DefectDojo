@@ -1,7 +1,9 @@
-import logging
 import json
-from dojo.models import Finding, Endpoint
+import logging
+import base64
 from urllib.parse import urlparse
+
+from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
 
@@ -17,18 +19,20 @@ DESCRIPTION_TEMPLATE = """**{title}**
 class BurpApiParser(object):
     """Parser that can load data from Burp API"""
 
-    def __init__(self, file, test):
-        self.items = []
+    def get_scan_types(self):
+        return ["Burp REST API"]
 
-        if file is None:
-            return
+    def get_label_for_scan_types(self, scan_type):
+        return "Burp REST API"
 
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Burp REST API scan data in JSON format (/scan/[task_id] endpoint)."
+
+    def get_findings(self, file, test):
         # API export is a JSON file
         tree = json.load(file)
 
-        # by default give the test a title
-        test.title = "Burp REST API"
-
+        items = []
         # for each issue found
         for issue_event in tree.get("issue_events", list()):
             if "issue_found" == issue_event.get("type") and "issue" in issue_event:
@@ -50,20 +54,11 @@ class BurpApiParser(object):
 
                 finding = Finding(
                     title=title,
-                    test=test,
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     description=description_formated,
                     mitigation="No mitigation provided",
                     references="No references provided",
-                    cve=None,
-                    cwe=0,
-                    active=True,
-                    verified=False,
                     false_p=false_p,
-                    duplicate=False,
-                    out_of_scope=False,
-                    mitigated=None,
                     impact="No impact provided",
                     static_finding=False,  # by definition
                     dynamic_finding=True,  # by definition
@@ -84,10 +79,32 @@ class BurpApiParser(object):
                                                             host=parts.netloc,
                                                             path=parts.path,
                                                             query=parts.query,
-                                                            fragment=parts.fragment,
-                                                            product=test.engagement.product)
+                                                            fragment=parts.fragment)
                                                  ]
-                self.items.append(finding)
+                finding.unsaved_req_resp = []
+                for evidence in issue.get('evidence', []):
+                    if not evidence.get('type') in ['InformationListEvidence', "FirstOrderEvidence"]:
+                        continue
+                    request = self.get_clean_base64(evidence.get('request_response').get('request'))
+                    response = self.get_clean_base64(evidence.get('request_response').get('response'))
+                    finding.unsaved_req_resp.append({"req": request, "resp": response})
+
+                items.append(finding)
+        return items
+
+    def get_clean_base64(self, value):
+        output = ""
+        if value is not None:
+            for segment in value:
+                if segment["type"] == "DataSegment":
+                    output += base64.b64decode(segment["data"]).decode()
+                elif segment["type"] == "SnipSegment":
+                    output += f"\n<...> ({segment['length']} bytes)"
+                elif segment["type"] == "HighlightSegment":
+                    output += "\n\n------------------------------------------------------------------\n\n"
+                else:
+                    raise ValueError(f"uncknown segment type in Burp data {segment['type']}")
+        return output
 
 
 def convert_severity(issue):

@@ -1,14 +1,13 @@
-# Sorry for the lazyness but I just update the column name fields
-# Didn't change the class names, only the main one..
 
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
-from dateutil.parser import parse
-import re
-from urllib.parse import urlparse
+import io
 import socket
+
+from dateutil.parser import parse
+
+from dojo.models import Endpoint, Finding
+
 
 class ColumnMappingStrategy(object):
 
@@ -68,6 +67,27 @@ class CweColumnMappingStrategy(ColumnMappingStrategy):
             finding.cwe = int(column_value)
 
 
+class PortColumnMappingStrategy(ColumnMappingStrategy):
+
+    def __init__(self):
+        self.mapped_column = 'port'
+        super(PortColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        if column_value.isdigit():
+            finding.unsaved_endpoints[0].port = int(column_value)
+
+
+class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
+
+    def __init__(self):
+        self.mapped_column = 'port protocol'
+        super(ProtocolColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        finding.unsaved_endpoints[0].protocol = column_value
+
+
 class UrlColumnMappingStrategy(ColumnMappingStrategy):
 
     def __init__(self):
@@ -84,83 +104,7 @@ class UrlColumnMappingStrategy(ColumnMappingStrategy):
         return valid
 
     def map_column_value(self, finding, column_value):
-        url = column_value
-        finding.url = url
-        o = urlparse(url)
-
-        """
-        Todo: Replace this with a centralized parsing function as many of the parsers
-        use the same method for parsing urls.
-
-        ParseResult(scheme='http', netloc='www.cwi.nl:80', path='/%7Eguido/Python.html',
-                    params='', query='', fragment='')
-        """
-        if self.is_valid_ipv4_address(url) == False:
-            rhost = re.search(
-                "(http|https|ftp)\://([a-zA-Z0-9\.\-]+(\:[a-zA-Z0-9\.&amp;%\$\-]+)*@)*((25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|([a-zA-Z0-9\-]+\.)*[a-zA-Z0-9\-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))[\:]*([0-9]+)*([/]*($|[a-zA-Z0-9\.\,\?\'\\\+&amp;%\$#\=~_\-]+)).*?$",
-                url)
-
-            if rhost:
-                protocol = o.scheme
-                host = o.netloc
-                path = o.path
-                query = o.query
-                fragment = o.fragment
-
-                port = 80
-                if protocol == 'https':
-                    port = 443
-
-                if rhost.group(11) is not None:
-                    port = rhost.group(11)
-
-                try:
-                    dupe_endpoint = Endpoint.objects.get(protocol=protocol,
-                                                         host=host + (":" + port) if port is not None else "",
-                                                         query=query,
-                                                         fragment=fragment,
-                                                         path=path,
-                                                         product=finding.test.engagement.product)
-                except:
-                    dupe_endpoint = None
-
-                if not dupe_endpoint:
-                    endpoint = Endpoint(protocol=protocol,
-                                        host=host + (":" + str(port)) if port is not None else "",
-                                        query=query,
-                                        fragment=fragment,
-                                        path=path,
-                                        product=finding.test.engagement.product)
-                else:
-                    endpoint = dupe_endpoint
-
-                if not dupe_endpoint:
-                    endpoints = [endpoint]
-                else:
-                    endpoints = [endpoint, dupe_endpoint]
-
-                finding.unsaved_endpoints = endpoints
-
-        #URL is an IP so save as an IP endpoint
-        elif self.is_valid_ipv4_address(url) == True:
-            try:
-                dupe_endpoint = Endpoint.objects.get(protocol=None,
-                                                     host=url,
-                                                     path=None,
-                                                     query=None,
-                                                     fragment=None,
-                                                     product=finding.test.engagement.product)
-            except:
-                dupe_endpoint = None
-
-            if not dupe_endpoint:
-                endpoints = [Endpoint(host=url, product=finding.test.engagement.product)]
-            else:
-                endpoints = [dupe_endpoint]
-
-            finding.unsaved_endpoints = endpoints
-
-
+        finding.unsaved_endpoints[0].host = column_value
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -261,7 +205,7 @@ class DuplicateColumnMappingStrategy(ColumnMappingStrategy):
         finding.duplicate = self.evaluate_bool_value(column_value)
 
 
-class OpenVASUploadCsvParser(object):
+class OpenVASCsvParser(object):
 
     def create_chain(self):
         date_column_strategy = DateColumnMappingStrategy()
@@ -277,7 +221,11 @@ class OpenVASUploadCsvParser(object):
         verified_column_strategy = VerifiedColumnMappingStrategy()
         false_positive_strategy = FalsePositiveColumnMappingStrategy()
         duplicate_strategy = DuplicateColumnMappingStrategy()
+        port_strategy = PortColumnMappingStrategy()
+        protocol_strategy = ProtocolColumnMappingStrategy()
 
+        port_strategy.successor = protocol_strategy
+        duplicate_strategy.successor = port_strategy
         false_positive_strategy.successor = duplicate_strategy
         verified_column_strategy.successor = false_positive_strategy
         active_column_strategy.successor = verified_column_strategy
@@ -291,56 +239,62 @@ class OpenVASUploadCsvParser(object):
         title_column_strategy.successor = cwe_column_strategy
         date_column_strategy.successor = title_column_strategy
 
-        self.chain = date_column_strategy
+        return date_column_strategy
 
     def read_column_names(self, row):
+        column_names = dict()
         index = 0
         for column in row:
-            self.column_names[index] = column
+            column_names[index] = column
             index += 1
+        return column_names
 
-    def __init__(self, filename, test):
-        self.chain = None
-        self.column_names = dict()
-        self.dupes = dict()
-        self.items = ()
-        self.create_chain()
+    def get_scan_types(self):
+        return ["OpenVAS CSV"]
 
-        if filename is None:
-            self.items = ()
-            return
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
 
-        content = open(filename.temporary_file_path(), 'rb')
-        reportCSV = io.TextIOWrapper(content, encoding='utf-8 ', errors='replace')
-        reader = csv.reader(reportCSV, delimiter=',', quotechar='"')
+    def get_description_for_scan_types(self, scan_type):
+        return "Import OpenVAS Scan in CSV format. Export as CSV Results on OpenVAS."
+
+    def get_findings(self, filename, test):
+
+        column_names = dict()
+        dupes = dict()
+        chain = self.create_chain()
+
+        content = filename.read()
+        if type(content) is bytes:
+            content = content.decode('utf-8')
+        reader = csv.reader(io.StringIO(content), delimiter=',', quotechar='"')
 
         row_number = 0
         for row in reader:
             finding = Finding(test=test)
+            finding.unsaved_endpoints = [Endpoint()]
 
             if row_number == 0:
-                self.read_column_names(row)
+                column_names = self.read_column_names(row)
                 row_number += 1
                 continue
 
             column_number = 0
             for column in row:
-                self.chain.process_column(self.column_names[column_number], column, finding)
+                chain.process_column(column_names[column_number], column, finding)
                 column_number += 1
 
             if finding is not None and row_number > 0:
-                if finding.url is None:
-                    finding.url = ""
                 if finding.title is None:
                     finding.title = ""
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.md5((finding.url + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
+                key = hashlib.sha256((finding.unsaved_endpoints[0].get_normalized_url() + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+                if key not in dupes:
+                    dupes[key] = finding
 
             row_number += 1
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())

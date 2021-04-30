@@ -1,27 +1,34 @@
 import json
+
 from dojo.models import Finding
 
 
-class GitlabSastReportParser(object):
-    def __init__(self, json_output, test):
-        self.items = []
+class GitlabSastParser(object):
+
+    def get_scan_types(self):
+        return ["GitLab SAST Report"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import GitLab SAST Report vulnerabilities in JSON format."
+
+    def get_findings(self, json_output, test):
 
         if json_output is None:
             return
 
         tree = self.parse_json(json_output)
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return self.get_items(tree, test)
 
     def parse_json(self, json_output):
+        data = json_output.read()
         try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
+            tree = json.loads(str(data, 'utf-8'))
         except:
-            raise Exception("Invalid format")
+            tree = json.loads(data)
 
         return tree
 
@@ -83,13 +90,12 @@ def get_item(vuln, test):
     elif 'method' in location:
         sast_object = location['method']
 
-    severity = vuln['severity']
-    if severity == 'Undefined' or severity == 'Unknown':
+    severity = vuln.get('severity')
+    if severity is None or severity == 'Undefined' or severity == 'Unknown':
         # Severity can be "Undefined" or "Unknown" in SAST report
         # In that case we set it as Info and specify the initial severity in the title
         title = '[{} severity] {}'.format(severity, title)
         severity = 'Info'
-    numerical_severity = Finding.get_numerical_severity(severity)
     scanner_confidence = get_confidence_numeric(vuln.get('confidence', 'Unkown'))
 
     mitigation = ''
@@ -118,11 +124,8 @@ def get_item(vuln, test):
 
     finding = Finding(title=title,
                       test=test,
-                      active=False,
-                      verified=False,
                       description=description,
                       severity=severity,
-                      numerical_severity=numerical_severity,
                       scanner_confidence=scanner_confidence,
                       mitigation=mitigation,
                       unique_id_from_tool=unique_id_from_tool,

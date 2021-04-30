@@ -10,23 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class JIRAConfigEngagementTest(DojoTestCase):
-    fixtures = ['dojo_testdata.json']
-
-    product_id = 999
-
-    def __init__(self, *args, **kwargs):
-        DojoTestCase.__init__(self, *args, **kwargs)
-
-    def setUp(self):
-        self.system_settings(enable_jira=True)
-        self.client.force_login(self.get_test_admin())
-        # product 3 has no jira project config, double check to make sure someone didn't molest the fixture
-        # running this in __init__ throws database access denied error
-        self.product_id = 3
-        product = Product.objects.get(id=self.product_id)
-        self.assertIsNone(jira_helper.get_jira_project(product))
-
+class JIRAConfigEngagementBase(object):
     def get_new_engagement_with_jira_project_data(self):
         return {
             'name': 'new engagement',
@@ -36,9 +20,27 @@ class JIRAConfigEngagementTest(DojoTestCase):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'IUNSEC',
             'jira-project-form-product_jira_sla_notification': 'on',
+        }
+
+    def get_new_engagement_with_jira_project_data_and_epic_mapping(self):
+        return {
+            'name': 'new engagement',
+            'description': 'new description',
+            'lead': 1,
+            'product': self.product_id,
+            'target_start': '2070-11-27',
+            'target_end': '2070-12-04',
+            'status': 'Not Started',
+            # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
+            'jira-project-form-jira_instance': 2,
+            'jira-project-form-project_key': 'IUNSEC',
+            'jira-project-form-product_jira_sla_notification': 'on',
+            'jira-project-form-enable_engagement_epic_mapping': 'on',
+            'jira-epic-form-push_to_jira': 'on',
         }
 
     def get_new_engagement_without_jira_project_data(self):
@@ -50,11 +52,12 @@ class JIRAConfigEngagementTest(DojoTestCase):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            'jira-project-form-inherit_from_product': 'on',
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_engagement_with_jira_project_data(self, engagement):
@@ -66,6 +69,7 @@ class JIRAConfigEngagementTest(DojoTestCase):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'ISEC',
             'jira-project-form-product_jira_sla_notification': 'on',
@@ -80,6 +84,7 @@ class JIRAConfigEngagementTest(DojoTestCase):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            # 'jira-project-form-inherit_from_product': 'on', # absence = False in html forms
             'jira-project-form-jira_instance': 2,
             'jira-project-form-project_key': 'ISEC2',
             'jira-project-form-product_jira_sla_notification': 'on',
@@ -94,11 +99,12 @@ class JIRAConfigEngagementTest(DojoTestCase):
             'target_start': '2070-11-27',
             'target_end': '2070-12-04',
             'status': 'Not Started',
+            'jira-project-form-inherit_from_product': 'on',
             # 'project_key': 'IFFF',
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_expected_redirect_engagement(self, engagement):
@@ -162,6 +168,9 @@ class JIRAConfigEngagementTest(DojoTestCase):
     def add_engagement_without_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
         return self.add_engagement_jira_with_data(self.get_new_engagement_without_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
+    def add_engagement_with_jira_project_and_epic_mapping(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+        return self.add_engagement_jira_with_data(self.get_new_engagement_with_jira_project_data_and_epic_mapping(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
+
     def edit_engagement_jira(self, engagement, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse('edit_engagement', args=(engagement.id, )))
 
@@ -201,19 +210,45 @@ class JIRAConfigEngagementTest(DojoTestCase):
     def edit_jira_project_for_engagement2(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
         return self.edit_jira_project_for_engagement_with_data(engagement, self.get_engagement_with_jira_project_data2(engagement), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
-    def empty_jira_project_for_engagement(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+    def empty_jira_project_for_engagement(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False, expect_error=False):
         jira_project_count_before = self.db_jira_project_count()
         print('before: ' + str(jira_project_count_before))
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = self.get_expected_redirect_engagement(engagement)
 
-        response = self.edit_engagement_jira(engagement, self.get_engagement_with_empty_jira_project_data(engagement), expect_redirect_to=expect_redirect_to, expect_200=expect_200)
+        response = None
+        if expect_error:
+            with self.assertRaisesRegex(ValueError, "Not allowed to remove existing JIRA Config for an engagement"):
+                response = self.edit_engagement_jira(engagement, self.get_engagement_with_empty_jira_project_data(engagement), expect_redirect_to=expect_redirect_to, expect_200=expect_200)
+        else:
+            response = self.edit_engagement_jira(engagement, self.get_engagement_with_empty_jira_project_data(engagement), expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
         print('after: ' + str(self.db_jira_project_count()))
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
+
+
+class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
+    fixtures = ['dojo_testdata.json']
+
+    product_id = 999
+
+    def __init__(self, *args, **kwargs):
+        DojoTestCase.__init__(self, *args, **kwargs)
+
+    def setUp(self):
+        self.system_settings(enable_jira=True)
+        self.user = self.get_test_admin()
+        self.client.force_login(self.user)
+        self.user.usercontactinfo.block_execution = True
+        self.user.usercontactinfo.save()
+        # product 3 has no jira project config, double check to make sure someone didn't molest the fixture
+        # running this in __init__ throws database access denied error
+        self.product_id = 3
+        product = Product.objects.get(id=self.product_id)
+        self.assertIsNone(jira_helper.get_jira_project(product))
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')
     def test_add_jira_project_to_engagement_without_jira_project(self, jira_mock):
@@ -246,8 +281,8 @@ class JIRAConfigEngagementTest(DojoTestCase):
         # - allow jira project with empty jira instance and/or empty project_key? unpredictable behaviour
         # - so prevent clearing out these values
         # response = self.empty_jira_project_for_engagement(Engagement.objects.get(id=3), -1)
-        # errors means it won't redirect to view_engagement, but returns a 200 and redisplays the edit engagement page
-        response = self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0, expect_200=True)
+        # expecting ValueError as we can't delete existing JIRA Projects
+        response = self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0, expect_error=True)
         self.assertEqual(jira_mock.call_count, 1)
 
     @patch('dojo.jira_link.views.jira_helper.is_jira_project_valid')

@@ -1,7 +1,8 @@
-import logging
 import json
+import logging
 import re
-from datetime import datetime
+import textwrap
+import dateutil.parser
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
@@ -14,29 +15,19 @@ class SarifParser(object):
 
     https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif
     """
-    def __init__(self, filehandle, test):
-        tree = self.parse_json(filehandle)
 
-        # by default give the test a title linked to the first tool in the report
-        test.title = f"SARIF ({tree['runs'][0]['tool']['driver']['name']})"
+    def get_scan_types(self):
+        return ["SARIF"]
 
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
 
-    def parse_json(self, filehandle):
-        try:
-            data = filehandle.read()
-        except:
-            return None
+    def get_description_for_scan_types(self, scan_type):
+        return "SARIF report file can be imported in SARIF format."
 
-        try:
-            tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
+    def get_findings(self, filehandle, test):
+        tree = json.load(filehandle)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = list()
@@ -45,10 +36,23 @@ class SarifParser(object):
             # load rules
             rules = get_rules(run)
             artifacts = get_artifacts(run)
+            # get the timestamp of the run if possible
+            run_date = self._get_last_invocation_date(run)
             for result in run.get('results', list()):
-                item = get_item(result, rules, artifacts, test)
+                item = get_item(result, rules, artifacts, run_date)
                 items.append(item)
         return items
+
+    def _get_last_invocation_date(self, data):
+        invocations = data.get('invocations', [])
+        if len(invocations) == 0:
+            return None
+        # try to get the last 'endTimeUtc'
+        raw_date = invocations[-1].get('endTimeUtc')
+        if raw_date is None:
+            return None
+        # if the data is here we try to convert it to datetime
+        return dateutil.parser.isoparse(raw_date)
 
 
 def get_rules(run):
@@ -97,32 +101,37 @@ def get_severity(data):
 
 
 def get_message_from_multiformatMessageString(data, rule):
+    """Get a message from multimessage struct
+
+    See here for the specification: https://docs.oasis-open.org/sarif/sarif/v2.1.0/os/sarif-v2.1.0-os.html#_Toc34317468
+    """
     if rule is not None and 'id' in data:
-        return rule['messageStrings'][data['id']]
+        text = rule['messageStrings'][data['id']].get('text')
+        arguments = data.get('arguments', [])
+        # argument substitution
+        for i in range(6):  # the specification limit to 6
+            substitution_str = "{" + str(i) + "}"
+            if substitution_str in text:
+                text = text.replace(substitution_str, arguments[i])
+            else:
+                return text
     else:
         # TODO manage markdown
         return data.get('text')
 
 
-def get_item(result, rules, artifacts, test):
+def cve_try(val):
+    # Match only the first CVE!
+    cveSearch = re.search("(CVE-[0-9]+-[0-9]+)", val, re.IGNORECASE)
+    if cveSearch:
+        return cveSearch.group(1).upper()
+    else:
+        return None
+
+
+def get_item(result, rules, artifacts, run_date):
     mitigation = result.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
     references = result.get('Remediation', {}).get('Recommendation', {}).get('Url')
-    verified = False
-    false_p = False
-    duplicate = False
-    out_of_scope = False
-    impact = None
-
-    if result.get('Compliance', {}).get('Status', "PASSED"):
-        if result.get('LastObservedAt', None):
-            try:
-                mitigated = datetime.strptime(result.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
-            except:
-                mitigated = datetime.strptime(result.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
-        else:
-            mitigated = datetime.utcnow()
-    else:
-        mitigated = None
 
     # if there is a location get it
     file_path = None
@@ -139,7 +148,9 @@ def get_item(result, rules, artifacts, test):
     rule = rules.get(result['ruleId'])
     title = result['ruleId']
     if 'message' in result:
-        title = get_message_from_multiformatMessageString(result['message'], rule)
+        description = get_message_from_multiformatMessageString(result['message'], rule)
+        if len(description) < 150:
+            title = description
     description = ''
     severity = get_severity('warning')
     if rule is not None:
@@ -148,39 +159,34 @@ def get_item(result, rules, artifacts, test):
             severity = get_severity(rule['defaultConfiguration'].get('level', 'warning'))
 
         if 'shortDescription' in rule:
-            title = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
             description = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
-        else:
-            title = result['message'].get('text', 'No text')
+        elif 'fullDescription' in rule:
             description = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
+        elif 'name' in rule:
+            description = rule['name']
+        else:
+            description = rule['id']
 
     # we add a special 'None' case if there is no CWE
     cwes = [0]
     if rule is not None:
         cwes_extracted = get_rule_cwes(rule)
-        if len(cwes_extracted) > 1:
+        if len(cwes_extracted) > 0:
             cwes = cwes_extracted
 
-    for cwe in cwes:
-        finding = Finding(title=title,
-                        test=test,
-                        severity=severity,
-                        numerical_severity=Finding.get_numerical_severity(severity),
-                        description=description,
-                        mitigation=mitigation,
-                        references=references,
-                        cve=None,  # for now CVE are not managed or it's not very clear how in the spec
-                        cwe=cwe,
-                        active=True,
-                        verified=verified,
-                        false_p=false_p,
-                        duplicate=duplicate,
-                        out_of_scope=out_of_scope,
-                        mitigated=mitigated,
-                        impact="No impact provided",
-                        static_finding=True,  # by definition
-                        dynamic_finding=False,  # by definition
-                        file_path=file_path,
-                        line=line)
+    finding = Finding(title=textwrap.shorten(title, 150),
+                    severity=severity,
+                    description=description,
+                    mitigation=mitigation,
+                    references=references,
+                    cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
+                    cwe=cwes[0],
+                    static_finding=True,  # by definition
+                    dynamic_finding=False,  # by definition
+                    file_path=file_path,
+                    line=line)
+
+    if run_date:
+        finding.date = run_date
 
     return finding

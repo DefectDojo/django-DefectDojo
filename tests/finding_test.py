@@ -1,7 +1,6 @@
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
 import unittest
@@ -66,11 +65,11 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("dropdownMenu1").click()
         # Click on `Edit Finding`
         driver.find_element_by_link_text("Edit Finding").click()
-        # Change: 'Severity' and 'Mitigation'
+        # Change: 'Severity' and 'cvssv3'
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("Critical")
-        # finding Description
-        driver.find_element_by_id("id_severity").send_keys(Keys.TAB, "This is a crucial update to finding description.")
+        # cvssv3
+        driver.find_element_by_id("id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # "Click" the Done button to Edit the finding
         driver.find_element_by_xpath("//input[@name='_Finished']").click()
         # Query the site to determine if the finding has been added
@@ -187,6 +186,8 @@ class FindingTest(BaseTestCase):
         self.goto_all_findings_list(driver)
         # Select and click on the particular finding to edit
         driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        pre_status = driver.find_element_by_xpath('//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
         # Click on the 'dropdownMenu1 button'
         driver.find_element_by_id("dropdownMenu1").click()
         # Click on `Close Finding`
@@ -196,9 +197,39 @@ class FindingTest(BaseTestCase):
         # click 'close Finding' submission button
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the finding has been added
-
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Finding closed.'))
+        # Check to see if the endpoint was mitigated
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        # This will throw exception if the test fails due to invalid xpath
+        post_status = driver.find_element_by_xpath('//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(pre_status != post_status)
+
+    def test_open_finding(self):
+        driver = self.driver
+        # Navigate to All Finding page
+        self.goto_all_findings_list(driver)
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        pre_status = driver.find_element_by_xpath('//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
+        # Click on the 'dropdownMenu1 button'
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Click on `Open Finding`
+        driver.find_element_by_link_text("Open Finding").click()
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Finding Reopened.'))
+        # Check to see if the endpoint was set to active again
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        # This will throw exception if the test fails due to invalid xpath
+        post_status = driver.find_element_by_xpath('//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(pre_status != post_status)
 
     def test_make_finding_a_template(self):
         driver = self.driver
@@ -286,9 +317,9 @@ class FindingTest(BaseTestCase):
             driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
         # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
-        # print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
+        # print("Checking for '.*ZAP Scan processed a total of 4 findings.*'")
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed, a total of 4 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed a total of 4 findings'))
 
     def test_delete_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
@@ -344,6 +375,7 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_mark_finding_for_review'))
     suite.addTest(FindingTest('test_clear_review_from_finding'))
     suite.addTest(FindingTest('test_close_finding'))
+    suite.addTest(FindingTest('test_open_finding'))
     suite.addTest(FindingTest('test_make_finding_a_template'))
     suite.addTest(FindingTest('test_apply_template_to_a_finding'))
     suite.addTest(FindingTest('test_import_scan_result'))

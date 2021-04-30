@@ -1,9 +1,10 @@
-from pathlib import Path
 import csv
 import io
 import zipfile
+import logging
+from pathlib import Path
 
-__author__ = 'Apipia'
+logger = logging.getLogger(__name__)
 
 
 class BlackduckCRImporter(object):
@@ -25,13 +26,10 @@ class BlackduckCRImporter(object):
         """
         if not issubclass(type(report), Path):
             report = Path(report.temporary_file_path())
-        try:
-            if zipfile.is_zipfile(str(report)):
-                return self._process_zipfile(report)
-            else:
-                raise Exception("File not a zip!")
-        except Exception as e:
-            print("Error processing file: {}".format(e))
+        if zipfile.is_zipfile(str(report)):
+            return self._process_zipfile(report)
+        else:
+            raise ValueError(f"File {report} not a zip!")
 
     def _process_zipfile(self, report: Path) -> (dict, dict, dict):
         """
@@ -69,7 +67,7 @@ class BlackduckCRImporter(object):
                     raise Exception("Zip file missing needed files!")
 
         except Exception as e:
-            print("Could not process zip file: {}".format(e))
+            logger.exception("Could not process zip file")
 
         return components, security_issues, source
 
