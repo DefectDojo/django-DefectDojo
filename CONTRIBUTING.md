@@ -14,7 +14,7 @@ Here are a few things to keep in mind when making changes to DefectDojo.
 
 ## Writing a new parser
 
-Please see [the parser guide](https://defectdojo.github.io/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
+Please see [the parser guide](https://defectdojo.github.io/django-DefectDojo/contributing/how-to-write-a-parser/) for guidance on how to write a parser.
 
 ## Modifying DefectDojo and Testing
 

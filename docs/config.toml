@@ -1,4 +1,4 @@
-baseURL = "https://defectdojo.github.io/"
+baseURL = "https://defectdojo.github.io/django-DefectDojo/"
 title = "DefectDojo"
 
 enableRobotsTXT = true

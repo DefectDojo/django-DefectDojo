@@ -36,7 +36,7 @@ Log in with `admin / defectdojo@demo#appsec` and please note that the demo serve
 ## Documentation
 
 For detailed documentation you can visit
-[Github Pages](https://defectdojo.github.io/).
+[Github Pages](https://defectdojo.github.io/django-DefectDojo/).
 
 ## Supported Installation Options
 
@@ -51,10 +51,10 @@ For detailed documentation you can visit
 We recommend checking out the
 [about](https://defectdojo.github.io/basics/about/) document to
 learn the terminology of DefectDojo and the
-[getting started guide](https://defectdojo.github.io/running/getting-started/)
+[getting started guide](https://defectdojo.github.io/django-DefectDojo/running/getting-started/)
 for setting up a new installation.
 We've also created some example
-[workflows](https://defectdojo.github.io/basics/workflows/) that
+[workflows](https://defectdojo.github.io/django-DefectDojo/basics/workflows/) that
 should give you an idea of how to use DefectDojo for your own team.
 
 ## REST APIs
@@ -62,7 +62,7 @@ should give you an idea of how to use DefectDojo for your own team.
 > ** Deprecation notice ** apiv1 is deprecated and EOS is on 12-31-2020. EOL is planned for 06-30-2021.
 > Please move on to apiv2 and raise issues for any unsupported operations.
 
-Defectdojo can be accessed through a Swagger REST API. Please see [the API documentation](https://defectdojo.github.io/integrations/api-v2-docs/) or the in-app Swagger documentation.
+Defectdojo can be accessed through a Swagger REST API. Please see [the API documentation](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/) or the in-app Swagger documentation.
 
 ## Client APIs and wrappers
 This section presents different ways to programmatically interact with DefectDojo APIs.
