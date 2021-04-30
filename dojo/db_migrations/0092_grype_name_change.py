@@ -11,8 +11,16 @@ class Migration(migrations.Migration):
             grype_testtype.name = 'Anchore Grype'
             grype_testtype.save()
 
+    def reverse_rename_grype_parser_name(apps, schema_editor):
+        test_type_model = apps.get_model('dojo', 'Test_Type')
+
+        grype_testtype = test_type_model.objects.filter(name='Anchore Grype').first()
+        if grype_testtype:
+            grype_testtype.name = 'anchore_grype'
+            grype_testtype.save()
+
     dependencies = [
         ('dojo', '0091_npm_audit_path_censoring'),
     ]
 
-    operations = [migrations.RunPython(rename_grype_parser_name)]
+    operations = [migrations.RunPython(rename_grype_parser_name, reverse_rename_grype_parser_name)]
