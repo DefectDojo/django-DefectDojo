@@ -6,7 +6,7 @@ class Migration(migrations.Migration):
         test_type_model = apps.get_model('dojo', 'Test_Type')
 
         # rename 'anchore_grype' to 'Anchore Grype'
-        grype_testtype = test_type_model.objects.all().filter(name='anchore_grype').first()
+        grype_testtype = test_type_model.objects.first().filter(name='anchore_grype')
         grype_testtype.name = 'Anchore Grype'
         grype_testtype.save()
 
