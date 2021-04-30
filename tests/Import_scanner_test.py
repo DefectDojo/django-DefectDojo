@@ -51,7 +51,7 @@ class ScannerTest(BaseTestCase):
 
     def test_check_for_doc(self):
         driver = self.driver
-        driver.get('https://defectdojo.github.io/integrations/import/')
+        driver.get('https://defectdojo.github.io/django-DefectDojo/integrations/import/')
 
         integration_index = integration_text.index('Integrations') + len('Integrations') + 1
         usage_index = integration_text.index('Usage Examples') - len('Models') - 2
