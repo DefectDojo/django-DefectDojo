@@ -271,6 +271,7 @@ def delete_test(request, tid):
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
+                product = test.engagement.product
                 test.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -278,6 +279,7 @@ def delete_test(request, tid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % test.title,
+                                    product=product,
                                     description='The test "%s" was deleted by %s' % (test.title, request.user),
                                     url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
                                     recipients=[test.engagement.lead],
@@ -432,6 +434,7 @@ def add_findings(request, tid):
             new_finding.save(false_history=True, push_to_jira=push_to_jira)
             create_notification(event='other',
                                 title='Addition of %s' % new_finding.title,
+                                finding=new_finding,
                                 description='Finding "%s" was added by %s' % (new_finding.title, request.user),
                                 url=request.build_absolute_uri(reverse('view_finding', args=(new_finding.id,))),
                                 icon="exclamation-triangle")
@@ -714,7 +717,7 @@ def re_import_scan_results(request, tid):
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings)
             except Exception as e:
-                # exceptions are already logged by the importer
+                logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
                 error = True
 

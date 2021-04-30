@@ -42,7 +42,6 @@ class TestsslParser(object):
                     title=row['id'],
                     description=row['finding'],
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     nb_occurences=1,
                 )
                 # manage CVE

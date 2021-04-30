@@ -32,7 +32,7 @@ def parse_findings(scan, test, active, verified, scan_type):
 def update_timestamps(test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time):
     test.engagement.updated = now
     if test.engagement.engagement_type == 'CI/CD':
-        test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
+        test.engagement.target_end = max_safe([scan_date_time.date(), test.engagement.target_end])
 
     test.updated = now
     test.target_end = max_safe([scan_date_time, test.target_end])
@@ -69,7 +69,7 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
 
     # tags=tags TODO no tags field in api for reimport it seems
     if endpoints_to_add:
-        import_settings['endpoints'] = endpoints_to_add
+        import_settings['endpoints'] = [str(endpoint) for endpoint in endpoints_to_add]
 
     test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=type)
     test_import.save()
@@ -90,7 +90,7 @@ def update_import_history(type, active, verified, tags, minimum_severity, endpoi
 
 def construct_imported_message(scan_type, finding_count=0, new_finding_count=0, closed_finding_count=0, reactivated_finding_count=0, untouched_finding_count=0):
     if finding_count:
-        message = scan_type + '%s processed a total of %s findings' % (scan_type, finding_count)
+        message = f'{scan_type} processed a total of {finding_count} findings'
 
         if new_finding_count:
             message = message + ' created %d findings' % (new_finding_count)

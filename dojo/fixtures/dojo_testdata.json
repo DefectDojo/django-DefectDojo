@@ -389,7 +389,7 @@
     "pk": 3,
     "model": "dojo.engagement_type",
     "fields": {
-      "name": "Type 3",
+      "name": "CI/CD",
       "id": 3
     }
   },
@@ -428,7 +428,7 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
+      "eng_type": 3,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -1571,8 +1571,8 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "<USERNAME HERE>",
-        "password": "<API TOKEN HERE>",
+        "username": "YOUR USERNAME HERE",
+        "password": "YOU API TOKEN HERE",
         "default_issue_type": "Task",
         "epic_name_id": 10011,
         "open_status_key": 11,
@@ -1670,6 +1670,19 @@
     "fields": {
       "push_notes": true,
       "product": 2,
+      "push_all_issues": false,
+      "component": "",
+      "enable_engagement_epic_mapping": false,
+      "jira_instance": 2,
+      "project_key": "NTEST"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "dojo.jira_project",
+    "fields": {
+      "push_notes": true,
+      "engagement": 3,
       "push_all_issues": false,
       "component": "",
       "enable_engagement_epic_mapping": true,

@@ -31,6 +31,7 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests
 from dojo.finding.queries import get_authorized_findings
 from dojo.endpoint.queries import get_authorized_endpoints
+from dojo.finding_group.queries import get_authorized_finding_groups
 from django.forms import HiddenInput
 
 logger = logging.getLogger(__name__)
@@ -852,6 +853,7 @@ class OpenFindingFilter(DojoFilter):
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.none(),
         label="Engagement")
+    file_path = CharFilter(lookup_expr='icontains')
 
     if settings.FEATURE_FINDING_GROUPS:
         finding_group = ModelMultipleChoiceFilter(
@@ -967,18 +969,8 @@ class OpenFindingFilter(DojoFilter):
         self.form.fields['cwe'].choices = list(cwe.items())
         if self.form.fields.get('test__engagement__product'):
             self.form.fields['test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
-        if self.user is not None and not self.user.is_staff:
-
-            if self.form.fields.get('finding_group', None):
-                logger.debug('setting queryset for finding_group field')
-                self.form.fields['test__engagement__product'].queryset = \
-                    Finding_Group.objects.filter(
-                        Q(test__engagement__product__authorized_users__in=[self.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[self.user])
-                                                )
-        else:
-            if self.form.fields.get('finding_group', None):
-                self.form.fields['finding_group'].queryset = Finding_Group.objects.all()
-
+        if self.form.fields.get('finding_group', None):
+            self.form.fields['finding_group'].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
         self.form.fields['endpoints'].queryset = get_authorized_endpoints(Permissions.Endpoint_View).distinct()
 
         # Don't show the product filter on the product finding view
@@ -1027,6 +1019,7 @@ class ClosedFindingFilter(DojoFilter):
         label="Product Type")
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
+    file_path = CharFilter(lookup_expr='icontains')
 
     has_jira_issue = BooleanFilter(field_name='jira_issue',
                                    lookup_expr='isnull',
@@ -1159,6 +1152,8 @@ class AcceptedFindingFilter(DojoFilter):
     test__engagement__product__prod_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.none(),
         label="Product Type")
+
+    file_path = CharFilter(lookup_expr='icontains')
 
     tags = ModelMultipleChoiceFilter(
         field_name='tags__name',
@@ -1615,6 +1610,7 @@ class MetricsFindingFilter(FilterSet):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
+    file_path = CharFilter(lookup_expr='icontains')
     test__test_type = ModelMultipleChoiceFilter(
         queryset=Test_Type.objects.all().order_by('name'),
         label="Test Type"
@@ -1734,6 +1730,7 @@ class ProductMetricsFindingFilter(FilterSet):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     # date = MetricsDateRangeFilter()
+    file_path = CharFilter(lookup_expr='icontains')
     test__engagement = ModelMultipleChoiceFilter(
         queryset=Engagement.objects.none(),
         label="Engagement")
@@ -2070,6 +2067,7 @@ class ReportFindingFilter(DojoFilter):
     )
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+    file_path = CharFilter(lookup_expr='icontains')
 
     class Meta:
         model = Finding
@@ -2165,6 +2163,7 @@ class ReportAuthedFindingFilter(DojoFilter):
     )
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+    file_path = CharFilter(lookup_expr='icontains')
 
     def __init__(self, *args, **kwargs):
         super(ReportAuthedFindingFilter, self).__init__(*args, **kwargs)

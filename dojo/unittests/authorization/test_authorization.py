@@ -254,7 +254,7 @@ class TestAuthorization(TestCase):
         self.assertEqual(mock_get.call_args[1]['product'], self.product)
 
     def test_user_has_permission_product_type_member_success_same_user(self):
-        result = user_has_permission(self.user, self.product_type_member_owner, Permissions.Product_Type_Remove_Member)
+        result = user_has_permission(self.user, self.product_type_member_owner, Permissions.Product_Type_Member_Delete)
         self.assertTrue(result)
 
     @patch('dojo.models.Product_Type_Member.objects.get')
@@ -268,7 +268,7 @@ class TestAuthorization(TestCase):
         product_type_member_other_user.role = Roles.Reader
         mock_get.return_value = product_type_member_other_user
 
-        result = user_has_permission(other_user, self.product_type_member_owner, Permissions.Product_Type_Remove_Member)
+        result = user_has_permission(other_user, self.product_type_member_owner, Permissions.Product_Type_Member_Delete)
 
         self.assertFalse(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
@@ -285,14 +285,14 @@ class TestAuthorization(TestCase):
         product_type_member_other_user.role = Roles.Owner
         mock_get.return_value = product_type_member_other_user
 
-        result = user_has_permission(other_user, self.product_type_member_reader, Permissions.Product_Type_Remove_Member)
+        result = user_has_permission(other_user, self.product_type_member_reader, Permissions.Product_Type_Member_Delete)
 
         self.assertTrue(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
         self.assertEqual(mock_get.call_args[1]['product_type'], self.product_type)
 
     def test_user_has_permission_product_member_success_same_user(self):
-        result = user_has_permission(self.user, self.product_member_owner, Permissions.Product_Remove_Member)
+        result = user_has_permission(self.user, self.product_member_owner, Permissions.Product_Member_Delete)
         self.assertTrue(result)
 
     @patch('dojo.models.Product_Member.objects.get')
@@ -306,7 +306,7 @@ class TestAuthorization(TestCase):
         product_member_other_user.role = Roles.Reader
         mock_get.return_value = product_member_other_user
 
-        result = user_has_permission(other_user, self.product_member_owner, Permissions.Product_Remove_Member)
+        result = user_has_permission(other_user, self.product_member_owner, Permissions.Product_Member_Delete)
 
         self.assertFalse(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
@@ -323,7 +323,7 @@ class TestAuthorization(TestCase):
         product_member_other_user.role = Roles.Owner
         mock_get.return_value = product_member_other_user
 
-        result = user_has_permission(other_user, self.product_member_reader, Permissions.Product_Remove_Member)
+        result = user_has_permission(other_user, self.product_member_reader, Permissions.Product_Member_Delete)
 
         self.assertTrue(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)

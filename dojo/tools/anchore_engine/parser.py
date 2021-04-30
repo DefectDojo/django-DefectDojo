@@ -30,6 +30,7 @@ class AnchoreEngineParser(object):
             findingdetail += '**Feed**: ' + item['feed'] + '/' + item['feed_group'] + '\n\n'
             findingdetail += '**CVE**: ' + cve + '\n\n'
             findingdetail += '**CPE**: ' + item['package_cpe'] + '\n\n'
+            findingdetail += '**Description**: ' + item.get('description', '<None>') + '\n\n'
 
             sev = item['severity']
             if sev == "Negligible" or sev == "Unknown":
@@ -76,7 +77,6 @@ class AnchoreEngineParser(object):
                     cvssv3_score=cvssv3_base_score,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
                     references=references,
                     file_path=item["package_path"],

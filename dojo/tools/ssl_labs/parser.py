@@ -187,7 +187,6 @@ class SSLlabsParser(object):
                                    test=test,
                                    description=description,
                                    severity=sev,
-                                   numerical_severity=Finding.get_numerical_severity(sev),
                                    mitigation=mitigation,
                                    impact=impact,
                                    references=references,

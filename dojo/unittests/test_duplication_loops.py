@@ -2,7 +2,7 @@ from crum import impersonate
 from django.test import TestCase, override_settings
 from dojo.utils import set_duplicate
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
-from dojo.models import Finding, User
+from dojo.models import Engagement, Finding, Product, User
 import logging
 
 
@@ -372,3 +372,13 @@ class TestDuplicationLoops(TestCase):
         self.assertEqual(self.finding_a.duplicate_finding, None)
         self.assertEqual(self.finding_c.duplicate_finding_set().count(), 2)
         self.assertEqual(self.finding_b.duplicate_finding_set().count(), 2)
+
+    def test_delete_all_engagements(self):
+        # make sure there is no exception when deleting all engagements
+        for engagement in Engagement.objects.all().order_by('id'):
+            engagement.delete()
+
+    def test_delete_all_products(self):
+        # make sure there is no exception when deleting all engagements
+        for product in Product.objects.all().order_by('id'):
+            product.delete()

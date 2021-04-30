@@ -454,6 +454,7 @@ def close_finding(request, fid):
                     extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Closing of %s' % finding.title,
+                                    finding=finding,
                                     description='The finding "%s" was closed by %s' % (finding.title, request.user),
                                     url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
                                     )
@@ -590,6 +591,7 @@ def reopen_finding(request, fid):
         extra_tags='alert-success')
     create_notification(event='other',
                         title='Reopening of %s' % finding.title,
+                        finding=finding,
                         description='The finding "%s" was reopened by %s' % (finding.title, request.user),
                         url=request.build_absolute_uri(reverse('view_test', args=(finding.test.id, ))),
                         )
@@ -642,6 +644,7 @@ def delete_finding(request, fid):
             create_notification(event='other',
                                 title='Deletion of %s' % finding.title,
                                 description='The finding "%s" was deleted by %s' % (finding.title, request.user),
+                                product=product,
                                 url=request.build_absolute_uri(reverse('all_findings')),
                                 recipients=[finding.test.engagement.lead],
                                 icon="exclamation-triangle")
@@ -722,7 +725,8 @@ def edit_finding(request, fid):
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
                     ra_helper.simple_risk_accept(new_finding, perform_save=False)
             else:
-                ra_helper.risk_unaccept(new_finding, perform_save=False)
+                if new_finding.risk_accepted:
+                    ra_helper.risk_unaccept(new_finding, perform_save=False)
 
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
@@ -942,6 +946,7 @@ def request_finding_review(request, fid):
 
             create_notification(event='review_requested',
                                 title='Finding review requested',
+                                finding=finding,
                                 description='User %s has requested that users %s review the finding "%s" for accuracy:\n\n%s' % (user, reviewers, finding.title, new_note),
                                 icon='check',
                                 url=reverse("view_finding", args=(finding.id,)))
@@ -1837,9 +1842,11 @@ def finding_bulk_update_all(request, pid=None):
                 skipped_find_count = total_find_count - finds.count()
                 deleted_find_count = finds.count()
 
-                finds.delete()
-                for prod in prods:
-                    calculate_grade(prod)
+                for find in finds:
+                    find.delete()
+
+                # for prod in prods:
+                #     calculate_grade(prod)
 
                 if skipped_find_count > 0:
                     add_error_message_to_response('Skipped deletion of {} findings because you are not authorized.'.format(skipped_find_count))

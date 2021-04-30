@@ -62,7 +62,6 @@ class GitleaksParser(object):
                                       cwe=798,
                                       description=description,
                                       severity=severity,
-                                      numerical_severity=Finding.get_numerical_severity(severity),
                                       mitigation="Secrets and passwords should be stored in a secure vault and/or secure storage.",
                                       impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
                                       file_path=file_path,

@@ -11,25 +11,26 @@ from django.urls.base import reverse
 from django.views.decorators.http import require_POST
 from dojo.models import Finding_Group
 import logging
-from dojo.user.helper import user_must_be_authorized
 import dojo.jira_link.helper as jira_helper
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
 
-@user_must_be_authorized(Finding_Group, 'view', 'fgid')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_View, 'fgid', 'view')
 def view_finding_group(request, fgid):
     logger.debug('view finding group: %s', fgid)
     return HttpResponse('Not implemented yet')
 
 
-@user_must_be_authorized(Finding_Group, 'change', 'fgid')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid', 'change')
 def edit_finding_group(request, fgid):
     logger.debug('edit finding group: %s', fgid)
     return HttpResponse('Not implemented yet')
 
 
-@user_must_be_authorized(Finding_Group, 'delete', 'fgid')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_Delete, 'fgid', 'delete')
 @require_POST
 def delete_finding_group(request, fgid):
     logger.debug('delete finding group: %s', fgid)
@@ -40,6 +41,7 @@ def delete_finding_group(request, fgid):
         if 'id' in request.POST and str(finding_group.id) == request.POST['id']:
             form = DeleteFindingGroupForm(request.POST, instance=finding_group)
             if form.is_valid():
+                product = finding_group.test.engagement.product
                 finding_group.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -48,6 +50,7 @@ def delete_finding_group(request, fgid):
 
                 create_notification(event='other',
                                     title='Deletion of %s' % finding_group.name,
+                                    product=product,
                                     description='The finding group "%s" was deleted by %s' % (finding_group.name, request.user),
                                     url=request.build_absolute_uri(reverse('view_test', args=(finding_group.test.id,))),
                                     icon="exclamation-triangle")
@@ -66,7 +69,7 @@ def delete_finding_group(request, fgid):
                    })
 
 
-@user_must_be_authorized(Finding_Group, 'change', 'fgid')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid', 'change')
 @require_POST
 def unlink_jira(request, fgid):
     logger.debug('/finding_group/%s/jira/unlink', fgid)
@@ -101,7 +104,7 @@ def unlink_jira(request, fgid):
         return HttpResponse(status=400)
 
 
-@user_must_be_authorized(Finding_Group, 'change', 'fgid')
+@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, 'fgid', 'change')
 @require_POST
 def push_to_jira(request, fgid):
     logger.debug('/finding_group/%s/jira/push', fgid)

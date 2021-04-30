@@ -1,6 +1,6 @@
 {
   "name": "DefectDojo",
-  "version": "1.15.0-dev",
+  "version": "2.0.0-dev",
   "dependencies": {
     "JUMFlot": "jumjum123/JUMFlot#*",
     "bootstrap": "^3.4.0",
@@ -18,7 +18,7 @@
     "datatables.net-dt": "^1.10.24",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
-    "easymde": "^2.14.0",
+    "easymde": "^2.15.0",
     "flot": "flot/flot#~0.8.3",
     "flot-axis": "markrcote/flot-axislabels#*",
     "font-awesome": "^4.0.0",

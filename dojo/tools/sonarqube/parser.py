@@ -101,7 +101,6 @@ class SonarQubeParser(object):
                        out_of_scope=False,
                        mitigated=None,
                        impact="No impact provided",
-                       numerical_severity=Finding.get_numerical_severity(vuln_severity),
                        static_finding=True,
                        dynamic_finding=False,
                        unique_id_from_tool=vuln_key)
@@ -130,7 +129,6 @@ class SonarQubeParser(object):
                            out_of_scope=False,
                            mitigated=None,
                            impact="No impact provided",
-                           numerical_severity=Finding.get_numerical_severity(vuln_severity),
                            static_finding=True,
                            dynamic_finding=False,
                            nb_occurences=1)

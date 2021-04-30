@@ -481,7 +481,7 @@ class Product_Type(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test__engagement__product__prod_type=self)
+        return Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement__product__prod_type=self)
 
     class Meta:
         ordering = ('name',)
@@ -905,11 +905,11 @@ class Engagement_Presets(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     created = models.DateTimeField(auto_now_add=True, null=False)
 
-    def __str__(self):
-        return self.title
-
     class Meta:
         ordering = ['title']
+
+    def __str__(self):
+        return self.title
 
 
 class Engagement_Type(models.Model):
@@ -1034,6 +1034,13 @@ class Engagement(models.Model):
     @property
     def is_ci_cd(self):
         return self.engagement_type == "CI/CD"
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d engagement delete', self.id)
+        import dojo.finding.helper as helper
+        helper.prepare_duplicates_for_delete(engagement=self)
+        super().delete(*args, **kwargs)
+        calculate_grade(self.product)
 
 
 class CWE(models.Model):
@@ -1320,6 +1327,11 @@ class Test(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_test', args=[str(self.id)])
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d test delete', self.id)
+        super().delete(*args, **kwargs)
+        calculate_grade(self.engagement.product)
 
 
 class Test_Import(TimeStampedModel):
@@ -1764,12 +1776,20 @@ class Finding(models.Model):
             models.Index(fields=['line']),
             models.Index(fields=['component_name']),
             models.Index(fields=['duplicate']),
+            models.Index(fields=['duplicate_finding', 'id']),
             models.Index(fields=['is_Mitigated']),
         ]
 
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_finding', args=[str(self.id)])
+
+    def delete(self, *args, **kwargs):
+        logger.debug('%d finding delete', self.id)
+        import dojo.finding.helper as helper
+        helper.finding_delete(self)
+        super().delete(*args, **kwargs)
+        calculate_grade(self.test.engagement.product)
 
     # only used by bulk risk acceptance api
     @classmethod
@@ -2108,11 +2128,10 @@ class Finding(models.Model):
         if not user:
             from dojo.utils import get_current_user
             user = get_current_user()
-            logger.debug('finding.save() getting current user: %s', user)
 
         # Title Casing
         from titlecase import titlecase
-        self.title = titlecase(self.title)
+        self.title = titlecase(self.title[:511])
 
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
@@ -2156,7 +2175,7 @@ class Finding(models.Model):
             finding_helper.update_finding_status(self, user, changed_fields={'id': (None, None)})
 
         else:
-            logger.debug('setting static / dynamic in save')
+            # logger.debug('setting static / dynamic in save')
             # need to have an id/pk before we can access endpoints
             if (self.file_path is not None) and (self.endpoints.count() == 0):
                 self.static_finding = True
@@ -2169,9 +2188,12 @@ class Finding(models.Model):
 
         self.found_by.add(self.test.test_type)
 
-        # postprocessing is done in a celery task
-        finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
-             issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
+        # only perform post processing (in celery task) if needed. this check avoids submitting 1000s of tasks to celery that will do nothing
+        if dedupe_option or false_history or issue_updater_option or product_grading_option or push_to_jira:
+            finding_helper.post_process_finding_save(self, dedupe_option=dedupe_option, false_history=false_history, rules_option=rules_option, product_grading_option=product_grading_option,
+                issue_updater_option=issue_updater_option, push_to_jira=push_to_jira, user=user, *args, **kwargs)
+        else:
+            logger.debug('no options selected that require finding post processing')
 
     # Check if a mandatory field is empty. If it's the case, fill it with "no <fieldName> given"
     def clean(self):
@@ -2235,7 +2257,10 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return self.sast_source_file_path
-        return create_bleached_link(self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path, self.sast_source_file_path)
+        link = self.test.engagement.source_code_management_uri + '/' + self.sast_source_file_path
+        if self.sast_source_line:
+            link = link + '#L' + str(self.sast_source_line)
+        return create_bleached_link(link, self.sast_source_file_path)
 
     def get_file_path_with_link(self):
         from dojo.utils import create_bleached_link
@@ -2243,7 +2268,10 @@ class Finding(models.Model):
             return None
         if self.test.engagement.source_code_management_uri is None:
             return self.file_path
-        return create_bleached_link(self.test.engagement.source_code_management_uri + '/' + self.file_path, self.file_path)
+        link = self.test.engagement.source_code_management_uri + '/' + self.file_path
+        if self.line:
+            link = link + '#L' + str(self.line)
+        return create_bleached_link(link, self.file_path)
 
     def get_references_with_links(self):
         import re
@@ -2650,7 +2678,7 @@ class GITHUB_Issue(models.Model):
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return str(self.github_issue_id) + '| GitHub Issue URL: ' + str(self.github_issue_url)
+        return str(self.issue_id) + '| GitHub Issue URL: ' + str(self.issue_url)
 
 
 class GITHUB_Clone(models.Model):
@@ -2822,7 +2850,7 @@ class JIRA_Conf_Admin(admin.ModelAdmin):
 
 
 class JIRA_Issue(models.Model):
-    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.PROTECT, null=True)  # just to be sure we don't delete JIRA_Issue if a jira_project is deleted
+    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.CASCADE, null=True)
     jira_id = models.CharField(max_length=200)
     jira_key = models.CharField(max_length=200)
     finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
@@ -3506,7 +3534,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.unregister(Cred_User)
 
 
-from dojo.utils import get_system_setting, to_str_typed
+from dojo.utils import calculate_grade, get_system_setting, to_str_typed
 enable_disable_auditlog(enable=get_system_setting('enable_auditlog'))  # on startup choose safe to retrieve system settiung)
 
 tagulous.admin.register(Product.tags)
