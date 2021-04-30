@@ -6,9 +6,10 @@ class Migration(migrations.Migration):
         test_type_model = apps.get_model('dojo', 'Test_Type')
 
         # rename 'anchore_grype' to 'Anchore Grype'
-        grype_testtype = test_type_model.objects.first().filter(name='anchore_grype')
-        grype_testtype.name = 'Anchore Grype'
-        grype_testtype.save()
+        grype_testtype = test_type_model.objects.filter(name='anchore_grype').first()
+        if grype_testtype:
+            grype_testtype.name = 'Anchore Grype'
+            grype_testtype.save()
 
     dependencies = [
         ('dojo', '0091_npm_audit_path_censoring'),
