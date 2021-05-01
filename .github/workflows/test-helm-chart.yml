@@ -38,7 +38,7 @@ jobs:
         uses: helm/chart-testing-action@v2.0.1
 
       - name: Determine target branch
-        id: ct-target-branch
+        id: ct-branch-target
         run: |
           if [ ! -z ${GITHUB_BASE_REF} ]; then
             echo ::set-output name=ct-branch::${GITHUB_BASE_REF}
