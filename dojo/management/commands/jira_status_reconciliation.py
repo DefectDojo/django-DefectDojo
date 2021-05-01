@@ -131,7 +131,7 @@ def jira_status_reconciliation(*args, **kwargs):
 
                     flag1 = not find.jira_issue.jira_change or (find.jira_issue.jira_change > issue_from_jira.fields.updated)
                     flag2 = find.last_status_update > issue_from_jira.fields.updated
-                    flag3 = find.is_Mitigated and find.mitigated and find.jira_issue.jira_change and find.mitigated > find.jira_issue.jira_change
+                    flag3 = find.is_mitigated and find.mitigated and find.jira_issue.jira_change and find.mitigated > find.jira_issue.jira_change
 
                     logger.debug('%s,%s,%s,%s', resolution_name, flag1, flag2, flag3)
 

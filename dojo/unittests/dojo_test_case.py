@@ -438,14 +438,14 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None, is_Mitigated=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None):
         payload = {'test': test_id}
         if active is not None:
             payload['active'] = active
         if verified is not None:
             payload['verified'] = verified
-        if is_Mitigated is not None:
-            payload['is_Mitigated'] = is_Mitigated
+        if is_mitigated is not None:
+            payload['is_mitigated'] = is_mitigated
 
         response = self.client.get(reverse('finding-list'), payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
@@ -526,7 +526,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         else:
             for finding in findings_content_json['results']:
                 logger.debug(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
-                        ': is_Mitigated: ' + str(finding['is_Mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
+                        ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
                         ": endpoints: " + str(finding['endpoints']))
 
         logger.debug('endpoints')
