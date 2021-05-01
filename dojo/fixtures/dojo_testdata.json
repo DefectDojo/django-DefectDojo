@@ -296,10 +296,7 @@
       "technical_contact": 3,
       "product_manager": 1,
       "team_manager": 2,
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "authorized_users": [
         1,
         2,
@@ -319,10 +316,7 @@
       "technical_contact": 2,
       "product_manager": 2,
       "team_manager": 3,
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "authorized_users": [
         2,
         3
@@ -341,10 +335,7 @@
       "technical_contact": 3,
       "product_manager": 1,
       "team_manager": 3,
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "authorized_users": [
         1,
         3
