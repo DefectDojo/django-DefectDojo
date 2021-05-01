@@ -655,8 +655,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
-    'tagulous',
-    'django_jsonfield_backport',
+    'tagulous'
 )
 
 # ------------------------------------------------------------------------------
