@@ -5,7 +5,9 @@ import re
 from django.core.validators import validate_ipv46_address
 from django.db import migrations
 from django.core.exceptions import FieldError, ValidationError
+from django.db.models import Count
 
+from dojo.endpoint.utils import endpoint_filter
 from dojo.models import Endpoint
 
 logger = logging.getLogger(__name__)
@@ -14,6 +16,8 @@ logger = logging.getLogger(__name__)
 def clean_hosts(apps, schema_editor):
     broken_endpoints = []
     Endpoint_model = apps.get_model('dojo', 'Endpoint')
+    Endpoint_Status_model = apps.get_model('dojo', 'Endpoint_Status')
+    Product_model = apps.get_model('dojo', 'Product')
     error_prefix = 'It is not possible to migrate it. Remove or fix this endpoint.'
     for endpoint in Endpoint_model.objects.all():
         if not endpoint.host or endpoint.host == '':
@@ -98,6 +102,44 @@ def clean_hosts(apps, schema_editor):
     if broken_endpoints != []:
         raise FieldError('It is not possible to migrate database because there is/are {} broken endpoint(s). '
                          'Please check logs.'.format(len(broken_endpoints)))
+
+    to_be_deleted = set()
+    for product in Product_model.objects.all().distinct():
+        for endpoint in Endpoint_model.objects.all():
+            if endpoint.id not in to_be_deleted:
+
+                ep = endpoint_filter(
+                    protocol=endpoint.protocol,
+                    userinfo=endpoint.userinfo,
+                    host=endpoint.host,
+                    fqdn=endpoint.fqdn,
+                    port=endpoint.port,
+                    path=endpoint.path,
+                    query=endpoint.query,
+                    fragment=endpoint.fragment,
+                    product_id=product.pk
+                ).order_by('id')
+
+                if ep.count() > 1:
+                    ep_ids = [x.id for x in ep]
+                    to_be_deleted.update(ep_ids[1:])
+                    logger.debug("0: {}, 1+: {}, all: {}".format(ep_ids[0], ep_ids[1:], to_be_deleted))
+                    Endpoint_Status_model.objects\
+                        .filter(id__in=ep_ids[1:])\
+                        .update(endpoint=ep_ids[0])
+                    epss = Endpoint_Status_model.objects\
+                        .filter(endpoint=ep_ids[0])\
+                        .values('finding')\
+                        .annotate(total=Count('id'))\
+                        .filter(total__gt=1)
+                    for eps in epss:
+                        esm = Endpoint_Status_model.objects\
+                            .filter(finding=eps['finding'])\
+                            .order_by('-date')
+                        esm.exclude(id=esm[0].pk).delete()
+
+    logger.debug("Removing endpoints: {}".format(to_be_deleted))
+    Endpoint_model.objects.filter(id__in=to_be_deleted).delete()
 
 
 class Migration(migrations.Migration):

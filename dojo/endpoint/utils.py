@@ -58,6 +58,8 @@ def endpoint_filter(**kwargs):
 
     if kwargs.get('product'):
         qs = qs.filter(product__exact=kwargs['product'])
+    elif kwargs.get('product_id'):
+        qs = qs.filter(product_id__exact=kwargs['product_id'])
     else:
         qs = qs.filter(product__isnull=True)
 
