@@ -72,7 +72,7 @@ class CoverityApiParser(object):
                 if "lastTriaged" in issue:
                     ds = issue["lastTriaged"][0:10]
                     finding.mitigated = datetime.strptime(ds, "%Y-%M-%d")
-                finding.is_Mitigated = True
+                finding.is_mitigated = True
                 finding.active = False
 
             items.append(finding)

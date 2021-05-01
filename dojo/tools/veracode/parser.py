@@ -130,7 +130,7 @@ class VeracodeParser(object):
             for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
                 _is_mitigated = True
                 _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
-        finding.is_Mitigated = _is_mitigated
+        finding.is_mitigated = _is_mitigated
         finding.mitigated = _mitigated_date
         finding.active = not _is_mitigated
 
