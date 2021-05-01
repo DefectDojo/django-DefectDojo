@@ -1,6 +1,6 @@
 ---
 title: "Installation"
-date: 2021-02-02T20:46:28+01:00
+description: "Installation with Docker Compose or Kubernetes"
 draft: false
 weight: 1
 ---

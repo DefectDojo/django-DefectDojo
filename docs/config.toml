@@ -60,6 +60,12 @@ languageName ="English"
 weight = 1
 
 [[menu.main]]
+    name = "Homepage"
+    weight = 30
+    pre = "<i class='fas fa-home'></i>"
+    url = "https://www.defectdojo.org/"
+
+[[menu.main]]
     name = "Demo Site"
     weight = 40
     pre = "<i class='fas fa-camera'></i>"
@@ -167,6 +173,10 @@ enable = false
 
 [params.links]
 # End user relevant links. These will show up on left side of footer and in the community page if you have one.
+[[params.links.user]]
+	name ="Homepage"
+	url = "https://www.defectdojo.org/"
+	icon = "fas fa-home"
 [[params.links.user]]
 	name ="Twitter"
 	url = "https://twitter.com/defectdojo"

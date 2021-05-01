@@ -1,6 +1,6 @@
 ---
 title: "Permissions"
-date: 2021-02-02T20:46:28+01:00
+description: "Users have different functionality available to them, depending on their system-wide permissions and on the role they have as a member of a particular Product or Product Type."
 weight: 4
 draft: false
 ---
@@ -8,8 +8,6 @@ draft: false
 {{% alert title="Warning" color="warning" %}}
 The permissions described on this page only become active if you set the ``FEATURE_AUTHORIZATION_V2`` feature flag to ``True``. This feature is currently in beta, you should not use it in production environments.
 {{% /alert %}}
-
-Users have different functionality available to them, depending on their system-wide permissions and on the role they have as a member of a particular Product or Product Type.
 
 ## System-wide permissions
 
