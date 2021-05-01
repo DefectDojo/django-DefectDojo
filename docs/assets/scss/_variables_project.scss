@@ -1,0 +1,19 @@
+/*
+
+Add styles or override variables from the theme here.
+
+*/
+
+$primary: #e7e7e7;
+$secondary: #f8f8f8;
+
+$navbar-dark-color: #333 !default;
+$navbar-dark-hover-color: #666 !default;
+
+.navbar-brand {
+    color: #333 !important
+}
+
+.td-sidebar-link.tree-root {
+    color: #333 !important
+}

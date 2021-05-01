@@ -1,13 +1,13 @@
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    User, ScanSettings, Scan, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
+    User, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
     BurpRawRequestResponse, DojoMeta, FileUpload
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
-    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, ScanSettingsViewSet, \
-    ScansViewSet, StubFindingsViewSet, TestsViewSet, \
+    JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
+    StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet
@@ -113,7 +113,7 @@ class BaseClass():
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '%s/' % current_objects['results'][-1]['id']
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code, response.content[:1000])
 
@@ -361,7 +361,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "url": "http://www.example.com",
             "thread_id": 1,
             "found_by": [],
-            "title": "DUMMY FINDING",
+            "title": "DUMMY FINDING123",
             "date": "2020-05-20",
             "cwe": 1,
             "severity": "HIGH",
@@ -387,7 +387,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "images": [],
             "tags": ['tag1', 'tag_2'],
         }
-        self.update_fields = {'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
+        self.update_fields = {'duplicate': False, 'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_duplicate(self):
@@ -627,35 +627,6 @@ class ProductTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class ScanSettingsTest(BaseClass.RESTEndpointTest):
-    fixtures = ['dojo_testdata.json']
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = ScanSettings
-        self.viewname = 'scansettings'
-        self.viewset = ScanSettingsViewSet
-        self.payload = {
-            "addresses": "127.0.0.1",
-            "frequency": "Weekly",
-            "email": "test@dojo.com",
-            "protocol": "TCP",
-            "product": 1,
-            "user": 3,
-        }
-        self.update_fields = {'protocol': 'ftp'}
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-class ScansTest(BaseClass.RESTEndpointTest):
-    fixtures = ['dojo_testdata.json']
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Scan
-        self.viewname = 'scan'
-        self.viewset = ScansViewSet
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
 class StubFindingsTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
@@ -693,7 +664,10 @@ class TestsTest(BaseClass.RESTEndpointTest):
             "target_end": "2017-01-12T00:00",
             "percent_complete": 0,
             "lead": 2,
-            "tags": []
+            "tags": [],
+            "version": "1.0",
+            "branch_tag": "master",
+            "commit_hash": "1234567890abcdefghijkl",
         }
         self.update_fields = {'percent_complete': 100}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
@@ -825,46 +799,6 @@ class ProductPermissionTest(DojoAPITestCase):
 
     def test_user_should_not_have_access_to_product_3_in_detail(self):
         response = self.client.get('http://testserver/api/v2/products/3/')
-        self.assertEqual(response.status_code, 404)
-
-
-class ScanSettingsPermissionTest(DojoAPITestCase):
-    fixtures = ['dojo_testdata.json']
-
-    def setUp(self):
-        testuser = User.objects.get(username='user1')
-        token = Token.objects.get(user=testuser)
-        self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-
-    def test_user_should_not_have_access_to_setting_3_in_list(self):
-        response = self.client.get(
-            reverse('scansettings-list'), format='json')
-        for obj in response.data['results']:
-            self.assertNotEqual(obj['id'], 3)
-
-    def test_user_should_not_have_access_to_setting_3_in_detail(self):
-        response = self.client.get('http://testserver/api/v2/scan_settings/3/')
-        self.assertEqual(response.status_code, 404)
-
-
-class ScansPermissionTest(DojoAPITestCase):
-    fixtures = ['dojo_testdata.json']
-
-    def setUp(self):
-        testuser = User.objects.get(username='user1')
-        token = Token.objects.get(user=testuser)
-        self.client = APIClient()
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
-
-    def test_user_should_not_have_access_to_scan_3_in_list(self):
-        response = self.client.get(
-            reverse('scan-list'), format='json')
-        for obj in response.data['results']:
-            self.assertNotEqual(obj['id'], 3)
-
-    def test_user_should_not_have_access_to_scan_3_in_detail(self):
-        response = self.client.get('http://testserver/api/v2/scans/3/')
         self.assertEqual(response.status_code, 404)
 
 

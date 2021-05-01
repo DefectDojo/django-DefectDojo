@@ -1,0 +1,2 @@
+"id","fqdn/ip","port","severity","finding","cve","cwe"
+"DROWN","www.defectdojo.org/185.199.109.153","443","HIGH","vulnerable to DROWN on this host and port","CVE-2016-0800 CVE-2016-0703","CWE-310"

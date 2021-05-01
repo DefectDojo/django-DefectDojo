@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load authorization_tags %}
+
 {% block content %}
     <h3 id="id_heading"> Product Type {{ pt.name }}</h3>
     <div class="row">
@@ -15,7 +17,7 @@
                                       <span class="caret"></span>
                                   </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if user|is_authorized_for_staff:pt %}
+                            {% if pt|has_object_permission:"Product_Type_Edit" or user|is_authorized_for_change:pt %}
                             <li>
                                 <a class="" href="{% url 'edit_product_type' pt.id %}">
                                 <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -26,11 +28,11 @@
                                 <a class="" href="{% url 'product_type_metrics' pt.id %}">
                                 <i class="fa fa-line-chart"></i> Metrics</a>
                             </li>
-                            {% if user|is_authorized_for_staff:pt %}
                             <li>
                                 <a class="" href="{% url 'product_type_report' pt.id %}">
                                 <i class="fa fa-file-text-o"></i> Product Type Report</a>
                             </li>
+                            {% if pt|has_object_permission:"Product_Type_Delete" or user|is_authorized_for_delete:pt %}
                             <li role="separator" class="divider"></li>
                             <li>
                                 <a class="" href="{% url 'delete_product_type' pt.id %}">
@@ -40,7 +42,7 @@
                         </ul>
                       </div>
                     </div>
-                </div>
+                  </div>
                 </div>
                 <div class="panel-body">
                   {{ pt.description|markdown_render }}
@@ -50,7 +52,7 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">Products</h4>
-                        {% if user|is_authorized_for_staff:pt %}
+                        {% if pt|has_object_permission:"Product_Type_Add_Product" or user|is_authorized_for_staff:pt %}
                         <div class="dropdown pull-right">
                             <div class="btn-group">
                                 <button class="btn btn-primary dropdown-toggle" type="button" label="Actions" id="dropdownMenu1" data-toggle="dropdown" aria-expanded="true">
@@ -120,6 +122,80 @@
                     </div>
                 {% endif %}
             </div>
+            {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="clearfix">
+                            <h4 class="pull-left">Members</h4>
+                            {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
+                            <div class="dropdown pull-right">
+                                <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductTypeMember"
+                                        data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Type Member">
+                                    <span class="fa fa-bars"></span>
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a id="addProductTypeMember" href="{% url 'add_product_type_member' pt.id %}">
+                                            <i class="fa fa-plus"></i> Add User
+                                        </a>
+                                    </li>
+                                </ul>
+                                &nbsp;
+                                <a href="https://defectdojo.github.io/django-DefectDojo/basics/permissions/" target="_blank">
+                                    <i class="fa fa-question-circle text-low"></i></a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if members %}
+                        <div class="table-responsive">
+                            <table class="tablesorter-bootstrap table table-condensed table-striped">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>User</th>
+                                    <th>Role</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for member in members %}
+                                    <tr>
+                                        <td>
+                                            <ul>
+                                            <li class="dropdown" style="list-style:none;position:absolute">
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                                <ul class="dropdown-menu">
+                                                    {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
+                                                    <li>
+                                                        <a name="editProductTypeMember" href="{% url 'edit_product_type_member' member.id %}">
+                                                        <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                                    </li>
+                                                    {% endif %}
+                                                    {% if member|has_object_permission:"Product_Type_Member_Delete" %}
+                                                    <li>
+                                                        <a name="deleteProductTypeMember" href="{% url 'delete_product_type_member' member.id %}">
+                                                        <i class="fa fa-trash"></i> Delete</a>
+                                                    </li>
+                                                    {% endif %}
+                                                </ul>
+                                            </li>
+                                            </ul>
+                                        </td>
+                                        <td name="member_user">{{ member.user|full_name }}</td>
+                                        <td name="member_role">{% role_as_string member.role %}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="panel-body">
+                            <small class="text-muted"><em>No members found.</em></small>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
         <div class="col-md-4">
             <div class="panel panel-default-secondary">
@@ -133,12 +209,25 @@
                       <tbody>
                         <tr>
                           <td style="width: 150px;"><strong>Critical product</strong></td>
-                          <td>{{ pt.critical_product }}</td>
-                        </tr>
+                          <td>
+                            {% if pt.critical_product %}
+                            <i class="text-success fa fa-check"></i>
+                            {% else %}
+                            <i class="text-danger fa fa-times"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
                         <tr>
                             <td style="width: 150px;"><strong>Key product</strong></td>
-                            <td>{{ pt.key_product }}</td>
+                            <td>
+                                {% if pt.key_product %}
+                                <i class="text-success fa fa-check"></i>
+                                {% else %}
+                                <i class="text-danger fa fa-times"></i>
+                                {% endif %}
+                            </td>
                         </tr>
+                        {% if not 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                         <tr>
                             <td style="width: 150px;"><strong>Authorized Users</strong></td>
                             <td>
@@ -153,10 +242,11 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        </tbody>
+                        {% endif %}
+                    </tbody>
                     </table>
                 </div>
-            </div>  
+            </div>
         </div>
-    </div>    
+    </div>
 {% endblock %}

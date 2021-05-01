@@ -3,11 +3,21 @@ from .importer import BlackduckCRImporter
 from dojo.models import Finding
 
 
-class BlackduckHubParser(object):
+class BlackduckComponentRiskParser(object):
     """
     Can import as exported from Blackduck:
     - from a zip file containing a security.csv, sources.csv and components.csv
     """
+
+    def get_scan_types(self):
+        return ["Blackduck Component Risk"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Blackduck Component Risk"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Upload the zip file containing the security.csv and files.csv."
+
     def get_findings(self, filename, test):
         """
         Function initializes the parser with a file and sets the
@@ -60,11 +70,8 @@ class BlackduckHubParser(object):
                 references = self.license_references(component)
                 finding = Finding(title=title,
                                   test=test,
-                                  active=False,
-                                  verified=False,
                                   description=description,
                                   severity=severity,
-                                  numerical_severity=Finding.get_numerical_severity(severity),
                                   mitigation=mitigation,
                                   impact=impact,
                                   references=references,
@@ -81,11 +88,8 @@ class BlackduckHubParser(object):
                 references = self.license_references(component)
                 finding = Finding(title=title,
                                   test=test,
-                                  active=False,
-                                  verified=False,
                                   description=description,
                                   severity=severity,
-                                  numerical_severity=Finding.get_numerical_severity(severity),
                                   mitigation=mitigation,
                                   impact=impact,
                                   references=references,
@@ -107,11 +111,8 @@ class BlackduckHubParser(object):
 
             finding = Finding(title=title,
                               test=test,
-                              active=False,
-                              verified=False,
                               description=description,
                               severity=severity,
-                              numerical_severity=Finding.get_numerical_severity(severity),
                               mitigation=mitigation,
                               impact=impact,
                               references=references,

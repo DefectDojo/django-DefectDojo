@@ -1,7 +1,6 @@
 # #  product
 import logging
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
@@ -9,11 +8,13 @@ from dojo.forms import DeleteToolProductSettingsForm, ToolProductSettingsForm, N
 from dojo.models import Product, Tool_Product_Settings
 from django.http import HttpResponseRedirect
 from dojo.utils import add_breadcrumb, Product_Tab
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def new_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -41,7 +42,7 @@ def new_tool_product(request, pid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def all_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by('name')
@@ -53,7 +54,7 @@ def all_tool_product(request, pid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def view_tool_product(request, pid, ttid):
     tool = Tool_Product_Settings.objects.get(pk=ttid)
     notes = tool.notes.all()
@@ -90,7 +91,7 @@ def view_tool_product(request, pid, ttid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_tool_product(request, pid, ttid):
     prod = get_object_or_404(Product, id=pid)
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
@@ -115,7 +116,7 @@ def edit_tool_product(request, pid, ttid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def delete_tool_product(request, pid, ttid):
     tool_product = Tool_Product_Settings.objects.get(pk=ttid)
     prod = get_object_or_404(Product, id=pid)
@@ -137,16 +138,4 @@ def delete_tool_product(request, pid, ttid):
     return render(request, 'dojo/delete_tool_product.html', {
         'tform': tform,
         'product_tab': product_tab
-    })
-
-
-@user_passes_test(lambda u: u.is_staff)
-def tool_product(request):
-    confs = Tool_Product_Settings.objects.all().order_by('name')
-    add_breadcrumb(
-        title="Tool Configuration List",
-        top_level=not len(request.GET),
-        request=request)
-    return render(request, 'dojo/tool_product.html', {
-        'confs': confs,
     })

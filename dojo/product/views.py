@@ -7,7 +7,6 @@ from datetime import datetime, date, timedelta
 from math import ceil
 from dateutil.relativedelta import relativedelta
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -17,25 +16,30 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
+from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
-                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, ScanSettings, Test, GITHUB_PKey, Finding_Template, \
+                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
+                       Edit_Product_MemberForm, Delete_Product_MemberForm
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse
-
-from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member
+from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
+                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
 
 from dojo.notifications.helper import create_notification
-from django.db.models import Prefetch, F
+from django.db.models import Prefetch, F, OuterRef, Subquery
 from django.db.models.query import QuerySet
 from github import Github
-from dojo.user.helper import user_must_be_authorized, user_is_authorized, check_auth_users_list
 from django.contrib.postgres.aggregates import StringAgg
 from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
-import dojo.finding.helper as finding_helper
+from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
+from django.conf import settings
+from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.product.queries import get_authorized_products, get_authorized_members_for_product
+from dojo.product_type.queries import get_authorized_members_for_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -48,13 +52,7 @@ def product(request):
         if len(p) == 1:
             product_type = get_object_or_404(Product_Type, id=p[0])
 
-    prods = Product.objects.all()
-
-    if not request.user.is_staff:
-        prods = prods.filter(
-            Q(authorized_users__in=[request.user]) |
-            Q(prod_type__authorized_users__in=[request.user])
-        )
+    prods = get_authorized_products(Permissions.Product_View)
 
     # perform all stuff for filtering and pagination first, before annotation/prefetching
     # otherwise the paginator will perform all the annotations/prefetching already only to count the total number of records
@@ -67,6 +65,8 @@ def product(request):
 
     # perform annotation/prefetching by replacing the queryset in the page with an annotated/prefetched queryset.
     prod_list.object_list = prefetch_for_product(prod_list.object_list)
+
+    # print(prod_list.object_list.explain)
 
     add_breadcrumb(title="Product List", top_level=not len(request.GET), request=request)
     return render(request,
@@ -81,8 +81,11 @@ def prefetch_for_product(prods):
     prefetched_prods = prods
     if isinstance(prods,
                   QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        prefetched_prods = prefetched_prods.select_related('technical_contact').select_related(
-            'product_manager').select_related('prod_type').select_related('team_manager')
+
+        prefetched_prods = prefetched_prods.prefetch_related('team_manager')
+        prefetched_prods = prefetched_prods.prefetch_related('product_manager')
+        prefetched_prods = prefetched_prods.prefetch_related('technical_contact')
+
         prefetched_prods = prefetched_prods.annotate(
             active_engagement_count=Count('engagement__id', filter=Q(engagement__active=True)))
         prefetched_prods = prefetched_prods.annotate(
@@ -91,16 +94,26 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.annotate(active_finding_count=Count('engagement__test__finding__id',
                                                                                 filter=Q(
                                                                                     engagement__test__finding__active=True)))
+        prefetched_prods = prefetched_prods.annotate(active_verified_finding_count=Count('engagement__test__finding__id',
+                                                                                filter=Q(
+                                                                                    engagement__test__finding__active=True,
+                                                                                    engagement__test__finding__verified=True)))
         prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
-        prefetched_prods = prefetched_prods.prefetch_related(
-            Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'),
-                     to_attr='github_confs'))
+        prefetched_prods = prefetched_prods.prefetch_related('authorized_users')
+        prefetched_prods = prefetched_prods.prefetch_related('prod_type__authorized_users')
+        prefetched_prods = prefetched_prods.prefetch_related('members')
+        prefetched_prods = prefetched_prods.prefetch_related('prod_type__members')
         active_endpoint_query = Endpoint.objects.filter(
             finding__active=True,
             finding__mitigated__isnull=True)
         prefetched_prods = prefetched_prods.prefetch_related(
             Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
         prefetched_prods = prefetched_prods.prefetch_related('tags')
+
+        if get_system_setting('enable_github'):
+            prefetched_prods = prefetched_prods.prefetch_related(
+                Prefetch('github_pkey_set', queryset=GITHUB_PKey.objects.all().select_related('git_conf'),
+                        to_attr='github_confs'))
 
     else:
         logger.debug('unable to prefetch because query was already executed')
@@ -114,11 +127,15 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
 
 
-@user_must_be_authorized(Product, 'view', 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_product(request, pid):
-    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact',
-                                                      'team_manager').prefetch_related('authorized_users')
+    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager') \
+                                      .prefetch_related('authorized_users') \
+                                      .prefetch_related('members') \
+                                      .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
+    product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
+    product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
@@ -180,9 +197,12 @@ def view_product(request, pid):
         'system_settings': system_settings,
         'benchmarks_percents': benchAndPercent,
         'benchmarks': benchmarks,
+        'product_members': product_members,
+        'product_type_members': product_type_members,
         'personal_notifications_form': personal_notifications_form})
 
 
+@user_is_authorized(Product, Permissions.Component_View, 'pid', 'view')
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(pid, title="Product", tab="components")
@@ -200,7 +220,7 @@ def view_product_components(request, pid):
 
     # Append finding counts
     component_query = component_query.annotate(total=Count('id')).order_by('component_name', 'component_version')
-    component_query = component_query.annotate(actives=Count('id', filter=Q(active=True)))
+    component_query = component_query.annotate(active=Count('id', filter=Q(active=True)))
     component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))
 
     # Default sort by total descending
@@ -443,7 +463,7 @@ def endpoint_querys(request, prod):
     return filters
 
 
-@user_must_be_authorized(Product, 'view', 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
@@ -453,9 +473,7 @@ def view_product_metrics(request, pid):
         request.GET,
         queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
 
-    i_engs_page = get_page_items(request, result.qs, 10)
-
-    scan_sets = ScanSettings.objects.filter(product=prod)
+    inactive_engs_page = get_page_items(request, result.qs, 10)
 
     filters = dict()
     if view == 'Finding':
@@ -575,8 +593,7 @@ def view_product_metrics(request, pid):
                   {'prod': prod,
                    'product_tab': product_tab,
                    'engs': engs,
-                   'i_engs': i_engs_page,
-                   'scan_sets': scan_sets,
+                   'inactive_engs': inactive_engs_page,
                    'view': view,
                    'verified_objs': filters.get('verified', None),
                    'open_objs': filters.get('open', None),
@@ -603,87 +620,90 @@ def view_product_metrics(request, pid):
                    'user': request.user})
 
 
-def view_engagements(request, pid, engagement_type="Interactive"):
+@user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
+def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
-    auth = request.user.is_staff or check_auth_users_list(request.user, prod)
-    if not auth:
-        raise PermissionDenied
 
     default_page_num = 10
+    recent_test_day_count = 7
 
     # In Progress Engagements
-    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress",
-                                     engagement_type=engagement_type).order_by('-updated')
-    active_engs = EngagementFilter(request.GET, queryset=engs)
-    result_active_engs = get_page_items(request, active_engs.qs, default_page_num, param_name="engs")
+    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress").order_by('-updated')
+    active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
+    result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list)
+    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list, recent_test_day_count)
 
     # Engagements that are queued because they haven't started or paused
-    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True,
-                                     engagement_type=engagement_type).order_by('-updated')
-    queued_engs = EngagementFilter(request.GET, queryset=engs)
-    result_queued_engs = get_page_items(request, queued_engs.qs, default_page_num, param_name="queued_engs")
-    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list)
+    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True).order_by('-updated')
+    queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
+    result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
+    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list, recent_test_day_count)
 
     # Cancelled or Completed Engagements
-    engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by(
-        '-target_end')
-    result_inactive = EngagementFilter(request.GET, queryset=engs)
-    result_inactive_engs_page = get_page_items(request, result_inactive.qs, default_page_num, param_name="i_engs")
-    result_inactive_engs_page.object_list = prefetch_for_view_engagements(result_inactive_engs_page.object_list)
+    engs = Engagement.objects.filter(product=prod, active=False).order_by('-target_end')
+    inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
+    result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
+    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list, recent_test_day_count)
 
     title = "All Engagements"
-    if engagement_type == "CI/CD":
-        title = "CI/CD Engagements"
 
     product_tab = Product_Tab(pid, title=title, tab="engagements")
     return render(request,
                   'dojo/view_engagements.html',
                   {'prod': prod,
                    'product_tab': product_tab,
-                   'engagement_type': engagement_type,
                    'engs': result_active_engs,
                    'engs_count': result_active_engs.paginator.count,
+                   'engs_filter': active_engs_filter,
                    'queued_engs': result_queued_engs,
                    'queued_engs_count': result_queued_engs.paginator.count,
-                   'i_engs': result_inactive_engs_page,
-                   'i_engs_count': result_inactive_engs_page.paginator.count,
-                   'user': request.user,
-                   'authorized': auth})
+                   'queued_engs_filter': queued_engs_filter,
+                   'inactive_engs': result_inactive_engs,
+                   'inactive_engs_count': result_inactive_engs.paginator.count,
+                   'inactive_engs_filter': inactive_engs_filter,
+                   'recent_test_day_count': recent_test_day_count,
+                   'user': request.user})
 
 
-def prefetch_for_view_engagements(engs):
-    prefetched_engs = engs
-    if isinstance(engs,
-                  QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        prefetched_engs = prefetched_engs.select_related('lead')
-        prefetched_engs = prefetched_engs.prefetch_related('test_set')
-        prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
-        prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
-        prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
-        ACCEPTED_FINDINGS_QUERY = Q(test__finding__risk_accepted=True)
-        prefetched_engs = prefetched_engs.annotate(count_findings_accepted=Count('test__finding__id', filter=ACCEPTED_FINDINGS_QUERY))
-        prefetched_engs = prefetched_engs.prefetch_related('tags')
-    else:
-        logger.debug('unable to prefetch because query was already executed')
+def prefetch_for_view_engagements(engagements, recent_test_day_count):
+    engagements = engagements.select_related(
+        'lead'
+    ).prefetch_related(
+        Prefetch('test_set', queryset=Test.objects.filter(
+            id__in=Subquery(
+                Test.objects.filter(
+                    engagement_id=OuterRef('engagement_id'),
+                    updated__gte=timezone.now() - timedelta(days=recent_test_day_count)
+                ).values_list('id', flat=True)
+            ))
+        ),
+        'test_set__test_type',
+    ).annotate(
+        count_tests=Count('test', distinct=True),
+        count_findings_all=Count('test__finding__id'),
+        count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)),
+        count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
+        count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)),
+        count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)),
+        count_findings_accepted=Count('test__finding__id', filter=Q(test__finding__risk_accepted=True)),
+    )
 
-    return prefetched_engs
+    if System_Settings.objects.get().enable_jira:
+        engagements = engagements.prefetch_related(
+            'jira_project__jira_instance',
+            'product__jira_project_set__jira_instance',
+        )
+
+    return engagements
 
 
-def view_engagements_cicd(request, pid):
-    return view_engagements(request, pid, engagement_type="CI/CD")
-
-
+# Authorization is within the import_scan_results method
 def import_scan_results_prod(request, pid=None):
     from dojo.engagement.views import import_scan_results
     return import_scan_results(request, pid=pid)
 
 
-@user_passes_test(lambda u: u.is_staff)
 def new_product(request, ptid=None):
     jira_project_form = None
     error = False
@@ -703,6 +723,12 @@ def new_product(request, ptid=None):
             gform = None
 
         if form.is_valid():
+            if settings.FEATURE_AUTHORIZATION_V2:
+                product_type = form.instance.prod_type
+                user_has_permission_or_403(request.user, product_type, Permissions.Product_Type_Add_Product)
+            else:
+                if not request.user.is_staff:
+                    raise PermissionDenied
             product = form.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -749,6 +775,7 @@ def new_product(request, ptid=None):
                 sonarqube_product.save()
 
             create_notification(event='product_added', title=product.name,
+                                product=product,
                                 url=reverse('view_product', args=(product.id,)))
 
             if not error:
@@ -756,15 +783,14 @@ def new_product(request, ptid=None):
             else:
                 # engagement was saved, but JIRA errors, so goto edit_product
                 return HttpResponseRedirect(reverse('edit_product', args=(product.id,)))
-
-    jira_project_form = None
-    if get_system_setting('enable_jira'):
-        jira_project_form = JIRAProjectForm()
-
-    if get_system_setting('enable_github'):
-        gform = GITHUB_Product_Form()
     else:
-        gform = None
+        if get_system_setting('enable_jira'):
+            jira_project_form = JIRAProjectForm()
+
+        if get_system_setting('enable_github'):
+            gform = GITHUB_Product_Form()
+        else:
+            gform = None
 
     add_breadcrumb(title="New Product", top_level=False, request=request)
     return render(request, 'dojo/new_product.html',
@@ -774,8 +800,7 @@ def new_product(request, ptid=None):
                    'sonarqube_form': Sonarqube_ProductForm()})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_product(request, pid):
     product = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
@@ -837,25 +862,25 @@ def edit_product(request, pid):
 
             if not error:
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
-
-    form = ProductForm(instance=product,
-                       initial={'auth_users': product.authorized_users.all()})
-
-    if jira_enabled:
-        jira_project = jira_helper.get_jira_project(product)
-        jform = JIRAProjectForm(instance=jira_project)
     else:
-        jform = None
+        form = ProductForm(instance=product,
+                        initial={'auth_users': product.authorized_users.all()})
 
-    if github_enabled and (github_inst is not None):
-        if github_inst is not None:
-            gform = GITHUB_Product_Form(instance=github_inst)
+        if jira_enabled:
+            jira_project = jira_helper.get_jira_project(product)
+            jform = JIRAProjectForm(instance=jira_project)
+        else:
+            jform = None
+
+        if github_enabled and (github_inst is not None):
+            if github_inst is not None:
+                gform = GITHUB_Product_Form(instance=github_inst)
+                gform = GITHUB_Product_Form()
             gform = GITHUB_Product_Form()
-        gform = GITHUB_Product_Form()
-    else:
-        gform = None
+        else:
+            gform = None
 
-    sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
+        sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
 
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
@@ -869,8 +894,7 @@ def edit_product(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Delete, 'pid', 'delete')
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
@@ -879,6 +903,7 @@ def delete_product(request, pid):
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
+                product_type = product.prod_type
                 product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -886,6 +911,7 @@ def delete_product(request, pid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % product.name,
+                                    product_type=product_type,
                                     description='The product "%s" was deleted by %s' % (product.name, request.user),
                                     url=request.build_absolute_uri(reverse('product')),
                                     icon="exclamation-triangle")
@@ -904,11 +930,10 @@ def delete_product(request, pid):
                    })
 
 
-@user_must_be_authorized(Product, 'staff',
-                         'pid')  # use arg 0 as using pid causes issues, I think due to cicd being there
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
 def new_eng_for_app(request, pid, cicd=False):
-    jira_project_form = None
     jira_project = None
+    jira_project_form = None
     jira_epic_form = None
 
     product = Product.objects.get(id=pid)
@@ -977,30 +1002,34 @@ def new_eng_for_app(request, pid, cicd=False):
                 return HttpResponseRedirect(reverse('edit_engagement', args=(engagement.id,)))
         else:
             logger.debug(form.errors)
+    else:
+        form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(),
+                                'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd,
+                    product=product, user=request.user)
 
-    form = EngForm(initial={'lead': request.user, 'target_start': timezone.now().date(),
-                            'target_end': timezone.now().date() + timedelta(days=7), 'product': product}, cicd=cicd,
-                   product=product, user=request.user)
-    jira_project_form = None
-    jira_epic_form = None
-    if get_system_setting('enable_jira'):
-        jira_project = jira_helper.get_jira_project(product)
-        logger.debug('showing jira-project-form')
-        jira_project_form = JIRAProjectForm(target='engagement', product=product)
-        logger.debug('showing jira-epic-form')
-        jira_epic_form = JIRAEngagementForm()
+        if get_system_setting('enable_jira'):
+            jira_project = jira_helper.get_jira_project(product)
+            logger.debug('showing jira-project-form')
+            jira_project_form = JIRAProjectForm(target='engagement', product=product)
+            logger.debug('showing jira-epic-form')
+            jira_epic_form = JIRAEngagementForm()
 
-    product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
+    if cicd:
+        title = 'New CI/CD Engagement'
+    else:
+        title = 'New Interactive Engagement'
+
+    product_tab = Product_Tab(pid, title=title, tab="engagements")
     return render(request, 'dojo/new_eng.html',
                   {'form': form,
+                   'title': title,
                    'product_tab': product_tab,
                    'jira_epic_form': jira_epic_form,
                    'jira_project_form': jira_project_form,
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def new_tech_for_prod(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1020,15 +1049,13 @@ def new_tech_for_prod(request, pid):
                   {'form': form, 'pid': pid})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
 def new_eng_for_app_cicd(request, pid):
     # we have to use pid=pid here as new_eng_for_app expects kwargs, because that is how django calls the function based on urls.py named groups
     return new_eng_for_app(request, pid=pid, cicd=True)
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def add_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1056,8 +1083,7 @@ def add_meta_data(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_meta_data(request, pid):
     prod = Product.objects.get(id=pid)
     if request.method == 'POST':
@@ -1088,8 +1114,7 @@ def edit_meta_data(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Finding_Add, 'pid', 'staff')
 def ad_hoc_finding(request, pid):
     prod = Product.objects.get(id=pid)
     test = None
@@ -1137,7 +1162,7 @@ def ad_hoc_finding(request, pid):
                                      extra_tags='alert-danger')
         if use_jira:
             jform = JIRAFindingForm(request.POST, prefix='jiraform', push_all=push_all_jira_issues,
-                                    jira_project=jira_helper.get_jira_project(test))
+                                    jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
         if form.is_valid() and (jform is None or jform.is_valid()):
             new_finding = form.save(commit=False)
@@ -1145,10 +1170,10 @@ def ad_hoc_finding(request, pid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            finding_helper.update_finding_status(new_finding, request.user)
             create_template = new_finding.is_template
             # always false now since this will be deprecated soon in favor of new Finding_Template model
             new_finding.is_template = False
+            new_finding.tags = form.cleaned_data['tags']
             new_finding.save()
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
             for endpoint in form.cleaned_data['endpoints']:
@@ -1277,14 +1302,14 @@ def ad_hoc_finding(request, pid):
             else:
                 form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'The form has errors, please correct them below.',
-                                 extra_tags='alert-danger')
+            add_error_message_to_response('The form has errors, please correct them below.')
+            add_field_errors_to_response(jform)
+            add_field_errors_to_response(form)
+
     else:
         if use_jira:
             jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix='jiraform',
-                                    jira_project=jira_helper.get_jira_project(test))
+                                    jira_project=jira_helper.get_jira_project(test), finding_form=form)
 
         if get_system_setting('enable_github'):
             if GITHUB_PKey.objects.filter(product=test.engagement.product).count() != 0:
@@ -1306,8 +1331,7 @@ def ad_hoc_finding(request, pid):
                    })
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'staff')
 def engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     presets = Engagement_Presets.objects.filter(product=prod).all()
@@ -1320,8 +1344,7 @@ def engagement_presets(request, pid):
                    'prod': prod})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def edit_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1347,8 +1370,7 @@ def edit_engagement_presets(request, pid, eid):
                    'prod': prod})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def add_engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1371,8 +1393,7 @@ def add_engagement_presets(request, pid):
     return render(request, 'dojo/new_params.html', {'tform': tform, 'pid': pid, 'product_tab': product_tab})
 
 
-# @user_passes_test(lambda u: u.is_staff)
-@user_must_be_authorized(Product, 'staff', 'pid')
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def delete_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets, id=eid)
@@ -1402,6 +1423,7 @@ def delete_engagement_presets(request, pid, eid):
                    })
 
 
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def edit_notifications(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == 'POST':
@@ -1423,3 +1445,94 @@ def edit_notifications(request, pid):
                                  extra_tags='alert-success')
 
     return HttpResponseRedirect(reverse('view_product', args=(pid,)))
+
+
+@user_is_authorized(Product, Permissions.Product_Manage_Members, 'pid')
+def add_product_member(request, pid):
+    product = get_object_or_404(Product, pk=pid)
+    memberform = Add_Product_MemberForm(initial={'product': product.id})
+    if request.method == 'POST':
+        memberform = Add_Product_MemberForm(request.POST, initial={'product': product.id})
+        if memberform.is_valid():
+            members = Product_Member.objects.filter(product=product, user=memberform.instance.user)
+            if members.count() > 0:
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'Product member already exists.',
+                                    extra_tags='alert-warning')
+            elif memberform.instance.role == Roles.Owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'You are not permitted to add users as owners.',
+                                    extra_tags='alert-warning')
+            else:
+                memberform.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Product member added successfully.',
+                                    extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_product', args=(pid, )))
+    product_tab = Product_Tab(pid, title="Add Product Member", tab="settings")
+    return render(request, 'dojo/new_product_member.html', {
+        'product': product,
+        'form': memberform,
+        'product_tab': product_tab,
+    })
+
+
+@user_is_authorized(Product_Member, Permissions.Product_Manage_Members, 'memberid')
+def edit_product_member(request, memberid):
+    member = get_object_or_404(Product_Member, pk=memberid)
+    memberform = Edit_Product_MemberForm(instance=member)
+    if request.method == 'POST':
+        memberform = Edit_Product_MemberForm(request.POST, instance=member)
+        if memberform.is_valid():
+            if member.role == Roles.Owner and not user_has_permission(request.user, member.product, Permissions.Product_Member_Add_Owner):
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'You are not permitted to make users to owners.',
+                                    extra_tags='alert-warning')
+            else:
+                memberform.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Product member updated successfully.',
+                                    extra_tags='alert-success')
+                if is_title_in_breadcrumbs('View User'):
+                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+    product_tab = Product_Tab(member.product.id, title="Edit Product Member", tab="settings")
+    return render(request, 'dojo/edit_product_member.html', {
+        'memberid': memberid,
+        'form': memberform,
+        'product_tab': product_tab,
+    })
+
+
+@user_is_authorized(Product_Member, Permissions.Product_Member_Delete, 'memberid')
+def delete_product_member(request, memberid):
+    member = get_object_or_404(Product_Member, pk=memberid)
+    memberform = Delete_Product_MemberForm(instance=member)
+    if request.method == 'POST':
+        memberform = Delete_Product_MemberForm(request.POST, instance=member)
+        member = memberform.instance
+        user = member.user
+        member.delete()
+        messages.add_message(request,
+                            messages.SUCCESS,
+                            'Product member deleted successfully.',
+                            extra_tags='alert-success')
+        if is_title_in_breadcrumbs('View User'):
+            return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+        else:
+            if user == request.user:
+                return HttpResponseRedirect(reverse('product'))
+            else:
+                return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+    product_tab = Product_Tab(member.product.id, title="Delete Product Member", tab="settings")
+    return render(request, 'dojo/delete_product_member.html', {
+        'memberid': memberid,
+        'form': memberform,
+        'product_tab': product_tab,
+    })

@@ -1,8 +1,9 @@
 import logging
 import mimetypes
 import os
+import re
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -12,14 +13,14 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, JsonResponse
 from django.http import HttpResponse
+from django_filters.filters import _truncate
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-from django.db.models import Q
 
 from dojo.celery import app
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter, \
-    EndpointFilter
+    EndpointFilter, now
 from dojo.forms import ReportOptionsForm, DeleteReportForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
     Dojo_User, Endpoint, Report, Risk_Acceptance
@@ -28,7 +29,11 @@ from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGC
 from dojo.tasks import async_pdf_report, async_custom_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
     get_words_for_field, redirect
-from dojo.user.helper import user_must_be_authorized, check_auth_users_list
+from dojo.user.helper import check_auth_users_list
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.finding.queries import get_authorized_findings
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +57,7 @@ def report_url_resolver(request):
 
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
-    findings = Finding.objects.all()
+    findings = get_authorized_findings(Permissions.Finding_View)
     findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
@@ -338,49 +343,42 @@ def regen_report(request, rid):
         return HttpResponseRedirect(reverse('reports'))
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid', 'view')
 def product_type_report(request, ptid):
     product_type = get_object_or_404(Product_Type, id=ptid)
     return generate_report(request, product_type)
 
 
-@user_must_be_authorized(Product, 'view', 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def product_report(request, pid):
     product = get_object_or_404(Product, id=pid)
     return generate_report(request, product)
 
 
 def product_findings_report(request):
-    if request.user.is_staff:
-        findings = Finding.objects.filter().distinct()
-    else:
-        findings = Finding.objects.filter(
-            Q(test__engagement__product__authorized_users__in=[request.user]) |
-            Q(test__engagement__product__prod_type__authorized_users__in=[request.user])
-        )
-
+    findings = get_authorized_findings(Permissions.Finding_View)
     return generate_report(request, findings)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_View, 'eid', 'view')
 def engagement_report(request, eid):
     engagement = get_object_or_404(Engagement, id=eid)
     return generate_report(request, engagement)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'view')
 def test_report(request, tid):
     test = get_object_or_404(Test, id=tid)
     return generate_report(request, test)
 
 
-@user_must_be_authorized(Endpoint, 'view', 'eid')
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
 def endpoint_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint)
 
 
-@user_must_be_authorized(Product, 'view', 'pid')
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def product_endpoint_report(request, pid):
     user = Dojo_User.objects.get(id=request.user.id)
     product = get_object_or_404(Product.objects.all().prefetch_related('engagement_set__test_set__test_type', 'engagement_set__test_set__environment'), id=pid)
@@ -403,6 +401,10 @@ def product_endpoint_report(request, pid):
     include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
+    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
+    disclaimer = get_system_setting('disclaimer')
+    if include_disclaimer and len(disclaimer) == 0:
+        disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
     add_breadcrumb(parent=product, title="Vulnerable Product Endpoints Report", top_level=False, request=request)
     report_form = ReportOptionsForm()
@@ -468,6 +470,8 @@ def product_endpoint_report(request, pid):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': request.user,
                            'title': 'Generate Report',
                            })
@@ -506,6 +510,8 @@ def product_endpoint_report(request, pid):
                                             'include_finding_images': include_finding_images,
                                             'include_executive_summary': include_executive_summary,
                                             'include_table_of_contents': include_table_of_contents,
+                                            'include_disclaimer': include_disclaimer,
+                                            'disclaimer': disclaimer,
                                             'user': user,
                                             'team_name': get_system_setting('team_name'),
                                             'title': 'Generate Report',
@@ -530,6 +536,8 @@ def product_endpoint_report(request, pid):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': request.user,
                            'title': 'Generate Report',
                            })
@@ -567,16 +575,36 @@ def generate_report(request, obj):
     report_info = "Generated By %s on %s" % (
         user.get_full_name(), (timezone.now().strftime("%m/%d/%Y %I:%M%p %Z")))
 
-    if type(obj).__name__ == "Product":
-        if request.user.is_staff or check_auth_users_list(request.user, obj):
-            pass  # user is authorized for this product
+    if type(obj).__name__ == "Product_Type":
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, obj, Permissions.Product_Type_View)
         else:
-            raise PermissionDenied
+            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
+                raise PermissionDenied
+    elif type(obj).__name__ == "Product":
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, obj, Permissions.Product_View)
+        else:
+            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
+                raise PermissionDenied
+    elif type(obj).__name__ == "Engagement":
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
+        else:
+            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
+                raise PermissionDenied
+    elif type(obj).__name__ == "Test":
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, obj, Permissions.Test_View)
+        else:
+            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
+                raise PermissionDenied
     elif type(obj).__name__ == "Endpoint":
-        if request.user.is_staff or check_auth_users_list(request.user, obj):
-            pass  # user is authorized for this product
+        if settings.FEATURE_AUTHORIZATION_V2:
+            user_has_permission_or_403(request.user, obj, Permissions.Endpoint_View)
         else:
-            raise PermissionDenied
+            if not (request.user.is_staff or check_auth_users_list(request.user, obj)):
+                raise PermissionDenied
     elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet":
         # authorization taken care of by only selecting findings from product user is authed to see
         pass
@@ -589,6 +617,10 @@ def generate_report(request, obj):
     include_finding_images = int(request.GET.get('include_finding_images', 0))
     include_executive_summary = int(request.GET.get('include_executive_summary', 0))
     include_table_of_contents = int(request.GET.get('include_table_of_contents', 0))
+    include_disclaimer = int(request.GET.get('include_disclaimer', 0))
+    disclaimer = get_system_setting('disclaimer')
+    if include_disclaimer and len(disclaimer) == 0:
+        disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
     report_name = str(obj)
     report_type = type(obj).__name__
@@ -638,6 +670,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -667,6 +701,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -698,6 +734,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -722,6 +760,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -750,6 +790,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': get_system_setting('team_name'),
                    'title': report_title,
@@ -771,6 +813,8 @@ def generate_report(request, obj):
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
                    'include_table_of_contents': include_table_of_contents,
+                   'include_disclaimer': include_disclaimer,
+                   'disclaimer': disclaimer,
                    'user': user,
                    'team_name': settings.TEAM_NAME,
                    'title': report_title,
@@ -796,6 +840,8 @@ def generate_report(request, obj):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': user,
                            'team_name': settings.TEAM_NAME,
                            'title': report_title,
@@ -850,6 +896,8 @@ def generate_report(request, obj):
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
                            'include_table_of_contents': include_table_of_contents,
+                           'include_disclaimer': include_disclaimer,
+                           'disclaimer': disclaimer,
                            'user': user,
                            'team_name': settings.TEAM_NAME,
                            'title': report_title,
@@ -909,3 +957,207 @@ def prefetch_related_endpoints_for_report(endpoints):
                                       'product',
                                       'tags'
                                      )
+
+
+def generate_quick_report(request, findings, obj=None):
+    product = engagement = test = None
+
+    if obj:
+        if type(obj).__name__ == "Product":
+            product = obj
+            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+        elif type(obj).__name__ == "Engagement":
+            engagement = obj
+            user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
+        elif type(obj).__name__ == "Test":
+            test = obj
+            user_has_permission_or_403(request.user, test, Permissions.Test_View)
+
+    return render(request, 'dojo/finding_pdf_report.html', {
+                    'report_name': 'Finding Report',
+                    'product': product,
+                    'engagement': engagement,
+                    'test': test,
+                    'findings': findings,
+                    'user': request.user,
+                    'team_name': settings.TEAM_NAME,
+                    'title': 'Finding Report',
+                    'user_id': request.user.id,
+                  })
+
+
+def validate_date(date, filter_lookup):
+    # Today
+    if date == 1:
+        filter_lookup['date__year'] = now().year
+        filter_lookup['date__month'] = now().month
+        filter_lookup['date__day'] = now().day
+    # Past 7 Days
+    elif date == 2:
+        filter_lookup['date__gte'] = _truncate(now() - timedelta(days=7))
+        filter_lookup['date__lt'] = _truncate(now() + timedelta(days=1))
+    # Past 30 Days
+    elif date == 3:
+        filter_lookup['date__gte'] = _truncate(now() - timedelta(days=30))
+        filter_lookup['date__lt'] = _truncate(now() + timedelta(days=1))
+    # Past 90 Days
+    elif date == 4:
+        filter_lookup['date__gte'] = _truncate(now() - timedelta(days=90))
+        filter_lookup['date__lt'] = _truncate(now() + timedelta(days=1))
+    # Current Month
+    elif date == 5:
+        filter_lookup['date__year'] = now().year
+        filter_lookup['date__month'] = now().month
+    # Current Year
+    elif date == 6:
+        filter_lookup['date__year'] = now().year
+    # Past Year
+    elif date == 7:
+        filter_lookup['date__gte'] = _truncate(now() - timedelta(days=365))
+        filter_lookup['date__lt'] = _truncate(now() + timedelta(days=1))
+
+
+def validate(field, value):
+    validated_field = field
+    validated_value = None
+    # Boolean values
+    if value in ['true', 'false', 'unknown']:
+        if value == 'true':
+            validated_value = True
+        elif value == 'false':
+            validated_value = False
+    # Tags (lists)
+    elif 'tags' in field:
+        validated_field = value.split(', ')
+        validated_field = field + '__in'
+    else:
+        # Integer (ID) values
+        try:
+            validated_value = int(value)
+            if field not in ['nb_occurences', 'nb_occurences', 'date', 'cwe']:
+                validated_field = field + '__id'
+        except ValueError:
+            # Okay it must be a string
+            validated_value = None if not len(value) else value
+    return (validated_field, validated_value)
+
+
+def parse_query(filter_lookup, query):
+    if query:
+        split_items = query.split('&')
+        items = []
+        for item in split_items:
+            query_split = item.split('=')
+            items.append((query_split[0], urllib.parse.unquote(query_split[1]).replace('+', ' ')))
+            field = query_split[0]
+            value = urllib.parse.unquote(query_split[1]).replace('+', ' ')
+            validated_data = validate(field, value)
+            # value could be False
+            if validated_data[1] is not None:
+                filter_lookup[validated_data[0]] = validated_data[1]
+        # Handle the date if specified
+        date = filter_lookup.pop('date', None)
+        if date:
+            validated_date = validate_date(date, filter_lookup)
+        # Handle the ordering if specified
+        order = filter_lookup.pop('o', None)
+        findings = Finding.objects.filter(**filter_lookup)
+        if order:
+            findings = findings.order_by(order)
+    else:
+        findings = Finding.objects.filter(**filter_lookup)
+    return findings
+
+
+def get_view(filter_lookup, obj_name, obj_id, view):
+    obj = None
+    if obj_id:
+        if 'product' in obj_name:
+            obj = get_object_or_404(Product, id=obj_id)
+            filter_lookup['test__engagement__product__id'] = obj_id
+        elif 'engagement' in obj_name:
+            obj = get_object_or_404(Engagement, id=obj_id)
+            filter_lookup['test__engagement__id'] = obj_id
+        elif 'test' in obj_name:
+            obj = get_object_or_404(Test, id=obj_id)
+            filter_lookup['test__id'] = obj_id
+
+    if view:
+        if view == 'open':
+            filter_lookup['active'] = True
+        elif view == 'inactive':
+            filter_lookup['active'] = True
+        elif view == 'verified':
+            filter_lookup['verified'] = True
+        elif view == 'closed':
+            filter_lookup['is_Mitigated'] = True
+        elif view == 'accepted':
+            filter_lookup['risk_accepted'] = True
+        elif view == 'out_of_scope':
+            filter_lookup['out_of_scope'] = True
+            filter_lookup['active'] = False
+        elif view == 'false_positive':
+            filter_lookup['false_positive'] = True
+            filter_lookup['active'] = False
+            filter_lookup['duplicate'] = False
+        elif view == 'inactive':
+            filter_lookup['false_positive'] = False
+            filter_lookup['active'] = False
+            filter_lookup['duplicate'] = False
+            filter_lookup['is_Mitigated'] = False
+            filter_lookup['out_of_scope'] = False
+
+    return obj
+
+
+def get_list_index(list, index):
+    try:
+        element = list[index]
+    except Exception as e:
+        element = None
+    return element
+
+
+def quick_report(request):
+    url = request.GET.get('url', None)
+    if not url:
+        raise Http404('Please use the report button when viewing findings')
+
+    views = ['all', 'open', 'inactive', 'verified',
+             'closed', 'accepted', 'out_of_scope',
+             'false_positive', 'inactive']
+    request.path = url
+    obj_name = obj_id = view = query = None
+    path_items = list(filter(None, re.split('/|\?', url))) # noqa W605
+    try:
+        finding_index = path_items.index('finding')
+    except ValueError:
+        finding_index = -1
+    filter_lookup = {}
+    # There is a engagement or product here
+    if finding_index > 0:
+        # path_items ['product', '1', 'finding', 'closed', 'test__engagement__product=1']
+        obj_name = get_list_index(path_items, 0)
+        obj_id = get_list_index(path_items, 1)
+        view = get_list_index(path_items, 3)
+        query = get_list_index(path_items, 4)
+        # Try to catch a mix up
+        query = query if view in views else view
+    # This is findings only. Accomodate view and query
+    elif finding_index == 0:
+        # path_items ['finding', 'closed', 'title=blah']
+        obj_name = get_list_index(path_items, 0)
+        view = get_list_index(path_items, 1)
+        query = get_list_index(path_items, 2)
+        # Try to catch a mix up
+        query = query if view in views else view
+    # This is a test or engagement only
+    elif finding_index == -1:
+        # path_items ['test', '1', 'test__engagement__product=1']
+        obj_name = get_list_index(path_items, 0)
+        obj_id = get_list_index(path_items, 1)
+        query = get_list_index(path_items, 2)
+
+    obj = get_view(filter_lookup, obj_name, obj_id, view)
+    findings = parse_query(filter_lookup, query)
+    return generate_quick_report(request, findings, obj)

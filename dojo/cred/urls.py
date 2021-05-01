@@ -1,6 +1,4 @@
 from django.conf.urls import url
-from django.contrib import admin
-from django.apps import apps
 from . import views
 
 urlpatterns = [
@@ -26,4 +24,5 @@ urlpatterns = [
     url(r'^test/(?P<tid>\d+)/cred/(?P<ttid>\d+)/delete$', views.delete_cred_test, name='delete_cred_test'),
     url(r'^finding/(?P<fid>\d+)/cred/add$', views.new_cred_finding, name='new_cred_finding'),
     url(r'^finding/(?P<fid>\d+)/cred/(?P<ttid>\d+)/view$', views.view_cred_finding, name='view_cred_finding'),
-    url(r'^finding/(?P<fid>\d+)/cred/(?P<ttid>\d+)/delete$', views.delete_cred_finding, name='delete_cred_finding'), ]
+    url(r'^finding/(?P<fid>\d+)/cred/(?P<ttid>\d+)/delete$', views.delete_cred_finding, name='delete_cred_finding'),
+]

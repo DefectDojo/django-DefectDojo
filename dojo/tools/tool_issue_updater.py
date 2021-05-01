@@ -1,4 +1,4 @@
-from celery.decorators import task
+from dojo.celery import app
 
 from dojo.decorators import (dojo_async_task, dojo_model_from_id,
                              dojo_model_to_id)
@@ -17,7 +17,7 @@ def is_tool_issue_updater_needed(finding, *args, **kwargs):
 
 @dojo_model_to_id
 @dojo_async_task
-@task
+@app.task
 @dojo_model_from_id
 def tool_issue_updater(finding, *args, **kwargs):
 
@@ -29,7 +29,7 @@ def tool_issue_updater(finding, *args, **kwargs):
 
 
 @dojo_async_task
-@task
+@app.task
 def update_findings_from_source_issues():
     from dojo.tools.sonarqube_api.updater_from_source import \
         SonarQubeApiUpdaterFromSource

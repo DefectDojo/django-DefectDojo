@@ -4,9 +4,9 @@ from django.shortcuts import render
 from watson import search as watson
 from django.db.models import Q
 from dojo.forms import SimpleSearchForm
-from dojo.models import Finding, Finding_Template, Product, Test, Endpoint, Engagement, Languages, \
+from dojo.models import Finding, Finding_Template, Product, Test, Engagement, Languages, \
     App_Analysis
-from dojo.utils import add_breadcrumb, get_words_for_field
+from dojo.utils import add_breadcrumb, get_page_items, get_words_for_field
 import re
 from dojo.finding.views import prefetch_for_findings
 from dojo.endpoint.views import prefetch_for_endpoints
@@ -14,6 +14,12 @@ from dojo.filters import OpenFindingFilter
 from django.conf import settings
 import shlex
 import itertools
+from dojo.product.queries import get_authorized_products
+from dojo.engagement.queries import get_authorized_engagements
+from dojo.test.queries import get_authorized_tests
+from dojo.finding.queries import get_authorized_findings
+from dojo.endpoint.queries import get_authorized_endpoints
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
@@ -81,20 +87,12 @@ def simple_search(request):
             search_languages = "language" in operators or search_tags or not (operators or search_finding_id or search_cve)
             search_technologies = "technology" in operators or search_tags or not (operators or search_finding_id or search_cve)
 
-            authorized_findings = Finding.objects.all()
-            authorized_tests = Test.objects.all()
-            authorized_engagements = Engagement.objects.all()
-            authorized_products = Product.objects.all()
-            authorized_endpoints = Endpoint.objects.all()
+            authorized_findings = get_authorized_findings(Permissions.Finding_View)
+            authorized_tests = get_authorized_tests(Permissions.Test_View)
+            authorized_engagements = get_authorized_engagements(Permissions.Engagement_View)
+            authorized_products = get_authorized_products(Permissions.Product_View)
+            authorized_endpoints = get_authorized_endpoints(Permissions.Endpoint_View)
             authorized_finding_templates = Finding_Template.objects.all()
-
-            if not request.user.is_staff:
-                authorized_findings = authorized_findings.filter(Q(test__engagement__product__authorized_users__in=[request.user]) | Q(test__engagement__product__prod_type__authorized_users__in=[request.user]))
-                authorized_tests = authorized_tests.filter(Q(engagement__product__authorized_users__in=[request.user]) | Q(engagement__product__prod_type__authorized_users__in=[request.user]))
-                authorized_engagements = authorized_engagements.filter(Q(product__authorized_users__in=[request.user]) | Q(product__prod_type__authorized_users__in=[request.user]))
-                authorized_products = authorized_products.filter(Q(authorized_users__in=[request.user]) | Q(prod_type__authorized_users__in=[request.user]))
-                authorized_endpoints = authorized_endpoints.filter(Q(product__authorized_users__in=[request.user]) | Q(product__prod_type__authorized_users__in=[request.user]))
-                # can't filter templates
 
             # TODO better get findings in their own query and match on id. that would allow filtering on additional fields such cve, prod_id, etc.
 
@@ -142,11 +140,13 @@ def simple_search(request):
             # prefetch after watson to avoid inavlid query errors due to watson not understanding prefetching
             if findings is not None:  # check for None to avoid query execution
                 logger.debug('prefetching findings')
-                findings = prefetch_for_findings(findings)
-                # some over the top tag displaying happening...
-                findings = findings.prefetch_related('test__engagement__product__tags')
 
-                findings = findings[:max_results]
+                findings = get_page_items(request, findings, 25)
+
+                findings.object_list = prefetch_for_findings(findings.object_list)
+
+                # some over the top tag displaying happening...
+                findings.object_list = findings.object_list.prefetch_related('test__engagement__product__tags')
 
             tag = operators['tag'] if 'tag' in operators else keywords
             tags = operators['tags'] if 'tags' in operators else keywords
@@ -162,12 +162,12 @@ def simple_search(request):
                 if tags:
                     Q2 = Q(tags__name__in=tags)
 
-                tagged_findings = authorized_findings.filter(Q1 | Q2).distinct()[:max_results]
+                tagged_findings = authorized_findings.filter(Q1 | Q2).distinct()[:max_results].prefetch_related('tags')
                 tagged_finding_templates = authorized_finding_templates.filter(Q1 | Q2).distinct()[:max_results]
-                tagged_tests = authorized_tests.filter(Q1 | Q2).distinct()[:max_results]
-                tagged_engagements = authorized_engagements.filter(Q1 | Q2).distinct()[:max_results]
-                tagged_products = authorized_products.filter(Q1 | Q2).distinct()[:max_results]
-                tagged_endpoints = authorized_endpoints.filter(Q1 | Q2).distinct()[:max_results]
+                tagged_tests = authorized_tests.filter(Q1 | Q2).distinct()[:max_results].prefetch_related('tags')
+                tagged_engagements = authorized_engagements.filter(Q1 | Q2).distinct()[:max_results].prefetch_related('tags')
+                tagged_products = authorized_products.filter(Q1 | Q2).distinct()[:max_results].prefetch_related('tags')
+                tagged_endpoints = authorized_endpoints.filter(Q1 | Q2).distinct()[:max_results].prefetch_related('tags')
             else:
                 tagged_findings = None
                 tagged_finding_templates = None
@@ -515,7 +515,10 @@ def perform_keyword_search_for_operator(qs, operators, operator, keywords_query)
 
     if keywords_query:
         logger.debug('going watson with: %s', keywords_query)
+        # watson is too slow to get all results or even to count them
+        # counting also results in invalid queries with group by errors
         watson_results = watson.filter(qs, keywords_query)[:max_results]
+        # watson_results = watson.filter(qs, keywords_query)
         qs = qs.filter(id__in=[watson.id for watson in watson_results])
 
     return qs

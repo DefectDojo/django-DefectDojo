@@ -1,4 +1,5 @@
 {% load display_tags %}
+{% load authorization_tags %}
 {% load static %}
 {% load get_endpoint_status %}
 
@@ -108,7 +109,7 @@
 
                         <table id="vuln_endpoints" class="table-striped table table-hover">
                             <thead>
-                                {% if user|is_authorized_for_change:finding %}
+                                {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                     <th class="hidden-sm" title="Select all vulnerable endpoints." style="width: 10%;">
                                         <form class="inline-form" action="#">
                                             <input type="checkbox" label="select_all_vulnerable" name="select_all_vulnerable" id="select_all_vulnerable"/>
@@ -124,7 +125,7 @@
                             <tbody>
                                 {% for endpoint in endpoints %}
                                     <tr>
-                                        {% if user|is_authorized_for_change:endpoint %}
+                                        {% if user|is_authorized_for_change:endpoint or finding|has_object_permission:"Finding_Edit" %}
                                             <td class="hidden-sm">
                                                 <form action="#">
                                                     <input type="checkbox" label="select_vulnerable_{{ endpoint.id }}" name="select_vulnerable_{{ endpoint.id }}" id="{{ endpoint.id }}"
@@ -168,7 +169,7 @@
                         </div>
                         <table id="remd_endpoints" class="table-striped table table-hover">
                             <thead>
-                                {% if user|is_authorized_for_change:finding %}
+                                {% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
                                     <th class="hidden-sm" title="Select all mitigated endpoints." style="width: 10%;">
                                         <form class="inline-form" action="#">
                                             <input type="checkbox" label="select_all_mitigated" name="select_all_mitigated" id="select_all_mitigated"/>
@@ -184,7 +185,7 @@
                             <tbody>
                                 {% for endpoint in endpoints %}
                                     <tr>
-                                        {% if user|is_authorized_for_change:endpoint %}
+                                        {% if user|is_authorized_for_change:endpoint or finding|has_object_permission:"Finding_Edit" %}
                                             <td class="hidden-sm">
                                                 <form action="#">
                                                     <input type="checkbox" label="select_mitigated_{{ endpoint.id }}" name="select_mitigated_{{ endpoint.id }}" id="{{ endpoint.id }}"

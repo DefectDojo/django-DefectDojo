@@ -9,6 +9,16 @@ class OssIndexDevauditParser(object):
     Parses files created by the Sonatype OssIndex Devaudit tool
     https://github.com/sonatype-nexus-community/DevAudit
     """
+
+    def get_scan_types(self):
+        return ["OssIndex Devaudit SCA Scan Importer"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import OssIndex Devaudit SCA Scan in json format."
+
     def get_findings(self, json_file, test):
 
         tree = self.parse_json(json_file)
@@ -68,8 +78,6 @@ def get_item(dependency_name, dependency_version, dependency_source, vulnerabili
                       cvssv3=vulnerability['cvssVector'].replace('CVSS:3.0', ''),
                       mitigation='Upgrade the component to the latest non-vulnerable version, or remove the package if it is not in use.',
                       references=vulnerability.get('reference', ''),
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,
