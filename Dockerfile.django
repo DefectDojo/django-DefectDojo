@@ -23,7 +23,6 @@ RUN \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
 FROM python:3.8.9-slim-buster@sha256:5d9e29ce2be0f6b0939691ac1331c4a42a2678d13c918a8eba00698449209ef1
@@ -55,7 +54,6 @@ RUN \
   true
 COPY --from=build /tmp/wheels /tmp/wheels
 COPY requirements.txt ./
-RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 install \
 	--no-cache-dir \
 	--no-index \
