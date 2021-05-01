@@ -1087,7 +1087,7 @@ def get_view(filter_lookup, obj_name, obj_id, view):
         elif view == 'verified':
             filter_lookup['verified'] = True
         elif view == 'closed':
-            filter_lookup['is_Mitigated'] = True
+            filter_lookup['is_mitigated'] = True
         elif view == 'accepted':
             filter_lookup['risk_accepted'] = True
         elif view == 'out_of_scope':
@@ -1101,7 +1101,7 @@ def get_view(filter_lookup, obj_name, obj_id, view):
             filter_lookup['false_positive'] = False
             filter_lookup['active'] = False
             filter_lookup['duplicate'] = False
-            filter_lookup['is_Mitigated'] = False
+            filter_lookup['is_mitigated'] = False
             filter_lookup['out_of_scope'] = False
 
     return obj

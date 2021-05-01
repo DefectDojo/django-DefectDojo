@@ -246,9 +246,9 @@ class NessusParser(object):
 
     def get_findings(self, filename, test):
 
-        if filename.name.lower().endswith('.xml'):
+        if filename.name.lower().endswith('.xml') or filename.name.lower().endswith('.nessus'):
             return NessusXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith('.csv'):
             return NessusCSVParser().get_findings(filename, test)
         else:
-            raise ValueError('Unknown File Format')
+            raise ValueError('Filename extension not recognized. Use .xml, .nessus or .csv')

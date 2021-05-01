@@ -193,7 +193,7 @@ class DojoDefaultImporter(object):
 
         for old_finding in old_findings:
             old_finding.active = False
-            old_finding.is_Mitigated = True
+            old_finding.is_mitigated = True
             old_finding.mitigated = scan_date_time
             old_finding.notes.create(author=user,
                                         entry="This finding has been automatically closed"

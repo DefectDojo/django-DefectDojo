@@ -352,7 +352,7 @@ def set_duplicate(new_finding, existing_finding):
 
 
 def is_duplicate_reopen(new_finding, existing_finding):
-    if (existing_finding.is_Mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_Mitigated:
+    if (existing_finding.is_mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_mitigated:
         return True
     else:
         return False
@@ -361,7 +361,7 @@ def is_duplicate_reopen(new_finding, existing_finding):
 def set_duplicate_reopen(new_finding, existing_finding):
     logger.debug('duplicate reopen existing finding')
     existing_finding.mitigated = new_finding.mitigated
-    existing_finding.is_Mitigated = new_finding.is_Mitigated
+    existing_finding.is_mitigated = new_finding.is_mitigated
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
@@ -1766,9 +1766,9 @@ def sla_compute_and_notify(*args, **kwargs):
 
             query = None
             if settings.SLA_NOTIFY_ACTIVE:
-                query = Q(active=True, is_Mitigated=False, duplicate=False)
+                query = Q(active=True, is_mitigated=False, duplicate=False)
             if settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
-                query = Q(active=True, verified=True, is_Mitigated=False, duplicate=False)
+                query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: {}".format(query))
 
             no_jira_findings = {}

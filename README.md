@@ -49,7 +49,7 @@ For detailed documentation you can visit
 ## Getting Started
 
 We recommend checking out the
-[about](https://defectdojo.github.io/django-DefectDojo/basics/about/) document to
+[about](https://defectdojo.github.io/basics/about/) document to
 learn the terminology of DefectDojo and the
 [getting started guide](https://defectdojo.github.io/django-DefectDojo/running/getting-started/)
 for setting up a new installation.
