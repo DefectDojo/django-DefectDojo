@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0071_product_type_enhancement'),
+        ('dojo', '0091_npm_audit_path_censoring'),
     ]
 
     operations = [
