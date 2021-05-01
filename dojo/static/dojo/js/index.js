@@ -122,10 +122,6 @@ function html_unescape(text) {
 function dismissAddAnotherPopupDojo(win, newId, newRepr) {
     // newId and newRepr are expected to have previously been escaped by
     // django.utils.html.escape.
-    console.log('from popup:')
-    console.log(win)
-    console.log(newId)
-    console.log(win)
     newId = html_unescape(newId);
     newRepr = html_unescape(newRepr);
     var name = windowname_to_id(win.name);
