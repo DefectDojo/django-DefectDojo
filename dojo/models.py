@@ -631,19 +631,6 @@ class Product(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
 
-    '''
-    The following three fields are deprecated and no longer in use.
-    They remain in model for backwards compatibility and will be removed
-    in a future release.  prod_manager, tech_contact, manager
-
-    The admin script migrate_product_contacts should be used to migrate data
-    from these fields to their replacements.
-    ./manage.py migrate_product_contacts
-    '''
-    prod_manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-    tech_contact = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-    manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                         related_name='product_manager', on_delete=models.CASCADE)
     technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
