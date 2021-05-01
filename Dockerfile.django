@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.7-slim-buster@sha256:327711ef71e4879ae6e7bc891993cfef77fff602957921cefad1276a1f7e03bd as build
+FROM python:3.8.9-slim-buster@sha256:5d9e29ce2be0f6b0939691ac1331c4a42a2678d13c918a8eba00698449209ef1 as build
 WORKDIR /app
 RUN \
   apt-get -y update && \
@@ -26,7 +26,7 @@ COPY requirements.txt ./
 RUN pip3 install --no-cache-dir --upgrade pip
 RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
 
-FROM python:3.7-slim-buster@sha256:327711ef71e4879ae6e7bc891993cfef77fff602957921cefad1276a1f7e03bd
+FROM python:3.8.9-slim-buster@sha256:5d9e29ce2be0f6b0939691ac1331c4a42a2678d13c918a8eba00698449209ef1
 WORKDIR /app
 ARG uid=1001
 ARG appuser=defectdojo

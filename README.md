@@ -49,7 +49,7 @@ For detailed documentation you can visit
 ## Getting Started
 
 We recommend checking out the
-[about](https://defectdojo.github.io/django-DefectDojo/basics/about/) document to
+[about](https://defectdojo.github.io/basics/about/) document to
 learn the terminology of DefectDojo and the
 [getting started guide](https://defectdojo.github.io/django-DefectDojo/running/getting-started/)
 for setting up a new installation.
@@ -155,19 +155,6 @@ More info: [Contributing guideline](CONTRIBUTING.md)
 
 We would also like to highlight the contributions from Michael Dong and Fatimah
 Zohra who contributed to DefectDojo before it was open source.
-
-### Swag Rewards
-
-If you fix an issue with the `swag reward` tag,  we'll send you a shirt and some
-stickers!
-
-![Dojo tshirt front](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/dojo_tshirt_front.png)
-
-## Support
-
-Proceeds are used for testing, infrastructure, etc.
-
-[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40owasp%2eorg&lc=US&item_name=OWASP%20DefectDojo&no_note=0&currency_code=USD&bn=PP%2dDonationsBF)
 
 ## Sponsors
 

@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 # please check the recorded files on sensitive data before committing to git
 
 
-class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
+class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -44,8 +44,8 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
-        my_vcr = super(JIRAConfigAndPushTestApi, self)._get_vcr(**kwargs)
-        my_vcr.record_mode = 'once'
+        my_vcr = super(JIRAImportAndPushTestApi, self)._get_vcr(**kwargs)
+        my_vcr.record_mode = 'none'
         my_vcr.path_transformer = VCR.ensure_suffix('.yaml')
         my_vcr.filter_headers = ['Authorization', 'X-Atlassian-Token']
         my_vcr.cassette_library_dir = 'dojo/unittests/vcr/jira/'
@@ -241,7 +241,7 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
         pre_jira_status = self.get_jira_issue_severity(new_finding_json['id'])
 
         self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True,
-                                                        "is_Mitigated": True,
+                                                        "is_mitigated": True,
                                                         "active": False})
         self.assert_jira_issue_count_in_test(test_id, 2)
         post_jira_status = self.get_jira_issue_severity(new_finding_json['id'])

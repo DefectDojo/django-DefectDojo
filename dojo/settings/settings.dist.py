@@ -799,7 +799,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'Dependency Check Scan': ['cve', 'file_path'],
+    'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],

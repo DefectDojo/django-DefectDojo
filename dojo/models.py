@@ -481,7 +481,7 @@ class Product_Type(models.Model):
     # only used by bulk risk acceptance api
     @property
     def unaccepted_open_findings(self):
-        return Finding.objects.filter(risk_accepted=False, active=True, verified=True, duplicate=False, test__engagement__product__prod_type=self)
+        return Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test__engagement__product__prod_type=self)
 
     class Meta:
         ordering = ('name',)
@@ -1569,7 +1569,7 @@ class Finding(models.Model):
                                                    on_delete=models.CASCADE,
                                                    verbose_name="Defect Review Requested By",
                                                    help_text="Documents who requested a defect review for this flaw.")
-    is_Mitigated = models.BooleanField(default=False,
+    is_mitigated = models.BooleanField(default=False,
                                        verbose_name="Is Mitigated",
                                        help_text="Denotes if this flaw has been fixed.")
     thread_id = models.IntegerField(default=0,
@@ -1750,7 +1750,7 @@ class Finding(models.Model):
         indexes = [
             models.Index(fields=['test', 'active', 'verified']),
 
-            models.Index(fields=['test', 'is_Mitigated']),
+            models.Index(fields=['test', 'is_mitigated']),
             models.Index(fields=['test', 'duplicate']),
             models.Index(fields=['test', 'out_of_scope']),
             models.Index(fields=['test', 'false_p']),
@@ -1776,8 +1776,8 @@ class Finding(models.Model):
             models.Index(fields=['line']),
             models.Index(fields=['component_name']),
             models.Index(fields=['duplicate']),
+            models.Index(fields=['is_mitigated']),
             models.Index(fields=['duplicate_finding', 'id']),
-            models.Index(fields=['is_Mitigated']),
         ]
 
     def get_absolute_url(self):
@@ -1983,7 +1983,7 @@ class Finding(models.Model):
             status += ['Inactive']
         if self.verified:
             status += ['Verified']
-        if self.mitigated or self.is_Mitigated:
+        if self.mitigated or self.is_mitigated:
             status += ['Mitigated']
         if self.false_p:
             status += ['False Positive']
@@ -2131,7 +2131,7 @@ class Finding(models.Model):
 
         # Title Casing
         from titlecase import titlecase
-        self.title = titlecase(self.title)
+        self.title = titlecase(self.title[:511])
 
         # Assign the numerical severity for correct sorting order
         self.numerical_severity = Finding.get_numerical_severity(self.severity)
@@ -2384,7 +2384,7 @@ class Finding_Group(TimeStampedModel):
         if any([find.active for find in self.findings.all()]):
             return 'Active'
 
-        if all([find.is_Mitigated for find in self.findings.all()]):
+        if all([find.is_mitigated for find in self.findings.all()]):
             return 'Mitigated'
 
         return 'Inactive'

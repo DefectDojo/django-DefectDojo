@@ -528,7 +528,7 @@
                             <span>Out of scope</span>
                         </label>
                         <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
+                            <input id="id_bulk_is_mitigated" name="is_mitigated" type="checkbox" disabled/>
                             <span>Mitigated</span>
                         </label>
 
@@ -767,7 +767,14 @@
                             {{ finding.severity_display }}
                             </span>
                         </td>
-                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+                        <td>
+                          {% if finding.title %}
+                          <a title="{{ finding.title }}"
+                                              href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+                          {% else %}
+                          <a title="{{ finding.id }}"
+                                              href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
+                          {% endif %}
                           {% if finding.file_path %}
                           <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
                             {% if finding.component_name %}
@@ -1265,18 +1272,18 @@
                 $('#bulk_edit_menu #id_bulk_verified').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', !checked);
             })
 
             $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', false);
             })
 
-            $('#bulk_edit_menu #id_bulk_is_Mitigated').on("click", function (e){
+            $('#bulk_edit_menu #id_bulk_is_mitigated').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
@@ -1290,7 +1297,7 @@
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', checked);
             })
 
             $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){
@@ -1335,9 +1342,9 @@
             $('#bulk_edit_menu #id_bulk_finding_group_create').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', false);
             })
 
             $('.finding_group_option').click(function () {

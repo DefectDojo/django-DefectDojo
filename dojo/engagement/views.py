@@ -416,7 +416,7 @@ def prefetch_for_view_tests(tests):
         prefetched = prefetched.annotate(count_findings_test_all=Count('finding__id', distinct=True))
         prefetched = prefetched.annotate(count_findings_test_active=Count('finding__id', filter=Q(finding__active=True), distinct=True))
         prefetched = prefetched.annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True), distinct=True))
+        prefetched = prefetched.annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_mitigated=True), distinct=True))
         prefetched = prefetched.annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True))
         prefetched = prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
 
@@ -601,7 +601,7 @@ def import_scan_results(request, eid=None, pid=None):
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
                             close_old_findings=close_old_findings)
 
-                message = scan_type + '%s processed a total of %s findings' % (scan_type, finding_count)
+                message = f'{scan_type} processed a total of {finding_count} findings'
 
                 if close_old_findings:
                     message = message + ' and closed %d findings' % (closed_finding_count)
