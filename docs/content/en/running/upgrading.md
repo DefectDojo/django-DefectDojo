@@ -120,6 +120,30 @@ If you're using docker:
 
 This can take a while depending on your instance size.
 
+Upgrading to DefectDojo Version 2.0.x.
+--------------------------------------
+
+WARNING: Upgrade to 1.15.x first before upgrading to 2.0.0, otherwise you will brick you instance.
+
+We decided to name this version 2.0.0 because we did some big cleanups in this release:
+
+- Remove API v1
+- Remove setup.bash installation method
+- Rename Fidning.is_Mitigated field to Finding.is_mitigated
+- Remove everything related to the old tagging library
+
+- See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.0.0
+
+- Hashcode calculation logic has changed. To update existing findings run:
+
+    `./manage.py dedupe --hash_code_only`
+
+If you're using docker:
+
+    `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`
+
+This can take a while depending on your instance size.
+
 
 Upgrading to DefectDojo Version 1.15.x
 --------------------------------------
