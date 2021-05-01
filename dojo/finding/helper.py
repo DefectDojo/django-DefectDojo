@@ -37,9 +37,9 @@ def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwar
 
 
 # also get signal when id is set/changed so we can process new findings
-pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_Mitigated', 'mitigated', 'mitigated_by', 'out_of_scope', 'risk_accepted'])
+pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope', 'risk_accepted'])
 # pre_save_changed.connect(pre_save_finding_status_change, sender=Finding)
-# post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_Mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
+# post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
 
 
 def update_finding_status(new_state_finding, user, changed_fields=None):
@@ -57,9 +57,9 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     # marked as duplicate
     # marked as original
 
-    if is_new_finding or 'is_Mitigated' in changed_fields:
+    if is_new_finding or 'is_mitigated' in changed_fields:
         # finding is being mitigated
-        if new_state_finding.is_Mitigated:
+        if new_state_finding.is_mitigated:
             # when mitigating a finding, the meta fields can only be editted if allowed
             logger.debug('finding being mitigated, set mitigated and mitigated_by fields')
 
@@ -76,7 +76,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             new_state_finding.mitigated_by = None
 
     # people may try to remove mitigated/mitigated_by by accident
-    if new_state_finding.is_Mitigated:
+    if new_state_finding.is_mitigated:
         new_state_finding.mitigated = new_state_finding.mitigated or now
         new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
 
@@ -85,7 +85,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
         if new_state_finding.active:
             new_state_finding.false_p = False
             new_state_finding.out_of_scope = False
-            new_state_finding.is_Mitigated = False
+            new_state_finding.is_mitigated = False
             new_state_finding.mitigated = None
             new_state_finding.mitigated_by = None
         else:
@@ -100,7 +100,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
         if new_state_finding.false_p or new_state_finding.out_of_scope:
             new_state_finding.mitigated = new_state_finding.mitigated or now
             new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
-            new_state_finding.is_Mitigated = True
+            new_state_finding.is_mitigated = True
             new_state_finding.active = False
             new_state_finding.verified = False
 

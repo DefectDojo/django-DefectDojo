@@ -1368,7 +1368,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 logger.debug("Marking related finding of {} as accepted. Creating risk acceptance.".format(jira_issue.jira_key))
                 finding.active = False
                 finding.mitigated = None
-                finding.is_Mitigated = False
+                finding.is_mitigated = False
                 finding.false_p = False
                 ra = Risk_Acceptance.objects.create(
                     accepted_by=assignee_name,
@@ -1383,17 +1383,17 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
                 finding.active = False
                 finding.verified = False
                 finding.mitigated = None
-                finding.is_Mitigated = False
+                finding.is_mitigated = False
                 finding.false_p = True
                 ra_helper.risk_unaccept(finding)
                 status_changed = True
         else:
             # Mitigated by default as before
-            if not finding.is_Mitigated:
+            if not finding.is_mitigated:
                 logger.debug("Marking related finding of {} as mitigated (default)".format(jira_issue.jira_key))
                 finding.active = False
                 finding.mitigated = jira_now
-                finding.is_Mitigated = True
+                finding.is_mitigated = True
                 finding.mitigated_by, created = User.objects.get_or_create(username='JIRA')
                 finding.endpoints.clear()
                 finding.false_p = False
@@ -1405,7 +1405,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name, assign
             logger.debug("Re-opening related finding of {}".format(jira_issue.jira_key))
             finding.active = True
             finding.mitigated = None
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             finding.false_p = False
             ra_helper.risk_unaccept(finding)
             status_changed = True

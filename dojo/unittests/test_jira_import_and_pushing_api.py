@@ -369,7 +369,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         pre_jira_status = self.get_jira_issue_status(new_finding_json['id'])
 
         self.patch_finding_api(new_finding_json['id'], {"push_to_jira": True,
-                                                        "is_Mitigated": True,
+                                                        "is_mitigated": True,
                                                         "active": False})
         self.assert_jira_issue_count_in_test(test_id, 2)
         self.assert_jira_group_issue_count_in_test(test_id, 0)
@@ -427,8 +427,8 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         pre_jira_status = self.get_jira_issue_status(findings['results'][0]['id'])
 
         # close both findings
-        self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_Mitigated": True, "push_to_jira": True})
-        self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_Mitigated": True, "push_to_jira": True})
+        self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
+        self.patch_finding_api(findings['results'][0]['id'], {"active": False, "is_mitigated": True, "push_to_jira": True})
 
         post_jira_status = self.get_jira_issue_status(findings['results'][0]['id'])
 
