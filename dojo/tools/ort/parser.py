@@ -5,8 +5,18 @@ from collections import namedtuple
 from dojo.models import Finding
 
 
-# Oss Review Toolkit Parser
 class OrtParser(object):
+    """Oss Review Toolkit Parser"""
+
+    def get_scan_types(self):
+        return ["ORT evaluated model Importer"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "ORT evaluated model Importer"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Outpost24 endpoint vulnerability scan in XML format."
+
     def get_findings(self, json_output, test):
 
         if json_output is None:
@@ -106,7 +116,13 @@ def get_rule_violation_model(rule_violation_unresolved, packages, licenses, depe
     for id in project_ids:
         project_names.append(get_name_id_for_package(packages, id))
     package = find_package_by_id(packages, rule_violation_unresolved['pkg'])
-    license_id = find_license_id(licenses, rule_violation_unresolved['license'])
+    if 'license' in rule_violation_unresolved:
+        license_tmp = rule_violation_unresolved['license']
+    else:
+        license_tmp = 'unset'
+    if 'license_source' not in rule_violation_unresolved:
+        rule_violation_unresolved['license_source'] = 'unset'
+    license_id = find_license_id(licenses, license_tmp)
 
     return RuleViolationModel(package, license_id, project_names, rule_violation_unresolved)
 
@@ -141,12 +157,9 @@ how to fix : {model.rule_violation['how_to_fix']}"""
 
     finding = Finding(title=model.rule_violation['rule'],
                       test=test,
-                      active=True,
-                      verified=True,
                       references=model.rule_violation['message'],
                       description=desc,
                       severity=severity,
-                      numerical_severity=Finding.get_number_severity(severity),
                       static_finding=True)
 
     return finding

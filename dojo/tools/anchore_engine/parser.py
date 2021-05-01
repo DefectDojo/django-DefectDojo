@@ -3,7 +3,16 @@ import json
 from dojo.models import Finding
 
 
-class AnchoreEngineScanParser(object):
+class AnchoreEngineParser(object):
+    def get_scan_types(self):
+        return ["Anchore Engine Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Anchore Engine Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Anchore-CLI JSON vulnerability report format."
+
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = dict()
@@ -21,6 +30,7 @@ class AnchoreEngineScanParser(object):
             findingdetail += '**Feed**: ' + item['feed'] + '/' + item['feed_group'] + '\n\n'
             findingdetail += '**CVE**: ' + cve + '\n\n'
             findingdetail += '**CPE**: ' + item['package_cpe'] + '\n\n'
+            findingdetail += '**Description**: ' + item.get('description', '<None>') + '\n\n'
 
             sev = item['severity']
             if sev == "Negligible" or sev == "Unknown":
@@ -28,6 +38,20 @@ class AnchoreEngineScanParser(object):
 
             mitigation = "Upgrade to " + item['package_name'] + ' ' + item['fix'] + '\n'
             mitigation += "URL: " + item['url'] + '\n'
+
+            cvssv3_base_score = None
+            if item['feed'] == 'nvdv2' or item['feed'] == 'vulnerabilities':
+                if 'nvd_data' in item and len(item['nvd_data']) > 0:
+                    cvssv3_base_score = item['nvd_data'][0]['cvss_v3']['base_score']
+            else:
+                # there may be other keys, but taking a best guess here
+                if 'vendor_data' in item and len(item['vendor_data']) > 0:
+                    # sometimes cvssv3 in 1st element will have -1 for "not set", but have data in the 2nd array item
+                    if 'cvss_v3' in item['vendor_data'][0] and item['vendor_data'][0]['cvss_v3']['base_score'] != -1:
+                        cvssv3_base_score = item['vendor_data'][0]['cvss_v3']['base_score']
+                    elif len(item['vendor_data']) > 1:
+                        if 'cvss_v3' in item['vendor_data'][1] and item['vendor_data'][1]['cvss_v3']['base_score'] != -1:
+                            cvssv3_base_score = item['vendor_data'][1]['cvss_v3']['base_score']
 
             references = item['url']
 
@@ -50,18 +74,19 @@ class AnchoreEngineScanParser(object):
                     title=title,
                     test=test,
                     cve=cve,
+                    cvssv3_score=cvssv3_base_score,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
-                    impact='No impact provided',
                     references=references,
                     file_path=item["package_path"],
                     component_name=item['package_name'],
                     component_version=item['package_version'],
                     url=item.get('url'),
                     static_finding=True,
-                    dynamic_finding=False)
+                    dynamic_finding=False,
+                    unique_id_from_tool=item.get('vuln'),
+                )
 
                 dupes[dupe_key] = find
 

@@ -4,11 +4,19 @@ import json
 from dojo.models import Finding
 
 
-class HuskyCIReportParser(object):
-
+class HuskyCIParser(object):
     """
     Read JSON data from huskyCI compatible format and import it to DefectDojo
     """
+
+    def get_scan_types(self):
+        return ["HuskyCI Report"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import HuskyCI Report vulnerabilities in JSON format."
 
     def get_findings(self, json_output, test):
 
@@ -69,8 +77,6 @@ def get_item(item_node, test):
         description=description,
         mitigation='N/A',
         references='',
-        active=False,
-        verified=False,
         false_p=False,
         duplicate=False,
         out_of_scope=False,

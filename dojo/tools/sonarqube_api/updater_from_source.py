@@ -4,6 +4,7 @@ from django.utils import timezone
 
 from dojo.models import Finding, Risk_Acceptance
 from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
+import dojo.risk_acceptance.helper as ra_helper
 
 logger = logging.getLogger(__name__)
 

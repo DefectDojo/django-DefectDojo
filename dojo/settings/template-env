@@ -60,15 +60,3 @@ DD_WHITENOISE=True
 
 # Admins for log emails
 # DD_ADMINS=Aaron:aaron@localhost,Greg:greg@localhost
-
-# Port scan contact email
-# DD_PORT_SCAN_CONTACT_EMAIL=email@localhost
-
-# Port scan from email
-# DD_PORT_SCAN_RESULT_EMAIL_FROM=email@localhost
-
-# Port scan email list
-# DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=['email@localhost']
-
-# Port scan source
-# DD_PORT_SCAN_SOURCE_IP=127.0.0.1

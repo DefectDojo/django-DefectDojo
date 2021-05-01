@@ -4,26 +4,19 @@ from dojo.models import Finding
 
 
 class HadolintParser(object):
+
+    def get_scan_types(self):
+        return ["Hadolint Dockerfile check"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Hadolint Dockerfile check findings in JSON format."
+
     def get_findings(self, json_output, test):
-
-        tree = self.parse_json(json_output)
-
-        if tree:
-            return self.get_items(tree, test)
-        else:
-            return list()
-
-    def parse_json(self, json_output):
-        json_output = json_output.read().strip()
-        try:
-            try:
-                tree = json.loads(str(json_output, 'utf-8'))
-            except:
-                tree = json.loads(json_output)
-        except ValueError:
-            raise Exception("Invalid format")
-
-        return tree
+        tree = json.load(json_output)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = {}
@@ -55,8 +48,6 @@ def get_item(vulnerability, test):
         severity=severity,
         description="File: {}:{}\nVulnerability ID: {}\nDetails: {}\n".format(vulnerability['file'], vulnerability['line'], vulnerability['code'], vulnerability['message']),
         mitigation="No mitigation provided",
-        active=False,
-        verified=False,
         false_p=False,
         duplicate=False,
         out_of_scope=False,

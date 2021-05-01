@@ -8,6 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 class NpmAuditParser(object):
+
+    def get_scan_types(self):
+        return ["NPM Audit Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "NPM Audit Scan json output up to v6 can be imported in JSON format."
+
     def get_findings(self, json_output, test):
         tree = self.parse_json(json_output)
         return self.get_items(tree, test)
@@ -49,6 +59,16 @@ class NpmAuditParser(object):
         return list(items.values())
 
 
+def censor_path_hashes(path):
+    """ https://github.com/npm/npm/issues/20739 for dependencies installed from git, npm audit replaces the name with a (random?) hash """
+    """ this hash changes on every run of npm audit, so defect dojo might think it's a new finding every run """
+    """ we strip the hash and replace it with 'censored_by_npm_audit` """
+    if not path:
+        return None
+
+    return re.sub('[a-f0-9]{64}', 'censored_by_npm_audit', path)
+
+
 def get_item(item_node, test):
 
     if item_node['severity'] == 'low':
@@ -81,7 +101,7 @@ def get_item(item_node, test):
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
-                      file_path=item_node['findings'][0]['paths'][0],
+                      file_path=censor_path_hashes(item_node['findings'][0]['paths'][0]),
                       description=item_node['url'] + "\n" +
                       item_node['overview'] + "\n Vulnerable Module: " +
                       item_node['module_name'] + "\n Vulnerable Versions: " +
@@ -96,8 +116,6 @@ def get_item(item_node, test):
                       references=item_node['url'],
                       component_name=item_node['module_name'],
                       component_version=component_version,
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,

@@ -5,6 +5,15 @@ from dojo.models import Finding
 
 class CheckovParser(object):
 
+    def get_scan_types(self):
+        return ["Checkov Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Checkov Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON reports of Infrastructure as Code vulnerabilities."
+
     def get_findings(self, json_output, test):
 
         if json_output is None:
@@ -73,7 +82,6 @@ def get_item(vuln, test, check_type):
     # Checkov doesn't define severities. Sine the findings are
     # vulnerabilities, we set them to Medium
     severity = 'Medium'
-    numerical_severity = Finding.get_numerical_severity(severity)
 
     mitigation = ''
 
@@ -83,11 +91,8 @@ def get_item(vuln, test, check_type):
 
     finding = Finding(title=title,
                       test=test,
-                      active=False,
-                      verified=False,
                       description=description,
                       severity=severity,
-                      numerical_severity=numerical_severity,
                       mitigation=mitigation,
                       references=references,
                       file_path=file_path,

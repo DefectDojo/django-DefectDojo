@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 # please check the recorded files on sensitive data before committing to git
 
 
-class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
+class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
@@ -44,8 +44,8 @@ class JIRAConfigAndPushTestApi(DojoVCRAPITestCase):
             self.assertTrue(self.cassette.all_played)
 
     def _get_vcr(self, **kwargs):
-        my_vcr = super(JIRAConfigAndPushTestApi, self)._get_vcr(**kwargs)
-        my_vcr.record_mode = 'once'
+        my_vcr = super(JIRAImportAndPushTestApi, self)._get_vcr(**kwargs)
+        my_vcr.record_mode = 'none'
         my_vcr.path_transformer = VCR.ensure_suffix('.yaml')
         my_vcr.filter_headers = ['Authorization', 'X-Atlassian-Token']
         my_vcr.cassette_library_dir = 'dojo/unittests/vcr/jira/'

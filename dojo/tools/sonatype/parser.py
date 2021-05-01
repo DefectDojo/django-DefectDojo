@@ -7,8 +7,18 @@ import json
 from dojo.models import Finding
 
 
-class SonatypeJSONParser(object):
+class SonatypeParser(object):
     # This parser does not deal with licenses information.
+
+    def get_scan_types(self):
+        return ["Sonatype Application Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Can be imported in JSON format"
+
     def get_findings(self, json_output, test):
         tree = json.load(json_output)
         return self.get_items(tree, test)
@@ -101,12 +111,9 @@ def get_item(vulnerability, test):
             cve=cve,
             test=test,
             severity=severity,
-            numerical_severity=Finding.get_numerical_severity(severity),
             description=finding_description,
             mitigation=status,
             references="{}\n{}\n".format(main_finding['url'], "\n".join(references)),
-            active=False,
-            verified=False,
             false_p=False,
             duplicate=False,
             out_of_scope=False,

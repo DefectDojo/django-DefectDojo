@@ -76,7 +76,7 @@ dojo/uploads/risk/*
 dojo/uploads/reports/*
 dojo/scans/scan*
 dojo/uploads/threat/*
-dojo/fixtures/initial_surveys.json
+# dojo/fixtures/initial_surveys.json
 .idea
 *.sqlite
 *.db
@@ -129,3 +129,7 @@ docker/extra_settings/*
 # Helm dependencies
 helm/defectdojo/charts
 
+# generates files for github pages
+docs/public
+docs/node_modules
+docs/resources

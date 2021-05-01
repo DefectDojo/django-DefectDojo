@@ -59,7 +59,7 @@ class TestUnitTest(BaseTestCase):
         # Click on the 'Engagement' Dropdown button
         driver.find_element_by_partial_link_text("Engagement").click()
         # 'click' the Add New Engagement option
-        driver.find_element_by_link_text("Add New Engagement").click()
+        driver.find_element_by_link_text("Add New Interactive Engagement").click()
         # Keep a good practice of clearing field before entering value
         # fill up at least all required input field options.
         # fields: 'Name', 'Description', 'Target Start', 'Target End', 'Testing Lead' and 'Status'
@@ -159,8 +159,10 @@ class TestUnitTest(BaseTestCase):
         # finding Date as a default value and can be safely skipped
         # finding Severity
         Select(driver.find_element_by_id("id_severity")).select_by_visible_text("High")
+        # cvss
+        driver.find_element_by_id("id_cvssv3").send_keys("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H")
         # finding Description
-        driver.find_element_by_id("id_severity").send_keys(Keys.TAB, "This is just a Test Case Finding2")
+        driver.find_element_by_id("id_cvssv3").send_keys(Keys.TAB, "This is just a Test Case Finding2")
         # Finding Mitigation
         # Use Javascript to bypass the editor by making Setting textArea style from none to inline
         # Any Text written to textarea automatically reflects in Editor field.

@@ -3,22 +3,20 @@ import json
 from dojo.models import Finding
 
 
-class AquaJSONParser(object):
+class AquaParser(object):
+
+    def get_scan_types(self):
+        return ["Aqua Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Aqua Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return ""
+
     def get_findings(self, json_output, test):
         tree = json.load(json_output)
         return self.get_items(tree, test)
-
-    def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return tree
 
     def get_items(self, tree, test):
         items = {}
@@ -47,6 +45,7 @@ def get_item(resource, vuln, test):
     cve = vuln.get('name', 'No CVE')
     fix_version = vuln.get('fix_version', 'None')
     description = vuln.get('description', 'No description.')
+    cvssv3 = None
 
     url = ""
     if 'nvd_url' in vuln:
@@ -72,6 +71,9 @@ def get_item(resource, vuln, test):
         score = vuln.get('nvd_score_v3')
         used_for_classification = "NVD score v3 ({}) used for classification.\n".format(score)
         severity_justification += "\nNVD v3 vectors: {}".format(vuln.get('nvd_vectors_v3'))
+        # Add the CVSS3 to Finding
+        cvssv3 = vuln.get('nvd_vectors_v3')
+
     severity_justification += "\n{}".format(used_for_classification)
 
     severity = severity_of(score)
@@ -83,6 +85,7 @@ def get_item(resource, vuln, test):
         severity_justification=severity_justification,
         cwe=0,
         cve=cve,
+        cvssv3=cvssv3,
         description=description.strip(),
         mitigation=fix_version,
         references=url,

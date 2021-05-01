@@ -1,0 +1,39 @@
+{
+	"random": 60,
+	"random float": 2.516,
+	"bool": true,
+	"date": "1989-06-14",
+	"regEx": "helloooooooo to you",
+	"enum": "generator",
+	"firstname": "Jillayne",
+	"lastname": "Berne",
+	"city": "Kandahar",
+	"country": "Bangladesh",
+	"countryCode": "AS",
+	"email uses current data": "Jillayne.Berne@gmail.com",
+	"email from expression": "Jillayne.Berne@yopmail.com",
+	"array": [
+		"Lizzie",
+		"Korrie",
+		"Micheline",
+		"Marylou",
+		"Brianna"
+	],
+	"array of objects": [
+		{
+			"index": 0,
+			"index start at 5": 5
+		},
+		{
+			"index": 1,
+			"index start at 5": 6
+		},
+		{
+			"index": 2,
+			"index start at 5": 7
+		}
+	],
+	"Roxane": {
+		"age": 76
+	}
+}
