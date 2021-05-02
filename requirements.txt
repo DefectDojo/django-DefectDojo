@@ -16,9 +16,7 @@ django-crispy-forms==1.11.2
 django_extensions==3.1.3
 django-rest-swagger==2.2.0
 django-slack==5.16.2
-django-tagging==0.5.0
-git+https://github.com/DefectDojo/django-tastypie-swagger.git@c7c5629480dc20cadd3015490a01bd8e70393c36#egg=django-tastypie-swagger
-django-tastypie==0.14.2
+django-tagging==0.5.0 # django-tagging is no longer used, but we need to have it installed to be able to run migration 0066
 django-watson==1.5.5
 django-prometheus==2.1.0
 Django==2.2.20
@@ -53,7 +51,7 @@ social-auth-core==4.1.0
 Python-jose==3.2.0
 gitpython==3.1.14
 ptvsd==4.3.2
-python-gitlab==2.6.0
+python-gitlab==2.7.1
 google-auth==1.30.0
 google-api-python-client==1.12.8
 google-auth-oauthlib==0.4.4

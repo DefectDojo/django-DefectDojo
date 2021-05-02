@@ -480,7 +480,6 @@ LOGIN_EXEMPT_URLS = (
     r'^%swebhook/' % URL_PREFIX,
     r'^%sjira/webhook/([\w-]+)$' % URL_PREFIX,
     r'^%sjira/webhook/' % URL_PREFIX,
-    r'^%sapi/v1/' % URL_PREFIX,
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
@@ -640,10 +639,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.humanize',
     'gunicorn',
-    'tastypie',
     'auditlog',
     'dojo',
-    'tastypie_swagger',
     'watson',
     'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     'imagekit',
