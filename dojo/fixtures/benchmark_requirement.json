@@ -7492,7 +7492,7 @@
     "pk": 418,
     "fields": {
       "category": 27,
-      "objective_number": "1.6.2",
+      "objective_number": "1.6.1",
       "objective": "Verify that there is an explicit policy for management of cryptographic keys and that a cryptographic key lifecycle follows a key management standard such as NIST SP 800-57.",
       "references": "",
       "level_1": false,
