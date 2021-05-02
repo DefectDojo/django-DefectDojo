@@ -1,9 +1,13 @@
 import logging
+import re
 
 from django.core.exceptions import MultipleObjectsReturned
 from hyperlink._url import SCHEME_PORT_MAP
 
-from django.db.models import Q
+from django.core.validators import validate_ipv46_address
+from django.db import migrations
+from django.core.exceptions import FieldError, ValidationError
+from django.db.models import Q, Count
 
 from dojo.models import Endpoint
 
@@ -78,3 +82,144 @@ def endpoint_get_or_create(**kwargs):
 
     else:
         raise MultipleObjectsReturned()
+
+def clean_hosts_run(apps, change):
+    broken_endpoints = []
+    Endpoint_model = apps.get_model('dojo', 'Endpoint')
+    Endpoint_Status_model = apps.get_model('dojo', 'Endpoint_Status')
+    Product_model = apps.get_model('dojo', 'Product')
+    error_suffix = 'It is not possible to migrate it. Remove or fix this endpoint.'
+    for endpoint in Endpoint_model.objects.all():
+        if not endpoint.host or endpoint.host == '':
+            logger.error('Endpoint (id={}) does not have "host" field. {}'.format(endpoint.pk, error_suffix))
+            broken_endpoints.append(endpoint.pk)
+        else:
+            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', endpoint.host):  # is old host valid FQDN?
+                try:
+                    validate_ipv46_address(endpoint.host)  # is old host valid IPv4/6?
+                except ValidationError:
+                    try:
+                        if '://' in endpoint.host:  # is the old host full uri?
+                            parts = Endpoint.from_uri(endpoint.host)
+                            # can raise exception if the old host is not valid URL
+                        else:
+                            parts = Endpoint.from_uri('//' + endpoint.host)
+                            # can raise exception if there is no way to parse the old host
+
+                        if parts.protocol:
+                            if endpoint.protocol and (endpoint.protocol != parts.protocol):
+                                logger.error('Endpoint (id={}) has defined protocol ({}) and it is not the same as '
+                                    'protocol in host ({}). {}'.format(endpoint.pk, endpoint.protocol, parts.protocol,
+                                                                        error_suffix))
+                                broken_endpoints.append(endpoint.pk)
+                            else:
+                                if change:
+                                    endpoint.protocol = parts.protocol
+
+                        if parts.userinfo:
+                            if change:
+                                endpoint.userinfo = parts.userinfo
+
+                        if parts.host:
+                            if change:
+                                endpoint.host = parts.host
+                        else:
+                            logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk,
+                                endpoint.host, error_suffix))
+                            broken_endpoints.append(endpoint.pk)
+
+                        if parts.port:
+                            try:
+                                if (endpoint.port is not None) and (int(endpoint.port) != parts.port):
+                                    logger.error('Endpoint (id={}) has defined port number ({}) and it is not the same '
+                                        'as port number in host ({}). {}'.format(endpoint.pk, endpoint.port, parts.port,
+                                            error_suffix))
+                                    broken_endpoints.append(endpoint.pk)
+                                else:
+                                    if change:
+                                        endpoint.port = parts.port
+                            except ValueError:
+                                logger.error('Endpoint (id={}) use non-numeric port: {}. {}'.format(endpoint.pk,
+                                                                                                    endpoint.port,
+                                                                                                    error_suffix))
+                                broken_endpoints.append(endpoint.pk)
+
+                        if parts.path:
+                            if endpoint.path and (endpoint.path != parts.path):
+                                logger.error('Endpoint (id={}) has defined path ({}) and it is not the same as path in '
+                                    'host ({}). {}'.format(endpoint.pk, endpoint.path, parts.path, error_suffix))
+                                broken_endpoints.append(endpoint.pk)
+                            else:
+                                if change:
+                                    endpoint.path = parts.path
+
+                        if parts.query:
+                            if endpoint.query and (endpoint.query != parts.query):
+                                logger.error('Endpoint (id={}) has defined query ({}) and it is not the same as query '
+                                    'in host ({}). {}'.format(endpoint.pk, endpoint.query, parts.query, error_suffix))
+                                broken_endpoints.append(endpoint.pk)
+                            else:
+                                if change:
+                                    endpoint.query = parts.query
+
+                        if parts.fragment:
+                            if endpoint.fragment and (endpoint.fragment != parts.fragment):
+                                logger.error('Endpoint (id={}) has defined fragment ({}) and it is not the same as '
+                                    'fragment in host ({}). {}'.format(endpoint.pk, endpoint.fragment, parts.fragment,
+                                                                       error_suffix))
+                                broken_endpoints.append(endpoint.pk)
+                            else:
+                                if change:
+                                    endpoint.fragment = parts.fragment
+
+                        if change:
+                            endpoint.save()
+
+                    except ValidationError:
+                        logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk,
+                            endpoint.host, error_suffix))
+                        broken_endpoints.append(endpoint.pk)
+
+    if broken_endpoints != []:
+        raise FieldError('It is not possible to migrate database because there is/are {} broken endpoint(s). '
+                         'Please check logs.'.format(len(broken_endpoints)))
+
+    if change:
+        to_be_deleted = set()
+        for product in Product_model.objects.all().distinct():
+            for endpoint in Endpoint_model.objects.filter(product=product):
+                if endpoint.id not in to_be_deleted:
+
+                    ep = endpoint_filter(
+                        protocol=endpoint.protocol,
+                        userinfo=endpoint.userinfo,
+                        host=endpoint.host,
+                        fqdn=endpoint.fqdn,
+                        port=endpoint.port,
+                        path=endpoint.path,
+                        query=endpoint.query,
+                        fragment=endpoint.fragment,
+                        product_id=product.pk
+                    ).order_by('id')
+
+                    if ep.count() > 1:
+                        ep_ids = [x.id for x in ep]
+                        logger.info("Merging Endpoints {} into {}".format(ep[1:], ep[0]))
+                        to_be_deleted.update(ep_ids[1:])
+                        Endpoint_Status_model.objects\
+                            .filter(id__in=ep_ids[1:])\
+                            .update(endpoint=ep_ids[0])
+                        epss = Endpoint_Status_model.objects\
+                            .filter(endpoint=ep_ids[0])\
+                            .values('finding')\
+                            .annotate(total=Count('id'))\
+                            .filter(total__gt=1)
+                        for eps in epss:
+                            esm = Endpoint_Status_model.objects\
+                                .filter(finding=eps['finding'])\
+                                .order_by('-last_modified')
+                            logger.info("Endpoint Statuses {} will be replaced by {}".format(esm[1:], esm[0]))
+                            esm.exclude(id=esm[0].pk).delete()
+
+        logger.info("Removing endpoints: {}".format(to_be_deleted))
+        Endpoint_model.objects.filter(id__in=to_be_deleted).delete()
