@@ -2202,7 +2202,6 @@ class Finding(models.Model):
                     setattr(self, field, "No %s given" % field)
 
     def severity_display(self):
-        system_settings = System_Settings.objects.get()
         return self.severity
 
     def get_breadcrumbs(self):
