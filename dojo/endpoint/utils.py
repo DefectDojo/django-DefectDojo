@@ -5,7 +5,6 @@ from django.core.exceptions import MultipleObjectsReturned
 from hyperlink._url import SCHEME_PORT_MAP
 
 from django.core.validators import validate_ipv46_address
-from django.db import migrations
 from django.core.exceptions import FieldError, ValidationError
 from django.db.models import Q, Count
 
@@ -82,6 +81,7 @@ def endpoint_get_or_create(**kwargs):
 
     else:
         raise MultipleObjectsReturned()
+
 
 def clean_hosts_run(apps, change):
     broken_endpoints = []

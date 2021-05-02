@@ -7,6 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class Command(BaseCommand):
 
     help = 'Usage: manage.py endpoint_pre-migration_check.py'
