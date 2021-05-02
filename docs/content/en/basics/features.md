@@ -454,7 +454,6 @@ Add `r\'\^media/\'` to `LOGIN_EXEMPT_URLS`:
 {{< highlight python >}}
 LOGIN_EXEMPT_URLS = (
     r'^static/',
-    r'^api/v1/',
     r'^ajax/v1/',
     r'^reports/cover$',
     r'^finding/image/(?P<token>[^/]+)$'
@@ -974,7 +973,7 @@ through CI in \'active\' state.
 
 ### What notification channels for SLA notifications?
 
-The same as usual. You will notice that an extra `SLA breach` option is now present 
+The same as usual. You will notice that an extra `SLA breach` option is now present
 on the `Notification` page and  also in the `Product` view.
 
 ![SLA notification checkbox](../../images/sla_notification_product_checkboxes.png)
