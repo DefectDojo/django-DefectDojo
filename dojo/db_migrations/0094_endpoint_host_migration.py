@@ -13,15 +13,15 @@ from dojo.models import Endpoint
 logger = logging.getLogger(__name__)
 
 
-def clean_hosts(apps, schema_editor):
+def clean_hosts_run(apps, change):
     broken_endpoints = []
     Endpoint_model = apps.get_model('dojo', 'Endpoint')
     Endpoint_Status_model = apps.get_model('dojo', 'Endpoint_Status')
     Product_model = apps.get_model('dojo', 'Product')
-    error_prefix = 'It is not possible to migrate it. Remove or fix this endpoint.'
+    error_suffix = 'It is not possible to migrate it. Remove or fix this endpoint.'
     for endpoint in Endpoint_model.objects.all():
         if not endpoint.host or endpoint.host == '':
-            logger.error('Endpoint (id={}) does have "host" field, {}'.format(endpoint.pk, error_prefix))
+            logger.error('Endpoint (id={}) does have "host" field, {}'.format(endpoint.pk, error_suffix))
             broken_endpoints.append(endpoint.pk)
         else:
             if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', endpoint.host):  # is old host valid FQDN?
@@ -38,9 +38,9 @@ def clean_hosts(apps, schema_editor):
 
                         if parts.protocol:
                             if endpoint.protocol and (endpoint.protocol != parts.protocol):
-                                logger.error('Endpoint (id={}) has defined protocol ({}) and it not same as protocol'
-                                             ' in host ({}). {}'.format(endpoint.pk, endpoint.protocol, parts.protocol,
-                                                                        error_prefix))
+                                logger.error('Endpoint (id={}) has defined protocol ({}) and it is not the same as '
+                                    'protocol in host ({}). {}'.format(endpoint.pk, endpoint.protocol, parts.protocol,
+                                                                        error_suffix))
                                 broken_endpoints.append(endpoint.pk)
                             else:
                                 endpoint.protocol = parts.protocol
@@ -51,95 +51,104 @@ def clean_hosts(apps, schema_editor):
                         if parts.host:
                             endpoint.host = parts.host
                         else:
-                            logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk, endpoint.host, error_prefix))
+                            logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk,
+                                endpoint.host, error_suffix))
                             broken_endpoints.append(endpoint.pk)
 
                         if parts.port:
                             try:
                                 if (endpoint.port is not None) and (int(endpoint.port) != parts.port):
-                                    logger.error('Endpoint (id={}) has defined port number ({}) and it not same as '
-                                                 'port number in host ({}). {}'.format(endpoint.pk, endpoint.port,
-                                                                                     parts.port, error_prefix))
+                                    logger.error('Endpoint (id={}) has defined port number ({}) and it is not the same '
+                                        'as port number in host ({}). {}'.format(endpoint.pk, endpoint.port, parts.port,
+                                            error_suffix))
                                     broken_endpoints.append(endpoint.pk)
                                 else:
                                     endpoint.port = parts.port
                             except ValueError:
                                 logger.error('Endpoint (id={}) use non-numeric port: {}. {}'.format(endpoint.pk,
                                                                                                     endpoint.port,
-                                                                                                    error_prefix))
+                                                                                                    error_suffix))
                                 broken_endpoints.append(endpoint.pk)
 
                         if parts.path:
                             if endpoint.path and (endpoint.path != parts.path):
-                                logger.error('Endpoint (id={}) has defined path ({}) and it not same as path in host '
-                                             '({}). {}'.format(endpoint.pk, endpoint.path, parts.path, error_prefix))
+                                logger.error('Endpoint (id={}) has defined path ({}) and it is not the same as path in '
+                                    'host ({}). {}'.format(endpoint.pk, endpoint.path, parts.path, error_suffix))
                                 broken_endpoints.append(endpoint.pk)
                             else:
                                 endpoint.path = parts.path
 
                         if parts.query:
                             if endpoint.query and (endpoint.query != parts.query):
-                                logger.error('Endpoint (id={}) has defined query ({}) and it not same as query in host '
-                                             '({}). {}'.format(endpoint.pk, endpoint.query, parts.query, error_prefix))
+                                logger.error('Endpoint (id={}) has defined query ({}) and it is not the same as query '
+                                    'in host ({}). {}'.format(endpoint.pk, endpoint.query, parts.query, error_suffix))
                                 broken_endpoints.append(endpoint.pk)
                             else:
                                 endpoint.query = parts.query
 
                         if parts.fragment:
                             if endpoint.fragment and (endpoint.fragment != parts.fragment):
-                                logger.error('Endpoint (id={}) has defined fragment ({}) and it not same as fragment '
-                                             'in host ({}). {}'.format(endpoint.pk, endpoint.fragment, parts.fragment,
-                                                                       error_prefix))
+                                logger.error('Endpoint (id={}) has defined fragment ({}) and it is not the same as '
+                                    'fragment in host ({}). {}'.format(endpoint.pk, endpoint.fragment, parts.fragment,
+                                                                       error_suffix))
                                 broken_endpoints.append(endpoint.pk)
                             else:
                                 endpoint.fragment = parts.fragment
 
-                        endpoint.save()
+                        if change:
+                            endpoint.save()
 
                     except ValidationError:
-                        logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk, endpoint.host, error_prefix))
+                        logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk,
+                            endpoint.host, error_suffix))
                         broken_endpoints.append(endpoint.pk)
+
     if broken_endpoints != []:
         raise FieldError('It is not possible to migrate database because there is/are {} broken endpoint(s). '
                          'Please check logs.'.format(len(broken_endpoints)))
 
-    to_be_deleted = set()
-    for product in Product_model.objects.all().distinct():
-        for endpoint in Endpoint_model.objects.filter(product=product):
-            if endpoint.id not in to_be_deleted:
+    if change:
+        to_be_deleted = set()
+        for product in Product_model.objects.all().distinct():
+            for endpoint in Endpoint_model.objects.filter(product=product):
+                if endpoint.id not in to_be_deleted:
 
-                ep = endpoint_filter(
-                    protocol=endpoint.protocol,
-                    userinfo=endpoint.userinfo,
-                    host=endpoint.host,
-                    fqdn=endpoint.fqdn,
-                    port=endpoint.port,
-                    path=endpoint.path,
-                    query=endpoint.query,
-                    fragment=endpoint.fragment,
-                    product_id=product.pk
-                ).order_by('id')
+                    ep = endpoint_filter(
+                        protocol=endpoint.protocol,
+                        userinfo=endpoint.userinfo,
+                        host=endpoint.host,
+                        fqdn=endpoint.fqdn,
+                        port=endpoint.port,
+                        path=endpoint.path,
+                        query=endpoint.query,
+                        fragment=endpoint.fragment,
+                        product_id=product.pk
+                    ).order_by('id')
 
-                if ep.count() > 1:
-                    ep_ids = [x.id for x in ep]
-                    to_be_deleted.update(ep_ids[1:])
-                    Endpoint_Status_model.objects\
-                        .filter(id__in=ep_ids[1:])\
-                        .update(endpoint=ep_ids[0])
-                    epss = Endpoint_Status_model.objects\
-                        .filter(endpoint=ep_ids[0])\
-                        .values('finding')\
-                        .annotate(total=Count('id'))\
-                        .filter(total__gt=1)
-                    for eps in epss:
-                        esm = Endpoint_Status_model.objects\
-                            .filter(finding=eps['finding'])\
-                            .order_by('-last_modified')
-                        esm.exclude(id=esm[0].pk).delete()
+                    if ep.count() > 1:
+                        ep_ids = [x.id for x in ep]
+                        logger.info("Merging Endpoints {} into {}".format(ep[1:], ep[0]))
+                        to_be_deleted.update(ep_ids[1:])
+                        Endpoint_Status_model.objects\
+                            .filter(id__in=ep_ids[1:])\
+                            .update(endpoint=ep_ids[0])
+                        epss = Endpoint_Status_model.objects\
+                            .filter(endpoint=ep_ids[0])\
+                            .values('finding')\
+                            .annotate(total=Count('id'))\
+                            .filter(total__gt=1)
+                        for eps in epss:
+                            esm = Endpoint_Status_model.objects\
+                                .filter(finding=eps['finding'])\
+                                .order_by('-last_modified')
+                            logger.info("Endpoint Statuses {} will be replaced by {}".format(esm[1:], esm[0]))
+                            esm.exclude(id=esm[0].pk).delete()
 
-    logger.info("Removing endpoints: {}".format(to_be_deleted))
-    Endpoint_model.objects.filter(id__in=to_be_deleted).delete()
+        logger.info("Removing endpoints: {}".format(to_be_deleted))
+        Endpoint_model.objects.filter(id__in=to_be_deleted).delete()
 
+def clean_hosts(apps, schema_editor):
+    clean_hosts_run(apps=apps, change=True)
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -147,7 +156,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # This step wasn't possible to merge with 0090_endpoint_userinfo_creation, because Unittest shows:
+        # This step wasn't possible to merge with 0093_endpoint_userinfo_creation, because Unittest shows:
         # django.db.utils.OperationalError: (1060, "Duplicate column name 'userinfo'")
         migrations.RunPython(clean_hosts)
     ]
