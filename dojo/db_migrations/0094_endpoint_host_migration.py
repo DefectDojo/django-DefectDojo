@@ -105,7 +105,7 @@ def clean_hosts(apps, schema_editor):
 
     to_be_deleted = set()
     for product in Product_model.objects.all().distinct():
-        for endpoint in Endpoint_model.objects.all():
+        for endpoint in Endpoint_model.objects.filter(product=product):
             if endpoint.id not in to_be_deleted:
 
                 ep = endpoint_filter(
