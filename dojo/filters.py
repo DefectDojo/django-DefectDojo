@@ -76,8 +76,8 @@ class DojoFilter(FilterSet):
     def __init__(self, *args, **kwargs):
         super(DojoFilter, self).__init__(*args, **kwargs)
 
-        # for now we have only fields called "tags"
-        for field in ['tags', 'test__tags', 'test__engagement__tags', 'test__engagement__product__tags']:
+        for field in ['tags', 'test__tags', 'test__engagement__tags', 'test__engagement__product__tags',
+                        'not_tags', 'not_test__tags', 'not_test__engagement__tags', 'not_test__engagement__product__tags']:
             if field in self.form.fields:
                 tags_filter = self.filters['tags']
                 model = tags_filter.model
@@ -88,19 +88,26 @@ class DojoFilter(FilterSet):
                 # the initialization now happens in filter_js_snippet.html
                 self.form.fields[field].widget.tag_options = \
                     self.form.fields[field].widget.tag_options + tagulous.models.options.TagOptions(autocomplete_settings={'width': '200px', 'defer': True})
-                tagged_model = get_tags_model_from_field_name(field)
+                tagged_model, exclude = get_tags_model_from_field_name(field)
                 if tagged_model:  # only if not the normal tags field
                     self.form.fields[field].label = get_tags_label_from_model(tagged_model)
                     self.form.fields[field].autocomplete_tags = tagged_model.tags.tag_model.objects.all().order_by('name')
 
+                if exclude:
+                    self.form.fields[field].label = 'Not ' + self.form.fields[field].label
+
 
 def get_tags_model_from_field_name(field):
+    exclude = False
+    if field.startswith('not_'):
+        field = field.replace('not_', '')
+        exclude = True
     try:
         parts = field.split('__')
         model_name = parts[-2]
-        return apps.get_model('dojo.%s' % model_name, require_ready=True)
+        return apps.get_model('dojo.%s' % model_name, require_ready=True), exclude
     except Exception as e:
-        return None
+        return None, exclude
 
 
 def get_tags_label_from_model(model):
@@ -793,9 +800,29 @@ class ApiFindingFilter(DojoFilter):
     # ReportRiskAcceptanceFilter
     risk_acceptance = ReportRiskAcceptanceFilter()
 
-    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+    tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
+    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
+                             help_text='Comma seperated list of exact tags')
+    test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in',
+                                   help_text='Comma seperated list of exact tags present on test')
+    test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags', lookup_expr='in',
+                                               help_text='Comma seperated list of exact tags present on engagement')
+    test__engagement__product__tags__name = CharFieldInFilter(field_name='test__engagement__product__tags__name',
+                                                              lookup_expr='in',
+                                                              help_text='Comma seperated list of exact tags present on product')
 
-    tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in')
+    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Not Tag name contains', exclude='True')
+    not_tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
+                                 help_text='Comma seperated list of exact tags not present on model', exclude='True')
+    not_test__tags = CharFieldInFilter(field_name='test__tags__name', lookup_expr='in',
+                                       help_text='Comma seperated list of exact tags not present on test', exclude='True')
+    not_test__engagement__tags = CharFieldInFilter(field_name='test__engagement__tags', lookup_expr='in',
+                                                   help_text='Comma seperated list of exact tags not present on engagement',
+                                                   exclude='True')
+    not_test__engagement__product__tags__name = CharFieldInFilter(field_name='test__engagement__product__tags__name',
+                                                                  lookup_expr='in',
+                                                                  help_text='Comma seperated list of exact tags not present on product',
+                                                                  exclude='True')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -922,6 +949,43 @@ class OpenFindingFilter(DojoFilter):
     )
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
+    not_tags = ModelMultipleChoiceFilter(
+        field_name='tags__name',
+        to_field_name='name',
+        exclude=True,
+        queryset=Finding.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    not_test__tags = ModelMultipleChoiceFilter(
+        field_name='test__tags__name',
+        to_field_name='name',
+        exclude=True,
+        label='Test without tags',
+        queryset=Test.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    not_test__engagement__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__tags__name',
+        to_field_name='name',
+        exclude=True,
+        label='Engagement without tags',
+        queryset=Engagement.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    not_test__engagement__product__tags = ModelMultipleChoiceFilter(
+        field_name='test__engagement__product__tags__name',
+        to_field_name='name',
+        exclude=True,
+        label='Product without tags',
+        queryset=Product.tags.tag_model.objects.all().order_by('name'),
+        # label='tags', # doesn't work with tagulous, need to set in __init__ below
+    )
+
+    not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
 
     o = OrderingFilter(
         # tuple-mapping retains order
