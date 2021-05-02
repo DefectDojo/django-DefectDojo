@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0093_remove_system_settings_s_finding_severity_naming'),
+        ('dojo', '0094_remove_system_settings_s_finding_severity_naming'),
     ]
 
     operations = [
