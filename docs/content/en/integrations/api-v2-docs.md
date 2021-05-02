@@ -76,7 +76,6 @@ The json object result looks like : :
           "id": 22,
           "last_login": "2019-06-18T08:05:51.925743",
           "last_name": "Paz",
-          "resource_uri": "/api/v1/users/22/",
           "username": "dev7958"
         },
         {
@@ -84,7 +83,6 @@ The json object result looks like : :
           "id": 31,
           "last_login": "2019-06-06T11:44:32.533035",
           "last_name": "",
-          "resource_uri": "/api/v1/users/31/",
           "username": "saurabh.paz"
         }
     ]
@@ -117,7 +115,6 @@ The json object result is: :
         "id": 22,
         "last_login": "2015-10-28T08:05:51.925743",
         "last_name": "Paz",
-        "resource_uri": "/api/v1/users/22/",
         "username": "jay7958"
     },
     {
@@ -125,7 +122,6 @@ The json object result is: :
         "id": 31,
         "last_login": "2015-10-13T11:44:32.533035",
         "last_name": "",
-        "resource_uri": "/api/v1/users/31/",
         "username": "jay.paz"
     }
 ]
@@ -144,8 +140,8 @@ Example for importing a scan result:
 
 -   Verb: POST
 -   URI: <http://localhost:8080/api/v2/import-scan/>
--   Headers tab: 
-    
+-   Headers tab:
+
     add the authentication header
     :   -   Key: Authorization
         -   Value: Token c8572a5adf107a693aa6c72584da31f4d1f1dcff

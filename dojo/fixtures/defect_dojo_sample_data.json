@@ -522,17 +522,6 @@
     }
 },
 {
-    "model": "tastypie.apikey",
-    "pk": 1,
-    "fields": {
-        "user": [
-            "admin"
-        ],
-        "key": "1dfdfa2042567ec751f6b3fa96038b743ea6f1cc",
-        "created": "2018-08-16T01:32:30.801Z"
-    }
-},
-{
     "model": "dojo.regulation",
     "pk": 1,
     "fields": {

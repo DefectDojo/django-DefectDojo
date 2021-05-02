@@ -57,22 +57,6 @@
   },
   {
     "fields": {
-      "model": "apiaccess",
-      "app_label": "tastypie"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 8
-  },
-  {
-    "fields": {
-      "model": "apikey",
-      "app_label": "tastypie"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 9
-  },
-  {
-    "fields": {
       "model": "logentry",
       "app_label": "auditlog"
     },
