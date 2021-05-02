@@ -139,13 +139,13 @@ class TestEndpointStatusMigration(MigratorTestCase):
         logger.debug("Endpoins: {}".format(self.endpoints))
         self.endpoint_status = {
             'old': Endpoint_Status.objects.create(
-                date=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
                 mitigated=True,
                 finding_id=self.finding,
                 endpoint_id=self.endpoints['short']
             ).pk,
             'new': Endpoint_Status.objects.create(
-                date=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
+                last_modified=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
                 mitigated=False,
                 finding_id=self.finding,
                 endpoint_id=self.endpoints['long']

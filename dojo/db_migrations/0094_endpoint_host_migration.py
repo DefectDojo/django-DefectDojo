@@ -134,7 +134,7 @@ def clean_hosts(apps, schema_editor):
                     for eps in epss:
                         esm = Endpoint_Status_model.objects\
                             .filter(finding=eps['finding'])\
-                            .order_by('-date')
+                            .order_by('-last_modified')
                         esm.exclude(id=esm[0].pk).delete()
 
     logger.info("Removing endpoints: {}".format(to_be_deleted))
