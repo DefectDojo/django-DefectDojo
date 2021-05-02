@@ -107,10 +107,28 @@ Upgrade Celery to the latest version:
 
 > `pip install --upgrade celery`
 
-Upgrading to DefectDojo Version 2.0.x
+Upgrading to DefectDojo Version 2.0.x.
 --------------------------------------
+
+WARNING: Upgrade to 1.15.x first before upgrading to 2.0.0, otherwise you will brick you instance.
+
+WARNING: Run `docker-compose exec uwsgi ./manage.py endpoint_pre-migration_check` before upgrading to check if
+your endpoints can be migrated succesfully. ([#4188](https://github.com/DefectDojo/django-DefectDojo/pull/4188))
+
+We decided to name this version 2.0.0 because we did some big cleanups in this release:
+
+- Remove API v1 ([#4413](https://github.com/DefectDojo/django-DefectDojo/pull/4413))
+- Remove setup.bash installation method ([#4417](https://github.com/DefectDojo/django-DefectDojo/pull/4417))
+- Rename Finding.is_Mitigated field to Finding.is_mitigated ([#3854](https://github.com/DefectDojo/django-DefectDojo/pull/4854))
+- Remove everything related to the old tagging library ([#4419](https://github.com/DefectDojo/django-DefectDojo/pull/4419))
+- Remove S0/S1/S2../S5 severity display option ([#4415](https://github.com/DefectDojo/django-DefectDojo/pull/4415))
+- Refactor EndPoint handling/formatting ([#4188](https://github.com/DefectDojo/django-DefectDojo/pull/4188))
+- Upgrade to Django 3.x ([#3632](https://github.com/DefectDojo/django-DefectDojo/pull/3632))
+- PDF Reports removed ([#4418](https://github.com/DefectDojo/django-DefectDojo/pull/4418))
+
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.0.0
-- Hashcode calculation logic has changed in #4307 to update existing findings run:
+
+- Hashcode calculation logic has changed. To update existing findings run:
 
     `./manage.py dedupe --hash_code_only`
 
