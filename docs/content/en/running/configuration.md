@@ -36,7 +36,6 @@ To complete
 -   `DD_SECURE_CONTENT_TYPE_NOSNIFF`:
 -   `DD_TIME_ZONE`:
 -   `DD_LANG`:
--   `DD_WKHTMLTOPDF`:
 -   `DD_TEAM_NAME`:
 -   `DD_ADMINS`:
 -   `DD_WHITENOISE`:
