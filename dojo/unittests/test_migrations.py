@@ -9,6 +9,7 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
+
 class TestEndpointMigrationBroken(TransactionTestCase):
     migrate_from = ('dojo', '0093_endpoint_userinfo_creation')
     migrate_to = ('dojo', '0094_endpoint_host_migration')
@@ -101,6 +102,7 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertEqual(endpoint.path, 'path1/path2/')
         self.assertEqual(endpoint.query, 'key1=value1&no_value_key')
         self.assertEqual(endpoint.fragment, 'fragmentX')
+
 
 class TestEndpointStatusMigration(MigratorTestCase):
     migrate_from = ('dojo', '0093_endpoint_userinfo_creation')

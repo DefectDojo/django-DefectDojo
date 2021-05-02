@@ -123,7 +123,6 @@ def clean_hosts(apps, schema_editor):
                 if ep.count() > 1:
                     ep_ids = [x.id for x in ep]
                     to_be_deleted.update(ep_ids[1:])
-                    logger.debug("0: {}, 1+: {}, all: {}".format(ep_ids[0], ep_ids[1:], to_be_deleted))
                     Endpoint_Status_model.objects\
                         .filter(id__in=ep_ids[1:])\
                         .update(endpoint=ep_ids[0])
@@ -138,7 +137,7 @@ def clean_hosts(apps, schema_editor):
                             .order_by('-date')
                         esm.exclude(id=esm[0].pk).delete()
 
-    logger.debug("Removing endpoints: {}".format(to_be_deleted))
+    logger.info("Removing endpoints: {}".format(to_be_deleted))
     Endpoint_model.objects.filter(id__in=to_be_deleted).delete()
 
 
