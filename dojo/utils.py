@@ -1934,7 +1934,7 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def mass_model_updater(model_type, models, function, fields, page_size=1000, order='asc', log_prefix=''):
+def mass_model_updater(model_type, models, function, fields=None, page_size=1000, order='asc', log_prefix=''):
     """ Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
     this process very well if we can process the models ordered by id.
