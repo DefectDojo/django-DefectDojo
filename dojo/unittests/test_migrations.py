@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class TestEndpointMigrationBroken(TransactionTestCase):
-    migrate_from = ('dojo', '0093_endpoint_userinfo_creation')
-    migrate_to = ('dojo', '0094_endpoint_host_migration')
+    migrate_from = ('dojo', '0094_endpoint_userinfo_creation')
+    migrate_to = ('dojo', '0095_endpoint_host_migration')
 
     def setUp(self):
         super().setUp()
@@ -52,8 +52,8 @@ class TestEndpointMigrationBroken(TransactionTestCase):
 
 
 class TestEndpointMigration(MigratorTestCase):
-    migrate_from = ('dojo', '0093_endpoint_userinfo_creation')
-    migrate_to = ('dojo', '0094_endpoint_host_migration')
+    migrate_from = ('dojo', '0094_endpoint_userinfo_creation')
+    migrate_to = ('dojo', '0095_endpoint_host_migration')
 
     def prepare(self):
         Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
@@ -105,8 +105,8 @@ class TestEndpointMigration(MigratorTestCase):
 
 
 class TestEndpointStatusMigration(MigratorTestCase):
-    migrate_from = ('dojo', '0093_endpoint_userinfo_creation')
-    migrate_to = ('dojo', '0094_endpoint_host_migration')
+    migrate_from = ('dojo', '0094_endpoint_userinfo_creation')
+    migrate_to = ('dojo', '0095_endpoint_host_migration')
 
     def prepare(self):
         Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')

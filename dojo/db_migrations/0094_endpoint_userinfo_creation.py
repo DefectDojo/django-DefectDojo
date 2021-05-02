@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0092_is_mitigated'),
+        ('dojo', '0093_django_tagging_removal'),
     ]
 
     operations = [
