@@ -115,7 +115,6 @@
     "pk": 1,
     "model": "dojo.system_settings",
     "fields": {
-      "s_finding_severity_naming": false,
       "jira_labels": null,
       "team_name": "",
       "url_prefix": "",
