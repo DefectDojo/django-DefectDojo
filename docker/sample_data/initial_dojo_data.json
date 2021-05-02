@@ -3371,10 +3371,7 @@
       "name": "Bodgeit",
       "created": null,
       "authorized_users": [],
-      "manager": "Aaron Weaver",
-      "tech_contact": "Jeffrey Williams",
       "tid": 0,
-      "prod_manager": "John Smith",
       "description": "The BodgeIt Store is a vulnerable web application which is currently aimed at people who are new to pen testing.",
       "tags": [
           "java",
@@ -3391,10 +3388,7 @@
       "name": "Gruyere",
       "created": null,
       "authorized_users": [],
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "description": "Vulnerable Application written by Google"
     },
     "model": "dojo.product",

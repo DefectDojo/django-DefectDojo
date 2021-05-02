@@ -1110,9 +1110,6 @@
     "fields": {
         "name": "BodgeIt",
         "description": "[Features](https://github.com/psiinon/bodgeit) and characteristics:\r\n\r\n* Easy to install - just requires java and a servlet engine, e.g. Tomcat\r\n* Self contained (no additional dependencies other than to 2 in the above line)\r\n* Easy to change on the fly - all the functionality is implemented in JSPs, so no IDE required\r\n* Cross platform\r\n* Open source\r\n* No separate db to install and configure - it uses an 'in memory' db that is automatically (re)initialized on start up",
-        "prod_manager": "Tester Jester",
-        "tech_contact": "Bob Buster",
-        "manager": "Peter Scramble",
         "product_manager": [
             "admin"
         ],
@@ -1158,9 +1155,6 @@
     "fields": {
         "name": "Internal CRM App",
         "description": "* New product in development that attempts to follow all best practices",
-        "prod_manager": "Bob Builder",
-        "tech_contact": "Tester Jester",
-        "manager": null,
         "product_manager": [
             "product_manager"
         ],
@@ -1200,9 +1194,6 @@
     "fields": {
         "name": "Apple Accounting Software",
         "description": "Accounting software is typically composed of various modules, different sections dealing with particular areas of accounting. Among the most common are:\r\n\r\n**Core modules**\r\n\r\n* Accounts receivable\u2014where the company enters money received\r\n* Accounts payable\u2014where the company enters its bills and pays money it owes\r\n* General ledger\u2014the company's \"books\"\r\n* Billing\u2014where the company produces invoices to clients/customers",
-        "prod_manager": "0",
-        "tech_contact": "0",
-        "manager": "0",
         "product_manager": [
             "admin"
         ],
