@@ -11,4 +11,7 @@ class Command(BaseCommand):
     help = 'Usage: manage.py endpoint_pre-migration_check.py'
 
     def handle(self, *args, **options):
-        clean_hosts_run(apps=apps, change=False)
+        try:
+            clean_hosts_run(apps=apps, change=False)
+        else:
+            logger.info('There is no problem with migration')

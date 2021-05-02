@@ -43,13 +43,16 @@ def clean_hosts_run(apps, change):
                                                                         error_suffix))
                                 broken_endpoints.append(endpoint.pk)
                             else:
-                                endpoint.protocol = parts.protocol
+                                if change:
+                                    endpoint.protocol = parts.protocol
 
                         if parts.userinfo:
-                            endpoint.userinfo = parts.userinfo
+                            if change:
+                                endpoint.userinfo = parts.userinfo
 
                         if parts.host:
-                            endpoint.host = parts.host
+                            if change:
+                                endpoint.host = parts.host
                         else:
                             logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk,
                                 endpoint.host, error_suffix))
@@ -63,7 +66,8 @@ def clean_hosts_run(apps, change):
                                             error_suffix))
                                     broken_endpoints.append(endpoint.pk)
                                 else:
-                                    endpoint.port = parts.port
+                                    if change:
+                                        endpoint.port = parts.port
                             except ValueError:
                                 logger.error('Endpoint (id={}) use non-numeric port: {}. {}'.format(endpoint.pk,
                                                                                                     endpoint.port,
@@ -76,7 +80,8 @@ def clean_hosts_run(apps, change):
                                     'host ({}). {}'.format(endpoint.pk, endpoint.path, parts.path, error_suffix))
                                 broken_endpoints.append(endpoint.pk)
                             else:
-                                endpoint.path = parts.path
+                                if change:
+                                    endpoint.path = parts.path
 
                         if parts.query:
                             if endpoint.query and (endpoint.query != parts.query):
@@ -84,7 +89,8 @@ def clean_hosts_run(apps, change):
                                     'in host ({}). {}'.format(endpoint.pk, endpoint.query, parts.query, error_suffix))
                                 broken_endpoints.append(endpoint.pk)
                             else:
-                                endpoint.query = parts.query
+                                if change:
+                                    endpoint.query = parts.query
 
                         if parts.fragment:
                             if endpoint.fragment and (endpoint.fragment != parts.fragment):
@@ -93,7 +99,8 @@ def clean_hosts_run(apps, change):
                                                                        error_suffix))
                                 broken_endpoints.append(endpoint.pk)
                             else:
-                                endpoint.fragment = parts.fragment
+                                if change:
+                                    endpoint.fragment = parts.fragment
 
                         if change:
                             endpoint.save()
