@@ -4,7 +4,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0091_npm_audit_path_censoring'),
+        ('dojo', '0092_is_mitigated.py'),
     ]
 
     operations = [
