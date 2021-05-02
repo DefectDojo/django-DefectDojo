@@ -1336,34 +1336,12 @@
     }
 },
 {
-    "model": "dojo.engagement_type",
-    "pk": 1,
-    "fields": {
-        "name": "Type 1"
-    }
-},
-{
-    "model": "dojo.engagement_type",
-    "pk": 2,
-    "fields": {
-        "name": "Type 2"
-    }
-},
-{
-    "model": "dojo.engagement_type",
-    "pk": 3,
-    "fields": {
-        "name": "Type 3"
-    }
-},
-{
     "model": "dojo.engagement",
     "pk": 1,
     "fields": {
         "name": "1st Quarter Engagement",
         "description": "test Engagement",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-12",
         "target_end": "2018-04-12",
@@ -1406,7 +1384,6 @@
         "name": "April Monthly Engagement",
         "description": "Requested by the team for regular manual checkup by the security team.",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-12",
         "target_end": "2018-04-12",
@@ -1449,7 +1426,6 @@
         "name": "weekly engagement",
         "description": "test Engagement",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-03",
         "target_end": "2018-04-04",
@@ -1492,7 +1468,6 @@
         "name": "Static Scan",
         "description": "Initial static scan for Bodgeit.",
         "version": "v.1.2.0",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-16",
         "target_end": "2018-08-23",
@@ -1535,7 +1510,6 @@
         "name": "Quarterly PCI Scan",
         "description": "Reccuring Quarterly Scan",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-11-01",
         "target_end": "2018-11-08",
@@ -1581,7 +1555,6 @@
         "name": "Ad Hoc Engagement",
         "description": null,
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-16",
         "target_end": "2018-08-16",
@@ -1622,7 +1595,6 @@
         "name": "Initial Assessment",
         "description": "This application needs to be assesed to determine the security posture.",
         "version": "10.2.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-10-02",
         "target_end": "2018-10-09",
@@ -1665,7 +1637,6 @@
         "name": "Multiple scanners",
         "description": "Example engagement with multiple scan types.",
         "version": "1.2.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-17",
@@ -1711,7 +1682,6 @@
         "name": "Manual PenTest",
         "description": "Please do a manual pentest before our next release to prod.",
         "version": "1.9.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-10-12",
         "target_end": "2018-10-15",
@@ -1754,7 +1724,6 @@
         "name": "CI/CD Baseline Security Test",
         "description": "",
         "version": "1.1.2",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-24",
@@ -1797,7 +1766,6 @@
         "name": "AdHoc Import - Fri, 17 Aug 2018 18:20:55",
         "description": null,
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-17",

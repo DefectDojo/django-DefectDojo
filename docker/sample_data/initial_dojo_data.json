@@ -129,14 +129,6 @@
   },
   {
     "fields": {
-      "model": "engagement_type",
-      "app_label": "dojo"
-    },
-    "model": "contenttypes.contenttype",
-    "pk": 20
-  },
-  {
-    "fields": {
       "model": "engagement",
       "app_label": "dojo"
     },
@@ -1797,33 +1789,6 @@
   },
   {
     "fields": {
-      "codename": "add_engagement_type",
-      "name": "Can add engagement_ type",
-      "content_type": 20
-    },
-    "model": "auth.permission",
-    "pk": 61
-  },
-  {
-    "fields": {
-      "codename": "change_engagement_type",
-      "name": "Can change engagement_ type",
-      "content_type": 20
-    },
-    "model": "auth.permission",
-    "pk": 62
-  },
-  {
-    "fields": {
-      "codename": "delete_engagement_type",
-      "name": "Can delete engagement_ type",
-      "content_type": 20
-    },
-    "model": "auth.permission",
-    "pk": 63
-  },
-  {
-    "fields": {
       "codename": "add_engagement",
       "name": "Can add engagement",
       "content_type": 21
@@ -3434,7 +3399,6 @@
       "reason": null,
       "requester": null,
       "risk_path": "none",
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2016-08-31",
@@ -3464,7 +3428,6 @@
       "reason": null,
       "requester": null,
       "risk_path": "none",
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2016-09-30",

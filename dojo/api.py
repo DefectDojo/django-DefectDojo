@@ -535,7 +535,6 @@ class EngagementResource(BaseModelResource):
         filtering = {
             'id': ALL,
             'active': ALL,
-            'eng_type': ALL,
             'target_start': ALL,
             'target_end': ALL,
             'requester': ALL,
@@ -558,10 +557,6 @@ class EngagementResource(BaseModelResource):
             return ModelFormValidation(form_class=EngForm, resource=EngagementResource)
 
     def dehydrate(self, bundle):
-        if bundle.obj.eng_type is not None:
-            bundle.data['eng_type'] = bundle.obj.eng_type.name
-        else:
-            bundle.data['eng_type'] = None
         bundle.data['product_id'] = bundle.obj.product.id
         bundle.data['report_type'] = bundle.obj.report_type
         bundle.data['requester'] = bundle.obj.requester

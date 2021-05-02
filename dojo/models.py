@@ -912,13 +912,6 @@ class Engagement_Presets(models.Model):
         return self.title
 
 
-class Engagement_Type(models.Model):
-    name = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-
 ENGAGEMENT_STATUS_CHOICES = (('Not Started', 'Not Started'),
                              ('Blocked', 'Blocked'),
                              ('Cancelled', 'Cancelled'),
@@ -932,7 +925,6 @@ class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     version = models.CharField(max_length=100, null=True, blank=True, help_text="Version of the product the engagement tested.")
-    eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True, on_delete=models.CASCADE)
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
