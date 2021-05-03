@@ -56,7 +56,13 @@ class TestEndpointMigration(MigratorTestCase):
     migrate_to = ('dojo', '0101_endpoint_host_migration')
 
     def prepare(self):
+        Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
+        Product = self.old_state.apps.get_model('dojo', 'Product')
+        Engagement = self.old_state.apps.get_model('dojo', 'Engagement')
+        Test = self.old_state.apps.get_model('dojo', 'Test')
+        Finding = self.old_state.apps.get_model('dojo', 'Finding')
         Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
+        Endpoint_Status = self.old_state.apps.get_model('dojo', 'Endpoint_Status')
         self.endpoints = {
             'valid_host': Endpoint.objects.create(host='foo.bar').pk,
             'valid_ip': Endpoint.objects.create(host='127.0.0.1').pk,
@@ -68,8 +74,49 @@ class TestEndpointMigration(MigratorTestCase):
                                                      '#fragmentX').pk,
         }
 
+        self.prod_type = Product_Type.objects.create()
+        self.product = Product.objects.create(prod_type=self.prod_type)
+        self.engagement = Engagement.objects.create(
+            product=self.product,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
+        )
+        self.test = Test.objects.create(
+            engagement_id=self.engagement.pk,
+            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
+            test_type_id=1
+        )
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        self.finding = Finding.objects.create(test=self.test, reporter_id=User.objects.create().pk).pk
+        self.endpoints_eps = {
+            'short': Endpoint.objects.create(protocol='http', host='foo.bar.eps', product=self.product).pk,
+            'long': Endpoint.objects.create(protocol='http', host='foo.bar.eps', port=80, product=self.product).pk,
+        }
+        self.endpoint_status = {
+            'old': Endpoint_Status.objects.create(
+                last_modified=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
+                mitigated=True,
+                finding_id=self.finding,
+                endpoint_id=self.endpoints_eps['short']
+            ).pk,
+            'new': Endpoint_Status.objects.create(
+                last_modified=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
+                mitigated=False,
+                finding_id=self.finding,
+                endpoint_id=self.endpoints_eps['long']
+            ).pk,
+        }
+
+        self.endpoints_eps_noproduct = {
+            'short': Endpoint.objects.create(protocol='http', host='foo.bar.eps').pk,
+            'long': Endpoint.objects.create(protocol='http', host='foo.bar.eps', port=80).pk,
+        }
+
     def test_migration_endpoint(self):
         Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
+        Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
 
         endpoint = Endpoint.objects.get(pk=self.endpoints['valid_host'])
         self.assertEqual(endpoint.host, 'foo.bar')
@@ -104,70 +151,23 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertEqual(endpoint.fragment, 'fragmentX')
 
 
-class TestEndpointStatusMigration(MigratorTestCase):
-    migrate_from = ('dojo', '0100_endpoint_userinfo_creation')
-    migrate_to = ('dojo', '0101_endpoint_host_migration')
-
-    def prepare(self):
-        Product_Type = self.old_state.apps.get_model('dojo', 'Product_Type')
-        Product = self.old_state.apps.get_model('dojo', 'Product')
-        Engagement = self.old_state.apps.get_model('dojo', 'Engagement')
-        Test = self.old_state.apps.get_model('dojo', 'Test')
-        Finding = self.old_state.apps.get_model('dojo', 'Finding')
-        Endpoint = self.old_state.apps.get_model('dojo', 'Endpoint')
-        Endpoint_Status = self.old_state.apps.get_model('dojo', 'Endpoint_Status')
-        self.prod_type = Product_Type.objects.create()
-        self.product = Product.objects.create(prod_type=self.prod_type)
-        self.engagement = Engagement.objects.create(
-            product=self.product,
-            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc)
-        )
-        self.test = Test.objects.create(
-            engagement_id=self.engagement.pk,
-            target_start=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-            target_end=datetime.datetime(2022, 1, 1, tzinfo=timezone.utc),
-            test_type_id=1
-        )
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        self.finding = Finding.objects.create(test=self.test, reporter_id=User.objects.create().pk).pk
-        self.endpoints = {
-            'short': Endpoint.objects.create(protocol='http', host='foo.bar', product=self.product).pk,
-            'long': Endpoint.objects.create(protocol='http', host='foo.bar', port=80, product=self.product).pk,
-        }
-        logger.debug("Endpoins: {}".format(self.endpoints))
-        self.endpoint_status = {
-            'old': Endpoint_Status.objects.create(
-                last_modified=datetime.datetime(2020, 1, 1, tzinfo=timezone.utc),
-                mitigated=True,
-                finding_id=self.finding,
-                endpoint_id=self.endpoints['short']
-            ).pk,
-            'new': Endpoint_Status.objects.create(
-                last_modified=datetime.datetime(2021, 1, 1, tzinfo=timezone.utc),
-                mitigated=False,
-                finding_id=self.finding,
-                endpoint_id=self.endpoints['long']
-            ).pk,
-        }
-        logger.debug("Endpoint status: {}".format(self.endpoint_status))
-
-    def test_migration_endpoint(self):
-
-        Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
-        Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
-
-        low_id = Endpoint.objects.filter(id=min(self.endpoints.values()))
-        logger.debug("Low id: {}".format(low_id))
+        low_id = Endpoint.objects.filter(id=min(self.endpoints_eps.values()))
+        logger.debug("Low id: {}".format(list(low_id)))
         self.assertEqual(low_id.count(), 1)
-        high_id = Endpoint.objects.filter(id=max(self.endpoints.values()))
-        logger.debug("High id: {}".format(high_id))
+        high_id = Endpoint.objects.filter(id=max(self.endpoints_eps.values()))
+        logger.debug("High id: {}".format(list(high_id)))
         self.assertEqual(high_id.count(), 0)
 
         eps = Endpoint_Status.objects.filter(
             finding_id=self.finding,
-            endpoint_id__in=self.endpoints.values()
+            endpoint_id__in=self.endpoints_eps.values()
         )
         self.assertEqual(eps.count(), 1)
         self.assertFalse(eps[0].mitigated)
+
+        low_id = Endpoint.objects.filter(id=min(self.endpoints_eps_noproduct.values()))
+        logger.debug("Low id: {}".format(list(low_id)))
+        self.assertEqual(low_id.count(), 1)
+        high_id = Endpoint.objects.filter(id=max(self.endpoints_eps_noproduct.values()))
+        logger.debug("High id: {}".format(list(high_id)))
+        self.assertEqual(high_id.count(), 0)

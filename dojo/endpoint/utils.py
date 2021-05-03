@@ -1,5 +1,6 @@
 import logging
 import re
+from itertools import chain
 
 from django.core.exceptions import MultipleObjectsReturned
 from hyperlink._url import SCHEME_PORT_MAP
@@ -188,8 +189,8 @@ def clean_hosts_run(apps, change):
 
     if change:
         to_be_deleted = set()
-        for product in Product_model.objects.all().distinct():
-            for endpoint in Endpoint_model.objects.filter(product=product):
+        for product in chain(Product_model.objects.all().distinct(), [None]):
+            for endpoint in Endpoint_model.objects.filter(product=product).distinct():
                 if endpoint.id not in to_be_deleted:
 
                     ep = endpoint_filter(
@@ -201,15 +202,17 @@ def clean_hosts_run(apps, change):
                         path=endpoint.path,
                         query=endpoint.query,
                         fragment=endpoint.fragment,
-                        product_id=product.pk
+                        product_id=product.pk if product else None
                     ).order_by('id')
 
                     if ep.count() > 1:
                         ep_ids = [x.id for x in ep]
-                        logger.info("Merging Endpoints {} into {}".format(ep[1:], ep[0]))
+                        logger.info("Merging Endpoints {} into '{}'".format(
+                            ["{} (id={})".format(str(x), x.pk) for x in ep[1:]],
+                            "{} (id={})".format(str(ep[0]), ep[0].pk)))
                         to_be_deleted.update(ep_ids[1:])
                         Endpoint_Status_model.objects\
-                            .filter(id__in=ep_ids[1:])\
+                            .filter(endpoint__in=ep_ids[1:])\
                             .update(endpoint=ep_ids[0])
                         epss = Endpoint_Status_model.objects\
                             .filter(endpoint=ep_ids[0])\
@@ -220,8 +223,11 @@ def clean_hosts_run(apps, change):
                             esm = Endpoint_Status_model.objects\
                                 .filter(finding=eps['finding'])\
                                 .order_by('-last_modified')
-                            logger.info("Endpoint Statuses {} will be replaced by {}".format(esm[1:], esm[0]))
+                            logger.info("Endpoint Statuses {} will be replaced by '{}'".format(
+                                ["last_modified: {} (id={})".format(x.last_modified, x.pk) for x in esm[1:]],
+                                "last_modified: {} (id={})".format(esm[0].last_modified, esm[0].pk)))
                             esm.exclude(id=esm[0].pk).delete()
 
-        logger.info("Removing endpoints: {}".format(to_be_deleted))
-        Endpoint_model.objects.filter(id__in=to_be_deleted).delete()
+        if to_be_deleted != set():
+            logger.info("Removing endpoints: {}".format(to_be_deleted))
+            Endpoint_model.objects.filter(id__in=to_be_deleted).delete()
