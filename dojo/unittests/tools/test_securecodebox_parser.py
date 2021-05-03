@@ -4,6 +4,7 @@ from dojo.models import Engagement, Product, Test
 
 
 class TestSecureCodeBoxParser(TestCase):
+
     def get_test(self):
         test = Test()
         test.engagement = Engagement()
@@ -51,7 +52,7 @@ class TestSecureCodeBoxParser(TestCase):
             "dojo/unittests/scans/securecodebox/scb_nikto_multiple_findings.json")
         parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
-        self.assertEqual(202, len(findings))
+        self.assertEqual(101, len(findings))
         testfile.close()
 
     def test_scb_parser_handles_multiple_scan_types(self):
@@ -68,11 +69,12 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual(findings[1].description, "SSH Service Information")
         self.assertEqual(
             findings[2].title, "The anti-clickjacking X-Frame-Options header is not present.")
-        self.assertEqual(findings[2].description, None)
+        self.assertEqual(findings[2].description, "N/A")
 
     def test_scb_parser_empty_with_error(self):
         with self.assertRaises(ValueError) as context:
-            testfile = open("dojo/unittests/scans/scb/empty_with_error.json")
+            testfile = open(
+                "dojo/unittests/scans/securecodebox/empty_with_error.json")
             parser = SecureCodeBoxParser()
             findings = parser.get_findings(testfile, self.get_test())
             testfile.close()
@@ -91,4 +93,4 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual(findings[1].description, "SSH Service Information")
         self.assertEqual(
             findings[2].title, "The anti-clickjacking X-Frame-Options header is not present.")
-        self.assertEqual(findings[2].description, None)
+        self.assertEqual(findings[2].description, "N/A")

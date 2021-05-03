@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 from urllib.parse import urlparse
 from dojo.models import Endpoint, Finding
 
@@ -32,8 +33,10 @@ class SecureCodeBoxParser(object):
                     static_finding=True, dynamic_finding=False, active=False, verified=False)
                 node = tree[idx]
                 self.set_finding_base_info(finding, node, test)
+                finding_unique_string = str(node['location'] +
+                                            finding.description + finding.title)
                 dupe_key = hashlib.md5(
-                    str(xstr(finding.description) + xstr(finding.title)).encode('utf-8')).hexdigest()
+                    finding_unique_string.encode('utf-8')).hexdigest()
                 if not dupe_key in dupes:
                     self.set_finding_endpoint(finding, node)
                     dupes[dupe_key] = finding
@@ -65,9 +68,10 @@ class SecureCodeBoxParser(object):
         finding.unsaved_endpoints = [endpoint]
 
     def set_finding_base_info(self, finding, node, test):
-        na = "N/A"
-        finding.title = node.get('name', na)
-        finding.description = node.get('description', na)
+        na = 'N/A'
+        # using node.get('name',na) does not work because the value can still be None
+        finding.title = node.get('name') or na
+        finding.description = node.get('description') or na
         finding.mitigation = na
         finding.impact = na
         finding.severity = self.get_severity(node.get('severity'))
@@ -84,9 +88,3 @@ class SecureCodeBoxParser(object):
             return "High"
         else:
             return "Info"
-
-
-def xstr(s):
-    if s is None:
-        return ''
-    return str(s)
