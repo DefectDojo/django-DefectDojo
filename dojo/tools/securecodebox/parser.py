@@ -71,8 +71,6 @@ class SecureCodeBoxParser(object):
         # using node.get('name',na) does not work because the value can still be None
         finding.title = node.get('name') or na
         finding.description = node.get('description') or na
-        finding.mitigation = na
-        finding.impact = na
         finding.severity = self.get_severity(node.get('severity'))
         finding.numerical_severity = Finding.get_numerical_severity(
             finding.severity)
