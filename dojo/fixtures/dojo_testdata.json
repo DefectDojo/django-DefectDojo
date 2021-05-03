@@ -361,30 +361,6 @@
   },
   {
     "pk": 1,
-    "model": "dojo.engagement_type",
-    "fields": {
-      "name": "Type 1",
-      "id": 1
-    }
-  },
-  {
-    "pk": 2,
-    "model": "dojo.engagement_type",
-    "fields": {
-      "name": "Type 2",
-      "id": 2
-    }
-  },
-  {
-    "pk": 3,
-    "model": "dojo.engagement_type",
-    "fields": {
-      "name": "CI/CD",
-      "id": 3
-    }
-  },
-  {
-    "pk": 1,
     "model": "dojo.notes",
     "fields": {
       "note_type": null,
@@ -418,7 +394,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": 3,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -449,7 +424,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -480,7 +454,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-04",
@@ -514,7 +487,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -545,8 +517,7 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
-      "active": true,
+"active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
       "name": "April monthly engagement",
@@ -576,7 +547,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",

@@ -530,7 +530,7 @@ class ApiEngagementFilter(DojoFilter):
 
     class Meta:
         model = Engagement
-        fields = ['id', 'active', 'eng_type', 'target_start',
+        fields = ['id', 'active', 'target_start',
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
                      'pen_test', 'status', 'product', 'name', 'version', 'tags']
