@@ -19,8 +19,6 @@ class SecureCodeBoxParser(object):
         return "SecureCodeBox Findings file in JSON format can be imported."
 
     def get_findings(self, file, test):
-        if file is None:
-            return []
         try:
             tree = json.load(file)
         except json.JSONDecodeError:
