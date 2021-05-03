@@ -30,7 +30,7 @@ from django.utils.translation import gettext as _
 from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
-from django_jsonfield_backport.models import JSONField
+from django.db.models import JSONField
 from itertools import groupby
 import hyperlink
 from cvss import CVSS3
