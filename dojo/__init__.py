@@ -8,4 +8,4 @@ default_app_config = 'dojo.apps.DojoAppConfig'
 
 __version__ = '2.0.0-dev'
 __url__ = 'https://github.com/DefectDojo/django-DefectDojo'
-__docs__ = 'https://defectdojo.github.io/django-DefectDojo/'
+__docs__ = 'https://defectdojo.github.io/django-DefectDojo'

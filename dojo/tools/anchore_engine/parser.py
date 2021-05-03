@@ -30,6 +30,7 @@ class AnchoreEngineParser(object):
             findingdetail += '**Feed**: ' + item['feed'] + '/' + item['feed_group'] + '\n\n'
             findingdetail += '**CVE**: ' + cve + '\n\n'
             findingdetail += '**CPE**: ' + item['package_cpe'] + '\n\n'
+            findingdetail += '**Description**: ' + item.get('description', '<None>') + '\n\n'
 
             sev = item['severity']
             if sev == "Negligible" or sev == "Unknown":
@@ -84,7 +85,7 @@ class AnchoreEngineParser(object):
                     url=item.get('url'),
                     static_finding=True,
                     dynamic_finding=False,
-                    unique_id_from_tool=item.get('vuln'),
+                    vuln_id_from_tool=item.get('vuln'),
                 )
 
                 dupes[dupe_key] = find
