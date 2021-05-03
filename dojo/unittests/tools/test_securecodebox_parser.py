@@ -49,15 +49,17 @@ class TestSecureCodeBoxParser(TestCase):
 
     def test_scb_parser_with_many_vuln_has_many_findings_nikto(self):
         testfile = open(
-            "dojo/unittests/scans/securecodebox/scb_nikto_multiple_findings.json")
+            "dojo/unittests/scans/securecodebox/scb_many_vul_nikto.json")
         parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         self.assertEqual(101, len(findings))
         testfile.close()
 
     def test_scb_parser_handles_multiple_scan_types(self):
+        # check that findings from multiple scanners can be parsed
+        # includes wps, ssh and nikto scan
         testfile = open(
-            "dojo/unittests/scans/securecodebox/scb_multiple_finding_formats.json")
+            "dojo/unittests/scans/securecodebox/scb_multiple_scans.json")
         parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
@@ -78,19 +80,3 @@ class TestSecureCodeBoxParser(TestCase):
             parser = SecureCodeBoxParser()
             findings = parser.get_findings(testfile, self.get_test())
             testfile.close()
-
-    def test_scb_parser_nikto_multiple(self):
-        testfile = open(
-            "dojo/unittests/scans/securecodebox/scb_multiple_finding_formats.json")
-        parser = SecureCodeBoxParser()
-        findings = parser.get_findings(testfile, self.get_test())
-        testfile.close()
-        self.assertEqual(3, len(findings))
-        self.assertEqual(findings[0].title, "WordPress Service")
-        self.assertEqual(findings[0].description,
-                         "WordPress Service Information")
-        self.assertEqual(findings[1].title, "SSH Service")
-        self.assertEqual(findings[1].description, "SSH Service Information")
-        self.assertEqual(
-            findings[2].title, "The anti-clickjacking X-Frame-Options header is not present.")
-        self.assertEqual(findings[2].description, "N/A")
