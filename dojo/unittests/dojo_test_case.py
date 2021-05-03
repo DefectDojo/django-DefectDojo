@@ -166,7 +166,7 @@ class DojoTestUtilsMixin(object):
         response = self.client.get(reverse('new_product'))
 
         # logger.debug('before: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = '/product/%i'
@@ -174,7 +174,7 @@ class DojoTestUtilsMixin(object):
         response = self.client.post(reverse('new_product'), urlencode(data), content_type='application/x-www-form-urlencoded')
 
         # logger.debug('after: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         product = None
         if expect_200:
@@ -222,13 +222,13 @@ class DojoTestUtilsMixin(object):
     def edit_product_jira(self, product, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse('edit_product', args=(product.id, )))
 
-        logger.debug('before: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # logger.debug('before: JIRA_Project last')
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         response = self.client.post(reverse('edit_product', args=(product.id, )), urlencode(data), content_type='application/x-www-form-urlencoded')
         # self.log_model_instance(product)
-        logger.debug('after: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # logger.debug('after: JIRA_Project last')
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         if expect_200:
             self.assertEqual(response.status_code, 200)
