@@ -87,7 +87,7 @@ You can execute the following command to see the configuration:
 and see what is in effect.
 
 
-*Monitoring*
+## Monitoring
 
 To expose Django statistics for Prometheus, using the text-editor of
 your choice, change `DJANGO_METRICS_ENABLED` to True in
