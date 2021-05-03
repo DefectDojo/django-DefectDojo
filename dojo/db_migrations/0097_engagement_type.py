@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0095_remove_old_product_contact_fields'),
+        ('dojo', '0096_grype_name_change'),
     ]
 
     operations = [
