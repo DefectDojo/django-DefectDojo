@@ -79,7 +79,7 @@ class CycloneDXParser(object):
     def internal_deduplicate(self, dupes, dupe_key, finding):
         if dupe_key in dupes:
             find = dupes[dupe_key]
-            find.description += "\n\n-----\n\n" + finding.description
+            find.description += "\n\n-----\n" + finding.description
             find.nb_occurences += 1
         else:
             dupes[dupe_key] = finding
