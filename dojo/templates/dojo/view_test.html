@@ -366,7 +366,7 @@
                             </i>
                         </td>
                         <td>
-                            {% for find in group.findings.all %}{% if find.cve%}<a href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
+                            {% for find in group.findings.all %}{% if find.cve%}<a target="_blank" href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
                         </td>
                         <td>
                             {{ group.components }}
