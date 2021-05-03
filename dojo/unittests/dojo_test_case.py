@@ -166,7 +166,7 @@ class DojoTestUtilsMixin(object):
         response = self.client.get(reverse('new_product'))
 
         # logger.debug('before: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = '/product/%i'
@@ -174,7 +174,7 @@ class DojoTestUtilsMixin(object):
         response = self.client.post(reverse('new_product'), urlencode(data), content_type='application/x-www-form-urlencoded')
 
         # logger.debug('after: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         product = None
         if expect_200:
@@ -222,13 +222,13 @@ class DojoTestUtilsMixin(object):
     def edit_product_jira(self, product, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse('edit_product', args=(product.id, )))
 
-        logger.debug('before: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # logger.debug('before: JIRA_Project last')
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         response = self.client.post(reverse('edit_product', args=(product.id, )), urlencode(data), content_type='application/x-www-form-urlencoded')
         # self.log_model_instance(product)
-        logger.debug('after: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # logger.debug('after: JIRA_Project last')
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         if expect_200:
             self.assertEqual(response.status_code, 200)
@@ -350,7 +350,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -365,6 +365,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
+
+        if endpoint_to_add is not None:
+            payload['endpoint_to_add'] = endpoint_to_add
 
         if tags is not None:
             payload['tags'] = tags
@@ -435,14 +438,14 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None, is_Mitigated=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None):
         payload = {'test': test_id}
         if active is not None:
             payload['active'] = active
         if verified is not None:
             payload['verified'] = verified
-        if is_Mitigated is not None:
-            payload['is_Mitigated'] = is_Mitigated
+        if is_mitigated is not None:
+            payload['is_mitigated'] = is_mitigated
 
         response = self.client.get(reverse('finding-list'), payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
@@ -523,7 +526,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         else:
             for finding in findings_content_json['results']:
                 logger.debug(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
-                        ': is_Mitigated: ' + str(finding['is_Mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
+                        ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
                         ": endpoints: " + str(finding['endpoints']))
 
         logger.debug('endpoints')

@@ -43,7 +43,7 @@ def create_with_duplicates(when: datetime, product_id: int, titles_and_severitie
 def mitigate(when: datetime, product_id: int, title: str):
     with patch('django.db.models.fields.timezone.now') as mock_now:
         mock_now.return_value = when
-        Finding.objects.filter(test__engagement__product_id=product_id, title=title).update(is_Mitigated=True, mitigated=when)
+        Finding.objects.filter(test__engagement__product_id=product_id, title=title).update(is_mitigated=True, mitigated=when)
 
 
 def accept(when: datetime, product_id: int, title: str):

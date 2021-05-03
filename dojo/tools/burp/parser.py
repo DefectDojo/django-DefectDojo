@@ -1,10 +1,10 @@
+import base64
+import logging
 import re
 from urllib.parse import urlparse
-import base64
-import html2text
-import logging
-from defusedxml import ElementTree as etree
 
+import html2text
+from defusedxml import ElementTree as etree
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
@@ -99,7 +99,15 @@ def do_clean(value):
 def get_clean_base64(value):
     if value is None:
         return ""
-    return base64.b64decode(value).decode()
+    try:
+        return base64.b64decode(value).decode()
+    except UnicodeDecodeError as ue:
+        # decoding of UTF-8 fail when you have a binary payload in the HTTP response
+        # so we just cut it to have only the header and add fake body
+        return "\r\n\r\n".join([
+            base64.b64decode(value).split(b"\r\n\r\n")[0].decode(),
+            "<Binary Redacted Data>",
+        ])
 
 
 def do_clean_cwe(value):
@@ -181,6 +189,8 @@ def get_item(item_node, test):
         references = text_maker.handle(references)
 
     severity = item_node.findall('severity')[0].text
+    if "information" == severity.lower():
+        severity = "Info"
 
     scanner_confidence = item_node.findall('confidence')[0].text
     if scanner_confidence:
@@ -212,7 +222,6 @@ def get_item(item_node, test):
         mitigated=None,
         dynamic_finding=True,
         impact=background,
-        numerical_severity=Finding.get_numerical_severity(severity),
         unique_id_from_tool=serial_number,
         vuln_id_from_tool=vuln_id_from_tool)
     finding.unsaved_req_resp = unsaved_req_resp

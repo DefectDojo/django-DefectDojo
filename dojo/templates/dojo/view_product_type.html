@@ -129,18 +129,21 @@
                             <h4 class="pull-left">Members</h4>
                             {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                             <div class="dropdown pull-right">
-                                <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenu1"
-                                        data-toggle="dropdown" aria-expanded="true">
+                                <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductTypeMember"
+                                        data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Type Member">
                                     <span class="fa fa-bars"></span>
                                     <span class="caret"></span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a class="" href="{% url 'add_product_type_member' pt.id %}">
-                                            <i class="fa fa-plus"></i> Add Member
+                                        <a id="addProductTypeMember" href="{% url 'add_product_type_member' pt.id %}">
+                                            <i class="fa fa-plus"></i> Add User
                                         </a>
                                     </li>
                                 </ul>
+                                &nbsp;
+                                <a href="https://defectdojo.github.io/django-DefectDojo/basics/permissions/" target="_blank">
+                                    <i class="fa fa-question-circle text-low"></i></a>
                             </div>
                             {% endif %}
                         </div>
@@ -161,17 +164,17 @@
                                         <td>
                                             <ul>
                                             <li class="dropdown" style="list-style:none;position:absolute">
-                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                                 <ul class="dropdown-menu">
                                                     {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                                                     <li>
-                                                        <a class="" href="{% url 'edit_product_type_member' member.id %}">
+                                                        <a name="editProductTypeMember" href="{% url 'edit_product_type_member' member.id %}">
                                                         <i class="fa fa-pencil-square-o"></i> Edit</a>
                                                     </li>
                                                     {% endif %}
-                                                    {% if member|has_object_permission:"Product_Type_Remove_Member" %}
+                                                    {% if member|has_object_permission:"Product_Type_Member_Delete" %}
                                                     <li>
-                                                        <a class="" href="{% url 'delete_product_type_member' member.id %}">
+                                                        <a name="deleteProductTypeMember" href="{% url 'delete_product_type_member' member.id %}">
                                                         <i class="fa fa-trash"></i> Delete</a>
                                                     </li>
                                                     {% endif %}
@@ -179,8 +182,8 @@
                                             </li>
                                             </ul>
                                         </td>
-                                        <td>{{ member.user|full_name }}</td>
-                                        <td>{% role_as_string member.role %}</td>
+                                        <td name="member_user">{{ member.user|full_name }}</td>
+                                        <td name="member_role">{% role_as_string member.role %}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

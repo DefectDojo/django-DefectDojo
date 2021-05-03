@@ -148,11 +148,8 @@
                                 <li><a href="{% url 'view_profile' %}"><i
                                         class="fa fa-user fa-fw"></i> {{ request.user.username }}</a>
                                 </li>
-                                <li><a href="{% url 'api_key' %}"><i class="fa fa-fw fa-key"></i> API v1 Key</a></li>
                                 <li><a href="{% url 'api_v2_key' %}"><i class="fa fa-fw fa-key"></i> API v2 Key</a></li>
                             {% endif %}
-                            <li><a href="{% url 'tastypie_swagger:index' %}"><i class="fa fa-book fa-fw"></i> API
-                                v1 Docs</a></li>
                             <li><a href="{% url 'api_v2_schema' %}"><i class="fa fa-book fa-fw"></i> API
                                 v2 Docs</a></li>
                             {{ block.super }}
@@ -210,7 +207,7 @@
                                 </a>
                                 <ul class="nav nav-second-level">
                                     <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
-                                    {% if request.user|feature_authorization_v2_or_user_is_staff %}
+                                    {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                         <li><a href="{% url 'engagements_all' %}">All Engagements</a></li>
                                     {% endif %}
                                     {% if request.user.is_staff %}
@@ -220,7 +217,7 @@
                                 </ul>
                                 <!-- /.nav-second-level -->
                             </li>
-                            {% if request.user|feature_authorization_v2_or_user_is_staff %}
+                            {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <li>
                                     <a href="{% url 'open_findings' %}" aria-expanded="false" aria-label="Findings">
                                         <i class="fa fa-bug fa-fw"></i>
@@ -248,8 +245,6 @@
                                     </ul>
                                     <!-- /.nav-second-level -->
                                 </li>
-                            {% endif %}
-                            {% if request.user.is_staff %}
                                 <li>
 				                    <a href="{% url 'components' %}" id="product_component_view" aria-expanded="false"  aria-label="Components">
                                         <i class="fa fa-th-large fa-fw"></i>
@@ -261,8 +256,6 @@
                                         </li>
                                     </ul>
                                 </li>
-                            {% endif %}
-                            {% if request.user|feature_authorization_v2_or_user_is_staff %}
                                 <li>
                                     <a href="{% url 'endpoints' %}" aria-expanded="false" aria-label="Endpoints">
 					                    <i class="fa fa-sitemap fa-fw"></i>
@@ -328,7 +321,7 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if request.user|feature_authorization_v2_or_user_is_staff %}
+                            {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <li>
 				                    <a href="{% url 'engagement_calendar' %}" aria-disabled="true" aria-expanded="false" aria-label="Calendar">
                                         <i class="fa fa-calendar fa-fw"></i>

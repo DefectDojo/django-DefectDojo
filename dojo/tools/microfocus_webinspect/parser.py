@@ -71,7 +71,6 @@ class MicrofocusWebinspectParser(object):
                     description=description,
                     mitigation=mitigation,
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     references=reference,
                     static_finding=False,
                     dynamic_finding=True,

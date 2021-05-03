@@ -1,12 +1,11 @@
 
 import hashlib
+import json
 import logging
 import re
+
 import hyperlink
-import json
-
 from defusedxml import ElementTree as ET
-
 from dojo.models import Endpoint, Finding
 
 logger = logging.getLogger(__name__)
@@ -109,7 +108,7 @@ class NiktoParser(object):
         for item in scan.findall('item'):
             # Title
             titleText = None
-            description = item.find("description").text
+            description = item.findtext("description")
             # Cut the title down to the first sentence
             sentences = re.split(
                 r'(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s', description)
@@ -118,49 +117,50 @@ class NiktoParser(object):
             else:
                 titleText = description[:900]
 
-            # Url
-            ip = item.find("iplink").text
-            # Remove the port numbers for 80/443
-            ip = ip.replace(r":['80']{2}\/?$", "")
-            ip = ip.replace(r":['443']{3}\/?$", "")
-
-            # Severity
-            severity = "Info"  # Nikto doesn't assign severity, default to Info
-
             # Description
             description = "\n".join([
-                    f"**Host:** `{ip}`",
-                    f"**Description:** `{item.find('description').text}`",
-                    f"**HTTP Method:** `{item.attrib['method']}`",
+                    f"**Host:** `{item.findtext('iplink')}`",
+                    f"**Description:** `{item.findtext('description')}`",
+                    f"**HTTP Method:** `{item.attrib.get('method')}`",
             ])
 
-            url = hyperlink.parse(ip)
-            endpoint = Endpoint(
-                protocol=url.scheme,
-                host=url.host,
-                port=url.port,
-                path="/".join(url.path),
+            # Manage severity the same way with JSON
+            severity = "Info"  # Nikto doesn't assign severity, default to Info
+            if item.get('osvdbid') is not None and "0" != item.get('osvdbid'):
+                severity = "Medium"
+
+            finding = Finding(
+                title=titleText,
+                test=test,
+                description=description,
+                severity=severity,
+                dynamic_finding=True,
+                static_finding=False,
+                vuln_id_from_tool=item.attrib.get('id'),
+                nb_occurences=1,
             )
+
+            # endpoint
+            try:
+                ip = item.findtext("iplink")
+                url = hyperlink.parse(ip)
+                endpoint = Endpoint(
+                    protocol=url.scheme,
+                    host=url.host,
+                    port=url.port,
+                    path="/".join(url.path),
+                )
+                finding.unsaved_endpoints = [endpoint]
+            except ValueError as exce:
+                logger.warn("Invalid iplink in the report")
 
             dupe_key = hashlib.sha256(description.encode("utf-8")).hexdigest()
 
             if dupe_key in dupes:
-                finding = dupes[dupe_key]
-                if finding.description:
-                    finding.description = finding.description + "\nHost:" + ip + "\n" + description
-                finding.unsaved_endpoints.append(endpoint)
-                finding.nb_occurences += 1
+                find = dupes[dupe_key]
+                find.description += "\n-----\n" + finding.description
+                find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                find.nb_occurences += 1
 
             else:
-                finding = Finding(title=titleText,
-                                    test=test,
-                                    description=description,
-                                    severity=severity,
-                                    numerical_severity=Finding.get_numerical_severity(
-                                        severity),
-                                    dynamic_finding=True,
-                                    nb_occurences=1,
-                                  )
-                finding.unsaved_endpoints = [endpoint]
-
                 dupes[dupe_key] = finding

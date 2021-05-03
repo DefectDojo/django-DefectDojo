@@ -16,9 +16,9 @@ SEVERITY = ['Info', 'Low', 'Medium', 'High', 'Critical']
 class DependencyCheckParser(object):
     def add_finding(self, finding, dupes):
         if finding is not None:
-            key_str = '{}|{}|{}'.format(finding.severity,
-                                            finding.title,
-                                            finding.description)
+            key_str = '{}|{}|{}'.format(finding.cve,
+                                            finding.cwe,
+                                            finding.file_path.lower())
             key = hashlib.md5(key_str.encode('utf-8')).hexdigest()
 
             if key not in dupes:
@@ -60,8 +60,8 @@ class DependencyCheckParser(object):
                 # newly found in v6.0.0
                 # <identifiers>
                 #     <package confidence="HIGH">
-                #         <id>pkg:maven/nl.isaac.client.offerservice/client-offer-service-codegen@1.0-SNAPSHOT</id>
-                #         <url>https://ossindex.sonatype.org/component/pkg:maven/nl.isaac.client.offerservice/client-offer-service-codegen@1.0-SNAPSHOT</url>
+                #         <id>pkg:maven/nl.company.client.offerservice/client-offer-service-codegen@1.0-SNAPSHOT</id>
+                #         <url>https://ossindex.sonatype.org/component/pkg:maven/nl.company.client.offerservice/client-offer-service-codegen@1.0-SNAPSHOT</url>
                 #     </package>
                 # </identifiers>
 
@@ -173,7 +173,6 @@ class DependencyCheckParser(object):
             cwe_field = self.get_field_value(vulnerability, 'cwe', namespace)
         description = self.get_field_value(vulnerability, 'description', namespace)
 
-        title = '{0} | {1}'.format(dependency_filename, name)
         cve = name[:28]
         if cve and not cve.startswith('CVE'):
             # for vulnerability sources which have a CVE, it is the start of the 'name'.
@@ -187,18 +186,36 @@ class DependencyCheckParser(object):
             if m:
                 cwe = int(m.group(2))
 
+        component_name, component_version = self.get_component_name_and_version_from_dependency(dependency, related_dependency, namespace)
+
+        stripped_name = name
+        # startswith CVE-XXX-YYY
+        stripped_name = re.sub(r'^CVE-\d{4}-\d{4,7}', '', stripped_name).strip()
+        # startswith CWE-XXX:
+        stripped_name = re.sub(r'^CWE-\d+\:', '', stripped_name).strip()
+        # startswith CWE-XXX
+        stripped_name = re.sub(r'^CWE-\d+', '', stripped_name).strip()
+
+        title = '%s:%s | %s(in %s)' % (component_name.split(':')[-1], component_version,
+            (stripped_name + ' ' if stripped_name else '') + (description if len(stripped_name) < 25 else ''),
+            dependency_filename)
+
         # some changes in v6.0.0 around CVSS version information
         # https://github.com/jeremylong/DependencyCheck/pull/2781
 
         cvssv2_node = vulnerability.find(namespace + 'cvssV2')
         cvssv3_node = vulnerability.find(namespace + 'cvssV3')
-        if cvssv3_node is not None:
-            severity = self.get_field_value(cvssv3_node, 'baseSeverity', namespace).lower().capitalize()
-        elif cvssv2_node is not None:
-            severity = self.get_field_value(cvssv2_node, 'severity', namespace).lower().capitalize()
-        else:
-            severity = self.get_field_value(vulnerability, 'severity', namespace).lower().capitalize()
-        # logger.debug("severity: " + severity)
+        severity = self.get_field_value(vulnerability, 'severity', namespace).lower().capitalize()
+        if not severity:
+            if cvssv3_node is not None:
+                severity = self.get_field_value(cvssv3_node, 'baseSeverity', namespace).lower().capitalize()
+            elif cvssv2_node is not None:
+                severity = self.get_field_value(cvssv2_node, 'severity', namespace).lower().capitalize()
+
+        # https://github.com/DefectDojo/django-DefectDojo/issues/4309
+        if severity.lower() == 'moderate':
+            severity = 'Medium'
+
         if severity in SEVERITY:
             severity = severity
         else:
@@ -221,8 +238,6 @@ class DependencyCheckParser(object):
                                      'source: {1}\n' \
                                      'url: {2}\n\n'.format(name, source, url)
 
-        component_name, component_version = self.get_component_name_and_version_from_dependency(dependency, related_dependency, namespace)
-
         return Finding(
             title=title,
             file_path=dependency_filename,
@@ -231,7 +246,6 @@ class DependencyCheckParser(object):
             cve=cve,
             description=description,
             severity=severity,
-            numerical_severity=Finding.get_numerical_severity(severity),
             static_finding=True,
             references=reference_detail,
             component_name=component_name,
@@ -299,8 +313,8 @@ class DependencyCheckParser(object):
 
                         # related dependencies can have different identifiers
                         # <relatedDependency>
-                        #     <fileName>lsnl-pangaea-nxg.ear: pangaea-nxg-rest-internal.war: jackson-datatype-jsr310-2.9.8.jar</fileName>
-                        #     <filePath>/var/lib/jenkins/workspace/nl-pangaea-nxg_-_metrics_develop/pangaea-nxg-lsnl/target/lsnl-pangaea-nxg.ear/pangaea-nxg-rest-internal.war/WEB-INF/lib/jackson-datatype-jsr310-2.9.8.jar</filePath>
+                        #     <fileName>client-platform.ear: platform-rest-internal.war: jackson-datatype-jsr310-2.9.8.jar</fileName>
+                        #     <filePath>/var/lib/jenkins/workspace/nl-platform_-_metrics_develop/platform-client/target/client-platform.ear/platform-rest-internal.war/WEB-INF/lib/jackson-datatype-jsr310-2.9.8.jar</filePath>
                         #     <sha256>fdca896161766ca4a2c3e06f02f6a5ede22a5b3a55606541cd2838eace08ca23</sha256>
                         #     <sha1>28ad1bced632ba338e51c825a652f6e11a8e6eac</sha1>
                         #     <md5>01d34ef6e91de1aea29aadebced1aaa5</md5>

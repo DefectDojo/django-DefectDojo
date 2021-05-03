@@ -3,6 +3,7 @@ import csv
 import hashlib
 import io
 import sys
+import datetime
 
 from dojo.models import Endpoint, Finding
 
@@ -36,43 +37,50 @@ class ContrastParser(object):
             severity = row.get('Severity')
             if severity == "Note":
                 severity = "Info"
-            mitigation = "N/A"
-            impact = "N/A"
-            references = "N/A"
+            date_raw = datetime.datetime.utcfromtimestamp(int(row.get('First Seen')) / 1000)
+            finding = Finding(
+                title=title.split(' from')[0],
+                date=date_raw,
+                cwe=cwe,
+                test=test,
+                description=description,
+                severity=severity,
+                dynamic_finding=True,
+                static_finding=False,
+                vuln_id_from_tool=row.get('Rule Name'),
+                unique_id_from_tool=row.get('Vulnerability ID'),
+                nb_occurences=1,
+            )
+            finding.unsaved_endpoints = []
+            if row.get('Request URI'):
+                endpoint = Endpoint(
+                    host="0.0.0.0",
+                    path=row.get('Request URI'),
+                    protocol=row.get('Request Protocol'),
+                )
+                finding.unsaved_endpoints.append(endpoint)
 
-            dupe_key = hashlib.md5(category.encode('utf-8') + str(cwe).encode('utf-8') + title.encode('utf-8')).hexdigest()
+            if row.get('Request Qs', '') != '' and row.get('Request Body', '') != '':
+                finding.unsaved_req_resp = []
+                finding.unsaved_req_resp.append({"req": row.get('Request Qs') + '\n' + row.get('Request Body'), "resp": ''})
+
+            dupe_key = hashlib.sha256("|".join([
+                finding.vuln_id_from_tool,
+            ]).encode("utf-8")).digest()
 
             if dupe_key in dupes:
-                finding = dupes[dupe_key]
-                if finding.description:
-                    finding.description = finding.description + "\nVulnerability ID: " + \
-                        row.get('Vulnerability ID') + "\n" + \
-                        row.get('Vulnerability Name') + "\n"
-                self.process_endpoints(finding, df, i)
-                dupes[dupe_key] = finding
+                dupes[dupe_key].description = dupes[dupe_key].description + "\n-----\n" + finding.description
+                dupes[dupe_key].unsaved_endpoints.extend(finding.unsaved_endpoints)
+                dupes[dupe_key].nb_occurences += finding.nb_occurences
+                dupes[dupe_key].unique_id_from_tool = None  # there is no uniq finding now
             else:
-                dupes[dupe_key] = True
-
-                finding = Finding(title=title,
-                                  cwe=cwe,
-                                  test=test,
-                                  description=description,
-                                  severity=severity,
-                                  numerical_severity=Finding.get_numerical_severity(
-                                      severity),
-                                  mitigation=mitigation,
-                                  impact=impact,
-                                  references=references,
-                                  vuln_id_from_tool=row.get('Vulnerability ID'),
-                                  dynamic_finding=True)
-
                 dupes[dupe_key] = finding
-                self.process_endpoints(finding, row)
 
         return list(dupes.values())
 
     def format_description(self, row):
-        description = "**Request URI**: " + str(row.get('Request URI')) + "\n"
+        description = "**Title:** " + str(row.get('Vulnerability Name')) + "\n"
+        description = description + "**Request URI**: " + str(row.get('Request URI')) + "\n"
         description = description + "**Rule Name:** " + row.get('Rule Name') + "\n"
         description = description + "**Vulnerability ID:** " + row.get('Vulnerability ID') + "\n"
         description = description + "**Vulnerability Name:** " + row.get('Vulnerability Name') + "\n"
@@ -87,42 +95,3 @@ class ContrastParser(object):
         filename = filename.split('.')[0]
 
         return int(filename)
-
-    def process_endpoints(self, finding, row):
-        protocol = "http"
-        host = "0.0.0.0"
-        query = ""
-        fragment = ""
-        path = row.get('Request URI')
-
-        if path:
-            try:
-                dupe_endpoint = Endpoint.objects.get(protocol="protocol",
-                                                     host=host,
-                                                     query=query,
-                                                     fragment=fragment,
-                                                     path=path,
-                                                     product=finding.test.engagement.product)
-            except Endpoint.DoesNotExist:
-                dupe_endpoint = None
-
-            if not dupe_endpoint:
-                endpoint = Endpoint(protocol=protocol,
-                                    host=host,
-                                    query=query,
-                                    fragment=fragment,
-                                    path=path,
-                                    product=finding.test.engagement.product)
-            else:
-                endpoint = dupe_endpoint
-
-            if not dupe_endpoint:
-                endpoints = [endpoint]
-            else:
-                endpoints = [endpoint, dupe_endpoint]
-
-            finding.unsaved_endpoints = finding.unsaved_endpoints + endpoints
-
-        if row.get('Request Qs', '') != '' and row.get('Request Body', '') != '':
-            finding.unsaved_req_resp = []
-            finding.unsaved_req_resp.append({"req": row.get('Request Qs') + '\n' + row.get('Request Body'), "resp": ''})

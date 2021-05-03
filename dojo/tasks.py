@@ -313,5 +313,5 @@ def jira_status_reconciliation_task(*args, **kwargs):
 
 @app.task
 def fix_loop_duplicates_task(*args, **kwargs):
-    from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
+    from dojo.finding.helper import fix_loop_duplicates
     return fix_loop_duplicates()

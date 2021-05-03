@@ -38,12 +38,13 @@ from django.urls import reverse
 from tagulous.forms import TagField
 import logging
 from crum import get_current_user
-from dojo.utils import get_system_setting
+from dojo.utils import get_system_setting, get_product
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
+from dojo.user.queries import get_authorized_users_for_product_and_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -215,6 +216,15 @@ class Add_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
         self.fields['user'].disabled = False
 
 
+class Add_Product_Type_Member_UserForm(Edit_Product_Type_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Type_Member_UserForm, self).__init__(*args, **kwargs)
+        current_members = Product_Type_Member.objects.filter(user=self.initial['user']).values_list('product_type', flat=True)
+        self.fields['product_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
+            .exclude(id__in=current_members)
+        self.fields['product_type'].disabled = False
+
+
 class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
     def __init__(self, *args, **kwargs):
         super(Delete_Product_Type_MemberForm, self).__init__(*args, **kwargs)
@@ -322,6 +332,15 @@ class Add_Product_MemberForm(Edit_Product_MemberForm):
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
         self.fields['user'].disabled = False
+
+
+class Add_Product_Member_UserForm(Edit_Product_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Member_UserForm, self).__init__(*args, **kwargs)
+        current_members = Product_Member.objects.filter(user=self.initial["user"]).values_list('product', flat=True)
+        self.fields['product'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
+            .exclude(id__in=current_members)
+        self.fields['product'].disabled = False
 
 
 class Delete_Product_MemberForm(Edit_Product_MemberForm):
@@ -691,8 +710,11 @@ class EngForm(forms.ModelForm):
 
         if product:
             self.fields['preset'] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
-            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
-            self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
+                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
+            else:
+                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
@@ -725,9 +747,9 @@ class EngForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        exclude = ('first_contacted', 'eng_type', 'real_start',
+        exclude = ('first_contacted', 'real_start', 'engagement_type',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
-                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
+                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list')
 
 
 class DeleteEngagementForm(forms.ModelForm):
@@ -767,10 +789,14 @@ class TestForm(forms.ModelForm):
         super(TestForm, self).__init__(*args, **kwargs)
 
         if obj:
-            staff_users = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', obj)]
+            product = get_product(obj)
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                authorized_for_lead = [user.id for user in User.objects.all() if user_is_authorized(user, 'staff', product)]
+                self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
+            else:
+                self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
         else:
-            staff_users = [user.id for user in User.objects.exclude(is_staff=False)]
-        self.fields['lead'].queryset = User.objects.filter(id__in=staff_users)
+            self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
     class Meta:
         model = Test
@@ -841,7 +867,7 @@ class AddFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -893,7 +919,7 @@ class AdHocFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -919,7 +945,7 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template', 'endpoint_status'
-                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
 
 
 class SplitDateTimeWidget(forms.MultiWidget):
@@ -1075,7 +1101,7 @@ class FindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
 class StubFindingForm(forms.ModelForm):
@@ -1085,7 +1111,7 @@ class StubFindingForm(forms.ModelForm):
         model = Stub_Finding
         order = ('title',)
         exclude = (
-            'date', 'description', 'severity', 'reporter', 'test', 'is_Mitigated')
+            'date', 'description', 'severity', 'reporter', 'test', 'is_mitigated')
 
     def clean(self):
         cleaned_data = super(StubFindingForm, self).clean()
@@ -1133,7 +1159,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     class Meta:
         fields = ['title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
-        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact', 'is_Mitigated')
+        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact', 'is_mitigated')
 
 
 class FindingTemplateForm(forms.ModelForm):
@@ -1159,7 +1185,7 @@ class FindingTemplateForm(forms.ModelForm):
     class Meta:
         model = Finding_Template
         order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact')
-        exclude = ('numerical_severity', 'is_Mitigated', 'last_used', 'endpoint_status')
+        exclude = ('numerical_severity', 'is_mitigated', 'last_used', 'endpoint_status')
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1208,7 +1234,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = ('severity', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'is_Mitigated')
+        fields = ('severity', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'is_mitigated')
 
 
 class EditEndpointForm(forms.ModelForm):
@@ -1575,19 +1601,25 @@ class DojoUserForm(forms.ModelForm):
 
 
 class AddDojoUserForm(forms.ModelForm):
-    authorized_products = forms.ModelMultipleChoiceField(
-        queryset=Product.objects.all(), required=False,
-        help_text='Select the products this user should have access to.')
-    authorized_product_types = forms.ModelMultipleChoiceField(
-        queryset=Product_Type.objects.all(), required=False,
-        help_text='Select the product types this user should have access to.')
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        authorized_products = forms.ModelMultipleChoiceField(
+            queryset=Product.objects.all(), required=False,
+            help_text='Select the products this user should have access to.')
+        authorized_product_types = forms.ModelMultipleChoiceField(
+            queryset=Product_Type.objects.all(), required=False,
+            help_text='Select the product types this user should have access to.')
 
     class Meta:
         model = Dojo_User
         fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
-        exclude = ['password', 'last_login', 'groups',
-                   'date_joined', 'user_permissions']
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['password', 'last_login', 'groups',
+                    'date_joined', 'user_permissions']
+        else:
+            exclude = ['password', 'last_login', 'groups',
+                    'date_joined', 'user_permissions',
+                    'authorized_products', 'authorized_product_types']
 
 
 class DeleteUserForm(forms.ModelForm):
@@ -2280,7 +2312,7 @@ class JIRAFindingForm(forms.Form):
 
         self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
 
-        if self.instance.has_jira_group_issue:
+        if self.instance and self.instance.has_jira_group_issue:
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
             self.fields['jira_issue'].help_text = 'Changing the linked JIRA issue for finding groups is not (yet) supported.'
             self.initial['jira_issue'] = self.instance.finding_group.jira_issue.jira_key
@@ -2412,7 +2444,7 @@ class GoogleSheetFieldsForm(forms.Form):
         self.credentials_required = kwargs.pop('credentials_required')
         options = ((0, 'Hide'), (100, 'Small'), (200, 'Medium'), (400, 'Large'))
         protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'is_template']
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'is_template']
         self.all_fields = kwargs.pop('all_fields')
         super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
         if not self.credentials_required:

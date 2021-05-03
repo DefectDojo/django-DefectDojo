@@ -1,6 +1,6 @@
 from django.test import TestCase
-from dojo.tools.snyk.parser import SnykParser
 from dojo.models import Test
+from dojo.tools.snyk.parser import SnykParser
 
 
 class TestSnykParser(TestCase):
@@ -67,7 +67,7 @@ class TestSnykParser(TestCase):
         )
         self.assertEqual("CVE-2019-12400", finding.cve)
         self.assertEqual(611, finding.cwe)
-        self.assertEqual("AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L", finding.cvssv3)
+        self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:L", finding.cvssv3)
         self.assertEqual(
             "## Remediation\nUpgrade `org.apache.santuario:xmlsec` to version 2.1.4 or higher.\n",
             finding.mitigation,
@@ -84,3 +84,38 @@ class TestSnykParser(TestCase):
         self.assertEqual(
             "com.test:myframework > org.apache.santuario:xmlsec", finding.file_path
         )
+
+    def test_snykParser_allprojects_issue4277(self):
+        """Report to linked to issue 4277"""
+        testfile = open("dojo/unittests/scans/snyk/all_projects_issue4277.json")
+        parser = SnykParser()
+        findings = list(parser.get_findings(testfile, Test()))
+        testfile.close()
+        self.assertEqual(82, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("Microsoft.AspNetCore", finding.component_name)
+            self.assertEqual("2.2.0", finding.component_version)
+            self.assertEqual("SNYK-DOTNET-MICROSOFTASPNETCORE-174184", finding.vuln_id_from_tool)
+            self.assertEqual("CVE-2019-0815", finding.cve)
+            self.assertEqual(200, finding.cwe)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H", finding.cvssv3)
+        with self.subTest(i=40):
+            finding = findings[40]
+            self.assertEqual("High", finding.severity)
+            self.assertEqual("lodash", finding.component_name)
+            self.assertEqual("4.17.11", finding.component_version)
+            self.assertEqual("SNYK-JS-LODASH-1040724", finding.vuln_id_from_tool)
+            self.assertEqual("CVE-2021-23337", finding.cve)
+            self.assertEqual(78, finding.cwe)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:N/S:U/C:H/I:H/A:H/E:P/RL:U/RC:C", finding.cvssv3)
+        with self.subTest(i=81):
+            finding = findings[81]
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("yargs-parser", finding.component_name)
+            self.assertEqual("5.0.0", finding.component_version)
+            self.assertEqual("SNYK-JS-YARGSPARSER-560381", finding.vuln_id_from_tool)
+            self.assertEqual("CVE-2020-7608", finding.cve)
+            self.assertEqual(400, finding.cwe)
+            self.assertEqual("CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:L/E:P/RL:O/RC:C", finding.cvssv3)

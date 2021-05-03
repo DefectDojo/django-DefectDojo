@@ -1,9 +1,10 @@
-| Wrapper                     | APIV1  | APIV2  | Notes                   |
-| ----------------------------| -------|   ---- | ------------------------|
-| Specific python wrapper     | Yes    | Yes    | working (21/1/2021      |
-| Openapi python wrapper      | No     | Yes    | proof of concept only   |
-| Bash wrapper                | No     | Yes    | might be outdated       |
-| Java wrapper                | No     | Yes    | might be outdated       |
+| Wrapper                      | APIV1  | APIV2  | Notes                   |
+| -----------------------------| -------|   ---- | ------------------------|
+| Specific python wrapper      | Yes    | Yes    | working (2021-01-21)    |
+| Openapi python wrapper       | No     | Yes    | proof of concept only   |
+| Bash wrapper                 | No     | Yes    | might be outdated       |
+| Java library                 | No     | Yes    | working (2021-04-13)    |
+| Image using the Java library | No     | Yes    | out of date             |
 
 ### Specific python wrapper
 * Install the DefectDojo Python API via `pip install defectdojo_api`(outdated) or clone
@@ -18,6 +19,8 @@ https://github.com/alles-klar/defectdojo-api-v2-client
 ### Bash wrapper
 https://github.com/wurstbrot/defectdojo-client
 
-### Java wrapper
+### Java library
+https://github.com/secureCodeBox/defectdojo-client-java
 
-https://github.com/DefectDojo/defectdojo-java-client
+### Image using the Java library
+https://github.com/DefectDojo/defectdojo-java-client (out of date, update expected)

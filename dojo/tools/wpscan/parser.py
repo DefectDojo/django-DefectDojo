@@ -41,7 +41,6 @@ class WpscanParser(object):
                     title=vul['title'],
                     description=description,
                     severity='Medium',
-                    numerical_severity=Finding.get_numerical_severity('Medium'),
                     cwe=1035,
                     references=self.generate_references(vul['references']),
                     dynamic_finding=True,
@@ -84,7 +83,6 @@ class WpscanParser(object):
                 title=f"Interesting finding: {interesting_finding.get('to_s')}",
                 description=description,
                 severity='Info',
-                numerical_severity=Finding.get_numerical_severity('Info'),
                 dynamic_finding=True,
                 static_finding=False,
             )
