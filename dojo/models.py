@@ -196,13 +196,6 @@ class System_Settings(models.Model):
                                                blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
-    s_finding_severity_naming = \
-        models.BooleanField(default=False, blank=False,
-                            help_text='With this setting turned on, Dojo '
-                                      'will display S0, S1, S2, etc in most '
-                                      'places, whereas if turned off '
-                                      'Critical, High, Medium, etc will '
-                                      'be displayed.')
     false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two.")
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
@@ -630,19 +623,6 @@ class Product(models.Model):
 
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
-
-    '''
-    The following three fields are deprecated and no longer in use.
-    They remain in model for backwards compatibility and will be removed
-    in a future release.  prod_manager, tech_contact, manager
-
-    The admin script migrate_product_contacts should be used to migrate data
-    from these fields to their replacements.
-    ./manage.py migrate_product_contacts
-    '''
-    prod_manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-    tech_contact = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-    manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
 
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                         related_name='product_manager', on_delete=models.CASCADE)
@@ -2203,15 +2183,7 @@ class Finding(models.Model):
                     setattr(self, field, "No %s given" % field)
 
     def severity_display(self):
-        try:
-            system_settings = System_Settings.objects.get()
-            if system_settings.s_finding_severity_naming:
-                return self.numerical_severity
-            else:
-                return self.severity
-
-        except:
-            return self.severity
+        return self.severity
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
