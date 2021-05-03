@@ -1,6 +1,5 @@
 import hashlib
 import json
-import logging
 from urllib.parse import urlparse
 from dojo.models import Endpoint, Finding
 
@@ -37,7 +36,7 @@ class SecureCodeBoxParser(object):
                                             finding.description + finding.title)
                 dupe_key = hashlib.md5(
                     finding_unique_string.encode('utf-8')).hexdigest()
-                if not dupe_key in dupes:
+                if dupe_key not in dupes:
                     self.set_finding_endpoint(finding, node)
                     dupes[dupe_key] = finding
             return list(dupes.values())
