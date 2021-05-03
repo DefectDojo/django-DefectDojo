@@ -2331,7 +2331,7 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        return min([find.sla_deadline() for find in self.findings.all()])
+        return min([find.sla_deadline() for find in self.findings.all() if find.sla_deadline()], default=None)
 
     # def cves(self):
     #     return ', '.join([find.cve for find in self.findings.all() if find.cve is not None])
