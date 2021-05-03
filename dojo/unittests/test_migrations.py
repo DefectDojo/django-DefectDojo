@@ -150,7 +150,6 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertEqual(endpoint.query, 'key1=value1&no_value_key')
         self.assertEqual(endpoint.fragment, 'fragmentX')
 
-
         low_id = Endpoint.objects.filter(id=min(self.endpoints_eps.values()))
         logger.debug("Low id: {}".format(list(low_id)))
         self.assertEqual(low_id.count(), 1)
