@@ -13,13 +13,15 @@ def check_post_permission(request, post_model, post_pk, post_permission):
         return True
 
 
-def check_object_permission(request, object, get_permission, put_permission, delete_permission):
+def check_object_permission(request, object, get_permission, put_permission, delete_permission, add_permission=None):
     if request.method == 'GET':
         return user_has_permission(request.user, object, get_permission)
     elif request.method == 'PUT' or request.method == 'PATCH':
         return user_has_permission(request.user, object, put_permission)
     elif request.method == 'DELETE':
         return user_has_permission(request.user, object, delete_permission)
+    elif request.method == 'POST':
+        return user_has_permission(request.user, object, add_permission)
     else:
         return False
 
@@ -96,6 +98,16 @@ class UserHasEngagementPermission(permissions.BasePermission):
         return check_object_permission(request, obj, Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Delete)
 
 
+class UserHasEngagementRelatedPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Edit, Permissions.Engagement_Edit)
+
+
+class UserHasFilePermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.File_View, Permissions.File_Manage, Permissions.File_Manage, Permissions.File_Manage)
+
+
 class UserHasFindingPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(request, Test, 'test', Permissions.Finding_Add)
@@ -104,9 +116,19 @@ class UserHasFindingPermission(permissions.BasePermission):
         return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Delete)
 
 
+class UserHasFindingRelatedPermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Edit, Permissions.Finding_Edit)
+
+
 class UserHasImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(request, Engagement, 'engagement', Permissions.Import_Scan_Result)
+
+
+class UserHasNotePermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Note_View, Permissions.Note_Edit, Permissions.Note_Delete, Permissions.Note_Add)
 
 
 class UserHasProductPermission(permissions.BasePermission):

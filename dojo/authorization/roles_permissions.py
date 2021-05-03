@@ -73,15 +73,19 @@ class Permissions(IntEnum):
 
     Component_View = 1702
 
-    Note_View_History = 1802
+    Note_View = 1802
     Note_Add = 1803
     Note_Edit = 1806
     Note_Delete = 1807
+    Note_View_History = 1808
 
     Finding_Group_View = 1902
     Finding_Group_Add = 1903
     Finding_Group_Edit = 1906
     Finding_Group_Delete = 1907
+
+    File_View = 2002
+    File_Manage = 2008
 
     @classmethod
     def has_value(cls, value):
@@ -95,22 +99,24 @@ class Permissions(IntEnum):
     def get_engagement_permissions(cls):
         return {Permissions.Engagement_View, Permissions.Engagement_Edit,
             Permissions.Engagement_Delete, Permissions.Risk_Acceptance,
-            Permissions.Test_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
+            Permissions.Test_Add, Permissions.Import_Scan_Result, Permissions.Note_View, Permissions.Note_Add,
+            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History,
+            Permissions.File_Manage} \
             .union(cls.get_test_permissions())
 
     @classmethod
     def get_test_permissions(cls):
         return {Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete,
-            Permissions.Finding_Add, Permissions.Import_Scan_Result, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
+            Permissions.Finding_Add, Permissions.Import_Scan_Result, Permissions.Note_View, Permissions.Note_Add,
+            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History, Permissions.File_Manage} \
             .union(cls.get_finding_permissions())
 
     @classmethod
     def get_finding_permissions(cls):
         return {Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Import_Scan_Result,
-            Permissions.Finding_Delete, Permissions.Risk_Acceptance, Permissions.Note_Add,
-            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History} \
+            Permissions.Finding_Delete, Permissions.Risk_Acceptance, Permissions.Note_View, Permissions.Note_Add,
+            Permissions.Note_Delete, Permissions.Note_Edit, Permissions.Note_View_History,
+            Permissions.File_Manage} \
             .union(cls.get_finding_group_permissions())
 
     @classmethod
@@ -150,7 +156,11 @@ def get_roles_with_permissions():
 
             Permissions.Endpoint_View,
 
-            Permissions.Component_View
+            Permissions.Component_View, 
+
+            Permissions.Note_View,
+
+            Permissions.File_View
         },
         Roles.API_Importer: {
             Permissions.Import_Scan_Result
@@ -187,9 +197,13 @@ def get_roles_with_permissions():
 
             Permissions.Component_View,
 
+            Permissions.Note_View,
             Permissions.Note_View_History,
             Permissions.Note_Edit,
-            Permissions.Note_Add
+            Permissions.Note_Add,
+
+            Permissions.File_View,
+            Permissions.File_Manage
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -236,10 +250,14 @@ def get_roles_with_permissions():
 
             Permissions.Component_View,
 
+            Permissions.Note_View,
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
-            Permissions.Note_Delete
+            Permissions.Note_Delete,
+
+            Permissions.File_View,
+            Permissions.File_Manage
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -290,9 +308,13 @@ def get_roles_with_permissions():
 
             Permissions.Component_View,
 
+            Permissions.Note_View,
             Permissions.Note_View_History,
             Permissions.Note_Edit,
             Permissions.Note_Add,
-            Permissions.Note_Delete
+            Permissions.Note_Delete,
+
+            Permissions.File_View,
+            Permissions.File_Manage
         }
     }
