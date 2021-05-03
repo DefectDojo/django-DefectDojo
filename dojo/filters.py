@@ -67,7 +67,7 @@ def get_earliest_finding(queryset=None):
 
     try:
         EARLIEST_FINDING = queryset.earliest('date')
-    except Finding.DoesNotExist:
+    except (Finding.DoesNotExist, Endpoint_Status.DoesNotExist):
         EARLIEST_FINDING = None
     return EARLIEST_FINDING
 

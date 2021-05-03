@@ -26,6 +26,21 @@ class FindingQueriesTest(TestCase):
         self.request.user = user
         self.request._messages = MockMessages()
 
+    def test_finding_queries_no_data(self):
+        user3 = User.objects.get(username='user3')
+        self.request.user = user3
+
+        product_types = []
+        finding_queries = views.finding_querys(
+            product_types,
+            self.request
+        )
+
+        self.assertSequenceEqual(
+            finding_queries['all'].values(),
+            [],
+        )
+
     @patch('django.utils.timezone.now')
     def test_finding_queries(self, mock_timezone):
         mock_datetime = datetime(2020, 12, 9, tzinfo=timezone.utc)
@@ -133,6 +148,21 @@ class EndpointQueriesTest(TestCase):
         self.request = RequestFactory().get(reverse('metrics'))
         self.request.user = user
         self.request._messages = MockMessages()
+
+    def test_endpoint_queries_no_data(self):
+        user3 = User.objects.get(username='user3')
+        self.request.user = user3
+
+        product_types = []
+        endpoint_queries = views.endpoint_querys(
+            product_types,
+            self.request
+        )
+
+        self.assertSequenceEqual(
+            endpoint_queries['all'].values(),
+            [],
+        )
 
     def test_endpoint_queries(self):
         # Queries over Finding and Endpoint_Status
