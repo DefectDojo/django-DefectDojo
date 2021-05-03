@@ -56,61 +56,29 @@ update the source code first)
 
 Replace the first step above with this one: - `docker-compose build`
 
-Setup.bash
-----------
 
-{{% alert title="Warning" color="warning" %}}
-This installation method will is EOL and will be removed on 2020-12-31
-{{% /alert %}}
-
-The easiest way to upgrade to a new version of DefectDojo is to pull
-from Github. Assuming the source code lives in a directory named
-`defect-dojo` you can complete the following steps to
-upgrade to the latest DefectDojo release.:
-
-    cd defect-dojo
-    git checkout master
-    git pull
-    pip freeze > pip_frozen.txt
-    pip install -r pip_frozen.txt --upgrade
-    ./manage.py makemigrations dojo
-    ./manage.py makemigrations
-    ./manage.py migrate
-
-Because yarn assets change from time to time, it is always a good idea
-to re-install them and collect the static resources. :
-
-    cd defect-dojo
-    cd components
-    yarn
-    cd ..
-
-At this point yarn may ask you to select from different versions of
-packages, choose the latest on each.
-
-Next you can run: :
-
-    ./manage.py collectstatic --noinput
-
-If you are in your production system, you will need to restart gunicorn
-and celery to make sure the latest code is being used by both.
-
-FAQ
----
-
-**Celery Error:**
-
-If you have an issue starting Django with the error: TypeError:
-config\_from\_object() got an unexpected keyword argument \'namespace\'
-
-Upgrade Celery to the latest version:
-
-> `pip install --upgrade celery`
-
-Upgrading to DefectDojo Version 2.0.x
+Upgrading to DefectDojo Version 2.0.x.
 --------------------------------------
+
+WARNING: Upgrade to 1.15.x first before upgrading to 2.0.0, otherwise you will brick you instance.
+
+WARNING: Run `docker-compose exec uwsgi ./manage.py endpoint_pre-migration_check` before upgrading to check if
+your endpoints can be migrated succesfully. ([#4188](https://github.com/DefectDojo/django-DefectDojo/pull/4188))
+
+We decided to name this version 2.0.0 because we did some big cleanups in this release:
+
+- Remove API v1 ([#4413](https://github.com/DefectDojo/django-DefectDojo/pull/4413))
+- Remove setup.bash installation method ([#4417](https://github.com/DefectDojo/django-DefectDojo/pull/4417))
+- Rename Finding.is_Mitigated field to Finding.is_mitigated ([#3854](https://github.com/DefectDojo/django-DefectDojo/pull/4854))
+- Remove everything related to the old tagging library ([#4419](https://github.com/DefectDojo/django-DefectDojo/pull/4419))
+- Remove S0/S1/S2../S5 severity display option ([#4415](https://github.com/DefectDojo/django-DefectDojo/pull/4415))
+- Refactor EndPoint handling/formatting ([#4188](https://github.com/DefectDojo/django-DefectDojo/pull/4188))
+- Upgrade to Django 3.x ([#3632](https://github.com/DefectDojo/django-DefectDojo/pull/3632))
+- PDF Reports removed ([#4418](https://github.com/DefectDojo/django-DefectDojo/pull/4418))
+
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.0.0
-- Hashcode calculation logic has changed in #4307 to update existing findings run:
+
+- Hashcode calculation logic has changed. To update existing findings run:
 
     `./manage.py dedupe --hash_code_only`
 
