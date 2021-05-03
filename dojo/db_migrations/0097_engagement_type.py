@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0096_grype_name_change'),
+        ('dojo', '0096_engagement_type'),
     ]
 
     operations = [
