@@ -15,9 +15,6 @@ updates:
     versions:
     - ">= 3.a"
     - "< 4"
-  - dependency-name: django-tastypie
-    versions:
-    - "> 0.14.2"
   - dependency-name: whitenoise
     versions:
     - ">= 5.a"

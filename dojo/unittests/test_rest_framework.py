@@ -269,7 +269,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         self.viewname = 'engagement'
         self.viewset = EngagementViewSet
         self.payload = {
-            "eng_type": 1,
+            "engagement_type": 'Interactive',
             "report_type": 1,
             "name": "",
             "description": "",

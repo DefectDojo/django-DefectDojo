@@ -580,7 +580,7 @@ class ApiEngagementFilter(DojoFilter):
 
     class Meta:
         model = Engagement
-        fields = ['id', 'active', 'eng_type', 'target_start',
+        fields = ['id', 'active', 'target_start',
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
                      'pen_test', 'status', 'product', 'name', 'version', 'tags']
@@ -915,7 +915,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'is_template', 'thread_id', 'notes', 'images', 'files',
-                   'sourcefile', 'line', 'endpoint_status', 'tags_from_django_tagging']
+                   'sourcefile', 'line', 'endpoint_status']
 
 
 class OpenFindingFilter(DojoFilter):
@@ -1065,7 +1065,7 @@ class OpenFindingFilter(DojoFilter):
                    'numerical_severity', 'reporter', 'last_reviewed', 'line',
                    'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
                    'line_number', 'reviewers', 'mitigated_by', 'sourcefile',
-                   'created', 'jira_creation', 'jira_change', 'tags_from_django_tagging',
+                   'created', 'jira_creation', 'jira_change',
                    'tags', 'files']
 
     def __init__(self, *args, **kwargs):
@@ -1250,7 +1250,7 @@ class ClosedFindingFilter(DojoFilter):
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'review_requested_by', 'defect_review_requested_by',
                    'last_reviewed_by', 'created', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging', 'files']
+                   'files']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -1410,7 +1410,7 @@ class AcceptedFindingFilter(DojoFilter):
                    'duplicate', 'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'o', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging', 'files']
+                   'files']
 
     def __init__(self, *args, **kwargs):
         self.pid = None
@@ -1555,7 +1555,7 @@ class ProductFindingFilter(DojoFilter):
                    'duplicate_finding', 'thread_id', 'mitigated', 'notes',
                    'numerical_severity', 'reporter', 'endpoints', 'endpoint_status',
                    'last_reviewed', 'jira_creation', 'jira_change',
-                   'tags_from_django_tagging', 'files']
+                   'files']
 
     def __init__(self, *args, **kwargs):
         super(ProductFindingFilter, self).__init__(*args, **kwargs)
@@ -1824,7 +1824,7 @@ class TemplateFindingFilter(DojoFilter):
     class Meta:
         model = Finding_Template
         exclude = ['description', 'mitigation', 'impact',
-                   'references', 'numerical_severity', 'tags_from_django_tagging']
+                   'references', 'numerical_severity']
 
     def __init__(self, *args, **kwargs):
         super(TemplateFindingFilter, self).__init__(*args, **kwargs)
@@ -2038,7 +2038,6 @@ class MetricsFindingFilter(FilterSet):
                    'is_template',
                    'jira_creation',
                    'jira_change',
-                   'tags_from_django_tagging',
                    'files'
                    ]
 
@@ -2089,7 +2088,7 @@ class MetricsEndpointFilter(FilterSet):
 
     class Meta:
         model = Endpoint_Status
-        exclude = ['last_modified', 'tags_from_django_tagging']
+        exclude = ['last_modified']
 
 
 class ProductMetricsFindingFilter(FilterSet):
@@ -2226,7 +2225,6 @@ class ProductMetricsFindingFilter(FilterSet):
                    'is_template',
                    'jira_creation',
                    'jira_change',
-                   'tags_from_django_tagging',
                    'files',
                    ]
 
@@ -2358,7 +2356,7 @@ class EndpointFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['mitigated', 'endpoint_status', 'tags_from_django_tagging']
+        exclude = ['mitigated', 'endpoint_status']
 
 
 class ApiEndpointFilter(DojoFilter):
@@ -2535,7 +2533,7 @@ class EndpointReportFilter(DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ['product', 'endpoint_status', 'tags_from_django_tagging']
+        exclude = ['product', 'endpoint_status']
 
 
 class ReportFindingFilter(DojoFilter):
@@ -2628,7 +2626,7 @@ class ReportFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template', 'sonarqube_issue'
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed', 'images',
-                   'jira_creation', 'jira_change', 'tags_from_django_tagging']
+                   'jira_creation', 'jira_change']
 
     def __init__(self, *args, **kwargs):
         self.prod_type = None
@@ -2775,7 +2773,7 @@ class ReportAuthedFindingFilter(DojoFilter):
                    'endpoint', 'references', 'test', 'is_template',
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed',
-                   'jira_creation', 'jira_change', 'tags_from_django_tagging']
+                   'jira_creation', 'jira_change']
 
 
 class UserFilter(DojoFilter):
