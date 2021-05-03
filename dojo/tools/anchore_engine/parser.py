@@ -85,7 +85,7 @@ class AnchoreEngineParser(object):
                     url=item.get('url'),
                     static_finding=True,
                     dynamic_finding=False,
-                    unique_id_from_tool=item.get('vuln'),
+                    vuln_id_from_tool=item.get('vuln'),
                 )
 
                 dupes[dupe_key] = find

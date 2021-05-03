@@ -196,13 +196,6 @@ class System_Settings(models.Model):
                                                blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
-    s_finding_severity_naming = \
-        models.BooleanField(default=False, blank=False,
-                            help_text='With this setting turned on, Dojo '
-                                      'will display S0, S1, S2, etc in most '
-                                      'places, whereas if turned off '
-                                      'Critical, High, Medium, etc will '
-                                      'be displayed.')
     false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two.")
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
@@ -631,19 +624,6 @@ class Product(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
 
-    '''
-    The following three fields are deprecated and no longer in use.
-    They remain in model for backwards compatibility and will be removed
-    in a future release.  prod_manager, tech_contact, manager
-
-    The admin script migrate_product_contacts should be used to migrate data
-    from these fields to their replacements.
-    ./manage.py migrate_product_contacts
-    '''
-    prod_manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-    tech_contact = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-    manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                         related_name='product_manager', on_delete=models.CASCADE)
     technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
@@ -671,8 +651,6 @@ class Product(models.Model):
     internet_accessible = models.BooleanField(default=False, help_text=_('Specify if the application is accessible from the public internet.'))
     regulations = models.ManyToManyField(Regulation, blank=True)
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
-    # tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
 
     enable_simple_risk_acceptance = models.BooleanField(default=False, help_text=_('Allows simple risk acceptance by checking/unchecking a checkbox.'))
@@ -912,13 +890,6 @@ class Engagement_Presets(models.Model):
         return self.title
 
 
-class Engagement_Type(models.Model):
-    name = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-
 ENGAGEMENT_STATUS_CHOICES = (('Not Started', 'Not Started'),
                              ('Blocked', 'Blocked'),
                              ('Cancelled', 'Cancelled'),
@@ -932,7 +903,6 @@ class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     version = models.CharField(max_length=100, null=True, blank=True, help_text="Version of the product the engagement tested.")
-    eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True, on_delete=models.CASCADE)
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
@@ -981,7 +951,6 @@ class Engagement(models.Model):
     orchestration_engine = models.ForeignKey(Tool_Configuration, verbose_name="Orchestration Engine", help_text="Orchestration service responsible for CI/CD test", null=True, blank=True, related_name='orchestration', on_delete=models.CASCADE)
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name="Deduplication within this engagement only", help_text="If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level.")
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add.")
 
     class Meta:
@@ -1114,7 +1083,6 @@ class Endpoint(models.Model):
     mitigated = models.BooleanField(default=False, blank=True)
     endpoint_status = models.ManyToManyField(Endpoint_Status, blank=True, related_name='endpoint_endpoint_status')
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.")
 
     class Meta:
@@ -1273,7 +1241,6 @@ class Test(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add.")
 
     version = models.CharField(max_length=100, null=True, blank=True)
@@ -1739,7 +1706,6 @@ class Finding(models.Model):
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -2208,15 +2174,7 @@ class Finding(models.Model):
                     setattr(self, field, "No %s given" % field)
 
     def severity_display(self):
-        try:
-            system_settings = System_Settings.objects.get()
-            if system_settings.s_finding_severity_naming:
-                return self.numerical_severity
-            else:
-                return self.severity
-
-        except:
-            return self.severity
+        return self.severity
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
@@ -2423,7 +2381,6 @@ class Finding_Template(models.Model):
     template_match = models.BooleanField(default=False, verbose_name='Template Match Enabled', help_text="Enables this template for matching remediation advice. Match will be applied to all active, verified findings by CWE.")
     template_match_title = models.BooleanField(default=False, verbose_name='Match Template by Title and CWE', help_text="Matches by title text (contains search) and CWE.")
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.")
 
     SEVERITIES = {'Info': 4, 'Low': 3, 'Medium': 2,
@@ -3084,7 +3041,6 @@ class App_Analysis(models.Model):
     website_found = models.URLField(max_length=400, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True)
 
     def __str__(self):
@@ -3111,7 +3067,6 @@ class Objects_Product(models.Model):
     review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
-    tags_from_django_tagging = models.TextField(editable=False, blank=True, help_text=_('Temporary archive with tags from the previous tagging library we used'))
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add.")
 
     def __str__(self):
@@ -3275,7 +3230,7 @@ class Benchmark_Product_Summary(models.Model):
 # product_opts = [f.name for f in Product._meta.fields]
 # test_opts = [f.name for f in Test._meta.fields]
 # test_type_opts = [f.name for f in Test_Type._meta.fields]
-finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['tags_from_django_tagging', 'last_status_update']]
+finding_opts = [f.name for f in Finding._meta.fields if f.name not in ['last_status_update']]
 # endpoint_opts = [f.name for f in Endpoint._meta.fields]
 # engagement_opts = [f.name for f in Engagement._meta.fields]
 # product_type_opts = [f.name for f in Product_Type._meta.fields]

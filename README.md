@@ -59,9 +59,6 @@ should give you an idea of how to use DefectDojo for your own team.
 
 ## REST APIs
 
-> ** Deprecation notice ** apiv1 is deprecated and EOS is on 12-31-2020. EOL is planned for 06-30-2021.
-> Please move on to apiv2 and raise issues for any unsupported operations.
-
 Defectdojo can be accessed through a Swagger REST API. Please see [the API documentation](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/) or the in-app Swagger documentation.
 
 ## Client APIs and wrappers

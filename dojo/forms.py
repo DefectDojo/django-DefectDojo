@@ -765,9 +765,9 @@ class EngForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        exclude = ('first_contacted', 'eng_type', 'real_start',
+        exclude = ('first_contacted', 'real_start', 'engagement_type',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
-                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
+                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list')
 
 
 class DeleteEngagementForm(forms.ModelForm):

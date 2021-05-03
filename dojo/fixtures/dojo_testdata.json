@@ -115,7 +115,6 @@
     "pk": 1,
     "model": "dojo.system_settings",
     "fields": {
-      "s_finding_severity_naming": false,
       "jira_labels": null,
       "team_name": "",
       "url_prefix": "",
@@ -296,10 +295,7 @@
       "technical_contact": 3,
       "product_manager": 1,
       "team_manager": 2,
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "authorized_users": [
         1,
         2,
@@ -319,10 +315,7 @@
       "technical_contact": 2,
       "product_manager": 2,
       "team_manager": 3,
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "authorized_users": [
         2,
         3
@@ -341,10 +334,7 @@
       "technical_contact": 3,
       "product_manager": 1,
       "team_manager": 3,
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "authorized_users": [
         1,
         3
@@ -367,30 +357,6 @@
       "website": null,
       "website_found": null,
       "created": "2018-08-16T16:58:23.908Z"
-    }
-  },
-  {
-    "pk": 1,
-    "model": "dojo.engagement_type",
-    "fields": {
-      "name": "Type 1",
-      "id": 1
-    }
-  },
-  {
-    "pk": 2,
-    "model": "dojo.engagement_type",
-    "fields": {
-      "name": "Type 2",
-      "id": 2
-    }
-  },
-  {
-    "pk": 3,
-    "model": "dojo.engagement_type",
-    "fields": {
-      "name": "CI/CD",
-      "id": 3
     }
   },
   {
@@ -428,7 +394,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": 3,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -459,7 +424,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -490,7 +454,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-04",
@@ -524,7 +487,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -555,8 +517,7 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
-      "active": true,
+"active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
       "name": "April monthly engagement",
@@ -586,7 +547,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
