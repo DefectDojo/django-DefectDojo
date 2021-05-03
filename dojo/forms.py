@@ -188,7 +188,7 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
     class Meta:
         model = Product_Type
-        fields = []
+        fields = ['id']
 
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
@@ -246,7 +246,7 @@ class Development_EnvironmentForm(forms.ModelForm):
 class Delete_Dev_EnvironmentForm(forms.ModelForm):
     class Meta:
         model = Development_Environment
-        fields = []
+        fields = ['id']
 
 
 class ProductForm(forms.ModelForm):
@@ -297,7 +297,7 @@ class DeleteProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = []
+        fields = ['id']
 
 
 class DeleteFindingGroupForm(forms.ModelForm):
@@ -306,7 +306,7 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Group
-        fields = []
+        fields = ['id']
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
@@ -776,7 +776,7 @@ class DeleteEngagementForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        fields = []
+        fields = ['id']
 
 
 class TestForm(forms.ModelForm):
@@ -828,7 +828,7 @@ class DeleteTestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        fields = []
+        fields = ['id']
 
 
 class AddFindingForm(forms.ModelForm):
@@ -1219,7 +1219,7 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Template
-        fields = []
+        fields = ['id']
 
 
 class FindingBulkUpdateForm(forms.ModelForm):
@@ -1445,7 +1445,7 @@ class DeleteEndpointForm(forms.ModelForm):
 
     class Meta:
         model = Endpoint
-        fields = []
+        fields = ['id']
 
 
 class NoteForm(forms.ModelForm):
@@ -1475,7 +1475,7 @@ class DeleteNoteForm(forms.ModelForm):
 
     class Meta:
         model = Notes
-        fields = []
+        fields = ['id']
 
 
 class CloseFindingForm(forms.ModelForm):
@@ -1655,7 +1655,7 @@ class DeleteUserForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = []
+        fields = ['id']
 
 
 class UserContactInfoForm(forms.ModelForm):
@@ -1722,7 +1722,7 @@ class DeleteReportForm(forms.ModelForm):
 
     class Meta:
         model = Report
-        fields = []
+        fields = ['id']
 
 
 class DeleteFindingForm(forms.ModelForm):
@@ -1731,7 +1731,7 @@ class DeleteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = []
+        fields = ['id']
 
 
 class FindingFormID(forms.ModelForm):
@@ -1749,7 +1749,7 @@ class DeleteStubFindingForm(forms.ModelForm):
 
     class Meta:
         model = Stub_Finding
-        fields = []
+        fields = ['id']
 
 
 class AddFindingImageForm(forms.ModelForm):
@@ -1782,7 +1782,7 @@ class DeleteGITHUBConfForm(forms.ModelForm):
 
     class Meta:
         model = GITHUB_Conf
-        fields = []
+        fields = ['id']
 
 
 class ExpressGITHUBForm(forms.ModelForm):
@@ -1897,7 +1897,7 @@ class DeleteBenchmarkForm(forms.ModelForm):
 
     class Meta:
         model = Benchmark_Product_Summary
-        fields = []
+        fields = ['id']
 
 
 # class JIRA_ProjectForm(forms.ModelForm):
@@ -1930,7 +1930,7 @@ class DeleteJIRAInstanceForm(forms.ModelForm):
 
     class Meta:
         model = JIRA_Instance
-        fields = []
+        fields = ['id']
 
 
 class ToolTypeForm(forms.ModelForm):
@@ -1992,7 +1992,7 @@ class DeleteObjectsSettingsForm(forms.ModelForm):
 
     class Meta:
         model = Objects_Product
-        fields = []
+        fields = ['id']
 
 
 class DeleteToolProductSettingsForm(forms.ModelForm):
@@ -2001,7 +2001,7 @@ class DeleteToolProductSettingsForm(forms.ModelForm):
 
     class Meta:
         model = Tool_Product_Settings
-        fields = []
+        fields = ['id']
 
 
 class ToolProductSettingsForm(forms.ModelForm):
@@ -2085,7 +2085,7 @@ class DeleteEngagementPresetsForm(forms.ModelForm):
 
     class Meta:
         model = Engagement_Presets
-        fields = []
+        fields = ['id']
 
 
 class SystemSettingsForm(forms.ModelForm):
@@ -2161,7 +2161,7 @@ class DeleteRuleForm(forms.ModelForm):
 
     class Meta:
         model = Rule
-        fields = []
+        fields = ['id']
 
 
 class CredUserForm(forms.ModelForm):
@@ -2722,7 +2722,7 @@ class Delete_Questionnaire_Form(forms.ModelForm):
 
     class Meta:
         model = Answered_Survey
-        fields = []
+        fields = ['id']
 
 
 class DeleteGeneralQuestionnaireForm(forms.ModelForm):
@@ -2731,7 +2731,7 @@ class DeleteGeneralQuestionnaireForm(forms.ModelForm):
 
     class Meta:
         model = General_Survey
-        fields = []
+        fields = ['id']
 
 
 class Delete_Eng_Survey_Form(forms.ModelForm):
@@ -2740,7 +2740,7 @@ class Delete_Eng_Survey_Form(forms.ModelForm):
 
     class Meta:
         model = Engagement_Survey
-        fields = []
+        fields = ['id']
 
 
 class CreateQuestionnaireForm(forms.ModelForm):
