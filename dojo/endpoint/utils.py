@@ -89,7 +89,9 @@ def clean_hosts_run(apps, change):
     Endpoint_Status_model = apps.get_model('dojo', 'Endpoint_Status')
     Product_model = apps.get_model('dojo', 'Product')
     error_suffix = 'It is not possible to migrate it. Remove or fix this endpoint.'
-    for endpoint in Endpoint_model.objects.all():
+    # when run on older versions, we haven't had the migration applied which has userinfo field added
+    # so defer that field and order by id (default ordering references userinfo field)
+    for endpoint in Endpoint_model.objects.defer('userinfo').order_by('id'):
         if not endpoint.host or endpoint.host == '':
             logger.error('Endpoint (id={}) does not have "host" field. {}'.format(endpoint.pk, error_suffix))
             broken_endpoints.append(endpoint.pk)
