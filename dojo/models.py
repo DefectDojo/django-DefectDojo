@@ -30,7 +30,7 @@ from django.utils.translation import gettext as _
 from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
-from django_jsonfield_backport.models import JSONField
+from django.db.models import JSONField
 from itertools import groupby
 import hyperlink
 from cvss import CVSS3
@@ -196,13 +196,6 @@ class System_Settings(models.Model):
                                                blank=True)
     mail_notifications_to = models.CharField(max_length=200, default='',
                                              blank=True)
-    s_finding_severity_naming = \
-        models.BooleanField(default=False, blank=False,
-                            help_text='With this setting turned on, Dojo '
-                                      'will display S0, S1, S2, etc in most '
-                                      'places, whereas if turned off '
-                                      'Critical, High, Medium, etc will '
-                                      'be displayed.')
     false_positive_history = models.BooleanField(default=False, help_text="DefectDojo will automatically mark the finding as a false positive if the finding has been previously marked as a false positive. Not needed when using deduplication, advised to not combine these two.")
 
     url_prefix = models.CharField(max_length=300, default='', blank=True, help_text="URL prefix if DefectDojo is installed in it's own virtual subdirectory.")
@@ -630,19 +623,6 @@ class Product(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000)
 
-    '''
-    The following three fields are deprecated and no longer in use.
-    They remain in model for backwards compatibility and will be removed
-    in a future release.  prod_manager, tech_contact, manager
-
-    The admin script migrate_product_contacts should be used to migrate data
-    from these fields to their replacements.
-    ./manage.py migrate_product_contacts
-    '''
-    prod_manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-    tech_contact = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-    manager = models.CharField(default=0, max_length=200, null=True, blank=True)  # unused
-
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
                                         related_name='product_manager', on_delete=models.CASCADE)
     technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
@@ -907,13 +887,6 @@ class Engagement_Presets(models.Model):
         return self.title
 
 
-class Engagement_Type(models.Model):
-    name = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-
 ENGAGEMENT_STATUS_CHOICES = (('Not Started', 'Not Started'),
                              ('Blocked', 'Blocked'),
                              ('Cancelled', 'Cancelled'),
@@ -927,7 +900,6 @@ class Engagement(models.Model):
     name = models.CharField(max_length=300, null=True, blank=True)
     description = models.CharField(max_length=2000, null=True, blank=True)
     version = models.CharField(max_length=100, null=True, blank=True, help_text="Version of the product the engagement tested.")
-    eng_type = models.ForeignKey(Engagement_Type, null=True, blank=True, on_delete=models.CASCADE)
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
@@ -2266,15 +2238,7 @@ class Finding(models.Model):
                     setattr(self, field, "No %s given" % field)
 
     def severity_display(self):
-        try:
-            system_settings = System_Settings.objects.get()
-            if system_settings.s_finding_severity_naming:
-                return self.numerical_severity
-            else:
-                return self.severity
-
-        except:
-            return self.severity
+        return self.severity
 
     def get_breadcrumbs(self):
         bc = self.test.get_breadcrumbs()
@@ -2644,29 +2608,6 @@ class Risk_Acceptance(models.Model):
             return engs[0]
 
         return None
-
-
-class Report(models.Model):
-    name = models.CharField(max_length=200)
-    type = models.CharField(max_length=100, default='Finding')
-    format = models.CharField(max_length=15, default='AsciiDoc')
-    requester = models.ForeignKey(User, on_delete=models.CASCADE)
-    task_id = models.CharField(max_length=50)
-    file = models.FileField(upload_to='reports/%Y/%m/%d',
-                            verbose_name='Report File', null=True)
-    status = models.CharField(max_length=10, default='requested')
-    options = models.TextField()
-    datetime = models.DateTimeField(auto_now_add=True)
-    done_datetime = models.DateTimeField(null=True)
-
-    def __str__(self):
-        return self.name
-
-    def get_url(self):
-        return reverse('download_report', args=(self.id,))
-
-    class Meta:
-        ordering = ['-datetime']
 
 
 class FindingImage(models.Model):
@@ -3635,7 +3576,6 @@ admin.site.register(Dojo_User)
 admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Note_Type)
-admin.site.register(Report)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Instance, JIRA_Instance_Admin)

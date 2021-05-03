@@ -30,7 +30,6 @@ env = environ.Env(
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
-    DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
     DD_WHITENOISE=(bool, False),
@@ -174,10 +173,6 @@ env = environ.Env(
     DD_FEATURE_AUTHORIZATION_V2=(bool, False),
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
-
-    # Feature toggle to show legacy list of PDF reports
-    # You need to have wkhtmltopdf installed on your system to generate PDF reports
-    DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
 
     DD_FEATURE_FINDING_GROUPS=(bool, False),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
@@ -540,9 +535,6 @@ SESSION_COOKIE_AGE = env('DD_SESSION_COOKIE_AGE')
 CREDENTIAL_AES_256_KEY = env('DD_CREDENTIAL_AES_256_KEY')
 DB_KEY = env('DD_CREDENTIAL_AES_256_KEY')
 
-# wkhtmltopdf settings
-WKHTMLTOPDF_PATH = env('DD_WKHTMLTOPDF')
-
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
 
@@ -652,8 +644,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
-    'tagulous',
-    'django_jsonfield_backport',
+    'tagulous'
 )
 
 # ------------------------------------------------------------------------------
@@ -793,6 +784,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
@@ -826,6 +818,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
+    'Anchore Grype': True,
     'Checkmarx Scan': False,
     'Checkmarx OSA': True,
     'SonarQube Scan': False,
@@ -867,7 +860,7 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
-    'anchore_grype': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1054,10 +1047,6 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
 # When enabled, staff users have full access to all product types and products
 AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
-
-# Feature toggle to show legacy list of PDF reports
-# You need to have wkhtmltopdf installed on your system to generate PDF reports
-FEATURE_REPORTS_PDF_LIST = env('DD_FEATURE_REPORTS_PDF_LIST')
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 

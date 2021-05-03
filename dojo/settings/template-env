@@ -52,9 +52,6 @@ DD_WHITENOISE=True
 # Change the default language set
 # DD_LANG=en-us
 
-# Path to PDF library
-# DD_WKHTMLTOPDF=/usr/local/bin/wkhtmltopdf
-
 # Security team name, used for outgoing emails
 # DD_TEAM_NAME=Security
 

@@ -279,23 +279,11 @@
                                 </li>
                             {% endif %}
                             <li>
-                                {% if 'FEATURE_REPORTS_PDF_LIST'|setting_enabled %}
-                                <a href="{% url 'reports' %}" aria-expanded="false" aria-label="Reports">
-				                    <i class="fa fa-file-text-o fa-fw"></i>
-                                    <span>Reports</span>
-                                    <span class="glyphicon arrow"></span>
-                                </a>
-                                <ul class="nav nav-second-level">
-                                    <li><a href="{% url 'reports' %}"> All Reports </a></li>
-                                    <li><a href="{% url 'report_builder' %}"> Report Builder </a></li>
-                                </ul>
-                                {% else %}
                                 <a href="{% url 'report_builder' %}" aria-expanded="false" aria-label="Reports">
 				                    <i class="fa fa-file-text-o fa-fw"></i>
                                     <span>Reports</span>
                                     <span class="glyphicon arrow"></span>
                                 </a>
-                                {% endif %}
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>

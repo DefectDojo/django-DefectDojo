@@ -902,6 +902,7 @@ def delete_product(request, pid):
     form = DeleteProductForm(instance=product)
 
     if request.method == 'POST':
+        logger.debug('delete_product: POST')
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
@@ -917,13 +918,22 @@ def delete_product(request, pid):
                                     description='The product "%s" was deleted by %s' % (product.name, request.user),
                                     url=request.build_absolute_uri(reverse('product')),
                                     icon="exclamation-triangle")
+                logger.debug('delete_product: POST RETURN')
                 return HttpResponseRedirect(reverse('product'))
+            else:
+                logger.debug('delete_product: POST INVALID FORM')
+                logger.error(form.errors)
+
+    logger.debug('delete_product: GET')
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([product])
     rels = collector.nested()
 
     product_tab = Product_Tab(pid, title="Product", tab="settings")
+
+    logger.debug('delete_product: GET RENDER')
+
     return render(request, 'dojo/delete_product.html',
                   {'product': product,
                    'form': form,

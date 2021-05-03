@@ -22,7 +22,7 @@ import tagulous
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
+    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, FindingImage, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
@@ -187,7 +187,7 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
     class Meta:
         model = Product_Type
-        fields = []
+        fields = ['id']
 
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
@@ -245,7 +245,7 @@ class Development_EnvironmentForm(forms.ModelForm):
 class Delete_Dev_EnvironmentForm(forms.ModelForm):
     class Meta:
         model = Development_Environment
-        fields = []
+        fields = ['id']
 
 
 class ProductForm(forms.ModelForm):
@@ -296,7 +296,7 @@ class DeleteProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = []
+        fields = ['id']
 
 
 class DeleteFindingGroupForm(forms.ModelForm):
@@ -305,7 +305,7 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Group
-        fields = []
+        fields = ['id']
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
@@ -746,9 +746,9 @@ class EngForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        exclude = ('first_contacted', 'eng_type', 'real_start',
+        exclude = ('first_contacted', 'real_start', 'engagement_type',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
-                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
+                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list')
 
 
 class DeleteEngagementForm(forms.ModelForm):
@@ -757,7 +757,7 @@ class DeleteEngagementForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        fields = []
+        fields = ['id']
 
 
 class TestForm(forms.ModelForm):
@@ -809,7 +809,7 @@ class DeleteTestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        fields = []
+        fields = ['id']
 
 
 class AddFindingForm(forms.ModelForm):
@@ -1193,7 +1193,7 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Template
-        fields = []
+        fields = ['id']
 
 
 class FindingBulkUpdateForm(forms.ModelForm):
@@ -1383,7 +1383,7 @@ class DeleteEndpointForm(forms.ModelForm):
 
     class Meta:
         model = Endpoint
-        fields = []
+        fields = ['id']
 
 
 class NoteForm(forms.ModelForm):
@@ -1413,7 +1413,7 @@ class DeleteNoteForm(forms.ModelForm):
 
     class Meta:
         model = Notes
-        fields = []
+        fields = ['id']
 
 
 class CloseFindingForm(forms.ModelForm):
@@ -1593,7 +1593,7 @@ class DeleteUserForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = []
+        fields = ['id']
 
 
 class UserContactInfoForm(forms.ModelForm):
@@ -1648,19 +1648,7 @@ class CustomReportOptionsForm(forms.Form):
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    if settings.FEATURE_REPORTS_PDF_LIST:
-        report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
-    else:
-        report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
-
-
-class DeleteReportForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Report
-        fields = []
+    report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
 
 class DeleteFindingForm(forms.ModelForm):
@@ -1669,7 +1657,7 @@ class DeleteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = []
+        fields = ['id']
 
 
 class FindingFormID(forms.ModelForm):
@@ -1687,7 +1675,7 @@ class DeleteStubFindingForm(forms.ModelForm):
 
     class Meta:
         model = Stub_Finding
-        fields = []
+        fields = ['id']
 
 
 class AddFindingImageForm(forms.ModelForm):
@@ -1720,7 +1708,7 @@ class DeleteGITHUBConfForm(forms.ModelForm):
 
     class Meta:
         model = GITHUB_Conf
-        fields = []
+        fields = ['id']
 
 
 class ExpressGITHUBForm(forms.ModelForm):
@@ -1835,7 +1823,7 @@ class DeleteBenchmarkForm(forms.ModelForm):
 
     class Meta:
         model = Benchmark_Product_Summary
-        fields = []
+        fields = ['id']
 
 
 # class JIRA_ProjectForm(forms.ModelForm):
@@ -1868,7 +1856,7 @@ class DeleteJIRAInstanceForm(forms.ModelForm):
 
     class Meta:
         model = JIRA_Instance
-        fields = []
+        fields = ['id']
 
 
 class ToolTypeForm(forms.ModelForm):
@@ -1930,7 +1918,7 @@ class DeleteObjectsSettingsForm(forms.ModelForm):
 
     class Meta:
         model = Objects_Product
-        fields = []
+        fields = ['id']
 
 
 class DeleteToolProductSettingsForm(forms.ModelForm):
@@ -1939,7 +1927,7 @@ class DeleteToolProductSettingsForm(forms.ModelForm):
 
     class Meta:
         model = Tool_Product_Settings
-        fields = []
+        fields = ['id']
 
 
 class ToolProductSettingsForm(forms.ModelForm):
@@ -2023,7 +2011,7 @@ class DeleteEngagementPresetsForm(forms.ModelForm):
 
     class Meta:
         model = Engagement_Presets
-        fields = []
+        fields = ['id']
 
 
 class SystemSettingsForm(forms.ModelForm):
@@ -2099,7 +2087,7 @@ class DeleteRuleForm(forms.ModelForm):
 
     class Meta:
         model = Rule
-        fields = []
+        fields = ['id']
 
 
 class CredUserForm(forms.ModelForm):
@@ -2654,7 +2642,7 @@ class Delete_Questionnaire_Form(forms.ModelForm):
 
     class Meta:
         model = Answered_Survey
-        fields = []
+        fields = ['id']
 
 
 class DeleteGeneralQuestionnaireForm(forms.ModelForm):
@@ -2663,7 +2651,7 @@ class DeleteGeneralQuestionnaireForm(forms.ModelForm):
 
     class Meta:
         model = General_Survey
-        fields = []
+        fields = ['id']
 
 
 class Delete_Eng_Survey_Form(forms.ModelForm):
@@ -2672,7 +2660,7 @@ class Delete_Eng_Survey_Form(forms.ModelForm):
 
     class Meta:
         model = Engagement_Survey
-        fields = []
+        fields = ['id']
 
 
 class CreateQuestionnaireForm(forms.ModelForm):

@@ -398,12 +398,12 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = Product
         if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['tid', 'manager', 'prod_manager', 'tech_contact', 'updated', 'members']
+            exclude = ['tid', 'updated', 'members']
             extra_kwargs = {
                 'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
             }
         else:
-            exclude = ['tid', 'manager', 'prod_manager', 'tech_contact', 'updated', 'authorized_users']
+            exclude = ['tid', 'updated', 'authorized_users']
 
     def get_findings_count(self, obj):
         return obj.findings_count

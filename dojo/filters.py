@@ -12,11 +12,11 @@ from django_filters import FilterSet, CharFilter, OrderingFilter, \
     ModelMultipleChoiceFilter, ModelChoiceFilter, MultipleChoiceFilter, \
     BooleanFilter, NumberFilter, DateFilter
 from django_filters import rest_framework as filters
-from django_filters.filters import ChoiceFilter, _truncate, DateTimeFilter
+from django_filters.filters import ChoiceFilter, _truncate
 import pytz
 from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_Type, Finding, Product, Test_Import, Test_Type, \
-    Endpoint, Development_Environment, Finding_Template, Report, Note_Type, \
+    Endpoint, Development_Environment, Finding_Template, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
     ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES
 from dojo.utils import get_system_setting
@@ -530,7 +530,7 @@ class ApiEngagementFilter(DojoFilter):
 
     class Meta:
         model = Engagement
-        fields = ['id', 'active', 'eng_type', 'target_start',
+        fields = ['id', 'active', 'target_start',
                      'target_end', 'requester', 'report_type',
                      'updated', 'threat_model', 'api_test',
                      'pen_test', 'status', 'product', 'name', 'version', 'tags']
@@ -2257,50 +2257,6 @@ class TestImportFilter(DojoFilter):
     class Meta:
         model = Test_Import
         fields = []
-
-
-class ReportFilter(DojoFilter):
-    name = CharFilter(lookup_expr='icontains')
-    type = MultipleChoiceFilter(choices=[])
-    format = MultipleChoiceFilter(choices=[])
-    requester = ModelMultipleChoiceFilter(queryset=Dojo_User.objects.all())
-    datetime = DateTimeFilter()
-    status = MultipleChoiceFilter(choices=[])
-
-    o = OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ('datetime', 'datetime'),
-            ('name', 'name'),
-            ('type', 'type'),
-            ('format', 'format'),
-            ('requester', 'requester'),
-        ),
-        field_labels={
-            'datetime': 'Date',
-        }
-
-    )
-
-    class Meta:
-        model = Report
-        exclude = ['task_id', 'file']
-
-    def __init__(self, *args, **kwargs):
-        super(ReportFilter, self).__init__(*args, **kwargs)
-        type = dict()
-        type = dict(
-            [report.type, report.type] for report in self.queryset.distinct()
-            if report.type is not None)
-        type = collections.OrderedDict(sorted(type.items()))
-        self.form.fields['type'].choices = list(type.items())
-
-        status = dict()
-        status = dict(
-            [report.status, report.status] for report in
-            self.queryset.distinct() if report.status is not None)
-        status = collections.OrderedDict(sorted(status.items()))
-        self.form.fields['status'].choices = list(status.items())
 
 
 class EngineerFilter(DojoFilter):
