@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             grype_testtype.save()
 
     dependencies = [
-        ('dojo', '0097_engagement_type'),
+        ('dojo', '0096_engagement_type'),
     ]
 
     operations = [migrations.RunPython(rename_grype_parser_name, reverse_rename_grype_parser_name)]
