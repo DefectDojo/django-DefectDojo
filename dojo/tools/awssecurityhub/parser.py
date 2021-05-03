@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from dojo.models import Finding
 
 
@@ -43,6 +44,17 @@ def get_item(finding, test):
     mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
     false_p = False
+
+    if finding.get('Compliance', {}).get('Status', "PASSED"):
+            if finding.get('LastObservedAt', None):
+                try:
+                    mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
+                except:
+                    mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%fZ")
+            else:
+                mitigated = datetime.utcnow()
+    else:
+        mitigated = None
 
     finding = Finding(title=f"Resource: {resource_id} - {title}",
                       test=test,
