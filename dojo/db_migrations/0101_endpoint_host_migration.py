@@ -9,11 +9,11 @@ def clean_hosts(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0094_endpoint_userinfo_creation'),
+        ('dojo', '0100_endpoint_userinfo_creation'),
     ]
 
     operations = [
-        # This step wasn't possible to merge with 0094_endpoint_userinfo_creation, because Unittest shows:
+        # This step wasn't possible to merge with 0100_endpoint_userinfo_creation, because Unittest shows:
         # django.db.utils.OperationalError: (1060, "Duplicate column name 'userinfo'")
         migrations.RunPython(clean_hosts)
     ]
