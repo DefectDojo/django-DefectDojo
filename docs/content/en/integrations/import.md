@@ -23,8 +23,7 @@ like `anchore-cli --json image vuln <image:tag> all`
 
 JSON report format.
 
-Anchore Grype
--------------
+### Anchore Grype
 
 Anchore Grype JSON report format generated with `-o json` option.
 
