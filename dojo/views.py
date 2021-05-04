@@ -108,17 +108,17 @@ def manage_files(request, oid, obj_type):
     if obj_type == 'Engagement':
         obj = get_object_or_404(Engagement, pk=oid)
         if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.File_Manage)
+            user_has_permission_or_403(request.user, obj, Permissions.Engagement_Edit)
         obj_vars = ('view_engagement', 'engagement_set')
     elif obj_type == 'Test':
         obj = get_object_or_404(Test, pk=oid)
         if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.File_Manage)
+            user_has_permission_or_403(request.user, obj, Permissions.Test_Edit)
         obj_vars = ('view_test', 'test_set')
     elif obj_type == 'Finding':
         obj = get_object_or_404(Finding, pk=oid)
         if settings.FEATURE_AUTHORIZATION_V2:
-            user_has_permission_or_403(request.user, obj, Permissions.File_Manage)
+            user_has_permission_or_403(request.user, obj, Permissions.Finding_Edit)
         obj_vars = ('view_finding', 'finding_set')
     else:
         raise Http404()
