@@ -137,7 +137,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     @swagger_auto_schema(
         request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
-    @action(detail=True, methods=["post"], permission_classes=[permissions.UserHasEngagementRelatedPermission])
+    @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
         eng = self.get_object()
         close_engagement(eng)
@@ -146,7 +146,7 @@ class EngagementViewSet(mixins.ListModelMixin,
     @swagger_auto_schema(
         request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
-    @action(detail=True, methods=["post"], permission_classes=[permissions.UserHasEngagementRelatedPermission])
+    @action(detail=True, methods=["post"])
     def reopen(self, request, pk=None):
         eng = self.get_object()
         reopen_engagement(eng)
@@ -176,7 +176,7 @@ class EngagementViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @action(detail=True, methods=["get", "post", "patch"], permission_classes=[permissions.UserHasNotePermission])
+    @action(detail=True, methods=["get", "post", "patch"])
     def notes(self, request, pk=None):
         engagement = self.get_object()
         if request.method == 'POST':
@@ -225,7 +225,7 @@ class EngagementViewSet(mixins.ListModelMixin,
         request_body=serializers.AddNewFileOptionSerializer,
         responses={status.HTTP_200_OK: serializers.FileSerializer}
     )
-    @action(detail=True, methods=["get", "post", "patch"], permission_classes=[permissions.UserHasFilePermission])
+    @action(detail=True, methods=["get", "post", "patch"])
     def files(self, request, pk=None):
         engagement = self.get_object()
         if request.method == 'POST':
@@ -372,7 +372,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         request_body=serializers.TagSerializer,
         responses={status.HTTP_200_OK: serializers.TagSerializer}
     )
-    @action(detail=True, methods=['get', 'post'], permission_classes=[permissions.UserHasFindingRelatedPermission])
+    @action(detail=True, methods=['get', 'post'])
     def tags(self, request, pk=None):
         finding = self.get_object()
 
@@ -404,7 +404,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         request_body=serializers.BurpRawRequestResponseSerializer,
         responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
     )
-    @action(detail=True, methods=['get', 'post'], permission_classes=[permissions.UserHasFindingRelatedPermission])
+    @action(detail=True, methods=['get', 'post'])
     def request_response(self, request, pk=None):
         finding = self.get_object()
 
@@ -441,7 +441,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         request_body=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_200_OK: serializers.NoteSerializer}
     )
-    @action(detail=True, methods=["get", "post", "patch"], permission_classes=[permissions.UserHasNotePermission])
+    @action(detail=True, methods=["get", "post", "patch"])
     def notes(self, request, pk=None):
         finding = self.get_object()
         if request.method == 'POST':
@@ -495,7 +495,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         request_body=serializers.AddNewFileOptionSerializer,
         responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
     )
-    @action(detail=True, methods=["get", "post", "patch"], permission_classes=[permissions.UserHasFilePermission])
+    @action(detail=True, methods=["get", "post", "patch"])
     def files(self, request, pk=None):
         finding = self.get_object()
         if request.method == 'POST':
@@ -595,7 +595,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     @swagger_auto_schema(
         responses={status.HTTP_200_OK: serializers.FindingSerializer(many=True)}
     )
-    @action(detail=True, methods=['get'], url_path=r'duplicate', permission_classes=[permissions.UserHasFindingRelatedPermission])
+    @action(detail=True, methods=['get'], url_path=r'duplicate')
     def get_duplicate_status(self, request, pk):
         finding = self.get_object()
         result = duplicate_cluster(request, finding)
@@ -607,8 +607,9 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         responses={status.HTTP_200_OK: ""},
         request_body=no_body
     )
-    @action(detail=True, methods=['post'], url_path=r'duplicate/reset', permission_classes=[permissions.UserHasFindingRelatedPermission])
+    @action(detail=True, methods=['post'], url_path=r'duplicate/reset')
     def reset_finding_duplicate_status(self, request, pk):
+        finding = self.get_object()
         checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, pk)
         if checked_duplicate_id is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -618,7 +619,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         responses={status.HTTP_200_OK: ""},
         request_body=no_body
     )
-    @action(detail=True, methods=['post'], url_path=r'original/(?P<new_fid>\d+)', permission_classes=[permissions.UserHasFindingRelatedPermission])
+    @action(detail=True, methods=['post'], url_path=r'original/(?P<new_fid>\d+)')
     def set_finding_as_original(self, request, pk, new_fid):
         finding = self.get_object()
         success = set_finding_as_original_internal(request.user, pk, new_fid)
@@ -742,7 +743,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         methods=['post'],
         request_body=serializers.FindingMetaSerializer
     )
-    @action(detail=True, methods=["post", "put", "delete", "get"], permission_classes=[permissions.UserHasFindingRelatedPermission])
+    @action(detail=True, methods=["post", "put", "delete", "get"])
     def metadata(self, request, pk=None):
         finding = self.get_object()
 
@@ -1114,7 +1115,7 @@ class TestsViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @action(detail=True, methods=["get", "post", "patch"], permission_classes=[permissions.UserHasNotePermission])
+    @action(detail=True, methods=["get", "post", "patch"])
     def notes(self, request, pk=None):
         test = self.get_object()
         if request.method == 'POST':
@@ -1163,7 +1164,7 @@ class TestsViewSet(mixins.ListModelMixin,
         request_body=serializers.AddNewFileOptionSerializer,
         responses={status.HTTP_200_OK: serializers.FileSerializer}
     )
-    @action(detail=True, methods=["get", "post", "patch"], permission_classes=[permissions.UserHasFilePermission])
+    @action(detail=True, methods=["get", "post", "patch"])
     def files(self, request, pk=None):
         test = self.get_object()
         if request.method == 'POST':

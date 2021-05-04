@@ -1,3 +1,4 @@
+import re
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
@@ -91,44 +92,48 @@ class UserHasEndpointStatusPermission(permissions.BasePermission):
 
 
 class UserHasEngagementPermission(permissions.BasePermission):
+    path_engagement_post = re.compile(r'^/api/v2/engagements/$')
+    path_engagement = re.compile(r'^/api/v2/engagements/\d+/$')
+
     def has_permission(self, request, view):
-        return check_post_permission(request, Product, 'product', Permissions.Engagement_Add)
+        if UserHasEngagementPermission.path_engagement_post.match(request.path) or \
+           UserHasEngagementPermission.path_engagement.match(request.path):
+            return check_post_permission(request, Product, 'product', Permissions.Engagement_Add)
+        else:
+            # related object only need object permission
+            return True
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Delete)
-
-
-class UserHasEngagementRelatedPermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Edit, Permissions.Engagement_Edit)
-
-
-class UserHasFilePermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.File_View, Permissions.File_Manage, Permissions.File_Manage, Permissions.File_Manage)
+        if UserHasEngagementPermission.path_engagement_post.match(request.path) or \
+           UserHasEngagementPermission.path_engagement.match(request.path):
+            return check_object_permission(request, obj, Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Delete)
+        else:
+            return check_object_permission(request, obj, Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Edit, Permissions.Engagement_Edit)
 
 
 class UserHasFindingPermission(permissions.BasePermission):
+    path_finding_post = re.compile(r'^/api/v2/findings/$')
+    path_finding = re.compile(r'^/api/v2/findings/\d+/$')
+
     def has_permission(self, request, view):
-        return check_post_permission(request, Test, 'test', Permissions.Finding_Add)
+        if UserHasFindingPermission.path_finding_post.match(request.path) or \
+           UserHasFindingPermission.path_finding.match(request.path):
+            return check_post_permission(request, Test, 'test', Permissions.Finding_Add)
+        else:
+            # related object only need object permission
+            return True
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Delete)
-
-
-class UserHasFindingRelatedPermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Edit, Permissions.Finding_Edit)
+        if UserHasFindingPermission.path_finding_post.match(request.path) or \
+           UserHasFindingPermission.path_finding.match(request.path):
+            return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Delete)
+        else:
+            return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Edit, Permissions.Finding_Edit)
 
 
 class UserHasImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return check_post_permission(request, Engagement, 'engagement', Permissions.Import_Scan_Result)
-
-
-class UserHasNotePermission(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Note_View, Permissions.Note_Edit, Permissions.Note_Delete, Permissions.Note_Add)
 
 
 class UserHasProductPermission(permissions.BasePermission):
@@ -172,11 +177,23 @@ class UserHasReimportPermission(permissions.BasePermission):
 
 
 class UserHasTestPermission(permissions.BasePermission):
+    path_tests_post = re.compile(r'^/api/v2/tests/$')
+    path_tests = re.compile(r'^/api/v2/tests/\d+/$')
+
     def has_permission(self, request, view):
-        return check_post_permission(request, Engagement, 'engagement', Permissions.Test_Add)
+        if UserHasTestPermission.path_tests_post.match(request.path) or \
+           UserHasTestPermission.path_tests.match(request.path):
+            return check_post_permission(request, Engagement, 'engagement', Permissions.Test_Add)
+        else:
+            # related object only need object permission
+            return True
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete)
+        if UserHasTestPermission.path_tests_post.match(request.path) or \
+           UserHasTestPermission.path_tests.match(request.path):
+            return check_object_permission(request, obj, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete)
+        else:
+            return check_object_permission(request, obj, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Edit, Permissions.Test_Edit)
 
 
 class UserHasTestImportPermission(permissions.BasePermission):
