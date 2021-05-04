@@ -804,6 +804,10 @@ def edit_finding(request, fid):
             # any existing finding should be updated
             push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
 
+            if old_finding.duplicate and not new_finding.duplicate:
+                reset_finding_duplicate_status_internal(request.user, new_finding.id)
+                new_finding.refresh_from_db()
+
             new_finding.save(push_to_jira=push_to_jira)
 
             # we only push the group after storing the finding to make sure
@@ -2147,6 +2151,7 @@ def reset_finding_duplicate_status_internal(user, duplicate_id):
     if duplicate.duplicate_finding:
         # duplicate.duplicate_finding.original_finding.remove(duplicate)  # shouldn't be needed
         duplicate.duplicate_finding = None
+        duplicate.duplicate_finding_id = None
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = user
     duplicate.save(dedupe_option=False)
