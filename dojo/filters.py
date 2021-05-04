@@ -1856,13 +1856,12 @@ class EndpointFilter(DojoFilter):
         queryset=Product.objects.none(),
         label="Product")
     protocol = CharFilter(lookup_expr='icontains')
-    userinfo = CharFilter(lookup_expr='contains')
+    userinfo = CharFilter(lookup_expr='icontains')
     host = CharFilter(lookup_expr='icontains')
-    fqdn = CharFilter(lookup_expr='icontains')
     port = NumberFilter()
-    path = CharFilter(lookup_expr='contains')
-    query = CharFilter(lookup_expr='contains')
-    fragment = CharFilter(lookup_expr='contains')
+    path = CharFilter(lookup_expr='icontains')
+    query = CharFilter(lookup_expr='icontains')
+    fragment = CharFilter(lookup_expr='icontains')
     mitigated = CharFilter(lookup_expr='icontains')
 
     tags = ModelMultipleChoiceFilter(
@@ -2006,13 +2005,12 @@ class ApiAppAnalysisFilter(DojoFilter):
 
 class EndpointReportFilter(DojoFilter):
     protocol = CharFilter(lookup_expr='icontains')
-    userinfo = CharFilter(lookup_expr='contains')
+    userinfo = CharFilter(lookup_expr='icontains')
     host = CharFilter(lookup_expr='icontains')
-    fqdn = CharFilter(lookup_expr='icontains')
     port = NumberFilter()
-    path = CharFilter(lookup_expr='contains')
-    query = CharFilter(lookup_expr='contains')
-    fragment = CharFilter(lookup_expr='contains')
+    path = CharFilter(lookup_expr='icontains')
+    query = CharFilter(lookup_expr='icontains')
+    fragment = CharFilter(lookup_expr='icontains')
     finding__severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     finding__mitigated = MitigatedDateRangeFilter()
 

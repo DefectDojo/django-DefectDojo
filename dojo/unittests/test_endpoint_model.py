@@ -12,7 +12,6 @@ class TestEndpointModel(TestCase):
         self.assertIsNone(endpoint.protocol)
         self.assertIsNone(endpoint.userinfo)
         self.assertIsNone(endpoint.host)
-        self.assertIsNone(endpoint.fqdn)
         self.assertIsNone(endpoint.port)
         self.assertIsNone(endpoint.path)
         self.assertIsNone(endpoint.query)

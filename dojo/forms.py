@@ -1261,7 +1261,6 @@ class EditEndpointForm(forms.ModelForm):
 
         protocol = cleaned_data['protocol']
         userinfo = cleaned_data['userinfo']
-        fqdn = cleaned_data['fqdn']
         port = cleaned_data['port']
         path = cleaned_data['path']
         query = cleaned_data['query']
@@ -1271,7 +1270,6 @@ class EditEndpointForm(forms.ModelForm):
             Endpoint(  # Endpoint constructor validate formats
                 protocol=protocol,
                 userinfo=userinfo,
-                fqdn=fqdn,
                 port=port,
                 path=path,
                 query=query,
@@ -1283,7 +1281,6 @@ class EditEndpointForm(forms.ModelForm):
         endpoint = endpoint_filter(protocol=protocol,
                                            userinfo=userinfo,
                                            host=host,
-                                           fqdn=fqdn,
                                            port=port,
                                            path=path,
                                            query=query,

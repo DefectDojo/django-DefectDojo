@@ -2,6 +2,15 @@
 from django.db import migrations, models
 
 
+def move_fqdn_to_host(apps, schema_editor):
+    Endpoint_model = apps.get_model('dojo', 'Endpoint')
+    for endpoint in Endpoint_model.objects.filter(fqdn__isnull=False):
+        logger.info('In Endpoint {} (id={}), host "{}" will be replaced by fqdn "{}" because fqdn field will be'
+            ' removed.'.format(str(endpoint), endpoint.pk, endpoint.host, endpoint.fqdn))
+        endpoint.host = endpoint.fqdn
+        endpoint.save()
+
+
 class Migration(migrations.Migration):
     dependencies = [
         ('dojo', '0099_delete_report'),
@@ -38,6 +47,11 @@ class Migration(migrations.Migration):
             name='path',
             field=models.CharField(blank=True, help_text="The location of the resource, it must not start with a '/'. "
                                                          "For example endpoint/420/edit", max_length=500, null=True),
+        ),
+        migrations.RunPython(move_fqdn_to_host),
+        migrations.RemoveField(
+            model_name='endpoint',
+            name='fqdn',
         ),
         migrations.RemoveField(
             model_name='system_settings',

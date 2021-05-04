@@ -563,7 +563,6 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
             protocol = data.get('protocol')
             userinfo = data.get('userinfo')
             host = data.get('host')
-            fqdn = data.get('fqdn')
             port = data.get('port')
             path = data.get('path')
             query = data.get('query')
@@ -575,7 +574,6 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
             host = data.get('host', self.instance.host)
             if not host or host == '':
                 raise serializers.ValidationError('Host is required. It must not be empty/undefined.')
-            fqdn = data.get('fqdn', self.instance.fqdn)
             port = data.get('port', self.instance.port)
             path = data.get('path', self.instance.path)
             query = data.get('query', self.instance.query)
@@ -589,7 +587,6 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
                 protocol=protocol,
                 userinfo=userinfo,
                 host=host,
-                fqdn=fqdn,
                 port=port,
                 path=path,
                 query=query,
@@ -601,7 +598,6 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
         endpoint = endpoint_filter(protocol=protocol,
                                            userinfo=userinfo,
                                            host=host,
-                                           fqdn=fqdn,
                                            port=port,
                                            path=path,
                                            query=query,

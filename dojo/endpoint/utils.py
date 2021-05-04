@@ -197,7 +197,6 @@ def clean_hosts_run(apps, change):
                         protocol=endpoint.protocol,
                         userinfo=endpoint.userinfo,
                         host=endpoint.host,
-                        fqdn=endpoint.fqdn,
                         port=endpoint.port,
                         path=endpoint.path,
                         query=endpoint.query,

@@ -1783,7 +1783,6 @@
     "fields": {
         "protocol": "http",
         "host": "127.0.0.1",
-        "fqdn": "example.com",
         "port": 80,
         "path": "/endpoint/420/edit/",
         "query": null,
@@ -1798,7 +1797,6 @@
     "fields": {
         "protocol": "ftp",
         "host": "localhost",
-        "fqdn": "www.example.com",
         "port": 21,
         "path": "/",
         "query": null,
@@ -1813,7 +1811,6 @@
     "fields": {
         "protocol": "ssh",
         "host": "127.0.0.1",
-        "fqdn": "www.example.com",
         "port": 22,
         "path": null,
         "query": null,
@@ -1828,7 +1825,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/login.jsp",
         "query": null,
@@ -1843,7 +1839,6 @@
     "fields": {
         "protocol": null,
         "host": "127.0.0.1",
-        "fqdn": null,
         "port": null,
         "path": null,
         "query": null,
@@ -1858,7 +1853,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/register.jsp",
         "query": null,
@@ -1873,7 +1867,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/password.jsp",
         "query": null,
@@ -1888,7 +1881,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/",
         "query": null,
@@ -1903,7 +1895,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/basket.jsp",
         "query": null,
@@ -1918,7 +1909,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/advanced.jsp",
         "query": null,
@@ -1933,7 +1923,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/admin.jsp",
         "query": null,
@@ -1948,7 +1937,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/about.jsp",
         "query": null,
@@ -1963,7 +1951,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/contact.jsp",
         "query": null,
@@ -1978,7 +1965,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/home.jsp",
         "query": null,
@@ -1993,7 +1979,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/product.jsp",
         "query": null,
@@ -2008,7 +1993,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/score.jsp",
         "query": null,
@@ -2023,7 +2007,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/search.jsp",
         "query": null,
@@ -2038,7 +2021,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/",
         "query": null,
@@ -2053,7 +2035,6 @@
     "fields": {
         "protocol": "http",
         "host": "localhost",
-        "fqdn": null,
         "port": 8888,
         "path": "/bodgeit/logout.jsp",
         "query": null,
