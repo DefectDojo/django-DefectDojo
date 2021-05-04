@@ -54,6 +54,24 @@
     }
   },
   {
+    "pk": 4,
+    "model": "auth.user",
+    "fields": {
+      "username": "user3",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
     "pk": "2dqr18yqu9mzb87abk0okid75w2clakl",
     "model": "sessions.session",
     "fields": {
