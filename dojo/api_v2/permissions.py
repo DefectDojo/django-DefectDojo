@@ -92,6 +92,8 @@ class UserHasEndpointStatusPermission(permissions.BasePermission):
 
 
 class UserHasEngagementPermission(permissions.BasePermission):
+    # Permission checks for related objects (like notes or metadata) can be moved
+    # into a seperate class, when the legacy authorization will be removed.
     path_engagement_post = re.compile(r'^/api/v2/engagements/$')
     path_engagement = re.compile(r'^/api/v2/engagements/\d+/$')
 
@@ -112,6 +114,8 @@ class UserHasEngagementPermission(permissions.BasePermission):
 
 
 class UserHasFindingPermission(permissions.BasePermission):
+    # Permission checks for related objects (like notes or metadata) can be moved
+    # into a seperate class, when the legacy authorization will be removed.
     path_finding_post = re.compile(r'^/api/v2/findings/$')
     path_finding = re.compile(r'^/api/v2/findings/\d+/$')
 
@@ -177,6 +181,8 @@ class UserHasReimportPermission(permissions.BasePermission):
 
 
 class UserHasTestPermission(permissions.BasePermission):
+    # Permission checks for related objects (like notes or metadata) can be moved
+    # into a seperate class, when the legacy authorization will be removed.
     path_tests_post = re.compile(r'^/api/v2/tests/$')
     path_tests = re.compile(r'^/api/v2/tests/\d+/$')
 
