@@ -1,7 +1,8 @@
 ---
 title: "Upgrading"
-date: 2021-02-02T20:46:28+01:00
+description: "Release specific upgrading instructions"
 draft: false
+weight: 5
 ---
 
 
@@ -41,8 +42,8 @@ The generic upgrade method for docker-compose follows these steps:
 -   Stop DefectDojo: `docker-compose stop`
 -   Re-start DefectDojo, allowing for container recreation:
     `docker-compose up -d`
--   Run the database migrations to bring your database schema up to
-    speed with the latest code
+-   This will run the database migrations to bring your database schema 
+    up to date for the latest release.
 -   If you have the initializer disabled (or if you want to be on the
     safe side), run the migration command:
     `docker-compose exec uwsgi /bin/bash -c 'python manage.py migrate`
@@ -50,15 +51,14 @@ The generic upgrade method for docker-compose follows these steps:
 ### Building your local images
 
 If you build your images locally and do not use the ones from DockerHub,
-the instructions are much the same, except that you\'d build your images
-first. (Of course, if you\'re doing this, then you know you have to
+the instructions are much the same, except that you'd build your images
+first. (Of course, if you're doing this, then you know you have to
 update the source code first)
 
-Replace the first step above with this one: - `docker-compose build`
+Replace the first step above with this one: `docker-compose build`
 
 
-Upgrading to DefectDojo Version 2.0.x.
---------------------------------------
+## Upgrading to DefectDojo Version 2.0.x.
 
 WARNING: Upgrade to 1.15.x first before upgrading to 2.0.0, otherwise you will brick you instance.
 
@@ -89,8 +89,8 @@ If you're using docker:
 This can take a while depending on your instance size.
 
 
-Upgrading to DefectDojo Version 1.15.x
---------------------------------------
+## Upgrading to DefectDojo Version 1.15.x
+
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.15.0
 - If you have made changes to JIRA templates or the template config in the JIRA Project config for instances/products/engagements:
 The jira template settings introduced in 1.13 have been changed. You now have to select a subfolder instead of a sinlge template file. If you have chosen a non-default template here, you have to reapply that to all products / engagements. Also you have to move your custom templates into the correct subfolder in `dojo/templates/issue-trackers/`.
@@ -106,8 +106,8 @@ This can take a while depending on your instance size.
 
 
 
-Upgrading to DefectDojo Version 1.14.x
---------------------------------------
+## Upgrading to DefectDojo Version 1.14.x
+
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.14.0
 
 Note that the below fields are now optional without default value. They will not be filled anymore with values such as "No references given" when found empty while saving the findings
@@ -118,8 +118,8 @@ Note that the below fields are now optional without default value. They will not
 
 
 
-Upgrading to DefectDojo Version 1.13.x
---------------------------------------
+## Upgrading to DefectDojo Version 1.13.x
+
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.13.0
 - Hashcode settings affecting deduplication have changed, to update existing findings run:
 
@@ -132,18 +132,17 @@ If you're using docker:
 This can take a while depeneding on your instance size. It might possible that new duplicates are detected among existing findings, so make a backup before running!
 
 
-Upgrading to DefectDojo Version 1.12.x
---------------------------------------
+## Upgrading to DefectDojo Version 1.12.x
+
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.12.0
 - 1.12.1 is a security release https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.12.1
 
-Upgrading to DefectDojo Version 1.11.x
---------------------------------------
+## Upgrading to DefectDojo Version 1.11.x
+
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.11.0
 - 1.11.1 is a security release https://github.com/DefectDojo/django-DefectDojo/releases/tag/1.11.1
 
-Upgrading to DefectDojo Version 1.10.x
---------------------------------------
+## Upgrading to DefectDojo Version 1.10.x
 
 **1.10.4 is a security release**
 
@@ -190,8 +189,7 @@ After ensuring your rabbitMQ celery queue is empty, you will then want
 to delete your rabbitMQ StatefulSet and PVC to allow them to get
 re-created, or fully delete and recreate defectdojo.
 
-Upgrading to DefectDojo Version 1.9.3
--------------------------------------
+## Upgrading to DefectDojo Version 1.9.3
 
 **This is a security release**
 
@@ -232,8 +230,7 @@ If you\'re using docker:
 This can take a while depending on your hardware and the number of
 findings in your instance.
 
-Upgrading to DefectDojo Version 1.8.0
--------------------------------------
+## Upgrading to DefectDojo Version 1.8.0
 
 **What\'s New:**
 
@@ -272,8 +269,7 @@ If you\'re using docker:
 This can take a while depending on your hardware and the number of
 findings in your instance.
 
-Upgrading to DefectDojo Version 1.7.0
--------------------------------------
+## Upgrading to DefectDojo Version 1.7.0
 
 **What\'s New:**
 
@@ -400,8 +396,7 @@ environment can be copied into this file.
 
 6.  Complete
 
-Upgrading to DefectDojo Version 1.3.1
--------------------------------------
+## Upgrading to DefectDojo Version 1.3.1
 
 **What\'s New:**
 
@@ -420,8 +415,7 @@ Upgrading to DefectDojo Version 1.3.1
 3.  ./manage.py collectstatic \--noinput
 4.  Complete
 
-Upgrading to DefectDojo Version 1.2.9
--------------------------------------
+## Upgrading to DefectDojo Version 1.2.9
 
 **What\'s New:** New feature: Benchmarks (OWASP ASVS)
 
@@ -434,8 +428,7 @@ Upgrading to DefectDojo Version 1.2.9
 2.  ./manage.py collectstatic \--noinput
 3.  Complete
 
-Upgrading to DefectDojo Version 1.2.8
--------------------------------------
+## Upgrading to DefectDojo Version 1.2.8
 
 New feature: Product Grading (Overall Product Health) Upgrading to 1.2.8
 requires:
@@ -447,16 +440,14 @@ requires:
 4.  pip install \--upgrade celery
 5.  Complete
 
-Upgrading to DefectDojo Version 1.2.4
--------------------------------------
+## Upgrading to DefectDojo Version 1.2.4
 
 Upgrading to 1.2.4 requires:
 
 1.  ./manage.py makemigrations ./manage.py migrate ./manage.py loaddata
     dojo/fixtures/objects\_review.json
 
-Upgrading to DefectDojo Version 1.2.3
--------------------------------------
+## Upgrading to DefectDojo Version 1.2.3
 
 Upgrading to 1.2.3 requires:
 
@@ -465,8 +456,7 @@ Upgrading to 1.2.3 requires:
 2.  Currently languages and technologies can be updated via the API or
     in the admin section of Django.
 
-July 6th 2017 - New location for system settings
-------------------------------------------------
+## July 6th 2017 - New location for system settings
 
 Pull request \#313 moves a number of system settings previously located
 in the application\'s settings.py to a model that can be used and
@@ -493,8 +483,7 @@ to avoid confusion:
 -   `TIME_ZONE`
 -   `TEAM_NAME`
 
-Upgrading to DefectDojo Version 1.2.2
--------------------------------------
+## Upgrading to DefectDojo Version 1.2.2
 
 Upgrading to 1.2.2 requires:
 
@@ -502,8 +491,7 @@ Upgrading to 1.2.2 requires:
 2.  If you have supervisor scripts change
     DJANGO\_SETTINGS\_MODULE=dojo.settings.settings
 
-Upgrading to Django 1.1.5
--------------------------
+## Upgrading to Django 1.1.5
 
 If you are upgrading an existing version of DefectDojo, you will need to
 run the following commands manually:
@@ -531,8 +519,7 @@ run the following commands manually:
             os.path.dirname(DOJO_ROOT) + "/components/yarn_components",
         )
 
-Upgrading to Django 1.11
-------------------------
+## Upgrading to Django 1.11
 
 Pull request \#300 makes DefectDojo Django 1.11 ready. A fresh install
 of DefectDojo can be done with the setup.bash script included - no
