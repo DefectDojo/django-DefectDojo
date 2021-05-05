@@ -2548,29 +2548,6 @@ class Risk_Acceptance(models.Model):
         return None
 
 
-class Report(models.Model):
-    name = models.CharField(max_length=200)
-    type = models.CharField(max_length=100, default='Finding')
-    format = models.CharField(max_length=15, default='AsciiDoc')
-    requester = models.ForeignKey(User, on_delete=models.CASCADE)
-    task_id = models.CharField(max_length=50)
-    file = models.FileField(upload_to='reports/%Y/%m/%d',
-                            verbose_name='Report File', null=True)
-    status = models.CharField(max_length=10, default='requested')
-    options = models.TextField()
-    datetime = models.DateTimeField(auto_now_add=True)
-    done_datetime = models.DateTimeField(null=True)
-
-    def __str__(self):
-        return self.name
-
-    def get_url(self):
-        return reverse('download_report', args=(self.id,))
-
-    class Meta:
-        ordering = ['-datetime']
-
-
 class FindingImage(models.Model):
     image = models.ImageField(upload_to=UniqueUploadNameProvider('finding_images'))
     caption = models.CharField(max_length=500, blank=True)
@@ -3536,7 +3513,6 @@ admin.site.register(Dojo_User)
 admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Note_Type)
-admin.site.register(Report)
 admin.site.register(Alerts)
 admin.site.register(JIRA_Issue)
 admin.site.register(JIRA_Instance, JIRA_Instance_Admin)
