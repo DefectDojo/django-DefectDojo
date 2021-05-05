@@ -196,7 +196,7 @@ class WhiteHatSentinelParser(object):
 
         date_created = whitehat_sentinel_vuln['found'].split('T')[0]
         mitigated_ts = whitehat_sentinel_vuln.get('closed'.split('T')[0], None)
-        cwe = self._parse_cwe_from_tags(whitehat_sentinel_vuln['attack_vectors'][0]['scanner_tags'])
+        cwe = self._parse_cwe_from_tags(whitehat_sentinel_vuln['attack_vectors'][0].get('scanner_tags', []))
         description_ref = self._parse_description(whitehat_sentinel_vuln['description'])
         description = description_ref['description']
         references = description_ref['reference_link']
