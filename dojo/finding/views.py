@@ -804,6 +804,8 @@ def edit_finding(request, fid):
             # any existing finding should be updated
             push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
 
+            # if we're removing the "duplicate" in the edit finding screen
+            # do not relaunch deduplication, otherwise, it's never taken into account
             if old_finding.duplicate and not new_finding.duplicate:
                 reset_finding_duplicate_status_internal(request.user, new_finding.id)
                 new_finding.refresh_from_db()
