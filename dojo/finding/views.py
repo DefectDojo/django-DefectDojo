@@ -807,8 +807,7 @@ def edit_finding(request, fid):
             # if we're removing the "duplicate" in the edit finding screen
             # do not relaunch deduplication, otherwise, it's never taken into account
             if old_finding.duplicate and not new_finding.duplicate:
-                reset_finding_duplicate_status_internal(request.user, new_finding.id)
-                new_finding.refresh_from_db()
+                new_finding.duplicate_finding = None
                 new_finding.save(push_to_jira=push_to_jira, dedupe_option=False)
             else:
                 new_finding.save(push_to_jira=push_to_jira)
@@ -2154,7 +2153,6 @@ def reset_finding_duplicate_status_internal(user, duplicate_id):
     if duplicate.duplicate_finding:
         # duplicate.duplicate_finding.original_finding.remove(duplicate)  # shouldn't be needed
         duplicate.duplicate_finding = None
-        duplicate.duplicate_finding_id = None
     duplicate.last_reviewed = timezone.now()
     duplicate.last_reviewed_by = user
     duplicate.save(dedupe_option=False)
