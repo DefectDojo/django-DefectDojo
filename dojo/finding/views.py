@@ -807,8 +807,9 @@ def edit_finding(request, fid):
             if old_finding.duplicate and not new_finding.duplicate:
                 reset_finding_duplicate_status_internal(request.user, new_finding.id)
                 new_finding.refresh_from_db()
-
-            new_finding.save(push_to_jira=push_to_jira)
+                new_finding.save(push_to_jira=push_to_jira, dedupe_option=False)
+            else:
+                new_finding.save(push_to_jira=push_to_jira)
 
             # we only push the group after storing the finding to make sure
             # the updated data of the finding is pushed as part of the group
