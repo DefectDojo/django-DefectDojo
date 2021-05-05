@@ -1,12 +1,8 @@
-
 import json
 import logging
 import re
-from json import JSONDecodeError
 from typing import Union, List
 from urllib.parse import urlparse
-
-from tagging.fields import TagField
 
 from dojo.models import Finding, Endpoint
 
@@ -185,7 +181,6 @@ class WhiteHatSentinelParser(object):
                 pass
 
         return endpoints_list
-
 
     def _convert_whitehat_sentinel_vuln_to_dojo_finding(self, whitehat_sentinel_vuln, test):
         """
