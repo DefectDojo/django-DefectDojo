@@ -6,6 +6,8 @@ from json import JSONDecodeError
 from typing import Union, List
 from urllib.parse import urlparse
 
+from tagging.fields import TagField
+
 from dojo.models import Finding, Endpoint
 
 
@@ -184,6 +186,7 @@ class WhiteHatSentinelParser(object):
 
         return endpoints_list
 
+
     def _convert_whitehat_sentinel_vuln_to_dojo_finding(self, whitehat_sentinel_vuln, test):
         """
         Converts a WhiteHat Sentinel vuln to a DefectDojo finding
@@ -207,10 +210,17 @@ class WhiteHatSentinelParser(object):
         severity = self._convert_whitehat_severity_id_to_dojo_severity(risk_id)
         false_positive = whitehat_sentinel_vuln.get('status') == 'invalid'
 
+        # WhiteHat has the following statuses: open, closed, out of scope, accepted, invalid, mitigated.
+        # Out of scope is considered active because the vulnerability is valid, just not for the specified WhiteHat
+        # Asset. This is often the case when a vulnerability is found in a sister product like an authentication or
+        # notification service.
+        active = True if whitehat_sentinel_vuln.get('status') in ('open', 'out of scope') else False
+        is_mitigated = not active
+
         finding = Finding(title=whitehat_sentinel_vuln['class'],
                           test=test,
                           cwe=cwe,
-                          active=not whitehat_sentinel_vuln.get('mitigated', True),
+                          active=active,
                           verified=True,
                           description=description,
                           steps_to_reproduce=steps,
@@ -219,7 +229,7 @@ class WhiteHatSentinelParser(object):
                           severity=severity,
                           false_p=false_positive,
                           date=date_created,
-                          is_Mitigated=whitehat_sentinel_vuln.get('mitigated', False),
+                          is_mitigated=is_mitigated,
                           mitigated=mitigated_ts,
                           last_reviewed=whitehat_sentinel_vuln.get('lastRetested', None),
                           dynamic_finding=True,
