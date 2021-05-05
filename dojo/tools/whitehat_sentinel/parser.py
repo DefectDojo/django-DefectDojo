@@ -209,7 +209,7 @@ class WhiteHatSentinelParser(object):
         # Out of scope is considered active because the vulnerability is valid, just not for the specified WhiteHat
         # Asset. This is often the case when a vulnerability is found in a sister product like an authentication or
         # notification service.
-        active = True if whitehat_sentinel_vuln.get('status') in ('open', 'out of scope') else False
+        active = whitehat_sentinel_vuln.get('status') in ('open', 'out of scope')
         is_mitigated = not active
 
         finding = Finding(title=whitehat_sentinel_vuln['class'],
