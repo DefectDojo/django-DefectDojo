@@ -17,7 +17,7 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 It is probably easier to use the docker-compose stack (and benefit from the hot-reload capbility for uWSGI).
 Set up your environment to use the dev (with debugpy) environment, such as:
 
-`$ docker/setEnv.sh dev`
+`$ docker/setEnv.sh debug`
 
 Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md) for more details.
 

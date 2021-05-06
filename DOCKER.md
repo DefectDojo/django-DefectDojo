@@ -106,16 +106,16 @@ The Dev mode, offers out of the box a debugging server listening on port 3000
 
 ```zsh
 # switch to dev configuration
-docker/setEnv.sh dev
+docker/setEnv.sh debug
 # then use docker-compose as usual
 docker-compose up
 ```
 
-This will run the application based on merged configurations from `docker-compose.yml` and `docker-compose.override.dev.yml`.
+This will run the application based on merged configurations from `docker-compose.yml` and `docker-compose.override.debug.yml`.
 
 Alternatively (if using docker for windows for example), you can copy the override file over (and re-create the containers):
 ```
-cp docker-compose.override.dev.yml docker-compose.override.yml
+cp docker-compose.override.debug.yml docker-compose.override.yml
 docker-compose down
 docker-compose up
 ```
