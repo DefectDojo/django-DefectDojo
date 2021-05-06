@@ -40,7 +40,7 @@ function get_current {
 # Tell to which environments we can switch
 function say_switch {
     echo "Using '${current_env}' configuration."
-    for one_env in dev unit_tests integration_tests release
+    for one_env in dev debug unit_tests integration_tests release
     do
         if [ "${current_env}" != ${one_env} ]; then
             echo "-> You can switch to '${one_env}' with '${0} ${one_env}'"

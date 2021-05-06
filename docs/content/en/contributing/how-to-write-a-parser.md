@@ -15,7 +15,7 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 - It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name` yet that's up to you.
 
 It is probably easier to use the docker-compose stack (and benefit from the hot-reload capbility for uWSGI).
-Set up your environment to use the dev (with debugpy) environment, such as:
+Set up your environment to use the debug environment, such as:
 
 `$ docker/setEnv.sh debug`
 

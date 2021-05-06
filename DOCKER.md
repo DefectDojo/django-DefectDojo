@@ -102,10 +102,10 @@ id -u
 
 ## Run with Docker compose in development mode with debugpy (remote debug)
 
-The Dev mode, offers out of the box a debugging server listening on port 3000
+The debug mode, offers out of the box a debugging server listening on port 3000
 
 ```zsh
-# switch to dev configuration
+# switch to debug configuration
 docker/setEnv.sh debug
 # then use docker-compose as usual
 docker-compose up
@@ -120,7 +120,7 @@ docker-compose down
 docker-compose up
 ```
 
-The default configuration assumes port 3000 by default for dev.
+The default configuration assumes port 3000 by default for debug.
 
 But you can pass additional environment variables:
 - `DD_DEBUG_PORT` to define a different port
