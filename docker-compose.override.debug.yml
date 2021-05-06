@@ -6,8 +6,14 @@ services:
     volumes:
       - '.:/app:z'
     environment:
+      DD_DEBUG: 'True'
       DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
       DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
+    ports:
+      - target: ${DD_DEBUG_PORT:-3000}
+        published: ${DD_DEBUG_PORT:-3000}
+        protocol: tcp
+        mode: host
   celeryworker:
     volumes:
       - '.:/app:z'

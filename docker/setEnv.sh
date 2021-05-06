@@ -5,6 +5,7 @@
 target_dir="${0%/*}/.."
 override_link='docker-compose.override.yml'
 override_file_dev='docker-compose.override.dev.yml'
+override_file_debug='docker-compose.override.debug.yml'
 override_file_unit_tests='docker-compose.override.unit_tests.yml'
 override_file_unit_tests_cicd='docker-compose.override.unit_tests_cicd.yml'
 override_file_integration_tests='docker-compose.override.integration_tests.yml'
@@ -75,6 +76,19 @@ function set_dev {
     fi
 }
 
+function set_debug {
+    get_current
+    if [ "${current_env}" != debug ]
+    then
+        rm -f ${override_link}
+        ln -s ${override_file_debug} ${override_link}
+        docker-compose down
+        echo "Now using 'debug' configuration."
+    else
+        echo "Already using 'debug' configuration."
+    fi
+}
+
 function set_unit_tests {
     get_current
     if [ "${current_env}" != unit_tests ]
@@ -117,7 +131,7 @@ function set_integration_tests {
 # Change directory to allow working with relative paths.
 cd ${target_dir}
 
-if [ ${#} -eq 1 ] && [[ 'dev unit_tests unit_tests_cicd integration_tests release' =~ "${1}" ]]
+if [ ${#} -eq 1 ] && [[ 'dev debug unit_tests unit_tests_cicd integration_tests release' =~ "${1}" ]]
 then
     set_"${1}"
 else
