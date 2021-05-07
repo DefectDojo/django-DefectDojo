@@ -11,6 +11,8 @@ from django.urls import reverse
 from dojo.metrics import views
 from dojo.models import User
 
+from django.conf import settings
+
 
 class MockMessages:
     def add(*args, **kwargs):
@@ -25,6 +27,21 @@ class FindingQueriesTest(TestCase):
         self.request = RequestFactory().get(reverse('metrics'))
         self.request.user = user
         self.request._messages = MockMessages()
+
+    def test_finding_queries_no_data(self):
+        user3 = User.objects.get(username='user3')
+        self.request.user = user3
+
+        product_types = []
+        finding_queries = views.finding_querys(
+            product_types,
+            self.request
+        )
+
+        self.assertSequenceEqual(
+            finding_queries['all'].values(),
+            [],
+        )
 
     @patch('django.utils.timezone.now')
     def test_finding_queries(self, mock_timezone):
@@ -134,6 +151,21 @@ class EndpointQueriesTest(TestCase):
         self.request.user = user
         self.request._messages = MockMessages()
 
+    def test_endpoint_queries_no_data(self):
+        user3 = User.objects.get(username='user3')
+        self.request.user = user3
+
+        product_types = []
+        endpoint_queries = views.endpoint_querys(
+            product_types,
+            self.request
+        )
+
+        self.assertSequenceEqual(
+            endpoint_queries['all'].values(),
+            [],
+        )
+
     def test_endpoint_queries(self):
         # Queries over Finding and Endpoint_Status
         with self.assertNumQueries(67):
@@ -161,24 +193,46 @@ class EndpointQueriesTest(TestCase):
 
             # Assert that we get expected querysets back. This is to be used to
             # support refactoring, in attempt of lowering the query count.
-            self.assertSequenceEqual(
-                endpoint_queries['all'].values(),
-                [
-                    {
-                        'id': 1,
-                        'date': datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc),
-                        'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=timezone.utc),
-                        'mitigated': False,
-                        'mitigated_time': None,
-                        'mitigated_by_id': None,
-                        'false_positive': False,
-                        'out_of_scope': False,
-                        'risk_accepted': False,
-                        'endpoint_id': 2,
-                        'finding_id': 2
-                    }
-                ],
-            )
+            if settings.FEATURE_AUTHORIZATION_V2:
+                self.assertSequenceEqual(
+                    endpoint_queries['all'].values(),
+                    [
+                        {
+                            'id': 1,
+                            'date': datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc),
+                            'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=timezone.utc),
+                            'mitigated': False,
+                            'mitigated_time': None,
+                            'mitigated_by_id': None,
+                            'false_positive': False,
+                            'out_of_scope': False,
+                            'risk_accepted': False,
+                            'endpoint_id': 2,
+                            'finding_id': 2,
+                            'endpoint__product__prod_type__member': False,
+                            'endpoint__product__member': True
+                        }
+                    ],
+                )
+            else:
+                self.assertSequenceEqual(
+                    endpoint_queries['all'].values(),
+                    [
+                        {
+                            'id': 1,
+                            'date': datetime(2020, 7, 1, 0, 0, tzinfo=timezone.utc),
+                            'last_modified': datetime(2020, 7, 1, 17, 45, 39, 791907, tzinfo=timezone.utc),
+                            'mitigated': False,
+                            'mitigated_time': None,
+                            'mitigated_by_id': None,
+                            'false_positive': False,
+                            'out_of_scope': False,
+                            'risk_accepted': False,
+                            'endpoint_id': 2,
+                            'finding_id': 2
+                        }
+                    ],
+                )
             self.assertSequenceEqual(
                 endpoint_queries['closed'].values(),
                 [],

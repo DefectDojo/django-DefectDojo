@@ -442,7 +442,9 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
         metadata.save()
 
     def test_create(self):
-        self.client.post(self.base_url, data={"name": "test_meta2", "value": "40"})
+        response = self.client.post(self.base_url, data={"name": "test_meta2", "value": "40"})
+        self.assertEqual(200, response.status_code, response.data)
+
         results = self.client.get(self.base_url).data
         for result in results:
             if result["name"] == "test_meta2" and result["value"] == "40":

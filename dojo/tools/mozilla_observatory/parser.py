@@ -1,12 +1,17 @@
-import hashlib
 import json
 
-from dojo.models import Endpoint, Finding
-
-__author__ = 'dr3dd589'
+from dojo.models import Finding
 
 
 class MozillaObservatoryParser(object):
+    """Mozilla Observatory
+
+    See: https://observatory.mozilla.org
+
+    See: https://github.com/mozilla/observatory-cli
+
+    See: https://github.com/mozilla/http-observatory
+    """
 
     def get_scan_types(self):
         return ["Mozilla Observatory Scan"]
@@ -18,50 +23,36 @@ class MozillaObservatoryParser(object):
         return "Import JSON report."
 
     def get_findings(self, file, test):
-        dupes = dict()
-        data = file.read()
-        try:
-            tree = json.loads(str(data, 'utf-8'))
-        except:
-            tree = json.loads(data)
-        for content in tree:
-            node = tree[content]
-            if not node['pass']:
-                title = node['name']
-                description = "**Score Description** : " + node['score_description'] + "\n\n" + \
-                            "**Result** : " + node['result'] + "\n\n" + \
-                            "**expectation** : " + node['expectation'] + "\n"
-                severity = self.get_severity(int(node['score_modifier']))
-                mitigation = "N/A"
-                impact = "N/A"
-                references = "N/A"
-                output = node['output']
-                url = output.get('destination')
+        data = json.load(file)
+        # format from the CLI
+        if "tests" in data:
+            nodes = data["tests"]
+        else:
+            nodes = data
 
-                dupe_key = hashlib.md5(str(description + title).encode('utf-8')).hexdigest()
+        findings = list()
+        for key in nodes:
+            node = nodes[key]
 
-                if dupe_key in dupes:
-                    finding = dupes[dupe_key]
-                    if finding.description:
-                        finding.description = finding.description
-                    dupes[dupe_key] = finding
-                else:
-                    dupes[dupe_key] = True
+            description = "\n".join([
+                "**Score Description** : `" + node['score_description'] + "`",
+                "**Result** : `" + node['result'] + "`"
+                "**expectation** : " + str(node.get('expectation')) + "`",
+            ])
 
-                    finding = Finding(title=title,
-                                    test=test,
-                                    description=description,
-                                    severity=severity,
-                                    mitigation=mitigation,
-                                    impact=impact,
-                                    references=references,
-                                    dynamic_finding=True)
-                    finding.unsaved_endpoints = list()
-                    dupes[dupe_key] = finding
+            finding = Finding(
+                title=node['score_description'],
+                test=test,
+                active=not node['pass'],
+                description=description,
+                severity=self.get_severity(int(node['score_modifier'])),
+                static_finding=False,
+                dynamic_finding=True,
+                vuln_id_from_tool=node['name']
+            )
 
-                    if url is not None:
-                        finding.unsaved_endpoints.append(Endpoint.from_uri(url))
-        return dupes.values()
+            findings.append(finding)
+        return findings
 
     def get_severity(self, num_severity):
         if num_severity >= -10:
