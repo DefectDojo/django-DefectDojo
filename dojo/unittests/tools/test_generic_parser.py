@@ -31,10 +31,12 @@ class TestGenericParser(TestCase):
         finding = findings[0]
         self.assertEqual(5, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
-        self.assertEqual("vulnerable.endpoint.com:443", endpoint.host)
+        self.assertEqual("vulnerable.endpoint.com", endpoint.host)
+        self.assertEqual(443, endpoint.port)
         self.assertEqual("resource1/asdf", endpoint.path)
         endpoint = finding.unsaved_endpoints[1]
-        self.assertEqual("vulnerable.endpoint.com:443", endpoint.host)
+        self.assertEqual("vulnerable.endpoint.com", endpoint.host)
+        self.assertEqual(443, endpoint.port)
         self.assertEqual("resource2/qwerty", endpoint.path)
         self.assertEqual("https", endpoint.protocol)
 
@@ -162,7 +164,8 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         finding = findings[0]
         self.assertEqual(1, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
-        self.assertEqual('localhost:80', endpoint.host)
+        self.assertEqual('localhost', endpoint.host)
+        self.assertEqual(80, endpoint.port)
         self.assertEqual('http', endpoint.protocol)
         self.assertEqual('default.aspx', endpoint.path)
         self.assertIsNone(endpoint.query)
@@ -349,11 +352,11 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
     def test_column_order_is_flexible(self):
         content1 = """\
 Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
-11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,True,True
+11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,References,True,True
 """
         content2 = """\
 Verified,Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active
-True,11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,True
+True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,References,True
 """
         file1 = TestFile("findings.csv", content1)
         file2 = TestFile("findings.csv", content2)

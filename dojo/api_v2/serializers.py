@@ -1,4 +1,6 @@
 from drf_yasg.utils import swagger_serializer_method
+
+from dojo.endpoint.utils import endpoint_filter
 from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -12,7 +14,6 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
 from dojo.utils import is_scan_file_too_large
-from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -553,71 +554,51 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def validate(self, data):
         # print('EndpointSerialize.validate')
-        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}" \
-                  "|655[0-2][0-9]|6553[0-5])"
 
         if not self.context['request'].method == 'PATCH':
-            if ('host' not in data or
-                    'protocol' not in data or
-                    'path' not in data or
-                    'query' not in data or
-                    'fragment' not in data):
-                raise serializers.ValidationError(
-                    'Please provide valid host, protocol, path, query and '
-                    'fragment')
-            protocol = data['protocol']
-            path = data['path']
-            query = data['query']
-            fragment = data['fragment']
-            host = data['host']
+            if 'host' not in data:
+                raise serializers.ValidationError('Host is required')
+            if 'product' not in data:
+                raise serializers.ValidationError('Product is required')
+            protocol = data.get('protocol')
+            userinfo = data.get('userinfo')
+            host = data.get('host')
+            port = data.get('port')
+            path = data.get('path')
+            query = data.get('query')
+            fragment = data.get('fragment')
+            product = data.get('product')
         else:
             protocol = data.get('protocol', self.instance.protocol)
+            userinfo = data.get('userinfo', self.instance.userinfo)
+            host = data.get('host', self.instance.host)
+            if not host or host == '':
+                raise serializers.ValidationError('Host is required. It must not be empty/undefined.')
+            port = data.get('port', self.instance.port)
             path = data.get('path', self.instance.path)
             query = data.get('query', self.instance.query)
             fragment = data.get('fragment', self.instance.fragment)
-            host = data.get('host', self.instance.host)
-        product = data.get('product', None)
+            if 'product' in data and data['product'] != self.instance.product:
+                raise serializers.ValidationError('Change of product is not possible')
+            product = self.instance.product
 
-        from urllib.parse import urlunsplit
-        if protocol:
-            endpoint = urlunsplit((protocol, host, path, query, fragment))
-        else:
-            endpoint = host
-
-        from django.core import exceptions
-        from django.core.validators import RegexValidator
-        import re
         try:
-            url_validator = URLValidator()
-            url_validator(endpoint)
-        except exceptions.ValidationError:
-            try:
-                # do we have a port number?
-                regex = re.compile(port_re)
-                host = endpoint
-                if regex.findall(endpoint):
-                    for g in regex.findall(endpoint):
-                        host = re.sub(port_re, '', host)
-                validate_ipv46_address(host)
-            except exceptions.ValidationError:
-                try:
-                    validate_hostname = RegexValidator(
-                        regex=r'[a-zA-Z0-9-_]*\.[a-zA-Z]{2,6}')
-                    # do we have a port number?
-                    regex = re.compile(port_re)
-                    host = endpoint
-                    if regex.findall(endpoint):
-                        for g in regex.findall(endpoint):
-                            host = re.sub(port_re, '', host)
-                    validate_hostname(host)
-                except:  # noqa
-                    raise serializers.ValidationError(
-                        'It does not appear as though this endpoint is a '
-                        'valid URL or IP address.',
-                        code='invalid')
+            Endpoint(  # Endpoint constructor validate formats
+                protocol=protocol,
+                userinfo=userinfo,
+                host=host,
+                port=port,
+                path=path,
+                query=query,
+                fragment=fragment
+            )
+        except ValidationError as e:
+            raise serializers.ValidationError('; '.join(e), code='invalid')
 
-        endpoint = Endpoint.objects.filter(protocol=protocol,
+        endpoint = endpoint_filter(protocol=protocol,
+                                           userinfo=userinfo,
                                            host=host,
+                                           port=port,
                                            path=path,
                                            query=query,
                                            fragment=fragment,

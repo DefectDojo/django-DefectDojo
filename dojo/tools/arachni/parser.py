@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-from urllib.parse import urlparse
 
 import html2text
 from django.utils.encoding import force_str
@@ -52,18 +51,6 @@ class ArachniParser(object):
             url = item_node['vector']['action']
         else:
             url = item_node['response']['url']
-        o = urlparse(url)
-        protocol = o.scheme
-        host = o.netloc
-        path = o.path
-        query = o.query
-        fragment = o.fragment
-
-        port = 80
-        if protocol == 'https':
-            port = 443
-        if o.port is not None:
-            port = o.port
 
         request = item_node['request']
         #
@@ -86,12 +73,7 @@ class ArachniParser(object):
         if request is not None and respz is not None:
             unsaved_req_resp.append({"req": req, "resp": resp})
 
-        endpoint = Endpoint(protocol=protocol,
-                                host=host,
-                                port=port,
-                                query=query,
-                                fragment=fragment,
-                                path=path)
+        endpoint = Endpoint.from_uri(url)
 
         description = item_node.get('description', 'N/A')
         description = html2text.html2text(description)
