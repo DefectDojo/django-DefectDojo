@@ -1,6 +1,6 @@
 ---
 title: "Authentication via OAuth2"
-date: 2021-02-02T20:46:28+01:00
+description: "OAuth2 let users authenticate against enterprise directories."
 draft: false
 weight: 3
 ---

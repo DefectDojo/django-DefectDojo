@@ -1,5 +1,5 @@
 ---
-title: "Running in Production"
+title: "Running in production"
 description: "Productive use of DefectDojo needs consideration of performance and backups."
 draft: false
 weight: 4

@@ -1,8 +1,8 @@
 ---
-title: "Core Data Classes (Overview)"
+title: "Core data classes"
 description: "DefectDojo is based on a model that allows the ultimate flexibility in your test tracking needs."
 draft: false
-weight: 02
+weight: 1
 ---
 
 ![Data Model](../../images/DD-Hierarchy.svg)
