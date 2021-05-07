@@ -12,7 +12,6 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
-from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
