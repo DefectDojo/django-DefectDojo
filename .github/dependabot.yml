@@ -11,10 +11,6 @@ updates:
     versions:
     - ">= 5.a"
     - "< 6"
-  - dependency-name: django
-    versions:
-    - ">= 3.a"
-    - "< 4"
   - dependency-name: whitenoise
     versions:
     - ">= 5.a"
@@ -76,12 +72,4 @@ updates:
     interval: weekly
   open-pull-requests-limit: 10
   target-branch: dev
-  ignore:
-  - dependency-name: python
-    versions:
-    - ">= 3.7.a"
-    - "< 3.8"
-  - dependency-name: python
-    versions:
-    - ">= 3.8.a"
-    - "< 3.9"
+  
