@@ -69,3 +69,20 @@ class TestAwsProwlerParser(TestCase):
         self.assertEqual("Ensure IAM password policy requires at least one uppercase letter (Scored)", findings[6].title)
         self.assertEqual("Medium", findings[6].severity)
         self.assertEqual(1032, findings[6].cwe)
+
+    def test_aws_prowler_parser_issue4450(self):
+        findings = self.setup(open("dojo/unittests/scans/aws_prowler/issue4450.csv"))
+        self.assertEqual(2, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertFalse(finding.active)
+            self.assertEqual("Avoid the use of the root account (Scored)", finding.title)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual(1032, finding.cwe)
+        with self.subTest(i=1):
+            finding = findings[1]
+            self.assertTrue(finding.active)
+            self.assertEqual("Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password (Scored)", finding.title)
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(1032, finding.cwe)
+            self.assertEqual(3, finding.nb_occurences)
