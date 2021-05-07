@@ -43,7 +43,9 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual(
             findings[0].unsaved_endpoints[0].host, "scanme.nmap.org")
         self.assertEqual(findings[0].unsaved_endpoints[0].protocol, "tcp")
-        self.assertEqual(findings[0].unsaved_endpoints[0].path, "")
+        self.assertEqual(findings[0].unsaved_endpoints[0].path, None)
+        self.assertEqual(findings[0].unsaved_endpoints[0].query, None)
+        self.assertEqual(findings[0].unsaved_endpoints[0].fragment, None)
         self.assertEqual(findings[0].unsaved_endpoints[0].port, 22)
 
     def test_scb_parser_with_many_vuln_has_many_findings_nikto(self):

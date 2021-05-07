@@ -1,7 +1,7 @@
 import hashlib
 import json
-from urllib.parse import urlparse
 from dojo.models import Endpoint, Finding
+import hyperlink
 
 
 class SecureCodeBoxParser(object):
@@ -38,21 +38,19 @@ class SecureCodeBoxParser(object):
         finding.unsaved_endpoints = list()
         endpoint = Endpoint()
         url = node['location']
-        parsedUrl = urlparse(url)
-        endpoint.protocol = parsedUrl.scheme
-        endpoint.query = parsedUrl.query
-        endpoint.fragment = parsedUrl.fragment
-        endpoint.path = parsedUrl.path
-        try:
-            (endpoint.host, port) = parsedUrl.netloc.split(':')
-            endpoint.port = int(port)
-        except:
-            endpoint.host = parsedUrl.netloc
-            endpoint.port = None
+        parsed_url = hyperlink.parse(url)
+        endpoint.protocol = parsed_url.scheme
+        endpoint.host = parsed_url.host
+        endpoint.port = parsed_url.port
+        # replace default values of hyperlink with more reasonable None values (if needed)
+        endpoint.path = parsed_url.path if parsed_url.path != () else None
+        endpoint.query = parsed_url.query if parsed_url.query != () else None
+        endpoint.fragment = parsed_url.fragment if parsed_url.fragment != "" else None
         if 'attributes' in node:
             attributes = node['attributes']
             # override if present in attributes
-            endpoint.host = attributes.get('hostname', endpoint.host)
+            endpoint.host = attributes.get(
+                'hostname', endpoint.host)
             # override if present in attributes
             endpoint.port = attributes.get('port', endpoint.port)
             # override if present in attributes
