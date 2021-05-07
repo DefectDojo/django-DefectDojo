@@ -1,6 +1,6 @@
 ---
 title: "Core data classes"
-description: "DefectDojo is based on a model that allows the ultimate flexibility in your test tracking needs."
+description: "DefectDojo is based on a model that allows high flexibility for your test tracking needs."
 draft: false
 weight: 1
 ---

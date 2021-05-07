@@ -18,10 +18,10 @@ images, JavaScript files or CSS files.
 that runs the DefectDojo application, written in Python/Django, to serve all
 dynamic content.
 
-## RabbitMQ
+## Message Broker
 
-The application server sends tasks to a [RabbitMQ](https://www.rabbitmq.com/)
-message queue for asynchronous execution. 
+The application server sends tasks to a [Message Broker](https://docs.celeryproject.org/en/stable/getting-started/brokers/index.html)
+for asynchronous execution. [RabbitMQ](https://www.rabbitmq.com/) is a well supported choice.
 
 ## Celery Worker
 
