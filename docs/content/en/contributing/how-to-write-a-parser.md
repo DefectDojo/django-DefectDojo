@@ -1,7 +1,8 @@
 ---
-title: "How to write a DefectDojo parser"
-date: 2021-02-02T20:46:28+01:00
+title: "DefectDojo parser"
+description: "How to write a DefectDojo parser"
 draft: false
+weight: 1
 ---
 
 {{% alert title="Information" color="info" %}}
@@ -123,4 +124,4 @@ If you want to take a look at previous parsers that are now part of DefectDojo, 
 
 ## Update the GitHub pages documentation
 
-The DefectDojo official documentation lives in the docs folder, https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs Please update `docs/content/en/import.md` with the details of your new parser.
+The DefectDojo official documentation lives in the docs folder, https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs Please update [`docs/content/en/integrations/import.md`](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/integrations/import.md) with the details of your new parser.

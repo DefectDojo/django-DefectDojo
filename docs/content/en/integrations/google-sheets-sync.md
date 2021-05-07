@@ -1,8 +1,8 @@
 ---
-title: "Google Sheets Sync"
-date: 2021-02-02T20:46:28+01:00
+title: "Google Sheets synchronisation"
+description: "Export finding details to Google Sheets and upload changes from Google Sheets."
 draft: false
-weight: 6
+weight: 7
 ---
 
 

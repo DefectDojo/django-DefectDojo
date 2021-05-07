@@ -1,6 +1,6 @@
 ---
 title: "DefectDojo API v2"
-date: 2021-02-02T20:46:28+01:00
+description: "DefectDojo's API lets you automate tasks, e.g. uploading scan reports in CI/CD pipelines."
 draft: false
 weight: 2
 ---

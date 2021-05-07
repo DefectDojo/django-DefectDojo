@@ -1,15 +1,13 @@
 ---
 title: "Permissions"
-date: 2021-02-02T20:46:28+01:00
-weight: 4
+description: "Users have different functionality available to them, depending on their system-wide permissions and on the role they have as a member of a particular Product or Product Type."
+weight: 3
 draft: false
 ---
 
 {{% alert title="Warning" color="warning" %}}
 The permissions described on this page only become active if you set the ``FEATURE_AUTHORIZATION_V2`` feature flag to ``True``. This feature is currently in beta, you should not use it in production environments.
 {{% /alert %}}
-
-Users have different functionality available to them, depending on their system-wide permissions and on the role they have as a member of a particular Product or Product Type.
 
 ## System-wide permissions
 
@@ -83,6 +81,6 @@ Users can be assigned as members to Products and Product Types, giving them one 
 
 <sup>2)</sup> Every user is allowed to delete his own notes.
 
-The role of a user within a Product Type is inherited by all Products of that Product Type, unless the user is explicitly defined as a member of a Product with a different role. If a user is a member of a Product, his role in the Product must be at least the same level or higher as his role for the respective Product Type.
+The role of a user within a Product Type is inherited by all Products of that Product Type, unless the user is explicitly defined as a member of a Product with a different role. In that case, if a user doesn't have a certain right for the Product Type, it is then checked if he has the right for the Product.
 
 A Product Type needs to have at least one owner. The last owner cannot be removed.
