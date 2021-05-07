@@ -257,19 +257,23 @@
                                     </ul>
                                 </li>
                                 <li>
-                                    <a href="{% url 'endpoints' %}" aria-expanded="false" aria-label="Endpoints">
+                                    <a href="{% url 'endpoint' %}" aria-expanded="false" aria-label="Endpoints">
 					                    <i class="fa fa-sitemap fa-fw"></i>
                                         <span>Endpoints</span>
                                         <span class="glyphicon arrow"></span>
                                     </a>
                                     <ul class="nav nav-second-level">
                                         <li>
-                                            <a href="{% url 'endpoints' %}">All Endpoints</a>
+                                            <a href="{% url 'endpoint' %}">All Endpoints</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'vulnerable_endpoints' %}">
-                                                Vulnerable Endpoints
-                                            </a>
+                                            <a href="{% url 'endpoint_host' %}">All Endpoint Hosts</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'vulnerable_endpoints' %}">Vulnerable Endpoints</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'vulnerable_endpoint_hosts' %}">Vulnerable Endpoint Hosts</a>
                                         </li>
                                     </ul>
                                 </li>
@@ -443,11 +447,13 @@
                   <!-- Endpoints Tab -->
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'endpoints' %} active active-color{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-sitemap" aria-hidden="true"></span>
-                    <span class="hidden-xs"> Endpoints{% if product_tab.endpoints > 0 %} <span class="badge">{{ product_tab.endpoints }}</span>{% endif %}</span>
+                    <span class="hidden-xs"> Endpoints{% if product_tab.endpoints > 0 %} <span class="badge">{{ product_tab.endpoint_hosts }} / {{ product_tab.endpoints }}</span>{% endif %}</span>
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li><a href="{% url 'endpoints' %}?product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                      <li><a href="{% url 'endpoint' %}?product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                      <li><a href="{% url 'endpoint_host' %}?product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Hosts</a></li>
                       <li><a href="{% url 'vulnerable_endpoints' %}?product={{ product_tab.product.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
+                      <li><a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ product_tab.product.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Hosts</a></li>
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'product_endpoint_report' product_tab.product.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
                       {% if product_tab.product|has_object_permission:"Endpoint_Add" or user|is_authorized_for_staff:product_tab.product %}

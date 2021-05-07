@@ -1,7 +1,6 @@
 import os
 import re
 from datetime import datetime, date
-from urllib.parse import urlsplit, urlunsplit
 import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
@@ -11,7 +10,6 @@ from django.db.models import Count, Q
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
-from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms import utils as form_utils
@@ -21,6 +19,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
+from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, FindingImage, \
@@ -1238,7 +1237,6 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
 
 class EditEndpointForm(forms.ModelForm):
-
     class Meta:
         model = Endpoint
         exclude = ['product']
@@ -1252,56 +1250,38 @@ class EditEndpointForm(forms.ModelForm):
             self.product = self.endpoint_instance.product
 
     def clean(self):
-        from django.core.validators import URLValidator, validate_ipv46_address
 
-        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
         cleaned_data = super(EditEndpointForm, self).clean()
 
         if 'host' in cleaned_data:
             host = cleaned_data['host']
         else:
-            raise forms.ValidationError('Please enter a valid URL or IP address.',
+            raise forms.ValidationError('Please enter a valid domain name or IP address.',
                                         code='invalid')
 
         protocol = cleaned_data['protocol']
+        userinfo = cleaned_data['userinfo']
+        port = cleaned_data['port']
         path = cleaned_data['path']
         query = cleaned_data['query']
         fragment = cleaned_data['fragment']
 
-        if protocol and path:
-            endpoint = urlunsplit((protocol, host, path, query, fragment))
-        else:
-            endpoint = host
-
         try:
-            url_validator = URLValidator()
-            url_validator(endpoint)
-        except forms.ValidationError:
-            try:
-                # do we have a port number?
-                regex = re.compile(port_re)
-                host = endpoint
-                if regex.findall(endpoint):
-                    for g in regex.findall(endpoint):
-                        host = re.sub(port_re, '', host)
-                validate_ipv46_address(host)
-            except forms.ValidationError:
-                try:
-                    validate_hostname = RegexValidator(regex=r'[a-zA-Z0-9-_]*\.[a-zA-Z]{2,6}')
-                    # do we have a port number?
-                    regex = re.compile(port_re)
-                    host = endpoint
-                    if regex.findall(endpoint):
-                        for g in regex.findall(endpoint):
-                            host = re.sub(port_re, '', host)
-                    validate_hostname(host)
-                except:
-                    raise forms.ValidationError(
-                        'It does not appear as though this endpoint is a valid URL or IP address.',
-                        code='invalid')
+            Endpoint(  # Endpoint constructor validate formats
+                protocol=protocol,
+                userinfo=userinfo,
+                port=port,
+                path=path,
+                query=query,
+                fragment=fragment
+            )
+        except ValidationError as e:
+            raise forms.ValidationError('; '.join(e), code='invalid')
 
-        endpoint = Endpoint.objects.filter(protocol=protocol,
+        endpoint = endpoint_filter(protocol=protocol,
+                                           userinfo=userinfo,
                                            host=host,
+                                           port=port,
                                            path=path,
                                            query=query,
                                            fragment=fragment,
@@ -1341,19 +1321,19 @@ class AddEndpointForm(forms.Form):
     def save(self):
         processed_endpoints = []
         for e in self.endpoints_to_process:
-            endpoint, created = Endpoint.objects.get_or_create(protocol=e[0],
-                                                               host=e[1],
-                                                               path=e[2],
-                                                               query=e[3],
-                                                               fragment=e[4],
+            endpoint, created = endpoint_get_or_create(protocol=e[0],
+                                                               userinfo=e[1],
+                                                               host=e[2],
+                                                               port=e[3],
+                                                               path=e[4],
+                                                               query=e[5],
+                                                               fragment=e[6],
                                                                product=self.product)
             processed_endpoints.append(endpoint)
         return processed_endpoints
 
     def clean(self):
-        from django.core.validators import URLValidator, validate_ipv46_address
 
-        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
         cleaned_data = super(AddEndpointForm, self).clean()
 
         if 'endpoint' in cleaned_data and 'product' in cleaned_data:
@@ -1368,47 +1348,29 @@ class AddEndpointForm(forms.Form):
                                         code='invalid')
 
         endpoints = endpoint.split()
-        count = 0
-        error = False
+
         for endpoint in endpoints:
             try:
-                url_validator = URLValidator()
-                url_validator(endpoint)
-                protocol, host, path, query, fragment = urlsplit(endpoint)
-                self.endpoints_to_process.append([protocol, host, path, query, fragment])
-            except forms.ValidationError:
-                try:
-                    # do we have a port number?
-                    host = endpoint
-                    regex = re.compile(port_re)
-                    if regex.findall(endpoint):
-                        for g in regex.findall(endpoint):
-                            host = re.sub(port_re, '', host)
-                    validate_ipv46_address(host)
-                    protocol, host, path, query, fragment = ("", endpoint, "", "", "")
-                    self.endpoints_to_process.append([protocol, host, path, query, fragment])
-                except forms.ValidationError:
-                    try:
-                        regex = re.compile(
-                            r'^(?:(?:[A-Z0-9](?:[A-Z0-9-_]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}(?<!-)\.?)|'  # domain...
-                            r'localhost|'  # localhost...
-                            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'  # ...or ipv4
-                            r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'  # ...or ipv6
-                            r'(?::\d+)?'  # optional port
-                            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-                        validate_hostname = RegexValidator(regex=regex)
-                        validate_hostname(host)
-                        protocol, host, path, query, fragment = (None, host, None, None, None)
-                        if "/" in host or "?" in host or "#" in host:
-                            # add a fake protocol just to join, wont use in update to database
-                            host_with_protocol = "http://" + host
-                            p, host, path, query, fragment = urlsplit(host_with_protocol)
-                        self.endpoints_to_process.append([protocol, host, path, query, fragment])
-                    except forms.ValidationError:
-                        raise forms.ValidationError(
-                            'Please check items entered, one or more do not appear to be a valid URL or IP address.',
-                            code='invalid')
-
+                if '://' in endpoint:  # is it full uri?
+                    endpoint = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
+                else:
+                    # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
+                    # format doesn't follow RFC 3986 but users use it
+                    endpoint = Endpoint.from_uri('//' + endpoint)
+                if not endpoint.host:
+                    raise ValidationError("Host is required")
+                self.endpoints_to_process.append([
+                    endpoint.protocol,
+                    endpoint.userinfo,
+                    endpoint.host,
+                    endpoint.port,
+                    endpoint.path,
+                    endpoint.query,
+                    endpoint.fragment
+                ])
+            except ValidationError:
+                raise forms.ValidationError('Please check items entered, one or more do not appear to be a valid URL, '
+                                            'IP address or domain (you can add also port).', code='invalid')
         return cleaned_data
 
 

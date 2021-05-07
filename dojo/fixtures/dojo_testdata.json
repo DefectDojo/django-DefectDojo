@@ -646,10 +646,9 @@
       "product": 2,
       "protocol": "http",
       "fragment": null,
-      "fqdn": "example.com",
       "host": "127.0.0.1",
       "query": null,
-      "path": "/endpoint/420/edit/",
+      "path": "endpoint/420/edit/",
       "port": 80
     }
   },
@@ -660,10 +659,9 @@
       "product": 1,
       "protocol": "ftp",
       "fragment": null,
-      "fqdn": "www.example.com",
       "host": "localhost",
       "query": null,
-      "path": "/",
+      "path": null,
       "port": 21
     }
   },
@@ -674,8 +672,7 @@
       "product": 3,
       "protocol": "ssh",
       "fragment": null,
-      "fqdn": "www.example.com",
-      "host": "127.0.1",
+      "host": "127.0.0.1",
       "query": null,
       "path": null,
       "port": 22
