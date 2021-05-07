@@ -93,8 +93,8 @@ spec:
         - name: http
           protocol: TCP
           containerPort: 8081
-        {{- if .Values.django.uwsgi.enable_debugpy }}
-        - name: debugpy
+        {{- if .Values.django.uwsgi.enable_debug }}
+        - name: debug
           protocol: TCP
           containerPort: 3000
         {{- end }}
