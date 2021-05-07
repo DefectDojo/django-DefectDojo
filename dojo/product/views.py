@@ -330,19 +330,19 @@ def finding_querys(request, prod):
                                          duplicate=False,
                                          out_of_scope=False,
                                          active=True,
-                                         is_Mitigated=False)
+                                         is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
-                                             is_Mitigated=False)
+                                             is_mitigated=False)
     filters['closed'] = findings_qs.filter(date__range=[start_date, end_date],
                                            false_p=False,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=False,
-                                           is_Mitigated=True)
+                                           is_mitigated=True)
     filters['false_positive'] = findings_qs.filter(date__range=[start_date, end_date],
                                                    false_p=True,
                                                    duplicate=False,
@@ -684,7 +684,7 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
         count_findings_all=Count('test__finding__id'),
         count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)),
         count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
-        count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)),
+        count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_mitigated=True)),
         count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)),
         count_findings_accepted=Count('test__finding__id', filter=Q(test__finding__risk_accepted=True)),
     )
@@ -900,6 +900,7 @@ def delete_product(request, pid):
     form = DeleteProductForm(instance=product)
 
     if request.method == 'POST':
+        logger.debug('delete_product: POST')
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
@@ -915,13 +916,22 @@ def delete_product(request, pid):
                                     description='The product "%s" was deleted by %s' % (product.name, request.user),
                                     url=request.build_absolute_uri(reverse('product')),
                                     icon="exclamation-triangle")
+                logger.debug('delete_product: POST RETURN')
                 return HttpResponseRedirect(reverse('product'))
+            else:
+                logger.debug('delete_product: POST INVALID FORM')
+                logger.error(form.errors)
+
+    logger.debug('delete_product: GET')
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([product])
     rels = collector.nested()
 
     product_tab = Product_Tab(pid, title="Product", tab="settings")
+
+    logger.debug('delete_product: GET RENDER')
+
     return render(request, 'dojo/delete_product.html',
                   {'product': product,
                    'form': form,

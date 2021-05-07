@@ -374,7 +374,7 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(6, findings)
 
         # one mitigated (the one previously imported which has changed unique_id_from_tool)
-        findings = self.get_test_findings_api(test_id, is_Mitigated=True)
+        findings = self.get_test_findings_api(test_id, is_mitigated=True)
         self.assert_finding_count_json(1, findings)
 
         # one verified False (the new one, as reimport was done with verified false)
@@ -793,7 +793,7 @@ class ImportReimportMixin(object):
         not_mitigated = 0
         for finding in findings['results']:
             logger.debug(finding)
-            if finding['is_Mitigated']:
+            if finding['is_mitigated']:
                 mitigated += 1
             else:
                 not_mitigated += 1
@@ -861,21 +861,21 @@ class ImportReimportMixin(object):
                                                        "false_p": True,
                                                        "out_of_scope": False,
                                                        "risk_accepted": False,
-                                                       "is_Mitigated": True})
+                                                       "is_mitigated": True})
             elif 'Zap2' in finding['title']:
                 self.patch_finding_api(finding['id'], {"active": False,
                                                        "verified": False,
                                                        "false_p": False,
                                                        "out_of_scope": True,
                                                        "risk_accepted": False,
-                                                       "is_Mitigated": True})
+                                                       "is_mitigated": True})
             elif 'Zap3' in finding['title']:
                 self.patch_finding_api(finding['id'], {"active": False,
                                                        "verified": False,
                                                        "false_p": False,
                                                        "out_of_scope": False,
                                                        "risk_accepted": True,
-                                                       "is_Mitigated": True})
+                                                       "is_mitigated": True})
 
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(1, active_findings_before)
@@ -905,28 +905,28 @@ class ImportReimportMixin(object):
                 self.assertTrue(finding['false_p'])
                 self.assertFalse(finding['out_of_scope'])
                 self.assertFalse(finding['risk_accepted'])
-                self.assertTrue(finding['is_Mitigated'])
+                self.assertTrue(finding['is_mitigated'])
             elif 'Zap2' in finding['title']:
                 self.assertFalse(finding['active'])
                 self.assertFalse(finding['verified'])
                 self.assertFalse(finding['false_p'])
                 self.assertTrue(finding['out_of_scope'])
                 self.assertFalse(finding['risk_accepted'])
-                self.assertTrue(finding['is_Mitigated'])
+                self.assertTrue(finding['is_mitigated'])
             elif 'Zap3' in finding['title']:
                 self.assertFalse(finding['active'])
                 self.assertFalse(finding['verified'])
                 self.assertFalse(finding['false_p'])
                 self.assertFalse(finding['out_of_scope'])
                 self.assertTrue(finding['risk_accepted'])
-                self.assertTrue(finding['is_Mitigated'])
+                self.assertTrue(finding['is_mitigated'])
             elif 'Zap5' in finding['title']:
                 self.assertTrue(finding['active'])
                 self.assertTrue(finding['verified'])
                 self.assertFalse(finding['false_p'])
                 self.assertFalse(finding['out_of_scope'])
                 self.assertFalse(finding['risk_accepted'])
-                self.assertFalse(finding['is_Mitigated'])
+                self.assertFalse(finding['is_mitigated'])
 
     # import gitlab_dep_scan_components_filename with 6 findings
     # findings 1, 2 and 3 have the same component_name (golang.org/x/crypto) and the same CVE (CVE-2020-29652), but different component_version
@@ -1006,7 +1006,7 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(4, findings)
 
         # imported findings should be active in the engagement
-        engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_Mitigated=False)
+        engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
         self.assertEqual(engagement_findings.count(), 4)
 
         # findings should have only one endpoint, added with endpoint_to_add
@@ -1019,7 +1019,7 @@ class ImportReimportMixin(object):
             self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
 
         # all findings from import0 should be closed now
-        engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_Mitigated=False).count()
+        engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False).count()
         self.assertEqual(engagement_findings_count, 0)
 
 

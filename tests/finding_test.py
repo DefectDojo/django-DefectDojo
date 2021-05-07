@@ -40,7 +40,7 @@ class FindingTest(BaseTestCase):
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), False)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), False)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_mitigated").is_enabled(), False)
 
         driver.find_element_by_id("id_bulk_status").click()
 
@@ -49,7 +49,7 @@ class FindingTest(BaseTestCase):
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), True)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), True)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_mitigated").is_enabled(), True)
 
     @on_exception_html_source_logger
     def test_edit_finding(self):
