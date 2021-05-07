@@ -1,6 +1,8 @@
-+++
-title = "Contributing"
-date = 2021-02-02T21:06:48+01:00
-weight = 4
-chapter = true
-+++
+---
+title: "Contributing"
+description: "How you can help to make DefectDojo even better"
+weight: 4
+chapter: true
+---
+
+You can find further information in the [contributing guidelines](https://github.com/DefectDojo/django-DefectDojo/blob/master/CONTRIBUTING.md).

@@ -1,6 +1,6 @@
-+++
-title = "Integrations"
-date = 2021-02-02T21:04:59+01:00
-weight = 2
-chapter = true
-+++
+---
+title: "Integrations"
+description: "A lot of integrations help to fit DefectDojo in your environment"
+weight: 3
+chapter: true
+---

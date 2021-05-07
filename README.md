@@ -49,12 +49,12 @@ For detailed documentation you can visit
 ## Getting Started
 
 We recommend checking out the
-[about](https://defectdojo.github.io/basics/about/) document to
+[Core Data Classes](https://defectdojo.github.io/usage/models/) document to
 learn the terminology of DefectDojo and the
-[getting started guide](https://defectdojo.github.io/django-DefectDojo/running/getting-started/)
+[getting started guide](https://defectdojo.github.io/django-DefectDojo/getting_started/)
 for setting up a new installation.
 We've also created some example
-[workflows](https://defectdojo.github.io/django-DefectDojo/basics/workflows/) that
+[workflows](https://defectdojo.github.io/django-DefectDojo/usage/workflows/) that
 should give you an idea of how to use DefectDojo for your own team.
 
 ## REST APIs
