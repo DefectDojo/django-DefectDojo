@@ -11,11 +11,6 @@ class TestSecureCodeBoxParser(TestCase):
         test.engagement.product = Product()
         return test
 
-    def test_scb_parser_without_file_has_no_findings(self):
-        parser = SecureCodeBoxParser()
-        findings = parser.get_findings(None, self.get_test())
-        self.assertEqual(0, len(findings))
-
     def test_scb_parser_with_no_vuln_has_no_findings(self):
         testfile = open("dojo/unittests/scans/securecodebox/scb_zero_vul.json")
         parser = SecureCodeBoxParser()
@@ -30,6 +25,8 @@ class TestSecureCodeBoxParser(TestCase):
         testfile.close()
         self.assertEqual(1, len(findings))
         self.assertEqual("High", findings[0].severity)
+        self.assertEqual("473454f7-14b4-4014-8c2b-d0325b55234e",
+                         findings[0].unique_id_from_tool)
 
     def test_scb_parser_with_many_vuln_has_many_findings(self):
         testfile = open("dojo/unittests/scans/securecodebox/scb_many_vul.json")
@@ -41,6 +38,8 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual(findings[0].title, "ssh")
         self.assertEqual(findings[0].description,
                          "Port 22 is open using tcp protocol.")
+        self.assertEqual(findings[0].unique_id_from_tool,
+                         "473454f7-14b4-4014-8c2b-d0325b55234e")
         self.assertEqual(
             findings[0].unsaved_endpoints[0].host, "scanme.nmap.org")
         self.assertEqual(findings[0].unsaved_endpoints[0].protocol, "tcp")

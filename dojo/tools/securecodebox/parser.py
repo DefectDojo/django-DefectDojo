@@ -65,6 +65,7 @@ class SecureCodeBoxParser(object):
         finding.title = node.get('name') or na
         finding.description = node.get('description') or na
         finding.severity = self.get_severity(node.get('severity'))
+        finding.unique_id_from_tool = node.get('id')
         finding.test = test
 
     def get_severity(self, severity):
