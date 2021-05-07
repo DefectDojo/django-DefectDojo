@@ -148,11 +148,8 @@
                                 <li><a href="{% url 'view_profile' %}"><i
                                         class="fa fa-user fa-fw"></i> {{ request.user.username }}</a>
                                 </li>
-                                <li><a href="{% url 'api_key' %}"><i class="fa fa-fw fa-key"></i> API v1 Key</a></li>
                                 <li><a href="{% url 'api_v2_key' %}"><i class="fa fa-fw fa-key"></i> API v2 Key</a></li>
                             {% endif %}
-                            <li><a href="{% url 'tastypie_swagger:index' %}"><i class="fa fa-book fa-fw"></i> API
-                                v1 Docs</a></li>
                             <li><a href="{% url 'api_v2_schema' %}"><i class="fa fa-book fa-fw"></i> API
                                 v2 Docs</a></li>
                             {{ block.super }}
@@ -278,23 +275,11 @@
                                 </li>
                             {% endif %}
                             <li>
-                                {% if 'FEATURE_REPORTS_PDF_LIST'|setting_enabled %}
-                                <a href="{% url 'reports' %}" aria-expanded="false" aria-label="Reports">
-				                    <i class="fa fa-file-text-o fa-fw"></i>
-                                    <span>Reports</span>
-                                    <span class="glyphicon arrow"></span>
-                                </a>
-                                <ul class="nav nav-second-level">
-                                    <li><a href="{% url 'reports' %}"> All Reports </a></li>
-                                    <li><a href="{% url 'report_builder' %}"> Report Builder </a></li>
-                                </ul>
-                                {% else %}
                                 <a href="{% url 'report_builder' %}" aria-expanded="false" aria-label="Reports">
 				                    <i class="fa fa-file-text-o fa-fw"></i>
                                     <span>Reports</span>
                                     <span class="glyphicon arrow"></span>
                                 </a>
-                                {% endif %}
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>

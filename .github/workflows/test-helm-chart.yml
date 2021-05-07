@@ -37,22 +37,25 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.0.1
 
+      - name: Determine target branch
+        id: ct-branch-target
+        run: |
+          if [ ! -z ${GITHUB_BASE_REF} ]; then
+            echo ::set-output name=ct-branch::${GITHUB_BASE_REF}
+          else
+            echo ::set-output name=ct-branch::${GITHUB_REF#refs/heads/}
+          fi
+
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          if [ ! -z ${GITHUB_BASE_REF} ]; then
-            echo "pull_request: ct list-changed --config ct.yaml --target-branch ${GITHUB_BASE_REF}"
-            changed=$(ct list-changed --config ct.yaml --target-branch ${GITHUB_BASE_REF})
-          else
-            echo "push: ct list-changed --config ct.yaml --target-branch ${GITHUB_REF#refs/heads/}"
-            changed=$(ct list-changed --config ct.yaml --target-branch ${GITHUB_REF#refs/heads/})
-          fi
+          changed=$(ct list-changed --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch}})
           if [[ -n "$changed" ]]; then
             echo "::set-output name=changed::true"
           fi
 
       - name: Run chart-testing (lint)
-        run: ct lint --config ct.yaml
+        run: ct lint --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch }}
         if: steps.list-changed.outputs.changed == 'true'
 
       - name: Create kind cluster
@@ -60,5 +63,5 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
 
       - name: Run chart-testing (install)
-        run: ct install
+        run: ct install --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch }}
         if: steps.list-changed.outputs.changed == 'true'
