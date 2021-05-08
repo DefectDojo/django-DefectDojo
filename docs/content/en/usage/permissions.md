@@ -24,7 +24,7 @@ Users can be assigned as members to Products and Product Types, giving them one 
 |                             | Reader | Writer | Maintainer | Owner | API Importer |
 |-----------------------------|:------:|:------:|:----------:|:-----:|:------------:|
 | Add Product Type <sup>1)</sup> |     |        |            |       |              |
-| View Product Type           | x      | x      | x          | x     |              |
+| View Product Type           | x      | x      | x          | x     | x            |
 | Remove yourself as a member | x      | x      | x          | x     |              |
 | Manage Product Type members |        |        | x          | x     |              |
 | Edit Product Type           |        |        | x          | x     |              |
@@ -32,36 +32,36 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | Add Product Type member as Owner |   |        |            | x     |              |
 | Delete Product Type         |        |        |            | x     |              |
 |                             |        |        |            |       |              |
-| View Product                | x      | x      | x          | x     |              |
+| View Product                | x      | x      | x          | x     |  x           |
 | Remove yourself as a member | x      | x      | x          | x     |              |
 | Manage Product members      |        |        | x          | x     |              |
 | Edit Product                |        |        | x          | x     |              |
 | Add Product member as Owner |        |        |            | x     |              |
 | Delete Product              |        |        |            | x     |              |
 |                             |        |        |            |       |              |
-| View Engagement             | x      | x      | x          | x     |              |
+| View Engagement             | x      | x      | x          | x     |  x           |
 | Add Engagement              |        | x      | x          | x     |              |
 | Edit Engagement             |        | x      | x          | x     |              |
 | Risk Acceptance             |        | x      | x          | x     |              |
 | Delete Engagement           |        |        | x          | x     |              |
 |                             |        |        |            |       |              |
-| View Test                   | x      | x      | x          | x     |              |
+| View Test                   | x      | x      | x          | x     | x            |
 | Add Test                    |        | x      | x          | x     |              |
 | Edit Test                   |        | x      | x          | x     |              |
 | Delete Test                 |        |        | x          | x     |              |
 |                             |        |        |            |       |              |
-| View Finding                | x      | x      | x          | x     |              |
+| View Finding                | x      | x      | x          | x     | x            |
 | Add Finding                 |        | x      | x          | x     |              |
 | Edit Finding                |        | x      | x          | x     |              |
 | (Re-)Import Scan Result     |        | x      | x          | x     | x            |
 | Delete Finding              |        |        | x          | x     |              |
 |                             |        |        |            |       |              |
-| View Finding Group          | x      | x      | x          | x     |              |
+| View Finding Group          | x      | x      | x          | x     | x            |
 | Add Finding Group           |        | x      | x          | x     |              |
 | Edit Finding Group          |        | x      | x          | x     |              |
 | Delete Finding Group        |        | x      | x          | x     |              |
 |                             |        |        |            |       |              |
-| View Endpoint               | x      | x      | x          | x     |              |
+| View Endpoint               | x      | x      | x          | x     | x            |
 | Add Endpoint                |        | x      | x          | x     |              |
 | Edit Endpoint               |        | x      | x          | x     |              |
 | Delete Endpoint             |        |        | x          | x     |              |
@@ -69,7 +69,7 @@ Users can be assigned as members to Products and Product Types, giving them one 
 | Edit Benchmark              |        | x      | x          | x     |              |
 | Delete Benchmark            |        |        | x          | x     |              |
 |                             |        |        |            |       |              |
-| View Components             | x      | x      | x          | x     |              |
+| View Components             | x      | x      | x          | x     | x            |
 |                             |        |        |            |       |              |
 | View Note History           | x      | x      | x          | x     |              |
 | Add Note                    |        | x      | x          | x     |              |
