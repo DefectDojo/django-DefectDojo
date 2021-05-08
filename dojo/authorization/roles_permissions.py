@@ -153,6 +153,22 @@ def get_roles_with_permissions():
             Permissions.Component_View
         },
         Roles.API_Importer: {
+            Permissions.Product_Type_View,
+
+            Permissions.Product_View,
+
+            Permissions.Engagement_View,
+
+            Permissions.Test_View,
+
+            Permissions.Finding_View,
+
+            Permissions.Finding_Group_View,
+
+            Permissions.Endpoint_View,
+
+            Permissions.Component_View,
+
             Permissions.Import_Scan_Result
         },
         Roles.Writer: {
