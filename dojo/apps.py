@@ -62,6 +62,7 @@ class DojoAppConfig(AppConfig):
 
         # YourModel = self.get_model("YourModel")
         # watson.register(YourModel)
+        pass
 
 
 def get_model_fields_with_extra(model, extra_fields=()):
