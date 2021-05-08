@@ -3443,16 +3443,16 @@ class ChoiceAnswer(Answer):
 def enable_disable_auditlog(enable=True):
     if enable:
         # Register for automatic logging to database
-        logger.info('enabling audit logging')
-        auditlog.register(Dojo_User)
-        auditlog.register(Endpoint)
-        auditlog.register(Engagement)
-        auditlog.register(Finding)
-        auditlog.register(Product)
-        auditlog.register(Test)
-        auditlog.register(Risk_Acceptance)
-        auditlog.register(Finding_Template)
-        auditlog.register(Cred_User)
+#         logger.info('enabling audit logging')
+#         auditlog.register(Dojo_User)
+#         auditlog.register(Endpoint)
+#         auditlog.register(Engagement)
+#         auditlog.register(Finding)
+#         auditlog.register(Product)
+#         auditlog.register(Test)
+#         auditlog.register(Risk_Acceptance)
+#         auditlog.register(Finding_Template)
+#         auditlog.register(Cred_User)
     else:
         logger.info('disabling audit logging')
         auditlog.unregister(Dojo_User)
