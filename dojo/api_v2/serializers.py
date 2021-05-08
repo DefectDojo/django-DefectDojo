@@ -371,6 +371,11 @@ class FileSerializer(serializers.ModelSerializer):
 
 class ProductMemberSerializer(serializers.ModelSerializer):
 
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
+
     class Meta:
         model = Product_Member
         fields = '__all__'
@@ -412,6 +417,11 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
+
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
 
     class Meta:
         model = Product_Type_Member
