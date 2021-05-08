@@ -3453,6 +3453,7 @@ def enable_disable_auditlog(enable=True):
 #         auditlog.register(Risk_Acceptance)
 #         auditlog.register(Finding_Template)
 #         auditlog.register(Cred_User)
+        pass
     else:
         logger.info('disabling audit logging')
         auditlog.unregister(Dojo_User)
