@@ -1,15 +1,15 @@
 ---
 # Global settings
 # create defectdojo specific secret
-createSecret: false
+createSecret: true
 # create rabbitmq secret in defectdojo chart, outside of rabbitmq chart
-createRabbitMqSecret: false
+createRabbitMqSecret: true
 # create redis secret in defectdojo chart, outside of redis chart
 createRedisSecret: false
 # create mysql secret in defectdojo chart, outside of mysql chart
 createMysqlSecret: false
 # create postgresql secret in defectdojo chart, outside of postgresql chart
-createPostgresqlSecret: false
+createPostgresqlSecret: true
 # Configuration value to select database type
 # Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
