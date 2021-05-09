@@ -263,6 +263,10 @@ rabbitmq:
     existingErlangSecret: defectdojo-rabbitmq-specific
   affinity: {}
   nodeSelector: {}
+  memoryHighWatermark:
+    enabled: true
+    type: relative
+    value: 0.5
   resources:
     requests:
       cpu: 100m
