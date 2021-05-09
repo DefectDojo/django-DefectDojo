@@ -4,7 +4,6 @@ import logging
 from django_test_migrations.contrib.unittest_case import MigratorTestCase
 from django_test_migrations.migrator import Migrator
 from django.test import TransactionTestCase
-from django.core.exceptions import FieldError
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -39,16 +38,14 @@ class TestEndpointMigrationBroken(TransactionTestCase):
         }
 
     def tearDown(self):
-        try:
-            self.migrator.reset()
-        except FieldError:
-            pass
+        self.migrator.reset()
         super().tearDown()
 
     def test_migration_endpoint_broken(self):
-        with self.assertRaisesRegex(FieldError, r'^It is not possible to migrate database because there is\/are {} brok'
-                                                r'en endpoint\(s\)\. Please check logs\.$'.format(len(self.endpoints))):
+        with self.assertLogs('dojo.endpoint.utils', 'ERROR') as cm:
             self.migrator.apply_tested_migration(self.migrate_to)
+        self.assertIn('ERROR:dojo.endpoint.utils:It is not possible to migrate database because there is/are {} broken '
+                      'endpoint(s). Please check logs.'.format(len(self.endpoints)), cm.output)
 
 
 class TestEndpointMigration(MigratorTestCase):

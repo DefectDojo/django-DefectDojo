@@ -12,6 +12,8 @@ from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q, QuerySet, Count
+
+from dojo.endpoint.utils import clean_hosts_run
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
@@ -23,6 +25,8 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.endpoint.queries import get_authorized_endpoints
+from django.apps import apps
+
 
 logger = logging.getLogger(__name__)
 
@@ -489,3 +493,18 @@ def prefetch_for_endpoints(endpoints):
         logger.debug('unable to prefetch because query was already executed')
 
     return endpoints
+
+
+def migrate_endpoints_view(request):
+
+    view_name = 'Migrate endpoints'
+
+    html_log = clean_hosts_run(apps=apps, change=(request.method == 'POST'))
+    logger.info("{}".format(html_log))
+
+    return render(
+        request, 'dojo/migrate_endpoints.html', {
+            'product_tab': None,
+            "name": view_name,
+            "html_log": html_log
+        })

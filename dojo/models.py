@@ -1090,19 +1090,24 @@ class Endpoint(models.Model):
         ]
 
     def __init__(self, *args, **kwargs):
-        if kwargs.get('protocol'):
+        kwargs = self.verify_and_clean(**kwargs)
+        logger.info(kwargs)
+        super(Endpoint, self).__init__(*args, **kwargs)
+
+    def verify_and_clean(self, **kwargs):
+        if kwargs.get('protocol') or kwargs.get('protocol') == '':
             if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['protocol']):  # https://tools.ietf.org/html/rfc3986#section-3.1
                 raise ValidationError('Protocol "{}" has invalid format'.format(kwargs['protocol']))
-        if kwargs.get('userinfo'):
+        if kwargs.get('userinfo') or kwargs.get('userinfo') == '':
             if not re.match(r'^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$', kwargs['userinfo']):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
                 raise ValidationError('Userinfo "{}" has invalid format'.format(kwargs['userinfo']))
-        if kwargs.get('host'):
+        if kwargs.get('host') or kwargs.get('host') == '':
             if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['host']):  # https://tools.ietf.org/html/rfc3986#section-3.2.2
                 try:
                     validate_ipv46_address(kwargs['host'])
                 except ValidationError:
                     raise ValidationError('Host "{}" has invalid format'.format(kwargs['host']))
-        if kwargs.get('port'):
+        if kwargs.get('port') or kwargs.get('port') == 0:
             try:
                 int_port = int(kwargs['port'])
                 if not (0 <= int_port < 65536):
@@ -1110,24 +1115,64 @@ class Endpoint(models.Model):
                 kwargs['port'] = int_port
             except ValueError:
                 raise ValidationError('Port "{}" has invalid format - it is not a number'.format(kwargs['port']))
-        if kwargs.get('path'):
+        if kwargs.get('path') or kwargs.get('path') == '':
             while len(kwargs['path']) > 0 and kwargs['path'][0] == "/":  # Endpoint store "root-less" path
                 kwargs['path'] = kwargs['path'][1:]
             if kwargs['path'] == '':
                 kwargs['path'] = None
-        if kwargs.get('query'):
+        if kwargs.get('query') or kwargs.get('query') == '':
             if len(kwargs['query']) > 0 and kwargs['query'][0] == "?":
                 kwargs['query'] = kwargs['query'][1:]
             if kwargs['query'] == '':
                 kwargs['query'] = None
-        if kwargs.get('fragment'):
+        if kwargs.get('fragment') or kwargs.get('fragment') == '':
             if len(kwargs['fragment']) > 0 and kwargs['fragment'][0] == "#":
                 kwargs['fragment'] = kwargs['fragment'][1:]
             if kwargs['fragment'] == '':
                 kwargs['fragment'] = None
-        super(Endpoint, self).__init__(*args, **kwargs)
+        logger.info(kwargs)
+        return kwargs
 
     def __str__(self):
+        try:
+            return self.str()
+        except:
+            url = ''
+            if self.protocol:
+                url += '{}://'.format(self.protocol)
+            if self.userinfo:
+                url += '{}@'.format(self.userinfo)
+            if self.host:
+                url += self.host
+            if self.port:
+                url += ':{}'.format(self.port)
+            if self.path:
+                url += '{}{}'.format('/' if self.path[0] != '/' else '', self.path)
+            if self.query:
+                url += '?{}'.format(self.query)
+            if self.fragment:
+                url += '#{}'.format(self.fragment)
+            return url
+
+    def __hash__(self):
+        return self.__str__().__hash__()
+
+    def __eq__(self, other):
+        if isinstance(other, Endpoint):
+            return str(self) == str(other)
+        else:
+            return NotImplemented
+
+    def str(self):
+        self.verify_and_clean(**{
+            'protocol': self.protocol,
+            'userinfo': self.userinfo,
+            'host': self.host,
+            'port': self.port,
+            'path': self.path,
+            'query': self.query,
+            'fragment': self.fragment
+        })
         if self.host:
             dummy_scheme = 'dummy-scheme'  # workaround for https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988
             url = hyperlink.EncodedURL(
@@ -1159,14 +1204,14 @@ class Endpoint(models.Model):
         else:
             return ''
 
-    def __hash__(self):
-        return self.__str__().__hash__()
-
-    def __eq__(self, other):
-        if isinstance(other, Endpoint):
-            return str(self) == str(other)
+    @property
+    def is_broken(self):
+        try:
+            self.str()
+        except:
+            return True
         else:
-            return NotImplemented
+            return False
 
     def vulnerable(self):
         return self.active_findings_count() > 0

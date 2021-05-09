@@ -1,12 +1,14 @@
 import logging
 import re
+
+from django.urls import reverse
 from itertools import chain
 
 from django.core.exceptions import MultipleObjectsReturned
 from hyperlink._url import SCHEME_PORT_MAP
 
 from django.core.validators import validate_ipv46_address
-from django.core.exceptions import FieldError, ValidationError
+from django.core.exceptions import ValidationError
 from django.db.models import Q, Count
 
 from dojo.models import Endpoint
@@ -85,17 +87,25 @@ def endpoint_get_or_create(**kwargs):
 
 
 def clean_hosts_run(apps, change):
-    broken_endpoints = []
+    html_log = []
+    broken_endpoints = set()
     Endpoint_model = apps.get_model('dojo', 'Endpoint')
     Endpoint_Status_model = apps.get_model('dojo', 'Endpoint_Status')
     Product_model = apps.get_model('dojo', 'Product')
-    error_suffix = 'It is not possible to migrate it. Remove or fix this endpoint.'
+    error_suffix = 'It is not possible to migrate it. Delete or edit this endpoint.'
     # when run on older versions, we haven't had the migration applied which has userinfo field added
     # so defer that field and order by id (default ordering references userinfo field)
     for endpoint in Endpoint_model.objects.defer('userinfo').order_by('id'):
+        endpoint_html_log = {
+            'view': reverse('view_endpoint', args=[endpoint.pk]),
+            'edit': reverse('edit_endpoint', args=[endpoint.pk]),
+            'delete': reverse('delete_endpoint', args=[endpoint.pk]),
+        }
         if not endpoint.host or endpoint.host == '':
-            logger.error('Endpoint (id={}) does not have "host" field. {}'.format(endpoint.pk, error_suffix))
-            broken_endpoints.append(endpoint.pk)
+            message = 'does not have "host" field'
+            html_log.append({**endpoint_html_log, **{'message': message}})
+            logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
+            broken_endpoints.add(endpoint.pk)
         else:
             if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', endpoint.host):  # is old host valid FQDN?
                 try:
@@ -111,10 +121,11 @@ def clean_hosts_run(apps, change):
 
                         if parts.protocol:
                             if endpoint.protocol and (endpoint.protocol != parts.protocol):
-                                logger.error('Endpoint (id={}) has defined protocol ({}) and it is not the same as '
-                                    'protocol in host ({}). {}'.format(endpoint.pk, endpoint.protocol, parts.protocol,
-                                                                        error_suffix))
-                                broken_endpoints.append(endpoint.pk)
+                                message = 'has defined protocol ({}) and it is not the same as protocol in host ' \
+                                          '({})'.format(endpoint.protocol, parts.protocol)
+                                html_log.append({**endpoint_html_log, **{'message': message}})
+                                logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
+                                broken_endpoints.add(endpoint.pk)
                             else:
                                 if change:
                                     endpoint.protocol = parts.protocol
@@ -127,89 +138,101 @@ def clean_hosts_run(apps, change):
                             if change:
                                 endpoint.host = parts.host
                         else:
-                            logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk,
-                                endpoint.host, error_suffix))
-                            broken_endpoints.append(endpoint.pk)
+                            message = '"{}" use invalid format of host'.format(endpoint.host)
+                            html_log.append({**endpoint_html_log, **{'message': message}})
+                            logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
+                            broken_endpoints.add(endpoint.pk)
 
                         if parts.port:
                             try:
                                 if (endpoint.port is not None) and (int(endpoint.port) != parts.port):
-                                    logger.error('Endpoint (id={}) has defined port number ({}) and it is not the same '
-                                        'as port number in host ({}). {}'.format(endpoint.pk, endpoint.port, parts.port,
-                                            error_suffix))
-                                    broken_endpoints.append(endpoint.pk)
+                                    message = 'has defined port number ({}) and it is not the same as port number in ' \
+                                              'host ({})'.format(endpoint.port, parts.port)
+                                    html_log.append({**endpoint_html_log, **{'message': message}})
+                                    logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
+                                    broken_endpoints.add(endpoint.pk)
                                 else:
                                     if change:
                                         endpoint.port = parts.port
                             except ValueError:
-                                logger.error('Endpoint (id={}) use non-numeric port: {}. {}'.format(endpoint.pk,
-                                                                                                    endpoint.port,
-                                                                                                    error_suffix))
-                                broken_endpoints.append(endpoint.pk)
+                                message = 'uses non-numeric port: {}'.format(endpoint.port)
+                                html_log.append({**endpoint_html_log, **{'message': message}})
+                                logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
+                                broken_endpoints.add(endpoint.pk)
 
                         if parts.path:
                             if endpoint.path and (endpoint.path != parts.path):
-                                logger.error('Endpoint (id={}) has defined path ({}) and it is not the same as path in '
-                                    'host ({}). {}'.format(endpoint.pk, endpoint.path, parts.path, error_suffix))
-                                broken_endpoints.append(endpoint.pk)
+                                message = 'has defined path ({}) and it is not the same as path in host ' \
+                                          '({})'.format(endpoint.path, parts.path)
+                                html_log.append({**endpoint_html_log, **{'message': message}})
+                                logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
+                                broken_endpoints.add(endpoint.pk)
                             else:
                                 if change:
                                     endpoint.path = parts.path
 
                         if parts.query:
                             if endpoint.query and (endpoint.query != parts.query):
-                                logger.error('Endpoint (id={}) has defined query ({}) and it is not the same as query '
-                                    'in host ({}). {}'.format(endpoint.pk, endpoint.query, parts.query, error_suffix))
-                                broken_endpoints.append(endpoint.pk)
+                                message = 'has defined query ({}) and it is not the same as query in host ' \
+                                          '({})'.format(endpoint.query, parts.query)
+                                html_log.append({**endpoint_html_log, **{'message': message}})
+                                logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
+                                broken_endpoints.add(endpoint.pk)
                             else:
                                 if change:
                                     endpoint.query = parts.query
 
                         if parts.fragment:
                             if endpoint.fragment and (endpoint.fragment != parts.fragment):
-                                logger.error('Endpoint (id={}) has defined fragment ({}) and it is not the same as '
-                                    'fragment in host ({}). {}'.format(endpoint.pk, endpoint.fragment, parts.fragment,
-                                                                       error_suffix))
-                                broken_endpoints.append(endpoint.pk)
+                                message = 'has defined fragment ({}) and it is not the same as fragment in host ' \
+                                          '({})'.format(endpoint.fragment, parts.fragment)
+                                html_log.append({**endpoint_html_log, **{'message': message}})
+                                logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
+                                broken_endpoints.add(endpoint.pk)
                             else:
                                 if change:
                                     endpoint.fragment = parts.fragment
 
-                        if change:
+                        if change and (endpoint.pk not in broken_endpoints):  # do not save broken endpoints
                             endpoint.save()
 
                     except ValidationError:
-                        logger.error('Endpoint (id={}) "{}" use invalid format of host. {}'.format(endpoint.pk,
-                            endpoint.host, error_suffix))
-                        broken_endpoints.append(endpoint.pk)
+                        message = '"{}" uses invalid format of host'.format(endpoint.host)
+                        html_log.append({**endpoint_html_log, **{'message': message}})
+                        logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
+                        broken_endpoints.add(endpoint.pk)
 
-    if broken_endpoints != []:
-        raise FieldError('It is not possible to migrate database because there is/are {} broken endpoint(s). '
-                         'Please check logs.'.format(len(broken_endpoints)))
+    if broken_endpoints != set():
+        logger.error('It is not possible to migrate database because there is/are {} broken endpoint(s). '
+                     'Please check logs.'.format(len(broken_endpoints)))
+    else:
+        logger.info('There is not broken endpoint.')
 
-    if change:
-        to_be_deleted = set()
-        for product in chain(Product_model.objects.all().distinct(), [None]):
-            for endpoint in Endpoint_model.objects.filter(product=product).distinct():
-                if endpoint.id not in to_be_deleted:
+    to_be_deleted = set()
+    for product in chain(Product_model.objects.all().distinct(), [None]):
+        for endpoint in Endpoint_model.objects.filter(product=product).distinct():
+            if endpoint.id not in to_be_deleted:
 
-                    ep = endpoint_filter(
-                        protocol=endpoint.protocol,
-                        userinfo=endpoint.userinfo,
-                        host=endpoint.host,
-                        port=endpoint.port,
-                        path=endpoint.path,
-                        query=endpoint.query,
-                        fragment=endpoint.fragment,
-                        product_id=product.pk if product else None
-                    ).order_by('id')
+                ep = endpoint_filter(
+                    protocol=endpoint.protocol,
+                    userinfo=endpoint.userinfo,
+                    host=endpoint.host,
+                    port=endpoint.port,
+                    path=endpoint.path,
+                    query=endpoint.query,
+                    fragment=endpoint.fragment,
+                    product_id=product.pk if product else None
+                ).order_by('id')
 
-                    if ep.count() > 1:
-                        ep_ids = [x.id for x in ep]
-                        logger.info("Merging Endpoints {} into '{}'".format(
+                if ep.count() > 1:
+                    ep_ids = [x.id for x in ep]
+                    to_be_deleted.update(ep_ids[1:])
+                    if change:
+                        message = "Merging Endpoints {} into '{}'".format(
                             ["{} (id={})".format(str(x), x.pk) for x in ep[1:]],
-                            "{} (id={})".format(str(ep[0]), ep[0].pk)))
-                        to_be_deleted.update(ep_ids[1:])
+                            "{} (id={})".format(str(ep[0]), ep[0].pk))
+                        html_log.append(message)
+                        logger.info(message)
                         Endpoint_Status_model.objects\
                             .filter(endpoint__in=ep_ids[1:])\
                             .update(endpoint=ep_ids[0])
@@ -222,11 +245,20 @@ def clean_hosts_run(apps, change):
                             esm = Endpoint_Status_model.objects\
                                 .filter(finding=eps['finding'])\
                                 .order_by('-last_modified')
-                            logger.info("Endpoint Statuses {} will be replaced by '{}'".format(
+                            message = "Endpoint Statuses {} will be replaced by '{}'".format(
                                 ["last_modified: {} (id={})".format(x.last_modified, x.pk) for x in esm[1:]],
-                                "last_modified: {} (id={})".format(esm[0].last_modified, esm[0].pk)))
+                                "last_modified: {} (id={})".format(esm[0].last_modified, esm[0].pk))
+                            html_log.append(message)
+                            logger.info(message)
                             esm.exclude(id=esm[0].pk).delete()
 
-        if to_be_deleted != set():
-            logger.info("Removing endpoints: {}".format(to_be_deleted))
+    if to_be_deleted != set():
+        if change:
+            message = "Removing endpoints: {}".format(list(to_be_deleted))
             Endpoint_model.objects.filter(id__in=to_be_deleted).delete()
+        else:
+            message = "Redundant endpoints: {}, migration is required.".format(list(to_be_deleted))
+        html_log.append(message)
+        logger.info(message)
+
+    return html_log

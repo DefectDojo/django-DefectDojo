@@ -100,7 +100,7 @@
                                 {% if host_view %}
                                   <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
                                 {% else %}
-                                  <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}</a>
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
                                   {% if e.tags %}
                                       <sup>

@@ -34,4 +34,6 @@ urlpatterns = [
         name='endpoints_bulk_update_all_product'),
     url(r'^endpoint/(?P<fid>\d+)/bulk_status$', views.endpoint_status_bulk_update,
         name='endpoints_status_bulk'),
+    url(r'^endpoint/migrate$', views.migrate_endpoints_view,
+        name='endpoint_migrate'),
 ]

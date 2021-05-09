@@ -275,6 +275,11 @@
                                         <li>
                                             <a href="{% url 'vulnerable_endpoint_hosts' %}">Vulnerable Endpoint Hosts</a>
                                         </li>
+                                        {% if request.user.is_staff %}
+                                            <li>
+                                                <a href="{% url 'endpoint_migrate' %}">Migrate Endpoints</a>
+                                            </li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                             {% endif %}
