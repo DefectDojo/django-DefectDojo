@@ -66,8 +66,8 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
             if not settings.FEATURE_AUTHORIZATION_V2:
                 if not user_is_authorized(request.user, 'view', product):
                     raise PermissionDenied
-                else:
-                    user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            else:
+                user_has_permission_or_403(request.user, product, Permissions.Product_View)
             product_tab = Product_Tab(product.id, view_name, tab="endpoints")
 
     return render(
