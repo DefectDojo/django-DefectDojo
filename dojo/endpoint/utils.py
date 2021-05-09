@@ -252,7 +252,7 @@ def clean_hosts_run(apps, change):
                             logger.info(message)
                             esm.exclude(id=esm[0].pk).delete()
 
-    if to_be_deleted != set():
+    if to_be_deleted:
         if change:
             message = "Removing endpoints: {}".format(list(to_be_deleted))
             Endpoint_model.objects.filter(id__in=to_be_deleted).delete()
