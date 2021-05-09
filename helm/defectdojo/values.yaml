@@ -266,7 +266,7 @@ rabbitmq:
     type: relative
     value: 0.5
   affinity: {}
-  nodeSelector: {}  
+  nodeSelector: {}
   resources:
     requests:
       cpu: 100m
