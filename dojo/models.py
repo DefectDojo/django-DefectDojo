@@ -1091,7 +1091,6 @@ class Endpoint(models.Model):
 
     def __init__(self, *args, **kwargs):
         kwargs = self.verify_and_clean(**kwargs)
-        logger.info(kwargs)
         super(Endpoint, self).__init__(*args, **kwargs)
 
     def verify_and_clean(self, **kwargs):
@@ -1130,7 +1129,6 @@ class Endpoint(models.Model):
                 kwargs['fragment'] = kwargs['fragment'][1:]
             if kwargs['fragment'] == '':
                 kwargs['fragment'] = None
-        logger.info(kwargs)
         return kwargs
 
     def __str__(self):
