@@ -1,6 +1,7 @@
 from django.test import TestCase
 from dojo.tools.aqua.parser import AquaParser
 from dojo.models import Test
+from collections import Counter
 
 
 class TestAquaParser(TestCase):
@@ -58,62 +59,18 @@ class TestAquaParser(TestCase):
 
             self.assertEqual(16, nb_cvssv3)
 
-    def test_aqua_parser_for_aqua_severity_critical(self):
+    def test_aqua_parser_for_aqua_severity(self):
         with open("dojo/unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
             parser = AquaParser()
             findings = parser.get_findings(testfile, Test())
-            nbsev = 0
+            sevs = list()
 
             for finding in findings:
-                if finding.severity == 'Critical':
-                    nbsev = nbsev + 1
+                sevs.append(finding.severity)
 
-            self.assertEqual(1, nbsev)
-
-    def test_aqua_parser_for_aqua_severity_high(self):
-        with open("dojo/unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
-            parser = AquaParser()
-            findings = parser.get_findings(testfile, Test())
-            nbsev = 0
-
-            for finding in findings:
-                if finding.severity == 'High':
-                    nbsev = nbsev + 1
-
-            self.assertEqual(1, nbsev)
-
-    def test_aqua_parser_for_aqua_severity_medium(self):
-        with open("dojo/unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
-            parser = AquaParser()
-            findings = parser.get_findings(testfile, Test())
-            nbsev = 0
-
-            for finding in findings:
-                if finding.severity == 'Medium':
-                    nbsev = nbsev + 1
-
-            self.assertEqual(2, nbsev)
-
-    def test_aqua_parser_for_aqua_severity_low(self):
-        with open("dojo/unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
-            parser = AquaParser()
-            findings = parser.get_findings(testfile, Test())
-            nbsev = 0
-
-            for finding in findings:
-                if finding.severity == 'Low':
-                    nbsev = nbsev + 1
-
-            self.assertEqual(2, nbsev)
-
-    def test_aqua_parser_for_aqua_severity_info(self):
-        with open("dojo/unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
-            parser = AquaParser()
-            findings = parser.get_findings(testfile, Test())
-            nbsev = 0
-
-            for finding in findings:
-                if finding.severity == 'Info':
-                    nbsev = nbsev + 1
-
-            self.assertEqual(7, nbsev)
+            d = Counter(sevs)
+            self.assertEqual(1, d['Critical'])
+            self.assertEqual(1, d['High'])
+            self.assertEqual(2, d['Medium'])
+            self.assertEqual(2, d['Low'])
+            self.assertEqual(7, d['Info'])
