@@ -44,11 +44,11 @@
           "nvd_vectors_v3": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
           "nvd_severity_v3": "low",
           "aqua_score": 3.7,
-          "aqua_severity": "negligible",
+          "aqua_severity": "critical",
           "aqua_vectors": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
           "aqua_scoring_system": "CVSS V3",
           "heuristic_ref_id": 305173,
-          "aqua_severity_classification": "Vendor Severity: unimportant",
+          "aqua_severity_classification": "Vendor Severity: critical",
           "aqua_score_classification": "NVD CVSS V3 Score: 3.7"
         }
       ]
@@ -86,10 +86,10 @@
           "nvd_vectors_v3": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
           "nvd_severity_v3": "high",
           "aqua_score": 7.8,
-          "aqua_severity": "negligible",
+          "aqua_severity": "high",
           "aqua_vectors": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
           "aqua_scoring_system": "CVSS V3",
-          "aqua_severity_classification": "Vendor Severity: unimportant",
+          "aqua_severity_classification": "Vendor Severity: High",
           "aqua_score_classification": "NVD CVSS V3 Score: 7.8"
         }
       ]
@@ -127,11 +127,11 @@
           "nvd_vectors_v3": "CVSS:3.0/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N",
           "nvd_severity_v3": "medium",
           "aqua_score": 4.7,
-          "aqua_severity": "negligible",
+          "aqua_severity": "medium",
           "aqua_vectors": "CVSS:3.0/AV:L/AC:H/PR:L/UI:N/S:U/C:N/I:H/A:N",
           "aqua_scoring_system": "CVSS V3",
           "heuristic_ref_id": 289393,
-          "aqua_severity_classification": "Vendor Severity: unimportant",
+          "aqua_severity_classification": "Vendor Severity: Medium",
           "aqua_score_classification": "NVD CVSS V3 Score: 4.7"
         }
       ]
@@ -449,10 +449,10 @@
           "nvd_vectors_v3": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
           "nvd_severity_v3": "medium",
           "aqua_score": 5.5,
-          "aqua_severity": "negligible",
+          "aqua_severity": "low",
           "aqua_vectors": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
           "aqua_scoring_system": "CVSS V3",
-          "aqua_severity_classification": "Vendor Severity: unimportant",
+          "aqua_severity_classification": "Vendor Severity: low",
           "aqua_score_classification": "NVD CVSS V3 Score: 5.5"
         }
       ]
