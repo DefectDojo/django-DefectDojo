@@ -1612,8 +1612,8 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "YOUR USERNAME HERE",
-        "password": "YOU API TOKEN HERE",
+        "username": "YOUR USERNAME",
+        "password": "YOU API TOKEN",
         "default_issue_type": "Task",
         "epic_name_id": 10011,
         "open_status_key": 11,
