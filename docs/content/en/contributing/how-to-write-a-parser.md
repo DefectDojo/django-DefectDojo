@@ -15,18 +15,9 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 - It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name` yet that's up to you.
 
 It is probably easier to use the docker-compose stack (and benefit from the hot-reload capbility for uWSGI).
-Set up your environment to use the dev or ptvsd environment, such as:
+Set up your environment to use the debug environment, such as:
 
-{{< highlight bash >}}
-$ docker/setEnv.sh dev
-{{< /highlight >}}
-
-or
-
-{{< highlight bash >}}
-# allows to set breakpoints in uWSGI
-$ docker/setEnv.sh ptvsd
-{{< /highlight >}}
+`$ docker/setEnv.sh debug`
 
 Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md) for more details.
 
