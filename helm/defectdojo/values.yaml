@@ -149,7 +149,7 @@ django:
     app_settings:
       processes: 2
       threads: 2
-    enable_ptvsd: false  # this also requires DD_DEBUG to be set to True
+    enable_debugpy: false  # this also requires DD_DEBUG to be set to True
     certificates:
     # includes additional CA certificate as volume, it refrences REQUESTS_CA_BUNDLE env varible
     # to create configMap `kubectl create  cm defectdojo-ca-certs --from-file=ca.crt`
