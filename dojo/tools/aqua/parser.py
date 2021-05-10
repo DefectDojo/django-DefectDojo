@@ -58,30 +58,28 @@ def get_item(resource, vuln, test):
     severity_justification = ""
     used_for_classification = ""
     if 'aqua_severity' in vuln:
-        #Take Aqua severity as the real  element for the compute of severity
-
         score = vuln.get ('aqua_severity')
         severity = aqua_severity_of(score)
+        used_for_classification = "Aqua security score ({}) used for classification.\n".format(score)
         severity_justification = vuln.get('aqua_severity_classification')
-
+        severity_justification += "\n{}".format(used_for_classification)
     else:
         if 'aqua_score' in vuln:
             score = vuln.get('aqua_score')
             used_for_classification = "Aqua score ({}) used for classification.\n".format(score)
-        if 'vendor_score' in vuln:
+        elif 'vendor_score' in vuln:
             score = vuln.get('vendor_score')
             used_for_classification = "Vendor score ({}) used for classification.\n".format(score)
-        if 'nvd_score' in vuln:
-            score = vuln.get('nvd_score')
-            used_for_classification = "NVD score v2 ({}) used for classification.\n".format(score)
-            severity_justification += "\nNVD v2 vectors: {}".format(vuln.get('nvd_vectors'))
-        if 'nvd_score_v3' in vuln:
+        elif 'nvd_score_v3' in vuln:
             score = vuln.get('nvd_score_v3')
             used_for_classification = "NVD score v3 ({}) used for classification.\n".format(score)
             severity_justification += "\nNVD v3 vectors: {}".format(vuln.get('nvd_vectors_v3'))
             # Add the CVSS3 to Finding
             cvssv3 = vuln.get('nvd_vectors_v3')
-
+        elif 'nvd_score' in vuln:
+            score = vuln.get('nvd_score')
+            used_for_classification = "NVD score v2 ({}) used for classification.\n".format(score)
+            severity_justification += "\nNVD v2 vectors: {}".format(vuln.get('nvd_vectors'))
         severity = severity_of(score)
         severity_justification += "\n{}".format(used_for_classification)
 
