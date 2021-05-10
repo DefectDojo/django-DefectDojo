@@ -41,8 +41,8 @@ The generic upgrade method for docker-compose follows these steps:
 -   Stop DefectDojo: `docker-compose stop`
 -   Re-start DefectDojo, allowing for container recreation:
     `docker-compose up -d`
--   Run the database migrations to bring your database schema up to
-    speed with the latest code
+-   Database migrations will be run automatically by the initializer.
+    Check the output via `docker-compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the
     safe side), run the migration command:
     `docker-compose exec uwsgi /bin/bash -c 'python manage.py migrate`
@@ -60,10 +60,15 @@ Replace the first step above with this one: - `docker-compose build`
 Upgrading to DefectDojo Version 2.0.x.
 --------------------------------------
 
-WARNING: Upgrade to 1.15.x first before upgrading to 2.0.0, otherwise you will brick you instance.
+BEFORE UPGRADING:
+- Upgrade to 1.15.x first before upgrading to 2.0.0, otherwise you will brick you instance.
 
-WARNING: Run `docker-compose exec uwsgi ./manage.py endpoint_pre-migration_check` before upgrading to check if
-your endpoints can be migrated succesfully. ([#4188](https://github.com/DefectDojo/django-DefectDojo/pull/4188))
+Now follow usual steps to upgrade as described above.
+
+AFTER UPGRADING
+- Check if all your endpoints could be migrated succesfully, go to: https://<defect-dojo-url>/endpoint/migrate.
+- Alternatively, this can be run as management command:  `docker-compose exec uwsgi ./manage.py endpoint_migration`
+- Details about endpoint migration / improvements in https://github.com/DefectDojo/django-DefectDojo/pull/4473
 
 We decided to name this version 2.0.0 because we did some big cleanups in this release:
 
