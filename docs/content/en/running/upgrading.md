@@ -63,7 +63,7 @@ Upgrading to DefectDojo Version 2.0.x.
 BEFORE UPGRADING:
 - Upgrade to 1.15.x first before upgrading to 2.0.0, otherwise you will brick you instance.
 
-Now follow usual steps to upgrade as described above.
+Now follow the usual steps to upgrade as described above.
 
 AFTER UPGRADING
 - Check if all your endpoints could be migrated succesfully, go to: https://<defect-dojo-url>/endpoint/migrate.
