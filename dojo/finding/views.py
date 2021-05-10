@@ -721,6 +721,10 @@ def edit_finding(request, fid):
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
 
+            if 'group' in form.cleaned_data:
+                finding_group = form.cleaned_data['group']
+                finding_helper.update_finding_group(new_finding, finding_group)
+
             if 'risk_accepted' in form.cleaned_data and form['risk_accepted'].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
                     ra_helper.simple_risk_accept(new_finding, perform_save=False)
@@ -1966,6 +1970,23 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response('Skipped %s findings when removing from any finding group, findings not part of any group' % (skipped))
+
+                    # refresh findings from db
+                    finds = finds.all()
+
+                if form.cleaned_data['finding_group_by']:
+                    logger.debug('finding_group_by checked!')
+                    logger.debug(form.cleaned_data)
+                    finding_group_by_option = form.cleaned_data['finding_group_by_option']
+                    logger.debug('finding_group_by_option: %s', finding_group_by_option)
+
+                    finding_groups, grouped, skipped, groups_created = finding_helper.group_findings_by(finds, finding_group_by_option)
+
+                    if grouped:
+                        add_success_message_to_response('Grouped %d findings into %d (%d newly created) finding groups' % (grouped, len(finding_groups), groups_created))
+
+                    if skipped:
+                        add_success_message_to_response('Skipped %s findings when grouping by %s as these findings were already in an existing group' % (skipped, finding_group_by_option))
 
                     # refresh findings from db
                     finds = finds.all()

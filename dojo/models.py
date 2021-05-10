@@ -1928,10 +1928,7 @@ class Finding(models.Model):
     @staticmethod
     def get_severity(num_severity):
         severities = {0: 'Info', 1: 'Low', 2: 'Medium', 3: 'High', 4: 'Critical'}
-        logger.debug(severities.keys())
-        logger.debug(num_severity in severities.keys())
         if num_severity in severities.keys():
-            logger.debug('returning severity: %s', severities[num_severity])
             return severities[num_severity]
 
         return None
@@ -2038,7 +2035,9 @@ class Finding(models.Model):
 
     @cached_property
     def finding_group(self):
-        return self.finding_group_set.all().first()
+        group = self.finding_group_set.all().first()
+        logger.debug('finding.finding_group: %s', group)
+        return group
 
     @cached_property
     def has_jira_group_issue(self):
@@ -2279,6 +2278,9 @@ class Stub_Finding(models.Model):
 
 
 class Finding_Group(TimeStampedModel):
+
+    GROUP_BY_OPTIONS = [('component_name', 'Component Name'), ('component_name+component_version', 'Component Name + Version'), ('file_path', 'File path')]
+
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     findings = models.ManyToManyField(Finding)
@@ -2297,7 +2299,6 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
         max_number_severity = max([Finding.get_number_severity(find.severity) for find in self.findings.all()])
-        logger.debug('MAX:%s', max_number_severity)
         return Finding.get_severity(max_number_severity)
 
     @cached_property
@@ -2321,7 +2322,7 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        return min([find.sla_days_remaining() for find in self.findings.all()])
+        return min([find.sla_days_remaining() for find in self.findings.all() if find.sla_days_remaining()], default=None)
 
     def sla_days_remaining(self):
         return self.sla_days_remaining_internal
@@ -2330,7 +2331,7 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        return min([find.sla_deadline() for find in self.findings.all()])
+        return min([find.sla_deadline() for find in self.findings.all() if find.sla_deadline()], default=None)
 
     # def cves(self):
     #     return ', '.join([find.cve for find in self.findings.all() if find.cve is not None])
@@ -2352,7 +2353,7 @@ class Finding_Group(TimeStampedModel):
         return all([find.mitigated is not None for find in self.findings.all()])
 
     def get_sla_start_date(self):
-        return min([find.sla_deadline() for find in self.findings.all()])
+        return min([find.get_sla_start_date() for find in self.findings.all()])
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -2689,7 +2690,6 @@ class JIRA_Instance(models.Model):
         return self.configuration_name + " | " + self.url + " | " + self.username
 
     def get_priority(self, status):
-        logger.debug('get_priority for: %s', status)
         if status == 'Info':
             return self.info_mapping_severity
         elif status == 'Low':
