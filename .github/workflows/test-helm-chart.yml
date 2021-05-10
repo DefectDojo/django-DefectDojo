@@ -58,10 +58,10 @@ jobs:
         run: ct lint --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch }}
         if: steps.list-changed.outputs.changed == 'true'
 
-      - name: Create kind cluster
-        uses: helm/kind-action@v1.1.0
-        if: steps.list-changed.outputs.changed == 'true'
+      # - name: Create kind cluster
+      #  uses: helm/kind-action@v1.1.0
+      #  if: steps.list-changed.outputs.changed == 'true'
 
-      - name: Run chart-testing (install)
-        run: ct install --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch }}
-        if: steps.list-changed.outputs.changed == 'true'
+      # - name: Run chart-testing (install)
+      #   run: ct install --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch }} --helm-extra-args '--set createSecret=true --set createRabbitMqSecret=true --set createPostgresqlSecret=true --set timeout=900'
+      #  if: steps.list-changed.outputs.changed == 'true'
