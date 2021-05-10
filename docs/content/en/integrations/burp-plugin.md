@@ -1,12 +1,12 @@
 ---
-title: "Defect Dojo Burp-Plugin"
-date: 2021-02-02T20:46:28+01:00
+title: "Defect Dojo Burp plugin"
+description: "Export findings directly from Burp to DefectDojo."
 draft: false
-weight: 7
+weight: 8
 ---
 
 
-This is Burp Plugin to export findings directly to Defect Dojo .
+This is Burp Plugin to export findings directly to DefectDojo.
 
 Installation
 ------------

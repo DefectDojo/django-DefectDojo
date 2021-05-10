@@ -1,8 +1,8 @@
 ---
-title: "Workflows"
-date: 2021-02-02T20:46:28+01:00
+title: "Example workflows"
+description: "Two examples how DefectDojo can be used in day-to-day operations."
 draft: false
-weight: 5
+weight: 4
 ---
 
 
