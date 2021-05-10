@@ -58,7 +58,7 @@ def get_item(resource, vuln, test):
     severity_justification = ""
     used_for_classification = ""
     if 'aqua_severity' in vuln:
-        score = vuln.get ('aqua_severity')
+        score = vuln.get('aqua_severity')
         severity = aqua_severity_of(score)
         used_for_classification = "Aqua security score ({}) used for classification.\n".format(score)
         severity_justification = vuln.get('aqua_severity_classification')
@@ -123,9 +123,9 @@ def get_item_v2(item, test):
                    severity=severity,
                    impact=severity,
                    mitigation=mitigation)
-## Add a new severity map between defectdojo and aqua severity
 
-def aqua_severity_of (score):
+
+def aqua_severity_of(score):
     if score == 'high':
         return "High"
     if score == 'medium':
@@ -136,6 +136,7 @@ def aqua_severity_of (score):
         return "Info"
     else:
         return "Critical"
+
 
 def severity_of(score):
     if score == 0:
