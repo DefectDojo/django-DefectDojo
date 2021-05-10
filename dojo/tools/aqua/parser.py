@@ -63,6 +63,8 @@ def get_item(resource, vuln, test):
         used_for_classification = "Aqua security score ({}) used for classification.\n".format(score)
         severity_justification = vuln.get('aqua_severity_classification')
         severity_justification += "\n{}".format(used_for_classification)
+        if 'nvd_score_v3' in vuln:
+            cvssv3 = vuln.get('nvd_vectors_v3')
     else:
         if 'aqua_score' in vuln:
             score = vuln.get('aqua_score')
