@@ -7,7 +7,7 @@ from dojo.models import Finding
 # We need to pass --cwe to the scanner for the data to feed CWE in the report
 
 
-class SecurityCodeScan(object):
+class SecurityCodeScanParser(object):
 
     def get_scan_types(self):
         return ["Security Code Scan Report"]
@@ -16,7 +16,8 @@ class SecurityCodeScan(object):
         return scan_type  # no custom label for now
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import Security Code Scan output (--json)"
+        return "Import Security Code Scan output (--cwe)"
 
     def get_findings(self, filename, test):
+
         return None
