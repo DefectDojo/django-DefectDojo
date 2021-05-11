@@ -729,7 +729,7 @@
     },
     {
         "fields": {
-            "name": "SecureCodeBox Finding Import"
+            "name": "SecureCodeBox Findings Import"
         },
         "model": "dojo.test_type",
         "pk": 196
