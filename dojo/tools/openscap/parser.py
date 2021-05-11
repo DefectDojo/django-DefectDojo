@@ -80,7 +80,6 @@ class OpenscapParser(object):
                     title=title,
                     description=description,
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     references=references,
                     dynamic_finding=True,
                     static_finding=False,

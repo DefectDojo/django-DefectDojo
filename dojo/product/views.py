@@ -25,10 +25,10 @@ from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, T
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
-                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check
+                       get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
 
 from dojo.notifications.helper import create_notification
-from django.db.models import Prefetch, F
+from django.db.models import Prefetch, F, OuterRef, Subquery
 from django.db.models.query import QuerySet
 from github import Github
 from django.contrib.postgres.aggregates import StringAgg
@@ -38,8 +38,8 @@ from dojo.authorization.authorization import user_has_permission, user_has_permi
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product.queries import get_authorized_products, get_authorized_product_members
-from dojo.product_type.queries import get_authorized_members
+from dojo.product.queries import get_authorized_products, get_authorized_members_for_product
+from dojo.product_type.queries import get_authorized_members_for_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +101,8 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.prefetch_related('jira_project_set__jira_instance')
         prefetched_prods = prefetched_prods.prefetch_related('authorized_users')
         prefetched_prods = prefetched_prods.prefetch_related('prod_type__authorized_users')
+        prefetched_prods = prefetched_prods.prefetch_related('members')
+        prefetched_prods = prefetched_prods.prefetch_related('prod_type__members')
         active_endpoint_query = Endpoint.objects.filter(
             finding__active=True,
             finding__mitigated__isnull=True)
@@ -127,11 +129,13 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
 
 @user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
 def view_product(request, pid):
-    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact',
-                                                      'team_manager').prefetch_related('authorized_users')
+    prod_query = Product.objects.all().select_related('product_manager', 'technical_contact', 'team_manager') \
+                                      .prefetch_related('authorized_users') \
+                                      .prefetch_related('members') \
+                                      .prefetch_related('prod_type__members')
     prod = get_object_or_404(prod_query, id=pid)
-    product_members = get_authorized_product_members(prod, Permissions.Product_View)
-    product_type_members = get_authorized_members(prod.prod_type, Permissions.Product_Type_View)
+    product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
+    product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
@@ -216,7 +220,7 @@ def view_product_components(request, pid):
 
     # Append finding counts
     component_query = component_query.annotate(total=Count('id')).order_by('component_name', 'component_version')
-    component_query = component_query.annotate(actives=Count('id', filter=Q(active=True)))
+    component_query = component_query.annotate(active=Count('id', filter=Q(active=True)))
     component_query = component_query.annotate(duplicate=(Count('id', filter=Q(duplicate=True))))
 
     # Default sort by total descending
@@ -326,19 +330,19 @@ def finding_querys(request, prod):
                                          duplicate=False,
                                          out_of_scope=False,
                                          active=True,
-                                         is_Mitigated=False)
+                                         is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
-                                             is_Mitigated=False)
+                                             is_mitigated=False)
     filters['closed'] = findings_qs.filter(date__range=[start_date, end_date],
                                            false_p=False,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=False,
-                                           is_Mitigated=True)
+                                           is_mitigated=True)
     filters['false_positive'] = findings_qs.filter(date__range=[start_date, end_date],
                                                    false_p=True,
                                                    duplicate=False,
@@ -617,43 +621,38 @@ def view_product_metrics(request, pid):
 
 
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
-def view_engagements(request, pid, engagement_type="Interactive"):
+def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
 
     default_page_num = 10
+    recent_test_day_count = 7
 
     # In Progress Engagements
-    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress",
-                                     engagement_type=engagement_type).order_by('-updated')
+    engs = Engagement.objects.filter(product=prod, active=True, status="In Progress").order_by('-updated')
     active_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='active')
     result_active_engs = get_page_items(request, active_engs_filter.qs, default_page_num, prefix="engs")
     # prefetch only after creating the filters to avoid https://code.djangoproject.com/ticket/23771 and https://code.djangoproject.com/ticket/25375
-    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list)
+    result_active_engs.object_list = prefetch_for_view_engagements(result_active_engs.object_list, recent_test_day_count)
 
     # Engagements that are queued because they haven't started or paused
-    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True,
-                                     engagement_type=engagement_type).order_by('-updated')
+    engs = Engagement.objects.filter(~Q(status="In Progress"), product=prod, active=True).order_by('-updated')
     queued_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='queued')
     result_queued_engs = get_page_items(request, queued_engs_filter.qs, default_page_num, prefix="queued_engs")
-    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list)
+    result_queued_engs.object_list = prefetch_for_view_engagements(result_queued_engs.object_list, recent_test_day_count)
 
     # Cancelled or Completed Engagements
-    engs = Engagement.objects.filter(product=prod, active=False, engagement_type=engagement_type).order_by(
-        '-target_end')
+    engs = Engagement.objects.filter(product=prod, active=False).order_by('-target_end')
     inactive_engs_filter = ProductEngagementFilter(request.GET, queryset=engs, prefix='closed')
     result_inactive_engs = get_page_items(request, inactive_engs_filter.qs, default_page_num, prefix="inactive_engs")
-    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list)
+    result_inactive_engs.object_list = prefetch_for_view_engagements(result_inactive_engs.object_list, recent_test_day_count)
 
     title = "All Engagements"
-    if engagement_type == "CI/CD":
-        title = "CI/CD Engagements"
 
     product_tab = Product_Tab(pid, title=title, tab="engagements")
     return render(request,
                   'dojo/view_engagements.html',
                   {'prod': prod,
                    'product_tab': product_tab,
-                   'engagement_type': engagement_type,
                    'engs': result_active_engs,
                    'engs_count': result_active_engs.paginator.count,
                    'engs_filter': active_engs_filter,
@@ -663,35 +662,40 @@ def view_engagements(request, pid, engagement_type="Interactive"):
                    'inactive_engs': result_inactive_engs,
                    'inactive_engs_count': result_inactive_engs.paginator.count,
                    'inactive_engs_filter': inactive_engs_filter,
+                   'recent_test_day_count': recent_test_day_count,
                    'user': request.user})
 
 
-def prefetch_for_view_engagements(engs):
-    prefetched_engs = engs
-    if isinstance(engs,
-                  QuerySet):  # old code can arrive here with prods being a list because the query was already executed
-        prefetched_engs = prefetched_engs.select_related('lead')
-        prefetched_engs = prefetched_engs.prefetch_related('test_set')
-        prefetched_engs = prefetched_engs.prefetch_related('test_set__test_type')  # test.name uses test_type
-        prefetched_engs = prefetched_engs.prefetch_related('jira_project__jira_instance')
-        prefetched_engs = prefetched_engs.prefetch_related('product__jira_project_set__jira_instance')
-        prefetched_engs = prefetched_engs.annotate(count_findings_all=Count('test__finding__id'))
-        prefetched_engs = prefetched_engs.annotate(count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)))
-        prefetched_engs = prefetched_engs.annotate(count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)))
-        ACCEPTED_FINDINGS_QUERY = Q(test__finding__risk_accepted=True)
-        prefetched_engs = prefetched_engs.annotate(count_findings_accepted=Count('test__finding__id', filter=ACCEPTED_FINDINGS_QUERY))
-        prefetched_engs = prefetched_engs.prefetch_related('tags')
-    else:
-        logger.debug('unable to prefetch because query was already executed')
+def prefetch_for_view_engagements(engagements, recent_test_day_count):
+    engagements = engagements.select_related(
+        'lead'
+    ).prefetch_related(
+        Prefetch('test_set', queryset=Test.objects.filter(
+            id__in=Subquery(
+                Test.objects.filter(
+                    engagement_id=OuterRef('engagement_id'),
+                    updated__gte=timezone.now() - timedelta(days=recent_test_day_count)
+                ).values_list('id', flat=True)
+            ))
+        ),
+        'test_set__test_type',
+    ).annotate(
+        count_tests=Count('test', distinct=True),
+        count_findings_all=Count('test__finding__id'),
+        count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)),
+        count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
+        count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_mitigated=True)),
+        count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)),
+        count_findings_accepted=Count('test__finding__id', filter=Q(test__finding__risk_accepted=True)),
+    )
 
-    return prefetched_engs
+    if System_Settings.objects.get().enable_jira:
+        engagements = engagements.prefetch_related(
+            'jira_project__jira_instance',
+            'product__jira_project_set__jira_instance',
+        )
 
-
-@user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
-def view_engagements_cicd(request, pid):
-    return view_engagements(request, pid=pid, engagement_type="CI/CD")
+    return engagements
 
 
 # Authorization is within the import_scan_results method
@@ -771,6 +775,7 @@ def new_product(request, ptid=None):
                 sonarqube_product.save()
 
             create_notification(event='product_added', title=product.name,
+                                product=product,
                                 url=reverse('view_product', args=(product.id,)))
 
             if not error:
@@ -895,9 +900,11 @@ def delete_product(request, pid):
     form = DeleteProductForm(instance=product)
 
     if request.method == 'POST':
+        logger.debug('delete_product: POST')
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
+                product_type = product.prod_type
                 product.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -905,16 +912,26 @@ def delete_product(request, pid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % product.name,
+                                    product_type=product_type,
                                     description='The product "%s" was deleted by %s' % (product.name, request.user),
                                     url=request.build_absolute_uri(reverse('product')),
                                     icon="exclamation-triangle")
+                logger.debug('delete_product: POST RETURN')
                 return HttpResponseRedirect(reverse('product'))
+            else:
+                logger.debug('delete_product: POST INVALID FORM')
+                logger.error(form.errors)
+
+    logger.debug('delete_product: GET')
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([product])
     rels = collector.nested()
 
     product_tab = Product_Tab(pid, title="Product", tab="settings")
+
+    logger.debug('delete_product: GET RENDER')
+
     return render(request, 'dojo/delete_product.html',
                   {'product': product,
                    'form': form,
@@ -1007,9 +1024,15 @@ def new_eng_for_app(request, pid, cicd=False):
             logger.debug('showing jira-epic-form')
             jira_epic_form = JIRAEngagementForm()
 
-    product_tab = Product_Tab(pid, title="New Engagement", tab="engagements")
+    if cicd:
+        title = 'New CI/CD Engagement'
+    else:
+        title = 'New Interactive Engagement'
+
+    product_tab = Product_Tab(pid, title=title, tab="engagements")
     return render(request, 'dojo/new_eng.html',
                   {'form': form,
+                   'title': title,
                    'product_tab': product_tab,
                    'jira_epic_form': jira_epic_form,
                    'jira_project_form': jira_project_form,
@@ -1485,7 +1508,10 @@ def edit_product_member(request, memberid):
                                     messages.SUCCESS,
                                     'Product member updated successfully.',
                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+                if is_title_in_breadcrumbs('View User'):
+                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
     product_tab = Product_Tab(member.product.id, title="Edit Product Member", tab="settings")
     return render(request, 'dojo/edit_product_member.html', {
         'memberid': memberid,
@@ -1494,7 +1520,7 @@ def edit_product_member(request, memberid):
     })
 
 
-@user_is_authorized(Product_Member, Permissions.Product_Remove_Member, 'memberid')
+@user_is_authorized(Product_Member, Permissions.Product_Member_Delete, 'memberid')
 def delete_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
     memberform = Delete_Product_MemberForm(instance=member)
@@ -1507,10 +1533,13 @@ def delete_product_member(request, memberid):
                             messages.SUCCESS,
                             'Product member deleted successfully.',
                             extra_tags='alert-success')
-        if user == request.user:
-            return HttpResponseRedirect(reverse('product'))
+        if is_title_in_breadcrumbs('View User'):
+            return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
         else:
-            return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
+            if user == request.user:
+                return HttpResponseRedirect(reverse('product'))
+            else:
+                return HttpResponseRedirect(reverse('view_product', args=(member.product.id, )))
     product_tab = Product_Tab(member.product.id, title="Delete Product Member", tab="settings")
     return render(request, 'dojo/delete_product_member.html', {
         'memberid': memberid,

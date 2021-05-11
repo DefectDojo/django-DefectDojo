@@ -109,7 +109,6 @@ class SonarQubeApiImporter(object):
                     references=references,
                     file_path=component_key,
                     line=line,
-                    active=True,
                     verified=self.is_confirmed(status),
                     false_p=False,
                     duplicate=False,
@@ -117,7 +116,6 @@ class SonarQubeApiImporter(object):
                     mitigated=None,
                     mitigation='No mitigation provided',
                     impact="No impact provided",
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
                 )

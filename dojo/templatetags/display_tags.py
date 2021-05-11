@@ -234,6 +234,18 @@ def version_num(value):
     return version
 
 
+@register.filter(name='group_sla')
+def group_sla(group):
+    if not get_system_setting('enable_finding_sla'):
+        return ""
+
+    if not group.findings.all():
+        return ""
+
+    # if there is at least 1 finding, there will be date, severity etc to calculate sla
+    return finding_sla(group)
+
+
 @register.filter(name='finding_sla')
 def finding_sla(finding):
     if not get_system_setting('enable_finding_sla'):
@@ -404,17 +416,6 @@ def pic_token(context, image, size):
     token = FindingImageAccessToken(user=user, image=image, size=size)
     token.save()
     return reverse('download_finding_pic', args=[token.token])
-
-
-@register.simple_tag
-def severity_value(value):
-    try:
-        if get_system_setting('s_finding_severity_naming'):
-            value = Finding.get_numerical_severity(value)
-    except:
-        pass
-
-    return value
 
 
 @register.simple_tag
@@ -937,7 +938,7 @@ def import_settings_tag(test_import, autoescape=True):
             <b>Close Old Findings:</b> %s<br/>
             <b>Push to jira:</b> %s<br/>
             <b>Tags:</b> %s<br/>
-            <b>Endpoint:</b> %s<br/>
+            <b>Endpoints:</b> %s<br/>
         "
     </i>
     """
@@ -953,7 +954,7 @@ def import_settings_tag(test_import, autoescape=True):
                                 esc(test_import.import_settings.get('close_old_findings', None)),
                                 esc(test_import.import_settings.get('push_to_jira', None)),
                                 esc(test_import.import_settings.get('tags', None)),
-                                esc(test_import.import_settings.get('endpoint', None))))
+                                esc(test_import.import_settings.get('endpoints', test_import.import_settings.get('endpoint', None)))))
 
 
 @register.filter(needs_autoescape=True)

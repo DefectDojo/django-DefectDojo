@@ -36,7 +36,7 @@ class IBMAppScanTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert the query to determine status or failure
-        self.assertTrue(self.is_success_message_present(text='IBM AppScan DAST processed, a total of 27 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='IBM AppScan DAST processed a total of 27 findings'))
 
 
 def suite():

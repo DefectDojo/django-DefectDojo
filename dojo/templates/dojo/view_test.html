@@ -328,14 +328,14 @@
                                         <i class="fa fa-arrow-circle-right"></i> View
                                         </a>
                                     </li>
-                                    {% if user|is_authorized_for_change:group %}
+                                    {% if user|is_authorized_for_change:group or group|has_object_permission:"Finding_Group_Edit" %}
                                         <li>
                                             <a class="" href="{% url 'edit_finding_group' group.id %}?return_url={{ request.get_full_path|urlencode }}">
                                             <i class="fa fa-pencil-square-o"></i> Edit
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if user|is_authorized_for_delete:group %}
+                                    {% if user|is_authorized_for_delete:group or group|has_object_permission:"Finding_Group_Delete" %}
                                         <li>
                                             <form method="post" action="{% url 'delete_finding_group' group.id %}"
                                                 style="display: inline" class="form-inline form" id="delete-finding-group-menu-{{ group.id }}-form">
@@ -366,7 +366,7 @@
                             </i>
                         </td>
                         <td>
-                            {% for find in group.findings.all %}{% if find.cve%}<a href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
+                            {% for find in group.findings.all %}{% if find.cve%}<a target="_blank" href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
                         </td>
                         <td>
                             {{ group.components }}
@@ -375,7 +375,7 @@
                         <td>{{ group.age }}</td>
                         {% if system_settings.enable_finding_sla %}
                             <td>
-                            {{ group|finding_sla }}
+                            {{ group|group_sla }}
                             </td>
                         {% endif %}
                         <td>
@@ -473,9 +473,9 @@
             {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
         </div>
 
-        {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled %}
+        {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or test|has_object_permission:"Finding_Edit" %}
         <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-            {% if test|has_object_permission:"Test_Edit" or user|is_authorized_for_change:test %}
+            {% if test|has_object_permission:"Finding_Edit" or user|is_authorized_for_change:test %}
                 <button class="btn btn-info btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     Bulk Edit
@@ -490,7 +490,7 @@
                         </a>
                     </button>
                 {% endif %}
-                {% if test|has_object_permission:"Test_Delete" or user|is_authorized_for_delete:test %}
+                {% if test|has_object_permission:"Finding_Delete" or user|is_authorized_for_delete:test %}
                     <button type="button" class="btn btn-info btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Delete Findings">
                         <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                             <i class="fa fa-trash"></i>
@@ -501,7 +501,7 @@
             <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                 <li class="dropdown-header">Choose wisely...</li>
                 <li style="padding-left: 8px;padding-right: 8px;">
-                    <form action="{% url 'finding_bulk_update_all' %}" method="post" id="bulk_change_form">
+                    <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
                         {% csrf_token %}
                         <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                         <label style="display: block" for="severity">Severity</label>
@@ -528,7 +528,7 @@
                             <span>Out of scope</span>
                         </label>
                         <label style="font-size: 80%; font-weight: normal; display: block">
-                            <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
+                            <input id="id_bulk_is_mitigated" name="is_mitigated" type="checkbox" disabled/>
                             <span>Mitigated</span>
                         </label>
 
@@ -550,7 +550,7 @@
                                 <label style="font-size: 80%; font-weight: normal;">
                                     <input id="id_bulk_finding_group_add" name="finding_group_add" class="finding_group_option" type="checkbox" disabled/> <span>Add to...</span>
                                 </label>
-                                <select name="add_to_finding_group" id="add_to_finding_group" style="font-size: 80%">
+                                <select id="id_add_to_finding_group" name="add_to_finding_group" style="font-size: 80%">
                                     <option value="">Choose...</option>
                                     {% for group in finding_groups %}
                                         <option value="{{ group.id }}">{{ group.name|truncatechars_html:40 }}</option>
@@ -560,6 +560,17 @@
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_finding_group_remove" name="finding_group_remove" class="finding_group_option" type="checkbox" disabled/> <span>Remove from any group</span>
                             </label>
+                            <span>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_finding_group_by" name="finding_group_by" class="finding_group_option" type="checkbox" disabled/> <span>Group by</span>
+                                    <select id="id_finding_group_by_option" name="finding_group_by_option" style="font-size: 80%">
+                                        <option value="">Choose...</option>
+                                        {% for finding_group_by_option in finding_group_by_options %}
+                                            <option value="{{ finding_group_by_option.0 }}">{{ finding_group_by_option.1|truncatechars_html:40 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </span>
                         {% endif %}
 
                         {% if system_settings.enable_jira %}
@@ -767,7 +778,14 @@
                             {{ finding.severity_display }}
                             </span>
                         </td>
-                        <td><a href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+                        <td>
+                          {% if finding.title %}
+                          <a title="{{ finding.title }}"
+                                              href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+                          {% else %}
+                          <a title="{{ finding.id }}"
+                                              href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
+                          {% endif %}
                           {% if finding.file_path %}
                           <i class="fa dojo-sup fa-code has-popover" data-trigger="hover" data-content="{{ finding.file_path }}" data-placement="right" data-container="body" data-original-title="Files" title=""></i>
                             {% if finding.component_name %}
@@ -1265,18 +1283,18 @@
                 $('#bulk_edit_menu #id_bulk_verified').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', !checked);
             })
 
             $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', false);
             })
 
-            $('#bulk_edit_menu #id_bulk_is_Mitigated').on("click", function (e){
+            $('#bulk_edit_menu #id_bulk_is_mitigated').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
@@ -1290,7 +1308,7 @@
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', checked);
             })
 
             $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){
@@ -1330,14 +1348,15 @@
                 $('#bulk_edit_menu #id_bulk_finding_group_create').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_finding_group_add').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_finding_group_remove').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_finding_group_by').prop('disabled', !checked);
             })
 
             $('#bulk_edit_menu #id_bulk_finding_group_create').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', false);
             })
 
             $('.finding_group_option').click(function () {

@@ -57,12 +57,9 @@ class DawnScannerParser(object):
                 find = Finding(
                     title=title,
                     test=test,
-                    active=False,
                     cve=cve,
-                    verified=False,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
                     impact=impact,
                     references=references,

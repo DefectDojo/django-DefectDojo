@@ -64,11 +64,8 @@ class AppSpiderParser(object):
             else:
                 find = Finding(title=title,
                                test=test,
-                               active=False,
-                               verified=False,
                                description=html2text.html2text(description),
                                severity=severity,
-                               numerical_severity=Finding.get_numerical_severity(severity),
                                mitigation=html2text.html2text(mitigation),
                                impact="N/A",
                                references=None,

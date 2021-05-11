@@ -89,12 +89,9 @@ class NessusCSVParser(object):
                     description = description + str(row.get('Plugin Output'))
                 find = Finding(title=title,
                                 test=test,
-                                active=False,
                                 cve=cve,
-                                verified=False,
                                 description=description,
                                 severity=severity,
-                                numerical_severity=Finding.get_numerical_severity(severity),
                                 mitigation=mitigation,
                                 impact=impact,
                                 references=references)
@@ -204,11 +201,8 @@ class NessusXMLParser(object):
                     else:
                         find = Finding(title=title,
                                        test=test,
-                                       active=False,
-                                       verified=False,
                                        description=description,
                                        severity=severity,
-                                       numerical_severity=Finding.get_numerical_severity(severity),
                                        mitigation=mitigation,
                                        impact=impact,
                                        references=references,
@@ -252,9 +246,9 @@ class NessusParser(object):
 
     def get_findings(self, filename, test):
 
-        if filename.name.lower().endswith('.xml'):
+        if filename.name.lower().endswith('.xml') or filename.name.lower().endswith('.nessus'):
             return NessusXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith('.csv'):
             return NessusCSVParser().get_findings(filename, test)
         else:
-            raise ValueError('Unknown File Format')
+            raise ValueError('Filename extension not recognized. Use .xml, .nessus or .csv')

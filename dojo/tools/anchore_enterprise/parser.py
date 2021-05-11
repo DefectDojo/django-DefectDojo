@@ -56,7 +56,6 @@ class AnchoreEnterpriseParser:
                                         cve=cve,
                                         description=description,
                                         severity=severity,
-                                        numerical_severity=Finding.get_number_severity(severity),
                                         references="Policy ID: {}\nTrigger ID: {}".format(policyid, triggerid),
                                         file_path=search_filepath(description),
                                         component_name=repo,

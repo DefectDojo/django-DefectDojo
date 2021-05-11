@@ -120,7 +120,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.3.1
+        uses: manusa/actions-setup-minikube@v2.4.0
         with:
           minikube version: 'v1.14.2'
           kubernetes version: ${{ matrix.k8s }}
@@ -181,13 +181,15 @@ jobs:
       - name: Check Application
         run: |-
              to_complete () {
-               kubectl wait  --for=$1 $2 --timeout=500s --selector=$3
-               if [[ ${?} != 0 ]]; then
+               kubectl wait --for=$1 $2 --timeout=500s --selector=$3 2>/tmp/test || true
+               if [[ -s /tmp/test ]]; then
                  echo "ERROR: $2"
+                 cat /tmp/test
                  echo "INFO: status:"
                  kubectl get pods
                  echo "INFO: logs:"
-                 kubectl logs  --selector=$3
+                 kubectl logs  --selector=$3 --all-containers=true
+                 exit 1
                fi
                return ${?}
              }

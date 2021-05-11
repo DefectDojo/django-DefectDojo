@@ -10,22 +10,23 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def we_want_async(*args, **kwargs):
+def we_want_async(*args, func=None, **kwargs):
     from dojo.utils import get_current_user
     from dojo.models import Dojo_User
 
     sync = kwargs.get('sync', False)
     if sync:
-        logger.debug('dojo_async_task: running task in the foreground as sync=True has been found as kwarg')
+        logger.debug('dojo_async_task %s: running task in the foreground as sync=True has been found as kwarg', func)
         return False
 
     user = get_current_user()
+    logger.debug('user: %s', user)
 
     if Dojo_User.wants_block_execution(user):
-        logger.debug('dojo_async_task: running task in the foreground as block_execution is set to True for %s', user)
+        logger.debug('dojo_async_task %s: running task in the foreground as block_execution is set to True for %s', func, user)
         return False
 
-    logger.debug('dojo_async_task: no current user, running task in the background')
+    logger.debug('dojo_async_task %s: no current user, running task in the background', func)
     return True
 
 
@@ -34,7 +35,7 @@ def we_want_async(*args, **kwargs):
 def dojo_async_task(func):
     @wraps(func)
     def __wrapper__(*args, **kwargs):
-        if we_want_async(*args, **kwargs):
+        if we_want_async(*args, func=func, **kwargs):
             return func.delay(*args, **kwargs)
         else:
             return func(*args, **kwargs)
@@ -58,7 +59,7 @@ def dojo_model_to_id(_func=None, *, parameter=0):
             model_or_id = get_parameter_froms_args_kwargs(args, kwargs, parameter)
 
             if model_or_id:
-                if isinstance(model_or_id, models.Model) and we_want_async(*args, **kwargs):
+                if isinstance(model_or_id, models.Model) and we_want_async(*args, func=func, **kwargs):
                     logger.debug('converting model_or_id to id: %s', model_or_id)
                     id = model_or_id.id
                     args = list(args)
@@ -97,7 +98,7 @@ def dojo_model_from_id(_func=None, *, model=Finding, parameter=0):
             model_or_id = get_parameter_froms_args_kwargs(args, kwargs, parameter)
 
             if model_or_id:
-                if not isinstance(model_or_id, models.Model) and we_want_async(*args, **kwargs):
+                if not isinstance(model_or_id, models.Model) and we_want_async(*args, func=func, **kwargs):
                     logger.debug('instantiating model_or_id: %s for model: %s', model_or_id, model)
                     try:
                         instance = model.objects.get(id=model_or_id)
@@ -163,7 +164,7 @@ def list_of_models_to_dict_with_tags(model_list):
 
 
 def convert_kwargs_if_async(**kwargs):
-    if we_want_async():
+    if we_want_async(func=convert_kwargs_if_async):
         # not sync means using celery for notifications.
         # sending full model instances to celery is bad practice.
         # and any models with tags cannot be sent to celery due to serialization problems with celery

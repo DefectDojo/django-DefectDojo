@@ -1,0 +1,245 @@
+<NexposeReport version="2.0">
+    <scans>
+        <scan id="28959" name="Localhost" startTime="20210228T225351463" endTime="20210228T225429678"
+              status="finished"/>
+    </scans>
+    <nodes>
+        <node address="192.168.1.1" status="alive" hardware-address="001122334455" device-id="1"
+              site-name="Localhost" site-importance="Normal" scan-template="Full audit"
+              risk-score="1.0">
+            <fingerprints>
+                <os certainty="0.67" device-class="General" vendor="Linux" family="Linux" product="Linux"
+                    version="2.6.32"/>
+            </fingerprints>
+            <endpoints>
+                <endpoint protocol="tcp" port="53" status="open">
+                    <services>
+                        <service name="DNS">
+                            <fingerprints>
+                                <fingerprint certainty="0.90" vendor="PowerDNS" family="PowerDNS" product="Recursor"
+                                             version="4.3.5"/>
+                            </fingerprints>
+                            <tests>
+                                <test id="dns-allows-cache-snooping" key="" status="vulnerable-exploited"
+                                      scan-id="28959" vulnerable-since="20210211T164506081"
+                                      pci-compliance-status="fail">
+
+                                    <Paragraph>
+                                        <Paragraph>Received 4 answers to a non-recursive query for www.rapid7.com
+                                        </Paragraph>
+                                    </Paragraph>
+                                </test>
+
+                                <test id="dns-processes-recursive-queries" key="" status="vulnerable-exploited"
+                                      scan-id="28959" vulnerable-since="20210211T164506081"
+                                      pci-compliance-status="pass">
+
+                                    <Paragraph>
+                                        <Paragraph>Nameserver resolved www.google.com to:
+                                            <UnorderedList>
+                                                <ListItem>www.google.com. 12 IN A 172.217.17.100</ListItem>
+                                            </UnorderedList>
+                                        </Paragraph>
+                                    </Paragraph>
+                                </test>
+                            </tests>
+                        </service>
+                    </services>
+                </endpoint>
+
+                <endpoint protocol="udp" port="53" status="open">
+                    <services>
+                        <service name="DNS">
+                            <fingerprints>
+                                <fingerprint certainty="0.90" vendor="PowerDNS" family="PowerDNS" product="Recursor"
+                                             version="4.3.5"/>
+                            </fingerprints>
+                            <tests>
+                                <test id="dns-allows-cache-snooping" key="" status="vulnerable-exploited"
+                                      scan-id="28959" vulnerable-since="20210211T164506081"
+                                      pci-compliance-status="fail">
+
+                                    <Paragraph>
+                                        <Paragraph>Received 4 answers to a non-recursive query for www.rapid7.com
+                                        </Paragraph>
+                                    </Paragraph>
+                                </test>
+
+                                <test id="dns-processes-recursive-queries" key="" status="vulnerable-exploited"
+                                      scan-id="28959" vulnerable-since="20210211T164506081"
+                                      pci-compliance-status="pass">
+
+                                    <Paragraph>
+                                        <Paragraph>Nameserver resolved www.google.com to:
+                                            <UnorderedList>
+                                                <ListItem>www.google.com. 300 IN A 216.58.211.100</ListItem>
+                                            </UnorderedList>
+                                        </Paragraph>
+                                    </Paragraph>
+                                </test>
+
+                                <test id="dns-amplification" key="" status="vulnerable-exploited" scan-id="28959"
+                                      vulnerable-since="20210211T164506081" pci-compliance-status="pass">
+
+                                    <Paragraph>
+                                        <Paragraph>Running DNS over UDP</Paragraph>
+                                    </Paragraph>
+                                </test>
+                            </tests>
+                        </service>
+                    </services>
+                </endpoint>
+            </endpoints>
+        </node>
+    </nodes>
+    <VulnerabilityDefinitions>
+        <vulnerability id="dns-allows-cache-snooping" title="DNS server allows cache snooping" severity="5"
+                       pciSeverity="3" cvssScore="5.0" cvssVector="(AV:N/AC:L/Au:N/C:P/I:N/A:N)"
+                       published="19900101T000000000" added="20110401T000000000" modified="20160408T000000000"
+                       riskScore="599.5486">
+            <malware/>
+            <exploits/>
+            <description>
+
+                <ContainerBlockElement>
+
+                    <Paragraph>
+                        This DNS server is susceptible to DNS cache snooping, whereby an attacker
+                        can make non-recursive queries to a DNS server, looking for records
+                        potentially already resolved by this DNS server for other clients.
+                        Depending on the response, an attacker can use this information to
+                        potentially launch other attacks.
+                    </Paragraph>
+                </ContainerBlockElement>
+            </description>
+            <references>
+                <reference source="URL">http://cs.unc.edu/~fabian/course_papers/cache_snooping.pdf</reference>
+            </references>
+            <tags>
+                <tag>DNS</tag>
+                <tag>ISC</tag>
+                <tag>ISC BIND</tag>
+            </tags>
+            <solution>
+
+                <ContainerBlockElement>
+                    <Paragraph>
+                        <Paragraph>
+                            Restrict the processing of DNS queries to only systems that should
+                            be allowed to use this nameserver.
+                        </Paragraph>
+                    </Paragraph>
+                </ContainerBlockElement>
+            </solution>
+        </vulnerability>
+
+        <vulnerability id="dns-amplification" title="DNS Traffic Amplification" severity="1" pciSeverity="1"
+                       cvssScore="0.0" cvssVector="(AV:N/AC:L/Au:N/C:N/I:N/A:N)" published="20130329T000000000"
+                       added="20141210T000000000" modified="20180321T000000000" riskScore="0.0">
+            <malware/>
+            <exploits/>
+            <description>
+
+                <ContainerBlockElement>
+
+                    <Paragraph>
+                        A Domain Name Server (DNS) amplification attack is a popular form of
+                        distributed denial of service (DDoS) that relies on the use of publically
+                        accessible open DNS servers to overwhelm a victim system with DNS response
+                        traffic.
+                    </Paragraph>
+
+                    <Paragraph>
+                        A Domain Name Server (DNS) Amplification attack is a popular form of
+                        Distributed Denial of Service (DDoS), in which attackers use publically
+                        accessible open DNS servers to flood a target system with DNS response traffic.
+                        The primary technique consists of an attacker sending a DNS name lookup request
+                        to an open DNS server with the source address spoofed to be the target's
+                        address. When the DNS server sends the DNS record response, it is sent instead
+                        to the target. Attackers will typically submit a request for as much zone
+                        information as possible to maximize the amplification effect. In most attacks
+                        of this type observed by US-CERT, the spoofed queries sent by the attacker are
+                        of the type, "ANY" which returns all known information about a DNS zone in a
+                        single request. Because the size of the response is considerably larger than
+                        the request, the attacker is able to increase the amount of traffic directed at
+                        the victim. By leveraging a botnet to produce a large number of spoofed DNS
+                        queries, an attacker can create an immense amount of traffic with little
+                        effort. Additionally, because the responses are legitimate data coming from
+                        valid servers, it is extremely difficult to prevent these types of attacks.
+                        While the attacks are difficult to stop, network operators can apply several
+                        possible mitigation strategies.
+                    </Paragraph>
+
+                    <Paragraph>
+                        While the most common form of this attack that US-CERT has observed
+                        involves DNS servers configured to allow unrestricted recursive resolution for
+                        any client on the Internet, attacks can also involve authoritative name servers
+                        that do not provide recursive resolution. The attack method is similar to open
+                        recursive resolvers, but is more difficult to mitigate since even a server
+                        configured with best practices can still be used in an attack. In the case of
+                        authoritative servers, mitigation should focus on using Response Rate Limiting
+                        to restrict the amount of traffic.
+                    </Paragraph>
+                </ContainerBlockElement>
+            </description>
+            <references>
+                <reference source="CERT">TA13-088A</reference>
+                <reference source="CERT">TA14-017A</reference>
+            </references>
+            <tags>
+                <tag>DNS</tag>
+                <tag>Denial of Service</tag>
+                <tag>ISC</tag>
+                <tag>ISC BIND</tag>
+            </tags>
+            <solution>
+
+                <ContainerBlockElement>
+                    <Paragraph>
+                        DNS is often vital to the proper functioning of a network. Restrict access
+                        to the DNS service to only trusted assets.
+                    </Paragraph>
+                </ContainerBlockElement>
+            </solution>
+        </vulnerability>
+
+        <vulnerability id="dns-processes-recursive-queries" title="Nameserver Processes Recursive Queries" severity="5"
+                       pciSeverity="2" cvssScore="5.0" cvssVector="(AV:N/AC:L/Au:N/C:N/I:N/A:P)"
+                       published="19900101T000000000" added="20100226T000000000" modified="20121023T000000000"
+                       riskScore="199.8495">
+            <malware/>
+            <exploits/>
+            <description>
+
+                <ContainerBlockElement>
+
+                    <Paragraph>
+                        Allowing nameservers to process recursive queries coming from any system
+                        may, in certain situations, help attackers conduct denial of service or
+                        cache poisoning attacks.
+                    </Paragraph>
+                </ContainerBlockElement>
+            </description>
+            <references>
+                <reference source="URL">http://www.us-cert.gov/reading_room/DNS-recursion033006.pdf</reference>
+            </references>
+            <tags>
+                <tag>DNS</tag>
+                <tag>Denial of Service</tag>
+                <tag>ISC</tag>
+                <tag>ISC BIND</tag>
+            </tags>
+            <solution>
+
+                <ContainerBlockElement>
+                    <Paragraph>
+                        <Paragraph>
+                            Restrict the processing of recursive queries to only systems that
+                            should be allowed to use this nameserver.
+                        </Paragraph>
+                    </Paragraph>
+                </ContainerBlockElement>
+            </solution>
+        </vulnerability>
+    </VulnerabilityDefinitions>
+</NexposeReport>

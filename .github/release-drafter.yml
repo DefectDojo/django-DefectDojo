@@ -6,10 +6,11 @@ categories:
   - title: '💣 Breaking changes'
     labels:
       - 'Breaking Changes'
-  - title: '🚩 Requires settings change or database migration'
+  - title: '🚩 Requires settings changes, database migration, hash code recomputation'
     labels:
       - 'settings_changes'
       - 'New Migration'
+      - 'hashcode-update-needed'
   - title: '🚩 Security'
     labels:
       - 'security'

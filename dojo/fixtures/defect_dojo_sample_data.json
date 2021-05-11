@@ -522,17 +522,6 @@
     }
 },
 {
-    "model": "tastypie.apikey",
-    "pk": 1,
-    "fields": {
-        "user": [
-            "admin"
-        ],
-        "key": "1dfdfa2042567ec751f6b3fa96038b743ea6f1cc",
-        "created": "2018-08-16T01:32:30.801Z"
-    }
-},
-{
     "model": "dojo.regulation",
     "pk": 1,
     "fields": {
@@ -708,7 +697,6 @@
         "enable_mail_notifications": false,
         "mail_notifications_from": "from@example.com",
         "mail_notifications_to": "",
-        "s_finding_severity_naming": false,
         "false_positive_history": false,
         "url_prefix": "",
         "team_name": "",
@@ -1122,9 +1110,6 @@
     "fields": {
         "name": "BodgeIt",
         "description": "[Features](https://github.com/psiinon/bodgeit) and characteristics:\r\n\r\n* Easy to install - just requires java and a servlet engine, e.g. Tomcat\r\n* Self contained (no additional dependencies other than to 2 in the above line)\r\n* Easy to change on the fly - all the functionality is implemented in JSPs, so no IDE required\r\n* Cross platform\r\n* Open source\r\n* No separate db to install and configure - it uses an 'in memory' db that is automatically (re)initialized on start up",
-        "prod_manager": "Tester Jester",
-        "tech_contact": "Bob Buster",
-        "manager": "Peter Scramble",
         "product_manager": [
             "admin"
         ],
@@ -1170,9 +1155,6 @@
     "fields": {
         "name": "Internal CRM App",
         "description": "* New product in development that attempts to follow all best practices",
-        "prod_manager": "Bob Builder",
-        "tech_contact": "Tester Jester",
-        "manager": null,
         "product_manager": [
             "product_manager"
         ],
@@ -1212,9 +1194,6 @@
     "fields": {
         "name": "Apple Accounting Software",
         "description": "Accounting software is typically composed of various modules, different sections dealing with particular areas of accounting. Among the most common are:\r\n\r\n**Core modules**\r\n\r\n* Accounts receivable\u2014where the company enters money received\r\n* Accounts payable\u2014where the company enters its bills and pays money it owes\r\n* General ledger\u2014the company's \"books\"\r\n* Billing\u2014where the company produces invoices to clients/customers",
-        "prod_manager": "0",
-        "tech_contact": "0",
-        "manager": "0",
         "product_manager": [
             "admin"
         ],
@@ -1336,34 +1315,12 @@
     }
 },
 {
-    "model": "dojo.engagement_type",
-    "pk": 1,
-    "fields": {
-        "name": "Type 1"
-    }
-},
-{
-    "model": "dojo.engagement_type",
-    "pk": 2,
-    "fields": {
-        "name": "Type 2"
-    }
-},
-{
-    "model": "dojo.engagement_type",
-    "pk": 3,
-    "fields": {
-        "name": "Type 3"
-    }
-},
-{
     "model": "dojo.engagement",
     "pk": 1,
     "fields": {
         "name": "1st Quarter Engagement",
         "description": "test Engagement",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-12",
         "target_end": "2018-04-12",
@@ -1406,7 +1363,6 @@
         "name": "April Monthly Engagement",
         "description": "Requested by the team for regular manual checkup by the security team.",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-12",
         "target_end": "2018-04-12",
@@ -1449,7 +1405,6 @@
         "name": "weekly engagement",
         "description": "test Engagement",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-03",
         "target_end": "2018-04-04",
@@ -1492,7 +1447,6 @@
         "name": "Static Scan",
         "description": "Initial static scan for Bodgeit.",
         "version": "v.1.2.0",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-16",
         "target_end": "2018-08-23",
@@ -1535,7 +1489,6 @@
         "name": "Quarterly PCI Scan",
         "description": "Reccuring Quarterly Scan",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-11-01",
         "target_end": "2018-11-08",
@@ -1581,7 +1534,6 @@
         "name": "Ad Hoc Engagement",
         "description": null,
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-16",
         "target_end": "2018-08-16",
@@ -1622,7 +1574,6 @@
         "name": "Initial Assessment",
         "description": "This application needs to be assesed to determine the security posture.",
         "version": "10.2.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-10-02",
         "target_end": "2018-10-09",
@@ -1665,7 +1616,6 @@
         "name": "Multiple scanners",
         "description": "Example engagement with multiple scan types.",
         "version": "1.2.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-17",
@@ -1711,7 +1661,6 @@
         "name": "Manual PenTest",
         "description": "Please do a manual pentest before our next release to prod.",
         "version": "1.9.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-10-12",
         "target_end": "2018-10-15",
@@ -1754,7 +1703,6 @@
         "name": "CI/CD Baseline Security Test",
         "description": "",
         "version": "1.1.2",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-24",
@@ -1797,7 +1745,6 @@
         "name": "AdHoc Import - Fri, 17 Aug 2018 18:20:55",
         "description": null,
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-17",

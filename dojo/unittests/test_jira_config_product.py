@@ -48,9 +48,9 @@ class JIRAConfigProductTest(DojoTestCase):
     def add_jira_instance(self, data, jira_mock):
         response = self.client.post(reverse('add_jira'), urlencode(data), content_type='application/x-www-form-urlencoded')
         # check that storing a new config triggers a login call to JIRA
-        call_1 = call(data['url'], data['username'], data['password'], validate=True)
-        call_2 = call(data['url'], data['username'], data['password'], validate=True)
-        # jira_mock.assert_called_once_with(data['url'], data['username'], data['password'], validate=True)
+        call_1 = call(data['url'], data['username'], data['password'])
+        call_2 = call(data['url'], data['username'], data['password'])
+        # jira_mock.assert_called_once_with(data['url'], data['username'], data['password'])
         jira_mock.assert_has_calls([call_1, call_2])
         # succesful, so should redirect to list of JIRA instances
         self.assertRedirects(response, '/jira')
@@ -85,7 +85,7 @@ class JIRAConfigProductTest(DojoTestCase):
 
         # test raw connection error
         with self.assertRaises(requests.exceptions.RequestException):
-            jira = jira_helper.get_jira_connection_raw(data['url'], data['username'], data['password'], validate=True)
+            jira = jira_helper.get_jira_connection_raw(data['url'], data['username'], data['password'])
 
     @patch('dojo.jira_link.views.jira_helper.get_jira_connection_raw')
     def test_add_jira_instance_invalid_credentials(self, jira_mock):
