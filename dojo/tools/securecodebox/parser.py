@@ -1,4 +1,3 @@
-import hashlib
 import json
 from dojo.models import Endpoint, Finding
 import hyperlink
