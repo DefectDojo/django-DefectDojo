@@ -199,10 +199,6 @@ class SonarQubeApiImporter(object):
                     false_p=False,
                     duplicate=False,
                     out_of_scope=False,
-                    mitigated=None,
-                    mitigation='No mitigation provided',
-                    impact="No impact provided",
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
                 )
