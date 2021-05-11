@@ -5,7 +5,6 @@ from dojo.models import Finding
 
 class SecurityCodeScanParser(object):
 
-
     def get_scan_types(self):
         return ["Security Code Scan Report"]
 
@@ -54,4 +53,3 @@ class SecurityCodeScanParser(object):
                     dupes[dupe_key] = finding
 
         return list(dupes.values())
-
