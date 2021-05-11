@@ -50,3 +50,5 @@ GitHub](https://github.com/DefectDojo/django-DefectDojo).
 A running example is available on [the demo server](https://demo.defectdojo.org),
 using the credentials `admin` / `defectdojo@demo#appsec`. Note: The demo
 server is refreshed regularly and provisioned with some sample data.
+
+You can also find videos of demos on [our YouTube channel](https://www.youtube.com/channel/UC3WVGA1vSO0IV-8cDxdqoPQ).
