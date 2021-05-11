@@ -6,7 +6,7 @@ Found: /src/WebGoatCore/Controllers/AccountController.cs(179,42): warning SCS001
 Found: /src/WebGoatCore/Controllers/AccountController.cs(209,42): warning SCS0016: CWE-352: Controller method is potentially vulnerable to Cross Site Request Forgery (CSRF).
 Found: /src/WebGoatCore/Controllers/AccountController.cs(50,37): warning SCS0027: CWE-601: Potential Open Redirect vulnerability was found where 'url' in 'RedirectResult ControllerBase.Redirect(string url)' may be tainted by user-controlled data from 'LoginViewModel model' in method 'Task<IActionResult> AccountController.Login(LoginViewModel model)'.
 Found: /src/WebGoatCore/Controllers/CheckoutController.cs(78,30): warning SCS0016: CWE-352: Controller method is potentially vulnerable to Cross Site Request Forgery (CSRF).
-Found: /src/WebGoatCore/Controllers/CheckoutController.cs(219,29): warning SCS0027: CWE-601: Potential Open Redirect vulnerability was found where 'url' in 'RedirectResult ControllerBase.Redirect(string url)' may be tainted by user-controlled data from 'string carrier' in method 'IActionResult CheckoutController.GoToExternalTracker(string carrier, string trackingNumber)'.
+Found: /src/WebGoatCore/Controllers/CheckoutController.cs(219,29): info SCS0027: CWE-601: Potential Open Redirect vulnerability was found where 'url' in 'RedirectResult ControllerBase.Redirect(string url)' may be tainted by user-controlled data from 'string carrier' in method 'IActionResult CheckoutController.GoToExternalTracker(string carrier, string trackingNumber)'.
 Found: /src/WebGoatCore/Controllers/CheckoutController.cs(219,29): warning SCS0027: CWE-601: Potential Open Redirect vulnerability was found where 'url' in 'RedirectResult ControllerBase.Redirect(string url)' may be tainted by user-controlled data from 'string trackingNumber' in method 'IActionResult CheckoutController.GoToExternalTracker(string carrier, string trackingNumber)'.
 Found: /src/WebGoatCore/Controllers/CartController.cs(34,30): warning SCS0016: CWE-352: Controller method is potentially vulnerable to Cross Site Request Forgery (CSRF).
 Found: /src/WebGoatCore/Controllers/BlogController.cs(33,30): warning SCS0016: CWE-352: Controller method is potentially vulnerable to Cross Site Request Forgery (CSRF).
@@ -25,6 +25,6 @@ Found: /src/WebGoatCore/Data/ShipperRepository.cs(58,53): warning SCS0005: CWE-3
 Found: /src/WebGoatCore/Data/ShipperRepository.cs(58,89): warning SCS0005: CWE-338: Weak random number generator.
 Found: /src/WebGoatCore/Data/ShipperRepository.cs(58,125): warning SCS0005: CWE-338: Weak random number generator.
 Found: /src/WebGoatCore/Data/CustomerRepository.cs(67,98): warning SCS0005: CWE-338: Weak random number generator.
-Found: /src/WebGoatCore/Models/CreditCard.cs(143,24): warning SCS0005: CWE-338: Weak random number generator.
+Found: /src/WebGoatCore/Models/CreditCard.cs(143,24): error SCS0005: CWE-338: Weak random number generator.
 Completed in 00:00:12
 25 warnings
