@@ -30,7 +30,6 @@ env = environ.Env(
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
-    DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
     DD_WHITENOISE=(bool, False),
@@ -174,10 +173,6 @@ env = environ.Env(
     DD_FEATURE_AUTHORIZATION_V2=(bool, False),
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
-
-    # Feature toggle to show legacy list of PDF reports
-    # You need to have wkhtmltopdf installed on your system to generate PDF reports
-    DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
 
     DD_FEATURE_FINDING_GROUPS=(bool, False),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
@@ -539,9 +534,6 @@ SESSION_COOKIE_AGE = env('DD_SESSION_COOKIE_AGE')
 # Credential Key
 CREDENTIAL_AES_256_KEY = env('DD_CREDENTIAL_AES_256_KEY')
 DB_KEY = env('DD_CREDENTIAL_AES_256_KEY')
-
-# wkhtmltopdf settings
-WKHTMLTOPDF_PATH = env('DD_WKHTMLTOPDF')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
@@ -974,8 +966,8 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+            'handlers': ['mail_admins', 'console'],
+            'level': 'WARN',
             'propagate': True,
         },
         'django.security': {
@@ -1055,10 +1047,6 @@ TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separat
 FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
 # When enabled, staff users have full access to all product types and products
 AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
-
-# Feature toggle to show legacy list of PDF reports
-# You need to have wkhtmltopdf installed on your system to generate PDF reports
-FEATURE_REPORTS_PDF_LIST = env('DD_FEATURE_REPORTS_PDF_LIST')
 
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 

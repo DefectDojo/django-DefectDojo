@@ -1,5 +1,6 @@
 ---
 title: "Source code repositories"
+description: "Integration of repositories to navigate to the locaction of findings in the source code."
 draft: false
 weight: 5
 ---

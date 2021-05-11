@@ -366,7 +366,7 @@
                             </i>
                         </td>
                         <td>
-                            {% for find in group.findings.all %}{% if find.cve%}<a href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
+                            {% for find in group.findings.all %}{% if find.cve%}<a target="_blank" href="{{ find.cve|cve_url }}">{{ find.cve }}</a>{% if not forloop.last %},{% endif %}{% endif %}{% endfor %}
                         </td>
                         <td>
                             {{ group.components }}
@@ -375,7 +375,7 @@
                         <td>{{ group.age }}</td>
                         {% if system_settings.enable_finding_sla %}
                             <td>
-                            {{ group|finding_sla }}
+                            {{ group|group_sla }}
                             </td>
                         {% endif %}
                         <td>
@@ -550,7 +550,7 @@
                                 <label style="font-size: 80%; font-weight: normal;">
                                     <input id="id_bulk_finding_group_add" name="finding_group_add" class="finding_group_option" type="checkbox" disabled/> <span>Add to...</span>
                                 </label>
-                                <select name="add_to_finding_group" id="add_to_finding_group" style="font-size: 80%">
+                                <select id="id_add_to_finding_group" name="add_to_finding_group" style="font-size: 80%">
                                     <option value="">Choose...</option>
                                     {% for group in finding_groups %}
                                         <option value="{{ group.id }}">{{ group.name|truncatechars_html:40 }}</option>
@@ -560,6 +560,17 @@
                             <label style="font-size: 80%; font-weight: normal; display: block">
                                 <input id="id_bulk_finding_group_remove" name="finding_group_remove" class="finding_group_option" type="checkbox" disabled/> <span>Remove from any group</span>
                             </label>
+                            <span>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_finding_group_by" name="finding_group_by" class="finding_group_option" type="checkbox" disabled/> <span>Group by</span>
+                                    <select id="id_finding_group_by_option" name="finding_group_by_option" style="font-size: 80%">
+                                        <option value="">Choose...</option>
+                                        {% for finding_group_by_option in finding_group_by_options %}
+                                            <option value="{{ finding_group_by_option.0 }}">{{ finding_group_by_option.1|truncatechars_html:40 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </span>
                         {% endif %}
 
                         {% if system_settings.enable_jira %}
@@ -1337,6 +1348,7 @@
                 $('#bulk_edit_menu #id_bulk_finding_group_create').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_finding_group_add').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_finding_group_remove').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_finding_group_by').prop('disabled', !checked);
             })
 
             $('#bulk_edit_menu #id_bulk_finding_group_create').on("click", function (e){

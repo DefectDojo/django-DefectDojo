@@ -93,8 +93,8 @@ spec:
         - name: http
           protocol: TCP
           containerPort: 8081
-        {{- if .Values.django.uwsgi.enable_ptvsd }}
-        - name: ptvsd
+        {{- if .Values.django.uwsgi.enable_debug }}
+        - name: debug
           protocol: TCP
           containerPort: 3000
         {{- end }}
@@ -110,6 +110,10 @@ spec:
             secretKeyRef:
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
+        {{- if .Values.django.uwsgi.enable_debug }}
+        - name: DD_DEBUG
+          value: 'True'
+        {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:

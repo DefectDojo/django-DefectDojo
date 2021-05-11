@@ -1,6 +1,6 @@
 ---
-title: "JIRA Integration"
-date: 2021-02-02T20:46:28+01:00
+title: "JIRA integration"
+description: "Bidirectional integration of DefectDojo findings with Jira issues."
 draft: false
 weight: 4
 ---

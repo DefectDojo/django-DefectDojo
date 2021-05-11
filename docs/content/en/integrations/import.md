@@ -1,12 +1,9 @@
 ---
-title: "Import Reports"
-date: 2021-02-02T20:46:28+01:00
+title: "Import scan reports"
+description: "DefectDojo has the ability to import scan reports from a large number of security tools."
 draft: false
 weight: 1
 ---
-
-
-DefectDojo has the ability to import reports from other security tools.
 
 ## Security Tools
 

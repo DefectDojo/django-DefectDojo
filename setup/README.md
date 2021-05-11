@@ -38,7 +38,7 @@ All installs make these assumption:
 ### Definitions
 
 * DefectDojo - the source code and supporting files for DefectDojo contained in the Github repo at https://github.com/DefectDojo/django-DefectDojo
-* Dojo dependencies - any additional software, libraries or services needed to install and run the software in the DefectDojo repo.  This includes Django and other pip packages, celery workers, and any binaries required to run DefectDojo such as wkhtmltopdf
+* Dojo dependencies - any additional software, libraries or services needed to install and run the software in the DefectDojo repo.  This includes Django and other pip packages, celery workers, and any binaries required to run DefectDojo
 * 3rd party services - additional services not maintained by DefectDojo but needed to run DefectDojo - currently a database
 
 ### Command-line options
