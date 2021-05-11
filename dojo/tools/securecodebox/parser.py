@@ -25,10 +25,7 @@ class SecureCodeBoxParser(object):
             finding = Finding(
                 static_finding=True, dynamic_finding=False, active=False, verified=False)
             self.set_finding_base_info(finding, node, test)
-            finding_unique_string = str(node['location'] +
-                                        finding.description + finding.title)
-            dupe_key = hashlib.md5(
-                finding_unique_string.encode('utf-8')).hexdigest()
+            dupe_key = finding.unique_id_from_tool
             if dupe_key not in dupes:
                 self.set_finding_endpoint(finding, node)
                 dupes[dupe_key] = finding
