@@ -195,7 +195,7 @@ class FindingFilterWithTags(DojoFilter):
     not_tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Not tag name contains', exclude=True)
 
     def __init__(self, *args, **kwargs):
-        super(DojoFilter, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class DateRangeFilter(ChoiceFilter):
@@ -1000,6 +1000,8 @@ class ApiFindingFilter(DojoFilter):
 
 
 class FindingFilter(FindingFilterWithTags):
+    # tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
+
     title = CharFilter(lookup_expr='icontains')
     date = DateRangeFilter()
     last_reviewed = DateRangeFilter()
