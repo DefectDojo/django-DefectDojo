@@ -197,7 +197,8 @@ class WhiteHatSentinelParser(object):
         cwe = self._parse_cwe_from_tags(whitehat_sentinel_vuln['attack_vectors'][0].get('scanner_tags', []))
         description_ref = self._parse_description(whitehat_sentinel_vuln['description'])
         description = description_ref['description']
-        references = description_ref['reference_link']
+        references = f"{description_ref['reference_link']}\nhttps://source.whitehatsec.com/asset-management/site" \
+                     f"-summary/{whitehat_sentinel_vuln['site']}/findings/{whitehat_sentinel_vuln['id']}"
         steps = whitehat_sentinel_vuln['description'].get('description_prepend', '')
         solution = self._parse_solution(whitehat_sentinel_vuln['solution'])
         risk_id = whitehat_sentinel_vuln.get('custom_risk') if whitehat_sentinel_vuln.get(
