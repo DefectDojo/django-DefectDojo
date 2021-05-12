@@ -1130,6 +1130,7 @@ class FindingFilter(FindingFilterWithTags):
         # Don't show the product filter on the product finding view
         if self.pid:
             del self.form.fields['test__engagement__product']
+            # TODO add authorized check to be sure
             self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
                 product_id=self.pid
             ).all()
