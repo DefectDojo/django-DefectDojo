@@ -33,7 +33,7 @@ class TestSecureCodeBoxParser(TestCase):
         parser = SecureCodeBoxParser()
         findings = parser.get_findings(testfile, self.get_test())
         testfile.close()
-        self.assertEqual(5, len(findings))
+        self.assertEqual(6, len(findings))
         self.assertEqual(findings[0].severity, "Info")
         self.assertEqual(findings[0].title, "ssh")
         self.assertEqual(findings[0].description,
@@ -47,6 +47,9 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].query, None)
         self.assertEqual(findings[0].unsaved_endpoints[0].fragment, None)
         self.assertEqual(findings[0].unsaved_endpoints[0].port, 22)
+        self.assertEqual(findings[5].unsaved_endpoints[0].path, "/robots.txt")
+        self.assertEqual(findings[5].unsaved_endpoints[0].fragment, "test")
+        self.assertEqual(findings[5].unsaved_endpoints[0].query, None)
 
     def test_scb_parser_with_many_vuln_has_many_findings_nikto(self):
         testfile = open(

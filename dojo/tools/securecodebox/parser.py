@@ -39,8 +39,8 @@ class SecureCodeBoxParser(object):
         endpoint.host = parsed_url.host
         endpoint.port = parsed_url.port
         # replace default values of hyperlink with more reasonable None values (if needed)
-        endpoint.path = parsed_url.path if parsed_url.path != () else None
-        endpoint.query = parsed_url.query if parsed_url.query != () else None
+        endpoint.path = "/" + \
+            "/".join(parsed_url.path) if parsed_url.path != () else None
         endpoint.fragment = parsed_url.fragment if parsed_url.fragment != "" else None
         if 'attributes' in node:
             attributes = node['attributes']

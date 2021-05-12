@@ -104,5 +104,22 @@
       "operating_system": null
     },
     "id": "b293f2d4-d39a-409b-b678-e7012d2b2706"
+  },
+  {
+    "name": "\"robots.txt\" contains 1 entry which should be manually viewed.",
+    "description": null,
+    "category": "robots.txt",
+    "location": "http://juice-shop/robots.txt?q=test&b=test#test",
+    "osi_layer": "NETWORK",
+    "severity": "INFORMATIONAL",
+    "attributes": {
+      "ip_address": "10.96.193.17",
+      "hostname": "juice-shop",
+      "banner": "",
+      "method": "GET",
+      "port": 3000,
+      "niktoId": 999996
+    },
+    "id": "7332d472-4242-46e6-ac9b-2d8818d4b39d"
   }
 ]
