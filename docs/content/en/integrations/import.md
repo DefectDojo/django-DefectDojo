@@ -139,6 +139,10 @@ Import CSV credential scanner reports
 
 CSV Report
 
+### Dockle Report
+
+Import JSON container image linter reports
+
 ### Checkmarx
 
 - `Checkmarx Scan`, `Checkmarx Scan detailed`: XML report from Checkmarx SAST (source code analysis)

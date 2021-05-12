@@ -1,0 +1,58 @@
+import json
+import hashlib
+from dojo.models import Finding
+
+
+class DockleParser(object):
+    """
+    A class that can be used to parse the Dockle JSON report files
+    """
+
+    # table to match Dockle severity to DefectDojo severity
+    SEVERITY = {
+        "INFO": "Low",
+        "WARN": "Medium",
+        "FATAL": "High",
+    }
+
+    def get_scan_types(self):
+        return ["Dockle Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "Dockle Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON output for Dockle scan report."
+
+    def get_findings(self, filename, test):
+        data = json.load(filename)
+        dupes = {}
+        for item in data['details']:
+            code = item['code']
+            dockle_severity = item['level']
+            title = item['title']
+            if dockle_severity == "IGNORE":
+                continue
+            severity = self.SEVERITY[dockle_severity]
+            description = ""
+            for row in item['alerts']:
+                description += "{}\n".format(row)
+            dupe_key = hashlib.sha256(
+                (code + title).encode("utf-8")
+            ).hexdigest()
+
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
+                finding.nb_occurences += 1
+            else:
+                finding = Finding(
+                    title=f"Found {code}: {title}",
+                    test=test,
+                    severity=severity,
+                    numerical_severity=Finding.get_numerical_severity(severity),
+                    description=description,
+                    static_finding=True,
+                    nb_occurences=1,
+                )
+                dupes[dupe_key] = finding
+        return list(dupes.values())
