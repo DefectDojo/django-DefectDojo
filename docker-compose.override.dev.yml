@@ -6,9 +6,8 @@ services:
     volumes:
       - '.:/app:z'
     environment:
-      DD_DEBUG: 'True'
       DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
-      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}      
+      DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
   celeryworker:
     volumes:
       - '.:/app:z'

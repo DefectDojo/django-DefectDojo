@@ -1,7 +1,8 @@
 ---
-title: "How to write a DefectDojo parser"
-date: 2021-02-02T20:46:28+01:00
+title: "DefectDojo parser"
+description: "How to write a DefectDojo parser"
 draft: false
+weight: 1
 ---
 
 {{% alert title="Information" color="info" %}}
@@ -14,18 +15,9 @@ All commands assume that you're located at the root of the django-DefectDojo clo
 - It's advised that you create a dedicated branch for your development, such as `git checkout -b parser-name` yet that's up to you.
 
 It is probably easier to use the docker-compose stack (and benefit from the hot-reload capbility for uWSGI).
-Set up your environment to use the dev or ptvsd environment, such as:
+Set up your environment to use the debug environment, such as:
 
-{{< highlight bash >}}
-$ docker/setEnv.sh dev
-{{< /highlight >}}
-
-or
-
-{{< highlight bash >}}
-# allows to set breakpoints in uWSGI
-$ docker/setEnv.sh ptvsd
-{{< /highlight >}}
+`$ docker/setEnv.sh debug`
 
 Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md) for more details.
 
@@ -123,4 +115,4 @@ If you want to take a look at previous parsers that are now part of DefectDojo, 
 
 ## Update the GitHub pages documentation
 
-The DefectDojo official documentation lives in the docs folder, https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs Please update `docs/content/en/import.md` with the details of your new parser.
+The DefectDojo official documentation lives in the docs folder, https://github.com/DefectDojo/django-DefectDojo/tree/dev/docs Please update [`docs/content/en/integrations/import.md`](https://github.com/DefectDojo/django-DefectDojo/blob/master/docs/content/en/integrations/import.md) with the details of your new parser.

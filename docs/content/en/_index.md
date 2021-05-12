@@ -37,16 +37,10 @@ and test cycles, and allows for fine-grained reporting.
 
 ### How does DefectDojo work?
 
-DefectDojo is based on a model that allows the ultimate flexibility in
-your test tracking needs.
-
--   Working in DefectDojo starts with a `Product Type`.
--   Each Product Type can have one or more `Products`.
--   Each Product can have one or more `Engagements`.
--   Each Engagement can have one or more `Tests`.
--   Each Test can have one or more `Findings`.
-
-![image](images/DD-Hierarchy.png)
+1. [Getting started]({{< ref "/getting_started" >}}) will tell you how to install and configure DefectDojo.
+2. [Usage]({{< ref "/usage" >}}) shows how to use DefectDojo to manage vulnerabilities.
+3. A lot of [integrations]({{< ref "/integrations" >}}) help to fit DefectDojo in your environment.
+4. [Contributing]({{< ref "/contributing" >}}) gives insights how you can help to make DefectDojo even better.
 
 ### Where to find DefectDojo?
 
@@ -56,3 +50,5 @@ GitHub](https://github.com/DefectDojo/django-DefectDojo).
 A running example is available on [the demo server](https://demo.defectdojo.org),
 using the credentials `admin` / `defectdojo@demo#appsec`. Note: The demo
 server is refreshed regularly and provisioned with some sample data.
+
+You can also find videos of demos on [our YouTube channel](https://www.youtube.com/channel/UC3WVGA1vSO0IV-8cDxdqoPQ).
