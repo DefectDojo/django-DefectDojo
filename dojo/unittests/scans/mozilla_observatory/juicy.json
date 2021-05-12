@@ -1,0 +1,201 @@
+{
+    "scan": {
+        "algorithm_version": 2,
+        "end_time": "Wed, 05 May 2021 07:59:48 GMT",
+        "grade": "F",
+        "hidden": false,
+        "likelihood_indicator": "MEDIUM",
+        "response_headers": {
+            "Accept-Ranges": "bytes",
+            "Access-Control-Allow-Origin": "*",
+            "Cache-Control": "public, max-age=0",
+            "Connection": "keep-alive",
+            "Content-Encoding": "gzip",
+            "Content-Type": "text/html; charset=UTF-8",
+            "Date": "Wed, 05 May 2021 07:59:46 GMT",
+            "Etag": "W/\"784-1793b3ce1d2\"",
+            "Feature-Policy": "payment 'self'",
+            "Last-Modified": "Wed, 05 May 2021 06:35:16 GMT",
+            "Server": "Cowboy",
+            "Transfer-Encoding": "chunked",
+            "Vary": "Accept-Encoding",
+            "Via": "1.1 vegur",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "SAMEORIGIN"
+        },
+        "scan_id": 19008363,
+        "score": 0,
+        "start_time": "Wed, 05 May 2021 07:59:44 GMT",
+        "state": "FINISHED",
+        "status_code": 200,
+        "tests_failed": 5,
+        "tests_passed": 7,
+        "tests_quantity": 12
+    },
+    "tests": {
+        "content-security-policy": {
+            "expectation": "csp-implemented-with-no-unsafe",
+            "name": "content-security-policy",
+            "output": {
+                "data": null,
+                "http": false,
+                "meta": false,
+                "policy": null
+            },
+            "pass": false,
+            "result": "csp-not-implemented",
+            "score_description": "Content Security Policy (CSP) header not implemented",
+            "score_modifier": -25
+        },
+        "contribute": {
+            "expectation": "contribute-json-only-required-on-mozilla-properties",
+            "name": "contribute",
+            "output": {
+                "data": null
+            },
+            "pass": true,
+            "result": "contribute-json-only-required-on-mozilla-properties",
+            "score_description": "Contribute.json isn't required on websites that don't belong to Mozilla",
+            "score_modifier": 0
+        },
+        "cookies": {
+            "expectation": "cookies-secure-with-httponly-sessions",
+            "name": "cookies",
+            "output": {
+                "data": null,
+                "sameSite": null
+            },
+            "pass": true,
+            "result": "cookies-not-found",
+            "score_description": "No cookies detected",
+            "score_modifier": 0
+        },
+        "cross-origin-resource-sharing": {
+            "expectation": "cross-origin-resource-sharing-not-implemented",
+            "name": "cross-origin-resource-sharing",
+            "output": {
+                "data": {
+                    "acao": "*",
+                    "clientaccesspolicy": null,
+                    "crossdomain": null
+                }
+            },
+            "pass": true,
+            "result": "cross-origin-resource-sharing-implemented-with-public-access",
+            "score_description": "Public content is visible via cross-origin resource sharing (CORS) Access-Control-Allow-Origin header",
+            "score_modifier": 0
+        },
+        "public-key-pinning": {
+            "expectation": "hpkp-not-implemented",
+            "name": "public-key-pinning",
+            "output": {
+                "data": null,
+                "includeSubDomains": false,
+                "max-age": null,
+                "numPins": null,
+                "preloaded": false
+            },
+            "pass": true,
+            "result": "hpkp-not-implemented",
+            "score_description": "HTTP Public Key Pinning (HPKP) header not implemented",
+            "score_modifier": 0
+        },
+        "redirection": {
+            "expectation": "redirection-to-https",
+            "name": "redirection",
+            "output": {
+                "destination": "http://juice-shop.herokuapp.com/",
+                "redirects": false,
+                "route": [
+                    "http://juice-shop.herokuapp.com/"
+                ],
+                "status_code": 200
+            },
+            "pass": false,
+            "result": "redirection-missing",
+            "score_description": "Does not redirect to an HTTPS site",
+            "score_modifier": -20
+        },
+        "referrer-policy": {
+            "expectation": "referrer-policy-private",
+            "name": "referrer-policy",
+            "output": {
+                "data": null,
+                "http": false,
+                "meta": false
+            },
+            "pass": true,
+            "result": "referrer-policy-not-implemented",
+            "score_description": "Referrer-Policy header not implemented",
+            "score_modifier": 0
+        },
+        "strict-transport-security": {
+            "expectation": "hsts-implemented-max-age-at-least-six-months",
+            "name": "strict-transport-security",
+            "output": {
+                "data": null,
+                "includeSubDomains": false,
+                "max-age": null,
+                "preload": false,
+                "preloaded": false
+            },
+            "pass": false,
+            "result": "hsts-not-implemented",
+            "score_description": "HTTP Strict Transport Security (HSTS) header not implemented",
+            "score_modifier": -20
+        },
+        "subresource-integrity": {
+            "expectation": "sri-implemented-and-external-scripts-loaded-securely",
+            "name": "subresource-integrity",
+            "output": {
+                "data": {
+                    "//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js": {
+                        "crossorigin": null,
+                        "integrity": null
+                    },
+                    "//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js": {
+                        "crossorigin": null,
+                        "integrity": null
+                    }
+                }
+            },
+            "pass": false,
+            "result": "sri-not-implemented-and-external-scripts-not-loaded-securely",
+            "score_description": "Subresource Integrity (SRI) not implemented, and external scripts are loaded over HTTP or use protocol-relative URLs via src=\"//...\"",
+            "score_modifier": -50
+        },
+        "x-content-type-options": {
+            "expectation": "x-content-type-options-nosniff",
+            "name": "x-content-type-options",
+            "output": {
+                "data": "nosniff"
+            },
+            "pass": true,
+            "result": "x-content-type-options-nosniff",
+            "score_description": "X-Content-Type-Options header set to \"nosniff\"",
+            "score_modifier": 0
+        },
+        "x-frame-options": {
+            "expectation": "x-frame-options-sameorigin-or-deny",
+            "name": "x-frame-options",
+            "output": {
+                "data": "SAMEORIGIN"
+            },
+            "pass": true,
+            "result": "x-frame-options-sameorigin-or-deny",
+            "score_description": "X-Frame-Options (XFO) header set to SAMEORIGIN or DENY",
+            "score_modifier": 0
+        },
+        "x-xss-protection": {
+            "expectation": "x-xss-protection-1-mode-block",
+            "name": "x-xss-protection",
+            "output": {
+                "data": null
+            },
+            "pass": false,
+            "result": "x-xss-protection-not-implemented",
+            "score_description": "X-XSS-Protection header not implemented",
+            "score_modifier": -10
+        }
+    }
+}
