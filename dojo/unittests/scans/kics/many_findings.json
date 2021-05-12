@@ -1,0 +1,227 @@
+{
+	"files_scanned": 9,
+	"files_parsed": 9,
+	"files_failed_to_scan": 0,
+	"queries_total": 315,
+	"queries_failed_to_execute": 0,
+	"queries_failed_to_compute_similarity_id": 0,
+	"queries": [
+		{
+			"query_name": "CPU Limits Not Set",
+			"query_id": "4ac0e2b7-d2d2-4af7-8799-e8de6721ccda",
+			"query_url": "https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+			"severity": "MEDIUM",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/test/templates/test.yaml",
+					"similarity_id": "617aa050f1330042e30c448968c0bcbd3b005dcd5844ba0ebdd6392e69b9190f",
+					"line": 62,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{test}}.spec.template.spec.containers.name={{test}}.resources.limits",
+					"search_value": "",
+					"expected_value": "spec.template.spec.containers.name=test has CPU limits",
+					"actual_value": "spec.template.spec.containers.name=test doesn't have CPU limits",
+					"value": null
+				}
+			],
+			"category": "Resource Management",
+			"description": "CPU limits should be set because if the system has CPU time free, a container is guaranteed to be allocated as much CPU as it requests"
+		},
+		{
+			"query_name": "Liveness Probe Is Not Defined",
+			"query_id": "ade74944-a674-4e00-859e-c6eab5bde441",
+			"query_url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-tcp-liveness-probe",
+			"severity": "MEDIUM",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/test/templates/test.yaml",
+					"similarity_id": "5e1956885d2b7dae4a0753cca96201a955906fea13a611e6b7af0ed66acea769",
+					"line": 62,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{test}}.spec.template.spec.containers.name={{test}}",
+					"search_value": "",
+					"expected_value": "metadata.name={{test}}.spec.containers.name={{test}}.livenessProbe is defined",
+					"actual_value": "metadata.name={{test}}.spec.containers.name={{test}}.livenessProbe is undefined",
+					"value": null
+				}
+			],
+			"category": "Availability",
+			"description": "Liveness Probe must be defined."
+		},
+		{
+			"query_name": "Seccomp Profile Is Not Configured",
+			"query_id": "f377b83e-bd07-4f48-a591-60c82b14a78b",
+			"query_url": "https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp",
+			"severity": "MEDIUM",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/test/templates/test.yaml",
+					"similarity_id": "8bddf13aa202c8acaf7b88210b12d2078886cf14af63b254bda1da293c49904e",
+					"line": 19,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{test}}.spec.template.metadata",
+					"search_value": "",
+					"expected_value": "'spec.template.metadata.annotations' is set",
+					"actual_value": "'spec.template.metadata.annotations' is undefined",
+					"value": null
+				}
+			],
+			"category": "Insecure Configurations",
+			"description": "Check if any resource does not configure Seccomp default profile properly"
+		},
+		{
+			"query_name": "Service Account Token Automount Not Disabled",
+			"query_id": "48471392-d4d0-47c0-b135-cdec95eb3eef",
+			"query_url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-the-default-service-account-to-access-the-api-server",
+			"severity": "MEDIUM",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/test/templates/test.yaml",
+					"similarity_id": "1b914d3920f3c99e85247670be40fc93d3227be27061977e3cd98d3c1b4b23be",
+					"line": 22,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{test}}.spec.template.spec",
+					"search_value": "",
+					"expected_value": "'spec.template.spec.automountServiceAccountToken' is false",
+					"actual_value": "'spec.template.spec.automountServiceAccountToken' is undefined",
+					"value": null
+				}
+			],
+			"category": "Insecure Defaults",
+			"description": "Service Account Tokens are automatically mounted even if not necessary"
+		},
+		{
+			"query_name": "No Drop Capabilities for Containers",
+			"query_id": "268ca686-7fb7-4ae9-b129-955a2a89064e",
+			"query_url": "https://kubernetes.io/docs/concepts/workloads/pods/init-containers/",
+			"severity": "LOW",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/test/templates/test.yaml",
+					"similarity_id": "0115b24f0aa5809c26d3c3a95b4fd42260f9e6ad1781e6fa9ed788ce947aa94a",
+					"line": 62,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{test}}.spec.containers.name=test",
+					"search_value": "",
+					"expected_value": "metadata.name={{test}}.spec.containers.name=test.securityContext is set",
+					"actual_value": "metadata.name={{test}}.spec.containers.name=test.securityContext is undefined",
+					"value": null
+				}
+			],
+			"category": "Best Practices",
+			"description": "Sees if Kubernetes Drop Capabilities exists to ensure containers security context"
+		},
+		{
+			"query_name": "Permissive Access to Create Pods",
+			"query_id": "592ad21d-ad9b-46c6-8d2d-fad09d62a942",
+			"query_url": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/#privilege-escalation-prevention-and-bootstrapping",
+			"severity": "LOW",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/test/templates/rbac.yaml",
+					"similarity_id": "23fa1a536877428292013cd7186ddddaa4bca8f0a5fb7440a831d6c5808de3ec",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{test}}.rules.verbs.*",
+					"search_value": "",
+					"expected_value": "metadata.name=test.rules.verbs should not contain a wildcard value when metadata.name=test.rules.resources contains a wildcard value",
+					"actual_value": "metadata.name=test.rules.verbs contains a wildcard value and metadata.name=test.rules.resources contains a wildcard value",
+					"value": null
+				}
+			],
+			"category": "Access Control",
+			"description": "The permission to create pods in a cluster should be restricted because it allows privilege escalation."
+		},
+		{
+			"query_name": "Pod or Container Without Security Context",
+			"query_id": "a97a340a-0063-418e-b3a1-3028941d0995",
+			"query_url": "https://kubernetes.io/docs/tasks/configure-pod-container/security-context/",
+			"severity": "LOW",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/test/templates/test.yaml",
+					"similarity_id": "95c48ae90aabaf7440f0323cb16618c67e51d736bcdb55b889b02ba2248e032a",
+					"line": 62,
+					"issue_type": "MissingAttribute",
+					"search_key": "metadata.name={{test}}.spec.template.spec.containers.name=test",
+					"search_value": "",
+					"expected_value": "spec.template.spec.containers.name=test has a security context",
+					"actual_value": "spec.template.spec.containers.name=test does not have a security context",
+					"value": null
+				}
+			],
+			"category": "Insecure Configurations",
+			"description": "A security context defines privilege and access control settings for a Pod or Container"
+		},
+		{
+			"query_name": "RBAC Wildcard In Rule",
+			"query_id": "6b896afb-ca07-467a-b256-1a0077a1c08e",
+			"query_url": "https://kubernetes.io/docs/reference/access-authn-authz/rbac/",
+			"severity": "LOW",
+			"platform": "Kubernetes",
+			"files": [
+				{
+					"file_name": "test/charts/test/templates/rbac.yaml",
+					"similarity_id": "493c98bdbbe21a2412788a2f73c170d000bb35977156ff5ac15942f402248574",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{test}}.rules",
+					"search_value": "",
+					"expected_value": "metadata.name={{test}}.rules[0].apiGroups shouldn't contain value: '*'",
+					"actual_value": "metadata.name={{test}}.rules[0].apiGroups contains value: '*'",
+					"value": null
+				},
+				{
+					"file_name": "test/charts/test/templates/rbac.yaml",
+					"similarity_id": "493c98bdbbe21a2412788a2f73c170d000bb35977156ff5ac15942f402248574",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{test}}.rules",
+					"search_value": "",
+					"expected_value": "metadata.name={{test}}.rules[0].resources shouldn't contain value: '*'",
+					"actual_value": "metadata.name={{test}}.rules[0].resources contains value: '*'",
+					"value": null
+				},
+				{
+					"file_name": "test/charts/test/templates/rbac.yaml",
+					"similarity_id": "493c98bdbbe21a2412788a2f73c170d000bb35977156ff5ac15942f402248574",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{test}}.rules",
+					"search_value": "",
+					"expected_value": "metadata.name={{test}}.rules[0].verbs shouldn't contain value: '*'",
+					"actual_value": "metadata.name={{test}}.rules[0].verbs contains value: '*'",
+					"value": null
+				},
+				{
+					"file_name": "test/charts/test/templates/rbac.yaml",
+					"similarity_id": "493c98bdbbe21a2412788a2f73c170d000bb35977156ff5ac15942f402248574",
+					"line": 20,
+					"issue_type": "IncorrectValue",
+					"search_key": "metadata.name={{test}}.rules",
+					"search_value": "",
+					"expected_value": "metadata.name={{test}}.rules[1].verbs shouldn't contain value: '*'",
+					"actual_value": "metadata.name={{test}}.rules[1].verbs contains value: '*'",
+					"value": null
+				}
+			],
+			"category": "Access Control",
+			"description": "Kubernetes Roles and ClusterRoles should not use wildcards in rules (objects or actions)"
+		}
+	],
+	"scan_id": "console",
+	"severity_counters": {
+		"HIGH": 0,
+		"INFO": 0,
+		"LOW": 7,
+		"MEDIUM": 4
+	},
+	"total_counter": 11
+}

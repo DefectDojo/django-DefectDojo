@@ -56,6 +56,10 @@ JS file in scout2-report/inc-awsconfig/aws\_config.js.
 
 Prowler file can be imported as a CSV file (-M csv).
 
+### KICS Scanner
+
+Import of JSON report from <https://github.com/Checkmarx/kics>
+
 ### Bandit
 
 JSON report format
