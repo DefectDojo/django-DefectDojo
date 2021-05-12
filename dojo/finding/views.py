@@ -27,8 +27,7 @@ from itertools import chain
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 
-from dojo.filters import OpenFindingFilter, OpenFindingSuperFilter, AcceptedFindingFilter, AcceptedFindingSuperFilter, \
-    ClosedFindingFilter, ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
+from dojo.filters import OpenFindingFilter, AcceptedFindingFilter, ClosedFindingFilter, TemplateFindingFilter, SimilarFindingFilter
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
@@ -66,20 +65,15 @@ CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 
 
 def open_findings_filter(request, queryset, user, pid):
-    if user.is_staff:
-        return OpenFindingSuperFilter(request.GET, queryset=queryset, user=user, pid=pid)
-    else:
-        return OpenFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
+    return OpenFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
 def accepted_findings_filter(request, queryset, user, pid):
-    filter_class = AcceptedFindingSuperFilter if user.is_staff else AcceptedFindingFilter
-    return filter_class(request.GET, queryset=queryset, pid=pid)
+    return AcceptedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
 def closed_findings_filter(request, queryset, user, pid):
-    filter_class = ClosedFindingSuperFilter if user.is_staff else ClosedFindingFilter
-    return filter_class(request.GET, queryset=queryset, pid=pid)
+    return ClosedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
 def open_findings(request, pid=None, eid=None, view=None):
