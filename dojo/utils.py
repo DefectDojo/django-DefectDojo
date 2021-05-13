@@ -1,3 +1,5 @@
+from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.queries import get_authorized_findings
 import re
 import binascii
 import os
@@ -1859,10 +1861,15 @@ def sla_compute_and_notify(*args, **kwargs):
         logger.info("Findings SLA is not enabled.")
 
 
-def get_words_for_field(queryset, fieldname):
+def get_words_for_field(model, fieldname):
     max_results = getattr(settings, 'MAX_AUTOCOMPLETE_WORDS', 20000)
+    models = []
+    if model == Finding:
+        models = get_authorized_findings(Permissions.Finding_View, user=get_current_user())
+    elif model == 'Finding_Template':
+        models = Finding_Template.objects.all()
     words = [
-        word for component_name in queryset.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (component_name.split() if component_name else []) if len(word) > 2
+        word for field_value in models.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
     ]
     return sorted(set(words))
 

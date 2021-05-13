@@ -123,8 +123,8 @@ def simple_search(request):
                 # setting initial values for filters is not supported and discouraged: https://django-filter.readthedocs.io/en/stable/guide/tips.html#using-initial-values-as-defaults
                 # we could try to modify request.GET before generating the filter, but for now we'll leave it as is
 
-                title_words = get_words_for_field(authorized_findings, 'title')
-                component_words = get_words_for_field(authorized_findings, 'component_name')
+                title_words = get_words_for_field(Finding, 'title')
+                component_words = get_words_for_field(Finding, 'component_name')
 
                 findings = findings_filter.qs
 

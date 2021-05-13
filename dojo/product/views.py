@@ -16,7 +16,7 @@ from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
+from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
@@ -277,7 +277,7 @@ def finding_querys(request, prod):
         # 'test__test_type',
         # 'risk_acceptance_set',
         'reporter')
-    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
+    findings = MetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
@@ -390,7 +390,7 @@ def endpoint_querys(request, prod):
         'finding__test__engagement__risk_acceptance',
         'finding__risk_acceptance_set',
         'finding__reporter').annotate(severity=F('finding__severity'))
-    endpoints = ProductMetricsEndpointFilter(request.GET, queryset=endpoints_query)
+    endpoints = MetricsEndpointFilter(request.GET, queryset=endpoints_query)
     endpoints_qs = queryset_check(endpoints)
     filters['form'] = endpoints.form
 
