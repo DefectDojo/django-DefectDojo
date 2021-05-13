@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0100_dojo_user_for_authv2'),
+        ('dojo', '0101_enable_features'),
     ]
 
     operations = [
