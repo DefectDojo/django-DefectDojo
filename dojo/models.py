@@ -288,6 +288,21 @@ class System_Settings(models.Model):
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text="Default expiry period for risk acceptance form.")
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name="Risk acceptance expiration heads up days", help_text="Notify X days before risk acceptance expires. Leave empty to disable.")
+    enable_credentials = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable credentials',
+        help_text="With this setting turned off, credentials will be disabled in the user interface.")
+    enable_questionnaires = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable questionnaires',
+        help_text="With this setting turned off, questionnaires will be disabled in the user interface.")
+    enable_checklists = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable checklists',
+        help_text="With this setting turned off, checklists will be disabled in the user interface.")
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
