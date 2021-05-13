@@ -54,7 +54,6 @@ class KICSParser(object):
                         title=f"{category}: {name}",
                         test=test,
                         severity=severity,
-                        numerical_severity=Finding.get_numerical_severity(severity),
                         description=description,
                         active=True,
                         verified=False,
