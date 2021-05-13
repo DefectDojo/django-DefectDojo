@@ -985,6 +985,7 @@
     </div>
 
     <!--Cred Begin-->
+    {% if system_settings.enable_credentials %}
     <div class="row">
     <div class="col-md-12" id="cred">
         <div class="panel panel-default">
@@ -1078,6 +1079,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 <!--Cred end -->
 
 <!--Files beign -->
