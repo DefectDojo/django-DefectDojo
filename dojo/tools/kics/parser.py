@@ -31,8 +31,10 @@ class KICSParser(object):
         for query in data['queries']:
             name = query.get('query_name')
             url = query.get('query_url')
-            severity = query.get('severity')
-            severity = self.SEVERITY[severity]
+            if query.get('severity') in self.SEVERITY:
+                severity = self.SEVERITY[query.get('severity')]
+            else:
+                severity = "Medium"
             platform = query.get('platform')
             category = query.get('category')
             description = f"{query.get('description')}\nMore information: {url}"
