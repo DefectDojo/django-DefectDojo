@@ -29,18 +29,18 @@ class KICSParser(object):
         data = json.load(filename)
         dupes = {}
         for query in data['queries']:
-            name = query['query_name']
-            url = query['query_url']
-            severity = query['severity']
+            name = query.get('query_name')
+            url = query.get('query_url')
+            severity = query.get('severity')
             severity = self.SEVERITY[severity]
-            platform = query['platform']
-            category = query['category']
-            description = f"{query['description']}\nMore information: {url}"
-            for item in query['files']:
-                file_name = item['file_name']
-                line_number = item['line']
-                issue_type = item['issue_type']
-                expected_value = item['expected_value']
+            platform = query.get('platform')
+            category = query.get('category')
+            description = f"{query.get('description')}\nMore information: {url}"
+            for item in query.get('files'):
+                file_name = item.get('file_name')
+                line_number = item.get('line')
+                issue_type = item.get('issue_type')
+                expected_value = item.get('expected_value')
 
                 dupe_key = hashlib.sha256(
                     (platform + category + issue_type + file_name + str(line_number)).encode("utf-8")
