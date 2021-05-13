@@ -36,7 +36,9 @@ class Command(BaseCommand):
                     product_type_member.user = staff_user
                     product_type_member.role = 4  # Owner
                     product_type_member.save()
-                    logger.info('ProductTypeMember added: {} / {} / {}'.format(product_type.name, staff_user.username, Roles(product_type_member.role).name))
+                    logger.info('Product_Type_Member added: {} / {} / {}'.format(product_type.name, staff_user.username, Roles(product_type_member.role).name))
+                else:
+                    logger.info('Product_Type_Member already exists: {} / {}'.format(product_type.name, staff_user.username))
 
             # Authorized users for product types will be converted to product type members
             # with a role according to the settings
@@ -49,7 +51,9 @@ class Command(BaseCommand):
                     product_type_member.user = authorized_user
                     product_type_member.role = get_role()
                     product_type_member.save()
-                    logger.info('ProductTypeMember added: {} / {} / {}'.format(product_type.name, authorized_user.username, Roles(product_type_member.role).name))
+                    logger.info('Product_Type_Member added: {} / {} / {}'.format(product_type.name, authorized_user.username, Roles(product_type_member.role).name))
+                else:
+                    logger.info('Product_Type_Member already exists: {} / {}'.format(product_type.name, authorized_user.username))
 
         products = Product.objects.all().prefetch_related('authorized_users')
         for product in products:
@@ -64,7 +68,9 @@ class Command(BaseCommand):
                     product_member.user = authorized_user
                     product_member.role = get_role()
                     product_member.save()
-                    logger.info('ProductMember added: {} / {} / {}'.format(product.name, authorized_user.username, Roles(product_member.role).name))
+                    logger.info('Product_Member added: {} / {} / {}'.format(product.name, authorized_user.username, Roles(product_member.role).name))
+                else:
+                    logger.info('Product_Member already exists: {} / {}'.format(product.name, authorized_user.username))
 
         if authorized_user_exists and not settings.AUTHORIZED_USERS_ALLOW_STAFF and \
                 (settings.AUTHORIZED_USERS_ALLOW_CHANGE or settings.AUTHORIZED_USERS_ALLOW_DELETE):
