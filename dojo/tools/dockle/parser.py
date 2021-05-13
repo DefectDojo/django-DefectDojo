@@ -49,7 +49,6 @@ class DockleParser(object):
                     title=f"Found {code}: {title}",
                     test=test,
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     description=description,
                     static_finding=True,
                     nb_occurences=1,
