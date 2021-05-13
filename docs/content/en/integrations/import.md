@@ -56,10 +56,6 @@ JS file in scout2-report/inc-awsconfig/aws\_config.js.
 
 Prowler file can be imported as a CSV file (-M csv).
 
-### KICS Scanner
-
-Import of JSON report from <https://github.com/Checkmarx/kics>
-
 ### Bandit
 
 JSON report format
@@ -376,6 +372,10 @@ Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan.
 ### kube-bench Scanner
 
 Import JSON reports of Kubernetes CIS benchmark scans.
+
+### KICS Scanner
+
+Import of JSON report from <https://github.com/Checkmarx/kics>
 
 ### Microfocus Webinspect Scanner
 

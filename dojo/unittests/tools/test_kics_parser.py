@@ -15,4 +15,4 @@ class TestKICSParser(TestCase):
         testfile = open("dojo/unittests/scans/kics/many_findings.json")
         parser = KICSParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(7, len(findings))
+        self.assertEqual(13, len(findings))
