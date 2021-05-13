@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0099_delete_report'),
+        ('dojo', '0100_dojo_user_for_authv2'),
     ]
 
     operations = [
