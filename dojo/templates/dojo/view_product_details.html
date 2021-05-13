@@ -251,7 +251,7 @@
                                 </li>
                                 </ul>
                             </td>
-                            <td name="member_user">{{ member.user|full_name }}</td>
+                            <td name="member_user">{{ member.user.get_full_name }}</td>
                             <td>Product member</td>
                             <td name="member_role">{% role_as_string member.role %}</td>
                         </tr>
@@ -260,7 +260,7 @@
                         <tr>
                             <td>
                             </td>
-                            <td>{{ member.user|full_name }}</td>
+                            <td>{{ member.user.get_full_name }}</td>
                             <td>
                                 <a class="" href="{% url 'view_product_type' member.product_type.id %}">
                                     {{ member.product_type|product_type_name }}
