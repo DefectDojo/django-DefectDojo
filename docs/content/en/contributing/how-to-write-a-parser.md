@@ -76,13 +76,13 @@ MYSQL> flush privileges;
 This local command will launch the unit test for your new parser
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.<your_unittest_py_file>.<main_class_name> -v2'
+$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.<your_unittest_py_file>.<main_class_name> -v2'
 {{< /highlight >}}
 
 Example for the blackduck hub parser:
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
+$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
 {{< /highlight >}}
 
 {{% alert title="Information" color="info" %}}

@@ -127,6 +127,7 @@
         </div>
         <!-- /.col-lg-6 -->
     </div>
+    {% if system_settings.enable_questionnaires %}
     <div class="row">
         <div class="col-lg-12">
             <div class="panel panel-default">
@@ -203,6 +204,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     <div class="row">
         {% if punchcard %}
             <div class="col-lg-12">
