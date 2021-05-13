@@ -49,7 +49,7 @@ class FindingQueriesTest(TestCase):
         mock_timezone.return_value = mock_datetime
 
         # Queries over Finding and Risk_Acceptance
-        with self.assertNumQueries(29):
+        with self.assertNumQueries(27):
             product_types = []
             finding_queries = views.finding_querys(
                 product_types,
@@ -168,7 +168,7 @@ class EndpointQueriesTest(TestCase):
 
     def test_endpoint_queries(self):
         # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(67):
+        with self.assertNumQueries(65):
             product_types = []
             endpoint_queries = views.endpoint_querys(
                 product_types,
