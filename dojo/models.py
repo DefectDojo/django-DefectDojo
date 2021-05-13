@@ -384,7 +384,7 @@ class UserContactInfo(models.Model):
 class Dojo_Group(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True)
-    users = models.ManyToManyField(User, blank=True)
+    users = models.ManyToManyField(Dojo_User, blank=True)
 
 
 class Contact(models.Model):
