@@ -147,7 +147,7 @@ class BaseClass():
 
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
-            print("=======================================================")
+            # print("=======================================================")
             prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
 
             current_objects = self.client.get(self.url, format='json').data
@@ -324,7 +324,7 @@ class FindingFilesTest(DojoAPITestCase):
             'engagements/1'
         ]
         path = pathlib.Path(__file__).parent.absolute()
-        print(path)
+        # print(path)
         for level in url_levels:
             length = FileUpload.objects.count()
             payload = {
