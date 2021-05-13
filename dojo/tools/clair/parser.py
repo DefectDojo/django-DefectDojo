@@ -16,7 +16,8 @@ class ClairParser(object):
 
     def get_findings(self, json_output, test):
         tree = self.parse_json(json_output)
-        return self.get_items(tree, test)
+        subtree = tree['vulnerabilities']
+        return self.get_items(subtree, test)
 
     def parse_json(self, json_output):
         data = json_output.read()
