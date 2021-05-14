@@ -19,7 +19,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
     SonarqubeProductViewSet, RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
-    DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet
+    DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, ObtainAuthTokenExtended
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -74,11 +74,8 @@ v2_api.register(r'jira_projects', JiraProjectViewSet)
 v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
 if settings.FEATURE_AUTHORIZATION_V2:
-    v2_api.register(r'dojo_groups', DojoGroupViewSet)
     v2_api.register(r'product_type_members', ProductTypeMemberViewSet)
     v2_api.register(r'product_members', ProductMemberViewSet)
-    v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
-    v2_api.register(r'product_groups', ProductGroupViewSet)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
 v2_api.register(r'sonarqube_product_configurations', SonarqubeProductViewSet)
