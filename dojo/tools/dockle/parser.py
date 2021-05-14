@@ -37,9 +37,7 @@ class DockleParser(object):
                 severity = self.SEVERITY[dockle_severity]
             else:
                 severity = "Medium"
-            description = ""
-            for row in item['alerts']:
-                description += "{}\n".format(row)
+            description = "\n".join(item.get('alerts', []))
             dupe_key = hashlib.sha256(
                 (code + title).encode("utf-8")
             ).hexdigest()
