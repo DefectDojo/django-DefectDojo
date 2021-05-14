@@ -1869,7 +1869,7 @@ def get_words_for_field(model, fieldname):
     elif model == Finding_Template:
         models = Finding_Template.objects.all()
 
-    if models:
+    if models is not None:
         words = [
             word for field_value in models.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
         ]
