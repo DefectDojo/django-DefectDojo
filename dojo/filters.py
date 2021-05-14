@@ -173,8 +173,18 @@ def get_tags_label_from_model(model):
         return 'Tags (Unknown)'
 
 
-def get_finding_filter_fields(metrics=False):
-    fields = ['title']
+def get_finding_filter_fields(metrics=False, similar=False):
+    fields = []
+
+    if similar:
+        fields.extend([
+            'id',
+            'unique_id_from_tool',
+            'vuln_id_from_tool',
+            'hash_code'
+        ])
+
+    fields.extend(['title'])
 
     if metrics:
         fields.extend([
@@ -209,6 +219,14 @@ def get_finding_filter_fields(metrics=False):
                 'has_component',
                 'has_notes',
                 'file_path',
+    ])
+
+    if similar:
+        fields.extend([
+            'id',
+        ])
+
+    fields.extend([
                 'sourcefilepath',
                 'param',
                 'payload',
@@ -1264,57 +1282,13 @@ class AcceptedFindingFilter(FindingFilter):
         super().__init__(*args, **kwargs)
 
 
-class SimilarFindingFilter(FindingFilterWithTags):
+class SimilarFindingFilter(FindingFilter):
     hash_code = MultipleChoiceFilter()
-    cve = CharFilter(lookup_expr='icontains')
-    cwe = NumberFilter()
-    title = CharFilter(lookup_expr='icontains')
-    duplicate = ReportBooleanFilter()
-    # sourcefile = CharFilter(lookup_expr='icontains')
-    file_path = CharFilter(lookup_expr='icontains')
-    is_mitigated = ReportBooleanFilter()
-    mitigated = DateRangeFilter(label="Mitigated Date")
-    date = DateRangeFilter()
-    component_name = CharFilter(lookup_expr='icontains')
-    component_version = CharFilter(lookup_expr='icontains')
 
-    test__test_type = ModelMultipleChoiceFilter(
-        queryset=Test_Type.objects.all(), label='Test Type')
-    test__engagement__product = ModelMultipleChoiceFilter(
-        queryset=Product.objects.none(),
-        label="Product")
-    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.none(),
-        label="Product Type")
-
-    has_jira_issue = BooleanFilter(field_name='jira_issue',
-                                lookup_expr='isnull',
-                                exclude=True,
-                                label='has JIRA')
-
-    jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
-
-    has_notes = BooleanFilter(field_name='notes',
-                                lookup_expr='isnull',
-                                exclude=True,
-                                label='has notes')
-
-    o = OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ('numerical_severity', 'numerical_severity'),
-            ('date', 'date'),
-            ('title', 'title'),
-            ('test__engagement__product__name',
-             'test__engagement__product__name'),
-        ),
-
-    )
-
-    class Meta:
+    class Meta(FindingFilter.Meta):
         model = Finding
-        fields = ['id', 'title', 'cve', 'cwe', 'unique_id_from_tool', 'file_path', 'line', 'hash_code', 'active',
-                    'duplicate', 'risk_accepted', 'false_p', 'out_of_scope', 'is_mitigated', 'tags']
+        # slightly different fields from FindingFilter, but keep the same ordering for UI consistency
+        fields = get_finding_filter_fields(similar=True)
 
     def __init__(self, data=None, *args, **kwargs):
         self.user = None
@@ -1347,17 +1321,6 @@ class SimilarFindingFilter(FindingFilterWithTags):
 
         if self.finding and self.finding.hash_code:
             self.form.fields['hash_code'] = forms.MultipleChoiceField(choices=[(self.finding.hash_code, self.finding.hash_code[:24] + '...')], required=False, initial=[])
-
-        if not get_system_setting('enable_jira'):
-            self.form.fields.pop('jira_issue__jira_key')
-            self.form.fields.pop('has_jira_issue')
-
-        if self.form.fields.get('test__engagement__product'):
-            self.form.fields[
-                'test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
-        if self.form.fields.get('test__engagement__product__prod_type'):
-            self.form.fields[
-                'test__engagement__product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
     def filter_queryset(self, *args, **kwargs):
         queryset = super().filter_queryset(*args, **kwargs)
