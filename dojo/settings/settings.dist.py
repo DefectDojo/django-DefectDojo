@@ -110,6 +110,7 @@ env = environ.Env(
     DD_SAML2_ENTITY_ID=(str, ''),
     DD_SAML2_LOGOUT_URL=(str, ''),
     DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
+    DD_SAML2_CREATE_USER=(bool, True),
     DD_SAML2_NEW_USER_PROFILE=(dict, {
         # The default group name when a new user logs in
         'USER_GROUPS': [],
@@ -440,6 +441,7 @@ SAML2_AUTH = {
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
     # Optional settings below
     'DEFAULT_NEXT_URL': env('DD_SAML2_DEFAULT_NEXT_URL'),
+    'CREATE_USER': env('DD_SAML2_CREATE_USER'),
     'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
     'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
 }
