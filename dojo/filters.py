@@ -194,7 +194,7 @@ def get_finding_filter_fields(metrics=False, similar=False):
             'hash_code'
         ])
 
-    fields.extend(['title'])
+    fields.extend(['title', 'component_name', 'component_version'])
 
     if metrics:
         fields.extend([
