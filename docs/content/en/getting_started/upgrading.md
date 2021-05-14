@@ -60,13 +60,12 @@ Replace the first step above with this one: `docker-compose build`
 
 ## Upgrading to DefectDojo Version 2.0.x.
 
-BEFORE UPGRADING:
-- Upgrade to 1.15.x first before upgrading to 2.0.0, otherwise you will brick you instance.
-
-Now follow the usual steps to upgrade as described above.
+Follow the usual steps to upgrade as described above.
 
 AFTER UPGRADING
-- Check if all your endpoints could be migrated succesfully, go to: https://<defect-dojo-url>/endpoint/migrate.
+- Usual migration process (`python manage.py migrate`) try to migrate all endpoints to new format and merge duplicates.
+- All broken endpoints (which wasn't possible to migrate) have red flag 🚩 in standard list of endpoints.
+- Check if all your endpoints was migrated successfully, go to: https://<defect-dojo-url>/endpoint/migrate.
 - Alternatively, this can be run as management command:  `docker-compose exec uwsgi ./manage.py endpoint_migration`
 - Details about endpoint migration / improvements in https://github.com/DefectDojo/django-DefectDojo/pull/4473
 
@@ -77,7 +76,7 @@ We decided to name this version 2.0.0 because we did some big cleanups in this r
 - Rename Finding.is_Mitigated field to Finding.is_mitigated ([#3854](https://github.com/DefectDojo/django-DefectDojo/pull/4854))
 - Remove everything related to the old tagging library ([#4419](https://github.com/DefectDojo/django-DefectDojo/pull/4419))
 - Remove S0/S1/S2../S5 severity display option ([#4415](https://github.com/DefectDojo/django-DefectDojo/pull/4415))
-- Refactor EndPoint handling/formatting ([#4188](https://github.com/DefectDojo/django-DefectDojo/pull/4188))
+- Refactor EndPoint handling/formatting ([#4473](https://github.com/DefectDojo/django-DefectDojo/pull/4473))
 - Upgrade to Django 3.x ([#3632](https://github.com/DefectDojo/django-DefectDojo/pull/3632))
 - PDF Reports removed ([#4418](https://github.com/DefectDojo/django-DefectDojo/pull/4418))
 
