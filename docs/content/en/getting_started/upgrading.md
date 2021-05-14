@@ -64,9 +64,11 @@ Follow the usual steps to upgrade as described above.
 
 AFTER UPGRADING
 - Usual migration process (`python manage.py migrate`) try to migrate all endpoints to new format and merge duplicates.
-- All broken endpoints (which wasn't possible to migrate) have red flag 🚩 in standard list of endpoints.
+- All broken endpoints (which weren't possible to migrate) have red flag 🚩 in standard list of endpoints.
 - Check if all your endpoints was migrated successfully, go to: https://<defect-dojo-url>/endpoint/migrate.
-- Alternatively, this can be run as management command:  `docker-compose exec uwsgi ./manage.py endpoint_migration`
+- Alternatively, this can be run as management command:  `docker-compose exec uwsgi ./manage.py endpoint_migration --dry-run`
+- When all endpoint will be fixed (there is not broken endpoint), press "Run migration" in https://<defect-dojo-url>/endpoint/migrate
+- Or, you can run management command: `docker-compose exec uwsgi ./manage.py endpoint_migration`
 - Details about endpoint migration / improvements in https://github.com/DefectDojo/django-DefectDojo/pull/4473
 
 We decided to name this version 2.0.0 because we did some big cleanups in this release:
