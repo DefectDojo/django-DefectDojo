@@ -1847,8 +1847,8 @@ class ObtainAuthTokenExtended(rest_framework.authtoken.views.ObtainAuthToken):
             target_user = serializer.validated_data['target_user']
 
             if not user.is_superuser:
-                return Response({ 'message': 'Action forbidden',
-                                 'username': user.username },
+                return Response({'message': 'Action forbidden',
+                                 'username': user.username},
                                 status=status.HTTP_403_FORBIDDEN)
 
             user = User.objects.get(username=target_user)
