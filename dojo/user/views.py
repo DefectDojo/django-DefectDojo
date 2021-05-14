@@ -113,22 +113,19 @@ def login_view(request):
         settings.SAML2_ENABLED
     ]) == 1:
         if settings.GOOGLE_OAUTH_ENABLED:
-            return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=['google-oauth2']),
-                                                       urlencode({'next': request.GET.get('next')})))
+            social_auth = 'google-oauth2'
         elif settings.OKTA_OAUTH_ENABLED:
-            return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', 'okta-oauth2'),
-                                                       urlencode({'next': request.GET.get('next')})))
+            social_auth = 'okta-oauth2'
         elif settings.AZUREAD_TENANT_OAUTH2_ENABLED:
-            return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', 'azuread-tenant-oauth2'),
-                                                       urlencode({'next': request.GET.get('next')})))
+            social_auth = 'azuread-tenant-oauth2'
         elif settings.GITLAB_OAUTH2_ENABLED:
-            return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', 'gitlab'),
-                                                       urlencode({'next': request.GET.get('next')})))
+            social_auth = 'gitlab'
         elif settings.AUTH0_OAUTH2_ENABLED:
-            return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', 'auth0'),
-                                                       urlencode({'next': request.GET.get('next')})))
+            social_auth = 'auth0'
         else:
             return HttpResponseRedirect('/saml2/login')
+        return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=[social_auth]),
+                                                   urlencode({'next': request.GET.get('next')})))
     else:
         return LoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
 
