@@ -1,8 +1,11 @@
 ---
-title: "Branching Model"
-date: 2021-02-17T20:46:28+01:00
+title: "Branching model"
+description: "How to create releases"
 draft: false
+weight: 3
 ---
+
+## Regular releases
 
 The DefectDojo team aims to release at least once a month, on the last Tuesday.
 Bugfix or security releases can come at any time.

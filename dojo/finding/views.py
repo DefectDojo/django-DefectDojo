@@ -2173,8 +2173,8 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     finding = get_object_or_404(Finding, id=finding_id)
     new_original = get_object_or_404(Finding, id=new_original_id)
 
-    if new_original.test.engagement != new_original.test.engagement:
-        if new_original.test.engagement.deduplication_on_engagement or new_original.test.engagement.deduplication_on_engagement:
+    if finding.test.engagement != new_original.test.engagement:
+        if finding.test.engagement.deduplication_on_engagement or new_original.test.engagement.deduplication_on_engagement:
             return False
 
     if finding.duplicate or finding.original_finding.all():

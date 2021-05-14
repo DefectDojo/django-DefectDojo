@@ -1,10 +1,9 @@
 ---
-title: "Running in Production"
-date: 2021-02-02T20:46:28+01:00
+title: "Running in production"
+description: "Productive use of DefectDojo needs consideration of performance and backups."
 draft: false
+weight: 4
 ---
-
-
 
 ## Production with docker-compose
 
@@ -89,15 +88,9 @@ and see what is in effect.
 
 ## Monitoring
 
-To expose Django statistics for Prometheus, using the text-editor of
-your choice, change `DJANGO_METRICS_ENABLED` to True in
-django-DefectDojo/dojo/settings/settings.py to:
+To expose Django statistics for [Prometheus](https://prometheus.io/), set
+`DJANGO_METRICS_ENABLED` to `True` in the settings
+(see [Configuration](../configuration)).
 
-``` {.sourceCode .console}
-`DJANGO_METRICS_ENABLED = True`
-```
-
-Or export `DD_DJANGO_METRICS_ENABLED` with the same value.
-
-Prometheus endpoint than is available under the path:
+The Prometheus endpoint is than available under the path:
 `http://dd_server/django_metrics/metrics`

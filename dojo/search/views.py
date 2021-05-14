@@ -267,7 +267,7 @@ def simple_search(request):
                 app_analysis = None
 
             # make sure watson only searches in authorized model instances
-            if keywords_query and False:
+            if keywords_query:
                 logger.debug('searching generic')
                 logger.debug('going generic with: %s', keywords_query)
                 generic = watson.search(keywords_query, models=(

@@ -150,9 +150,11 @@
                                 </li>
                                 <li><a href="{% url 'api_v2_key' %}"><i class="fa fa-fw fa-key"></i> API v2 Key</a></li>
                             {% endif %}
-                            <li><a href="{% url 'api_v2_schema' %}"><i class="fa fa-book fa-fw"></i> API
+                            <li><a href="{% url 'api_v2_schema' %}" target="_blank"><i class="fa fa-book fa-fw"></i> API
                                 v2 Docs</a></li>
-                            {{ block.super }}
+                                <li><a href="https://defectdojo.github.io/django-DefectDojo" target="_blank">
+                                    <i class="fa fa-question-circle fa-fw"></i> Documentation</a></li>
+                                {{ block.super }}
                             {% if user.is_staff %}
                                 <li><a href="{% url 'questionnaire' %}"> <i class="fa fa-hospital-o fa-fw"> </i> Questionnaires </a></li>
                             {% endif %}
