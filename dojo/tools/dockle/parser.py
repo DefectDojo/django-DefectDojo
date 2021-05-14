@@ -53,6 +53,7 @@ class DockleParser(object):
                     description=description,
                     static_finding=True,
                     nb_occurences=1,
+                    vuln_id_from_tool=code,
                 )
                 dupes[dupe_key] = finding
         return list(dupes.values())
