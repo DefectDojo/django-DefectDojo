@@ -3,7 +3,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from rest_framework import viewsets, mixins, status, request
+from rest_framework import viewsets, mixins, status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from django.db import IntegrityError

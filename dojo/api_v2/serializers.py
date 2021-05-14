@@ -1441,9 +1441,10 @@ class FindingNoteSerializer(serializers.Serializer):
 class BurpRawRequestResponseSerializer(serializers.Serializer):
     req_resp = RequestResponseSerializerField(required=True)
 
+
 class AuthTokenSerializerExtended(rest_framework.authtoken.serializers.AuthTokenSerializer):
     target_user = serializers.CharField(
-        label = _("TargetUser"),
-        write_only = True,
-        required = False,
+        label=_("TargetUser"),
+        write_only=True,
+        required=False,
     )
