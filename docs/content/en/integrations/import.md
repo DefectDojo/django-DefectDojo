@@ -378,6 +378,10 @@ Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan.
 
 Import JSON reports of Kubernetes CIS benchmark scans.
 
+### KICS Scanner
+
+Import of JSON report from <https://github.com/Checkmarx/kics>
+
 ### Microfocus Webinspect Scanner
 
 Import XML report
