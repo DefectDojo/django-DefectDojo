@@ -1834,7 +1834,7 @@ class SystemSettingsViewSet(mixins.ListModelMixin,
 
 # Authorization: superuser if target_user is specified
 class ObtainAuthTokenExtended(rest_framework.authtoken.views.ObtainAuthToken):
-    serializer_class = serializers.AuthTokenSerilizerExtended
+    serializer_class = serializers.AuthTokenSerializerExtended
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
