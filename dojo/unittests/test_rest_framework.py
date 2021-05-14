@@ -851,7 +851,8 @@ class ReimportScanTest(DojoAPITestCase):
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code, response.content[:1000])
 
-class UserAPITest(DojoAPITestCase):
+
+class UserAPITokenTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 
     def setUp(self):
@@ -876,3 +877,21 @@ class UserAPITest(DojoAPITestCase):
                 "target_user": "user1"
             })
         self.assertEqual(response.status_code, 200)
+
+    def test_fetch_token_non_existing(self):
+        response = self.client.post(
+            reverse('api_token_auth'), {
+                "username": 'admin',
+                "password": 'admin',
+                "target_user": "xyz"
+            })
+        self.assertEqual(response.status_code, 404)
+
+    def test_fetch_token_negative_non_admin_user(self):
+        response = self.client.post(
+            reverse('api_token_auth'), {
+                "username": 'user1',
+                "password": 'user1',
+                "target_user": "user2"
+            })
+        self.assertEqual(response.status_code, 403)

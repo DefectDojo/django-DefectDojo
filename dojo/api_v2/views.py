@@ -1851,7 +1851,7 @@ class ObtainAuthTokenExtended(rest_framework.authtoken.views.ObtainAuthToken):
                                  'username': user.username},
                                 status=status.HTTP_403_FORBIDDEN)
 
-            user = User.objects.get(username=target_user)
+            user = get_object_or_404(User, username=target_user )
 
         token, created = Token.objects.get_or_create(user=user)
         return Response({
