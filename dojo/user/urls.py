@@ -8,7 +8,7 @@ urlpatterns = [
     # social-auth-django required url package
     url('', include('social_django.urls', namespace='social')),
     #  user specific
-    url(r'^login$', LoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm), name='login'),
+    url(r'^login$', views.login_view, name='login'),
     url(r'^logout$', views.logout_view, name='logout'),
     url(r'^alerts$', views.alerts, name='alerts'),
     url(r'^alerts/json$', views.alerts_json, name='alerts_json'),
