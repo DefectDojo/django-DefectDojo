@@ -2051,7 +2051,7 @@ class Finding(models.Model):
     @cached_property
     def finding_group(self):
         group = self.finding_group_set.all().first()
-        logger.debug('finding.finding_group: %s', group)
+        # logger.debug('finding.finding_group: %s', group)
         return group
 
     @cached_property

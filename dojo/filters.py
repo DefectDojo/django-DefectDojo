@@ -1,5 +1,6 @@
 __author__ = 'Jay Paz'
 import collections
+from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY
 import logging
 from datetime import timedelta, datetime
 from django import forms
@@ -63,29 +64,38 @@ class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
 
 class FindingStatusFilter(ChoiceFilter):
     def any(self, qs, name):
-        return qs.filter(verified=True,
-                         false_p=False,
-                         duplicate=False,
-                         out_of_scope=False)
+        return qs
 
     def open(self, qs, name):
-        return qs.filter(mitigated__isnull=True,
-                         verified=True,
-                         false_p=False,
-                         duplicate=False,
-                         out_of_scope=False, )
+        return qs.filter(OPEN_FINDINGS_QUERY)
+
+    def verified(self, qs, name):
+        return qs.filter(VERIFIED_FINDINGS_QUERY)
+
+    def out_of_scope(self, qs, name):
+        return qs.filter(OUT_OF_SCOPE_FINDINGS_QUERY)
+
+    def false_positive(self, qs, name):
+        return qs.filter(FALSE_POSITIVE_FINDINGS_QUERY)
+
+    def inactive(self, qs, name):
+        return qs.filter(INACTIVE_FINDINGS_QUERY)
+
+    def risk_accepted(self, qs, name):
+        return qs.filter(ACCEPTED_FINDINGS_QUERY)
 
     def closed(self, qs, name):
-        return qs.filter(mitigated__isnull=False,
-                         verified=True,
-                         false_p=False,
-                         duplicate=False,
-                         out_of_scope=False, )
+        return qs.filter(CLOSED_FINDINGS_QUERY)
 
     options = {
         '': (_('Any'), any),
         0: (_('Open'), open),
-        1: (_('Closed'), closed),
+        1: (_('Verified'), verified),
+        2: (_('Out Of Scope'), out_of_scope),
+        3: (_('False Positive'), false_positive),
+        4: (_('Inactive'), inactive),
+        5: (_('Risk Accepted'), risk_accepted),
+        6: (_('Closed'), closed),
     }
 
     def __init__(self, *args, **kwargs):

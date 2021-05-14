@@ -310,7 +310,7 @@ def finding_querys(request, prod):
     # risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod)).prefetch_related('accepted_findings')
     # filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
 
-    from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
+    from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY
     filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY).distinct()
 
     filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
