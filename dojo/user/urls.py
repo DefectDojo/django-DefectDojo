@@ -1,6 +1,4 @@
 from django.conf.urls import url, include
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.forms import AuthenticationForm
 
 from dojo.user import views
 

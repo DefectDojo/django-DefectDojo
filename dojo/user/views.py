@@ -132,6 +132,7 @@ def login_view(request):
     else:
         return LoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
 
+
 def logout_view(request):
     logout(request)
     messages.add_message(request,
