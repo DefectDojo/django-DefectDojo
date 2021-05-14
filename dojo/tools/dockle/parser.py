@@ -33,7 +33,10 @@ class DockleParser(object):
             title = item['title']
             if dockle_severity == "IGNORE":
                 continue
-            severity = self.SEVERITY[dockle_severity]
+            if dockle_severity in self.SEVERITY:
+                severity = self.SEVERITY[dockle_severity]
+            else:
+                severity = "Medium"
             description = ""
             for row in item['alerts']:
                 description += "{}\n".format(row)
