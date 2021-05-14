@@ -5,14 +5,18 @@ from dojo.models import Test, Product_Member, Product_Type_Member, Test_Import
 from dojo.authorization.authorization import get_roles_for_permission
 
 
-def get_authorized_tests(permission):
+def get_authorized_tests(permission, product=None):
     user = get_current_user()
 
     if user is None:
         return Test.objects.none()
 
+    tests = Test.objects.all()
+    if product:
+        tests = tests.filter(engagement__product=product)
+
     if user.is_superuser:
-        return Test.objects.all()
+        return tests
 
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
@@ -27,17 +31,16 @@ def get_authorized_tests(permission):
             product=OuterRef('engagement__product_id'),
             user=user,
             role__in=roles)
-        tests = Test.objects.annotate(
+
+        tests = tests.annotate(
             engagement__product__prod_type__member=Exists(authorized_product_type_roles),
             engagement__product__member=Exists(authorized_product_roles))
         tests = tests.filter(
             Q(engagement__product__prod_type__member=True) |
             Q(engagement__product__member=True))
     else:
-        if user.is_staff:
-            tests = Test.objects.all()
-        else:
-            tests = Test.objects.filter(
+        if not user.is_staff:
+            tests = tests.filter(
                 Q(engagement__product__authorized_users__in=[user]) |
                 Q(engagement__product__prod_type__authorized_users__in=[user]))
     return tests

@@ -61,6 +61,53 @@ class CharFieldInFilter(filters.BaseInFilter, filters.CharFilter):
         super(CharFilter, self).__init__(*args, **kwargs)
 
 
+class FindingStatusFilter(ChoiceFilter):
+    def any(self, qs, name):
+        return qs.filter(verified=True,
+                         false_p=False,
+                         duplicate=False,
+                         out_of_scope=False)
+
+    def open(self, qs, name):
+        return qs.filter(mitigated__isnull=True,
+                         verified=True,
+                         false_p=False,
+                         duplicate=False,
+                         out_of_scope=False, )
+
+    def closed(self, qs, name):
+        return qs.filter(mitigated__isnull=False,
+                         verified=True,
+                         false_p=False,
+                         duplicate=False,
+                         out_of_scope=False, )
+
+    options = {
+        '': (_('Any'), any),
+        0: (_('Open'), open),
+        1: (_('Closed'), closed),
+    }
+
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = [
+            (key, value[0]) for key, value in six.iteritems(self.options)]
+        super(FindingStatusFilter, self).__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        earliest_finding = get_earliest_finding(qs)
+        if earliest_finding is not None:
+            start_date = local_tz.localize(datetime.combine(
+                earliest_finding.date, datetime.min.time())
+            )
+            self.start_date = _truncate(start_date - timedelta(days=1))
+            self.end_date = _truncate(now() + timedelta(days=1))
+        try:
+            value = int(value)
+        except (ValueError, TypeError):
+            value = ''
+        return self.options[value][1](self, qs, self.field_name)
+
+
 def get_earliest_finding(queryset=None):
     if queryset is None:  # don't to 'if not queryset' which will trigger the query
         queryset = Finding.objects.all()
@@ -124,6 +171,70 @@ def get_tags_label_from_model(model):
         return 'Tags (%s)' % model.__name__.title()
     else:
         return 'Tags (Unknown)'
+
+
+def get_finding_filter_fields(metrics=False):
+    fields = ['title']
+
+    if metrics:
+        fields.extend([
+            'start_date',
+            'end_date',
+        ])
+
+    fields.extend([
+                'date',
+                'cve',
+                'cwe',
+                'severity',
+                'last_reviewed',
+                'last_status_update',
+                'mitigated',
+                'reporter',
+                'test__engagement__product__prod_type',
+                'test__engagement__product',
+                'test__engagement',
+                'test',
+                'test__test_type',
+                'test__engagement__version',
+                'test__version',
+                'status',
+                'active',
+                'verified',
+                'duplicate',
+                'is_mitigated',
+                'out_of_scope',
+                'false_p',
+                'risk_accepted',
+                'has_component',
+                'has_notes',
+                'file_path',
+                'sourcefilepath',
+                'param',
+                'payload',
+                'risk_acceptance',
+    ])
+
+    if get_system_setting('enable_jira'):
+        fields.extend([
+            'has_jira_issue',
+            'jira_creation',
+            'jira_change',
+            'jira_issue__jira_key',
+        ])
+
+    if settings.FEATURE_FINDING_GROUPS:
+        fields.extend([
+            'has_finding_group',
+            'finding_group',
+        ])
+
+        if get_system_setting('enable_jira'):
+            fields.extend([
+                'has_jira_group_issue',
+            ])
+
+    return fields
 
 
 class FindingFilterWithTags(DojoFilter):
@@ -906,7 +1017,7 @@ class ApiFindingFilter(DojoFilter):
     reviewers = NumberInFilter(field_name='reviewers', lookup_expr='in')
     sast_source_line = NumberInFilter(field_name='sast_source_line', lookup_expr='in')
     sonarqube_issue = NumberInFilter(field_name='sonarqube_issue', lookup_expr='in')
-    test__test_type = NumberInFilter(field_name='test__test_type', lookup_expr='in')
+    test__test_type = NumberInFilter(field_name='test__test_type', lookup_expr='in', label='Test Type')
     test__engagement = NumberInFilter(field_name='test__engagement', lookup_expr='in')
     test__engagement__product = NumberInFilter(field_name='test__engagement__product', lookup_expr='in')
     finding_group = NumberInFilter(field_name='finding_group', lookup_expr='in')
@@ -985,7 +1096,7 @@ class FindingFilter(FindingFilterWithTags):
     cwe = MultipleChoiceFilter(choices=[])
     severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
     test__test_type = ModelMultipleChoiceFilter(
-        queryset=Test_Type.objects.all())
+        queryset=Test_Type.objects.all(), label='Test Type')
 
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
@@ -1010,6 +1121,15 @@ class FindingFilter(FindingFilterWithTags):
         queryset=Engagement.objects.none(),
         label="Engagement")
 
+    test = ModelMultipleChoiceFilter(
+        queryset=Test.objects.none(),
+        label="Test")
+
+    test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
+    test__version = CharFilter(lookup_expr='icontains', label="Test Version")
+
+    status = FindingStatusFilter(label='Status')
+
     if settings.FEATURE_FINDING_GROUPS:
         finding_group = ModelMultipleChoiceFilter(
             queryset=Finding_Group.objects.none(),
@@ -1018,7 +1138,7 @@ class FindingFilter(FindingFilterWithTags):
         has_finding_group = BooleanFilter(field_name='finding_group',
                                     lookup_expr='isnull',
                                     exclude=True,
-                                    label='is Grouped')
+                                    label='Is Grouped')
 
     risk_acceptance = ReportRiskAcceptanceFilter(
         label="Risk Accepted")
@@ -1029,7 +1149,7 @@ class FindingFilter(FindingFilterWithTags):
         has_jira_issue = BooleanFilter(field_name='jira_issue',
                                     lookup_expr='isnull',
                                     exclude=True,
-                                    label='has JIRA')
+                                    label='Has JIRA')
         jira_creation = DateRangeFilter(field_name='jira_issue__jira_creation', label='JIRA Creation')
         jira_change = DateRangeFilter(field_name='jira_issue__jira_change', label='JIRA Updated')
         jira_issue__jira_key = CharFilter(field_name='jira_issue__jira_key', lookup_expr='icontains', label="JIRA issue")
@@ -1038,17 +1158,17 @@ class FindingFilter(FindingFilterWithTags):
             has_jira_group_issue = BooleanFilter(field_name='finding_group__jira_issue',
                                         lookup_expr='isnull',
                                         exclude=True,
-                                        label='has Group JIRA')
+                                        label='Has Group JIRA')
 
     has_component = BooleanFilter(field_name='component_name',
                                 lookup_expr='isnull',
                                 exclude=True,
-                                label='has Component')
+                                label='Has Component')
 
     has_notes = BooleanFilter(field_name='notes',
                                 lookup_expr='isnull',
                                 exclude=True,
-                                label='has notes')
+                                label='Has notes')
 
     o = OrderingFilter(
         # tuple-mapping retains order
@@ -1075,15 +1195,16 @@ class FindingFilter(FindingFilterWithTags):
 
     class Meta:
         model = Finding
+        fields = get_finding_filter_fields()
+
         exclude = ['url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'test', 'is_template',
-                   'thread_id', 'notes', 'scanner_confidence', 'mitigated',
-                   'numerical_severity', 'last_reviewed', 'line',
-                   'duplicate_finding', 'hash_code', 'images', 'endpoint_status',
+                   'endpoint', 'references', 'is_template',
+                   'thread_id', 'notes', 'scanner_confidence',
+                   'numerical_severity', 'line', 'duplicate_finding',
+                   'hash_code', 'images', 'endpoint_status',
                    'line_number', 'reviewers', 'sourcefile',
-                   'created', 'jira_creation', 'jira_change',
-                   'files', 'sla_start_date', 'cvssv3', 'severity_justification',
-                   'steps_to_reproduce']
+                   'created', 'files', 'sla_start_date', 'cvssv3',
+                   'severity_justification', 'steps_to_reproduce']
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -1097,25 +1218,27 @@ class FindingFilter(FindingFilterWithTags):
 
         self.form.fields['cwe'].choices = cwe_options(self.queryset)
 
+        # Don't show the product filter on the product finding view
+        if self.pid:
+            del self.form.fields['test__engagement__product']
+            del self.form.fields['test__engagement__product__prod_type']
+            # TODO add authorized check to be sure
+            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
+                product_id=self.pid
+            ).all()
+            self.form.fields['test'].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related('test_type')
+        else:
+            self.form.fields[
+                'test__engagement__product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+            self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View)
+            del self.form.fields['test']
+
         if self.form.fields.get('test__engagement__product'):
             self.form.fields['test__engagement__product'].queryset = get_authorized_products(Permissions.Product_View)
         if self.form.fields.get('finding_group', None):
             self.form.fields['finding_group'].queryset = get_authorized_finding_groups(Permissions.Finding_Group_View)
         if self.form.fields.get('endpoints'):
             self.form.fields['endpoints'].queryset = get_authorized_endpoints(Permissions.Endpoint_View).distinct()
-
-        # Don't show the product filter on the product finding view
-        if self.pid:
-            del self.form.fields['test__engagement__product']
-            # TODO add authorized check to be sure
-            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
-                product_id=self.pid
-            ).all()
-        else:
-            self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View)
-
-        self.form.fields[
-            'test__engagement__product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
 
 
 class OpenFindingFilter(FindingFilter):
@@ -1156,7 +1279,7 @@ class SimilarFindingFilter(FindingFilterWithTags):
     component_version = CharFilter(lookup_expr='icontains')
 
     test__test_type = ModelMultipleChoiceFilter(
-        queryset=Test_Type.objects.all())
+        queryset=Test_Type.objects.all(), label='Test Type')
     test__engagement__product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
@@ -1312,71 +1435,10 @@ class ApiTemplateFindingFilter(DojoFilter):
                      'mitigation']
 
 
-class FindingStatusFilter(ChoiceFilter):
-    def any(self, qs, name):
-        return qs.filter(verified=True,
-                         false_p=False,
-                         duplicate=False,
-                         out_of_scope=False)
-
-    def open(self, qs, name):
-        return qs.filter(mitigated__isnull=True,
-                         verified=True,
-                         false_p=False,
-                         duplicate=False,
-                         out_of_scope=False, )
-
-    def closed(self, qs, name):
-        return qs.filter(mitigated__isnull=False,
-                         verified=True,
-                         false_p=False,
-                         duplicate=False,
-                         out_of_scope=False, )
-
-    options = {
-        '': (_('Any'), any),
-        0: (_('Open'), open),
-        1: (_('Closed'), closed),
-    }
-
-    def __init__(self, *args, **kwargs):
-        kwargs['choices'] = [
-            (key, value[0]) for key, value in six.iteritems(self.options)]
-        super(FindingStatusFilter, self).__init__(*args, **kwargs)
-
-    def filter(self, qs, value):
-        earliest_finding = get_earliest_finding(qs)
-        if earliest_finding is not None:
-            start_date = local_tz.localize(datetime.combine(
-                earliest_finding.date, datetime.min.time())
-            )
-            self.start_date = _truncate(start_date - timedelta(days=1))
-            self.end_date = _truncate(now() + timedelta(days=1))
-        try:
-            value = int(value)
-        except (ValueError, TypeError):
-            value = ''
-        return self.options[value][1](self, qs, self.field_name)
-
-
-class MetricsFindingFilter(FindingFilterWithTags):
+class MetricsFindingFilter(FindingFilter):
     start_date = DateFilter(field_name='date', label='Start Date', lookup_expr=('gt'))
     end_date = DateFilter(field_name='date', label='End Date', lookup_expr=('lt'))
     date = MetricsDateRangeFilter()
-    file_path = CharFilter(lookup_expr='icontains')
-    test__test_type = ModelMultipleChoiceFilter(
-        queryset=Test_Type.objects.all().order_by('name'),
-        label="Test Type"
-    )
-    test__engagement__product__prod_type = ModelMultipleChoiceFilter(
-        queryset=Product_Type.objects.none(),
-        label="Product Type")
-    test__engagement = ModelMultipleChoiceFilter(
-        queryset=Engagement.objects.none(),
-        label="Engagement")
-    test__engagement__version = CharFilter(lookup_expr='icontains', label="Engagement Version")
-    severity = MultipleChoiceFilter(choices=SEVERITY_CHOICES)
-    status = FindingStatusFilter(label='Status')
 
     def __init__(self, *args, **kwargs):
         if args[0]:
@@ -1385,52 +1447,11 @@ class MetricsFindingFilter(FindingFilterWithTags):
                 args[0]['date'] = 8
                 args[0]._mutable = False
 
-        self.pid = None
-        if 'pid' in kwargs:
-            self.pid = kwargs.pop('pid')
-
         super().__init__(*args, **kwargs)
-        if self.pid:
-            del self.form.fields['test__engagement__product__prod_type']
-            self.form.fields['test__engagement'].queryset = Engagement.objects.filter(
-                product_id=self.pid
-            ).all()
-            self.form.fields['test'].queryset = Test.objects.filter(
-                engagement__product_id=self.pid
-            ).all()
-        else:
-            self.form.fields['test__engagement'].queryset = get_authorized_engagements(Permissions.Engagement_View).order_by('name')
 
-        if 'test__engagement__product__prod_type' in self.form.fields:
-            self.form.fields[
-                'test__engagement__product__prod_type'].queryset = get_authorized_product_types(Permissions.Product_Type_View)
-        self.form.fields['test'].queryset = get_authorized_tests(Permissions.Test_View).prefetch_related('test_type')
-
-    class Meta:
+    class Meta(FindingFilter.Meta):
         model = Finding
-        exclude = ['url',
-                   'description',
-                   'duplicate_finding',
-                   'mitigation',
-                   'unsaved_endpoints',
-                   'unsaved_request',
-                   'unsaved_response',
-                   'unsaved_tags',
-                   'references',
-                   'review_requested_by',
-                   'reviewers',
-                   'defect_review_requested_by',
-                   'thread_id',
-                   'notes',
-                   'last_reviewed_by',
-                   'images',
-                   'endpoints',
-                   'endpoint_status',
-                   'is_template',
-                   'jira_creation',
-                   'jira_change',
-                   'files'
-                   ]
+        fields = get_finding_filter_fields(metrics=True)
 
 
 class MetricsEndpointFilter(FilterSet):
