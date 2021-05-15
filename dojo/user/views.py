@@ -104,7 +104,7 @@ def api_v2_key(request):
 
 
 def login_view(request):
-    if not settings.SHOW_LOGIN_FORM and sum([
+    if not settings.SHOW_LOGIN_FORM and settings.SOCIAL_LOGIN_AUTO_REDIRECT and sum([
         settings.GOOGLE_OAUTH_ENABLED,
         settings.OKTA_OAUTH_ENABLED,
         settings.AZUREAD_TENANT_OAUTH2_ENABLED,
