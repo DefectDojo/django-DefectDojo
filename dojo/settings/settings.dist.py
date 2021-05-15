@@ -30,7 +30,6 @@ env = environ.Env(
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
-    DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
     DD_WHITENOISE=(bool, False),
@@ -111,6 +110,7 @@ env = environ.Env(
     DD_SAML2_ENTITY_ID=(str, ''),
     DD_SAML2_LOGOUT_URL=(str, ''),
     DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
+    DD_SAML2_CREATE_USER=(bool, True),
     DD_SAML2_NEW_USER_PROFILE=(dict, {
         # The default group name when a new user logs in
         'USER_GROUPS': [],
@@ -175,12 +175,14 @@ env = environ.Env(
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
-    # Feature toggle to show legacy list of PDF reports
-    # You need to have wkhtmltopdf installed on your system to generate PDF reports
-    DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
+    DD_FEATURE_FINDING_GROUPS=(bool, False),
+    DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
+    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
 
-    DD_JIRA_TEMPLATE_DIR=(str, 'dojo/templates/issue-trackers'),
-    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/')
+    # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
+    # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
+    # Set to True to revert to the old behaviour where all duplicates are deleted
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False)
 )
 
 
@@ -439,6 +441,7 @@ SAML2_AUTH = {
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
     # Optional settings below
     'DEFAULT_NEXT_URL': env('DD_SAML2_DEFAULT_NEXT_URL'),
+    'CREATE_USER': env('DD_SAML2_CREATE_USER'),
     'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
     'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
 }
@@ -474,7 +477,6 @@ LOGIN_EXEMPT_URLS = (
     r'^%swebhook/' % URL_PREFIX,
     r'^%sjira/webhook/([\w-]+)$' % URL_PREFIX,
     r'^%sjira/webhook/' % URL_PREFIX,
-    r'^%sapi/v1/' % URL_PREFIX,
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
@@ -534,9 +536,6 @@ SESSION_COOKIE_AGE = env('DD_SESSION_COOKIE_AGE')
 # Credential Key
 CREDENTIAL_AES_256_KEY = env('DD_CREDENTIAL_AES_256_KEY')
 DB_KEY = env('DD_CREDENTIAL_AES_256_KEY')
-
-# wkhtmltopdf settings
-WKHTMLTOPDF_PATH = env('DD_WKHTMLTOPDF')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
@@ -634,10 +633,8 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.humanize',
     'gunicorn',
-    'tastypie',
     'auditlog',
     'dojo',
-    'tastypie_swagger',
     'watson',
     'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     'imagekit',
@@ -649,8 +646,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
-    'tagulous',
-    'django_jsonfield_backport',
+    'tagulous'
 )
 
 # ------------------------------------------------------------------------------
@@ -670,6 +666,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
+    'dojo.request_cache.middleware.RequestCacheMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -749,6 +746,11 @@ CELERY_BEAT_SCHEDULE = {
     #     'schedule': timedelta(hours=12),
     #     'kwargs': {'mode': 'reconcile', 'dryrun': True, 'daysback': 10, 'product': None, 'engagement': None}
     # },
+    # 'fix_loop_duplicates': {
+    #     'task': 'dojo.tasks.fix_loop_duplicates_task',
+    #     'schedule': timedelta(hours=12)
+    # },
+
 
 }
 
@@ -784,10 +786,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'Dependency Check Scan': ['cve', 'file_path'],
+    'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
@@ -809,7 +812,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
-    'SpotBugs Scan': ['cwe', 'severity', 'file_path'],
+    'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -817,6 +820,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
+    'Anchore Grype': True,
     'Checkmarx Scan': False,
     'Checkmarx OSA': True,
     'SonarQube Scan': False,
@@ -831,7 +835,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'DSOP Scan': True,
     'Acunetix Scan': True,
     'Trivy Scan': True,
-    'SpotBugs Scan ': False,
+    'SpotBugs Scan': False,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -858,7 +862,7 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
-    'anchore_grype': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
@@ -889,6 +893,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
+    'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -963,8 +968,8 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+            'handlers': ['mail_admins', 'console'],
+            'level': 'WARN',
             'propagate': True,
         },
         'django.security': {
@@ -1045,13 +1050,12 @@ FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
 # When enabled, staff users have full access to all product types and products
 AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
 
-# Feature toggle to show legacy list of PDF reports
-# You need to have wkhtmltopdf installed on your system to generate PDF reports
-FEATURE_REPORTS_PDF_LIST = env('DD_FEATURE_REPORTS_PDF_LIST')
-
 EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
 
 USE_L10N = True
 
-JIRA_TEMPLATE_DIR = env('DD_JIRA_TEMPLATE_DIR')
+FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
+JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
+
+DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')

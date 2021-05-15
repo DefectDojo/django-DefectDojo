@@ -153,7 +153,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_1.json")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test
         self.goto_active_engagements_overview(driver)
@@ -166,7 +166,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_2.json")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     @on_exception_html_source_logger
     def test_check_path_status(self):
@@ -226,7 +226,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test : Immuniweb Scan (dynamic)
         self.goto_active_engagements_overview(driver)
@@ -240,7 +240,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_2.xml")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     @on_exception_html_source_logger
     def test_check_endpoint_status(self):
@@ -295,7 +295,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test : Generic Findings Import with Url (dynamic)
         self.goto_active_engagements_overview(driver)
@@ -308,7 +308,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     @on_exception_html_source_logger
     def test_check_same_eng_status(self):
@@ -368,7 +368,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 2 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 2 findings'))
 
         # Second test
         self.goto_active_engagements_overview(driver)
@@ -381,7 +381,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings_line_changed.xml"))
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 2 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 2 findings'))
 
     def test_check_path_status_checkmarx_scan(self):
         # After aggregation, it's only two findings. Both are duplicates even though the line number has changed
@@ -446,7 +446,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test : generic scan with url (dynamic)
         self.goto_active_engagements_overview(driver)
@@ -459,7 +459,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     def test_check_cross_status(self):
         self.check_nb_duplicates(1)

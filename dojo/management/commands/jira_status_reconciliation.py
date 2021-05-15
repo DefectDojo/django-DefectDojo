@@ -131,7 +131,7 @@ def jira_status_reconciliation(*args, **kwargs):
 
                     flag1 = not find.jira_issue.jira_change or (find.jira_issue.jira_change > issue_from_jira.fields.updated)
                     flag2 = find.last_status_update > issue_from_jira.fields.updated
-                    flag3 = find.is_Mitigated and find.mitigated and find.jira_issue.jira_change and find.mitigated > find.jira_issue.jira_change
+                    flag3 = find.is_mitigated and find.mitigated and find.jira_issue.jira_change and find.mitigated > find.jira_issue.jira_change
 
                     logger.debug('%s,%s,%s,%s', resolution_name, flag1, flag2, flag3)
 
@@ -207,7 +207,7 @@ class Command(BaseCommand):
     """
 
     help = 'Reconcile finding status with JIRA issue status, stdout will contain semicolon seperated CSV results. \
-        Risk Accepted findings are skipped.'
+        Risk Accepted findings are skipped. Findings created before 1.14.0 are skipped.'
 
     mode_help = \
         '- reconcile: (default)reconcile any differences in status between Defect Dojo and JIRA, will look at the latest status change timestamp in both systems to determine which one is the correct status' \

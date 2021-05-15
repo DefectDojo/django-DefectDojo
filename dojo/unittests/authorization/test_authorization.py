@@ -4,9 +4,10 @@ from django.test import TestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint
+import dojo.authorization.authorization
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, \
     user_has_permission_or_403, user_has_permission, \
-    RoleDoesNotExistError, PermissionDoesNotExistError, NoAuthorizationImplementedError
+    RoleDoesNotExistError, PermissionDoesNotExistError
 from dojo.authorization.roles_permissions import Permissions, Roles
 
 
@@ -15,10 +16,15 @@ class TestAuthorization(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user = User()
+        cls.user.id = 1
         cls.product_type = Product_Type()
+        cls.product_type.id = 1
         cls.product_type_member = Product_Type_Member()
+        cls.product_type_member.id = 1
         cls.product = Product()
+        cls.product.id = 1
         cls.product_member = Product_Member()
+        cls.product_member.id = 1
         cls.product.prod_type = cls.product_type
         cls.engagement = Engagement()
         cls.engagement.product = cls.product
@@ -86,7 +92,7 @@ class TestAuthorization(TestCase):
         self.assertEqual(mock_get.call_args[1]['product_type'], self.product_type)
 
     def test_user_has_permission_exception(self):
-        with self.assertRaisesMessage(NoAuthorizationImplementedError,
+        with self.assertRaisesMessage(dojo.authorization.authorization.NoAuthorizationImplementedError,
                 'No authorization implemented for class Product_Type_Member and permission 1007'):
             user_has_permission(self.user, self.product_type_member, Permissions.Product_Type_Delete)
 
@@ -248,19 +254,21 @@ class TestAuthorization(TestCase):
         self.assertEqual(mock_get.call_args[1]['product'], self.product)
 
     def test_user_has_permission_product_type_member_success_same_user(self):
-        result = user_has_permission(self.user, self.product_type_member_owner, Permissions.Product_Type_Remove_Member)
+        result = user_has_permission(self.user, self.product_type_member_owner, Permissions.Product_Type_Member_Delete)
         self.assertTrue(result)
 
     @patch('dojo.models.Product_Type_Member.objects.get')
     def test_user_has_permission_product_type_member_no_permission(self, mock_get):
         other_user = User()
+        other_user.id = 2
         product_type_member_other_user = Product_Type_Member()
+        product_type_member_other_user.id = 2
         product_type_member_other_user.user = other_user
         product_type_member_other_user.product_type = self.product_type
         product_type_member_other_user.role = Roles.Reader
         mock_get.return_value = product_type_member_other_user
 
-        result = user_has_permission(other_user, self.product_type_member_owner, Permissions.Product_Type_Remove_Member)
+        result = user_has_permission(other_user, self.product_type_member_owner, Permissions.Product_Type_Member_Delete)
 
         self.assertFalse(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
@@ -269,32 +277,36 @@ class TestAuthorization(TestCase):
     @patch('dojo.models.Product_Type_Member.objects.get')
     def test_user_has_permission_product_type_member_success(self, mock_get):
         other_user = User()
+        other_user.id = 2
         product_type_member_other_user = Product_Type_Member()
+        product_type_member_other_user.id = 2
         product_type_member_other_user.user = other_user
         product_type_member_other_user.product_type = self.product_type
         product_type_member_other_user.role = Roles.Owner
         mock_get.return_value = product_type_member_other_user
 
-        result = user_has_permission(other_user, self.product_type_member_reader, Permissions.Product_Type_Remove_Member)
+        result = user_has_permission(other_user, self.product_type_member_reader, Permissions.Product_Type_Member_Delete)
 
         self.assertTrue(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
         self.assertEqual(mock_get.call_args[1]['product_type'], self.product_type)
 
     def test_user_has_permission_product_member_success_same_user(self):
-        result = user_has_permission(self.user, self.product_member_owner, Permissions.Product_Remove_Member)
+        result = user_has_permission(self.user, self.product_member_owner, Permissions.Product_Member_Delete)
         self.assertTrue(result)
 
     @patch('dojo.models.Product_Member.objects.get')
     def test_user_has_permission_product_member_no_permission(self, mock_get):
         other_user = User()
+        other_user.id = 2
         product_member_other_user = Product_Member()
+        product_member_other_user.id = 2
         product_member_other_user.user = other_user
         product_member_other_user.product = self.product
         product_member_other_user.role = Roles.Reader
         mock_get.return_value = product_member_other_user
 
-        result = user_has_permission(other_user, self.product_member_owner, Permissions.Product_Remove_Member)
+        result = user_has_permission(other_user, self.product_member_owner, Permissions.Product_Member_Delete)
 
         self.assertFalse(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
@@ -303,13 +315,15 @@ class TestAuthorization(TestCase):
     @patch('dojo.models.Product_Member.objects.get')
     def test_user_has_permission_product_member_success(self, mock_get):
         other_user = User()
+        other_user.id = 2
         product_member_other_user = Product_Member()
+        product_member_other_user.id = 2
         product_member_other_user.user = other_user
         product_member_other_user.product_type = self.product
         product_member_other_user.role = Roles.Owner
         mock_get.return_value = product_member_other_user
 
-        result = user_has_permission(other_user, self.product_member_reader, Permissions.Product_Remove_Member)
+        result = user_has_permission(other_user, self.product_member_reader, Permissions.Product_Member_Delete)
 
         self.assertTrue(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)

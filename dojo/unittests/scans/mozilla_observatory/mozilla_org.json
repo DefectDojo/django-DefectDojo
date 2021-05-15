@@ -1,0 +1,339 @@
+{
+    "scan": {
+        "algorithm_version": 2,
+        "end_time": "Tue, 04 May 2021 10:05:44 GMT",
+        "grade": "B+",
+        "hidden": false,
+        "likelihood_indicator": "MEDIUM",
+        "response_headers": {
+            "Age": "373",
+            "CF-Cache-Status": "HIT",
+            "CF-Ray": "64a0e9822a2c025a-SJC",
+            "Cache-Control": "max-age=600",
+            "Connection": "keep-alive",
+            "Content-Encoding": "gzip",
+            "Content-Security-Policy": "style-src 'self' *.mozilla.net *.mozilla.org *.mozilla.com 'unsafe-inline' app.convert.com; default-src 'self' *.mozilla.net *.mozilla.org *.mozilla.com; connect-src 'self' *.mozilla.net *.mozilla.org *.mozilla.com www.googletagmanager.com www.google-analytics.com logs.convertexperiments.com 1003350.metrics.convertexperiments.com 1003343.metrics.convertexperiments.com sentry.prod.mozaws.net https://accounts.firefox.com/ https://accounts.firefox.com.cn/; frame-src 'self' *.mozilla.net *.mozilla.org *.mozilla.com www.googletagmanager.com www.google-analytics.com www.youtube-nocookie.com trackertest.org www.surveygizmo.com accounts.firefox.com accounts.firefox.com.cn www.youtube.com; img-src 'self' *.mozilla.net *.mozilla.org *.mozilla.com data: mozilla.org firefox.com www.firefox.com www.googletagmanager.com www.google-analytics.com adservice.google.com adservice.google.de adservice.google.dk creativecommons.org cdn-3.convertexperiments.com logs.convertexperiments.com ad.doubleclick.net; script-src 'self' *.mozilla.net *.mozilla.org *.mozilla.com 'unsafe-inline' 'unsafe-eval' www.googletagmanager.com www.google-analytics.com tagmanager.google.com www.youtube.com s.ytimg.com cdn-3.convertexperiments.com app.convert.com data.track.convertexperiments.com 1003350.track.convertexperiments.com 1003343.track.convertexperiments.com; child-src 'self' *.mozilla.net *.mozilla.org *.mozilla.com www.googletagmanager.com www.google-analytics.com www.youtube-nocookie.com trackertest.org www.surveygizmo.com accounts.firefox.com accounts.firefox.com.cn www.youtube.com",
+            "Content-Type": "text/html; charset=utf-8",
+            "Date": "Tue, 04 May 2021 10:05:42 GMT",
+            "ETag": "W/\"f080cb51a5a7900324a4a5fb1d8a7c52\"",
+            "Expect-CT": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+            "Expires": "Tue, 04 May 2021 10:09:29 GMT",
+            "Server": "cloudflare",
+            "Strict-Transport-Security": "max-age=31536000",
+            "Transfer-Encoding": "chunked",
+            "Vary": "Accept-Encoding",
+            "Via": "1.1 google",
+            "X-Backend-Server": "bedrock-prod-web-79b5d6895b-4z6x9.iowa-a",
+            "X-Clacks-Overhead": "GNU Terry Pratchett",
+            "X-Content-Type-Options": "nosniff",
+            "X-Frame-Options": "DENY",
+            "X-XSS-Protection": "1; mode=block",
+            "cf-request-id": "09d870455c0000025a1c1da000000001"
+        },
+        "scan_id": 18995851,
+        "score": 80,
+        "start_time": "Tue, 04 May 2021 10:05:40 GMT",
+        "state": "FINISHED",
+        "status_code": 200,
+        "tests_failed": 1,
+        "tests_passed": 11,
+        "tests_quantity": 12
+    },
+    "tests": {
+        "content-security-policy": {
+            "expectation": "csp-implemented-with-no-unsafe",
+            "name": "content-security-policy",
+            "output": {
+                "data": {
+                    "child-src": [
+                        "www.surveygizmo.com",
+                        "*.mozilla.org",
+                        "accounts.firefox.com",
+                        "accounts.firefox.com.cn",
+                        "'self'",
+                        "www.googletagmanager.com",
+                        "*.mozilla.com",
+                        "www.youtube.com",
+                        "*.mozilla.net",
+                        "www.google-analytics.com",
+                        "www.youtube-nocookie.com",
+                        "trackertest.org"
+                    ],
+                    "connect-src": [
+                        "*.mozilla.org",
+                        "logs.convertexperiments.com",
+                        "1003350.metrics.convertexperiments.com",
+                        "sentry.prod.mozaws.net",
+                        "'self'",
+                        "www.googletagmanager.com",
+                        "*.mozilla.com",
+                        "1003343.metrics.convertexperiments.com",
+                        "*.mozilla.net",
+                        "https://accounts.firefox.com/",
+                        "https://accounts.firefox.com.cn/",
+                        "www.google-analytics.com"
+                    ],
+                    "default-src": [
+                        "*.mozilla.net",
+                        "'self'",
+                        "*.mozilla.com",
+                        "*.mozilla.org"
+                    ],
+                    "frame-src": [
+                        "www.surveygizmo.com",
+                        "*.mozilla.org",
+                        "accounts.firefox.com",
+                        "accounts.firefox.com.cn",
+                        "'self'",
+                        "www.googletagmanager.com",
+                        "*.mozilla.com",
+                        "www.youtube.com",
+                        "*.mozilla.net",
+                        "www.google-analytics.com",
+                        "www.youtube-nocookie.com",
+                        "trackertest.org"
+                    ],
+                    "img-src": [
+                        "firefox.com",
+                        "*.mozilla.org",
+                        "creativecommons.org",
+                        "cdn-3.convertexperiments.com",
+                        "logs.convertexperiments.com",
+                        "data:",
+                        "mozilla.org",
+                        "adservice.google.com",
+                        "www.firefox.com",
+                        "'self'",
+                        "*.mozilla.com",
+                        "www.googletagmanager.com",
+                        "*.mozilla.net",
+                        "adservice.google.de",
+                        "www.google-analytics.com",
+                        "ad.doubleclick.net",
+                        "adservice.google.dk"
+                    ],
+                    "script-src": [
+                        "'unsafe-inline'",
+                        "1003343.track.convertexperiments.com",
+                        "cdn-3.convertexperiments.com",
+                        "*.mozilla.org",
+                        "'unsafe-eval'",
+                        "1003350.track.convertexperiments.com",
+                        "tagmanager.google.com",
+                        "s.ytimg.com",
+                        "app.convert.com",
+                        "'self'",
+                        "*.mozilla.com",
+                        "www.googletagmanager.com",
+                        "www.youtube.com",
+                        "*.mozilla.net",
+                        "data.track.convertexperiments.com",
+                        "www.google-analytics.com"
+                    ],
+                    "style-src": [
+                        "'unsafe-inline'",
+                        "*.mozilla.org",
+                        "app.convert.com",
+                        "'self'",
+                        "*.mozilla.com",
+                        "*.mozilla.net"
+                    ]
+                },
+                "http": true,
+                "meta": false,
+                "policy": {
+                    "antiClickjacking": false,
+                    "defaultNone": false,
+                    "insecureBaseUri": true,
+                    "insecureFormAction": true,
+                    "insecureSchemeActive": false,
+                    "insecureSchemePassive": false,
+                    "strictDynamic": false,
+                    "unsafeEval": true,
+                    "unsafeInline": true,
+                    "unsafeInlineStyle": true,
+                    "unsafeObjects": false
+                }
+            },
+            "pass": false,
+            "result": "csp-implemented-with-unsafe-inline",
+            "score_description": "Content Security Policy (CSP) implemented unsafely. This includes 'unsafe-inline' or data: inside script-src, overly broad sources such as https: inside object-src or script-src, or not restricting the sources for object-src or script-src.",
+            "score_modifier": -20
+        },
+        "contribute": {
+            "expectation": "contribute-json-with-required-keys",
+            "name": "contribute",
+            "output": {
+                "data": {
+                    "bugs": {
+                        "list": "https://bugzilla.mozilla.org/describecomponents.cgi?product=www.mozilla.org",
+                        "mentored": "https://bugzilla.mozilla.org/buglist.cgi?f1=bug_mentor&o1=isnotempty&query_format=advanced&bug_status=NEW&product=www.mozilla.org&list_id=10866041",
+                        "report": "https://bugzilla.mozilla.org/enter_bug.cgi?product=www.mozilla.org"
+                    },
+                    "description": "The app powering www.mozilla.org.",
+                    "name": "Bedrock",
+                    "participate": {
+                        "docs": "http://bedrock.readthedocs.org/",
+                        "home": "https://wiki.mozilla.org/Webdev/GetInvolved/mozilla.org",
+                        "irc": "irc://irc.mozilla.org/#www",
+                        "irc-contacts": [
+                            "agibson",
+                            "craigcook",
+                            "jpetto",
+                            "pmac",
+                            "kohei",
+                            "jgmize"
+                        ],
+                        "mailing-list": "https://www.mozilla.org/about/forums/#dev-mozilla-org"
+                    },
+                    "urls": {
+                        "demo1": "https://www-demo1.allizom.org",
+                        "demo2": "https://www-demo2.allizom.org",
+                        "demo3": "https://www-demo3.allizom.org",
+                        "demo4": "https://www-demo4.allizom.org",
+                        "demo5": "https://www-demo5.allizom.org",
+                        "dev": "https://www-dev.allizom.org",
+                        "prod": "https://www.mozilla.org",
+                        "stage": "https://www.allizom.org"
+                    }
+                }
+            },
+            "pass": true,
+            "result": "contribute-json-with-required-keys",
+            "score_description": "Contribute.json implemented with the required contact information",
+            "score_modifier": 0
+        },
+        "cookies": {
+            "expectation": "cookies-secure-with-httponly-sessions",
+            "name": "cookies",
+            "output": {
+                "data": null,
+                "sameSite": null
+            },
+            "pass": true,
+            "result": "cookies-not-found",
+            "score_description": "No cookies detected",
+            "score_modifier": 0
+        },
+        "cross-origin-resource-sharing": {
+            "expectation": "cross-origin-resource-sharing-not-implemented",
+            "name": "cross-origin-resource-sharing",
+            "output": {
+                "data": {
+                    "acao": null,
+                    "clientaccesspolicy": null,
+                    "crossdomain": null
+                }
+            },
+            "pass": true,
+            "result": "cross-origin-resource-sharing-not-implemented",
+            "score_description": "Content is not visible via cross-origin resource sharing (CORS) files or headers",
+            "score_modifier": 0
+        },
+        "public-key-pinning": {
+            "expectation": "hpkp-not-implemented",
+            "name": "public-key-pinning",
+            "output": {
+                "data": null,
+                "includeSubDomains": false,
+                "max-age": null,
+                "numPins": null,
+                "preloaded": false
+            },
+            "pass": true,
+            "result": "hpkp-not-implemented",
+            "score_description": "HTTP Public Key Pinning (HPKP) header not implemented",
+            "score_modifier": 0
+        },
+        "redirection": {
+            "expectation": "redirection-to-https",
+            "name": "redirection",
+            "output": {
+                "destination": "https://www.mozilla.org/en-US/",
+                "redirects": true,
+                "route": [
+                    "http://www.mozilla.org/",
+                    "https://www.mozilla.org/",
+                    "https://www.mozilla.org/en-US/"
+                ],
+                "status_code": 200
+            },
+            "pass": true,
+            "result": "redirection-to-https",
+            "score_description": "Initial redirection is to HTTPS on same host, final destination is HTTPS",
+            "score_modifier": 0
+        },
+        "referrer-policy": {
+            "expectation": "referrer-policy-private",
+            "name": "referrer-policy",
+            "output": {
+                "data": null,
+                "http": false,
+                "meta": false
+            },
+            "pass": true,
+            "result": "referrer-policy-not-implemented",
+            "score_description": "Referrer-Policy header not implemented",
+            "score_modifier": 0
+        },
+        "strict-transport-security": {
+            "expectation": "hsts-implemented-max-age-at-least-six-months",
+            "name": "strict-transport-security",
+            "output": {
+                "data": "max-age=31536000",
+                "includeSubDomains": false,
+                "max-age": 31536000,
+                "preload": false,
+                "preloaded": false
+            },
+            "pass": true,
+            "result": "hsts-implemented-max-age-at-least-six-months",
+            "score_description": "HTTP Strict Transport Security (HSTS) header set to a minimum of six months (15768000)",
+            "score_modifier": 0
+        },
+        "subresource-integrity": {
+            "expectation": "sri-implemented-and-external-scripts-loaded-securely",
+            "name": "subresource-integrity",
+            "output": {
+                "data": {}
+            },
+            "pass": true,
+            "result": "sri-not-implemented-but-all-scripts-loaded-from-secure-origin",
+            "score_description": "Subresource Integrity (SRI) not implemented, but all scripts are loaded from a similar origin",
+            "score_modifier": 0
+        },
+        "x-content-type-options": {
+            "expectation": "x-content-type-options-nosniff",
+            "name": "x-content-type-options",
+            "output": {
+                "data": "nosniff"
+            },
+            "pass": true,
+            "result": "x-content-type-options-nosniff",
+            "score_description": "X-Content-Type-Options header set to \"nosniff\"",
+            "score_modifier": 0
+        },
+        "x-frame-options": {
+            "expectation": "x-frame-options-sameorigin-or-deny",
+            "name": "x-frame-options",
+            "output": {
+                "data": "DENY"
+            },
+            "pass": true,
+            "result": "x-frame-options-sameorigin-or-deny",
+            "score_description": "X-Frame-Options (XFO) header set to SAMEORIGIN or DENY",
+            "score_modifier": 0
+        },
+        "x-xss-protection": {
+            "expectation": "x-xss-protection-1-mode-block",
+            "name": "x-xss-protection",
+            "output": {
+                "data": "1; mode=block"
+            },
+            "pass": true,
+            "result": "x-xss-protection-enabled-mode-block",
+            "score_description": "X-XSS-Protection header set to \"1; mode=block\"",
+            "score_modifier": 0
+        }
+    }
+}

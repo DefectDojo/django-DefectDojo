@@ -44,7 +44,6 @@ jobs:
       - name: Update version numbers in key files
         run: |
           sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number_dev }}'/" dojo/__init__.py
-          sed -ri "s/version='.*'/version='${{ github.event.inputs.release_number_dev }}'/" setup.py
           sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number_dev }}\"/" helm/defectdojo/Chart.yaml
           sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number_dev }}\"/" components/package.json
       - name: Check numbers
@@ -54,7 +53,7 @@ jobs:
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
       - name: Push version changes
-        uses: stefanzweifel/git-auto-commit-action@v4.9.2
+        uses: stefanzweifel/git-auto-commit-action@v4.11.0
         with:
           commit_user_name: "${{ env.GIT_USERNAME }}"
           commit_user_email: "${{ env.GIT_EMAIL }}"
@@ -66,7 +65,7 @@ jobs:
       - name: Create Pull Request
         env:
           REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
-        uses: actions/github-script@v3
+        uses: actions/github-script@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

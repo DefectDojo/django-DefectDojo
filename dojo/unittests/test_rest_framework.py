@@ -113,7 +113,7 @@ class BaseClass():
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
             current_objects = self.client.get(self.url, format='json').data
-            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            relative_url = self.url + '%s/' % current_objects['results'][-1]['id']
             response = self.client.delete(relative_url)
             self.assertEqual(204, response.status_code, response.content[:1000])
 
@@ -147,7 +147,7 @@ class BaseClass():
 
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
-            print("=======================================================")
+            # print("=======================================================")
             prefetchable_fields = [x[0] for x in _get_prefetchable_fields(self.viewset.serializer_class)]
 
             current_objects = self.client.get(self.url, format='json').data
@@ -269,7 +269,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         self.viewname = 'engagement'
         self.viewset = EngagementViewSet
         self.payload = {
-            "eng_type": 1,
+            "engagement_type": 'Interactive',
             "report_type": 1,
             "name": "",
             "description": "",
@@ -324,7 +324,7 @@ class FindingFilesTest(DojoAPITestCase):
             'engagements/1'
         ]
         path = pathlib.Path(__file__).parent.absolute()
-        print(path)
+        # print(path)
         for level in url_levels:
             length = FileUpload.objects.count()
             payload = {
@@ -442,7 +442,9 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
         metadata.save()
 
     def test_create(self):
-        self.client.post(self.base_url, data={"name": "test_meta2", "value": "40"})
+        response = self.client.post(self.base_url, data={"name": "test_meta2", "value": "40"})
+        self.assertEqual(200, response.status_code, response.data)
+
         results = self.client.get(self.base_url).data
         for result in results:
             if result["name"] == "test_meta2" and result["value"] == "40":
@@ -664,7 +666,10 @@ class TestsTest(BaseClass.RESTEndpointTest):
             "target_end": "2017-01-12T00:00",
             "percent_complete": 0,
             "lead": 2,
-            "tags": []
+            "tags": [],
+            "version": "1.0",
+            "branch_tag": "master",
+            "commit_hash": "1234567890abcdefghijkl",
         }
         self.update_fields = {'percent_complete': 100}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)

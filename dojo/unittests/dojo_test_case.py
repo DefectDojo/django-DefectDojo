@@ -68,6 +68,11 @@ class DojoTestUtilsMixin(object):
         jira_issues = JIRA_Issue.objects.filter(finding__in=test.finding_set.all())
         self.assertEqual(count, len(jira_issues))
 
+    def assert_jira_group_issue_count_in_test(self, test_id, count):
+        test = self.get_test(test_id)
+        jira_issues = JIRA_Issue.objects.filter(finding_group__test=test)
+        self.assertEqual(count, len(jira_issues))
+
     def model_to_dict(self, instance):
         opts = instance._meta
         data = {}
@@ -78,7 +83,7 @@ class DojoTestUtilsMixin(object):
         return data
 
     def log_model_instance(self, instance):
-        logger.debug(pprint.pprint(self.model_to_dict(instance)))
+        logger.debug('model instance: %s', pprint.pprint(self.model_to_dict(instance)))
 
     def log_model_instances(self, instances):
         for instance in instances:
@@ -120,7 +125,7 @@ class DojoTestUtilsMixin(object):
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_product_with_jira_project_data(self, product):
@@ -156,7 +161,7 @@ class DojoTestUtilsMixin(object):
             # 'jira_instance': 2,
             # 'enable_engagement_epic_mapping': 'on',
             # 'push_notes': 'on',
-            'jira-project-form-product_jira_sla_notification': 'on'  # default is true so we have to supply to make has_changed() work OK
+            # 'jira-project-form-product_jira_sla_notification': 'on'
         }
 
     def get_expected_redirect_product(self, product):
@@ -166,7 +171,7 @@ class DojoTestUtilsMixin(object):
         response = self.client.get(reverse('new_product'))
 
         # logger.debug('before: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = '/product/%i'
@@ -174,7 +179,7 @@ class DojoTestUtilsMixin(object):
         response = self.client.post(reverse('new_product'), urlencode(data), content_type='application/x-www-form-urlencoded')
 
         # logger.debug('after: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         product = None
         if expect_200:
@@ -216,18 +221,19 @@ class DojoTestUtilsMixin(object):
         return self.add_product_jira_with_data(self.get_new_product_with_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def add_product_without_jira_project(self, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+        logger.debug('adding product without jira project')
         return self.add_product_jira_with_data(self.get_new_product_without_jira_project_data(), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def edit_product_jira(self, product, data, expect_redirect_to=None, expect_200=False):
         response = self.client.get(reverse('edit_product', args=(product.id, )))
 
-        logger.debug('before: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # logger.debug('before: JIRA_Project last')
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         response = self.client.post(reverse('edit_product', args=(product.id, )), urlencode(data), content_type='application/x-www-form-urlencoded')
         # self.log_model_instance(product)
-        logger.debug('after: JIRA_Project last')
-        self.log_model_instance(JIRA_Project.objects.last())
+        # logger.debug('after: JIRA_Project last')
+        # self.log_model_instance(JIRA_Project.objects.last())
 
         if expect_200:
             self.assertEqual(response.status_code, 200)
@@ -258,6 +264,7 @@ class DojoTestUtilsMixin(object):
         return self.edit_jira_project_for_product_with_data(product, self.get_product_with_jira_project_data2(product), expected_delta_jira_project_db, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
 
     def empty_jira_project_for_product(self, product, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False):
+        logger.debug('empty jira project for product')
         jira_project_count_before = self.db_jira_project_count()
         # print('before: ' + str(jira_project_count_before))
 
@@ -271,10 +278,36 @@ class DojoTestUtilsMixin(object):
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
 
-    def get_jira_issue_severity(self, finding_id):
+    def get_jira_issue_status(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
-        status = jira_helper.get_jira_status(finding)
-        return status
+        updated = jira_helper.get_jira_status(finding)
+        return updated
+
+    def get_jira_issue_updated(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        updated = jira_helper.get_jira_updated(finding)
+        return updated
+
+    def get_jira_issue_updated_map(self, test_id):
+        findings = Test.objects.get(id=test_id).finding_set.all()
+        updated_map = {}
+        for finding in findings:
+            logger.debug('finding!!!')
+            updated = jira_helper.get_jira_updated(finding)
+            updated_map[finding.id] = updated
+        return updated_map
+
+    def assert_jira_updated_map_unchanged(self, test_id, updated_map):
+        findings = Test.objects.get(id=test_id).finding_set.all()
+        for finding in findings:
+            logger.debug('finding!')
+            self.assertEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
+
+    def assert_jira_updated_map_changed(self, test_id, updated_map):
+        findings = Test.objects.get(id=test_id).finding_set.all()
+        for finding in findings:
+            logger.debug('finding!')
+            self.assertNotEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
 
     # Toggle epic mapping on jira product
     def toggle_jira_project_epic_mapping(self, obj, value):
@@ -308,8 +341,8 @@ class DojoTestUtilsMixin(object):
         else:
             self.assertTrue(epic_id != epic_link)
 
-    def assert_jira_status_change(self, old_status, new_status):
-        self.assertFalse(old_status == new_status)
+    def assert_jira_updated_change(self, old, new):
+        self.assertTrue(old != new)
 
 
 class DojoTestCase(TestCase, DojoTestUtilsMixin):
@@ -348,7 +381,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
+                                push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -364,12 +398,19 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
 
+        if endpoint_to_add is not None:
+            payload['endpoint_to_add'] = endpoint_to_add
+
         if tags is not None:
             payload['tags'] = tags
 
+        if group_by is not None:
+            payload['group_by'] = group_by
+
         return self.import_scan(payload)
 
-    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
+    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None,
+                                  tags=None, close_old_findings=True, group_by=None):
         payload = {
                 "test": test_id,
                 "scan_date": '2020-06-04',
@@ -388,6 +429,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if tags is not None:
             payload['tags'] = tags
+
+        if group_by is not None:
+            payload['group_by'] = group_by
 
         return self.reimport_scan(payload)
 
@@ -433,14 +477,18 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None, is_Mitigated=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None, component_name=None, component_version=None):
         payload = {'test': test_id}
         if active is not None:
             payload['active'] = active
         if verified is not None:
             payload['verified'] = verified
-        if is_Mitigated is not None:
-            payload['is_Mitigated'] = is_Mitigated
+        if is_mitigated is not None:
+            payload['is_mitigated'] = is_mitigated
+        if component_name is not None:
+            payload['component_name'] = component_name
+        if component_version is not None:
+            payload['component_version'] = component_version
 
         response = self.client.get(reverse('finding-list'), payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
@@ -462,13 +510,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def get_finding_tags_api(self, finding_id):
         response = self.do_finding_tags_api(self.client.get, finding_id)
-        print(response.data)
+        # print(response.data)
         return response.data
 
     def get_finding_api_filter_tags(self, tags):
         response = self.client.get(reverse('finding-list') + '?tags=%s' % tags, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])
-        print(response.data)
+        # print(response.data)
         return response.data
 
     def post_finding_tags_api(self, finding_id, tags):
@@ -481,8 +529,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             data = {'tags': tags}
 
         response = http_method(reverse('finding-remove-tags', args=(finding_id,)), data, format='json')
-        print(response)
-        print(response.content)
+        # print(response)
+        # print(response.content)
         self.assertEqual(expected_response_status_code, response.status_code, response.content[:1000])
         return response.data
 
@@ -499,11 +547,11 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if note:
             data = {'entry': note}
 
-        print('data:' + str(data))
+        # print('data:' + str(data))
 
         response = http_method(reverse('finding-notes', args=(finding_id,)), data, format='json')
-        print(vars(response))
-        print(response.content)
+        # print(vars(response))
+        # print(response.content)
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response
 
@@ -521,7 +569,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         else:
             for finding in findings_content_json['results']:
                 logger.debug(str(finding['id']) + ': ' + finding['title'][:5] + ':' + finding['severity'] + ': active: ' + str(finding['active']) + ': verified: ' + str(finding['verified']) +
-                        ': is_Mitigated: ' + str(finding['is_Mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
+                        ': is_mitigated: ' + str(finding['is_mitigated']) + ": notes: " + str([n['id'] for n in finding['notes']]) +
                         ": endpoints: " + str(finding['endpoints']))
 
         logger.debug('endpoints')

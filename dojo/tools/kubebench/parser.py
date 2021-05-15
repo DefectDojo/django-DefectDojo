@@ -89,7 +89,6 @@ def get_item(vuln, test, description):
     # kube-bench doesn't define severities. Sine the findings are
     # vulnerabilities, we set them to Medium
     severity = 'Medium'
-    numerical_severity = Finding.get_numerical_severity(severity)
 
     mitigation = ''
     if 'remediation' in vuln:
@@ -97,11 +96,8 @@ def get_item(vuln, test, description):
 
     finding = Finding(title=title,
                       test=test,
-                      active=False,
-                      verified=False,
                       description=description,
                       severity=severity,
-                      numerical_severity=numerical_severity,
                       mitigation=mitigation,
                       unique_id_from_tool=unique_id_from_tool,
                       static_finding=True,
