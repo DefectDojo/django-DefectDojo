@@ -43,20 +43,20 @@ class TestSpotbugsParser(TestCase):
         parser = SpotbugsParser()
         findings = parser.get_findings("dojo/unittests/scans/spotbugs/many_findings.xml", Test())
         test_finding = findings[0]
-        # Test if line 8 is correct
+        # Test if line 13 is correct
         self.assertEqual(
             "At IdentityFunctionCommandInjection.kt:[lines 20-170]",
-            test_finding.description.splitlines()[7]
+            test_finding.description.splitlines()[12]
         )
 
     def test_mitigation(self):
         parser = SpotbugsParser()
         findings = parser.get_findings("dojo/unittests/scans/spotbugs/many_findings.xml", Test())
         test_finding = findings[0]
-        # Test if line 11 is correct
+        # Test if line 10 is correct
         self.assertEqual(
             "#### Example",
-            test_finding.mitigation.splitlines()[10]
+            test_finding.mitigation.splitlines()[9]
         )
 
     def test_references(self):
