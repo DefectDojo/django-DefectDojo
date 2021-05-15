@@ -57,9 +57,9 @@ class SpotbugsParser(object):
                     break
                 # Add a string before the code indicating that it's just an example, NOT the actual scanned code
                 if ('Vulnerable Code:' in line) or ('Insecure configuration:' in line) or ('Code at risk:' in line):
-                    mitigation += '\n\n\n#### Example\n'
+                    mitigation += '\n\n#### Example\n'
                 # Add line to mitigation
-                mitigation += line.replace('\n', '') + '\n'
+                mitigation += line + '\n'
             # Add mitigations to dictionary
             mitigation_patterns[pattern.get('type')] = mitigation
 
@@ -84,9 +84,7 @@ class SpotbugsParser(object):
         for bug in root.findall('BugInstance'):
             desc = ''
             for message in bug.itertext():
-                # The message comes with multiple breaklines,
-                # so were removing all of them and adding only one at the end
-                desc += message.replace('\n', '') + '\n'
+                desc += message + '\n'
 
             dupe_key = bug.get('instanceHash')
 
