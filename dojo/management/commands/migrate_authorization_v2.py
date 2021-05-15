@@ -74,7 +74,7 @@ class Command(BaseCommand):
 
         if authorized_user_exists and not settings.AUTHORIZED_USERS_ALLOW_STAFF and \
                 (settings.AUTHORIZED_USERS_ALLOW_CHANGE or settings.AUTHORIZED_USERS_ALLOW_DELETE):
-            logger.warn('Authorized users have less permissions than before, because there is no equivalent for AUTHORIZED_USERS_ALLOW_CHANGE and AUTHORIZED_USERS_ALLOW_DELETE')
+            logger.warn('Authorized users have more permissions than before, because there is no equivalent for AUTHORIZED_USERS_ALLOW_CHANGE and AUTHORIZED_USERS_ALLOW_DELETE')
 
         logger.info('Finished migrating users for authorization v2')
 
@@ -82,5 +82,7 @@ class Command(BaseCommand):
 def get_role():
     if settings.AUTHORIZED_USERS_ALLOW_STAFF:
         return 4  # Owner
+    elif settings.AUTHORIZED_USERS_ALLOW_CHANGE or settings.AUTHORIZED_USERS_ALLOW_DELETE:
+        return 2  # Writer
     else:
         return 0  # Reader
