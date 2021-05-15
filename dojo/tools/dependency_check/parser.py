@@ -238,7 +238,7 @@ class DependencyCheckParser(object):
                                      'source: {1}\n' \
                                      'url: {2}\n\n'.format(name, source, url)
 
-        mitigation = 'Update ' + component_name + '-' + component_version + ' to at least the version recommended in the description'
+        mitigation = 'Update ' + component_name + ':' + component_version + ' to at least the version recommended in the description'
 
         return Finding(
             title=title,
