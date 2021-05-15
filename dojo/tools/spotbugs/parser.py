@@ -76,7 +76,7 @@ class SpotbugsParser(object):
             #   regex: turns ')  [' into ')\n['
             #      ')': reference ends
             #      '[': reference starts
-            reference = re.sub(r'(?<=))(.*?)(?=[)', '\n', reference)
+            reference = re.sub(r'(?<=\))(.*?)(?=\[)', '\n', reference)
             # Add references to dictionary
             reference_patterns[pattern.get('type')] = reference
 
