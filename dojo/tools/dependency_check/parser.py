@@ -238,8 +238,6 @@ class DependencyCheckParser(object):
                                      'source: {1}\n' \
                                      'url: {2}\n\n'.format(name, source, url)
 
-        component_name, component_version = self.get_component_name_and_version_from_dependency(dependency, related_dependency, namespace)
-
         mitigation = 'Update ' + component_name + '-' + component_version + ' to at least the version recommended in the description'
 
         return Finding(
