@@ -4,7 +4,7 @@ __email__ = "bigorigor.ua@gmail.com"
 __status__ = "Development"
 
 import re
-from bs4 import BeautifulSoup
+import html2text
 from defusedxml import ElementTree as ET
 from dojo.models import Finding
 
@@ -34,42 +34,53 @@ class SpotbugsParser(object):
         tree = ET.parse(filename)
         root = tree.getroot()
 
+        html_parser = html2text.HTML2Text()
+        html_parser.ignore_links = False
+
         # Parse <BugPattern> tags
         for pattern in root.findall('BugPattern'):
-            # Parse <BugPattern> content as html
-            html_text = BeautifulSoup(ET.tostring(pattern.find('Details'), method='text').decode('utf-8'), features="html.parser")
+            # Parse <BugPattern>...<Details> html content
+            html_text = html_parser.handle(
+                ET.tostring(
+                    pattern.find('Details'),
+                    method='text'
+                ).decode('utf-8')
+            )
 
-            # Surround text inside <pre> tags with ```
-            for pre in html_text.find_all('pre'):
-                temp = pre.text
-                pre.string = '```\n' + temp + '\n```'
-            # Surround text inside <code> tags with `
-            for code in html_text.find_all('code'):
-                temp = code.text
-                code.string = '`' + temp + '`'
-            # Surround text inside <b> tags with **
-            for bold in html_text.find_all('b'):
-                temp = bold.text
-                bold.string = '**' + temp + '**'
-
-            # Get <p> tags
-            paragraphs = html_text.find_all('p')
-
-            # All <p> tags (except the last one) are the bug description with instructions on how to fix it
+            # Parse mitigation from html
             mitigation = ''
-            for p in paragraphs[:-1]:
-                if ('Vulnerable Code:' in p.text) or ('Insecure configuration:' in p.text) or ('Code at risk:' in p.text):
-                    # Add a string indicating the code here its just an example, NOT the actual scanned code
+            i = 0
+            for line in html_text.splitlines():
+                i += 1
+                # Break loop when references are reached
+                if 'Reference' in line:
+                    break
+                # Add a string before the code indicating that it's just an example, NOT the actual scanned code
+                if (('Vulnerable Code:' in line)
+                    or ('Insecure configuration:' in line)
+                    or ('Code at risk:' in line)
+                ):
                     mitigation += '\n\n\n#### Example\n'
-                # Append text removing leading whitespaces if is not a code
-                mitigation += re.sub("  +", "", p.text) if '```' not in p.text else p.text
+                # Add line to mitigation
+                mitigation += line.replace('\n', '') + '\n'
+            # Add mitigations to dictionary
             mitigation_patterns[pattern.get('type')] = mitigation
 
-            # The last <p> is always references
+            # Parse references from html
             reference = ''
-            links = paragraphs[-1].find_all('a', href=True)
-            for link in links:
-                reference += link['href'] + ' - ' + link.text + '\n'
+            #   Sometimes there's a breakline in the middle of the reference,
+            #   so the splitlines method ends up breaking it in two.
+            #   We solve this problem by joining all references and adding breaklines with regex.
+            # Start loop where the previous loop ended
+            for line in html_text.splitlines()[i:]:
+                # Concatenate all references in one big string
+                reference += line + ' '
+            # Add breakline between each reference
+            #   regex: turns ')  [' into ')\n['
+            #      ')': reference ends
+            #      '[': reference starts
+            reference = re.sub('(?<=\))(.*?)(?=\[)', '\n', reference)
+            # Add references to dictionary
             reference_patterns[pattern.get('type')] = reference
 
         # Parse <BugInstance> tags

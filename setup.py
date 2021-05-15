@@ -64,7 +64,6 @@ setup(
         'django-environ==0.4.5',
         'titlecase',
         'jsonlines==2.0.0',  # requred by yarn audit parser
-        'beautifulsoup4'  # Required by SpotBugs parser
     ],
 
     extras_require={'mysql': ['mysqlclient==2.0.3']},
