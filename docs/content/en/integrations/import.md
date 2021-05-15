@@ -205,6 +205,11 @@ imported in JSON format. See here for more info on this JSON format:
 Import of JSON report from
 <https://github.com/Santandersecurityresearch/DrHeader>
 
+### Dockle Report
+
+Import JSON container image linter reports
+<https://github.com/goodwithtech/dockle>
+
 ### ESLint
 
 ESLint Json report format (-f json)
@@ -372,6 +377,10 @@ Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan.
 ### kube-bench Scanner
 
 Import JSON reports of Kubernetes CIS benchmark scans.
+
+### KICS Scanner
+
+Import of JSON report from <https://github.com/Checkmarx/kics>
 
 ### Microfocus Webinspect Scanner
 

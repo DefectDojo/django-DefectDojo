@@ -68,6 +68,11 @@ class DojoTestUtilsMixin(object):
         jira_issues = JIRA_Issue.objects.filter(finding__in=test.finding_set.all())
         self.assertEqual(count, len(jira_issues))
 
+    def assert_jira_group_issue_count_in_test(self, test_id, count):
+        test = self.get_test(test_id)
+        jira_issues = JIRA_Issue.objects.filter(finding_group__test=test)
+        self.assertEqual(count, len(jira_issues))
+
     def model_to_dict(self, instance):
         opts = instance._meta
         data = {}
@@ -273,10 +278,36 @@ class DojoTestUtilsMixin(object):
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
 
-    def get_jira_issue_severity(self, finding_id):
+    def get_jira_issue_status(self, finding_id):
         finding = Finding.objects.get(id=finding_id)
-        status = jira_helper.get_jira_status(finding)
-        return status
+        updated = jira_helper.get_jira_status(finding)
+        return updated
+
+    def get_jira_issue_updated(self, finding_id):
+        finding = Finding.objects.get(id=finding_id)
+        updated = jira_helper.get_jira_updated(finding)
+        return updated
+
+    def get_jira_issue_updated_map(self, test_id):
+        findings = Test.objects.get(id=test_id).finding_set.all()
+        updated_map = {}
+        for finding in findings:
+            logger.debug('finding!!!')
+            updated = jira_helper.get_jira_updated(finding)
+            updated_map[finding.id] = updated
+        return updated_map
+
+    def assert_jira_updated_map_unchanged(self, test_id, updated_map):
+        findings = Test.objects.get(id=test_id).finding_set.all()
+        for finding in findings:
+            logger.debug('finding!')
+            self.assertEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
+
+    def assert_jira_updated_map_changed(self, test_id, updated_map):
+        findings = Test.objects.get(id=test_id).finding_set.all()
+        for finding in findings:
+            logger.debug('finding!')
+            self.assertNotEquals(jira_helper.get_jira_updated(finding), updated_map[finding.id])
 
     # Toggle epic mapping on jira product
     def toggle_jira_project_epic_mapping(self, obj, value):
@@ -310,8 +341,8 @@ class DojoTestUtilsMixin(object):
         else:
             self.assertTrue(epic_id != epic_link)
 
-    def assert_jira_status_change(self, old_status, new_status):
-        self.assertFalse(old_status == new_status)
+    def assert_jira_updated_change(self, old, new):
+        self.assertTrue(old != new)
 
 
 class DojoTestCase(TestCase, DojoTestUtilsMixin):
@@ -350,7 +381,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         # print('test.content: ', response.content)
         return json.loads(response.content)
 
-    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False):
+    def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
+                                push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -372,9 +404,13 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         if tags is not None:
             payload['tags'] = tags
 
+        if group_by is not None:
+            payload['group_by'] = group_by
+
         return self.import_scan(payload)
 
-    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=True):
+    def reimport_scan_with_params(self, test_id, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None,
+                                  tags=None, close_old_findings=True, group_by=None):
         payload = {
                 "test": test_id,
                 "scan_date": '2020-06-04',
@@ -393,6 +429,9 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if tags is not None:
             payload['tags'] = tags
+
+        if group_by is not None:
+            payload['group_by'] = group_by
 
         return self.reimport_scan(payload)
 
@@ -438,7 +477,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
     def assert_finding_count_json(self, count, findings_content_json):
         self.assertEqual(findings_content_json['count'], count)
 
-    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None):
+    def get_test_findings_api(self, test_id, active=None, verified=None, is_mitigated=None, component_name=None, component_version=None):
         payload = {'test': test_id}
         if active is not None:
             payload['active'] = active
@@ -446,6 +485,10 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
             payload['verified'] = verified
         if is_mitigated is not None:
             payload['is_mitigated'] = is_mitigated
+        if component_name is not None:
+            payload['component_name'] = component_name
+        if component_version is not None:
+            payload['component_version'] = component_version
 
         response = self.client.get(reverse('finding-list'), payload, format='json')
         self.assertEqual(200, response.status_code, response.content[:1000])

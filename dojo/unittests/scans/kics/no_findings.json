@@ -1,0 +1,17 @@
+{
+	"files_scanned": 1,
+	"files_parsed": 1,
+	"files_failed_to_scan": 0,
+	"queries_total": 235,
+	"queries_failed_to_execute": 0,
+	"queries_failed_to_compute_similarity_id": 0,
+	"queries": [],
+	"scan_id": "console",
+	"severity_counters": {
+		"HIGH": 0,
+		"INFO": 0,
+		"LOW": 0,
+		"MEDIUM": 0
+	},
+	"total_counter": 0
+}

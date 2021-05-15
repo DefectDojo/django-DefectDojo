@@ -134,7 +134,7 @@ class JIRAConfigEngagementBase(object):
         elif expect_redirect_to:
             self.assertEqual(response.status_code, 302)
             # print('response: ' + response)
-            print('url: ' + response.url)
+            # print('url: ' + response.url)
             try:
                 engagement = Engagement.objects.get(id=response.url.split('/')[-1])
             except:
@@ -186,14 +186,11 @@ class JIRAConfigEngagementBase(object):
 
     def edit_jira_project_for_engagement_with_data(self, engagement, data, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=None):
         jira_project_count_before = self.db_jira_project_count()
-        print('before: ' + str(jira_project_count_before))
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = self.get_expected_redirect_engagement(engagement)
 
         response = self.edit_engagement_jira(engagement, data, expect_redirect_to=expect_redirect_to, expect_200=expect_200)
-
-        print('after: ' + str(self.db_jira_project_count()))
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
@@ -206,7 +203,6 @@ class JIRAConfigEngagementBase(object):
 
     def empty_jira_project_for_engagement(self, engagement, expected_delta_jira_project_db=0, expect_redirect_to=None, expect_200=False, expect_error=False):
         jira_project_count_before = self.db_jira_project_count()
-        print('before: ' + str(jira_project_count_before))
 
         if not expect_redirect_to and not expect_200:
             expect_redirect_to = self.get_expected_redirect_engagement(engagement)
@@ -217,8 +213,6 @@ class JIRAConfigEngagementBase(object):
                 response = self.edit_engagement_jira(engagement, self.get_engagement_with_empty_jira_project_data(engagement), expect_redirect_to=expect_redirect_to, expect_200=expect_200)
         else:
             response = self.edit_engagement_jira(engagement, self.get_engagement_with_empty_jira_project_data(engagement), expect_redirect_to=expect_redirect_to, expect_200=expect_200)
-
-        print('after: ' + str(self.db_jira_project_count()))
 
         self.assertEqual(self.db_jira_project_count(), jira_project_count_before + expected_delta_jira_project_db)
         return response
