@@ -202,7 +202,7 @@ def clean_hosts_run(apps, change):
                         logger.error('Endpoint (id={}) {}. {}'.format(endpoint.pk, message, error_suffix))
                         broken_endpoints.add(endpoint.pk)
 
-    if broken_endpoints != set():
+    if broken_endpoints:
         logger.error('It is not possible to migrate database because there is/are {} broken endpoint(s). '
                      'Please check logs.'.format(len(broken_endpoints)))
     else:
