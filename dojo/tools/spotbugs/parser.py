@@ -56,10 +56,7 @@ class SpotbugsParser(object):
                 if 'Reference' in line:
                     break
                 # Add a string before the code indicating that it's just an example, NOT the actual scanned code
-                if (('Vulnerable Code:' in line)
-                    or ('Insecure configuration:' in line)
-                    or ('Code at risk:' in line)
-                ):
+                if ('Vulnerable Code:' in line) or ('Insecure configuration:' in line) or ('Code at risk:' in line):
                     mitigation += '\n\n\n#### Example\n'
                 # Add line to mitigation
                 mitigation += line.replace('\n', '') + '\n'
@@ -79,7 +76,7 @@ class SpotbugsParser(object):
             #   regex: turns ')  [' into ')\n['
             #      ')': reference ends
             #      '[': reference starts
-            reference = re.sub('(?<=\))(.*?)(?=\[)', '\n', reference)
+            reference = re.sub(r'(?<=))(.*?)(?=[)', '\n', reference)
             # Add references to dictionary
             reference_patterns[pattern.get('type')] = reference
 
