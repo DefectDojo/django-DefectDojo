@@ -1608,9 +1608,17 @@ class DeleteUserForm(forms.ModelForm):
 
 
 class UserContactInfoForm(forms.ModelForm):
+    if settings.FEATURE_AUTHORIZATION_V2:
+        blank_choice = [(None, '----------')]
+        global_role = forms.ChoiceField(choices=blank_choice + Roles.choices(), required=False,
+            help_text='The global role will be applied to all product types and products.')
+
     class Meta:
         model = UserContactInfo
-        exclude = ['user', 'slack_user_id']
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['user', 'slack_user_id', 'global_role']
+        else:
+            exclude = ['user', 'slack_user_id']
 
 
 def get_years():

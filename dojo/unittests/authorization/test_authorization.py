@@ -17,21 +17,34 @@ class TestAuthorization(TestCase):
     def setUpTestData(cls):
         cls.user = Dojo_User()
         cls.user.id = 1
+
+        cls.user2 = Dojo_User()
+        cls.user2.id = 2
+        cls.usercontactinfo = UserContactInfo()
+        cls.usercontactinfo.user = cls.user2
+        cls.usercontactinfo.global_role = 0
+        cls.user2.usercontactinfo = cls.usercontactinfo
+
         cls.product_type = Product_Type()
         cls.product_type.id = 1
         cls.product_type_member = Product_Type_Member()
         cls.product_type_member.id = 1
+
         cls.product = Product()
         cls.product.id = 1
         cls.product_member = Product_Member()
         cls.product_member.id = 1
         cls.product.prod_type = cls.product_type
+
         cls.engagement = Engagement()
         cls.engagement.product = cls.product
+
         cls.test = Test()
         cls.test.engagement = cls.engagement
+
         cls.finding = Finding()
         cls.finding.test = cls.test
+
         cls.endpoint = Endpoint()
         cls.endpoint.product = cls.product
 
@@ -417,3 +430,11 @@ class TestAuthorization(TestCase):
 
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(group__users=self.user)
+
+    def test_user_has_global_role_no_permission(self):
+        result = user_has_permission(self.user2, self.product, Permissions.Product_Delete)
+        self.assertFalse(result)
+
+    def test_user_has_global_role_success(self):
+        result = user_has_permission(self.user2, self.product, Permissions.Product_View)
+        self.assertTrue(result)

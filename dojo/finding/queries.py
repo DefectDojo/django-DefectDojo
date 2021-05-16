@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Finding, Product_Member, Product_Type_Member, Stub_Finding, \
     Product_Group, Product_Type_Group
-from dojo.authorization.authorization import get_roles_for_permission
+from dojo.authorization.authorization import get_roles_for_permission, role_has_permission
 
 
 def get_authorized_findings(permission, queryset=None, user=None):
@@ -24,6 +24,9 @@ def get_authorized_findings(permission, queryset=None, user=None):
 
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+            return findings
+
+        if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
             return findings
 
         roles = get_roles_for_permission(permission)
@@ -72,6 +75,9 @@ def get_authorized_stub_findings(permission):
 
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+            return Stub_Finding.objects.all()
+
+        if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
             return Stub_Finding.objects.all()
 
         roles = get_roles_for_permission(permission)

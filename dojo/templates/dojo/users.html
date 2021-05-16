@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% block content %}
     {% load display_tags %}
     <div class="row">
@@ -52,6 +53,7 @@
                             <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'Staff' 'is_staff' %}</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'SuperUser' 'is_superuser' %}</th>
+                            <th class="nowrap">Global Role</th>
                         </tr>
                         {% for u in users %}
                             <tr>
@@ -108,7 +110,10 @@
                                 <td class="text-center">{% if u.is_superuser %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
-                            </tr>
+                                {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+                                <td>{% role_as_string u.usercontactinfo.global_role %}</td>
+                                {% endif %}
+                                </tr>
                         {% endfor %}
                     </table>
                 </div>

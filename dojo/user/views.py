@@ -289,6 +289,8 @@ def add_user(request):
             user.save()
             contact = contact_form.save(commit=False)
             contact.user = user
+            if contact.global_role == '':
+                contact.global_role = None
             contact.save()
             if not settings.FEATURE_AUTHORIZATION_V2:
                 if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
@@ -380,6 +382,8 @@ def edit_user(request, uid):
                         pt.authorized_users.add(user)
                         pt.save()
             contact = contact_form.save(commit=False)
+            if contact.global_role == '':
+                contact.global_role = None
             contact.user = user
             contact.save()
             messages.add_message(request,

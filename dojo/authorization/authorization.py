@@ -14,6 +14,9 @@ def user_has_permission(user, obj, permission):
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return True
 
+    if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
+        return True
+
     if isinstance(obj, Product_Type):
         # Check if the user has a role for the product type with the requested permissions
         member = get_product_type_member(user, obj)
@@ -88,6 +91,8 @@ def get_roles_for_permission(permission):
 
 
 def role_has_permission(role, permission):
+    if role is None:
+        return False
     if not Roles.has_value(role):
         raise RoleDoesNotExistError('Role {} does not exist'.format(role))
     roles = get_roles_with_permissions()

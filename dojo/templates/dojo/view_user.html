@@ -324,6 +324,12 @@
                             </td>
                         </tr>
                         {% endif %}
+                        {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+                        <tr>
+                            <td style="width: 200px;"><strong>Global role</strong></td>
+                            <td>{% role_as_string user.usercontactinfo.global_role %}</td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
