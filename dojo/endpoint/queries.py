@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Endpoint, Endpoint_Status, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group
-from dojo.authorization.authorization import get_roles_for_permission
+from dojo.authorization.authorization import get_roles_for_permission, role_has_permission
 
 
 def get_authorized_endpoints(permission, queryset=None, user=None):
@@ -24,6 +24,9 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
 
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+            return endpoints
+
+        if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
             return endpoints
 
         roles = get_roles_for_permission(permission)
@@ -77,6 +80,9 @@ def get_authorized_endpoint_status(permission, queryset=None, user=None):
 
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+            return endpoint_status
+
+        if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
             return endpoint_status
 
         roles = get_roles_for_permission(permission)
