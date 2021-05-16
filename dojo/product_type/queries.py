@@ -1,7 +1,7 @@
 from crum import get_current_user
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Q
 from django.conf import settings
-from dojo.models import Product_Type, Product_Type_Member
+from dojo.models import Product_Type, Product_Type_Member, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, user_has_permission
 
 
@@ -22,8 +22,14 @@ def get_authorized_product_types(permission):
         authorized_roles = Product_Type_Member.objects.filter(product_type=OuterRef('pk'),
             user=user,
             role__in=roles)
-        product_types = Product_Type.objects.annotate(member=Exists(authorized_roles)).order_by('name')
-        product_types = product_types.filter(member=True)
+        authorized_groups = Product_Type_Group.objects.filter(
+            product_type=OuterRef('pk'),
+            group__users=user,
+            role__in=roles)
+        product_types = Product_Type.objects.annotate(
+            member=Exists(authorized_roles),
+            authorized_group=Exists(authorized_groups)).order_by('name')
+        product_types = product_types.filter(Q(member=True) | Q(authorized_group=True))
     else:
         if user.is_staff:
             product_types = Product_Type.objects.all().order_by('name')

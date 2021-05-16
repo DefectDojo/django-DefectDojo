@@ -381,6 +381,12 @@ class UserContactInfo(models.Model):
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
+class Dojo_Group(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True)
+    users = models.ManyToManyField(Dojo_User, blank=True)
+
+
 class Contact(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -452,6 +458,7 @@ class Product_Type(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
     authorized_users = models.ManyToManyField(User, blank=True)
     members = models.ManyToManyField(Dojo_User, through='Product_Type_Member', related_name='prod_type_members', blank=True)
+    authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Type_Group', related_name='product_type_groups', blank=True)
 
     @cached_property
     def critical_present(self):
@@ -653,6 +660,7 @@ class Product(models.Model):
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
+    authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Group', related_name='product_groups', blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     # Metadata
@@ -803,9 +811,21 @@ class Product_Member(models.Model):
     role = models.IntegerField(default=0)
 
 
+class Product_Group(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
+    role = models.IntegerField(default=0)
+
+
 class Product_Type_Member(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    role = models.IntegerField(default=0)
+
+
+class Product_Type_Group(models.Model):
+    product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
     role = models.IntegerField(default=0)
 
 

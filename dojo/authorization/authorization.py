@@ -3,7 +3,7 @@ from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Finding_Group
+    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group
 
 
 def user_has_permission(user, obj, permission):
@@ -15,21 +15,30 @@ def user_has_permission(user, obj, permission):
         return True
 
     if isinstance(obj, Product_Type):
+        # Check if the user has a role for the product type with the requested permissions
         member = get_product_type_member(user, obj)
-        if member is None:
-            return False
-        return role_has_permission(member.role, permission)
+        if member is not None and role_has_permission(member.role, permission):
+            return True
+        # Check if the user is in a group with a role for the product type with the requested permissions
+        for product_type_group in get_product_type_groups(user, obj):
+            if role_has_permission(product_type_group.role, permission):
+                return True
+        return False
     elif (isinstance(obj, Product) and
             permission.value >= Permissions.Product_View.value):
         # Products inherit permissions of their product type
         if user_has_permission(user, obj.prod_type, permission):
             return True
 
-        # Maybe the user has a role for the product with the requested permissions
+        # Check if the user has a role for the product with the requested permissions
         member = get_product_member(user, obj)
-        if member is None:
-            return False
-        return role_has_permission(member.role, permission)
+        if member is not None and role_has_permission(member.role, permission):
+            return True
+        # Check if the user is in a group with a role for the product with the requested permissions
+        for product_group in get_product_groups(user, obj):
+            if role_has_permission(product_group.role, permission):
+                return True
+        return False
     elif isinstance(obj, Engagement) and permission in Permissions.get_engagement_permissions():
         return user_has_permission(user, obj.product, permission)
     elif isinstance(obj, Test) and permission in Permissions.get_test_permissions():
@@ -111,3 +120,13 @@ def get_product_type_member(user, product_type):
         return Product_Type_Member.objects.get(user=user, product_type=product_type)
     except Product_Type_Member.DoesNotExist:
         return None
+
+
+@cache_for_request
+def get_product_groups(user, product):
+    return Product_Group.objects.filter(product=product, group__users=user)
+
+
+@cache_for_request
+def get_product_type_groups(user, product_type):
+    return Product_Type_Group.objects.filter(product_type=product_type, group__users=user)
