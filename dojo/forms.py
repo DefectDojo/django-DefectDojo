@@ -1620,6 +1620,12 @@ class UserContactInfoForm(forms.ModelForm):
         else:
             exclude = ['user', 'slack_user_id']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        user = get_current_user()
+        if not user.is_superuser:
+            self.fields['global_role'].disabled = True
+
 
 def get_years():
     now = timezone.now()

@@ -1,4 +1,5 @@
 import logging
+from crum import get_current_user
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import user_passes_test, login_required
@@ -196,6 +197,10 @@ def alertcount(request):
 def view_profile(request):
     user = get_object_or_404(Dojo_User, pk=request.user.id)
     user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
+    if user_contact is not None:
+        previous_global_role = user_contact.global_role
+    else:
+        previous_global_role = None
     form = DojoUserForm(instance=user)
     if user_contact is None:
         contact_form = UserContactInfoForm()
@@ -207,7 +212,16 @@ def view_profile(request):
         if form.is_valid() and contact_form.is_valid():
             form.save()
             contact = contact_form.save(commit=False)
+            request_user = get_current_user()
+            if not request_user.is_superuser:
+                contact.global_role = previous_global_role
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'Only superusers are allowed to change their global role.',
+                                    extra_tags='alert-warning')
             contact.user = user
+            if contact.global_role == '':
+                contact.global_role = None
             contact.save()
 
             messages.add_message(request,
