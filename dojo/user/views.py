@@ -213,7 +213,7 @@ def view_profile(request):
             form.save()
             contact = contact_form.save(commit=False)
             request_user = get_current_user()
-            if not request_user.is_superuser:
+            if contact.global_role != previous_global_role and not request_user.is_superuser:
                 contact.global_role = previous_global_role
                 messages.add_message(request,
                                     messages.WARNING,

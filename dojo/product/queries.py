@@ -188,7 +188,7 @@ def get_authorized_dojo_meta(permission):
             return DojoMeta.objects.all().order_by('name')
 
         if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
-            return App_Analysis.objects.all().order_by('name')
+            return DojoMeta.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
         product_authorized_product_type_roles = Product_Type_Member.objects.filter(
