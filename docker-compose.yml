@@ -1,3 +1,10 @@
+# This docker-compose.yml file  is fully functional to evaluate DefectDojo
+# in your local environment. 
+#
+# Although Docker Compose is one of the supported installation methods to
+# deploy a containerized DefectDojo in a production environment, the 
+# docker-compose.yml file is not intended for production use without first
+# customizing it to your particular situation.
 ---
 version: '3.7'
 services:
@@ -10,6 +17,8 @@ services:
       - uwsgi
     environment:
       NGINX_METRICS_ENABLED: ${NGINX_METRICS_ENABLED:-false}
+    volumes:
+      - defectdojo_media:/usr/share/nginx/html/media
     ports:
       - target: 8080
         published: ${DD_PORT:-8080}
@@ -36,8 +45,13 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
+        - defectdojo_media:${DD_MEDIA_ROOT:-/app/media}
   celerybeat:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
       - mysql
       - rabbitmq
@@ -48,8 +62,12 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
   celeryworker:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
       - mysql
       - rabbitmq
@@ -60,8 +78,12 @@ services:
       DD_CELERY_BROKER_PASSWORD: ${DD_CELERY_BROKER_USER:-guest}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
   initializer:
-    image: defectdojo/defectdojo-django:latest
+    image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
       - mysql
     entrypoint: ['/wait-for-it.sh', 'mysql:3306', '--', '/entrypoint-initializer.sh']
@@ -74,8 +96,12 @@ services:
       DD_INITIALIZE: ${DD_INITIALIZE:-true}
       DD_SECRET_KEY: ${DD_SECRET_KEY:-hhZCp@D28z!n@NED*yB!ROMt+WzsY*iq}
       DD_CREDENTIAL_AES_256_KEY: ${DD_CREDENTIAL_AES_256_KEY:-&91a*agLqesc*0DJ+2*bAbsUZfR*4nLw}
+    volumes:
+        - type: bind
+          source: ./docker/extra_settings
+          target: /app/docker/extra_settings
   mysql:
-    image: mysql:5.7.32@sha256:ce6815027949d0b48e3097a94fa3ec062866a78868d50c7900c697c13574599f
+    image: mysql:5.7.34@sha256:a682e3c78fc5bd941e9db080b4796c75f69a28a8cad65677c23f7a9f18ba21fa
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -86,6 +112,7 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.8.9@sha256:30a52abe6009eea97c89dcd72b9dcf9c2a26563beb4b4d948d595c0415fc8680
+    image: rabbitmq:3.8.16@sha256:bab178419907cdbc561c0222ac4cdbbbdea2d390dab0a84d7972be3bdb537d13
 volumes:
   defectdojo_data: {}
+  defectdojo_media: {}

@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 
 def reopen_external_issue_github(find, note, prod, eng):
 
+    from dojo.utils import get_system_setting
+    if not get_system_setting('enable_github'):
+        return
+
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
         return
@@ -41,6 +45,10 @@ def reopen_external_issue_github(find, note, prod, eng):
 
 
 def close_external_issue_github(find, note, prod, eng):
+
+    from dojo.utils import get_system_setting
+    if not get_system_setting('enable_github'):
+        return
 
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
@@ -69,6 +77,10 @@ def close_external_issue_github(find, note, prod, eng):
 
 def update_external_issue_github(find, prod, eng):
 
+    from dojo.utils import get_system_setting
+    if not get_system_setting('enable_github'):
+        return
+
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:
         return
@@ -92,6 +104,10 @@ def update_external_issue_github(find, prod, eng):
 
 
 def add_external_issue_github(find, prod, eng):
+
+    from dojo.utils import get_system_setting
+    if not get_system_setting('enable_github'):
+        return
 
     # Check if we have github info related to the product
     if GITHUB_PKey.objects.filter(product=prod).count() == 0:

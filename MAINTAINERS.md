@@ -31,6 +31,9 @@ Furthermore, maintainers that have not had any activities (commits, PR, PR revie
 
 ### Maintainers
 * Anthony Pipia (@apipia)
-* Saurabh (@dr3dd589)
 * Jannik Jürgens (@alles-klar)
 * Pascal Trovatelli (@ptrovatelli)
+
+### Reviewers
+* Saurabh (@dr3dd589)
+* Romain Aviolat (@xens)

@@ -64,7 +64,6 @@ class DojoSytemSettingsMiddleware(object):
         return response
 
     def process_exception(self, request, exception):
-        logger.debug('cleaning up during exception')
         self.cleanup()
 
     @classmethod
@@ -76,7 +75,6 @@ class DojoSytemSettingsMiddleware(object):
 
     @classmethod
     def cleanup(cls, *args, **kwargs):
-        logger.debug('removing thread local system_settings')
         if hasattr(cls._thread_local, 'system_settings'):
             del cls._thread_local.system_settings
 

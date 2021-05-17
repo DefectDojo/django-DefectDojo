@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% load static from staticfiles %}
+{% load display_tags %}
+{% load static %}
 {% block add_css %}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
@@ -13,36 +14,38 @@
     }
 {% endblock %}
 {% block content %}
-    {% if edit %}
-        <h3> Edit Engagement </h3>
-    {% else %}
-        <h3> New Engagement </h3>
-    {% endif %}
+    <h3> {{ title }} </h3>
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
-        {%  if jform %}
-                <h4> JIRA </h4>
+
+        {%  if jira_project_form %}
+            <h4> JIRA Project</h4>
+            <hr>
+            {% include "dojo/form_fields.html" with form=jira_project_form %}
+        {% endif %}
+
+        {%  if jira_epic_form %}
+                <h4> JIRA Epic</h4>
                 <hr>
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this product or engagment" data-placement="right" data-container="body" data-original-title="" title="">
+                        <i class="fa fa-question-circle has-popover" data-trigger="hover" data-content="JIRA URL connected to this engagement product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">
-                        {% if product_tab.product.jira_conf %}
-                            {% if eng and eng.jira_issue %}
-                                <a href="{{ eng.product.jira_conf.url }}/browse/{{ eng.jira_issue.jira_key }}"
-                                target="_blank"> {{ eng.product.jira_conf.url }}/browse/{{ eng.jira_issue.jira_key }} </a>
-                            {% else %}
-                                <a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
-                                target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
-                            {% endif %}
+                        {% if engagement.has_jira_issue %}
+                            <a href="{{ engagement | jira_issue_url }}"
+                            target="_blank"> {{ engagement | jira_issue_url }} </a>
+                        {% elif engagement %}
+                            <a href="{{ engagement | jira_project_url }}"
+                            target="_blank"> {{ engagement | jira_project_url }} </a>
                         {% else %}
-                        None
+                            <a href="{{ product_tab.product | jira_project_url }}"
+                            target="_blank"> {{ product_tab.product | jira_project_url }} </a>
                         {% endif %}
                     </div>
                 </div>
-                {% include "dojo/form_fields.html" with form=jform %}
+                {% include "dojo/form_fields.html" with form=jira_epic_form %}
             {% endif %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -78,22 +81,25 @@
                 });
                 mde.render();
             });
-            $('#id_tags').chosen({
-                'placeholder_text_multiple': 'Select or add some tags...',
-                'no_results_text': "Tag not found, press TAB key to add.",
-            });
-
-            $(".search-field").find("input").on("keydown", function (evt) {
-                var stroke;
-                stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
-                if (stroke == 9) { // 9 = tab key
-                    var o = new Option($(this).val(), $(this).val(), true, true);
-			        $("#id_tags").append(o);
-                    $('#id_tags').trigger('chosen:updated');
-                    $('#id_tags').focus();
-                    return false;
-                }
+        });
+    </script>
+    <script type="application/javascript">
+        $(function () {
+            $('[id$="inherit_from_product"]').click(function()  {
+                inherit_from_product = $(this)
+                checked = $(this).prop('checked')
+                $('[id^="id_jira-project-form-"]').each(function() {
+                    console.log('found field: ' + $(this).attr('id'))
+                    if (!$(this).is(inherit_from_product)) {
+                        console.log('disabling: ' + $(this).attr('id'))
+                        $(this).prop("disabled", checked)
+                        if (checked) {
+                            $(this).val('')
+                        }
+                    }
+                });
             });
         });
     </script>
+
 {% endblock %}

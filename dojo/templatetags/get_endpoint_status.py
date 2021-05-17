@@ -56,9 +56,3 @@ def endpoint_mitigator(endpoint, finding):
 def endpoint_mitigated_time(endpoint, finding):
     status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
     return status.mitigated_time
-
-
-@register.filter
-def endpoint_check_active(endpoint, finding):
-    status = Endpoint_Status.objects.get(endpoint=endpoint, finding=finding)
-    return not status.mitigated

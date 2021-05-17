@@ -12,8 +12,10 @@ env = environ.Env(
     DD_SITE_URL=(str, 'http://localhost:8080'),
     DD_DEBUG=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
+    DD_LOG_LEVEL=(str, ''),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
+    DD_LOGIN_URL=(str, '/login'),
     DD_DJANGO_ADMIN_ENABLED=(bool, False),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
@@ -21,18 +23,15 @@ env = environ.Env(
     DD_SECURE_HSTS_INCLUDE_SUBDOMAINS=(bool, False),
     DD_SECURE_HSTS_SECONDS=(int, 31536000),  # One year expiration
     DD_SESSION_COOKIE_SECURE=(bool, False),
+    DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
+    DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
     DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
-    DD_WKHTMLTOPDF=(str, '/usr/local/bin/wkhtmltopdf'),
     DD_TEAM_NAME=(str, 'Security Team'),
     DD_ADMINS=(str, 'DefectDojo:dojo@localhost,Admin:admin@localhost'),
-    DD_PORT_SCAN_CONTACT_EMAIL=(str, 'email@localhost'),
-    DD_PORT_SCAN_RESULT_EMAIL_FROM=(str, 'email@localhost'),
-    DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST=(str, ['email@localhost']),
-    DD_PORT_SCAN_SOURCE_IP=(str, '127.0.0.1'),
     DD_WHITENOISE=(bool, False),
     DD_TRACK_MIGRATIONS=(bool, False),
     DD_SECURE_PROXY_SSL_HEADER=(bool, False),
@@ -55,12 +54,15 @@ env = environ.Env(
     DD_CELERY_BROKER_HOST=(str, ''),
     DD_CELERY_BROKER_PORT=(int, -1),
     DD_CELERY_BROKER_PATH=(str, '/dojo.celerydb.sqlite'),
+    DD_CELERY_BROKER_PARAMS=(str, ''),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
     DD_CELERY_RESULT_BACKEND=(str, 'django-db'),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root('dojo.celery.beat.db')),
     DD_CELERY_TASK_SERIALIZER=(str, 'pickle'),
+    DD_CELERY_PASS_MODEL_BY_ID=(str, True),
     DD_FOOTER_VERSION=(str, ''),
+    # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
     DD_MAX_TAG_LENGTH=(int, 25),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
@@ -71,9 +73,11 @@ env = environ.Env(
     DD_DATABASE_PASSWORD=(str, 'defectdojo'),
     DD_DATABASE_PORT=(int, 3306),
     DD_DATABASE_USER=(str, 'defectdojo'),
-    DD_SECRET_KEY=(str, '.'),
+    DD_SECRET_KEY=(str, ''),
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
+    DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ''),
@@ -95,6 +99,7 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
+    DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
@@ -106,6 +111,7 @@ env = environ.Env(
     DD_SAML2_ENTITY_ID=(str, ''),
     DD_SAML2_LOGOUT_URL=(str, ''),
     DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
+    DD_SAML2_CREATE_USER=(bool, True),
     DD_SAML2_NEW_USER_PROFILE=(dict, {
         # The default group name when a new user logs in
         'USER_GROUPS': [],
@@ -132,23 +138,56 @@ env = environ.Env(
     # Set to True if you want to allow authorized users staff access only on specific products
     # This will only apply to users with 'active' status
     DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, False),
+    # SLA Notifications via alerts and JIRA comments
+    # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
-    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, True),
+    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
+    # finetuning settings for when enabled
     DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
-
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
+    DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
-
     # if you want to keep logging to the console but in json format, change this here to 'json_console'
-    DD_LOGGING_FORMAT=(str, 'console')
+    DD_LOGGING_HANDLER=(str, 'console'),
+    DD_ALERT_REFRESH=(bool, True),
+    DD_DISABLE_ALERT_COUNTER=(bool, False),
+    # to disable deleting alerts per user set value to -1
+    DD_MAX_ALERTS_PER_USER=(int, 999),
+    DD_TAG_PREFETCHING=(bool, True),
+    DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
+    # when enabled in sytem settings,  every minute a job run to delete excess duplicates
+    # we limit the amount of duplicates that can be deleted in a single run of that job
+    # to prevent overlapping runs of that job from occurrring
+    DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    # APIv1 is depreacted and will be removed at 2021-06-30
+    DD_LEGACY_API_V1_ENABLE=(bool, False),
+    # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
+    DD_EDITABLE_MITIGATED_DATA=(bool, False),
+    # new experimental feature that tracks history across multiple reimports for the same test
+    DD_TRACK_IMPORT_HISTORY=(bool, False),
+
+    # Feature toggle for new authorization, which is incomplete at the moment.
+    # Don't set it to True for productive environments!
+    DD_FEATURE_AUTHORIZATION_V2=(bool, False),
+    # When enabled, staff users have full access to all product types and products
+    DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
+
+    DD_FEATURE_FINDING_GROUPS=(bool, False),
+    DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
+    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
+
+    # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
+    # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
+    # Set to True to revert to the old behaviour where all duplicates are deleted
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False)
 )
 
 
-def generate_url(scheme, double_slashes, user, password, host, port, path):
+def generate_url(scheme, double_slashes, user, password, host, port, path, params):
     result_list = []
     result_list.append(scheme)
     result_list.append(':')
@@ -167,6 +206,9 @@ def generate_url(scheme, double_slashes, user, password, host, port, path):
     if len(path) > 0 and path[0] != '/':
         result_list.append('/')
     result_list.append(path)
+    if len(params) > 0 and params[0] != '?':
+        result_list.append('?')
+    result_list.append(params)
     return ''.join(result_list)
 
 
@@ -214,6 +256,12 @@ USE_L10N = env('DD_USE_L10N')
 USE_TZ = env('DD_USE_TZ')
 
 TEST_RUNNER = env('DD_TEST_RUNNER')
+
+ALERT_REFRESH = env('DD_ALERT_REFRESH')
+DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
+MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
+
+TAG_PREFETCHING = env('DD_TAG_PREFETCHING')
 
 # ------------------------------------------------------------------------------
 # DATABASE
@@ -315,7 +363,7 @@ URL_PREFIX = env('DD_URL_PREFIX')
 # ------------------------------------------------------------------------------
 
 LOGIN_REDIRECT_URL = env('DD_LOGIN_REDIRECT_URL')
-LOGIN_URL = '/login'
+LOGIN_URL = env('DD_LOGIN_URL')
 
 # These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
@@ -340,9 +388,13 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
+    'dojo.pipeline.update_product_access',
 )
 
 CLASSIC_AUTH_ENABLED = True
+# Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
+SHOW_LOGIN_FORM = env('DD_SOCIAL_AUTH_SHOW_LOGIN_FORM')
+SOCIAL_LOGIN_AUTO_REDIRECT = env('DD_SOCIAL_LOGIN_AUTO_REDIRECT')
 
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
@@ -369,6 +421,7 @@ SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env('DD_SOCIAL_AUTH_AZUREAD_TENANT
 SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE')
 
 GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
+GITLAB_PROJECT_AUTO_IMPORT = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT')
 SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
 SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
 SOCIAL_AUTH_GITLAB_API_URL = env('DD_SOCIAL_AUTH_GITLAB_API_URL')
@@ -390,6 +443,7 @@ SAML2_AUTH = {
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
     # Optional settings below
     'DEFAULT_NEXT_URL': env('DD_SAML2_DEFAULT_NEXT_URL'),
+    'CREATE_USER': env('DD_SAML2_CREATE_USER'),
     'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
     'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
 }
@@ -416,6 +470,7 @@ SLA_NOTIFY_PRE_BREACH = env('DD_SLA_NOTIFY_PRE_BREACH')  # in days, notify betwe
 SLA_NOTIFY_POST_BREACH = env('DD_SLA_NOTIFY_POST_BREACH')  # in days, skip notifications for findings that go past dayofbreach plus this number
 
 SEARCH_MAX_RESULTS = env('DD_SEARCH_MAX_RESULTS')
+SIMILAR_FINDINGS_MAX_RESULTS = env('DD_SIMILAR_FINDINGS_MAX_RESULTS')
 MAX_AUTOCOMPLETE_WORDS = env('DD_MAX_AUTOCOMPLETE_WORDS')
 
 LOGIN_EXEMPT_URLS = (
@@ -424,7 +479,6 @@ LOGIN_EXEMPT_URLS = (
     r'^%swebhook/' % URL_PREFIX,
     r'^%sjira/webhook/([\w-]+)$' % URL_PREFIX,
     r'^%sjira/webhook/' % URL_PREFIX,
-    r'^%sapi/v1/' % URL_PREFIX,
     r'^%sreports/cover$' % URL_PREFIX,
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
@@ -433,6 +487,8 @@ LOGIN_EXEMPT_URLS = (
     r'saml2/acs',
     r'empty_questionnaire/([\d]+)/answer'
 )
+
+LEGACY_API_V1_ENABLE = env('DD_LEGACY_API_V1_ENABLE')
 
 # ------------------------------------------------------------------------------
 # SECURITY DIRECTIVES
@@ -472,6 +528,9 @@ if env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS'):
     SECURE_HSTS_SECONDS = env('DD_SECURE_HSTS_SECONDS')
     SECURE_HSTS_INCLUDE_SUBDOMAINS = env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS')
 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = env('DD_SESSION_EXPIRE_AT_BROWSER_CLOSE')
+SESSION_COOKIE_AGE = env('DD_SESSION_COOKIE_AGE')
+
 # ------------------------------------------------------------------------------
 # DEFECTDOJO SPECIFIC
 # ------------------------------------------------------------------------------
@@ -479,14 +538,6 @@ if env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS'):
 # Credential Key
 CREDENTIAL_AES_256_KEY = env('DD_CREDENTIAL_AES_256_KEY')
 DB_KEY = env('DD_CREDENTIAL_AES_256_KEY')
-
-# wkhtmltopdf settings
-WKHTMLTOPDF_PATH = env('DD_WKHTMLTOPDF')
-
-PORT_SCAN_CONTACT_EMAIL = env('DD_PORT_SCAN_CONTACT_EMAIL')
-PORT_SCAN_RESULT_EMAIL_FROM = env('DD_PORT_SCAN_RESULT_EMAIL_FROM')
-PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
-PORT_SCAN_SOURCE_IP = env('DD_PORT_SCAN_EXTERNAL_UNIT_EMAIL_LIST')
 
 # Used in a few places to prefix page headings and in email salutations
 TEAM_NAME = env('DD_TEAM_NAME')
@@ -584,24 +635,20 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.humanize',
     'gunicorn',
-    'tastypie',
     'auditlog',
     'dojo',
-    'tastypie_swagger',
     'watson',
-    'tagging',
-    'custom_field',
+    'tagging',  # not used, but still needed for migration 0065_django_tagulous.py (v1.10.0)
     'imagekit',
     'multiselectfield',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_swagger',
     'dbbackup',
-    # 'taggit_serializer',
-    # 'axes'
     'django_celery_results',
     'social_django',
-    'drf_yasg2',
+    'drf_yasg',
+    'tagulous'
 )
 
 # ------------------------------------------------------------------------------
@@ -621,6 +668,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     'watson.middleware.SearchContextMiddleware',
     'auditlog.middleware.AuditlogMiddleware',
     'crum.CurrentRequestUserMiddleware',
+    'dojo.request_cache.middleware.RequestCacheMiddleware',
 ]
 
 MIDDLEWARE = DJANGO_MIDDLEWARE_CLASSES
@@ -654,6 +702,7 @@ CELERY_BROKER_URL = env('DD_CELERY_BROKER_URL') \
     env('DD_CELERY_BROKER_HOST'),
     env('DD_CELERY_BROKER_PORT'),
     env('DD_CELERY_BROKER_PATH'),
+    env('DD_CELERY_BROKER_PARAMS')
 )
 CELERY_TASK_IGNORE_RESULT = env('DD_CELERY_TASK_IGNORE_RESULT')
 CELERY_RESULT_BACKEND = env('DD_CELERY_RESULT_BACKEND')
@@ -662,6 +711,9 @@ CELERY_RESULT_EXPIRES = env('DD_CELERY_RESULT_EXPIRES')
 CELERY_BEAT_SCHEDULE_FILENAME = env('DD_CELERY_BEAT_SCHEDULE_FILENAME')
 CELERY_ACCEPT_CONTENT = ['pickle', 'json', 'msgpack', 'yaml']
 CELERY_TASK_SERIALIZER = env('DD_CELERY_TASK_SERIALIZER')
+CELERY_PASS_MODEL_BY_ID = env('DD_CELERY_PASS_MODEL_BY_ID')
+
+CELERY_IMPORTS = ('dojo.tools.tool_issue_updater', )
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -670,21 +722,39 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': timedelta(hours=1),
         'args': [timedelta(hours=1)]
     },
+    'cleanup-alerts': {
+        'task': 'dojo.tasks.cleanup_alerts',
+        'schedule': timedelta(hours=8),
+    },
     'dedupe-delete': {
         'task': 'dojo.tasks.async_dupe_delete',
         'schedule': timedelta(minutes=1),
         'args': [timedelta(minutes=1)]
     },
     'update-findings-from-source-issues': {
-        'task': 'dojo.tasks.async_update_findings_from_source_issues',
+        'task': 'dojo.tools.tool_issue_updater.update_findings_from_source_issues',
         'schedule': timedelta(hours=3),
     },
     'compute-sla-age-and-notify': {
-        'task': 'dojo.tasks.async_sla_compute_and_notify',
+        'task': 'dojo.tasks.async_sla_compute_and_notify_task',
         'schedule': crontab(hour=7, minute=30),
-    }
-}
+    },
+    'risk_acceptance_expiration_handler': {
+        'task': 'dojo.risk_acceptance.helper.expiration_handler',
+        'schedule': crontab(minute=0, hour='*/3'),  # every 3 hours
+    },
+    # 'jira_status_reconciliation': {
+    #     'task': 'dojo.tasks.jira_status_reconciliation_task',
+    #     'schedule': timedelta(hours=12),
+    #     'kwargs': {'mode': 'reconcile', 'dryrun': True, 'daysback': 10, 'product': None, 'engagement': None}
+    # },
+    # 'fix_loop_duplicates': {
+    #     'task': 'dojo.tasks.fix_loop_duplicates_task',
+    #     'schedule': timedelta(hours=12)
+    # },
 
+
+}
 
 # ------------------------------------
 # Monitoring Metrics
@@ -713,50 +783,67 @@ if env('DD_DJANGO_METRICS_ENABLED'):
 # If not present, default is the legacy behavior: see models.py, compute_hash_code_legacy function
 # legacy is:
 #   static scanner:  ['title', 'cwe', 'line', 'file_path', 'description']
-#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description', 'endpoints']
+#   dynamic scanner: ['title', 'cwe', 'line', 'file_path', 'description']
 HASHCODE_FIELDS_PER_SCANNER = {
     # In checkmarx, same CWE may appear with different severities: example "sql injection" (high) and "blind sql injection" (low).
     # Including the severity in the hash_code keeps those findings not duplicate
+    'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
+    'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
+    'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'Dependency Check Scan': ['cve', 'file_path'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
+    'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
+    'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
-    # possible improvment: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
+    # possible improvement: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
     'Whitesource Scan': ['title', 'severity', 'description'],
-    'ZAP Scan': ['title', 'cwe', 'endpoints', 'severity'],
-    'Qualys Scan': ['title', 'endpoints', 'severity'],
+    'ZAP Scan': ['title', 'cwe', 'severity'],
+    'Qualys Scan': ['title', 'severity'],
     'PHP Symfony Security Check': ['title', 'cve'],
     'Clair Scan': ['title', 'cve', 'description', 'severity'],
     'Clair Klar Scan': ['title', 'description', 'severity'],
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': ['title', 'cve'],
     'DSOP Scan': ['cve'],
+    'Acunetix Scan': ['title', 'description'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
+    'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
+    'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
+    'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
 # If False and cwe = 0, then the hash_code computation will fallback to legacy algorithm for the concerned finding
 # Default is True (if scanner is not configured here but is configured in HASHCODE_FIELDS_PER_SCANNER, it allows null cwe)
 HASHCODE_ALLOWS_NULL_CWE = {
+    'Anchore Engine Scan': True,
+    'Anchore Grype': True,
     'Checkmarx Scan': False,
+    'Checkmarx OSA': True,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
+    'Nessus Scan': True,
+    'Nexpose Scan': True,
     'NPM Audit Scan': True,
     'Yarn Audit Scan': True,
     'Whitesource Scan': True,
     'ZAP Scan': False,
     'Qualys Scan': True,
     'DSOP Scan': True,
+    'Acunetix Scan': True,
     'Trivy Scan': True,
+    'SpotBugs Scan': False,
 }
 
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners)
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity']
+HASHCODE_ALLOWED_FIELDS = ['title', 'cwe', 'cve', 'line', 'file_path', 'component_name', 'component_version', 'description', 'endpoints', 'unique_id_from_tool', 'severity', 'vuln_id_from_tool']
 
 # ------------------------------------
 # Deduplication configuration
@@ -776,17 +863,25 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Key = the scan_type from factory.py (= the test_type)
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
+    'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
+    'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
+    'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
+    'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
+    'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
     'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
@@ -795,9 +890,19 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
     'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
+    'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
+    'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
+    'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
+    'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
+DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
+
 DISABLE_FINDING_MERGE = env('DD_DISABLE_FINDING_MERGE')
+
+TRACK_IMPORT_HISTORY = env('DD_TRACK_IMPORT_HISTORY')
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -819,7 +924,12 @@ JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
 # ------------------------------------------------------------------------------
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-LOGGING_FORMAT = env('DD_LOGGING_FORMAT')
+LOGGING_HANDLER = env('DD_LOGGING_HANDLER')
+
+LOG_LEVEL = env('DD_LOG_LEVEL')
+if not LOG_LEVEL:
+    LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -851,6 +961,7 @@ LOGGING = {
         },
         'console': {
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
         },
         'json_console': {
             'class': 'logging.StreamHandler',
@@ -859,46 +970,49 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+            'handlers': ['mail_admins', 'console'],
+            'level': 'WARN',
             'propagate': True,
         },
         'django.security': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
-            'level': 'INFO',
+            'handlers': [r'%s' % LOGGING_HANDLER],
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'celery': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
-            'level': 'INFO',
+            'handlers': [r'%s' % LOGGING_HANDLER],
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
-            # does not seem to work?
-            # 'worker_hijack_root_logger': False,
+            # workaround some celery logging known issue
+            'worker_hijack_root_logger': False,
         },
         'dojo': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
-            'level': 'INFO',
+            'handlers': [r'%s' % LOGGING_HANDLER],
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'dojo.specific-loggers.deduplication': {
-            'handlers': [r'%s' % LOGGING_FORMAT],
-            'level': 'INFO',
+            'handlers': [r'%s' % LOGGING_HANDLER],
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
         },
         'titlecase': {
-            # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
-            'handlers': [r'%s' % LOGGING_FORMAT],
+            # The titlecase library is too verbose in it's logging, reducing the verbosity in our logs.
+            'handlers': [r'%s' % LOGGING_HANDLER],
             'level': 'WARNING',
             'propagate': False,
         },
     }
 }
+
+# override filter to ensure sensitive variables are also hidden when DEBUG = True
+DEFAULT_EXCEPTION_REPORTER_FILTER = 'dojo.settings.exception_filter.CustomExceptionReporterFilter'
 
 # As we require `innodb_large_prefix = ON` for MySQL, we can silence the
 # warning about large varchar with unique indices.
@@ -909,3 +1023,41 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 # Maximum size of a scan file in MB
 SCAN_FILE_MAX_SIZE = 100
+
+# Apply a severity level to "Security Weaknesses" in Qualys WAS
+QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
+
+SERIALIZATION_MODULES = {
+    'xml': 'tagulous.serializers.xml_serializer',
+    'json': 'tagulous.serializers.json',
+    'python': 'tagulous.serializers.python',
+    'yaml': 'tagulous.serializers.pyyaml',
+}
+
+# There seems to be no way just use the default and just leave out jquery, so we have to copy...
+# ... and keep it up-to-date.
+TAGULOUS_AUTOCOMPLETE_JS = (
+    # 'tagulous/lib/jquery.js',
+    'tagulous/lib/select2-4/js/select2.full.min.js',
+    'tagulous/tagulous.js',
+    'tagulous/adaptor/select2-4.js',
+)
+
+# using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
+TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
+
+# Feature toggle for new authorization, which is incomplete at the moment.
+# Don't set it to True for productive environments!
+FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
+# When enabled, staff users have full access to all product types and products
+AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
+
+EDITABLE_MITIGATED_DATA = env('DD_EDITABLE_MITIGATED_DATA')
+
+USE_L10N = True
+
+FEATURE_FINDING_GROUPS = env('DD_FEATURE_FINDING_GROUPS')
+JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
+TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
+
+DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')

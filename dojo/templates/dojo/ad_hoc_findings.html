@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% load event_tags %}
-{% load static from staticfiles %}
+{% load display_tags %}
+{% load static %}
 {% block add_css %}
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    .select2 .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
     width: 70% !important;
     }
 {% endblock %}
@@ -26,9 +27,9 @@
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">
-                        {% if product_tab.product.jira_conf %}
-                            <a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
-                            target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+                        {% if product_tab.product.has_jira_configured %}
+                            <a href="{{ product_tab.product|jira_project_url }}"
+                            target="_blank"> {{ product_tab.product|jira_project_url }} </a>
                         {% else %}
                         None
                         {% endif %}

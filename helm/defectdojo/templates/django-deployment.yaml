@@ -26,6 +26,12 @@ spec:
       {{- with .Values.django.annotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9113"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+      {{- end }}
     spec:
       serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
@@ -35,6 +41,11 @@ spec:
       volumes:
       - name: run
         emptyDir: {}
+      {{- if  .Values.django.uwsgi.certificates.enabled }}
+      - name: cert-mount
+        configMap:
+          name: {{ .Values.django.uwsgi.certificates.configName }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -44,22 +55,49 @@ spec:
           runAsNonRoot: true
         command: ["/cloud_sql_proxy"]
         args:
+        - "-verbose={{ .Values.cloudsql.verbose }}"
         {{- if eq .Values.database "postgresql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
         {{- else if eq .Values.database "mysql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
         {{- end }}
       {{- end }}
+      {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
+      - name: metrics
+        image: {{ .Values.monitoring.prometheus.image }}
+        imagePullPolicy: {{ .Values.monitoring.prometheus.imagePullPolicy }}
+        command: [ '/usr/bin/exporter', '-nginx.scrape-uri', 'http://127.0.0.1:8080/nginx_status']
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: 9113
+          periodSeconds: 20
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+      {{- end }}
       - name: uwsgi
         image: '{{ template "django.uwsgi.repository" . }}:{{ .Values.tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
+        {{- end }}
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        {{- if  .Values.django.uwsgi.certificates.enabled }}
+        - name: cert-mount
+          mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
+        {{- end }}
         ports:
         - name: http
           protocol: TCP
           containerPort: 8081
+        {{- if .Values.django.uwsgi.enable_debug }}
+        - name: debug
+          protocol: TCP
+          containerPort: 3000
+        {{- end }}
         envFrom:
         - configMapRef:
             name: {{ $fullName }}
@@ -72,6 +110,10 @@ spec:
             secretKeyRef:
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
+        {{- if .Values.django.uwsgi.enable_debug }}
+        - name: DD_DEBUG
+          value: 'True'
+        {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -115,6 +157,10 @@ spec:
       - name: nginx
         image: '{{ template "django.nginx.repository" . }}:{{ .Values.tag }}'
         imagePullPolicy: {{ .Values.imagePullPolicy }}
+        {{- if .Values.securityContext.enabled }}
+        securityContext:
+          {{- toYaml .Values.securityContext.nginxSecurityContext | nindent 10 }}
+        {{- end }}
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo

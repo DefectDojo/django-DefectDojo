@@ -1,0 +1,329 @@
+{
+  "auditReportVersion": 2,
+  "vulnerabilities": {
+    "acorn": {
+      "name": "acorn",
+      "severity": "moderate",
+      "via": [
+        {
+          "source": 1488,
+          "name": "acorn",
+          "dependency": "acorn",
+          "title": "Regular Expression Denial of Service",
+          "url": "https://npmjs.com/advisories/1488",
+          "severity": "moderate",
+          "range": ">=5.5.0 <5.7.4 || >=6.0.0 <6.4.1 || >=7.0.0 <7.1.1"
+        }
+      ],
+      "effects": [],
+      "range": "5.5.0 - 5.7.3 || 6.0.0 - 6.4.0 || 7.0.0 - 7.1.0",
+      "nodes": [
+        "node_modules/acorn",
+        "node_modules/acorn-globals/node_modules/acorn",
+        "node_modules/eslint/node_modules/acorn",
+        "node_modules/espree/node_modules/acorn"
+      ],
+      "fixAvailable": true
+    },
+    "gulp": {
+      "name": "gulp",
+      "severity": "low",
+      "via": [
+        "gulp-cli"
+      ],
+      "effects": [],
+      "range": ">=4.0.0",
+      "nodes": [
+        "node_modules/gulp"
+      ],
+      "fixAvailable": {
+        "name": "gulp",
+        "version": "3.9.1",
+        "isSemVerMajor": true
+      }
+    },
+    "gulp-cli": {
+      "name": "gulp-cli",
+      "severity": "low",
+      "via": [
+        "yargs"
+      ],
+      "effects": [
+        "gulp"
+      ],
+      "range": ">=2.0.0",
+      "nodes": [
+        "node_modules/gulp-cli"
+      ],
+      "fixAvailable": {
+        "name": "gulp-cli",
+        "version": "1.4.0",
+        "isSemVerMajor": true
+      }
+    },
+    "handlebars": {
+      "name": "handlebars",
+      "severity": "low",
+      "via": [
+        "optimist"
+      ],
+      "effects": [],
+      "range": "3.0.0 - 4.7.3",
+      "nodes": [
+        "node_modules/handlebars"
+      ],
+      "fixAvailable": true
+    },
+    "highcharts": {
+      "name": "highcharts",
+      "severity": "high",
+      "via": [
+        {
+          "source": 1227,
+          "name": "highcharts",
+          "dependency": "highcharts",
+          "title": "Cross-Site Scripting",
+          "url": "https://npmjs.com/advisories/1227",
+          "severity": "high",
+          "range": "<7.2.2 || >=8.0.0 <8.1.1"
+        }
+      ],
+      "effects": [],
+      "range": "<7.2.2 || >=8.0.0 <8.1.1",
+      "nodes": [
+        "node_modules/highcharts"
+      ],
+      "fixAvailable": true
+    },
+    "jquery": {
+      "name": "jquery",
+      "severity": "moderate",
+      "via": [
+        {
+          "source": 1518,
+          "name": "jquery",
+          "dependency": "jquery",
+          "title": "Cross-Site Scripting",
+          "url": "https://npmjs.com/advisories/1518",
+          "severity": "moderate",
+          "range": "<3.5.0"
+        }
+      ],
+      "effects": [],
+      "range": "<3.5.0",
+      "nodes": [
+        "node_modules/jquery"
+      ],
+      "fixAvailable": true
+    },
+    "kind-of": {
+      "name": "kind-of",
+      "severity": "low",
+      "via": [
+        {
+          "source": 1490,
+          "name": "kind-of",
+          "dependency": "kind-of",
+          "title": "Validation Bypass",
+          "url": "https://npmjs.com/advisories/1490",
+          "severity": "low",
+          "range": ">=6.0.0 <6.0.3"
+        }
+      ],
+      "effects": [],
+      "range": "6.0.0 - 6.0.2",
+      "nodes": [
+        "node_modules/base/node_modules/kind-of",
+        "node_modules/define-property/node_modules/kind-of",
+        "node_modules/extglob/node_modules/kind-of",
+        "node_modules/make-iterator/node_modules/kind-of",
+        "node_modules/micromatch/node_modules/kind-of",
+        "node_modules/nanomatch/node_modules/kind-of",
+        "node_modules/snapdragon-node/node_modules/kind-of"
+      ],
+      "fixAvailable": true
+    },
+    "lodash": {
+      "name": "lodash",
+      "severity": "low",
+      "via": [
+        {
+          "source": 1523,
+          "name": "lodash",
+          "dependency": "lodash",
+          "title": "Prototype Pollution",
+          "url": "https://npmjs.com/advisories/1523",
+          "severity": "low",
+          "range": "<4.17.19"
+        }
+      ],
+      "effects": [],
+      "range": "<4.17.19",
+      "nodes": [
+        "node_modules/lodash"
+      ],
+      "fixAvailable": true
+    },
+    "minimist": {
+      "name": "minimist",
+      "severity": "low",
+      "via": [
+        {
+          "source": 1179,
+          "name": "minimist",
+          "dependency": "minimist",
+          "title": "Prototype Pollution",
+          "url": "https://npmjs.com/advisories/1179",
+          "severity": "low",
+          "range": "<0.2.1 || >=1.0.0 <1.2.3"
+        }
+      ],
+      "effects": [
+        "mkdirp",
+        "optimist"
+      ],
+      "range": "<0.2.1 || >=1.0.0 <1.2.3",
+      "nodes": [
+        "node_modules/fsevents/node_modules/minimist",
+        "node_modules/fsevents/node_modules/rc/node_modules/minimist",
+        "node_modules/minimist",
+        "node_modules/mkdirp/node_modules/minimist",
+        "node_modules/optimist/node_modules/minimist"
+      ],
+      "fixAvailable": true
+    },
+    "mkdirp": {
+      "name": "mkdirp",
+      "severity": "low",
+      "via": [
+        "minimist"
+      ],
+      "effects": [],
+      "range": "0.4.1 - 0.5.1",
+      "nodes": [
+        "node_modules/fsevents/node_modules/mkdirp",
+        "node_modules/mkdirp"
+      ],
+      "fixAvailable": true
+    },
+    "node-sass": {
+      "name": "node-sass",
+      "severity": "low",
+      "via": [
+        {
+          "source": 961,
+          "name": "node-sass",
+          "dependency": "node-sass",
+          "title": "Denial of Service",
+          "url": "https://npmjs.com/advisories/961",
+          "severity": "low",
+          "range": ">=3.3.0 <4.13.1"
+        },
+        "sass-graph"
+      ],
+      "effects": [],
+      "range": ">=3.3.0",
+      "nodes": [
+        "node_modules/node-sass"
+      ],
+      "fixAvailable": true
+    },
+    "optimist": {
+      "name": "optimist",
+      "severity": "low",
+      "via": [
+        "minimist"
+      ],
+      "effects": [
+        "handlebars"
+      ],
+      "range": ">=0.6.0",
+      "nodes": [
+        "node_modules/optimist"
+      ],
+      "fixAvailable": true
+    },
+    "sass-graph": {
+      "name": "sass-graph",
+      "severity": "low",
+      "via": [
+        "yargs"
+      ],
+      "effects": [
+        "node-sass"
+      ],
+      "range": "2.1.2 - 3.0.4",
+      "nodes": [
+        "node_modules/sass-graph"
+      ],
+      "fixAvailable": true
+    },
+    "yargs": {
+      "name": "yargs",
+      "severity": "low",
+      "via": [
+        "yargs-parser"
+      ],
+      "effects": [
+        "gulp-cli",
+        "sass-graph"
+      ],
+      "range": "4.0.0-alpha1 - 12.0.5 || 14.1.0 || 15.0.0 - 15.2.0",
+      "nodes": [
+        "node_modules/yargs"
+      ],
+      "fixAvailable": {
+        "name": "gulp-cli",
+        "version": "1.4.0",
+        "isSemVerMajor": true
+      }
+    },
+    "yargs-parser": {
+      "name": "yargs-parser",
+      "severity": "low",
+      "via": [
+        {
+          "source": 1500,
+          "name": "yargs-parser",
+          "dependency": "yargs-parser",
+          "title": "Prototype Pollution",
+          "url": "https://npmjs.com/advisories/1500",
+          "severity": "low",
+          "range": "<13.1.2 || >=14.0.0 <15.0.1 || >=16.0.0 <18.1.2"
+        }
+      ],
+      "effects": [
+        "yargs"
+      ],
+      "range": "<=13.1.1 || 14.0.0 - 15.0.0 || 16.0.0 - 18.1.1",
+      "nodes": [
+        "node_modules/jest-runtime/node_modules/yargs-parser",
+        "node_modules/jest/node_modules/yargs-parser",
+        "node_modules/yargs-parser"
+      ],
+      "fixAvailable": {
+        "name": "gulp-cli",
+        "version": "1.4.0",
+        "isSemVerMajor": true
+      }
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 12,
+      "moderate": 2,
+      "high": 1,
+      "critical": 0,
+      "total": 15
+    },
+    "dependencies": {
+      "prod": 5,
+      "dev": 1042,
+      "optional": 71,
+      "peer": 0,
+      "peerOptional": 0,
+      "total": 1047
+    }
+  }
+}

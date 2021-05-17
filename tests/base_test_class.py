@@ -3,8 +3,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoAlertPresentException
-
+from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
 import unittest
 import os
 import re
@@ -12,6 +11,22 @@ import re
 
 dd_driver = None
 dd_driver_options = None
+
+
+def on_exception_html_source_logger(func):
+    def wrapper(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+
+        except Exception as e:
+            print("exception occured at url:", self.driver.current_url)
+            print("page source:", self.driver.page_source)
+            f = open("selenium_page_source.html", "w", encoding='utf-8')
+            f.writelines(self.driver.page_source)
+            # time.sleep(30)
+            raise(e)
+
+    return wrapper
 
 
 class BaseTestCase(unittest.TestCase):
@@ -31,7 +46,7 @@ class BaseTestCase(unittest.TestCase):
 
             # the next 2 maybe needed in some scenario's for example on WSL or other headless situations
             dd_driver_options.add_argument("--no-sandbox")
-            # dd_driver_options.add_argument("--disable-dev-shm-usage")
+            dd_driver_options.add_argument("--disable-dev-shm-usage")
             dd_driver_options.add_argument("--disable-gpu")  # on windows sometimes chrome can't start with certain gpu driver versions, even in headless mode
 
             # start maximized or at least with sufficient with because datatables will hide certain controls when the screen is too narrow
@@ -72,12 +87,45 @@ class BaseTestCase(unittest.TestCase):
         self.assertFalse(self.is_element_by_css_selector_present('.alert-danger', 'Please enter a correct username and password'))
         return driver
 
+    def test_login(self):
+        return self.login_page()
+
+    @on_exception_html_source_logger
+    def delete_product_if_exists(self, name="QA Test"):
+        driver = self.driver
+        # Navigate to the product page
+        self.goto_product_overview(driver)
+        # Select the specific product to delete
+        qa_products = driver.find_elements(By.LINK_TEXT, name)
+
+        if len(qa_products) > 0:
+            self.test_delete_product(name)
+
+    # used to load some page just to get started
+    # we choose /user because it's lightweight and fast
+    def goto_some_page(self):
+        driver = self.driver
+        driver.get(self.base_url + "user")
+        return driver
+
     def goto_product_overview(self, driver):
         driver.get(self.base_url + "product")
         self.wait_for_datatable_if_content("no_products", "products_wrapper")
+        return driver
+
+    def goto_product_type_overview(self, driver):
+        driver.get(self.base_url + "product/type")
+        return driver
 
     def goto_component_overview(self, driver):
         driver.get(self.base_url + "components")
+        return driver
+
+    def goto_google_sheets_configuration_form(self, driver):
+        # if something is terribly wrong, it may still fail, even if system_settings is disabled.
+        # See https://github.com/DefectDojo/django-DefectDojo/issues/3742 for reference.
+        driver.get(self.base_url + "configure_google_sheets")
+        return driver
 
     def goto_active_engagements_overview(self, driver):
         # return self.goto_engagements_internal(driver, 'engagement')
@@ -98,6 +146,7 @@ class BaseTestCase(unittest.TestCase):
     def goto_all_findings_list(self, driver):
         driver.get(self.base_url + "finding")
         self.wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
+        return driver
 
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         no_content = None
@@ -128,6 +177,13 @@ class BaseTestCase(unittest.TestCase):
         # print('text mismatch!')
         return False
 
+    def is_element_by_id_present(self, id):
+        try:
+            self.driver.find_element_by_id(id)
+            return True
+        except NoSuchElementException:
+            return False
+
     def is_success_message_present(self, text=None):
         return self.is_element_by_css_selector_present('.alert-success', text=text)
 
@@ -151,7 +207,7 @@ class BaseTestCase(unittest.TestCase):
 
     def change_system_setting(self, id, enable=True):
         print("changing system setting " + id + " enable: " + str(enable))
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + 'system_settings')
 
         is_enabled = driver.find_element_by_id(id).is_selected()
@@ -193,7 +249,7 @@ class BaseTestCase(unittest.TestCase):
     def enable_block_execution(self):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
-        driver = self.login_page()
+        driver = self.driver
         driver.get(self.base_url + 'profile')
         if not driver.find_element_by_id('id_block_execution').is_selected():
             driver.find_element_by_xpath('//*[@id="id_block_execution"]').click()
@@ -233,14 +289,14 @@ class BaseTestCase(unittest.TestCase):
 
         for entry in WebdriverOnlyNewLogFacade(self.driver).get_log('browser'):
             """
-            images are not working in current docker/travis deployment, so ignore those 404s
-            see: https://github.com/DefectDojo/django-DefectDojo/issues/2045
-            examples:
-            http://localhost:8080/static/dojo/img/zoom-in.cur - Failed to load resource: the server responded with a status of 404 (Not Found)
-            http://localhost:8080/media/CACHE/images/finding_images/1bf9c0b1-5ed1-4b4e-9551-bcbfd198b90a/7d8d9af058566b8f2fe6548d96c63237.jpg - Failed to load resource: the server responded with a status of 404 (Not Found)
+            Images are now working after https://github.com/DefectDojo/django-DefectDojo/pull/3954,
+            but http://localhost:8080/static/dojo/img/zoom-in.cur still produces a 404
+
+            The addition of the trigger exception is due to the Report Builder tests. All of the moving objects are from javascrip
+            Tooltips are attached to each object and operate fine at human speeds. Selenium moves too fast for tooltips to be
+            cleaned up, edited, and displayed, so the issue is only present in the test
             """
-            accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)'
-            # accepted_javascript_messages = r'((zoom\-in\.cur.*)|(images\/finding_images\/.*))404\ \(Not\ Found\)|(bootstrap\-chosen\.css\.map)'
+            accepted_javascript_messages = r'(zoom\-in\.cur.*)404\ \(Not\ Found\)|Cannot read property \'trigger\' of null'
 
             if (entry['level'] == 'SEVERE'):
                 # print(self.driver.current_url)  # TODO actually this seems to be the previous url
@@ -302,19 +358,3 @@ class WebdriverOnlyNewLogFacade(object):
         self.last_timestamp = last_timestamp
 
         return filtered
-
-
-def on_exception_html_source_logger(func):
-    def wrapper(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-
-        except Exception as e:
-            print("exception occured at url:", self.driver.current_url)
-            print("page source:", self.driver.page_source)
-            f = open("selenium_page_source.html", "w", encoding='utf-8')
-            f.writelines(self.driver.page_source)
-            # time.sleep(30)
-            raise(e)
-
-    return wrapper

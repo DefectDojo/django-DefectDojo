@@ -13,7 +13,8 @@ class DojoAppConfig(AppConfig):
 
     def ready(self):
         # we need to initializer waston here because in models.py is to early if we want add extra fields to index
-        print('ready(): initializing watson')
+        # print('ready(): initializing watson')
+        # commented out ^ as it prints in manage.py dumpdata, docker logs and many other places
         # logger doesn't work yet at this stage
 
         # Watson doesn't have a way to let it index extra fields, so we have to explicitly list all the fields
@@ -69,7 +70,6 @@ def get_model_fields_with_extra(model, extra_fields=()):
 
 def get_model_fields(default_fields, extra_fields=()):
     combined = default_fields + extra_fields
-    # print(combined)
     return combined
 
 

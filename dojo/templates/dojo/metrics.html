@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load event_tags %}
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load static %}
 {% block add_styles %}
     .tabs-below > .nav-tabs,
     .tabs-right > .nav-tabs,
@@ -122,6 +122,7 @@
                         {% endif %} {% endcomment %}
                         {% if not critical_prods %}
                             <div class="dropdown pull-right">
+                                <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                                 <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                         data-toggle="dropdown" label="view_selector" aria-label="view_selector" aria-expanded="true">
                                     <span class="fa fa-bars"></span>
@@ -142,10 +143,10 @@
                             </div>
                         {% endif %}
                     </h3>
-                    
+
                 </div>
             </div>
-            <div id="the-filters" class="panel-body collapse">
+            <div id="the-filters" class="is-filters panel-body collapse">
                 {% include "dojo/filter_snippet.html" with form=findings.form clear_link="/metrics/product/type" %}
             </div>
         </div>
@@ -303,10 +304,10 @@
                                                     class="table table-bordered table-condensed table-striped table-400">
                                                 <tr>
                                                     <th>Product</th>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
                                                     <th>Total</th>
                                                 </tr>
                                                 {% for t in top_ten_products %}
@@ -360,11 +361,11 @@
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
-                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
+                                                    <th>Info</th>
                                                     <th>Total</th>
                                                 </tr>
                                                 <tr>
@@ -380,11 +381,11 @@
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
                                                     <th>Product</th>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
-                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
+                                                    <th>Info</th>
                                                     <th>Total</th>
 
                                                 </tr>
@@ -408,11 +409,11 @@
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
-                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
+                                                    <th>Info</th>
                                                     <th>Total</th>
                                                 </tr>
                                                 <tr>
@@ -428,11 +429,11 @@
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
                                                     <th>Product</th>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
-                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
+                                                    <th>Info</th>
                                                     <th>Total</th>
 
                                                 </tr>
@@ -458,11 +459,11 @@
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
-                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
+                                                    <th>Info</th>
                                                     <th>Total</th>
                                                 </tr>
                                                 <tr>
@@ -478,11 +479,11 @@
                                                     class="table table-bordered table-condensed table-striped table-600">
                                                 <tr>
                                                     <th>Product</th>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
-                                                    <th>{% severity_value 'Info' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
+                                                    <th>Info</th>
                                                     <th>Total</th>
 
                                                 </tr>
@@ -505,10 +506,10 @@
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
                                                     <th>Weekly</th>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
                                                     <th>Total</th>
                                                     <th>Closed*</th>
                                                 </tr>
@@ -529,10 +530,10 @@
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
                                                     <th>Monthly</th>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
                                                     <th>Total</th>
                                                     <th>Closed*</th>
                                                 </tr>
@@ -556,10 +557,10 @@
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
                                                     <th>By Week</th>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
                                                     <th>Total</th>
                                                 </tr>
                                                 {% for week in accepted_per_week|slice:'1:' %}
@@ -578,10 +579,10 @@
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
                                                     <th>By Month</th>
-                                                    <th>{% severity_value 'Critical' %}</th>
-                                                    <th>{% severity_value 'High' %}</th>
-                                                    <th>{% severity_value 'Medium' %}</th>
-                                                    <th>{% severity_value 'Low' %}</th>
+                                                    <th>Critical</th>
+                                                    <th>High</th>
+                                                    <th>Medium</th>
+                                                    <th>Low</th>
                                                     <th>Total</th>
                                                 </tr>
                                                 {% for month in accepted_per_month|slice:'1:' %}
@@ -643,7 +644,7 @@
     {% include "dojo/filter_js_snippet.html" %}
     <script src="{% static "justgage/raphael.min.js" %}"></script>
     <script src="{% static "justgage/justgage.js" %}"></script>
-    
+
     <script>
         $('.gaugeloop').each(function () {
             j_obj = $(this);
@@ -672,8 +673,10 @@
             {%  if accepted_per_month %}
                 chart_div2();
             {%  endif %}
-            chart_div3();
-            chart_div4();
+            {% if  not critical_prods %}
+                chart_div3();
+                chart_div4();
+            {% endif %}
 
             {% if opened_per_month %}
                 function chart_div() {

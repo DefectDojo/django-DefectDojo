@@ -3,27 +3,20 @@ import json
 from dojo.models import Finding
 
 
-class AquaJSONParser(object):
-    def __init__(self, json_output, test):
+class AquaParser(object):
 
-        tree = self.parse_json(json_output)
+    def get_scan_types(self):
+        return ["Aqua Scan"]
 
-        if tree:
-            self.items = [data for data in self.get_items(tree, test)]
-        else:
-            self.items = []
+    def get_label_for_scan_types(self, scan_type):
+        return "Aqua Scan"
 
-    def parse_json(self, json_output):
-        try:
-            data = json_output.read()
-            try:
-                tree = json.loads(str(data, 'utf-8'))
-            except:
-                tree = json.loads(data)
-        except:
-            raise Exception("Invalid format")
+    def get_description_for_scan_types(self, scan_type):
+        return ""
 
-        return tree
+    def get_findings(self, json_output, test):
+        tree = json.load(json_output)
+        return self.get_items(tree, test)
 
     def get_items(self, tree, test):
         items = {}
@@ -52,6 +45,7 @@ def get_item(resource, vuln, test):
     cve = vuln.get('name', 'No CVE')
     fix_version = vuln.get('fix_version', 'None')
     description = vuln.get('description', 'No description.')
+    cvssv3 = None
 
     url = ""
     if 'nvd_url' in vuln:
@@ -63,23 +57,32 @@ def get_item(resource, vuln, test):
     score = 0
     severity_justification = ""
     used_for_classification = ""
-    if 'aqua_score' in vuln:
-        score = vuln.get('aqua_score')
-        used_for_classification = "Aqua score ({}) used for classification.\n".format(score)
-    if 'vendor_score' in vuln:
-        score = vuln.get('vendor_score')
-        used_for_classification = "Vendor score ({}) used for classification.\n".format(score)
-    if 'nvd_score' in vuln:
-        score = vuln.get('nvd_score')
-        used_for_classification = "NVD score v2 ({}) used for classification.\n".format(score)
-        severity_justification += "\nNVD v2 vectors: {}".format(vuln.get('nvd_vectors'))
-    if 'nvd_score_v3' in vuln:
-        score = vuln.get('nvd_score_v3')
-        used_for_classification = "NVD score v3 ({}) used for classification.\n".format(score)
-        severity_justification += "\nNVD v3 vectors: {}".format(vuln.get('nvd_vectors_v3'))
-    severity_justification += "\n{}".format(used_for_classification)
-
-    severity = severity_of(score)
+    if 'aqua_severity' in vuln:
+        score = vuln.get('aqua_severity')
+        severity = aqua_severity_of(score)
+        used_for_classification = "Aqua security score ({}) used for classification.\n".format(score)
+        severity_justification = vuln.get('aqua_severity_classification')
+        if 'nvd_score_v3' in vuln:
+            cvssv3 = vuln.get('nvd_vectors_v3')
+    else:
+        if 'aqua_score' in vuln:
+            score = vuln.get('aqua_score')
+            used_for_classification = "Aqua score ({}) used for classification.\n".format(score)
+        elif 'vendor_score' in vuln:
+            score = vuln.get('vendor_score')
+            used_for_classification = "Vendor score ({}) used for classification.\n".format(score)
+        elif 'nvd_score_v3' in vuln:
+            score = vuln.get('nvd_score_v3')
+            used_for_classification = "NVD score v3 ({}) used for classification.\n".format(score)
+            severity_justification += "\nNVD v3 vectors: {}".format(vuln.get('nvd_vectors_v3'))
+            # Add the CVSS3 to Finding
+            cvssv3 = vuln.get('nvd_vectors_v3')
+        elif 'nvd_score' in vuln:
+            score = vuln.get('nvd_score')
+            used_for_classification = "NVD score v2 ({}) used for classification.\n".format(score)
+            severity_justification += "\nNVD v2 vectors: {}".format(vuln.get('nvd_vectors'))
+        severity = severity_of(score)
+        severity_justification += "\n{}".format(used_for_classification)
 
     return Finding(
         title=cve + " - " + resource_name + " (" + resource_version + ") ",
@@ -88,6 +91,7 @@ def get_item(resource, vuln, test):
         severity_justification=severity_justification,
         cwe=0,
         cve=cve,
+        cvssv3=cvssv3,
         description=description.strip(),
         mitigation=fix_version,
         references=url,
@@ -122,14 +126,27 @@ def get_item_v2(item, test):
                    mitigation=mitigation)
 
 
+def aqua_severity_of(score):
+    if score == 'high':
+        return "High"
+    if score == 'medium':
+        return "Medium"
+    elif score == 'low':
+        return "Low"
+    elif score == "negligible":
+        return "Info"
+    else:
+        return "Critical"
+
+
 def severity_of(score):
     if score == 0:
         return "Info"
-    elif score <= 3.9:
+    elif score < 4:
         return "Low"
-    elif 4.0 < score <= 6.9:
+    elif 4.0 < score < 7.0:
         return "Medium"
-    elif 7.0 < score <= 8.9:
+    elif 7.0 < score < 9.0:
         return "High"
     else:
         return "Critical"

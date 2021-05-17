@@ -1,10 +1,21 @@
 import json
 import math
+
 from dojo.models import Finding
 
 
-class PhpSecurityAuditV2(object):
-    def __init__(self, filename, test):
+class PhpSecurityAuditV2Parser(object):
+
+    def get_scan_types(self):
+        return ["PHP Security Audit v2"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import PHP Security Audit v2 Scan in JSON format."
+
+    def get_findings(self, filename, test):
         tree = filename.read()
         try:
             data = json.loads(str(tree, 'utf-8'))
@@ -25,7 +36,7 @@ class PhpSecurityAuditV2(object):
                     findingdetail += "Rule Source: " + issue["source"] + "\n"
                     findingdetail += "Details: " + issue["message"] + "\n"
 
-                    sev = PhpSecurityAuditV2.get_severity_word(issue["severity"])
+                    sev = PhpSecurityAuditV2Parser.get_severity_word(issue["severity"])
 
                     dupe_key = title + filepath + str(issue["line"]) + str(issue["column"])
 
@@ -34,24 +45,21 @@ class PhpSecurityAuditV2(object):
                     else:
                         dupes[dupe_key] = True
 
-                        find = Finding(title=title,
-                                       test=test,
-                                       active=False,
-                                       verified=False,
-                                       description=findingdetail,
-                                       severity=sev.title(),
-                                       numerical_severity=Finding.get_numerical_severity(sev),
-                                       mitigation='',
-                                       impact='',
-                                       references='',
-                                       file_path=filepath,
-                                       url='N/A',
-                                       static_finding=True)
+                        find = Finding(
+                            title=title,
+                            test=test,
+                            description=findingdetail,
+                            severity=sev.title(),
+                            file_path=filepath,
+                            line=issue["line"],
+                            static_finding=True,
+                            dynamic_finding=False,
+                        )
 
                         dupes[dupe_key] = find
                         findingdetail = ''
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     @staticmethod
     def get_severity_word(severity):

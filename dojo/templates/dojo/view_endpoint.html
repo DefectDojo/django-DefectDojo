@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% load display_tags %}
-{% load static from staticfiles %}
+{% load authorization_tags %}
+{% load static %}
 {% block add_styles %}
     .graph {min-height: 158px;}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
@@ -13,7 +14,7 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
-                <h4 class="pull-left to_highlight finding-title">
+                <h4 class="pull-left finding-title">
                     {{ endpoint.host_no_port }}
                     {% if endpoint.mitigated %}
                         - Mitigated
@@ -37,19 +38,20 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                {% if user|is_authorized_for_change:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Edit" or user|is_authorized_for_change:endpoint %}
                                     <li role="presentation">
                                         <a href="{% url 'edit_endpoint' endpoint.id %}">
                                             <i class="fa fa-pencil-square-o"></i> Edit Endpoint
                                         </a>
                                     </li>
                                 {% endif %}
-                                {% if user|is_authorized_for_staff:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Edit" or user|is_authorized_for_staff:endpoint %}
                                     <li role="presentation">
                                         <a href="{% url 'add_endpoint_meta_data' endpoint.id %}">
                                             <i class="fa fa-list-alt"></i> Add Metadata
                                         </a>
                                     </li>
+                                {% endif %}
                                     <li role="presentation">
                                         <a href="{% url 'endpoint_report' endpoint.id %}">
                                             <i class="fa fa-file-text-o"></i> Report
@@ -60,8 +62,7 @@
                                             <i class="fa fa-history"></i> View History
                                         </a>
                                     </li>
-                                {% endif %}
-                                {% if user|is_authorized_for_delete:endpoint %}
+                                {% if endpoint|has_object_permission:"Endpoint_Delete" or user|is_authorized_for_delete:endpoint %}
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation" class="text-danger">
                                         <a class="text-danger" href="{% url 'delete_endpoint' endpoint.id %}">
@@ -177,8 +178,8 @@
                 <h4>Tags</h4>
             </div>
             <div class="tags panel-body">
-                {% for tag in endpoint.tags %}
-                    <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query={{ tag }}">{{ tag }}</a>
+                {% for tag in endpoint.tags.all %}
+                    <a title="Search {{ tag }}" class="tag-label tag-color" href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
                 {% endfor %}
             </div>
         </div>

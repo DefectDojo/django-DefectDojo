@@ -6,9 +6,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.notifications.helper import create_notification
-from dojo.forms import Tag
 from dojo.models import Test, Test_Type, Development_Environment, Objects_Engagement, \
-                        Objects, Objects_Review
+                        Objects_Product, Objects_Review
 
 
 logger = logging.getLogger(__name__)
@@ -46,7 +45,7 @@ def import_object_eng(request, engagement, json_data):
     product = engagement.product
 
     # Retrieve the files currently set for this product
-    object_queryset = Objects.objects.filter(product=engagement.product.id).order_by('-path')
+    object_queryset = Objects_Product.objects.filter(product=engagement.product.id).order_by('-path')
     tree = json_data.read()
     try:
         data = json.loads(str(tree, 'utf-8'))
@@ -58,7 +57,6 @@ def import_object_eng(request, engagement, json_data):
     review_status = Objects_Review.objects.get(pk=review_status_id)
 
     for file in data:
-        # print(file["path"])
         # Save the file if the object isn't in object table
         file_type, found_object = find_item(file["path"], object_queryset)
 
@@ -73,12 +71,12 @@ def import_object_eng(request, engagement, json_data):
             review_status = Objects_Review.objects.get(pk=review_status_id)
 
             # if found_object is None:
-            object = Objects(product=product, path=file["path"], review_status=review_status)
+            object = Objects_Product(product=product, path=file["path"], review_status=review_status)
             object.save()
             found_object = object
             if file_type == "path":
-                for tag in found_object.tags:
-                    Tag.objects.update_tags(object, tag.name)
+                for tag in found_object.tags.all():
+                    object.tags.add(tag)
 
         full_url = None
         file_type = None

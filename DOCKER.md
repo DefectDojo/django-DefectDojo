@@ -1,16 +1,16 @@
 # Running with Docker Compose
 
-The docker-compose.yml in this repo is not intended for production use without first customizing it to fit your specific situation.  Please consider the docker-compose.yml files are templates to create on that fits your needs.
-Docker Compose is acceptable if you want to deploy a containerized DefectDojo to a production environment.
-It is one of the supported [Default installation](setup/README.md) methods.
+The docker-compose.yml file in this repository is fully functional to evaluate DefectDojo in your local environment. 
+
+Although Docker Compose is one of the supported installation methods to deploy a containerized DefectDojo in a production environment, the docker-compose.yml file is not intended for production use without first customizing it to your particular situation. [Running in Production](docs/content/running/running-in-production.md) gives advice on which adjustments are useful for performance and operational reliability. 
+
 
 # Prerequisites
 *  Docker version
     *  Installing with docker-compose requires at least docker 18.09.4 and docker-compose 1.24.0. See "Checking Docker versions" below for version errors during running docker-compose.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ . 
-*  Known issues
-    * finding images only work in `dev` and `ptvsd` mode. Making them work in `release` mode requires modifications to the docker-compose configuration.
+
 
 # Setup via Docker Compose - introduction
 
@@ -69,7 +69,6 @@ In this setup, you need to rebuild django and/or nginx images after each code ch
 For development, use: 
 
 ```zsh
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh dev
 docker-compose build
 docker-compose up
@@ -95,29 +94,38 @@ To update changes in static resources, served by nginx, just refresh the browser
 
 *Notes about volume permissions*
 
-*The manual copy of settings.py is sometimes required once after cloning the repository, on linux hosts when the host files cannot be modified from within the django container. In that case that copy in entrypoint-uwsgi-dev.sh fails.* 
-
-*Another way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
+*If you run into permission issues with the mounted volumes, a way to fix this is changing `USER 1001` in Dockerfile.django to match your user uid and then rebuild the images. Get your user id with* 
 
 ```
 id -u
 ```
 
-## Run with Docker compose in development mode with ptvsd (remote debug)
+## Run with Docker compose in development mode with debugpy (remote debug)
 
-If you want to be able to step in your code, you can activate ptvsd.Server.
-
-You can launch your local dev instance of DefectDojo as
+The debug mode, offers out of the box a debugging server listening on port 3000
 
 ```zsh
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
-docker/setEnv.sh ptvsd
+# switch to debug configuration
+docker/setEnv.sh debug
+# then use docker-compose as usual
 docker-compose up
 ```
 
-This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.ptvsd.yml.
+This will run the application based on merged configurations from `docker-compose.yml` and `docker-compose.override.debug.yml`.
 
-The default configuration assumes port 3000 by default for ptvsd.
+Alternatively (if using docker for windows for example), you can copy the override file over (and re-create the containers):
+```
+cp docker-compose.override.debug.yml docker-compose.override.yml
+docker-compose down
+docker-compose up
+```
+
+The default configuration assumes port 3000 by default for debug.
+
+But you can pass additional environment variables:
+- `DD_DEBUG_PORT` to define a different port
+- `DD_DEBUG_WAIT_FOR_CLIENT` - That's if you want to debugger to wait, right before calling `django.core.wsgi.get_wsgi_application()`
+
 
 ### VS code
 Add the following python debug configuration (You would have to install the `ms-python.python`. Other setup may work.)
@@ -156,7 +164,7 @@ docker-compose logs initializer | grep "Admin password:"
 
 Make sure you write down the first password generated as you'll need it when re-starting the application.
 
-# Option to change the password 
+## Option to change the password 
 * If you dont have admin password use the below command to change the password. 
 * After starting the container and open another tab in the same folder.  
 * django-defectdojo_uwsgi_1 -- name obtained from running containers using ```zsh docker ps ``` command
@@ -164,6 +172,29 @@ Make sure you write down the first password generated as you'll need it when re-
 ```zsh
 docker exec -it django-defectdojo_uwsgi_1 ./manage.py changepassword admin
 ```
+
+# Logging
+For docker-compose release mode the log level is INFO. In the other modes the log level is DEBUG. Logging is configured in `settings.dist.py` and can be tuned using a `local_settings.py`, see [template for local_settings.py](dojo/settings/template-local_settings). For example the deduplication logger can be set to DEBUG in a local_settings.py file:
+
+
+```
+LOGGING['loggers']['dojo.specific-loggers.deduplication']['level'] = 'DEBUG'
+```
+
+Or you can modify `settings.dist.py` directly, but this adds the risk of having conflicts when `settings.dist.py` gets updated upstream. 
+
+```
+          'dojo.specific-loggers.deduplication': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
+```
+
+## Debug Toolbar
+In the `dojo/settings/template-local_settings.py` you'll find instructions on how to enable the [Django Debug Toolbar](https://github.com/jazzband/django-debug-toolbar).
+This toolbar allows you to debug SQL queries, and shows some other interesting information.
+
 
 # Exploitation, versioning
 ## Disable the database initialization
@@ -265,7 +296,6 @@ The integration-tests are under `tests`
 This will run all unit-tests and leave the uwsgi container up: 
 
 ```
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh unit_tests
 docker-compose up
 ```
@@ -296,9 +326,15 @@ python manage.py test dojo.unittests.test_dependency_check_parser.TestDependency
 This will run all integration-tests and leave the containers up: 
 
 ```
-cp dojo/settings/settings.dist.py dojo/settings/settings.py
 docker/setEnv.sh integration_tests
 docker-compose up
+```
+
+NB: the first time you run it, initializing the database may be too long for the tests to succeed. In that case, you'll need to wait for the initializer container to end, then re-run `docker-compose up`
+
+Check the logs with:
+```
+docker logs -f django-defectdojo_integration-tests_1
 ```
 
 # Checking Docker versions

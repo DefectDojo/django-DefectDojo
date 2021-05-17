@@ -1,27 +1,54 @@
 import requests
 import logging
 from django.core.mail import EmailMessage
-from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo
+from dojo.models import Notifications, Dojo_User, Alerts, UserContactInfo, System_Settings
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
 from dojo.celery import app
-
+from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
+from dojo.authorization.roles_permissions import Permissions
+# from dojo.decorators import dojo_async_task, we_want_async, convert_kwargs_if_async
 
 logger = logging.getLogger(__name__)
 
 
-def create_notification(event=None, *args, **kwargs):
+def create_notification(event=None, **kwargs):
+    system_settings = System_Settings.objects.get()
+    kwargs["system_settings"] = system_settings
+
     if 'recipients' in kwargs:
         # mimic existing code so that when recipients is specified, no other system or personal notifications are sent.
         logger.debug('creating notifications for recipients')
         for recipient_notifications in Notifications.objects.filter(user__username__in=kwargs['recipients'], user__is_active=True, product=None):
             # kwargs.update({'user': recipient_notifications.user})
-            process_notifications(event, recipient_notifications, *args, **kwargs)
+            process_notifications(event, recipient_notifications, **kwargs)
     else:
         logger.debug('creating system notifications for event: %s', event)
         # send system notifications to all admin users
+
+        # parse kwargs before converting them to dicts
+        product_type = None
+        if 'product_type' in kwargs:
+            product_type = kwargs.get('product_type')
+
+        product = None
+        if 'product' in kwargs:
+            product = kwargs.get('product')
+        elif 'engagement' in kwargs:
+            product = kwargs['engagement'].product
+        elif 'test' in kwargs:
+            product = kwargs['test'].engagement.product
+        elif 'finding' in kwargs:
+            product = kwargs['finding'].test.engagement.product
+        elif 'obj' in kwargs:
+            from dojo.utils import get_product
+            product = get_product(kwargs['obj'])
+
+        # notifications are made synchronous again due to serialization bug in django-tagulous
+        # see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+        # kwargs = convert_kwargs_if_async(**kwargs)
 
         # System notifications
         try:
@@ -30,56 +57,50 @@ def create_notification(event=None, *args, **kwargs):
             system_notifications = Notifications()
 
         # System notifications are sent one with user=None, which will trigger email to configured system email, to global slack channel, etc.
-        process_notifications(event, system_notifications, *args, **kwargs)
+        process_notifications(event, system_notifications, **kwargs)
 
         # All admins will also receive system notifications, but as part of the person global notifications section below
         # This time user is set, so will trigger email to personal email, to personal slack channel (mention), etc.
         # only retrieve users which have at least one notification type enabled for this event type.
         logger.debug('creating personal notifications for event: %s', event)
 
-        product = None
-        if 'product' in kwargs:
-            product = kwargs.get('product')
+        # There are notification like deleting a product type that shall not be sent to users.
+        # These notifications will have the parameter no_users=True
+        if not ('no_users' in kwargs and kwargs['no_users'] is True):
+            # get users with either global notifications, or a product specific noditiciation
+            # and all admin/superuser, they will always be notified
+            users = Dojo_User.objects.filter(is_active=True).prefetch_related(Prefetch(
+                "notifications_set",
+                queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
+                to_attr="applicable_notifications"
+            )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
+                .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True) | Q(is_staff=True)))
 
-        if not product and 'engagement' in kwargs:
-            product = kwargs['engagement'].product
+            # only send to authorized users or admin/superusers
+            if product:
+                users = get_authorized_users_for_product_and_product_type(users, product, Permissions.Product_View)
+            elif product_type:
+                users = get_authorized_users_for_product_type(users, product_type, Permissions.Product_Type_View)
 
-        if not product and 'test' in kwargs:
-            product = kwargs['test'].engagement.product
+            for user in users:
+                # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
+                # kwargs.update({'user': user})
+                applicable_notifications = user.applicable_notifications
+                if user.is_staff or user.is_superuser:
+                    # admin users get all system notifications
+                    applicable_notifications.append(system_notifications)
 
-        if not product and 'finding' in kwargs:
-            product = kwargs['finding'].test.engagement.product
-
-        # get users with either global notifications, or a product specific noditiciation
-        # and all admin/superuser, they will always be notified
-        users = Dojo_User.objects.filter(is_active=True).prefetch_related(Prefetch(
-            "notifications_set",
-            queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
-            to_attr="applicable_notifications"
-        )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
-            .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True) | Q(is_staff=True)))
-
-        # only send to authorized users or admin/superusers
-        if product:
-            users = users.filter(Q(id__in=product.authorized_users.all()) | Q(id__in=product.prod_type.authorized_users.all()) | Q(is_superuser=True) | Q(is_staff=True))
-
-        for user in users:
-            # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
-            # kwargs.update({'user': user})
-            applicable_notifications = user.applicable_notifications
-            if user.is_staff or user.is_superuser:
-                # admin users get all system notifications
-                applicable_notifications.append(system_notifications)
-
-            notifications_set = Notifications.merge_notifications_list(applicable_notifications)
-            notifications_set.user = user
-            process_notifications(event, notifications_set, *args, **kwargs)
+                notifications_set = Notifications.merge_notifications_list(applicable_notifications)
+                notifications_set.user = user
+                process_notifications(event, notifications_set, **kwargs)
 
 
 def create_description(event, *args, **kwargs):
     if "description" not in kwargs.keys():
         if event == 'product_added':
             kwargs["description"] = "Product " + kwargs['title'] + " has been created successfully."
+        elif event == 'product_type_added':
+            kwargs["description"] = "Product Type " + kwargs['title'] + " has been created successfully."
         else:
             kwargs["description"] = "Event " + str(event) + " has occured."
 
@@ -103,20 +124,18 @@ def create_notification_message(event, user, notification_type, *args, **kwargs)
             kwargs["description"] = create_description(event, *args, **kwargs)
             notification_message = render_to_string('notifications/other.tpl', kwargs)
 
-    return notification_message
+    return notification_message if notification_message else ''
 
 
-def process_notifications(event, notifications=None, *args, **kwargs):
+def process_notifications(event, notifications=None, **kwargs):
     from dojo.utils import get_system_setting
 
     if not notifications:
         logger.warn('no notifications!')
         return
 
-    sync = 'initiator' in kwargs and Dojo_User.wants_block_execution(kwargs['initiator'])
-
     # logger.debug('sync: %s %s', sync, vars(notifications))
-    logger.debug('sending notification ' + ('synchronously' if sync else 'asynchronously'))
+    # logger.debug('sending notification ' + ('asynchronously' if we_want_async() else 'synchronously'))
     logger.debug('process notifications for %s', notifications.user)
     logger.debug('notifications: %s', vars(notifications))
 
@@ -125,30 +144,26 @@ def process_notifications(event, notifications=None, *args, **kwargs):
     mail_enabled = get_system_setting('enable_mail_notifications')
 
     if slack_enabled and 'slack' in getattr(notifications, event):
-        if not sync:
-            send_slack_notification.delay(event, notifications.user, *args, **kwargs)
-        else:
-            send_slack_notification(event, notifications.user, *args, **kwargs)
+        logger.debug('Sending Slack Notification')
+        send_slack_notification(event, notifications.user, **kwargs)
 
     if msteams_enabled and 'msteams' in getattr(notifications, event):
-        if not sync:
-            send_msteams_notification.delay(event, notifications.user, *args, **kwargs)
-        else:
-            send_msteams_notification(event, notifications.user, *args, **kwargs)
+        logger.debug('Sending MSTeams Notification')
+        send_msteams_notification(event, notifications.user, **kwargs)
 
-    logger.debug('mail_enabled: %s', mail_enabled)
-    logger.debug('getattr(notifications, event): %s', getattr(notifications, event))
     if mail_enabled and 'mail' in getattr(notifications, event):
-        if not sync:
-            send_mail_notification.delay(event, notifications.user, *args, **kwargs)
-        else:
-            send_mail_notification(event, notifications.user, *args, **kwargs)
+        logger.debug('Sending Mail Notification')
+        send_mail_notification(event, notifications.user, **kwargs)
 
     if 'alert' in getattr(notifications, event, None):
-        send_alert_notification(event, notifications.user, *args, **kwargs)
+        logger.debug('Sending Alert')
+        send_alert_notification(event, notifications.user, **kwargs)
 
 
-@app.task(name='send_slack_notification')
+# notifications are made synchronous again due to serialization bug in django-tagulous
+# see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+# @dojo_async_task
+@app.task
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -202,10 +217,13 @@ def send_slack_notification(event, user=None, *args, **kwargs):
 
     except Exception as e:
         logger.exception(e)
-        log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs['url'])
+        log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs.get('url', None))
 
 
-@app.task(name='send_msteams_notification')
+# notifications are made synchronous again due to serialization bug in django-tagulous
+# see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+# @dojo_async_task
+@app.task
 def send_msteams_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -213,6 +231,7 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         # Microsoft Teams doesn't offer direct message functionality, so no MS Teams PM functionality here...
         if user is None:
             if get_system_setting('msteams_url') is not None:
+                logger.debug('sending MSTeams message')
                 res = requests.request(
                     method='POST',
                     url=get_system_setting('msteams_url'),
@@ -230,7 +249,10 @@ def send_msteams_notification(event, user=None, *args, **kwargs):
         pass
 
 
-@app.task(name='send_mail_notification')
+# notifications are made synchronous again due to serialization bug in django-tagulous
+# see https://github.com/DefectDojo/django-DefectDojo/issues/3677
+# @dojo_async_task
+@app.task
 def send_mail_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -265,14 +287,14 @@ def send_mail_notification(event, user=None, *args, **kwargs):
 
 
 def send_alert_notification(event, user=None, *args, **kwargs):
-    logger.info('sending alert notification to %s', user)
+    logger.debug('sending alert notification to %s', user)
     try:
         # no need to differentiate between user/no user
         icon = kwargs.get('icon', 'info-circle')
         alert = Alerts(
             user_id=user,
-            title=kwargs.get('title')[:100],
-            description=create_notification_message(event, user, 'alert', *args, **kwargs),
+            title=kwargs.get('title')[:250],
+            description=create_notification_message(event, user, 'alert', *args, **kwargs)[:2000],
             url=kwargs.get('url', reverse('alerts')),
             icon=icon[:25],
             source=Notifications._meta.get_field(event).verbose_name.title()[:100]
@@ -287,6 +309,9 @@ def send_alert_notification(event, user=None, *args, **kwargs):
 
 
 def get_slack_user_id(user_email):
+    from dojo.utils import get_system_setting
+    import json
+
     user_id = None
 
     res = requests.request(
@@ -327,11 +352,24 @@ def log_alert(e, notification_type=None, *args, **kwargs):
     for user in users:
         alert = Alerts(
             user_id=user,
-            url=kwargs.get('url', reverse('alerts'))[:100],
-            title=kwargs.get('title', 'Notification issue'),
+            url=kwargs.get('url', reverse('alerts')),
+            title=kwargs.get('title', 'Notification issue')[:250],
             description=kwargs.get('description', '%s' % e)[:2000],
             icon="exclamation-triangle",
             source=notification_type[:100] if notification_type else kwargs.get('source', 'unknown')[:100])
         # relative urls will fail validation
         alert.clean_fields(exclude=['url'])
         alert.save()
+
+
+def notify_test_created(test):
+    title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+    create_notification(event='test_added', title=title, test=test, engagement=test.engagement, product=test.engagement.product,
+                        url=reverse('view_test', args=(test.id,)))
+
+
+def notify_scan_added(test, updated_count, new_findings, findings_mitigated=[], findings_reactivated=[], findings_untouched=[]):
+    title = 'Created/Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
+    create_notification(event='scan_added', title=title, findings_new=new_findings, findings_mitigated=findings_mitigated, findings_reactivated=findings_reactivated,
+                        finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=findings_untouched,
+                        url=reverse('view_test', args=(test.id,)))

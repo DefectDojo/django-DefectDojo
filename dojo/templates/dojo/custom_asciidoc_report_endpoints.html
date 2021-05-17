@@ -14,7 +14,7 @@
                 {% if find.tags %}
                     <sup>
                         [
-                        {% for tag in find.tags %}
+                        {% for tag in find.tags.all %}
                         {{ tag }}
                         {% endfor %}
                         ]

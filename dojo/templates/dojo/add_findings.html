@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load event_tags %}
-{% load static from staticfiles %}
+{% load display_tags %}
+{% load static %}
 {% block add_css %}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
@@ -31,9 +32,9 @@
                             </i>
                         </label>
                         <div class="col-sm-10 form-control-static">
-                            {% if product_tab.product.jira_conf %}
-                                <a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
-                                target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+                            {% if product_tab.product.has_jira_configured %}
+                                <a href="{{ product_tab.product|jira_project_url }}"
+                                target="_blank"> {{ product_tab.product|jira_project_url }} </a>
                             {% else %}
                             None
                             {% endif %}
@@ -62,9 +63,9 @@
                             </i>
                         </label>
                         <div class="col-sm-10 form-control-static">
-                            {% if product_tab.product.jira_conf %}
-                                <a href="{{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }}"
-                                target="_blank"> {{ product_tab.product.jira_conf.url }}/browse/{{ product_tab.product.jira_pkey.project_key }} </a>
+                            {% if product_tab.product.has_jira_configured %}
+                                <a href="{{ product_tab.product|jira_project_url }}"
+                                target="_blank"> {{ product_tab.product|jira_project_url }} </a>
                             {% else %}
                             None
                             {% endif %}
@@ -112,24 +113,6 @@
             {% endif %}
         });
 
-        $(function () {
-            $('#id_tags').chosen({
-                'placeholder_text_multiple': 'Select or add some tags...',
-                'no_results_text': "Tag not found, press TAB key to add.",
-            });
-
-            $(".search-field").find("input").on("keydown", function (evt) {
-                var stroke;
-                stroke = (_ref = evt.which) != null ? _ref : evt.keyCode;
-                if (stroke == 9) { // 9 = tab key
-                    var o = new Option($(this).val(), $(this).val(), true, true);
-			        $('#id_tags').append(o);
-                    $('#id_tags').trigger('chosen:updated');
-                    $('#id_tags').focus();
-                    return false;
-                }
-            });
-
             $("textarea").each(function (index, elem) {
 
                 if (elem.hasAttribute("required")) {
@@ -151,7 +134,6 @@
                 });
                 mde.render();
             });
-        });
 
         $("#add_finding").submit(function () {
             var isFormValid = true;

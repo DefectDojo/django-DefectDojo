@@ -6,7 +6,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Configuration List
+                        JIRA Instances
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -15,21 +15,26 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
-                                    <li role="presentation">
-                                        <a href="{% url 'add_jira' %}">
-                                            <i class="fa fa-plus"></i> Add Jira Configuration
-                                        </a>
-                                    </li>
+                                <li role="presentation">
+                                    <a href="{% url 'express_jira' %}">
+                                        <i class="fa fa-plus"></i> Add Jira Instance (Express)
+                                    </a>
+                                </li>
+                                <li role="presentation">
+                                    <a href="{% url 'add_jira' %}">
+                                        <i class="fa fa-plus"></i> Add Jira Instance
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </h3>
                 </div>
 
             </div>
-            {% if confs %}
+            {% if jira_instances %}
 
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                    {% include "dojo/paging_snippet.html" with page=jira_instances page_size=True %}
                 </div>
                 <div class="panel panel-default table-responsive">
                     <table id="products"
@@ -43,25 +48,25 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for conf in confs %}
+                        {% for jira_instance in jira_instances %}
                             <tr>
                                 <td>
-                                    <a href="{% url 'edit_jira' conf.id %}"><b>{{ conf.configuration_name }}</b></a>
+                                    <a href="{% url 'edit_jira' jira_instance.id %}"><b>{{ jira_instance.configuration_name }}</b></a>
                                 </td>
                                 <td>
-                                    <a href="{{ conf.url }}">{{ conf.url }}
+                                    <a href="{{ jira_instance.url }}">{{ jira_instance.url }}
                                     <i class="fa fa-external-link" aria-hidden="true"></i>
                                     </a>
                                 </td>
                                 <td>
-                                        {{ conf.username }}
+                                        {{ jira_instance.username }}
                                 </td>
                                 <td>
-                                    <a href="{% url 'edit_jira' conf.id %}" class="btn btn-sm btn-success">
+                                    <a href="{% url 'edit_jira' jira_instance.id %}" class="btn btn-sm btn-success">
                                         <i class="fa fa-pencil"></i>
                                         Edit
                                     </a>
-                                    <a href="{% url 'delete_jira' conf.id %}" class="btn btn-sm btn-warning">
+                                    <a href="{% url 'delete_jira' jira_instance.id %}" class="btn btn-sm btn-warning">
                                         <i class="fa fa-trash"></i>
                                         Delete
                                     </a>
@@ -73,10 +78,10 @@
                     </table>
                 </div>
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=confs page_size=True %}
+                    {% include "dojo/paging_snippet.html" with page=jira_instances page_size=True %}
                 </div>
             {% else %}
-                <p class="text-center">No configurations found.</p>
+                <p class="text-center">No JIRA instances found.</p>
             {% endif %}
         </div>
     </div>

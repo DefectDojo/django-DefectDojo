@@ -2,33 +2,47 @@ __guide__ = 'aaronweaver'
 __author__ = 'Rajarshi333'
 
 
-from defusedxml import ElementTree
-from dateutil import parser
+import logging
 import re
+
+from dateutil import parser
+from defusedxml import ElementTree
+
 from dojo.models import Finding
 
+logger = logging.getLogger(__name__)
 
-class FortifyXMLParser(object):
-    language_list = []
 
-    def __init__(self, filename, test):
+class FortifyParser(object):
+
+    def get_scan_types(self):
+        return ["Fortify Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import Findings from XML file format."
+
+    def get_findings(self, filename, test):
         fortify_scan = ElementTree.parse(filename)
         root = fortify_scan.getroot()
 
+        language_list = []
         # Get Date
-        date_string = root.getchildren()[5].getchildren()[1].getchildren()[2].text
+        date_string = root[5][1][2].text
         date_list = date_string.split()[1:4]
-        date_act = "".join(date_list)
+        date_list = [item.replace(',', '') for item in date_list]
+        date_act = ".".join(date_list)
         find_date = parser.parse(date_act)
-
         # Get Language
         lang_string = root[8][4][2].text
         lang_need_string = re.findall("^.*com.fortify.sca.Phase0HigherOrder.Languages.*$",
                                       lang_string, re.MULTILINE)
         lang_my_string = lang_need_string[0]
         language = lang_my_string.split('=')[1]
-        if language not in self.language_list:
-            self.language_list.append(language)
+        if language not in language_list:
+            language_list.append(language)
 
         # Get Category Information:
         # Abstract, Explanation, Recommendation, Tips
@@ -62,43 +76,50 @@ class FortifyXMLParser(object):
 
         # All issues obtained, create a map for reference
         issue_map = {}
-        for issue in issues:
-            details = {
-                "Category": issue.find("Category").text,
-                "Folder": issue.find("Folder").text, "Kingdom": issue.find("Kingdom").text,
-                "Abstract": issue.find("Abstract").text,
-                "Friority": issue.find("Friority").text,
-                "FileName": issue.find("Primary").find("FileName").text,
-                "FilePath": issue.find("Primary").find("FilePath").text,
-                "LineStart": issue.find("Primary").find("LineStart").text,
-                "Snippet": issue.find("Primary").find("Snippet").text}
+        issue_id = "N/A"
+        try:
+            for issue in issues:
+                issue_id = issue.attrib['iid']
+                details = {
+                    "Category": issue.find("Category").text,
+                    "Folder": issue.find("Folder").text, "Kingdom": issue.find("Kingdom").text,
+                    "Abstract": issue.find("Abstract").text,
+                    "Friority": issue.find("Friority").text,
+                    "FileName": issue.find("Primary").find("FileName").text,
+                    "FilePath": issue.find("Primary").find("FilePath").text,
+                    "LineStart": issue.find("Primary").find("LineStart").text}
 
-            if issue.find("Source"):
-                source = {
-                    "FileName": issue.find("Source").find("FileName").text,
-                    "FilePath": issue.find("Source").find("FilePath").text,
-                    "LineStart": issue.find("Source").find("LineStart").text,
-                    "Snippet": issue.find("Source").find("Snippet").text}
-                details["Source"] = source
+                if issue.find("Primary").find("Snippet"):
+                    details["Snippet"] = issue.find("Primary").find("Snippet").text
+                else:
+                    details["Snippet"] = "n/a"
 
-            issue_map.update({issue.attrib['iid']: details})
+                if issue.find("Source"):
+                    source = {
+                        "FileName": issue.find("Source").find("FileName").text,
+                        "FilePath": issue.find("Source").find("FilePath").text,
+                        "LineStart": issue.find("Source").find("LineStart").text,
+                        "Snippet": issue.find("Source").find("Snippet").text}
+                    details["Source"] = source
+
+                issue_map.update({issue.attrib['iid']: details})
+        except AttributeError:
+            logger.warning("XML Parsing error on issue number: %s", issue_id)
+            raise
         # map created
 
-        self.items = []
+        items = []
         dupes = set()
         for issue_key, issue in issue_map.items():
             title = self.format_title(issue["Category"], issue["FileName"], issue["LineStart"])
             if title not in dupes:
-                self.items.append(Finding(
+                items.append(Finding(
                     title=title,
                     severity=issue["Friority"],
-                    numerical_severity=Finding.get_numerical_severity(issue["Friority"]),
                     file_path=issue['FilePath'],
                     line_number=int(issue['LineStart']),
                     line=int(issue['LineStart']),
                     static_finding=True,
-                    active=False,
-                    verified=False,
                     test=test,
                     date=find_date,
                     description=self.format_description(issue, cat_meta),
@@ -106,6 +127,7 @@ class FortifyXMLParser(object):
                     unique_id_from_tool=issue_key
                 ))
                 dupes.add(title)
+        return items
 
     def format_title(self, category, filename, line_no):
         """

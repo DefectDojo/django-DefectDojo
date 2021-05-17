@@ -54,6 +54,26 @@
     }
 },
 {
+    "model": "dojo.tagulous_product_tags",
+    "pk": 1,
+    "fields": {
+        "name": "retire",
+        "slug": "retire",
+        "count": 1,
+        "protected": false
+    }
+},
+{
+    "model": "dojo.tagulous_engagement_tags",
+    "pk": 2,
+    "fields": {
+        "name": "pci",
+        "slug": "pci",
+        "count": 1,
+        "protected": false
+    }
+},
+{
     "model": "sessions.session",
     "pk": "0fy0ogscdoq7gy7k3rsgp39zumcidfu9",
     "fields": {
@@ -502,17 +522,6 @@
     }
 },
 {
-    "model": "tastypie.apikey",
-    "pk": 1,
-    "fields": {
-        "user": [
-            "admin"
-        ],
-        "key": "1dfdfa2042567ec751f6b3fa96038b743ea6f1cc",
-        "created": "2018-08-16T01:32:30.801Z"
-    }
-},
-{
     "model": "dojo.regulation",
     "pk": 1,
     "fields": {
@@ -673,7 +682,7 @@
     "pk": 1,
     "fields": {
         "enable_deduplication": false,
-        "delete_dupulicates": false,
+        "delete_duplicates": false,
         "max_dupes": null,
         "enable_jira": false,
         "enable_jira_web_hook": false,
@@ -688,7 +697,6 @@
         "enable_mail_notifications": false,
         "mail_notifications_from": "from@example.com",
         "mail_notifications_to": "",
-        "s_finding_severity_naming": false,
         "false_positive_history": false,
         "url_prefix": "",
         "team_name": "",
@@ -1102,9 +1110,6 @@
     "fields": {
         "name": "BodgeIt",
         "description": "[Features](https://github.com/psiinon/bodgeit) and characteristics:\r\n\r\n* Easy to install - just requires java and a servlet engine, e.g. Tomcat\r\n* Self contained (no additional dependencies other than to 2 in the above line)\r\n* Easy to change on the fly - all the functionality is implemented in JSPs, so no IDE required\r\n* Cross platform\r\n* Open source\r\n* No separate db to install and configure - it uses an 'in memory' db that is automatically (re)initialized on start up",
-        "prod_manager": "Tester Jester",
-        "tech_contact": "Bob Buster",
-        "manager": "Peter Scramble",
         "product_manager": [
             "admin"
         ],
@@ -1138,6 +1143,9 @@
         "regulations": [
             13,
             1
+        ],
+        "tags": [
+            "retire"
         ]
     }
 },
@@ -1147,9 +1155,6 @@
     "fields": {
         "name": "Internal CRM App",
         "description": "* New product in development that attempts to follow all best practices",
-        "prod_manager": "Bob Builder",
-        "tech_contact": "Tester Jester",
-        "manager": null,
         "product_manager": [
             "product_manager"
         ],
@@ -1189,9 +1194,6 @@
     "fields": {
         "name": "Apple Accounting Software",
         "description": "Accounting software is typically composed of various modules, different sections dealing with particular areas of accounting. Among the most common are:\r\n\r\n**Core modules**\r\n\r\n* Accounts receivable\u2014where the company enters money received\r\n* Accounts payable\u2014where the company enters its bills and pays money it owes\r\n* General ledger\u2014the company's \"books\"\r\n* Billing\u2014where the company produces invoices to clients/customers",
-        "prod_manager": "0",
-        "tech_contact": "0",
-        "manager": "0",
         "product_manager": [
             "admin"
         ],
@@ -1222,84 +1224,6 @@
         "regulations": [
             5
         ]
-    }
-},
-{
-    "model": "dojo.scansettings",
-    "pk": 1,
-    "fields": {
-        "product": 1,
-        "addresses": "127.0.0.1",
-        "user": [
-            "admin"
-        ],
-        "date": "2018-04-13T06:28:48.661Z",
-        "frequency": "Weekly",
-        "email": "test@example.com",
-        "protocol": "UDP"
-    }
-},
-{
-    "model": "dojo.scansettings",
-    "pk": 2,
-    "fields": {
-        "product": 2,
-        "addresses": "127.0.0.1",
-        "user": [
-            "product_manager"
-        ],
-        "date": "2018-04-13T06:28:11.843Z",
-        "frequency": "Weekly",
-        "email": "test@example.com",
-        "protocol": "TCP"
-    }
-},
-{
-    "model": "dojo.scansettings",
-    "pk": 3,
-    "fields": {
-        "product": 3,
-        "addresses": "127.0.0.1",
-        "user": [
-            "admin"
-        ],
-        "date": "2018-04-13T06:28:32.767Z",
-        "frequency": "Monthly",
-        "email": "test@example.com",
-        "protocol": "TCP"
-    }
-},
-{
-    "model": "dojo.scan",
-    "pk": 2,
-    "fields": {
-        "scan_settings": 1,
-        "date": "2018-04-13T06:33:55.548Z",
-        "protocol": "TCP",
-        "status": "Pending",
-        "baseline": false
-    }
-},
-{
-    "model": "dojo.scan",
-    "pk": 3,
-    "fields": {
-        "scan_settings": 3,
-        "date": "2018-04-13T06:34:09.127Z",
-        "protocol": "SSH",
-        "status": "Pending",
-        "baseline": true
-    }
-},
-{
-    "model": "dojo.scan",
-    "pk": 4,
-    "fields": {
-        "scan_settings": 1,
-        "date": "2018-04-13T06:34:19.385Z",
-        "protocol": "UDP",
-        "status": "Pending",
-        "baseline": false
     }
 },
 {
@@ -1391,34 +1315,12 @@
     }
 },
 {
-    "model": "dojo.engagement_type",
-    "pk": 1,
-    "fields": {
-        "name": "Type 1"
-    }
-},
-{
-    "model": "dojo.engagement_type",
-    "pk": 2,
-    "fields": {
-        "name": "Type 2"
-    }
-},
-{
-    "model": "dojo.engagement_type",
-    "pk": 3,
-    "fields": {
-        "name": "Type 3"
-    }
-},
-{
     "model": "dojo.engagement",
     "pk": 1,
     "fields": {
         "name": "1st Quarter Engagement",
         "description": "test Engagement",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-12",
         "target_end": "2018-04-12",
@@ -1442,7 +1344,6 @@
         "status": "In Progress",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1462,7 +1363,6 @@
         "name": "April Monthly Engagement",
         "description": "Requested by the team for regular manual checkup by the security team.",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-12",
         "target_end": "2018-04-12",
@@ -1486,7 +1386,6 @@
         "status": "Completed",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1506,7 +1405,6 @@
         "name": "weekly engagement",
         "description": "test Engagement",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-03",
         "target_end": "2018-04-04",
@@ -1530,7 +1428,6 @@
         "status": "Completed",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1550,7 +1447,6 @@
         "name": "Static Scan",
         "description": "Initial static scan for Bodgeit.",
         "version": "v.1.2.0",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-16",
         "target_end": "2018-08-23",
@@ -1574,7 +1470,6 @@
         "status": "Completed",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1594,7 +1489,6 @@
         "name": "Quarterly PCI Scan",
         "description": "Reccuring Quarterly Scan",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-11-01",
         "target_end": "2018-11-08",
@@ -1618,7 +1512,6 @@
         "status": "Not Started",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1628,7 +1521,10 @@
         "source_code_management_server": null,
         "source_code_management_uri": null,
         "orchestration_engine": null,
-        "risk_acceptance": []
+        "risk_acceptance": [],
+        "tags": [
+            "pci"
+        ]
     }
 },
 {
@@ -1638,7 +1534,6 @@
         "name": "Ad Hoc Engagement",
         "description": null,
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-16",
         "target_end": "2018-08-16",
@@ -1660,7 +1555,6 @@
         "status": "",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1680,7 +1574,6 @@
         "name": "Initial Assessment",
         "description": "This application needs to be assesed to determine the security posture.",
         "version": "10.2.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-10-02",
         "target_end": "2018-10-09",
@@ -1704,7 +1597,6 @@
         "status": "Not Started",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1724,7 +1616,6 @@
         "name": "Multiple scanners",
         "description": "Example engagement with multiple scan types.",
         "version": "1.2.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-17",
@@ -1748,7 +1639,6 @@
         "status": "Completed",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1758,7 +1648,10 @@
         "source_code_management_server": null,
         "source_code_management_uri": null,
         "orchestration_engine": null,
-        "risk_acceptance": []
+        "risk_acceptance": [],
+        "tags": [
+            "pci"
+        ]
     }
 },
 {
@@ -1768,7 +1661,6 @@
         "name": "Manual PenTest",
         "description": "Please do a manual pentest before our next release to prod.",
         "version": "1.9.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-10-12",
         "target_end": "2018-10-15",
@@ -1792,7 +1684,6 @@
         "status": "Blocked",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -1812,7 +1703,6 @@
         "name": "CI/CD Baseline Security Test",
         "description": "",
         "version": "1.1.2",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-24",
@@ -1836,7 +1726,6 @@
         "status": "Completed",
         "progress": "other",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "CI/CD",
         "build_id": "89",
@@ -1856,7 +1745,6 @@
         "name": "AdHoc Import - Fri, 17 Aug 2018 18:20:55",
         "description": null,
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-17",
@@ -1878,7 +1766,6 @@
         "status": "In Progress",
         "progress": "threat_model",
         "tmodel_path": "none",
-        "risk_path": "none",
         "done_testing": false,
         "engagement_type": "Interactive",
         "build_id": null,
@@ -24199,15 +24086,14 @@
     "model": "dojo.risk_acceptance",
     "pk": 1,
     "fields": {
+        "name": "Simple Builtin Risk Acceptance",
         "path": "",
+        "accepted_by": null,
         "expiration_date": null,
-        "accepted_by": "",
-        "reporter": [
-            "admin"
-        ],
-        "compensating_control": "",
-        "created": "2018-08-24T14:00:56.984Z",
-        "updated": "2018-08-24T14:00:56.984Z",
+        "owner": 1,
+        "decision_details": "These findings are accepted using a simple risk acceptance without expiration date, approval document or compensating control information. Unaccept and use full risk acceptance if you need to have more control over those fields.",
+        "created": "2020-11-09T23:13:08.520Z",
+        "updated": "2020-11-09T23:13:08.520Z",
         "accepted_findings": [
             2
         ],
@@ -24229,7 +24115,7 @@
     }
 },
 {
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "pk": 2,
     "fields": {
         "url": "http://www.testjira.com",
@@ -24247,7 +24133,7 @@
     }
 },
 {
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "pk": 3,
     "fields": {
         "url": "http://www.testjira.com",
@@ -24265,7 +24151,7 @@
     }
 },
 {
-    "model": "dojo.jira_conf",
+    "model": "dojo.jira_instance",
     "pk": 4,
     "fields": {
         "url": "http://www.testjira.com",
@@ -24304,12 +24190,12 @@
     }
 },
 {
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "pk": 1,
     "fields": {
         "project_key": "key1",
         "product": 1,
-        "conf": 2,
+        "jira_instance": 2,
         "component": "",
         "push_all_issues": false,
         "enable_engagement_epic_mapping": true,
@@ -24317,12 +24203,12 @@
     }
 },
 {
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "pk": 2,
     "fields": {
         "project_key": "key2",
         "product": 2,
-        "conf": 3,
+        "jira_instance": 3,
         "component": "",
         "push_all_issues": true,
         "enable_engagement_epic_mapping": true,
@@ -24330,12 +24216,12 @@
     }
 },
 {
-    "model": "dojo.jira_pkey",
+    "model": "dojo.jira_project",
     "pk": 3,
     "fields": {
         "project_key": "key3",
         "product": 3,
-        "conf": 4,
+        "jira_instance": 4,
         "component": "",
         "push_all_issues": false,
         "enable_engagement_epic_mapping": false,
@@ -40623,56 +40509,6 @@
         "content": "Cleartext submission of password None High URL: http://localhost:8888/bodgeit/password.jsp\n\nThe page contains a form with the following action URL, which is submitted over clear-text HTTP:\n\n  * http://localhost:8888/bodgeit/password.jsp\n\nThe form contains the following password fields:\n  * password1\n  * password2\n\n\n\nURL: http://localhost:8888/bodgeit/register.jsp\n\nThe page contains a form with the following action URL, which is submitted over clear-text HTTP:\n\n  * http://localhost:8888/bodgeit/register.jsp\n\nThe form contains the following password fields:\n  * password1\n  * password2\n\n\n\nURL: http://localhost:8888/bodgeit/login.jsp\n\nThe page contains a form with the following action URL, which is submitted over clear-text HTTP:\n\n  * http://localhost:8888/bodgeit/login.jsp\n\nThe form contains the following password field:\n  * password\n\n\n\n \n\nApplications should use transport-level encryption (SSL or TLS) to protect all sensitive communications passing between the client and the server. Communications that should be protected include the login mechanism and related functionality, and any functions where sensitive data can be accessed or privileged actions can be performed. These areas should employ their own session handling mechanism, and the session tokens used should never be transmitted over unencrypted communications. If HTTP cookies are used for transmitting session tokens, then the secure flag should be set to prevent transmission over clear-text HTTP.\n Some applications transmit passwords over unencrypted connections, making them vulnerable to interception. To exploit this vulnerability, an attacker must be suitably positioned to eavesdrop on the victim's network traffic. This scenario typically occurs when a client communicates with the server over an insecure connection such as public Wi-Fi, or a corporate or home network that is shared with a compromised computer. Common defenses such as switched networks are not sufficient to prevent this. An attacker situated in the user's ISP or the application's hosting infrastructure could also perform this attack. Note that an advanced adversary could potentially target any connection made over the Internet's core infrastructure.\n\nVulnerabilities that result in the disclosure of users' passwords can result in compromises that are extremely difficult to investigate due to obscured audit trails. Even if the application itself only handles non-sensitive information, exposing passwords puts users who have re-used their password elsewhere at risk.\n None None  S1 None None None None None cef2dcb7c7787157edc70e85d5017e72d1dbca1fd80909f5d76cda85a9bdec2c None",
         "url": "",
         "meta_encoded": "{}"
-    }
-},
-{
-    "model": "tagging.tag",
-    "pk": 1,
-    "fields": {
-        "name": "retire"
-    }
-},
-{
-    "model": "tagging.tag",
-    "pk": 2,
-    "fields": {
-        "name": "pci"
-    }
-},
-{
-    "model": "tagging.taggeditem",
-    "pk": 1,
-    "fields": {
-        "tag": 1,
-        "content_type": [
-            "dojo",
-            "product"
-        ],
-        "object_id": 1
-    }
-},
-{
-    "model": "tagging.taggeditem",
-    "pk": 2,
-    "fields": {
-        "tag": 2,
-        "content_type": [
-            "dojo",
-            "engagement"
-        ],
-        "object_id": 6
-    }
-},
-{
-    "model": "tagging.taggeditem",
-    "pk": 3,
-    "fields": {
-        "tag": 2,
-        "content_type": [
-            "dojo",
-            "engagement"
-        ],
-        "object_id": 10
     }
 },
 {

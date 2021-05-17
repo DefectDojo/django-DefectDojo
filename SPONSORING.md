@@ -1,4 +1,4 @@
-On April 5th, 2018, OWASP clarified their sponsorship requirements to note that time, software, or any other quantifiable contribution can be counted towards the $1000 threshold outlined by the [OWASP Global Policy](https://www.owasp.org/index.php/Project_Sponsorship_Operational_Guidelines).
+On April 5th, 2018, OWASP clarified their sponsorship requirements to note that time, software, or any other quantifiable contribution can be counted towards the $1000 threshold outlined by the [OWASP Global Policy](https://owasp.org/www-policy/operational/project-sponsorship).
 
 Below is our sponsorship guidelines to provide further clarification specific to our project for non-monetary contributions:
 

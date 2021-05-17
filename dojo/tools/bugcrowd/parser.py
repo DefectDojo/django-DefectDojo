@@ -1,18 +1,26 @@
-import io
 import csv
 import hashlib
-from dojo.models import Finding, Endpoint
+import io
 from urllib.parse import urlparse
 
+from dojo.models import Endpoint, Finding
 
-class BugCrowdCSVParser(object):
-    def __init__(self, filename, test):
-        self.dupes = dict()
-        self.items = ()
+
+class BugCrowdParser(object):
+
+    def get_scan_types(self):
+        return ["BugCrowd Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "BugCrowd Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "BugCrowd CSV report format"
+
+    def get_findings(self, filename, test):
 
         if filename is None:
-            self.items = ()
-            return
+            return ()
 
         content = filename.read()
         if type(content) is bytes:
@@ -23,6 +31,7 @@ class BugCrowdCSVParser(object):
         for row in reader:
             csvarray.append(row)
 
+        dupes = dict()
         for row in csvarray:
             finding = Finding(test=test)
 
@@ -63,10 +72,10 @@ class BugCrowdCSVParser(object):
 
                 key = hashlib.md5((finding.title + '|' + finding.description).encode("utf-8")).hexdigest()
 
-                if key not in self.dupes:
-                    self.dupes[key] = finding
+                if key not in dupes:
+                    dupes[key] = finding
 
-        self.items = list(self.dupes.values())
+        return list(dupes.values())
 
     def description_parse(self, ret):
         items = ['impact', 'steps to reproduce:', 'steps to reproduce', 'poc']

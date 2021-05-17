@@ -1,23 +1,33 @@
-import json
 import hashlib
+import json
+
 from dojo.models import Finding
 
 
-class CCVSReportParser(object):
-
+class CCVSParser(object):
     """
     Read JSON data from CCVS compatible format and import it to DefectDojo
     """
 
-    def __init__(self, json_output, test):
-        self.items = []
+    def get_scan_types(self):
+        return ["CCVS Report"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return scan_type  # no custom label for now
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import CCVS Report vulnerabilities in JSON format."
+
+    def get_findings(self, json_output, test):
 
         if json_output is None:
-            return
+            return list()
 
         tree = self.parse_json(json_output)
         if tree:
-            self.items = [data for data in self.get_items(tree, test)]
+            return [data for data in self.get_items(tree, test)]
+        else:
+            return list()
 
     def parse_json(self, json_output):
         try:
@@ -67,8 +77,6 @@ def get_item(item_node, test):
         description=description,
         mitigation=mitigation,
         references=references,
-        active=False,
-        verified=False,
         false_p=False,
         duplicate=False,
         out_of_scope=False,
