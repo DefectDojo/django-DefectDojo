@@ -61,6 +61,10 @@ def user_has_permission(user, obj, permission):
             return obj.user == user or user_has_permission(user, obj.product, permission)
         else:
             return user_has_permission(user, obj.product, permission)
+    elif isinstance(obj, Product_Type_Group) and permission in Permissions.get_product_type_group_permissions():
+        return user_has_permission(user, obj.product_type, permission)
+    elif isinstance(obj, Product_Group) and permission in Permissions.get_product_group_permissions():
+        return user_has_permission(user, obj.product, permission)
     else:
         raise NoAuthorizationImplementedError('No authorization implemented for class {} and permission {}'.
             format(type(obj).__name__, permission))

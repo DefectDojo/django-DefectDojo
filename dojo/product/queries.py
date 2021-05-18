@@ -97,6 +97,22 @@ def get_authorized_product_members_for_user(user, permission):
     return Product_Member.objects.filter(user=user, product__in=products)
 
 
+def get_authorized_product_groups(permission):
+    user = get_current_user()
+
+    if user is None:
+        return Product_Group.objects.none()
+
+    if user.is_superuser:
+        return Product_Group.objects.all()
+
+    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+        return Product_Group.objects.all()
+
+    products = get_authorized_products(permission)
+    return Product_Group.objects.filter(product__in=products)
+
+
 def get_authorized_app_analysis(permission):
     user = get_current_user()
 

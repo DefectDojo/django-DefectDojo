@@ -19,14 +19,17 @@ from dojo.api_v2.views import \
     SonarqubeIssueViewSet, SonarqubeProductViewSet, \
     SonarqubeIssueTransitionViewSet, StubFindingsViewSet, SystemSettingsViewSet, \
     TestTypesViewSet, TestsViewSet, ToolConfigurationsViewSet, ToolProductSettingsViewSet, \
-    ToolTypesViewSet, UsersViewSet, JiraIssuesViewSet, JiraProjectViewSet, AppAnalysisViewSet
+    ToolTypesViewSet, UsersViewSet, JiraIssuesViewSet, JiraProjectViewSet, AppAnalysisViewSet, \
+    DojoGroupViewSet, ProductMemberViewSet, ProductTypeMemberViewSet, ProductGroupViewSet, \
+    ProductTypeGroupViewSet
 
 from dojo.models import \
     Development_Environment, Endpoint_Status, Endpoint, Engagement, Finding_Template, \
     Finding, JIRA_Instance, JIRA_Issue, DojoMeta, Note_Type, Notes, Product_Type, Product, Regulation, \
     Sonarqube_Issue, Sonarqube_Product, Sonarqube_Issue_Transition, \
     Stub_Finding, System_Settings, Test_Type, Test, Tool_Configuration, Tool_Product_Settings, \
-    Tool_Type, Dojo_User, JIRA_Project, App_Analysis
+    Tool_Type, Dojo_User, JIRA_Project, App_Analysis, Dojo_Group, Product_Member, Product_Type_Member, \
+    Product_Group, Product_Type_Group
 
 from dojo.api_v2.serializers import \
     DevelopmentEnvironmentSerializer, EndpointStatusSerializer, EndpointSerializer, \
@@ -36,7 +39,8 @@ from dojo.api_v2.serializers import \
     SonarqubeIssueSerializer, SonarqubeProductSerializer, SonarqubeIssueTransitionSerializer, \
     StubFindingSerializer, SystemSettingsSerializer, TestTypeSerializer, TestSerializer, ToolConfigurationSerializer, \
     ToolProductSettingsSerializer, ToolTypeSerializer, UserSerializer, NoteSerializer, ProductTypeSerializer, \
-    AppAnalysisSerializer
+    AppAnalysisSerializer, DojoGroupSerializer, ProductMemberSerializer, ProductTypeMemberSerializer, \
+    ProductGroupSerializer, ProductTypeGroupSerializer
 
 SWAGGER_SCHEMA_GENERATOR = OpenAPISchemaGenerator(Info("defectdojo", "v2"))
 BASE_API_URL = "/api/v2"
@@ -316,6 +320,15 @@ class DevelopmentEnvironmentTest(BaseClass.SchemaTest):
         self.serializer = DevelopmentEnvironmentSerializer
 
 
+class DojoUserTest(BaseClass.SchemaTest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.viewname = "dojo_groups"
+        self.viewset = DojoGroupViewSet
+        self.model = Dojo_Group
+        self.serializer = DojoGroupSerializer
+
+
 class EndpointStatusTest(BaseClass.SchemaTest):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -541,6 +554,24 @@ class ProductTypeTest(BaseClass.SchemaTest):
         }
 
 
+class ProductTypeMemberTest(BaseClass.SchemaTest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.viewname = "product_type_members"
+        self.viewset = ProductTypeMemberViewSet
+        self.model = Product_Type_Member
+        self.serializer = ProductTypeMemberSerializer
+
+
+class ProductTypeGroupTest(BaseClass.SchemaTest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.viewname = "product_type_groups"
+        self.viewset = ProductTypeGroupViewSet
+        self.model = Product_Type_Group
+        self.serializer = ProductTypeGroupSerializer
+
+
 class ProductTest(BaseClass.SchemaTest):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -571,6 +602,28 @@ class ProductTest(BaseClass.SchemaTest):
     @testIsBroken
     def test_post_endpoint(self):
         super().test_post_endpoint()
+
+
+class ProductMemberTest(BaseClass.SchemaTest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.viewname = "product_members"
+        self.viewset = ProductMemberViewSet
+        self.model = Product_Member
+        self.serializer = ProductMemberSerializer
+
+    @testIsBroken
+    def test_post_endpoint(self):
+        super().test_post_endpoint()
+
+
+class ProductGroupTest(BaseClass.SchemaTest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.viewname = "product_groups"
+        self.viewset = ProductGroupViewSet
+        self.model = Product_Group
+        self.serializer = ProductGroupSerializer
 
 
 class RegulationTest(BaseClass.SchemaTest):

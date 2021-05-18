@@ -321,9 +321,18 @@ class UserStubSerializer(serializers.ModelSerializer):
 
 
 class DojoGroupSerializer(serializers.ModelSerializer):
+    users = UserStubSerializer(many=True, read_only=True)
+
     class Meta:
         model = Dojo_Group
         fields = '__all__'
+
+
+class AddUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('id', 'username')
 
 
 class NoteHistorySerializer(serializers.ModelSerializer):
@@ -409,6 +418,17 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         model = Product_Group
         fields = '__all__'
 
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            members = Product_Group.objects.filter(product=data.get('product'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Product_Group already exists')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add groups as owners')
+
+        return data
+
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
@@ -471,6 +491,17 @@ class ProductTypeGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type_Group
         fields = '__all__'
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            members = Product_Type_Group.objects.filter(product_type=data.get('product_type'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Product_Type_Group already exists')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add groups as owners')
+
+        return data
 
 
 class ProductTypeSerializer(serializers.ModelSerializer):
