@@ -54,6 +54,24 @@
     }
   },
   {
+    "pk": 4,
+    "model": "auth.user",
+    "fields": {
+      "username": "user3",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
     "pk": "2dqr18yqu9mzb87abk0okid75w2clakl",
     "model": "sessions.session",
     "fields": {
@@ -340,6 +358,69 @@
         3
       ],
       "description": "test product"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 1,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 2,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 1,
+      "user": 2,
+      "role": 4
+    }
+  },
+  {
+    "pk": 3,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 1,
+      "user": 3,
+      "role": 4
+    }
+  },
+  {
+    "pk": 4,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 2,
+      "user": 2,
+      "role": 4
+    }
+  },
+  {
+    "pk": 5,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 2,
+      "user": 3,
+      "role": 4
+    }
+  },
+  {
+    "pk": 6,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 3,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 7,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 3,
+      "user": 3,
+      "role": 4
     }
   },
   {
@@ -1531,8 +1612,8 @@
     "model": "dojo.jira_instance",
     "fields": {
         "url": "https://defectdojo.atlassian.net/",
-        "username": "YOUR USERNAME HERE",
-        "password": "YOU API TOKEN HERE",
+        "username": "YOUR USERNAME",
+        "password": "YOU API TOKEN",
         "default_issue_type": "Task",
         "epic_name_id": 10011,
         "open_status_key": 11,

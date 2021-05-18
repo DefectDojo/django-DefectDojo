@@ -288,6 +288,21 @@ class System_Settings(models.Model):
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text="Default expiry period for risk acceptance form.")
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name="Risk acceptance expiration heads up days", help_text="Notify X days before risk acceptance expires. Leave empty to disable.")
+    enable_credentials = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable credentials',
+        help_text="With this setting turned off, credentials will be disabled in the user interface.")
+    enable_questionnaires = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable questionnaires',
+        help_text="With this setting turned off, questionnaires will be disabled in the user interface.")
+    enable_checklists = models.BooleanField(
+        default=True,
+        blank=False,
+        verbose_name='Enable checklists',
+        help_text="With this setting turned off, checklists will be disabled in the user interface.")
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -366,6 +381,12 @@ class UserContactInfo(models.Model):
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
+class Dojo_Group(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True)
+    users = models.ManyToManyField(Dojo_User, blank=True)
+
+
 class Contact(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -436,7 +457,8 @@ class Product_Type(models.Model):
     updated = models.DateTimeField(auto_now=True, null=True)
     created = models.DateTimeField(auto_now_add=True, null=True)
     authorized_users = models.ManyToManyField(User, blank=True)
-    members = models.ManyToManyField(User, through='Product_Type_Member', related_name='prod_type_members', blank=True)
+    members = models.ManyToManyField(Dojo_User, through='Product_Type_Member', related_name='prod_type_members', blank=True)
+    authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Type_Group', related_name='product_type_groups', blank=True)
 
     @cached_property
     def critical_present(self):
@@ -637,7 +659,8 @@ class Product(models.Model):
     updated = models.DateTimeField(editable=False, null=True, blank=True)
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
-    members = models.ManyToManyField(User, through='Product_Member', related_name='product_members', blank=True)
+    members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
+    authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Group', related_name='product_groups', blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     # Metadata
@@ -784,13 +807,25 @@ class Product(models.Model):
 
 class Product_Member(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    role = models.IntegerField(default=0)
+
+
+class Product_Group(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
     role = models.IntegerField(default=0)
 
 
 class Product_Type_Member(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    role = models.IntegerField(default=0)
+
+
+class Product_Type_Group(models.Model):
+    product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
     role = models.IntegerField(default=0)
 
 
@@ -1928,10 +1963,7 @@ class Finding(models.Model):
     @staticmethod
     def get_severity(num_severity):
         severities = {0: 'Info', 1: 'Low', 2: 'Medium', 3: 'High', 4: 'Critical'}
-        logger.debug(severities.keys())
-        logger.debug(num_severity in severities.keys())
         if num_severity in severities.keys():
-            logger.debug('returning severity: %s', severities[num_severity])
             return severities[num_severity]
 
         return None
@@ -2038,7 +2070,9 @@ class Finding(models.Model):
 
     @cached_property
     def finding_group(self):
-        return self.finding_group_set.all().first()
+        group = self.finding_group_set.all().first()
+        logger.debug('finding.finding_group: %s', group)
+        return group
 
     @cached_property
     def has_jira_group_issue(self):
@@ -2279,6 +2313,9 @@ class Stub_Finding(models.Model):
 
 
 class Finding_Group(TimeStampedModel):
+
+    GROUP_BY_OPTIONS = [('component_name', 'Component Name'), ('component_name+component_version', 'Component Name + Version'), ('file_path', 'File path')]
+
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     findings = models.ManyToManyField(Finding)
@@ -2297,7 +2334,6 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
         max_number_severity = max([Finding.get_number_severity(find.severity) for find in self.findings.all()])
-        logger.debug('MAX:%s', max_number_severity)
         return Finding.get_severity(max_number_severity)
 
     @cached_property
@@ -2321,7 +2357,7 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        return min([find.sla_days_remaining() for find in self.findings.all()])
+        return min([find.sla_days_remaining() for find in self.findings.all() if find.sla_days_remaining()], default=None)
 
     def sla_days_remaining(self):
         return self.sla_days_remaining_internal
@@ -2330,7 +2366,7 @@ class Finding_Group(TimeStampedModel):
         if not self.findings.all():
             return None
 
-        return min([find.sla_deadline() for find in self.findings.all()])
+        return min([find.sla_deadline() for find in self.findings.all() if find.sla_deadline()], default=None)
 
     # def cves(self):
     #     return ', '.join([find.cve for find in self.findings.all() if find.cve is not None])
@@ -2352,7 +2388,7 @@ class Finding_Group(TimeStampedModel):
         return all([find.mitigated is not None for find in self.findings.all()])
 
     def get_sla_start_date(self):
-        return min([find.sla_deadline() for find in self.findings.all()])
+        return min([find.get_sla_start_date() for find in self.findings.all()])
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -2689,7 +2725,6 @@ class JIRA_Instance(models.Model):
         return self.configuration_name + " | " + self.url + " | " + self.username
 
     def get_priority(self, status):
-        logger.debug('get_priority for: %s', status)
         if status == 'Info':
             return self.info_mapping_severity
         elif status == 'Low':

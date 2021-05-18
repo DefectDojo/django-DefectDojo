@@ -60,6 +60,12 @@ languageName ="English"
 weight = 1
 
 [[menu.main]]
+    name = "Homepage"
+    weight = 30
+    pre = "<i class='fas fa-home'></i>"
+    url = "https://www.defectdojo.org/"
+
+[[menu.main]]
     name = "Demo Site"
     weight = 40
     pre = "<i class='fas fa-camera'></i>"
@@ -113,16 +119,16 @@ version = "0.0"
 url_latest_version = "https://example.com"
 
 # Repository configuration (URLs for in-page links to opening issues and suggesting changes)
-# github_repo = "https://github.com/google/docsy-example"
+github_repo = "https://github.com/DefectDojo/django-DefectDojo"
 # An optional link to a related project repo. For example, the sibling repository where your product code lives.
 # github_project_repo = "https://github.com/google/docsy"
 
 # Specify a value here if your content directory is not in your repo's root directory
-# github_subdir = ""
+github_subdir = "docs"
 
 # Uncomment this if you have a newer GitHub repo with "main" as the default branch,
 # or specify a new value if you want to reference another branch in your GitHub links
-# github_branch= "main"
+github_branch= "dev"
 
 # Google Custom Search Engine ID. Remove or comment out to disable search.
 # gcs_engine_id = "d72aa9b2712488cc3"
@@ -167,6 +173,10 @@ enable = false
 
 [params.links]
 # End user relevant links. These will show up on left side of footer and in the community page if you have one.
+[[params.links.user]]
+	name ="Homepage"
+	url = "https://www.defectdojo.org/"
+	icon = "fas fa-home"
 [[params.links.user]]
 	name ="Twitter"
 	url = "https://twitter.com/defectdojo"

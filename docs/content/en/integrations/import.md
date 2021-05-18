@@ -1,12 +1,9 @@
 ---
-title: "Import Reports"
-date: 2021-02-02T20:46:28+01:00
+title: "Import scan reports"
+description: "DefectDojo has the ability to import scan reports from a large number of security tools."
 draft: false
 weight: 1
 ---
-
-
-DefectDojo has the ability to import reports from other security tools.
 
 ## Security Tools
 
@@ -208,6 +205,11 @@ imported in JSON format. See here for more info on this JSON format:
 Import of JSON report from
 <https://github.com/Santandersecurityresearch/DrHeader>
 
+### Dockle Report
+
+Import JSON container image linter reports
+<https://github.com/goodwithtech/dockle>
+
 ### ESLint
 
 ESLint Json report format (-f json)
@@ -375,6 +377,10 @@ Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan.
 ### kube-bench Scanner
 
 Import JSON reports of Kubernetes CIS benchmark scans.
+
+### KICS Scanner
+
+Import of JSON report from <https://github.com/Checkmarx/kics>
 
 ### Microfocus Webinspect Scanner
 

@@ -160,7 +160,7 @@ def add_to_finding_group(finding_group, finds):
 def remove_from_finding_group(finds):
     removed = 0
     skipped = 0
-    affected_groups = []
+    affected_groups = set()
     for find in finds:
         groups = find.finding_group_set.all()
         if not groups:
@@ -169,11 +169,77 @@ def remove_from_finding_group(finds):
 
         for group in find.finding_group_set.all():
             group.findings.remove(find)
-            affected_groups.append(group)
+            affected_groups.add(group)
 
         removed += 1
 
     return affected_groups, removed, skipped
+
+
+def update_finding_group(finding, finding_group):
+    # finding_group = Finding_Group.objects.get(id=group)
+    if finding_group is not None:
+        if finding_group != finding.finding_group:
+            if finding.finding_group:
+                logger.debug('removing finding %d from finding_group %s', finding.id, finding.finding_group)
+                finding.finding_group.findings.remove(finding)
+            logger.debug('adding finding %d to finding_group %s', finding.id, finding_group)
+            finding_group.findings.add(finding)
+    else:
+        if finding.finding_group:
+            logger.debug('removing finding %d from finding_group %s', finding.id, finding.finding_group)
+            finding.finding_group.findings.remove(finding)
+
+
+def get_group_by_group_name(finding, finding_group_by_option):
+    if finding_group_by_option == 'component_name':
+        group_name = finding.component_name if finding.component_name else 'None'
+    elif finding_group_by_option == 'component_name+component_version':
+        group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
+        (finding.component_version if finding.component_version else 'None'))
+    elif finding_group_by_option == 'file_path':
+        group_name = 'Filepath %s' % (finding.file_path if finding.file_path else 'None')
+    else:
+        raise ValueError("Invalid group_by option %s" % finding_group_by_option)
+
+    return 'Findings in: %s' % group_name
+
+
+def group_findings_by(finds, finding_group_by_option):
+    grouped = 0
+    groups_created = 0
+    groups_existing = 0
+    skipped = 0
+    affected_groups = set()
+    for find in finds:
+        if find.finding_group is not None:
+            skipped += 1
+            continue
+
+        group_name = get_group_by_group_name(find, finding_group_by_option)
+        finding_group = Finding_Group.objects.filter(name=group_name).first()
+        if not finding_group:
+            finding_group, added, skipped = create_finding_group([find], group_name)
+            groups_created += 1
+            grouped += added
+            skipped += skipped
+        else:
+            add_to_finding_group(finding_group, [find])
+            groups_existing += 1
+            grouped += 1
+
+        affected_groups.add(finding_group)
+
+    return affected_groups, grouped, skipped, groups_created
+
+
+def add_finding_to_auto_group(finding, group_by):
+    test = finding.test
+    name = get_group_by_group_name(finding, group_by)
+    finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=get_current_user(), name=name)
+    if created:
+        logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
+    finding_group.findings.add(finding)
 
 
 @dojo_model_to_id
@@ -219,7 +285,14 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
     if push_to_jira:
         logger.debug('pushing finding %s to jira from finding.save()', finding.pk)
         import dojo.jira_link.helper as jira_helper
-        jira_helper.push_to_jira(finding)
+
+        # current approach is that whenever a finding is in a group, the group will be pushed to JIRA
+        # based on feedback we could introduct another push_group_to_jira boolean everywhere
+        # but what about the push_all boolean? Let's see how this works for now and get some feedback.
+        if finding.has_jira_issue or not finding.finding_group:
+            jira_helper.push_to_jira(finding)
+        elif finding.finding_group:
+            jira_helper.push_to_jira(finding.finding_group)
 
 
 @receiver(pre_delete, sender=Finding)

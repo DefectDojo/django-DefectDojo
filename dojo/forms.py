@@ -432,8 +432,17 @@ class ImportScanForm(forms.Form):
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
 
+    if settings.FEATURE_FINDING_GROUPS:
+        group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
     def __init__(self, *args, **kwargs):
         super(ImportScanForm, self).__init__(*args, **kwargs)
+
+        # couldn't find a cleaner way to add empty default
+        if 'group_by' in self.fields:
+            choices = self.fields['group_by'].choices
+            choices.insert(0, ('', '---------'))
+            self.fields['group_by'].choices = choices
 
     def clean(self):
         cleaned_data = super().clean()
@@ -482,12 +491,21 @@ class ReImportScanForm(forms.Form):
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
 
+    if settings.FEATURE_FINDING_GROUPS:
+        group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
+
     def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
         self.scan_type = None
         if test:
             self.scan_type = test.test_type.name
             self.fields['tags'].initial = test.tags.all()
+
+        # couldn't find a cleaner way to add empty default
+        if 'group_by' in self.fields:
+            choices = self.fields['group_by'].choices
+            choices.insert(0, ('', '---------'))
+            self.fields['group_by'].choices = choices
 
     def clean(self):
         cleaned_data = super().clean()
@@ -995,6 +1013,7 @@ class SplitDateTimeField(forms.MultiValueField):
 
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
+    group = forms.ModelChoiceField(required=False, queryset=Finding_Group.objects.none(), help_text='The Finding Group to which this finding belongs, leave empty to remove the finding from the group. Groups can only be created via Bulk Edit for now.')
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
@@ -1023,7 +1042,7 @@ class FindingForm(forms.ModelForm):
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
                    'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
@@ -1070,6 +1089,12 @@ class FindingForm(forms.ModelForm):
         else:
             del self.fields['mitigated']
             del self.fields['mitigated_by']
+
+        if not settings.FEATURE_FINDING_GROUPS or not hasattr(self.instance, 'test'):
+            del self.fields['group']
+        else:
+            self.fields['group'].queryset = self.instance.test.finding_group_set.all()
+            self.fields['group'].initial = self.instance.finding_group
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
@@ -1209,6 +1234,8 @@ class FindingBulkUpdateForm(forms.ModelForm):
     finding_group_add = forms.BooleanField(required=False)
     add_to_finding_group = forms.BooleanField(required=False)
     finding_group_remove = forms.BooleanField(required=False)
+    finding_group_by = forms.BooleanField(required=False)
+    finding_group_by_option = forms.CharField(required=False)
 
     push_to_jira = forms.BooleanField(required=False)
     # unlink_from_jira = forms.BooleanField(required=False)
@@ -2282,7 +2309,11 @@ class JIRAFindingForm(forms.Form):
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
-        self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
+        if settings.FEATURE_FINDING_GROUPS:
+            self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one. If this finding is part of a Finding Group, the group will pushed instead of the finding."
+        else:
+            self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
+
         self.fields['push_to_jira'].label = "Push to JIRA"
         if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
@@ -2297,8 +2328,10 @@ class JIRAFindingForm(forms.Form):
             if hasattr(self.instance, 'has_jira_issue') and self.instance.has_jira_issue:
                 self.initial['jira_issue'] = self.instance.jira_issue.jira_key
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
-
-        self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
+        if settings.FEATURE_FINDING_GROUPS:
+            self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding, or the group this finding is in.'})
+        else:
+            self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding.'})
 
         if self.instance and self.instance.has_jira_group_issue:
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
