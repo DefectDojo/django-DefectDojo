@@ -1,0 +1,76 @@
+import json
+import hashlib
+from dojo.models import Finding
+
+
+class TFSecParser(object):
+    """
+    A class that can be used to parse the tfsec JSON report file
+    """
+
+    # table to match tfsec severity to DefectDojo severity
+    SEVERITY = {
+        "ERROR": "High",
+        "WARNING": "Medium",
+        "INFO": "Info",
+    }
+
+    def get_scan_types(self):
+        return ["TFSec Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "TFSec Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return "Import JSON output for KICS scan report."
+
+    def get_findings(self, filename, test):
+        data = json.load(filename)
+        dupes = {}
+        if data.get('results'):
+            for item in data['results']:
+                rule_id = item.get('rule_id')
+                rule_description = item.get('rule_description')
+                rule_provider = item.get('rule_provider')
+                url = item.get('link')
+                file = item.get('location').get('filename')
+                start_line = item.get('location').get('start_line')
+                end_line = item.get('location').get('end_line')
+                description = item.get('description')
+                impact = item.get('impact')
+                resolution = item.get('resolution')
+                if item.get('passed') == False:
+                    active = True
+                else:
+                    active = False
+                if item.get('severity') in self.SEVERITY:
+                    severity = self.SEVERITY[item.get('severity')]
+                else:
+                    severity = "Low"
+
+                dupe_key = hashlib.sha256(
+                    (rule_provider + rule_id + file + str(start_line) + str(end_line)).encode('utf-8')
+                ).hexdigest()
+
+                if dupe_key in dupes:
+                    finding = dupes[dupe_key]
+                    finding.nb_occurences += 1
+                else:
+                    finding = Finding(
+                        title=f"{rule_description}",
+                        test=test,
+                        severity=severity,
+                        description=description,
+                        url=url,
+                        active=active,
+                        mitigation=resolution,
+                        impact=impact,
+                        file_path=file,
+                        line=start_line,
+                        component_name=rule_provider,
+                        vuln_id_from_tool=rule_id,
+                        nb_occurences=1,
+                    )
+                    dupes[dupe_key] = finding
+        return list(dupes.values())
+
