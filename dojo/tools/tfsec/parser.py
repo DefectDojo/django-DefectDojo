@@ -39,7 +39,7 @@ class TFSecParser(object):
                 description = item.get('description')
                 impact = item.get('impact')
                 resolution = item.get('resolution')
-                if item.get('passed') == False:
+                if item.get('passed') is False:
                     active = True
                 else:
                     active = False
@@ -73,4 +73,3 @@ class TFSecParser(object):
                     )
                     dupes[dupe_key] = finding
         return list(dupes.values())
-
