@@ -59,6 +59,21 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual(101, len(findings))
         testfile.close()
 
+    def test_scb_parser_with_many_vuln_has_many_findings_kubehunter(self):
+        testfile = open(
+            "dojo/unittests/scans/securecodebox/scb_many_vul_kubehunter.json")
+        parser = SecureCodeBoxParser()
+        findings = parser.get_findings(testfile, self.get_test())
+        self.assertEqual(findings[0].unsaved_endpoints[0].host, "10.1.0.1")
+        self.assertEqual(findings[0].unsaved_endpoints[0].port, None)
+        self.assertEqual(findings[0].unsaved_endpoints[0].path, None)
+        self.assertEqual(findings[0].unsaved_endpoints[0].protocol, "tcp")
+        self.assertEqual(findings[3].unsaved_endpoints[0].host, "10.1.0.1")
+        self.assertEqual(findings[3].unsaved_endpoints[0].port, 10250)
+        self.assertEqual(findings[3].unsaved_endpoints[0].path, None)
+        self.assertEqual(findings[3].unsaved_endpoints[0].protocol, "tcp")
+        testfile.close()
+
     def test_scb_parser_handles_multiple_scan_types(self):
         # check that findings from multiple scanners can be parsed
         # includes wps, ssh and nikto scan

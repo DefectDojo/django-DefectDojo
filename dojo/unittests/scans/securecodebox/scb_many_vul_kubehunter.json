@@ -1,0 +1,220 @@
+[
+  {
+    "name": "Read access to pod's service account token",
+    "description": " Accessing the pod service account token gives an attacker the option to use the server API ",
+    "location": "tcp://10.1.0.1",
+    "severity": "LOW",
+    "category": "Access Risk",
+    "reference": {
+      "id": "KHV050",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV050"
+    },
+    "attributes": {
+      "evidence": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkxuOE9ZaGt1SFFabmwzN3ZEYlg1R2ZqX25VVWtnWUlnU0VOdExBbWE4VFEifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Imx1cmNoZXItdG9rZW4tdjI4cWIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoibHVyY2hlciIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjIzMTg2YTI5LTY0NDQtNGI3Ny1hZjA1LTY5YzcyYWViZWYwZCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0Omx1cmNoZXIifQ.IeiByhB-g3W6Zzr4_cEU2sdfyAHVwgnKn-apu8YVkS9886zSeg_BB4F-KsljFApt8gZA4gzLEMuDTEubURkD-omaWw6_eHkV_SfIiD69rvLFC-wTtLLxQijrfBa1ZJ6PxI1kVnykaWMnmBUbkqaK-xsnhw8_pk536qWjwEFUyf6PUUg1wzk_IpEQAY8paDzB1Od2eoE18NbXUFZYllsqKZly59jvsjwPRRHk8yYr3eQW6AyxBezOhpY9qI3kooKY2_mzMXAiyrcmb-apucQabMuDfVaFF7zR0OQ-1wR_hwH-ZfLZXjf9S0Im8_Hf0WLPw60iWp5d9g_kdKuysPlJGg",
+      "kubeHunterRule": "Access Secrets"
+    },
+    "id": "df9afbb5-f0c4-475b-a0e5-e3635c55917a"
+  },
+  {
+    "name": "CAP_NET_RAW Enabled",
+    "description": "CAP_NET_RAW is enabled by default for pods.\n    If an attacker manages to compromise a pod,\n    they could potentially take advantage of this capability to perform network\n    attacks on other pods running on the same node",
+    "location": "tcp://10.1.0.1",
+    "severity": "LOW",
+    "category": "Access Risk",
+    "reference": {},
+    "attributes": {
+      "evidence": "",
+      "kubeHunterRule": "Pod Capabilities Hunter"
+    },
+    "id": "341ad0c8-0f3b-47ff-9b89-83d4a7e121f7"
+  },
+  {
+    "name": "Access to pod's secrets",
+    "description": " Accessing the pod's secrets within a compromised pod might disclose valuable data to a potential attacker",
+    "location": "tcp://10.1.0.1",
+    "severity": "LOW",
+    "category": "Access Risk",
+    "reference": {},
+    "attributes": {
+      "evidence": "['/var/run/secrets/kubernetes.io/serviceaccount/token', '/var/run/secrets/kubernetes.io/serviceaccount/namespace', '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt', '/var/run/secrets/kubernetes.io/serviceaccount/..2021_05_17_21_58_54.448582170/token', '/var/run/secrets/kubernetes.io/serviceaccount/..2021_05_17_21_58_54.448582170/namespace', '/var/run/secrets/kubernetes.io/serviceaccount/..2021_05_17_21_58_54.448582170/ca.crt']",
+      "kubeHunterRule": "Access Secrets"
+    },
+    "id": "eb0c75cf-beef-4fd8-b2ed-6e46a5afa1bc"
+  },
+  {
+    "name": "Exposed Pods",
+    "description": "An attacker could view sensitive information about pods that are\n    bound to a Node using the /pods endpoint",
+    "location": "tcp://10.1.0.1:10250",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV052",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV052"
+    },
+    "attributes": {
+      "evidence": "count: 20",
+      "kubeHunterRule": "Kubelet Secure Ports Hunter"
+    },
+    "id": "e2005058-6859-4f78-b2a3-128ff134e81b"
+  },
+  {
+    "name": "Exposed Running Pods",
+    "description": "Outputs a list of currently running pods,\n    and some of their metadata, which can reveal sensitive information",
+    "location": "tcp://10.1.0.1:10250",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV038",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV038"
+    },
+    "attributes": {
+      "evidence": "20 running pods",
+      "kubeHunterRule": "Kubelet Secure Ports Hunter"
+    },
+    "id": "247a97d9-5677-47cb-a455-75d177491e98"
+  },
+  {
+    "name": "Exposed Kubelet Cmdline",
+    "description": "Commandline flags that were passed to the kubelet can be obtained from the pprof endpoints",
+    "location": "tcp://10.1.0.1:10250",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV046",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV046"
+    },
+    "attributes": {
+      "evidence": "cmdline: kubelet\u0000--kubeconfig=/etc/kubernetes/kubelet.conf\u0000--config\u0000/etc/kubeadm/kubelet.yaml\u0000--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf\u0000--network-plugin=cni\u0000--cni-conf-dir=/etc/cni/net.d\u0000--cni-bin-dir=/var/lib/cni-plugins/bin\u0000--kube-reserved-cgroup=podruntime\u0000--system-reserved-cgroup=systemreserved\u0000--cgroup-root=kubepods\u0000--hostname-override=docker-desktop",
+      "kubeHunterRule": "Kubelet Secure Ports Hunter"
+    },
+    "id": "6cfb4829-cc0d-4802-a72a-51a1c77bd44e"
+  },
+  {
+    "name": "Exposed Run Inside Container",
+    "description": "An attacker could run an arbitrary command inside a container",
+    "location": "tcp://10.1.0.1:10250",
+    "severity": "HIGH",
+    "category": "Remote Code Execution",
+    "reference": {
+      "id": "KHV040",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV040"
+    },
+    "attributes": {
+      "evidence": "",
+      "kubeHunterRule": "Kubelet Secure Ports Hunter"
+    },
+    "id": "86d78a65-38ad-4825-bfce-f17dfe6937f7"
+  },
+  {
+    "name": "Exposed System Logs",
+    "description": "System logs are exposed from the /logs endpoint on the kubelet",
+    "location": "tcp://10.1.0.1:10250",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV045",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV045"
+    },
+    "attributes": {
+      "evidence": "",
+      "kubeHunterRule": "Kubelet Secure Ports Hunter"
+    },
+    "id": "7e28f6ec-cc1f-4513-adaa-67520e775b7e"
+  },
+  {
+    "name": "K8s Version Disclosure",
+    "description": "The kubernetes version could be obtained from the /version endpoint ",
+    "location": "tcp://10.96.0.1:443",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV002",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV002"
+    },
+    "attributes": {
+      "evidence": "v1.19.7",
+      "kubeHunterRule": "Api Version Hunter"
+    },
+    "id": "eb4571b7-7354-4633-88b3-fcaaa18d40d3"
+  },
+  {
+    "name": "Access to API using service account token",
+    "description": "The API Server port is accessible.\n    Depending on your RBAC settings this could expose access to or control of your cluster.",
+    "location": "tcp://10.96.0.1:443",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV005",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV005"
+    },
+    "attributes": {
+      "evidence": "b'{\"kind\":\"APIVersions\",\"versions\":[\"v1\"],\"serverAddressByClientCIDRs\":[{\"clientCIDR\":\"0.0.0.0/0\",\"serverAddress\":\"192.168.65.4:6443\"}]}\\n'",
+      "kubeHunterRule": "API Server Hunter"
+    },
+    "id": "0d08c266-e4be-4c73-8d86-b4a5a033c882"
+  },
+  {
+    "name": "Listing namespaces using default service account token",
+    "description": " Accessing namespaces might give an attacker valuable information ",
+    "location": "tcp://10.96.0.1:443",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV007",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV007"
+    },
+    "attributes": {
+      "evidence": "['default', 'kube-node-lease', 'kube-public', 'kube-system', 'kubernetes-dashboard', 'securecodebox-system']",
+      "kubeHunterRule": "API Server Hunter"
+    },
+    "id": "49957a01-e63c-4514-8143-d14943a45179"
+  },
+  {
+    "name": "Listing roles using default service account token",
+    "description": " Accessing roles might give an attacker valuable information ",
+    "location": "tcp://10.96.0.1:443",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV007",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV007"
+    },
+    "attributes": {
+      "evidence": "['kubeaudit', 'lurcher', 'parser', 'scan-completion-hook', 'kubeadm:bootstrap-signer-clusterinfo', 'system:controller:bootstrap-signer', 'extension-apiserver-authentication-reader', 'kube-proxy', 'kubeadm:kubelet-config-1.19', 'kubeadm:nodes-kubeadm-config', 'system::leader-locking-kube-controller-manager', 'system::leader-locking-kube-scheduler', 'system:controller:bootstrap-signer', 'system:controller:cloud-provider', 'system:controller:token-cleaner', 'kubernetes-dashboard', 'leader-election-role', 'securecodebox-operator-minio-update-prometheus-secret']",
+      "kubeHunterRule": "API Server Hunter"
+    },
+    "id": "95ae4062-31fa-405a-b68d-ce07f8f0f5ff"
+  },
+  {
+    "name": "Listing cluster roles using default service account token",
+    "description": " Accessing cluster roles might give an attacker valuable information ",
+    "location": "tcp://10.96.0.1:443",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV007",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV007"
+    },
+    "attributes": {
+      "evidence": "['admin', 'cluster-admin', 'edit', 'kubeadm:get-nodes', 'kubernetes-dashboard', 'manager-role', 'metrics-reader', 'parsedefinition-editor-role', 'parsedefinition-viewer-role', 'proxy-role', 'scan-editor-role', 'scan-viewer-role', 'scantype-editor-role', 'scantype-viewer-role', 'scheduledscan-editor-role', 'scheduledscan-viewer-role', 'system:aggregate-to-admin', 'system:aggregate-to-edit', 'system:aggregate-to-view', 'system:auth-delegator', 'system:basic-user', 'system:certificates.k8s.io:certificatesigningrequests:nodeclient', 'system:certificates.k8s.io:certificatesigningrequests:selfnodeclient', 'system:certificates.k8s.io:kube-apiserver-client-approver', 'system:certificates.k8s.io:kube-apiserver-client-kubelet-approver', 'system:certificates.k8s.io:kubelet-serving-approver', 'system:certificates.k8s.io:legacy-unknown-approver', 'system:controller:attachdetach-controller', 'system:controller:certificate-controller', 'system:controller:clusterrole-aggregation-controller', 'system:controller:cronjob-controller', 'system:controller:daemon-set-controller', 'system:controller:deployment-controller', 'system:controller:disruption-controller', 'system:controller:endpoint-controller', 'system:controller:endpointslice-controller', 'system:controller:endpointslicemirroring-controller', 'system:controller:expand-controller', 'system:controller:generic-garbage-collector', 'system:controller:horizontal-pod-autoscaler', 'system:controller:job-controller', 'system:controller:namespace-controller', 'system:controller:node-controller', 'system:controller:persistent-volume-binder', 'system:controller:pod-garbage-collector', 'system:controller:pv-protection-controller', 'system:controller:pvc-protection-controller', 'system:controller:replicaset-controller', 'system:controller:replication-controller', 'system:controller:resourcequota-controller', 'system:controller:route-controller', 'system:controller:service-account-controller', 'system:controller:service-controller', 'system:controller:statefulset-controller', 'system:controller:ttl-controller', 'system:coredns', 'system:discovery', 'system:heapster', 'system:kube-aggregator', 'system:kube-controller-manager', 'system:kube-dns', 'system:kube-scheduler', 'system:kubelet-api-admin', 'system:node', 'system:node-bootstrapper', 'system:node-problem-detector', 'system:node-proxier', 'system:persistent-volume-provisioner', 'system:public-info-viewer', 'system:volume-scheduler', 'view', 'vpnkit-controller']",
+      "kubeHunterRule": "API Server Hunter"
+    },
+    "id": "29b3bd3d-6d36-4ef2-85fa-044cb2318b46"
+  },
+  {
+    "name": "Listing pods using default service account token",
+    "description": " Accessing pods might give an attacker valuable information",
+    "location": "tcp://10.96.0.1:443",
+    "severity": "MEDIUM",
+    "category": "Information Disclosure",
+    "reference": {
+      "id": "KHV007",
+      "source": "https://aquasecurity.github.io/kube-hunter/kb/KHV007"
+    },
+    "attributes": {
+      "evidence": "[{'name': b'bodgeit-98745bbc-t757j', 'namespace': b'default'}, {'name': b'dummy-ssh-76979d9dc6-v7vtc', 'namespace': b'default'}, {'name': b'juice-shop-7874568448-vx4vl', 'namespace': b'default'}, {'name': b'old-wordpress-55f5dc469f-nsft5', 'namespace': b'default'}, {'name': b'old-wordpress-86d87d4674-g8ftr', 'namespace': b'default'}, {'name': b'parse-kubeaudit-juiceshop-vgc7j-cmvmf', 'namespace': b'default'}, {'name': b'scan-kube-hunter-in-cluster-n8xd6-kwkdb', 'namespace': b'default'}, {'name': b'scan-kubeaudit-juiceshop-22qlm-4jjxp', 'namespace': b'default'}, {'name': b'swagger-petstore-6b4778b85c-kgmjn', 'namespace': b'default'}, {'name': b'coredns-f9fd979d6-5mx48', 'namespace': b'kube-system'}, {'name': b'coredns-f9fd979d6-vfpr7', 'namespace': b'kube-system'}, {'name': b'etcd-docker-desktop', 'namespace': b'kube-system'}, {'name': b'kube-apiserver-docker-desktop', 'namespace': b'kube-system'}, {'name': b'kube-controller-manager-docker-desktop', 'namespace': b'kube-system'}, {'name': b'kube-proxy-5gh28', 'namespace': b'kube-system'}, {'name': b'kube-scheduler-docker-desktop', 'namespace': b'kube-system'}, {'name': b'storage-provisioner', 'namespace': b'kube-system'}, {'name': b'vpnkit-controller', 'namespace': b'kube-system'}, {'name': b'dashboard-metrics-scraper-7b59f7d4df-ghrfl', 'namespace': b'kubernetes-dashboard'}, {'name': b'kubernetes-dashboard-74d688b6bc-m72dn', 'namespace': b'kubernetes-dashboard'}, {'name': b'securecodebox-controller-manager-7fcb7d9b9-plq4p', 'namespace': b'securecodebox-system'}, {'name': b'securecodebox-operator-minio-7db977dc57-fhtp9', 'namespace': b'securecodebox-system'}]",
+      "kubeHunterRule": "API Server Hunter"
+    },
+    "id": "97e0ed39-8084-4714-b2d6-c40c5786d718"
+  }
+]
