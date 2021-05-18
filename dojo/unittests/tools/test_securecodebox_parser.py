@@ -49,7 +49,7 @@ class TestSecureCodeBoxParser(TestCase):
         self.assertEqual(findings[0].unsaved_endpoints[0].port, 22)
         self.assertEqual(findings[5].unsaved_endpoints[0].path, "/robots.txt")
         self.assertEqual(findings[5].unsaved_endpoints[0].fragment, "test")
-        self.assertEqual(findings[5].unsaved_endpoints[0].query, None)
+        self.assertIsNone(findings[5].unsaved_endpoints[0].query)
 
     def test_scb_parser_with_many_vuln_has_many_findings_nikto(self):
         testfile = open(
