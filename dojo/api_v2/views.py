@@ -960,6 +960,7 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
         serializer.save()
         if settings.FEATURE_AUTHORIZATION_V2:
             product_type_data = serializer.data
+            product_type_data.pop('authorization_groups')
             product_type_data.pop('members')
             member = Product_Type_Member()
             member.user = self.request.user
