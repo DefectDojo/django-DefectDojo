@@ -3,7 +3,7 @@ from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Te
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 
 
 def check_post_permission(request, post_model, post_pk, post_permission):
