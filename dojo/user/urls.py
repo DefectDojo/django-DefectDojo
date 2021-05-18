@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^change_password$', views.change_password,
         name='change_password'),
     url(r'^user$', views.user, name='users'),
+    url(r'^group$', views.group, name='groups'),
     url(r'^user/add$', views.add_user, name='add_user'),
     url(r'^user/(?P<uid>\d+)$', views.view_user,
         name='view_user'),
