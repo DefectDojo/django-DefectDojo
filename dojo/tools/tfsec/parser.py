@@ -22,7 +22,7 @@ class TFSecParser(object):
         return "TFSec Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import JSON output for KICS scan report."
+        return "Import JSON output for TFSec scan report."
 
     def get_findings(self, filename, test):
         data = json.load(filename)
