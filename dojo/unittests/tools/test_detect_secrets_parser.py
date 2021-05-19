@@ -52,4 +52,3 @@ class TestDetectSecretsParser(TestCase):
             self.assertEqual("example/pkg/docker_registry_watcher/docker_registry_watcher.go", finding.file_path)
             self.assertEqual(112, finding.line)
             self.assertEqual(1, finding.nb_occurences)
-            
