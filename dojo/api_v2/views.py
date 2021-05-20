@@ -976,6 +976,11 @@ class ProductMemberViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_product_members(Permissions.Product_View).distinct()
 
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 # Authorization: object-based
 class ProductGroupViewSet(prefetch.PrefetchListMixin,
@@ -997,6 +1002,11 @@ class ProductGroupViewSet(prefetch.PrefetchListMixin,
 
     def get_queryset(self):
         return get_authorized_product_groups(Permissions.Product_Group_View).distinct()
+
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 # Authorization: object-based
@@ -1087,6 +1097,11 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 # Authorization: object-based
 class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
@@ -1108,6 +1123,11 @@ class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
 
     def get_queryset(self):
         return get_authorized_product_type_groups(Permissions.Product_Type_Group_View).distinct()
+
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 # Authorization: object-based

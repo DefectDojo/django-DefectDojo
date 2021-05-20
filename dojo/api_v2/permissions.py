@@ -188,7 +188,7 @@ class UserHasProductTypeGroupPermission(permissions.BasePermission):
         return check_post_permission(request, Product_Type, 'product_type', Permissions.Product_Type_Group_Add)
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Product_Type_Group_View, Permissions.Product_Type_Group_Edit, Permissions.Product_Group_Delete)
+        return check_object_permission(request, obj, Permissions.Product_Type_Group_View, Permissions.Product_Type_Group_Edit, Permissions.Product_Type_Group_Delete)
 
 
 class UserHasReimportPermission(permissions.BasePermission):

@@ -277,9 +277,9 @@ def get_roles_with_permissions():
             Permissions.Product_Group_Delete,
 
             Permissions.Product_Type_Group_View,
-            Permissions.Product_Group_Add,
-            Permissions.Product_Group_Edit,
-            Permissions.Product_Group_Delete
+            Permissions.Product_Type_Group_Add,
+            Permissions.Product_Type_Group_Edit,
+            Permissions.Product_Type_Group_Delete
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
