@@ -20,6 +20,9 @@ def register_parser(scan_type, parser):
     if scan_type in PARSERS:
         raise ValueError(f"Try to register an existing parser '{scan_type}'")
     PARSERS[scan_type] = parser
+    test_type, created = Test_Type.objects.get_or_create(name=scan_type)
+    if created:
+        logging.info('Created new Test_Type with name %s because a parser with the correspoding scan type was registered', test_type.name)
 
 
 def import_parser_factory(file, test, active, verified, scan_type=None):
