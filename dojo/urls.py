@@ -54,6 +54,9 @@ from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.regulations.urls import urlpatterns as regulations
 
+import logging
+logger = logging.getLogger(__name__)
+
 admin.autodiscover()
 
 # v2 api written in django-rest-framework
@@ -176,3 +179,7 @@ if settings.DEBUG:
 # sometimes urlpatterns needed be added from local_settings.py to avoid having to modify core defect dojo files
 if hasattr(settings, 'EXTRA_URL_PATTERNS'):
     urlpatterns += settings.EXTRA_URL_PATTERNS
+
+logger.debug('registering parsers')
+from dojo.tools.factory import register_parsers
+register_parsers()
