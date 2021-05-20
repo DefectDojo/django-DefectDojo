@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.test import tag
 from rest_framework.test import APIRequestFactory
 from rest_framework.views import APIView
@@ -20,17 +19,14 @@ from dojo.api_v2.views import \
     SonarqubeIssueViewSet, SonarqubeProductViewSet, \
     SonarqubeIssueTransitionViewSet, StubFindingsViewSet, SystemSettingsViewSet, \
     TestTypesViewSet, TestsViewSet, ToolConfigurationsViewSet, ToolProductSettingsViewSet, \
-    ToolTypesViewSet, UsersViewSet, JiraIssuesViewSet, JiraProjectViewSet, AppAnalysisViewSet, \
-    DojoGroupViewSet, ProductMemberViewSet, ProductTypeMemberViewSet, ProductGroupViewSet, \
-    ProductTypeGroupViewSet
+    ToolTypesViewSet, UsersViewSet, JiraIssuesViewSet, JiraProjectViewSet, AppAnalysisViewSet
 
 from dojo.models import \
     Development_Environment, Endpoint_Status, Endpoint, Engagement, Finding_Template, \
     Finding, JIRA_Instance, JIRA_Issue, DojoMeta, Note_Type, Notes, Product_Type, Product, Regulation, \
     Sonarqube_Issue, Sonarqube_Product, Sonarqube_Issue_Transition, \
     Stub_Finding, System_Settings, Test_Type, Test, Tool_Configuration, Tool_Product_Settings, \
-    Tool_Type, Dojo_User, JIRA_Project, App_Analysis, Dojo_Group, Product_Member, Product_Type_Member, \
-    Product_Group, Product_Type_Group
+    Tool_Type, Dojo_User, JIRA_Project, App_Analysis
 
 from dojo.api_v2.serializers import \
     DevelopmentEnvironmentSerializer, EndpointStatusSerializer, EndpointSerializer, \
@@ -40,8 +36,7 @@ from dojo.api_v2.serializers import \
     SonarqubeIssueSerializer, SonarqubeProductSerializer, SonarqubeIssueTransitionSerializer, \
     StubFindingSerializer, SystemSettingsSerializer, TestTypeSerializer, TestSerializer, ToolConfigurationSerializer, \
     ToolProductSettingsSerializer, ToolTypeSerializer, UserSerializer, NoteSerializer, ProductTypeSerializer, \
-    AppAnalysisSerializer, DojoGroupSerializer, ProductMemberSerializer, ProductTypeMemberSerializer, \
-    ProductGroupSerializer, ProductTypeGroupSerializer
+    AppAnalysisSerializer
 
 SWAGGER_SCHEMA_GENERATOR = OpenAPISchemaGenerator(Info("defectdojo", "v2"))
 BASE_API_URL = "/api/v2"
