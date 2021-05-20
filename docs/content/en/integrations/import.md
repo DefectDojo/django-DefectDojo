@@ -93,6 +93,10 @@ processed and made available in the \'Finding View\' page.
 
 Import HTML reports from Burp Enterprise Edition
 
+### CargoAudit Scan
+
+Import JSON output of cargo-audit scan report <https://crates.io/crates/cargo-audit>
+
 ### CCVS Report
 
 Import JSON reports from \[CCVS
