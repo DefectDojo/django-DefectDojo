@@ -671,8 +671,6 @@ JSON output of the `twistcli` tool. Example:
 The CSV output from the UI is now also accepted.
 
 ### Visual Code Grepper (VCG)
-
-
 VCG output can be imported in CSV or Xml formats.
 
 ### Veracode
