@@ -1,5 +1,6 @@
 import json
 import hashlib
+import dateutil.parser
 from dojo.models import Finding
 
 
@@ -20,6 +21,8 @@ class DetectSecretsParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
+        if data.get('generated_at'):
+            find_date = dateutil.parser.parse(data.get('generated_at'))
         for detect_file in data.get('results'):
             for item in data.get('results').get(detect_file):
                 type = item.get('type')
@@ -39,6 +42,7 @@ class DetectSecretsParser(object):
                     finding = Finding(
                         title=f"{type}",
                         test=test,
+                        date=find_date,
                         severity="Medium",
                         verified=is_verified,
                         file_path=file,
