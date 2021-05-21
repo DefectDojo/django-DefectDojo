@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import NamedTuple, List
 
 from django.db.models import QuerySet
+from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser
@@ -38,6 +39,10 @@ class AcceptedRisksMixin(ABC):
         request_body=AcceptedRiskSerializer(many=True),
         responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
     )
+    @extend_schema(
+        request=AcceptedRiskSerializer(many=True),
+        responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
+    )
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
         model = self.get_object()
@@ -58,6 +63,10 @@ class AcceptedFindingsMixin(ABC):
 
     @swagger_auto_schema(
         request_body=AcceptedRiskSerializer(many=True),
+        responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
+    )
+    @extend_schema(
+        request=AcceptedRiskSerializer(many=True),
         responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
     )
     @action(methods=['post'], detail=False, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)

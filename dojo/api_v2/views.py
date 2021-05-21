@@ -44,6 +44,8 @@ from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.authorization.roles_permissions import Permissions, Roles
+from drf_spectacular.utils import extend_schema
+
 
 logger = logging.getLogger(__name__)
 
@@ -183,6 +185,15 @@ class EngagementViewSet(mixins.ListModelMixin,
     @swagger_auto_schema(
         methods=['post'],
         request_body=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.EngagementToNotesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
     )
     @action(detail=True, methods=["get", "post"])
