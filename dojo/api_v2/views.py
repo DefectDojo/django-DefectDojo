@@ -176,15 +176,24 @@ class EngagementViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @action(detail=True, methods=["get", "post", "patch"])
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.EngagementToNotesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post'],
+        request_body=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
+    @action(detail=True, methods=["get", "post"])
     def notes(self, request, pk=None):
         engagement = self.get_object()
         if request.method == 'POST':
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private']
-                note_type = new_note.validated_data['note_type']
+                private = new_note.validated_data.get('private', False)
+                note_type = new_note.validated_data.get('note_type', None)
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
@@ -202,18 +211,13 @@ class EngagementViewSet(mixins.ListModelMixin,
                 "engagement_id": engagement, "notes": [serialized_note.data]
             })
             return Response(serialized_note.data,
-                status=status.HTTP_200_OK)
+                status=status.HTTP_201_CREATED)
         notes = engagement.notes.all()
 
-        serialized_notes = []
-        if notes:
-            serialized_notes = serializers.EngagementToNotesSerializer({
-                    "engagement_id": engagement, "notes": notes
-            })
-            return Response(serialized_notes.data,
-                    status=status.HTTP_200_OK)
-
-        return Response(serialized_notes,
+        serialized_notes = serializers.EngagementToNotesSerializer({
+                "engagement_id": engagement, "notes": notes
+        })
+        return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -437,19 +441,19 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer}
     )
     @swagger_auto_schema(
-        methods=['post', 'patch'],
+        methods=['post'],
         request_body=serializers.AddNewNoteOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.NoteSerializer}
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
     )
-    @action(detail=True, methods=["get", "post", "patch"])
+    @action(detail=True, methods=["get", "post"])
     def notes(self, request, pk=None):
         finding = self.get_object()
         if request.method == 'POST':
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private'] if 'private' in new_note.validated_data else False
-                note_type = new_note.validated_data['note_type'] if 'note_type' in new_note.validated_data else None
+                private = new_note.validated_data.get('private', False)
+                note_type = new_note.validated_data.get('note_type', None)
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
@@ -472,18 +476,13 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                 "finding_id": finding, "notes": [serialized_note.data]
             })
             return Response(serialized_note.data,
-                status=status.HTTP_200_OK)
+                status=status.HTTP_201_CREATED)
         notes = finding.notes.all()
 
-        serialized_notes = []
-        if notes:
-            serialized_notes = serializers.FindingToNotesSerializer({
-                    "finding_id": finding, "notes": notes
-            })
-            return Response(serialized_notes.data,
-                    status=status.HTTP_200_OK)
-
-        return Response(serialized_notes,
+        serialized_notes = serializers.FindingToNotesSerializer({
+                "finding_id": finding, "notes": notes
+        })
+        return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
@@ -1115,15 +1114,24 @@ class TestsViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @action(detail=True, methods=["get", "post", "patch"])
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.TestToNotesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post'],
+        request_body=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
+    @action(detail=True, methods=["get", "post"])
     def notes(self, request, pk=None):
         test = self.get_object()
         if request.method == 'POST':
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private']
-                note_type = new_note.validated_data['note_type']
+                private = new_note.validated_data.get('private', False)
+                note_type = new_note.validated_data.get('note_type', None)
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
@@ -1141,18 +1149,13 @@ class TestsViewSet(mixins.ListModelMixin,
                 "test_id": test, "notes": [serialized_note.data]
             })
             return Response(serialized_note.data,
-                status=status.HTTP_200_OK)
+                status=status.HTTP_201_CREATED)
         notes = test.notes.all()
 
-        serialized_notes = []
-        if notes:
-            serialized_notes = serializers.TestToNotesSerializer({
-                    "test_id": test, "notes": notes
-            })
-            return Response(serialized_notes.data,
-                    status=status.HTTP_200_OK)
-
-        return Response(serialized_notes,
+        serialized_notes = serializers.TestToNotesSerializer({
+                "test_id": test, "notes": notes
+        })
+        return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
