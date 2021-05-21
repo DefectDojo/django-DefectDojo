@@ -36,7 +36,7 @@ class AcceptedRisksMixin(ABC):
 
     @swagger_auto_schema(
         request_body=AcceptedRiskSerializer(many=True),
-        responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer},
+        responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
     )
     @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request, pk=None):
@@ -51,14 +51,14 @@ class AcceptedRisksMixin(ABC):
         accepted = _accept_risks(accepted_risks, base_findings, owner)
         model.accept_risks(accepted)
         result = RiskAcceptanceSerializer(instance=accepted, many=True)
-        return Response(result.data)
+        return Response(status=status.HTTP_201_CREATED, data=result.data)
 
 
 class AcceptedFindingsMixin(ABC):
 
     @swagger_auto_schema(
         request_body=AcceptedRiskSerializer(many=True),
-        responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer},
+        responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
     )
     @action(methods=['post'], detail=False, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request):
@@ -75,7 +75,7 @@ class AcceptedFindingsMixin(ABC):
             engagement.accept_risks(accepted)
             accepted_result.extend(accepted)
         result = RiskAcceptanceSerializer(instance=accepted_result, many=True)
-        return Response(result.data)
+        return Response(status=201, data=result.data)
 
 
 def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, owner: User):
@@ -94,4 +94,5 @@ def _accept_risks(accepted_risks: List[AcceptedRisk], base_findings: QuerySet, o
             findings.update(risk_accepted=True)
             acceptance.save()
             accepted.append(acceptance)
+
     return accepted

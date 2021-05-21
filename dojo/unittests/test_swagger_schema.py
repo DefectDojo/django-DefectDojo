@@ -83,6 +83,7 @@ class SchemaChecker():
 
     def _check_or_fail(self, condition, message):
         if not condition:
+            print('failed!')
             self._has_failed = True
             self._register_error(message)
 
@@ -355,6 +356,7 @@ class EngagementTest(BaseClass.SchemaTest):
     def test_accept_risks(self):
         operation = self.get_endpoint_schema("/engagements/{id}/accept_risks/", "post")
         schema = operation['responses']['201']['schema']
+        print(schema)
         id = self.get_valid_object_id()
         if id is None:
             self.skipTest("No data exists to test endpoint")
@@ -369,6 +371,9 @@ class EngagementTest(BaseClass.SchemaTest):
 
         response = self.client.post(format_url(f"/engagements/{id}/accept_risks/"), data, format='json')
         check_response_valid(201, response)
+        print('response.data')
+        # print(vars(response))
+        print(response.content)
         obj = response.data
         self.check_schema(schema, obj)
 
