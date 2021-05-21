@@ -70,3 +70,4 @@ PyJWT==2.1.0
 cvss==2.2
 django-fieldsignals==0.6.0
 hyperlink==21.0.0
+drf-spectacular==0.16.0

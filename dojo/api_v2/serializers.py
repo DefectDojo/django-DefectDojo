@@ -751,9 +751,10 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         queryset=Engagement.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
         allow_null=True,
-        default=[],
+        # default=[],
         queryset=Notes.objects.all(),
-        many=True)
+        many=True,
+        required=False)
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -994,7 +995,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True,
         allow_null=True,
-        default=[],
+        # default=[],
+        required=False,
         many=True)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())

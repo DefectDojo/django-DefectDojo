@@ -567,6 +567,7 @@ DJANGO_ADMIN_ENABLED = env('DD_DJANGO_ADMIN_ENABLED')
 # ------------------------------------------------------------------------------
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
@@ -593,6 +594,13 @@ SWAGGER_SETTINGS = {
     'DOC_EXPANSION': "none",
     'JSON_EDITOR': True,
     'SHOW_REQUEST_HEADERS': True,
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Defect Dojo API v2',
+    'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy.',
+    'VERSION': '2.0.0',
+    # OTHER SETTINGS
 }
 
 # ------------------------------------------------------------------------------
@@ -648,6 +656,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
+    'drf_spectacular',
     'tagulous'
 )
 
