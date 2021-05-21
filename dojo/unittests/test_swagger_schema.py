@@ -425,15 +425,15 @@ class FindingTemplateTest(BaseClass.SchemaTest):
         self.model = Finding_Template
         self.serializer = FindingTemplateSerializer
 
-    @testIsBroken
+    # fixed
     def test_post_endpoint(self):
         super().test_post_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
         super().test_put_endpoint()
 

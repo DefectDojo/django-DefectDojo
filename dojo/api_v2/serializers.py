@@ -1037,7 +1037,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         return data
 
 
-class FindingTemplateSerializer(serializers.ModelSerializer):
+class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
