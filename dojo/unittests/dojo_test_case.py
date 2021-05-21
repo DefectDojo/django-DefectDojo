@@ -552,7 +552,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         response = http_method(reverse('finding-notes', args=(finding_id,)), data, format='json')
         # print(vars(response))
         # print(response.content)
-        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertEqual(201, response.status_code, response.content[:1000])
         return response
 
     def post_finding_notes_api(self, finding_id, note):
