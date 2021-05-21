@@ -22,7 +22,6 @@ class TestCargoAuditParser(TestCase):
             self.assertEqual("Dangling reference in `access::Map` with Constant", finding.title)
             self.assertEqual("High", finding.severity)
             self.assertEqual("CVE-2020-35711", finding.cve)
-            self.assertEqual("https://github.com/vorner/arc-swap/issues/45", finding.url)
             self.assertIsNotNone(finding.description)
             self.assertEqual("arc-swap", finding.component_name)
             self.assertEqual("0.4.7", finding.component_version)
