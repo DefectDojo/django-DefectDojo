@@ -22,7 +22,6 @@ class TestTFSecParser(TestCase):
             self.assertEqual("Potentially sensitive data stored in block attribute.", finding.title)
             self.assertEqual("Medium", finding.severity)
             self.assertIsNotNone(finding.description)
-            self.assertEqual("See https://tfsec.dev/docs/general/GEN003/ for more information.", finding.url)
             self.assertTrue(finding.active)
             self.assertEqual("Don't include sensitive data in blocks", finding.mitigation)
             self.assertEqual("Block attribute could be leaking secrets", finding.impact)
