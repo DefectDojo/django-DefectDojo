@@ -315,7 +315,6 @@
       "team_manager": 2,
       "tid": 0,
       "authorized_users": [
-        1,
         2,
         3
       ],
@@ -354,7 +353,6 @@
       "team_manager": 3,
       "tid": 0,
       "authorized_users": [
-        1,
         3
       ],
       "description": "test product"

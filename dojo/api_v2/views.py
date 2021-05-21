@@ -139,6 +139,10 @@ class EngagementViewSet(mixins.ListModelMixin,
     @swagger_auto_schema(
         request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
+    @extend_schema(
+        request=no_body,
+        responses={status.HTTP_200_OK: ""}
+    )
     @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
         eng = self.get_object()

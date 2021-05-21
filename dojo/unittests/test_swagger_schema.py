@@ -306,6 +306,8 @@ class BaseClass():
 
             data = self.construct_response_data(id)
 
+            print(data)
+
             schema = operation['responses']['201']['schema']
             response = self.client.post(format_url(f"/{self.viewname}/"), data, format='json')
             check_response_valid(status.HTTP_201_CREATED, response)
@@ -563,23 +565,23 @@ class ProductTest(BaseClass.SchemaTest):
             "name": lambda v: v + "_new"
         }
 
-    @testIsBroken
+    # fixed
     def test_list_endpoint(self):
         super().test_list_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
         super().test_put_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_retrieve_endpoint(self):
         super().test_retrieve_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_post_endpoint(self):
         super().test_post_endpoint()
 

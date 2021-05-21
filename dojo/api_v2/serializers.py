@@ -1,3 +1,4 @@
+from typing import List
 from drf_yasg.utils import swagger_serializer_method
 from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
@@ -408,30 +409,6 @@ class ProductGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Group
         fields = '__all__'
-
-
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
-    findings_count = serializers.SerializerMethodField()
-    findings_list = serializers.SerializerMethodField()
-
-    tags = TagListSerializerField(required=False)
-    product_meta = ProductMetaSerializer(read_only=True, many=True)
-
-    class Meta:
-        model = Product
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['tid', 'updated', 'members']
-            extra_kwargs = {
-                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-            }
-        else:
-            exclude = ['tid', 'updated', 'authorized_users']
-
-    def get_findings_count(self, obj):
-        return obj.findings_count
-
-    def get_findings_list(self, obj):
-        return obj.open_findings_list
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
@@ -918,7 +895,6 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             return None
 
-    @swagger_serializer_method(serializers.ListField(serializers.CharField()))
     def get_display_status(self, obj):
         return obj.status()
 
@@ -1085,6 +1061,32 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
+
+
+class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+    findings_count = serializers.SerializerMethodField()
+    findings_list = serializers.SerializerMethodField()
+
+    tags = TagListSerializerField(required=False)
+    product_meta = ProductMetaSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Product
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['tid', 'updated', 'members']
+            extra_kwargs = {
+                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+            }
+        else:
+            exclude = ['tid', 'updated', 'authorized_users']
+
+    def get_findings_count(self, obj) -> int:
+        return obj.findings_count
+
+    #  -> List[int] as return type doesn't seem enough for drf-yasg
+    @swagger_serializer_method(serializer_or_field=serializers.ListField(child=serializers.IntegerField()))
+    def get_findings_list(self, obj) -> List[int]:
+        return obj.open_findings_list
 
 
 class ImportScanSerializer(serializers.Serializer):
