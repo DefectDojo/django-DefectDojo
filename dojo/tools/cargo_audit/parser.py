@@ -46,7 +46,6 @@ class CargoAuditParser(object):
                         test=test,
                         severity=severity,
                         cve=cve,
-                        url=url,
                         description=description,
                         component_name=package_name,
                         component_version=package_version,
