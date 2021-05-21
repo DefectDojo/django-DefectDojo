@@ -25,10 +25,12 @@ class CargoAuditParser(object):
                 advisory = item.get('advisory')
                 vuln_id = advisory.get('id')
                 title = advisory.get('title')
-                description = advisory.get('description')
+                description = "\n".join([
+                    f"**Description:** `{advisory.get('description')}`",
+                    f"\n**Read more:** `{advisory.get('url')}`",
+                ])
                 date = advisory.get('date')
                 cve = advisory.get('aliases')[0]
-                url = advisory.get('url')
                 package_name = item.get('package').get('name')
                 package_version = item.get('package').get('version')
                 severity = "High"
