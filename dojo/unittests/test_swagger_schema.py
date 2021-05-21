@@ -141,6 +141,7 @@ class SchemaChecker():
     def check(self, schema, obj):
         def _check(schema, obj):
             schema = self._resolve_if_ref(schema)
+            print(schema)
             self._check_type(schema, obj)
 
             required_fields = schema.get("required", [])
@@ -152,6 +153,8 @@ class SchemaChecker():
             properties = schema.get("properties", None)
             if properties is not None:
                 for name, prop in properties.items():
+                    print('property: ', name)
+                    print('obj ', obj)
                     obj_child = obj.get(name, None)
                     if obj_child is not None:
                         self._with_prefix(name, _check, prop, obj_child)
@@ -200,6 +203,7 @@ class BaseClass():
 
         def check_schema(self, schema, obj):
             schema_checker = SchemaChecker(self.schema["definitions"])
+            # print(vars(schema_checker))
             schema_checker.check(schema, obj)
 
         def get_valid_object_id(self):
@@ -250,7 +254,9 @@ class BaseClass():
 
             schema = endpoints['get']['responses']['200']['schema']
             for id in ids:
+                print('id:', id)
                 response = self.client.get(format_url(f"/{self.viewname}/{id}/"), extra_args)
+                print(response.data)
                 check_response_valid(status.HTTP_200_OK, response)
                 obj = response.data
                 self.check_schema(schema, obj)
@@ -366,7 +372,7 @@ class EngagementTest(BaseClass.SchemaTest):
         obj = response.data
         self.check_schema(schema, obj)
 
-    @testIsBroken
+    # fixed
     def test_notes_read(self):
         operation = self.get_endpoint_schema("/engagements/{id}/notes/", "get")
         schema = operation['responses']['200']['schema']
@@ -379,7 +385,7 @@ class EngagementTest(BaseClass.SchemaTest):
         obj = response.data
         self.check_schema(schema, obj)
 
-    @testIsBroken
+    # fixed
     def test_notes_create(self):
         operation = self.get_endpoint_schema("/engagements/{id}/notes/", "post")
         schema = operation['responses']['201']['schema']
