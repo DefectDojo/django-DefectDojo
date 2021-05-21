@@ -352,7 +352,7 @@ class EngagementTest(BaseClass.SchemaTest):
         self.model = Engagement
         self.serializer = EngagementSerializer
 
-    @testIsBroken
+    # fixed
     def test_accept_risks(self):
         operation = self.get_endpoint_schema("/engagements/{id}/accept_risks/", "post")
         schema = operation['responses']['201']['schema']
