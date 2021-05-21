@@ -31,9 +31,10 @@ class CoverityApiParser(object):
 
             description_formated = "\n".join(
                 [
-                    f"**CID:** `{issue['cid']}`",
-                    f"**displayType:** `{issue['displayType']}`",
-                    f"**Status:** `{issue['status']}`",
+                    f"**CID:** `{issue.get('cid')}`",
+                    f"**Type:** `{issue.get('displayType')}`",
+                    f"**Status:** `{issue.get('status')}`",
+                    f"**Classification:** `{issue.get('classification')}`",
                 ]
             )
 
@@ -62,10 +63,13 @@ class CoverityApiParser(object):
 
             if "New" == issue.get("status"):
                 finding.active = True
+                finding.verified = False
             elif "Triaged" == issue.get("status"):
                 finding.active = True
+                finding.verified = True
             elif "Fixed" == issue.get("status"):
                 finding.active = False
+                finding.verified = True
             else:
                 if "False Positive" == issue.get("classification"):
                     finding.false_p = True
@@ -74,6 +78,7 @@ class CoverityApiParser(object):
                     finding.mitigated = datetime.strptime(ds, "%Y-%M-%d")
                 finding.is_mitigated = True
                 finding.active = False
+                finding.verified = True
 
             items.append(finding)
 
