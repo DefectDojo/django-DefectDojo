@@ -44,7 +44,6 @@ class NessusWASCSVParser(object):
             title = row.get('Name')
             if not title:
                 continue
-
             # get description, mitigation, impact etc. from respective columns
             description = row.get('Synopsis')
             mitigation = str(row.get('Solution'))
@@ -54,7 +53,6 @@ class NessusWASCSVParser(object):
 
             # get severity from 'Risk' column and manage columns with no 'Risk' value
             severity = self._convert_severity(row.get('Risk'))
-
             if 'CVE' in row:
                 detected_cve = self._format_cve(str(row.get('CVE')))
             cve = None
@@ -85,7 +83,6 @@ class NessusWASCSVParser(object):
 
                 find.unsaved_endpoints = list()
                 dupes[dupe_key] = find
-
             # manage endpoints
             endpoint = Endpoint(host='localhost')
             if 'Host' in row:
@@ -161,7 +158,6 @@ class NessusWASXMLParser(object):
                     cwe = None
                     if item.findtext("cwe"):
                         cwe = item.find("cwe").text
-
                     title = item.attrib["pluginName"]
                     dupe_key = severity + title
 
