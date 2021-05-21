@@ -43,7 +43,8 @@ class AcceptedRisksMixin(ABC):
         request=AcceptedRiskSerializer(many=True),
         responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
     )
-    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
+    @action(methods=['post'], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer,
+            filter_backends=None, pagination_class=None)
     def accept_risks(self, request, pk=None):
         model = self.get_object()
         serializer = AcceptedRiskSerializer(data=request.data, many=True)
