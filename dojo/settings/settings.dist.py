@@ -643,7 +643,6 @@ INSTALLED_APPS = (
     'multiselectfield',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
     'dbbackup',
     'django_celery_results',
     'social_django',
