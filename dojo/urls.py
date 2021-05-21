@@ -165,7 +165,7 @@ urlpatterns = [
 
     # drf-spectacular = OpenAPI3
     url(r'^%sapi/v2/oa3/schema/' % get_system_setting('url_prefix'), SpectacularAPIView.as_view(), name='schema_oa3'),
-    url(r'^%sapi/v2/oa3/swagger-ui/' % get_system_setting('url_prefix'), SpectacularSwaggerView.as_view(url_name='schema_oa3'), name='swagger-ui_oa3'),
+    url(r'^%sapi/v2/oa3/swagger-ui/' % get_system_setting('url_prefix'), SpectacularSwaggerView.as_view(url=get_system_setting('url_prefix') + '/api/v2/oa3/schema/?format=json'), name='swagger-ui_oa3'),
     url(r'^%sapi/v2/oa3/redoc/' % get_system_setting('url_prefix'), SpectacularRedocView.as_view(url_name='schema_oa3'), name='redoc_oa3'),
 
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
