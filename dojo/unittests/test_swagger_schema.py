@@ -446,21 +446,21 @@ class FindingTest(BaseClass.SchemaTest):
         self.model = Finding
         self.serializer = FindingSerializer
 
-    @testIsBroken
+    # fixed
     def test_list_endpoint(self):
         super().test_list_endpoint({
             "related_fields": True
         })
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
         super().test_put_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_retrieve_endpoint(self):
         super().test_retrieve_endpoint({
             "related_fields": True

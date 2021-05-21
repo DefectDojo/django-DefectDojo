@@ -1,5 +1,6 @@
 from typing import List
 from drf_yasg.utils import swagger_serializer_method
+from rest_framework.fields import DictField
 from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -211,7 +212,7 @@ class RequestResponseDict(list):
 
 
 class RequestResponseSerializerField(serializers.ListSerializer):
-    child = serializers.CharField()
+    child = DictField(child=serializers.CharField())
     default_error_messages = {
         'not_a_list': _(
             'Expected a list of items but got type "{input_type}".'),
@@ -276,6 +277,10 @@ class RequestResponseSerializerField(serializers.ListSerializer):
                     burps = value.all()
                 value = [{'request': burp.get_request(), 'response': burp.get_response()} for burp in burps]
         return value
+
+
+class BurpRawRequestResponseSerializer(serializers.Serializer):
+    req_resp = RequestResponseSerializerField(required=True)
 
 
 class MetaSerializer(serializers.ModelSerializer):
@@ -955,6 +960,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             return NoteSerializer, {'many': True, 'read_only': True}
         return super().build_relational_field(field_name, relation_info)
 
+    @swagger_serializer_method(serializer_or_field=BurpRawRequestResponseSerializer)
     def get_request_response(self, obj):
         # burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
         burp_req_resp = obj.burprawrequestresponse_set.all()
@@ -1359,7 +1365,3 @@ class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
-
-
-class BurpRawRequestResponseSerializer(serializers.Serializer):
-    req_resp = RequestResponseSerializerField(required=True)
