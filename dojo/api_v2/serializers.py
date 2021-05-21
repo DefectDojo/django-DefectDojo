@@ -496,7 +496,7 @@ class EngagementToFilesSerializer(serializers.Serializer):
     files = FileSerializer(many=True)
 
 
-class AppAnalysisSerializer(serializers.ModelSerializer):
+class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:

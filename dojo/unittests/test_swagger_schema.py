@@ -83,7 +83,6 @@ class SchemaChecker():
 
     def _check_or_fail(self, condition, message):
         if not condition:
-            print('failed!')
             self._has_failed = True
             self._register_error(message)
 
@@ -113,7 +112,7 @@ class SchemaChecker():
 
     def _check_type(self, schema, obj):
         schema_type = schema["type"]
-        print(schema)
+        # print(schema)
         is_nullable = schema.get("x-nullable", False) or schema.get("readOnly", False)
 
         def _check_helper(check):
@@ -145,7 +144,7 @@ class SchemaChecker():
     def check(self, schema, obj):
         def _check(schema, obj):
             schema = self._resolve_if_ref(schema)
-            print(schema)
+            # print(schema)
             self._check_type(schema, obj)
 
             required_fields = schema.get("required", [])
@@ -157,8 +156,8 @@ class SchemaChecker():
             properties = schema.get("properties", None)
             if properties is not None:
                 for name, prop in properties.items():
-                    print('property: ', name)
-                    print('obj ', obj)
+                    # print('property: ', name)
+                    # print('obj ', obj)
                     obj_child = obj.get(name, None)
                     if obj_child is not None:
                         self._with_prefix(name, _check, prop, obj_child)
@@ -260,7 +259,7 @@ class BaseClass():
             for id in ids:
                 print('id:', id)
                 response = self.client.get(format_url(f"/{self.viewname}/{id}/"), extra_args)
-                print(response.data)
+                print('response data:', response.data)
                 check_response_valid(status.HTTP_200_OK, response)
                 obj = response.data
                 self.check_schema(schema, obj)
@@ -311,11 +310,13 @@ class BaseClass():
             data = self.construct_response_data(id)
             data.update(extra_data)
 
-            print(data)
+            print('data:', data)
 
             schema = operation['responses']['201']['schema']
             response = self.client.post(format_url(f"/{self.viewname}/"), data, format='json')
             check_response_valid(status.HTTP_201_CREATED, response)
+
+            print('response.data:', response.data)
 
             obj = response.data
             self.check_schema(schema, obj)
@@ -656,15 +657,15 @@ class AppAnalysisTest(BaseClass.SchemaTest):
         self.model = App_Analysis
         self.serializer = AppAnalysisSerializer
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
         super().test_put_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_post_endpoint(self):
         super().test_post_endpoint()
 
