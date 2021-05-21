@@ -241,6 +241,7 @@ class RequestResponseSerializerField(serializers.ListSerializer):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
+        print('to_internal_value start: ', data)
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -252,6 +253,7 @@ class RequestResponseSerializerField(serializers.ListSerializer):
         if not isinstance(data, list):
             self.fail('not_a_list', input_type=type(data).__name__)
         for s in data:
+            print('s: ', s)
             if not isinstance(s, dict):
                 self.fail('not_a_dict', input_type=type(s).__name__)
 
@@ -263,8 +265,9 @@ class RequestResponseSerializerField(serializers.ListSerializer):
             if not isinstance(response, str):
                 self.fail('not_a_str', input_type=type(request).__name__)
 
-            self.child.run_validation(request)
-            self.child.run_validation(response)
+            self.child.run_validation(s)
+        print('to_internal_value:')
+        print(data)
         return data
 
     def to_representation(self, value):
@@ -276,11 +279,21 @@ class RequestResponseSerializerField(serializers.ListSerializer):
                 else:
                     burps = value.all()
                 value = [{'request': burp.get_request(), 'response': burp.get_response()} for burp in burps]
+        print('to_presentation:')
+        print(value)
+
         return value
 
 
 class BurpRawRequestResponseSerializer(serializers.Serializer):
     req_resp = RequestResponseSerializerField(required=True)
+
+    # def is_valid(self, *args, **kwargs):
+    #     print('is_valid!')
+    #     print(vars(self))
+    #     super_is_valid = super().is_valid(*args, **kwargs)
+    #     print('super_is_valid: ', super_is_valid)
+    #     return super_is_valid
 
 
 class MetaSerializer(serializers.ModelSerializer):

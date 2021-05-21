@@ -2,6 +2,7 @@ from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.utils.decorators import method_decorator
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from django.db import IntegrityError
@@ -112,6 +113,10 @@ class EndpointStatusViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
+@method_decorator(name='list', decorator=swagger_auto_schema(
+    operation_description="valentijns verified list operation",
+    parameters={}
+))
 class EngagementViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.UpdateModelMixin,
@@ -428,6 +433,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         finding = self.get_object()
 
         if request.method == 'POST':
+            print(isinstance(request.data, list))
             burps = serializers.BurpRawRequestResponseSerializer(data=request.data, many=isinstance(request.data, list))
             if burps.is_valid():
                 for pair in burps.validated_data['req_resp']:
@@ -439,6 +445,9 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                     burp_rr.clean()
                     burp_rr.save()
             else:
+                print('error')
+                print('request.data:')
+                print(request.data)
                 return Response(burps.errors,
                     status=status.HTTP_400_BAD_REQUEST)
 

@@ -305,6 +305,8 @@ class FindingRequestResponseTest(DojoAPITestCase):
 
     def test_request_response_get(self):
         response = self.client.get('/api/v2/findings/7/request_response/', format='json')
+        print('response.data:')
+        print(response.data)
         self.assertEqual(200, response.status_code, response.content[:1000])
 
 
