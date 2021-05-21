@@ -398,6 +398,10 @@ Import JSON report.
 
 Reports can be imported in the CSV, and .nessus (XML) report formats.
 
+### Nessus WAS (Tenable)
+
+Reports can be imported in the CSV, and .nessus (XML) report formats.
+
 ### Netsparker
 
 Vulnerabilities List - JSON report
