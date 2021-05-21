@@ -32,11 +32,10 @@ class TFSecParser(object):
                 rule_id = item.get('rule_id')
                 rule_description = item.get('rule_description')
                 rule_provider = item.get('rule_provider')
-                url = item.get('link')
                 file = item.get('location').get('filename')
                 start_line = item.get('location').get('start_line')
                 end_line = item.get('location').get('end_line')
-                description = item.get('description')
+                description = '\n'.join([item.get('description'), item.get('link')])
                 impact = item.get('impact')
                 resolution = item.get('resolution')
                 if item.get('passed') is False:
@@ -61,7 +60,6 @@ class TFSecParser(object):
                         test=test,
                         severity=severity,
                         description=description,
-                        url=url,
                         active=active,
                         mitigation=resolution,
                         impact=impact,
