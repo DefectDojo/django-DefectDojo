@@ -1,5 +1,5 @@
 from django.test import TestCase
-from dojo.tools.nessus_was.parser import NessusWASXMLParser, NessusWASCSVParser, NessusWASParser
+from dojo.tools.nessus_was.parser import NessusWASXMLParser, NessusWASCSVParser
 from dojo.models import Finding, Test, Engagement, Product
 
 
