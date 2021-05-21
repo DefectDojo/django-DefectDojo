@@ -106,11 +106,14 @@ class SchemaChecker():
 
     def _check_has_required_fields(self, required_fields, obj):
         for required_field in required_fields:
-            field = f"{self._get_prefix()}#{required_field}"
-            self._check_or_fail(obj is not None and required_field in obj, f"{field} is required but was not returned")
+            # passwords are writeOnly, but this is not supported by Swagger / OpenAPIv2
+            if required_field != 'password':
+                field = f"{self._get_prefix()}#{required_field}"
+                self._check_or_fail(obj is not None and required_field in obj, f"{field} is required but was not returned")
 
     def _check_type(self, schema, obj):
         schema_type = schema["type"]
+        print(schema)
         is_nullable = schema.get("x-nullable", False) or schema.get("readOnly", False)
 
         def _check_helper(check):
@@ -280,7 +283,7 @@ class BaseClass():
             self.check_schema(schema, obj)
 
         @skipIfNotSubclass(UpdateModelMixin)
-        def test_put_endpoint(self, extra_args=None):
+        def test_put_endpoint(self, extra_data={}, extra_args=None):
             operation = self.schema["paths"][f"/{self.viewname}/{{id}}/"]['put']
 
             id = self.get_valid_object_id()
@@ -288,6 +291,7 @@ class BaseClass():
                 self.skipTest("No data exists to test endpoint")
 
             data = self.construct_response_data(id)
+            data.update(extra_data)
 
             schema = operation['responses']['200']['schema']
             response = self.client.put(format_url(f"/{self.viewname}/{id}/"), data, format='json')
@@ -297,7 +301,7 @@ class BaseClass():
             self.check_schema(schema, obj)
 
         @skipIfNotSubclass(CreateModelMixin)
-        def test_post_endpoint(self, extra_args=None):
+        def test_post_endpoint(self, extra_data=[], extra_args=None):
             operation = self.schema["paths"][f"/{self.viewname}/"]["post"]
 
             id = self.get_valid_object_id()
@@ -305,6 +309,7 @@ class BaseClass():
                 self.skipTest("No data exists to test endpoint")
 
             data = self.construct_response_data(id)
+            data.update(extra_data)
 
             print(data)
 
@@ -469,25 +474,25 @@ class JiraInstanceTest(BaseClass.SchemaTest):
         self.model = JIRA_Instance
         self.serializer = JIRAInstanceSerializer
 
-    @testIsBroken
+    # fixed
     def test_list_endpoint(self):
         super().test_list_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
-        super().test_put_endpoint()
+        super().test_put_endpoint(extra_data={"password": "12345"})
 
-    @testIsBroken
+    # fixed
     def test_retrieve_endpoint(self):
         super().test_retrieve_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_post_endpoint(self):
-        super().test_post_endpoint()
+        super().test_post_endpoint(extra_data={"password": "12345"})
 
 
 class JiraFindingMappingsTest(BaseClass.SchemaTest):
