@@ -48,7 +48,6 @@ class TestCargoAuditParser(TestCase):
             self.assertEqual("Buffer overflow in SmallVec::insert_many", finding.title)
             self.assertEqual("High", finding.severity)
             self.assertEqual("CVE-2021-25900", finding.cve)
-            self.assertEqual("https://github.com/servo/rust-smallvec/issues/252", finding.url)
             self.assertIsNotNone(finding.description)
             self.assertEqual("smallvec", finding.component_name)
             self.assertEqual("0.6.13", finding.component_version)
