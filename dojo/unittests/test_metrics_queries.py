@@ -50,7 +50,7 @@ class FindingQueriesTest(TestCase):
 
         if settings.FEATURE_AUTHORIZATION_V2:
             # One more query to read usercontactinfo for global_role
-            num_queries = 30
+            num_queries = 35
         else:
             num_queries = 29
         # Queries over Finding and Risk_Acceptance
@@ -174,7 +174,7 @@ class EndpointQueriesTest(TestCase):
     def test_endpoint_queries(self):
         if settings.FEATURE_AUTHORIZATION_V2:
             # One more query to read usercontactinfo for global_role
-            num_queries = 68
+            num_queries = 73
         else:
             num_queries = 67
         # Queries over Finding and Endpoint_Status
