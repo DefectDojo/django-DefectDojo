@@ -395,6 +395,7 @@ class Role(models.Model):
 class Dojo_Group(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True)
+    global_role = models.IntegerField(null=True, help_text="The global role will be applied to all product types and products.", verbose_name="Global role")
     users = models.ManyToManyField(Dojo_User, blank=True)
 
     def __str__(self):

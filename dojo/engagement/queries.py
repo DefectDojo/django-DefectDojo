@@ -3,7 +3,8 @@ from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Engagement, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group
-from dojo.authorization.authorization import get_roles_for_permission, role_has_permission
+from dojo.authorization.authorization import get_roles_for_permission, role_has_permission, \
+    get_groups
 
 
 def get_authorized_engagements(permission):
@@ -21,6 +22,10 @@ def get_authorized_engagements(permission):
 
         if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
             return Engagement.objects.all()
+
+        for group in get_groups(user):
+            if role_has_permission(group.global_role, permission):
+                return Engagement.objects.all()
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(

@@ -4,7 +4,7 @@ from django.db.models import Exists, OuterRef, Q
 from dojo.models import Product, Product_Member, Product_Type_Member, App_Analysis, \
     DojoMeta, Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, user_has_permission, \
-    role_has_permission
+    role_has_permission, get_groups
 
 
 def get_authorized_products(permission, user=None):
@@ -24,6 +24,10 @@ def get_authorized_products(permission, user=None):
 
         if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
             return Product.objects.all().order_by('name')
+
+        for group in get_groups(user):
+            if role_has_permission(group.global_role, permission):
+                return Product.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -139,6 +143,10 @@ def get_authorized_app_analysis(permission):
         if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
             return App_Analysis.objects.all().order_by('name')
 
+        for group in get_groups(user):
+            if role_has_permission(group.global_role, permission):
+                return App_Analysis.objects.all().order_by('name')
+
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
             product_type=OuterRef('product__prod_type_id'),
@@ -189,6 +197,10 @@ def get_authorized_dojo_meta(permission):
 
         if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
             return DojoMeta.objects.all().order_by('name')
+
+        for group in get_groups(user):
+            if role_has_permission(group.global_role, permission):
+                return DojoMeta.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
         product_authorized_product_type_roles = Product_Type_Member.objects.filter(

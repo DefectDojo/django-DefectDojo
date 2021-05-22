@@ -3,7 +3,7 @@ from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group
+    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group
 
 
 def user_has_permission(user, obj, permission):
@@ -16,6 +16,10 @@ def user_has_permission(user, obj, permission):
 
     if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
         return True
+
+    for group in get_groups(user):
+        if role_has_permission(group.global_role, permission):
+            return True
 
     if isinstance(obj, Product_Type):
         # Check if the user has a role for the product type with the requested permissions
@@ -171,3 +175,8 @@ def get_product_type_groups_dict(user):
         pgtu_list.append(product_type_group)
         pgt_dict[product_type_group.product_type.id] = pgtu_list
     return pgt_dict
+
+
+@cache_for_request
+def get_groups(user):
+    return Dojo_Group.objects.filter(users=user)

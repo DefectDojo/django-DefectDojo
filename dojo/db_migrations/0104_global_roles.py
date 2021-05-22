@@ -15,4 +15,9 @@ class Migration(migrations.Migration):
             name='global_role',
             field=models.IntegerField(help_text='The global role will be applied to all product types and products.', null=True, verbose_name='Global role'),
         ),
+        migrations.AddField(
+            model_name='dojo_group',
+            name='global_role',
+            field=models.IntegerField(help_text='The global role will be applied to all product types and products.', null=True, verbose_name='Global role'),
+        ),
     ]

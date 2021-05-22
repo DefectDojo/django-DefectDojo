@@ -95,6 +95,14 @@ class TestAuthorization(TestCase):
         cls.product_type_group_owner.group = cls.group
         cls.product_type_group_owner.role = Role.objects.get(id=Roles.Owner)
 
+        cls.group2 = Dojo_Group()
+        cls.group2.id = 2
+        cls.group2.global_role = Roles.Maintainer
+
+        cls.user3 = Dojo_User()
+        cls.user3.id = 2
+        cls.group2.users.add(cls.user3)
+
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,
                 'Role 9999 does not exist'):
@@ -437,4 +445,18 @@ class TestAuthorization(TestCase):
 
     def test_user_has_global_role_success(self):
         result = user_has_permission(self.user2, self.product, Permissions.Product_View)
+        self.assertTrue(result)
+
+    @patch('dojo.models.Dojo_Group.objects.filter')
+    def test_user_in_group_with_global_role_no_permission(self, mock_get):
+        mock_get.return_value = {self.group2}
+
+        result = user_has_permission(self.user3, self.product, Permissions.Product_Delete)
+        self.assertFalse(result)
+
+    @patch('dojo.models.Dojo_Group.objects.filter')
+    def test_user_in_group_with_global_role_success(self, mock_get):
+        mock_get.return_value = {self.group2}
+
+        result = user_has_permission(self.user3, self.product, Permissions.Product_Edit)
         self.assertTrue(result)
