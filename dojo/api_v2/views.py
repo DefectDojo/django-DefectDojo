@@ -1846,7 +1846,9 @@ class ObtainAuthTokenExtended(rest_framework.authtoken.views.ObtainAuthToken):
         if serializer.validated_data.get("target_user"):
             target_user = serializer.validated_data['target_user']
 
-            if not user.is_superuser:
+            # Only superuser and AUTHORIZATION_V2 mode can use this feature
+            # TODO: log action
+            if not user.is_superuser or not  settings.FEATURE_AUTHORIZATION_V2:
                 return Response({'message': 'Action forbidden',
                                  'username': user.username},
                                 status=status.HTTP_403_FORBIDDEN)
