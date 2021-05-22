@@ -313,6 +313,12 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
 
+    def create(self, validated_data):
+        user = User.objects.create(**validated_data)
+        user.set_unusable_password()
+        user.save()
+        return user
+
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
