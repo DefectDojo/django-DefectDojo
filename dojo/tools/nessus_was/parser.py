@@ -102,7 +102,7 @@ class NessusWASXMLParser(object):
         root = nscan.getroot()
 
         if 'NessusClientData_v2' not in root.tag:
-            raise NamespaceErr('This version of Nessus report is not supported. Please make sure the export is '
+            raise ValueError('This version of Nessus report is not supported. Please make sure the export is '
                                'formatted using the NessusClientData_v2 schema.')
         dupes = {}
         for report in root.iter("Report"):
