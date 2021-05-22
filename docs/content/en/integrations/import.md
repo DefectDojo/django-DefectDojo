@@ -210,6 +210,10 @@ Import of JSON report from
 Import JSON container image linter reports
 <https://github.com/goodwithtech/dockle>
 
+### Detect-secrets
+
+Import of JSON report from <https://github.com/Yelp/detect-secrets>
+
 ### ESLint
 
 ESLint Json report format (-f json)
@@ -667,7 +671,6 @@ JSON output of the `twistcli` tool. Example:
 The CSV output from the UI is now also accepted.
 
 ### Visual Code Grepper (VCG)
-
 VCG output can be imported in CSV or Xml formats.
 
 ### Veracode
