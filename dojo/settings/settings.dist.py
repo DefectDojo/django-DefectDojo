@@ -172,7 +172,7 @@ env = environ.Env(
 
     # Feature toggle for new authorization, which is incomplete at the moment.
     # Don't set it to True for productive environments!
-    DD_FEATURE_AUTHORIZATION_V2=(bool, False),
+    DD_FEATURE_AUTHORIZATION_V2=(bool, True),
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
