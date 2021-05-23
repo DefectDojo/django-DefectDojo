@@ -46,7 +46,6 @@ class TestTFSecParser(TestCase):
             self.assertEqual("Username and password authentication methods are less secure", finding.impact)
             self.assertEqual("tfsec-test/cluster.tf", finding.file_path)
             self.assertEqual(52, finding.line)
-            self.assertEqual("google", finding.component_name)
             self.assertEqual("GCP008", finding.vuln_id_from_tool)
             self.assertEqual(1, finding.nb_occurences)
 
