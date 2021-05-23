@@ -60,7 +60,6 @@ class TestTFSecParser(TestCase):
             self.assertEqual("Pods could be operating with more permissions than required to be effective", finding.impact)
             self.assertEqual("tfsec-test/cluster.tf", finding.file_path)
             self.assertEqual(52, finding.line)
-            self.assertEqual("google", finding.component_name)
             self.assertEqual("GCP009", finding.vuln_id_from_tool)
             self.assertEqual(1, finding.nb_occurences)
 
