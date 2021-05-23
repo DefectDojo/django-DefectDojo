@@ -27,8 +27,9 @@ class TerrascanParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
-        if data.get('results').get('violations'):
-            for item in data.get('results').get('violations'):
+        if 'results' not in data and 'violations' not in data.get('results'):
+            raise ValueError("missing mandatory attribute 'results'")
+        for item in data.get('results').get('violations'):
                 rule_name = item.get('rule_name')
                 description = item.get('description')
                 if item.get('severity') in self.SEVERITY:
