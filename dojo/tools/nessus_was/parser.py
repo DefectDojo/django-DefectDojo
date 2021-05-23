@@ -3,10 +3,7 @@ import io
 import logging
 import re
 import sys
-from xml.dom import NamespaceErr
-
 from defusedxml import ElementTree
-
 from dojo.models import Endpoint, Finding, Test
 
 LOGGER = logging.getLogger(__name__)
