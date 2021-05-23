@@ -812,7 +812,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'DSOP Scan': ['cve'],
     'Acunetix Scan': ['title', 'description'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
-    'TFSec Scan': ['severity', 'vuln_id_from_tool', 'component_name', 'file_path', 'line', 'description'],
+    'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line', 'description'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
