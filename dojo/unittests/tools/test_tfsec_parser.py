@@ -87,6 +87,5 @@ class TestTFSecParser(TestCase):
             self.assertEqual("Block attribute could be leaking secrets", finding.impact)
             self.assertEqual("tfsec-test/identity.tf", finding.file_path)
             self.assertEqual(226, finding.line)
-            self.assertEqual("general", finding.component_name)
             self.assertEqual("GEN003", finding.vuln_id_from_tool)
             self.assertEqual(1, finding.nb_occurences)
