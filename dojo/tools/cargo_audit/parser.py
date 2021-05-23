@@ -34,6 +34,10 @@ class CargoAuditParser(object):
                 package_name = item.get('package').get('name')
                 package_version = item.get('package').get('version')
                 severity = "High"
+                if 'keywords' in advisory:
+                    tags = advisory.get('keywords')
+                else:
+                    tags = []
 
                 dupe_key = hashlib.sha256(
                     (vuln_id + cve + date + package_name + package_version).encode('utf-8')
@@ -48,6 +52,7 @@ class CargoAuditParser(object):
                         test=test,
                         severity=severity,
                         cve=cve,
+                        tags=tags,
                         description=description,
                         component_name=package_name,
                         component_version=package_version,
