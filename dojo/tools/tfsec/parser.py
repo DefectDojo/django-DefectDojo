@@ -27,8 +27,9 @@ class TFSecParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = {}
-        if data.get('results'):
-            for item in data['results']:
+        if 'results' not in data:
+            raise ValueError("Incorrect TFSec scan, missing attribute 'results'")
+        for item in data.get('results', []):
                 rule_id = item.get('rule_id')
                 rule_description = item.get('rule_description')
                 rule_provider = item.get('rule_provider')
