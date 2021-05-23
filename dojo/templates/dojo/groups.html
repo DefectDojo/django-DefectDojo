@@ -19,7 +19,7 @@
                             <ul class="dropdown-menu dropdown-menu-right" role="menu"
                                 aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
-                                        <a href="{% url 'add_user' %}">
+                                        <a href="{% url 'add_group' %}">
                                             <i class="fa fa-plus"></i> New Group
                                         </a>
                                     </li>
@@ -55,8 +55,23 @@
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuGroup">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                         <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuGroup">
                                             <li role="presentation">
-                                                <i class="fa fa-list-alt"></i> View</a>
+                                                <a class="" href="{% url 'view_group' g.id %}" id ="viewGroup">
+                                                    <i class="fa fa-list-alt"></i> View
+                                                </a>
                                             </li>
+                                            {% if request.user.is_superuser %}
+                                            <li role="presentation">
+                                                <a class="" href="{% url 'edit_group' g.id %}" id="editGroup">
+                                                    <i class="fa fa-pencil-square-o"></i> Edit </a>
+                                                </a>
+                                            </li>
+                                            <li role="separator" class="divider"></li>
+                                            <li role="presentation">
+                                                <a class="" href="{% url 'delete_group' g.id %}">
+                                                    <i class="fa fa-trash"></i> Delete
+                                                </a>
+                                            </li>
+                                            {% endif %}
                                         </ul>
                                     </li>
                                 </ul>
@@ -68,6 +83,9 @@
                         </tr>
                         {% endfor %}
                     </table>
+                </div>
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=groups page_size=True %}
                 </div>
             {% else %}
                 <h5> No Groups </h5>

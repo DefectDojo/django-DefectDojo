@@ -272,9 +272,7 @@ def user(request):
 @user_passes_test(lambda u: u.is_staff)
 def group(request):
     groups = Dojo_Group.objects.order_by('name')
-    # logger.exception("groups is:" + str(groups))
     paged_groups = get_page_items(request, groups, 25)
-    # logger.exception(paged_groups)
     add_breadcrumb(title="All Groups", top_level=True, request=request)
     return render(request,
                   'dojo/groups.html',
@@ -286,8 +284,22 @@ def group(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def view_group(request, gid):
-    print("lol")
+    print("placeholder")
 
+
+@user_passes_test(lambda u: u.is_superuser)
+def edit_group(request, gid):
+    print("placeholder")
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def delete_group(request, gid):
+    print("placeholder")
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def add_group(request):
+    print("placeholder")
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_user(request):
