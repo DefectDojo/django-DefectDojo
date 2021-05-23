@@ -29,7 +29,9 @@ class TFSecParser(object):
         dupes = {}
         if 'results' not in data:
             raise ValueError("Incorrect TFSec scan, missing attribute 'results'")
-        for item in data.get('results', []):
+        if data.get('results') is None:
+            return list()
+        for item in data.get('results'):
             rule_id = item.get('rule_id')
             rule_description = item.get('rule_description')
             rule_provider = item.get('rule_provider')
