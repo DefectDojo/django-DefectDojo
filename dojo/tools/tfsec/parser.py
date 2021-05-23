@@ -66,7 +66,6 @@ class TFSecParser(object):
                         impact=impact,
                         file_path=file,
                         line=start_line,
-                        component_name=rule_provider,
                         vuln_id_from_tool=rule_id,
                         nb_occurences=1,
                     )
