@@ -1,10 +1,10 @@
 import csv
 import hashlib
 import io
+import json
+
 import hyperlink
-
 from dateutil.parser import parse
-
 from dojo.models import Endpoint, Finding
 
 
@@ -20,7 +20,27 @@ class GenericParser(object):
         return "Import Generic findings in CSV format."
 
     def get_findings(self, filename, test, active=None, verified=None):
+        if filename.name.lower().endswith(".csv"):
+            return self.get_findings_csv(filename, test, active, verified)
+        elif filename.name.lower().endswith(".json"):
+            return self.get_findings_json(filename, test, active, verified)
+        else:  # default to CSV like before
+            return self.get_findings_csv(filename, test, active, verified)
 
+    def get_findings_json(self, filename, test, active=None, verified=None):
+        data = json.load(filename)
+        findings = list()
+        for item in data['findings']:
+            finding = Finding(**item)
+            # manage active/verified overrride
+            if active is not None:
+                finding.active = active
+            if verified is not None:
+                finding.verified = verified
+            findings.append(finding)
+        return findings
+
+    def get_findings_csv(self, filename, test, active=None, verified=None):
         content = filename.read()
         if type(content) is bytes:
             content = content.decode('utf-8')
@@ -64,6 +84,9 @@ class GenericParser(object):
             # FIXME remove this severity hack
             if finding.severity == 'Unknown':
                 finding.severity = 'Info'
+
+            if "CVSSV3" in row:
+                finding.cvssv3 = row["CVSSV3"]
 
             # manage active/verified overrride
             if active:
