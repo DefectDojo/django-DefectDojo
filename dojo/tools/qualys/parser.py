@@ -218,7 +218,7 @@ def parse_finding(host, tree):
                               vuln_id_from_tool=_gid,
                               )
         finding.mitigated = _temp['mitigation_date']
-        finding.is_Mitigated = _temp['mitigated']
+        finding.is_mitigated = _temp['mitigated']
         finding.active = _temp['active']
         if _temp.get('CVSS_vector') is not None:
             finding.cvssv3 = _temp.get('CVSS_vector')

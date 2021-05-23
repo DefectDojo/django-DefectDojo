@@ -23,7 +23,7 @@ import tagulous
 
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, Report, FindingImage, \
+    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, FindingImage, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
@@ -188,7 +188,7 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
     class Meta:
         model = Product_Type
-        fields = []
+        fields = ['id']
 
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
@@ -246,7 +246,7 @@ class Development_EnvironmentForm(forms.ModelForm):
 class Delete_Dev_EnvironmentForm(forms.ModelForm):
     class Meta:
         model = Development_Environment
-        fields = []
+        fields = ['id']
 
 
 class ProductForm(forms.ModelForm):
@@ -297,7 +297,7 @@ class DeleteProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = []
+        fields = ['id']
 
 
 class DeleteFindingGroupForm(forms.ModelForm):
@@ -306,7 +306,7 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Group
-        fields = []
+        fields = ['id']
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
@@ -432,8 +432,17 @@ class ImportScanForm(forms.Form):
                                                         "This affects the whole engagement/product depending on your deduplication scope.",
                                             required=False, initial=False)
 
+    if settings.FEATURE_FINDING_GROUPS:
+        group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
     def __init__(self, *args, **kwargs):
         super(ImportScanForm, self).__init__(*args, **kwargs)
+
+        # couldn't find a cleaner way to add empty default
+        if 'group_by' in self.fields:
+            choices = self.fields['group_by'].choices
+            choices.insert(0, ('', '---------'))
+            self.fields['group_by'].choices = choices
 
     def clean(self):
         cleaned_data = super().clean()
@@ -482,12 +491,21 @@ class ReImportScanForm(forms.Form):
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
 
+    if settings.FEATURE_FINDING_GROUPS:
+        group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
+
     def __init__(self, *args, test=None, **kwargs):
         super(ReImportScanForm, self).__init__(*args, **kwargs)
         self.scan_type = None
         if test:
             self.scan_type = test.test_type.name
             self.fields['tags'].initial = test.tags.all()
+
+        # couldn't find a cleaner way to add empty default
+        if 'group_by' in self.fields:
+            choices = self.fields['group_by'].choices
+            choices.insert(0, ('', '---------'))
+            self.fields['group_by'].choices = choices
 
     def clean(self):
         cleaned_data = super().clean()
@@ -747,9 +765,9 @@ class EngForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        exclude = ('first_contacted', 'eng_type', 'real_start',
+        exclude = ('first_contacted', 'real_start', 'engagement_type',
                    'real_end', 'requester', 'reason', 'updated', 'report_type',
-                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list', 'engagement_type')
+                   'product', 'threat_model', 'api_test', 'pen_test', 'check_list')
 
 
 class DeleteEngagementForm(forms.ModelForm):
@@ -758,7 +776,7 @@ class DeleteEngagementForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        fields = []
+        fields = ['id']
 
 
 class TestForm(forms.ModelForm):
@@ -810,7 +828,7 @@ class DeleteTestForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        fields = []
+        fields = ['id']
 
 
 class AddFindingForm(forms.ModelForm):
@@ -867,7 +885,7 @@ class AddFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
 class AdHocFindingForm(forms.ModelForm):
@@ -919,7 +937,7 @@ class AdHocFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
 class PromoteFindingForm(forms.ModelForm):
@@ -945,7 +963,7 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template', 'endpoint_status'
-                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change')
+                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
 
 
 class SplitDateTimeWidget(forms.MultiWidget):
@@ -995,6 +1013,7 @@ class SplitDateTimeField(forms.MultiValueField):
 
 class FindingForm(forms.ModelForm):
     title = forms.CharField(max_length=1000)
+    group = forms.ModelChoiceField(required=False, queryset=Finding_Group.objects.none(), help_text='The Finding Group to which this finding belongs, leave empty to remove the finding from the group. Groups can only be created via Bulk Edit for now.')
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}))
     cwe = forms.IntegerField(required=False)
@@ -1023,7 +1042,7 @@ class FindingForm(forms.ModelForm):
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ('title', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
                    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
                    'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
@@ -1071,6 +1090,12 @@ class FindingForm(forms.ModelForm):
             del self.fields['mitigated']
             del self.fields['mitigated_by']
 
+        if not settings.FEATURE_FINDING_GROUPS or not hasattr(self.instance, 'test'):
+            del self.fields['group']
+        else:
+            self.fields['group'].queryset = self.instance.test.finding_group_set.all()
+            self.fields['group'].initial = self.instance.finding_group
+
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
 
@@ -1101,7 +1126,7 @@ class FindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
 class StubFindingForm(forms.ModelForm):
@@ -1111,7 +1136,7 @@ class StubFindingForm(forms.ModelForm):
         model = Stub_Finding
         order = ('title',)
         exclude = (
-            'date', 'description', 'severity', 'reporter', 'test', 'is_Mitigated')
+            'date', 'description', 'severity', 'reporter', 'test', 'is_mitigated')
 
     def clean(self):
         cleaned_data = super(StubFindingForm, self).clean()
@@ -1159,7 +1184,7 @@ class ApplyFindingTemplateForm(forms.Form):
 
     class Meta:
         fields = ['title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'mitigation', 'impact', 'references', 'tags']
-        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact', 'is_Mitigated')
+        order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact', 'is_mitigated')
 
 
 class FindingTemplateForm(forms.ModelForm):
@@ -1185,7 +1210,7 @@ class FindingTemplateForm(forms.ModelForm):
     class Meta:
         model = Finding_Template
         order = ('title', 'cwe', 'cve', 'cvssv3', 'severity', 'description', 'impact')
-        exclude = ('numerical_severity', 'is_Mitigated', 'last_used', 'endpoint_status')
+        exclude = ('numerical_severity', 'is_mitigated', 'last_used', 'endpoint_status')
 
 
 class DeleteFindingTemplateForm(forms.ModelForm):
@@ -1194,7 +1219,7 @@ class DeleteFindingTemplateForm(forms.ModelForm):
 
     class Meta:
         model = Finding_Template
-        fields = []
+        fields = ['id']
 
 
 class FindingBulkUpdateForm(forms.ModelForm):
@@ -1209,6 +1234,8 @@ class FindingBulkUpdateForm(forms.ModelForm):
     finding_group_add = forms.BooleanField(required=False)
     add_to_finding_group = forms.BooleanField(required=False)
     finding_group_remove = forms.BooleanField(required=False)
+    finding_group_by = forms.BooleanField(required=False)
+    finding_group_by_option = forms.CharField(required=False)
 
     push_to_jira = forms.BooleanField(required=False)
     # unlink_from_jira = forms.BooleanField(required=False)
@@ -1234,7 +1261,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = ('severity', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'is_Mitigated')
+        fields = ('severity', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope', 'is_mitigated')
 
 
 class EditEndpointForm(forms.ModelForm):
@@ -1418,7 +1445,7 @@ class DeleteEndpointForm(forms.ModelForm):
 
     class Meta:
         model = Endpoint
-        fields = []
+        fields = ['id']
 
 
 class NoteForm(forms.ModelForm):
@@ -1448,7 +1475,7 @@ class DeleteNoteForm(forms.ModelForm):
 
     class Meta:
         model = Notes
-        fields = []
+        fields = ['id']
 
 
 class CloseFindingForm(forms.ModelForm):
@@ -1628,7 +1655,7 @@ class DeleteUserForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = []
+        fields = ['id']
 
 
 class UserContactInfoForm(forms.ModelForm):
@@ -1683,19 +1710,7 @@ class CustomReportOptionsForm(forms.Form):
     report_name = forms.CharField(required=False, max_length=100)
     include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
     include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    if settings.FEATURE_REPORTS_PDF_LIST:
-        report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc'), ('PDF', 'PDF')))
-    else:
-        report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
-
-
-class DeleteReportForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Report
-        fields = []
+    report_type = forms.ChoiceField(choices=(('HTML', 'HTML'), ('AsciiDoc', 'AsciiDoc')))
 
 
 class DeleteFindingForm(forms.ModelForm):
@@ -1704,7 +1719,7 @@ class DeleteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        fields = []
+        fields = ['id']
 
 
 class FindingFormID(forms.ModelForm):
@@ -1722,7 +1737,7 @@ class DeleteStubFindingForm(forms.ModelForm):
 
     class Meta:
         model = Stub_Finding
-        fields = []
+        fields = ['id']
 
 
 class AddFindingImageForm(forms.ModelForm):
@@ -1755,7 +1770,7 @@ class DeleteGITHUBConfForm(forms.ModelForm):
 
     class Meta:
         model = GITHUB_Conf
-        fields = []
+        fields = ['id']
 
 
 class ExpressGITHUBForm(forms.ModelForm):
@@ -1870,7 +1885,7 @@ class DeleteBenchmarkForm(forms.ModelForm):
 
     class Meta:
         model = Benchmark_Product_Summary
-        fields = []
+        fields = ['id']
 
 
 # class JIRA_ProjectForm(forms.ModelForm):
@@ -1903,7 +1918,7 @@ class DeleteJIRAInstanceForm(forms.ModelForm):
 
     class Meta:
         model = JIRA_Instance
-        fields = []
+        fields = ['id']
 
 
 class ToolTypeForm(forms.ModelForm):
@@ -1965,7 +1980,7 @@ class DeleteObjectsSettingsForm(forms.ModelForm):
 
     class Meta:
         model = Objects_Product
-        fields = []
+        fields = ['id']
 
 
 class DeleteToolProductSettingsForm(forms.ModelForm):
@@ -1974,7 +1989,7 @@ class DeleteToolProductSettingsForm(forms.ModelForm):
 
     class Meta:
         model = Tool_Product_Settings
-        fields = []
+        fields = ['id']
 
 
 class ToolProductSettingsForm(forms.ModelForm):
@@ -2058,7 +2073,7 @@ class DeleteEngagementPresetsForm(forms.ModelForm):
 
     class Meta:
         model = Engagement_Presets
-        fields = []
+        fields = ['id']
 
 
 class SystemSettingsForm(forms.ModelForm):
@@ -2134,7 +2149,7 @@ class DeleteRuleForm(forms.ModelForm):
 
     class Meta:
         model = Rule
-        fields = []
+        fields = ['id']
 
 
 class CredUserForm(forms.ModelForm):
@@ -2197,8 +2212,7 @@ class JIRAProjectForm(forms.ModelForm):
                 # once a jira project config is attached to an engagement, we can't go back to inheriting
                 # because the config needs to remain in place for the existing jira issues
                 self.fields['inherit_from_product'].disabled = True
-                self.fields['inherit_from_product'].help_text = 'Once an engagement has a JIRA Project stored, you can no   t switch back to inheritance to avoid breaking existing JIRA issues'
-
+                self.fields['inherit_from_product'].help_text = 'Once an engagement has a JIRA Project stored, you cannot switch back to inheritance to avoid breaking existing JIRA issues'
                 self.fields['jira_instance'].disabled = False
                 self.fields['project_key'].disabled = False
                 self.fields['issue_template_dir'].disabled = False
@@ -2294,7 +2308,11 @@ class JIRAFindingForm(forms.Form):
         super(JIRAFindingForm, self).__init__(*args, **kwargs)
         self.fields['push_to_jira'] = forms.BooleanField()
         self.fields['push_to_jira'].required = False
-        self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
+        if settings.FEATURE_FINDING_GROUPS:
+            self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one. If this finding is part of a Finding Group, the group will pushed instead of the finding."
+        else:
+            self.fields['push_to_jira'].help_text = "Checking this will overwrite content of your JIRA issue, or create one."
+
         self.fields['push_to_jira'].label = "Push to JIRA"
         if self.push_all:
             # This will show the checkbox as checked and greyed out, this way the user is aware
@@ -2309,8 +2327,10 @@ class JIRAFindingForm(forms.Form):
             if hasattr(self.instance, 'has_jira_issue') and self.instance.has_jira_issue:
                 self.initial['jira_issue'] = self.instance.jira_issue.jira_key
                 self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
-
-        self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue'})
+        if settings.FEATURE_FINDING_GROUPS:
+            self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding, or the group this finding is in.'})
+        else:
+            self.fields['jira_issue'].widget = forms.TextInput(attrs={'placeholder': 'Leave empty and check push to jira to create a new JIRA issue for this finding.'})
 
         if self.instance and self.instance.has_jira_group_issue:
             self.fields['push_to_jira'].widget.attrs['checked'] = 'checked'
@@ -2444,7 +2464,7 @@ class GoogleSheetFieldsForm(forms.Form):
         self.credentials_required = kwargs.pop('credentials_required')
         options = ((0, 'Hide'), (100, 'Small'), (200, 'Medium'), (400, 'Large'))
         protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
-                   'review_requested_by', 'is_Mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'is_template']
+                   'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'is_template']
         self.all_fields = kwargs.pop('all_fields')
         super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
         if not self.credentials_required:
@@ -2689,7 +2709,7 @@ class Delete_Questionnaire_Form(forms.ModelForm):
 
     class Meta:
         model = Answered_Survey
-        fields = []
+        fields = ['id']
 
 
 class DeleteGeneralQuestionnaireForm(forms.ModelForm):
@@ -2698,7 +2718,7 @@ class DeleteGeneralQuestionnaireForm(forms.ModelForm):
 
     class Meta:
         model = General_Survey
-        fields = []
+        fields = ['id']
 
 
 class Delete_Eng_Survey_Form(forms.ModelForm):
@@ -2707,7 +2727,7 @@ class Delete_Eng_Survey_Form(forms.ModelForm):
 
     class Meta:
         model = Engagement_Survey
-        fields = []
+        fields = ['id']
 
 
 class CreateQuestionnaireForm(forms.ModelForm):
