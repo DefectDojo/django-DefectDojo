@@ -73,7 +73,6 @@ class TestTFSecParser(TestCase):
             self.assertEqual("Node identity and integrity can't be verified without shielded GKE nodes", finding.impact)
             self.assertEqual("tfsec-test/cluster.tf", finding.file_path)
             self.assertEqual(52, finding.line)
-            self.assertEqual("google", finding.component_name)
             self.assertEqual("GCP010", finding.vuln_id_from_tool)
             self.assertEqual(1, finding.nb_occurences)
 
