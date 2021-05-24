@@ -259,6 +259,7 @@ class BaseClass():
             for id in ids:
                 print('id:', id)
                 response = self.client.get(format_url(f"/{self.viewname}/{id}/"), extra_args)
+                print('response type:', type(response))
                 print('response data:', response.data)
                 check_response_valid(status.HTTP_200_OK, response)
                 obj = response.data

@@ -601,6 +601,8 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy.',
     'VERSION': '2.0.0',
     # OTHER SETTINGS
+    # the following set to False could help some client generators
+    # 'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
 }
 
 # ------------------------------------------------------------------------------

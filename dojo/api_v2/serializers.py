@@ -241,7 +241,7 @@ class RequestResponseSerializerField(serializers.ListSerializer):
         self.pretty_print = pretty_print
 
     def to_internal_value(self, data):
-        print('to_internal_value start: ', data)
+        # print('to_internal_value start: ', data)
         if isinstance(data, six.string_types):
             if not data:
                 data = []
@@ -253,7 +253,7 @@ class RequestResponseSerializerField(serializers.ListSerializer):
         if not isinstance(data, list):
             self.fail('not_a_list', input_type=type(data).__name__)
         for s in data:
-            print('s: ', s)
+            # print('s: ', s)
             if not isinstance(s, dict):
                 self.fail('not_a_dict', input_type=type(s).__name__)
 
@@ -266,8 +266,8 @@ class RequestResponseSerializerField(serializers.ListSerializer):
                 self.fail('not_a_str', input_type=type(request).__name__)
 
             self.child.run_validation(s)
-        print('to_internal_value:')
-        print(data)
+        # print('to_internal_value:')
+        # print(data)
         return data
 
     def to_representation(self, value):
@@ -279,8 +279,8 @@ class RequestResponseSerializerField(serializers.ListSerializer):
                 else:
                     burps = value.all()
                 value = [{'request': burp.get_request(), 'response': burp.get_response()} for burp in burps]
-        print('to_presentation:')
-        print(value)
+        # print('to_presentation:')
+        # print(value)
 
         return value
 

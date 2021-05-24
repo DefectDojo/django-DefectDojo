@@ -1,3 +1,6 @@
+from collections import OrderedDict
+from drf_spectacular.drainage import GENERATOR_STATS
+# from drf_spectacular.renderers import OpenApiJsonRenderer
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
@@ -22,11 +25,41 @@ from rest_framework.mixins import \
     ListModelMixin, RetrieveModelMixin, CreateModelMixin, \
     DestroyModelMixin, UpdateModelMixin
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
+from drf_spectacular.settings import spectacular_settings
 import logging
 import pathlib
 
 
 logger = logging.getLogger(__name__)
+
+BASE_API_URL = "/api/v2"
+
+TYPE_OBJECT = "object"  #:
+TYPE_STRING = "string"  #:
+TYPE_NUMBER = "number"  #:
+TYPE_INTEGER = "integer"  #:
+TYPE_BOOLEAN = "boolean"  #:
+TYPE_ARRAY = "array"  #:
+TYPE_FILE = "file"  #:
+
+
+def get_open_api3_json_schema():
+    generator_class = spectacular_settings.DEFAULT_GENERATOR_CLASS
+    generator = generator_class()
+    schema = generator.get_schema(request=None, public=True)
+    GENERATOR_STATS.emit_summary()
+
+    from drf_spectacular.validation import validate_schema
+    validate_schema(schema)
+
+    # print('schema:')
+    # print(schema)
+
+    return schema
+
+    # renderer = OpenApiJsonRenderer()
+    # output = renderer.render(schema, renderer_context={})
+    # return output
 
 
 def skipIfNotSubclass(baseclass):
@@ -40,6 +73,204 @@ def skipIfNotSubclass(baseclass):
     return decorate
 
 
+# def testIsBroken(method):
+#     return tag("broken")(method)
+
+
+def check_response_valid(expected_code, response):
+    def _data_to_str(response):
+        if hasattr(response, "data"):
+            return response.data
+        return None
+
+    assert response.status_code == expected_code, \
+        f"Response invalid, returned with code {response.status_code}\nResponse Data:\n{_data_to_str(response)}"
+
+
+def format_url(path):
+    return f"{BASE_API_URL}{path}"
+
+
+class SchemaChecker():
+    def __init__(self, components):
+        self._prefix = []
+        self._has_failed = False
+        self._components = components
+        self._errors = []
+
+    def _register_error(self, error):
+        self._errors += [error]
+
+    def _check_or_fail(self, condition, message):
+        if not condition:
+            self._has_failed = True
+            self._register_error(message)
+            print(message)
+            raise ValueError('valentijn')
+
+    def _get_prefix(self):
+        return '#'.join(self._prefix)
+
+    def _push_prefix(self, prefix):
+        self._prefix += [prefix]
+
+    def _pop_prefix(self):
+        self._prefix = self._prefix if len(self._prefix) == 0 else self._prefix[:-1]
+
+    def _resolve_if_ref(self, schema):
+        if '$ref' not in schema:
+            return schema
+
+        ref_name = schema["$ref"]
+        ref_name = ref_name[ref_name.rfind("/") + 1:]
+        return self._components['schemas'][ref_name]
+
+    def _check_has_required_fields(self, required_fields, obj):
+        if not required_fields:
+            print('no required fields')
+
+        for required_field in required_fields:
+            # passwords are writeOnly, but this is not supported by Swagger / OpenAPIv2
+            # TODO check this for OpenAPI3
+            if required_field != 'password':
+                print('checking field: ', required_field)
+                field = f"{self._get_prefix()}#{required_field}"
+                self._check_or_fail(obj is not None and required_field in obj, f"{field} is required but was not returned")
+
+    def _check_type(self, schema, obj):
+        if 'type' not in schema:
+            # TODO implement OneOf / AllOff  (enums)
+            # Engagement
+            # "status": {
+            #     "nullable": true,
+            #     "oneOf": [
+            #         {
+            #             "$ref": "#/components/schemas/StatusEnum"
+            #         },
+            #         {
+            #             "$ref": "#/components/schemas/NullEnum"
+            #         }
+            #     ]
+            # },
+
+            # "StatusEnum": {
+            #     "enum": [
+            #         "Not Started",
+            #         "Blocked",
+            #         "Cancelled",
+            #         "Completed",
+            #         "In Progress",
+            #         "On Hold",
+            #         "Waiting for Resource"
+            #     ],
+            #     "type": "string"
+            # },
+            return schema
+        schema_type = schema["type"]
+        # print(schema)
+        is_nullable = schema.get("x-nullable", False) or schema.get("readOnly", False)
+
+        def _check_helper(check):
+            self._check_or_fail(check, f"{self._get_prefix()} should be of type {schema_type} but value was of type {type(obj)}")
+
+        if obj is None:
+            self._check_or_fail(is_nullable, f"{self._get_prefix()} is not nullable yet the value returned was null")
+        elif schema_type is TYPE_BOOLEAN:
+            _check_helper(isinstance(obj, bool))
+        elif schema_type is TYPE_INTEGER:
+            _check_helper(isinstance(obj, int))
+        elif schema_type is TYPE_NUMBER:
+            _check_helper(obj.isdecimal())
+        elif schema_type is TYPE_ARRAY:
+            _check_helper(isinstance(obj, list))
+        elif schema_type is TYPE_OBJECT:
+            _check_helper(isinstance(obj, OrderedDict) or isinstance(obj, dict))
+        elif schema_type is TYPE_STRING:
+            _check_helper(isinstance(obj, str))
+        else:
+            # Default case
+            _check_helper(False)
+
+        # print('_check_type ok for: %s: %s' % (schema, obj))
+
+    def _with_prefix(self, prefix, callable, *args):
+        self._push_prefix(prefix)
+        callable(*args)
+        self._pop_prefix()
+
+    def check(self, schema, obj):
+        def _check(schema, obj):
+            print('schema to check:')
+            print(schema)
+            schema = self._resolve_if_ref(schema)
+            print('resolved schema to check:')
+            print(schema)
+            self._check_type(schema, obj)
+
+            # print('type check ok')
+
+            required_fields = schema.get("required", [])
+            self._check_has_required_fields(required_fields, obj)
+
+            # print('required fields ok')
+
+            if obj is None:
+                return
+
+            properties = schema.get("properties", None)
+            print(properties)
+            if not properties:
+                print('no properties')
+
+            if properties is not None:
+                for name, prop in properties.items():
+
+                    # TODO tags is of type TagList
+                    # {'type': 'array', 'items': {'type': 'string'}}
+                    # schema to check:
+                    # {'type': 'string'}
+                    # item3#item0 should be of type string but value was of type <class 'dojo.api_v2.serializers.TagList'>
+
+                    # TODO request_response mimic from swagger
+                    # checking child:  request_response {'req_resp': []}
+                    # schema to check:
+                    # {'type': 'string', 'readOnly': True}
+                    # resolved schema to check:
+                    # {'type': 'string', 'readOnly': True}
+                    # should be of type string but value was of type <class 'rest_framework.utils.serializer_helpers.ReturnDict'>
+
+                    if name not in ['tags', 'request_response']:
+                        obj_child = obj.get(name, None)
+                        if obj_child is not None:
+                            print('checking child: ', name, obj_child)
+                            # self._with_prefix(name, _check, prop, obj_child)
+                            _check(prop, obj_child)
+
+                for child_name in obj.keys():
+                    # TODO prefetch mixins not picked up by spectcular?
+                    if child_name not in ['prefetch']:
+                        if child_name not in properties.keys():
+                            self._has_failed = True
+                            self._register_error(f'unexpected property "{child_name}" found')
+
+            additional_properties = schema.get("additionalProperties", None)
+            if additional_properties is not None:
+                for name, obj_child in obj.items():
+                    self._with_prefix(f"additionalProp<{name}>", _check, additional_properties, obj_child)
+
+            # TODO implement support for enum / OneOff / AllOff
+            if 'type' in schema and schema["type"] is TYPE_ARRAY:
+                items_schema = schema["items"]
+                for index in range(len(obj)):
+                    self._with_prefix(f"item{index}", _check, items_schema, obj[index])
+
+        self._has_failed = False
+        self._errors = []
+        self._prefix = []
+        _check(schema, obj)
+        assert not self._has_failed, "\n" + '\n'.join(self._errors) + "\nFailed with " + str(len(self._errors)) + " errors"
+
+
 class BaseClass():
     class RESTEndpointTest(DojoAPITestCase):
         def __init__(self, *args, **kwargs):
@@ -51,9 +282,55 @@ class BaseClass():
             self.client = APIClient()
             self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
             self.url = reverse(self.viewname + '-list')
+            self.schema = get_open_api3_json_schema()
+
+        def check_schema(self, schema, obj):
+            schema_checker = SchemaChecker(self.schema["components"])
+            # print(vars(schema_checker))
+            schema_checker.check(schema, obj)
+
+        # def get_valid_object_id(self):
+        #     response = self.client.get(format_url(f"/{self.viewname}/"))
+        #     check_response_valid(status.HTTP_200_OK, response)
+        #     if len(response.data["results"]) == 0:
+        #         return None
+
+        #     return response.data["results"][0].get('id', None)
+
+        def get_endpoint_schema(self, path, method):
+            paths = self.schema["paths"]
+            methods = paths.get(path, None)
+            assert methods is not None, f"{path} not found in {[path for path in paths.keys()]}"
+
+            endpoint = methods.get(method, None)
+            assert endpoint is not None, f"Method {method} not found in {[method for method in methods.keys()]}"
+
+            return endpoint
+
+        def check_schema_response(self, method, status_code, response, detail=False):
+            detail_path = '{id}/' if detail else ''
+            endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/{detail_path}")]
+            schema = endpoints_schema[method]['responses'][status_code]['content']['application/json']['schema']
+            print('schema:')
+            print(schema)
+            obj = response.data
+            self.check_schema(schema, obj)
+
+        # def construct_response_data(self, obj_id):
+        #     obj = self.model.objects.get(id=obj_id)
+        #     request = APIView().initialize_request(APIRequestFactory().request())
+        #     serialized_obj = self.serializer(context={"request": request}).to_representation(obj)
+
+        #     for name, transformer in self.field_transformers.items():
+        #         serialized_obj[name] = transformer(serialized_obj[name])
+
+        #     return serialized_obj
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list(self):
+            # print(open_api3_json_schema)
+            # validator = ResponseValidator(spec)
+
             check_for_tags = False
             if hasattr(self.endpoint_model, 'tags') and self.payload and self.payload.get('tags', None):
                 # create a new instance first to make sure there's at least 1 instance with tags set by payload to trigger tag handling code
@@ -67,6 +344,11 @@ class BaseClass():
                 check_for_tags = self.payload.get('tags', None)
 
             response = self.client.get(self.url, format='json')
+            print('response')
+            print(vars(response))
+
+            print('response.data')
+            print(response.data)
             # tags must be present in last entry, the one we created
             if check_for_tags:
                 tags_found = False
@@ -81,6 +363,16 @@ class BaseClass():
                 self.assertTrue(tags_found)
 
             self.assertEqual(200, response.status_code, response.content[:1000])
+
+            self.check_schema_response('get', '200', response)
+
+            # endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/")]
+            # schema = endpoints_schema['get']['responses']['200']['content']['application/json']['schema']
+            # print('schema:')
+            # print(schema)
+            # obj = response.data
+
+            # self.check_schema(schema, obj)
 
         @skipIfNotSubclass(CreateModelMixin)
         def test_create(self):
@@ -98,6 +390,16 @@ class BaseClass():
                     # logger.debug('looking for tag %s in tag list %s', tag, response.data['tags'])
                     self.assertTrue(tag in response.data['tags'])
 
+            self.check_schema_response('post', '201', response)
+
+            # endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/")]
+            # schema = endpoints_schema['post']['responses']['201']['content']['application/json']['schema']
+            # print('schema:')
+            # print(schema)
+            # obj = response.data
+
+            # self.check_schema(schema, obj)
+
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail(self):
             current_objects = self.client.get(self.url, format='json').data
@@ -109,6 +411,8 @@ class BaseClass():
             self.assertFalse('password' in response.data)
             self.assertFalse('ssh' in response.data)
             self.assertFalse('api_key' in response.data)
+
+            self.check_schema_response('get', '200', response, detail=True)
 
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete(self):
@@ -122,8 +426,12 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.patch(relative_url, self.update_fields)
+            print('patch response.data')
+            print(response.data)
 
             self.assertEqual(200, response.status_code, response.content[:1000])
+
+            self.check_schema_response('patch', '200', response, detail=True)
 
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
@@ -144,6 +452,10 @@ class BaseClass():
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code, response.content[:1000])
+            print('put response.data')
+            print(response.data)
+
+            self.check_schema_response('put', '200', response, detail=True)
 
         @skipIfNotSubclass(PrefetchRetrieveMixin)
         def test_detail_prefetch(self):
@@ -170,6 +482,8 @@ class BaseClass():
 
                 for value in values:
                     self.assertTrue(value in obj["prefetch"][field])
+
+            # TODO add schema check
 
         @skipIfNotSubclass(PrefetchListMixin)
         def test_list_prefetch(self):
@@ -198,12 +512,15 @@ class BaseClass():
                             value = value['id']
                         self.assertTrue(value in objs["prefetch"][field])
 
+            # TODO add schema check
+
 
 class AppAnalysisTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = App_Analysis
+        self.endpoint_path = 'technologies'
         self.viewname = 'app_analysis'
         self.viewset = AppAnalysisViewSet
         self.payload = {
@@ -226,6 +543,7 @@ class EndpointStatusTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Endpoint_Status
+        self.endpoint_path = 'endpoint_status'
         self.viewname = 'endpoint_status'
         self.viewset = EndpointStatusViewSet
         self.payload = {
@@ -246,6 +564,7 @@ class EndpointTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Endpoint
+        self.endpoint_path = 'endpoints'
         self.viewname = 'endpoint'
         self.viewset = EndPointViewSet
         self.payload = {
@@ -266,6 +585,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Engagement
+        self.endpoint_path = 'engagements'
         self.viewname = 'engagement'
         self.viewset = EngagementViewSet
         self.payload = {
@@ -353,6 +673,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Finding
+        self.endpoint_path = 'findings'
         self.viewname = 'finding'
         self.viewset = FindingViewSet
         self.payload = {
@@ -424,12 +745,14 @@ class FindingMetadataTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Finding
+        self.endpoint_path = 'findings'
         self.viewname = 'finding'
         self.viewset = FindingViewSet
         self.payload = {}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def setUp(self):
+        super().setUp()
         testuser = User.objects.get(username='admin')
         token = Token.objects.get(user=testuser)
         self.client = APIClient()
@@ -482,6 +805,7 @@ class FindingTemplatesTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Finding_Template
+        self.endpoint_path = 'finding_templates'
         self.viewname = 'finding_template'
         self.viewset = FindingTemplatesViewSet
         self.payload = {
@@ -502,6 +826,7 @@ class JiraInstancesTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = JIRA_Instance
+        self.endpoint_path = 'jira_instances'
         self.viewname = 'jira_instance'
         self.viewset = JiraInstanceViewSet
         self.payload = {
@@ -529,6 +854,7 @@ class JiraIssuesTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = JIRA_Issue
+        self.endpoint_path = 'jira_finding_mappings'
         self.viewname = 'jira_issue'
         self.viewset = JiraIssuesViewSet
         self.payload = {
@@ -546,6 +872,7 @@ class JiraProjectTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = JIRA_Project
+        self.endpoint_path = 'jira_projects'
         self.viewname = 'jira_project'
         self.viewset = JiraProjectViewSet
         self.payload = {
@@ -566,6 +893,7 @@ class SonarqubeIssueTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Sonarqube_Issue
+        self.endpoint_path = 'sonarqube_issues'
         self.viewname = 'sonarqube_issue'
         self.viewset = SonarqubeIssueViewSet
         self.payload = {
@@ -582,6 +910,7 @@ class SonarqubeIssuesTransitionTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Sonarqube_Issue_Transition
+        self.endpoint_path = 'sonarqube_transitions'
         self.viewname = 'sonarqube_issue_transition'
         self.viewset = SonarqubeIssuesTransitionTest
         self.payload = {
@@ -599,6 +928,7 @@ class SonarqubeProductTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Sonarqube_Product
+        self.endpoint_path = 'sonarqube_product_configurations'
         self.viewname = 'sonarqube_product'
         self.viewset = JiraProjectViewSet
         self.payload = {
@@ -615,6 +945,7 @@ class ProductTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Product
+        self.endpoint_path = 'products'
         self.viewname = 'product'
         self.viewset = ProductViewSet
         self.payload = {
@@ -636,6 +967,7 @@ class StubFindingsTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Stub_Finding
+        self.endpoint_path = 'stub_findings'
         self.viewname = 'stub_finding'
         self.viewset = StubFindingsViewSet
         self.payload = {
@@ -655,6 +987,7 @@ class TestsTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Test
+        self.endpoint_path = 'tests'
         self.viewname = 'test'
         self.viewset = TestsViewSet
         self.payload = {
@@ -683,6 +1016,7 @@ class ToolConfigurationsTest(BaseClass.RESTEndpointTest):
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Tool_Configuration
         self.viewname = 'tool_configuration'
+        self.endpoint_path = 'tool_configurations'
         self.viewset = ToolConfigurationsViewSet
         self.payload = {
             "configuration_url": "http://www.example.com",
@@ -705,6 +1039,7 @@ class ToolProductSettingsTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Tool_Product_Settings
+        self.endpoint_path = 'tool_product_settings'
         self.viewname = 'tool_product_settings'
         self.viewset = ToolProductSettingsViewSet
         self.payload = {
@@ -723,6 +1058,7 @@ class ToolTypesTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Tool_Type
+        self.endpoint_path = 'tool_types'
         self.viewname = 'tool_type'
         self.viewset = ToolTypesViewSet
         self.payload = {
@@ -738,6 +1074,7 @@ class NoteTypesTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Note_Type
+        self.endpoint_path = 'note_types'
         self.viewname = 'note_type'
         self.viewset = NoteTypeViewSet
         self.payload = {
@@ -756,6 +1093,7 @@ class NotesTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Notes
+        self.endpoint_path = 'notes'
         self.viewname = 'notes'
         self.viewset = NotesViewSet
         self.payload = {
@@ -773,6 +1111,7 @@ class UsersTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = User
+        self.endpoint_path = 'users'
         self.viewname = 'user'
         self.viewset = UsersViewSet
         self.payload = {
@@ -811,6 +1150,7 @@ class ImportScanTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Test
+        self.endpoint_path = 'import-scan'
         self.viewname = 'importscan'
         self.viewset = ImportScanView
         self.payload = {
@@ -852,3 +1192,4 @@ class ReimportScanTest(DojoAPITestCase):
             })
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code, response.content[:1000])
+        # TODO add schema check

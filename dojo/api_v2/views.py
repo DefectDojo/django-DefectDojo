@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.utils.decorators import method_decorator
+from drf_yasg.inspectors.base import NotHandled
+from drf_yasg.inspectors.query import CoreAPICompatInspector
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from django.db import IntegrityError
@@ -113,10 +115,6 @@ class EndpointStatusViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-@method_decorator(name='list', decorator=swagger_auto_schema(
-    operation_description="valentijns verified list operation",
-    parameters={}
-))
 class EngagementViewSet(mixins.ListModelMixin,
                         mixins.RetrieveModelMixin,
                         mixins.UpdateModelMixin,
@@ -891,6 +889,27 @@ class DojoMetaViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
+# @method_decorator(name='list', decorator=swagger_auto_schema(
+#     operation_description="valentijns verified list operation",
+#     parameters={}
+# ))
+class DjangoFilterDescriptionInspector(CoreAPICompatInspector):
+    def get_filter_parameters(self, filter_backend):
+        if isinstance(filter_backend, DjangoFilterBackend):
+            result = super(DjangoFilterDescriptionInspector, self).get_filter_parameters(filter_backend)
+            for param in result:
+                print('param: ', param)
+                if not param.get('description', ''):
+                    param.description = "Filter the returned list by {field_name}".format(field_name=param.name)
+
+            return result
+
+        return NotHandled
+
+
+@method_decorator(name='list', decorator=swagger_auto_schema(
+    filter_inspectors=[DjangoFilterDescriptionInspector]
+))
 class ProductViewSet(prefetch.PrefetchListMixin,
                      prefetch.PrefetchRetrieveMixin,
                      mixins.CreateModelMixin,
@@ -910,6 +929,13 @@ class ProductViewSet(prefetch.PrefetchListMixin,
 
     def get_queryset(self):
         return get_authorized_products(Permissions.Product_View).distinct()
+
+    # def list(self, request):
+    #     print(vars(request))
+    #     # Note the use of `get_queryset()` instead of `self.queryset`
+    #     queryset = self.get_queryset()
+    #     serializer = self.serializer_class(queryset, many=True)
+    #     return Response(serializer.data)
 
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
