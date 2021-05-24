@@ -1074,7 +1074,7 @@ class NoteTypesTest(BaseClass.RESTEndpointTest):
 
     def __init__(self, *args, **kwargs):
         self.endpoint_model = Note_Type
-        self.endpoint_path = 'note_types'
+        self.endpoint_path = 'note_type'
         self.viewname = 'note_type'
         self.viewset = NoteTypeViewSet
         self.payload = {
