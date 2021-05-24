@@ -652,6 +652,10 @@ JSON report of SSLyze version 3 scan
 
 Import CSV output of testssl scan report.
 
+### Terrascan
+
+Import JSON output of terrascan scan report <https://github.com/accurics/terrascan>
+
 ### Trivy
 
 JSON report of [trivy scanner](https://github.com/aquasecurity/trivy).
