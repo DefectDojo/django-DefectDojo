@@ -35,6 +35,7 @@ from dojo.search.urls import urlpatterns as search_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.user.urls import urlpatterns as user_urls
+from dojo.group.urls import urlpatterns as group_urls
 from dojo.jira_link.urls import urlpatterns as jira_urls
 from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
@@ -109,6 +110,7 @@ ur += search_urls
 ur += test_type_urls
 ur += test_urls
 ur += user_urls
+ur += group_urls
 ur += jira_urls
 ur += github_urls
 ur += tool_type_urls
