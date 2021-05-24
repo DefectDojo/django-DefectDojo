@@ -380,6 +380,12 @@ class UserContactInfo(models.Model):
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
+class Dojo_Group(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True)
+    users = models.ManyToManyField(Dojo_User, blank=True)
+
+
 class Contact(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
@@ -451,6 +457,7 @@ class Product_Type(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
     authorized_users = models.ManyToManyField(User, blank=True)
     members = models.ManyToManyField(Dojo_User, through='Product_Type_Member', related_name='prod_type_members', blank=True)
+    authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Type_Group', related_name='product_type_groups', blank=True)
 
     @cached_property
     def critical_present(self):
@@ -652,6 +659,7 @@ class Product(models.Model):
     tid = models.IntegerField(default=0, editable=False)
     authorized_users = models.ManyToManyField(User, blank=True)
     members = models.ManyToManyField(Dojo_User, through='Product_Member', related_name='product_members', blank=True)
+    authorization_groups = models.ManyToManyField(Dojo_Group, through='Product_Group', related_name='product_groups', blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     # Metadata
@@ -668,7 +676,7 @@ class Product(models.Model):
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this product. Choose from the list or add new tags. Press Enter key to add.")
 
     enable_simple_risk_acceptance = models.BooleanField(default=False, help_text=_('Allows simple risk acceptance by checking/unchecking a checkbox.'))
-    enable_full_risk_acceptance = models.BooleanField(default=True, help_text=_('Allows full risk acceptanc using a risk acceptance form, expiration date, uploaded proof, etc.'))
+    enable_full_risk_acceptance = models.BooleanField(default=True, help_text=_('Allows full risk acceptance using a risk acceptance form, expiration date, uploaded proof, etc.'))
 
     def __str__(self):
         return self.name
@@ -800,9 +808,21 @@ class Product_Member(models.Model):
     role = models.IntegerField(default=0)
 
 
+class Product_Group(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
+    role = models.IntegerField(default=0)
+
+
 class Product_Type_Member(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    role = models.IntegerField(default=0)
+
+
+class Product_Type_Group(models.Model):
+    product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
     role = models.IntegerField(default=0)
 
 
@@ -2951,7 +2971,6 @@ class Notifications(models.Model):
     engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, help_text='Triggered whenever an (re-)import has been done that created/updated/closed findings.')
-    report_created = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True, verbose_name="JIRA problems", help_text="JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe")
     upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
     stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default='alert', blank=True)
@@ -2998,7 +3017,6 @@ class Notifications(models.Model):
                 result.engagement_added = merge_sets_safe(result.engagement_added, notifications.engagement_added)
                 result.test_added = merge_sets_safe(result.test_added, notifications.test_added)
                 result.scan_added = merge_sets_safe(result.scan_added, notifications.scan_added)
-                result.report_created = merge_sets_safe(result.report_created, notifications.report_created)
                 result.jira_update = merge_sets_safe(result.jira_update, notifications.jira_update)
                 result.upcoming_engagement = merge_sets_safe(result.upcoming_engagement, notifications.upcoming_engagement)
                 result.stale_engagement = merge_sets_safe(result.stale_engagement, notifications.stale_engagement)
@@ -3629,7 +3647,6 @@ admin.site.register(Test_Type)
 admin.site.register(Endpoint)
 admin.site.register(Product)
 admin.site.register(Product_Type)
-admin.site.register(Dojo_User)
 admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Note_Type)

@@ -1,7 +1,8 @@
 from crum import get_current_user
 from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
-from dojo.models import Product, Product_Member, Product_Type_Member, App_Analysis, DojoMeta
+from dojo.models import Product, Product_Member, Product_Type_Member, App_Analysis, \
+    DojoMeta, Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, user_has_permission
 
 
@@ -29,12 +30,22 @@ def get_authorized_products(permission, user=None):
             product=OuterRef('pk'),
             user=user,
             role__in=roles)
+        authorized_product_type_groups = Product_Type_Group.objects.filter(
+            product_type=OuterRef('prod_type_id'),
+            group__users=user,
+            role__in=roles)
+        authorized_product_groups = Product_Group.objects.filter(
+            product=OuterRef('pk'),
+            group__users=user,
+            role__in=roles)
         products = Product.objects.annotate(
             prod_type__member=Exists(authorized_product_type_roles),
-            member=Exists(authorized_product_roles)).order_by('name')
+            member=Exists(authorized_product_roles),
+            prod_type__authorized_group=Exists(authorized_product_type_groups),
+            authorized_group=Exists(authorized_product_groups)).order_by('name')
         products = products.filter(
-            Q(prod_type__member=True) |
-            Q(member=True))
+            Q(prod_type__member=True) | Q(member=True) |
+            Q(prod_type__authorized_group=True) | Q(authorized_group=True))
     else:
         if user.is_staff:
             products = Product.objects.all().order_by('name')

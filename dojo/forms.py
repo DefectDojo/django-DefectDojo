@@ -2174,8 +2174,7 @@ class JIRAProjectForm(forms.ModelForm):
                 # once a jira project config is attached to an engagement, we can't go back to inheriting
                 # because the config needs to remain in place for the existing jira issues
                 self.fields['inherit_from_product'].disabled = True
-                self.fields['inherit_from_product'].help_text = 'Once an engagement has a JIRA Project stored, you can no   t switch back to inheritance to avoid breaking existing JIRA issues'
-
+                self.fields['inherit_from_product'].help_text = 'Once an engagement has a JIRA Project stored, you cannot switch back to inheritance to avoid breaking existing JIRA issues'
                 self.fields['jira_instance'].disabled = False
                 self.fields['project_key'].disabled = False
                 self.fields['issue_template_dir'].disabled = False
