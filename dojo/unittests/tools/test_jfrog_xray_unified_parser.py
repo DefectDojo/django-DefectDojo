@@ -50,24 +50,24 @@ class TestJFrogXrayUnifiedParser(TestCase):
         parser = JFrogXrayUnifiedParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
-        
-        #The report has 14219 rows, but Xray has a bug with repeated data, and we're only importing
-        #unique rows. There are 2208 unique issue IDs in the report.
+
+        # The report has 14219 rows, but Xray has a bug with repeated data, and we're only importing
+        # unique rows. There are 2208 unique issue IDs in the report.
         self.assertEqual(2208, len(findings))
-        
-        #blank cvss2
+
+        # blank cvss2
         item = [i for i in findings if i.title[:11] == "XRAY-106730"][0]
         self.assertEquals("CVE-2018-10754", item.cve)
         self.assertIsNotNone(item.severity_justification)
         self.assertGreater(len(item.severity_justification), 0)
 
-        #blank cvss3
+        # blank cvss3
         item = [i for i in findings if i.title[:11] == "XRAY-100538"][0]
         self.assertEquals("CVE-2015-2716", item.cve)
         self.assertIsNotNone(item.severity_justification)
         self.assertGreater(len(item.severity_justification), 0)
-        
-        #0 references
+
+        # 0 references
         item = [i for i in findings if i.title[:11] == "XRAY-100015"][0]
         self.assertEquals("CVE-2020-13790", item.cve)
         self.assertIsNotNone(item.references)

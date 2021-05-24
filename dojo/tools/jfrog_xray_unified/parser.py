@@ -26,22 +26,22 @@ class JFrogXrayUnifiedParser(object):
 
             for node in vulnerabilityTree:
                 item = get_item(node, test)
-                
-                #Xray has a bug with duplicate results, so save to a dictionary so we only get
-                #one finding per issue_id
+
+                # Xray has a bug with duplicate results, so save to a dictionary so we only get
+                # one finding per issue_id
                 unique_key = node['issue_id']
                 items[unique_key] = item
-        
+
         return list(items.values())
 
 def get_item(vulnerability, test):
-    #Some items have multiple CVEs for some reason, so get the CVE with the highest CVSSv3 score.
-    #Note: the xray v2 importer just took the first CVE in the list, that doesn't seem ideal though
+    # Some items have multiple CVEs for some reason, so get the CVE with the highest CVSSv3 score.
+    # Note: the xray v2 importer just took the first CVE in the list, that doesn't seem ideal though
     highestCvssV3Index = 0
     highestCvssV3Score = 0
-    
-    for thisCveIndex in range(0, len(vulnerability['cves'])-1):
-        #not all cves have cvssv3 scores, so skip these. If no v3 scores, we'll default to index 0
+
+    for thisCveIndex in range(0, len(vulnerability['cves']) - 1):
+        # not all cves have cvssv3 scores, so skip these. If no v3 scores, we'll default to index 0
         if 'cvss_v3_score' in vulnerability['cves'][thisCveIndex]:
             thisCvssV3Score = vulnerability['cves'][thisCveIndex]['cvss_v3_score']
             if thisCvssV3Score > highestCvssV3Score:
@@ -57,7 +57,7 @@ def get_item(vulnerability, test):
     # TODO: Needs UNKNOWN new status in the model.
     else:
         severity = "Info"
-    
+
     cveIndex = highestCvssV3Index
 
     cve = "No CVE on file"
@@ -65,7 +65,7 @@ def get_item(vulnerability, test):
     cvss_v2 = "No CVSS v2 score."
     mitigation = "N/A"
     extra_desc = ""
-    
+
     cves = vulnerability.get('cves', [])
     if len(cves) > 0:
         worstCve = cves[cveIndex]
@@ -79,7 +79,7 @@ def get_item(vulnerability, test):
     if 'fixed_versions' in vulnerability and len(vulnerability['fixed_versions']) > 0:
         mitigation = "Versions containing a fix:\n"
         mitigation = mitigation + "</br>".join(vulnerability['fixed_versions'])
-    
+
     if 'external_advisory_source' in vulnerability and 'external_advisory_severity' in vulnerability:
         extra_desc = vulnerability['external_advisory_source'] + ": " + vulnerability['external_advisory_severity']
 
@@ -87,17 +87,17 @@ def get_item(vulnerability, test):
         title = vulnerability['issue_id'] + " - " + vulnerability['summary']
     else:
         title = vulnerability['summary']
-    
+
     references = ""
     for reference in vulnerability['references']:
         references += reference + "\n"
 
-    #component has several parts separated by colons. Last part is the version, everything else is the name
+    # component has several parts separated by colons. Last part is the version, everything else is the name
     splitComponent = vulnerability['vulnerable_component'].split(':')
     component_name = ":".join(splitComponent[:-1])
     component_version = splitComponent[-1:][0]
 
-    #create the finding object
+    # create the finding object
     finding = Finding(
         title=title,
         cve=cve,
@@ -114,5 +114,5 @@ def get_item(vulnerability, test):
         references=references,
         impact=severity,
         cvssv3=cvss_v3)
-    
+
     return finding
