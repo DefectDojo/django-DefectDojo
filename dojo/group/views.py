@@ -16,7 +16,7 @@ from django.utils.http import urlencode
 from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
 
-from dojo.filters import UserFilter
+from dojo.filters import GroupFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
     Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm
 from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group
@@ -30,7 +30,8 @@ logger = logging.getLogger(__name__)
 @user_passes_test(lambda u: u.is_staff)
 def group(request):
     groups = Dojo_Group.objects.order_by('name')
-    paged_groups = get_page_items(request, groups, 25)
+    groups = GroupFilter(request.GET, queryset=groups)
+    paged_groups = get_page_items(request, groups.qs, 25)
     add_breadcrumb(title="All Groups", top_level=True, request=request)
     return render(request,
                   'dojo/groups.html',
