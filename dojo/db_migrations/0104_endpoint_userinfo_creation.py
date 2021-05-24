@@ -13,7 +13,7 @@ def move_fqdn_to_host(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('dojo', '0101_enable_features'),
+        ('dojo', '0103_report_notification'),
     ]
 
     operations = [
