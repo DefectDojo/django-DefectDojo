@@ -872,6 +872,7 @@ class UserAPITokenTest(DojoAPITestCase):
         self.assertEqual(response.status_code, 200)
 
     @override_settings(FEATURE_AUTHORIZATION_V2=True)
+    @override_settings(FEATURE_SUPERADMIN_TOKEN_FETCH=True)
     def test_fetch_token_user1(self):
         response = self.client.post(
             reverse('api_token_auth'), {
@@ -891,6 +892,17 @@ class UserAPITokenTest(DojoAPITestCase):
         self.assertEqual(response.status_code, 403)
 
     @override_settings(FEATURE_AUTHORIZATION_V2=True)
+    def test_fetch_token_negative_auth2_feature_disabled_user1(self):
+        response = self.client.post(
+            reverse('api_token_auth'), {
+                "username": 'admin',
+                "password": 'admin',
+                "target_user": "user1"
+            })
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(FEATURE_AUTHORIZATION_V2=True)
+    @override_settings(FEATURE_SUPERADMIN_TOKEN_FETCH=True)
     def test_fetch_token_non_existing(self):
         response = self.client.post(
             reverse('api_token_auth'), {
@@ -901,6 +913,7 @@ class UserAPITokenTest(DojoAPITestCase):
         self.assertEqual(response.status_code, 404)
 
     @override_settings(FEATURE_AUTHORIZATION_V2=True)
+    @override_settings(FEATURE_SUPERADMIN_TOKEN_FETCH=True)
     def test_fetch_token_negative_non_admin_user(self):
         response = self.client.post(
             reverse('api_token_auth'), {

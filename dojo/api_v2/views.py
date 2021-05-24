@@ -1848,7 +1848,8 @@ class ObtainAuthTokenExtended(rest_framework.authtoken.views.ObtainAuthToken):
 
             # Only superuser and AUTHORIZATION_V2 mode can use this feature
             # TODO: log action
-            if not user.is_superuser or not settings.FEATURE_AUTHORIZATION_V2:
+            if not user.is_superuser or not settings.FEATURE_AUTHORIZATION_V2 \
+                    or not settings.FEATURE_SUPERADMIN_TOKEN_FETCH:
                 return Response({'message': 'Action forbidden',
                                  'username': user.username},
                                 status=status.HTTP_403_FORBIDDEN)
