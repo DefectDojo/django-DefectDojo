@@ -666,7 +666,6 @@ class ProductFilter(DojoFilter):
 
 class ApiProductFilter(DojoFilter):
     # BooleanFilter
-    duplicate = BooleanFilter(field_name='duplicate')
     external_audience = BooleanFilter(field_name='external_audience')
     internet_accessible = BooleanFilter(field_name='internet_accessible')
     # CharFilter
@@ -687,7 +686,6 @@ class ApiProductFilter(DojoFilter):
     prod_numeric_grade = NumberInFilter(field_name='prod_numeric_grade', lookup_expr='in')
     user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
     regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
-    active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
 

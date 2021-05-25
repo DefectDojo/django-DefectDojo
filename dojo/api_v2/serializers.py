@@ -1,4 +1,5 @@
 from typing import List
+from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
 from rest_framework.fields import DictField
 from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
@@ -399,7 +400,7 @@ class ProductMemberSerializer(serializers.ModelSerializer):
 
     role_name = serializers.SerializerMethodField()
 
-    def get_role_name(self, obj):
+    def get_role_name(self, obj) -> str:
         return Roles(obj.role).name
 
     class Meta:
@@ -421,7 +422,7 @@ class ProductMemberSerializer(serializers.ModelSerializer):
 class ProductGroupSerializer(serializers.ModelSerializer):
     role_name = serializers.SerializerMethodField()
 
-    def get_role_name(self, obj):
+    def get_role_name(self, obj) -> str:
         return Roles(obj.role).name
 
     class Meta:
@@ -433,7 +434,7 @@ class ProductTypeMemberSerializer(serializers.ModelSerializer):
 
     role_name = serializers.SerializerMethodField()
 
-    def get_role_name(self, obj):
+    def get_role_name(self, obj) -> str:
         return Roles(obj.role).name
 
     class Meta:
@@ -672,7 +673,7 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
         model = JIRA_Issue
         fields = '__all__'
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         return jira_helper.get_jira_issue_url(obj)
 
 
@@ -803,7 +804,7 @@ class FindingImageSerializer(serializers.ModelSerializer):
         model = FindingImage
         fields = ["base64", "caption", "id"]
 
-    def get_base64(self, obj):
+    def get_base64(self, obj) -> bytes:
         return base64.b64encode(obj.image.read())
 
 
@@ -861,10 +862,12 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
     test = serializers.SerializerMethodField()
     jira = serializers.SerializerMethodField()
 
+    @extend_schema_field(FindingTestSerializer)
     @swagger_serializer_method(FindingTestSerializer)
     def get_test(self, obj):
         return FindingTestSerializer(read_only=True).to_representation(obj.test)
 
+    @extend_schema_field(JIRAIssueSerializer)
     @swagger_serializer_method(JIRAIssueSerializer)
     def get_jira(self, obj):
         issue = jira_helper.get_jira_issue(obj)
@@ -893,14 +896,17 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Finding
         fields = '__all__'
 
+    @extend_schema_field(serializers.DateTimeField())
     @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_creation(self, obj):
         return jira_helper.get_jira_creation(obj)
 
+    @extend_schema_field(serializers.DateTimeField())
     @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_change(self, obj):
         return jira_helper.get_jira_change(obj)
 
+    @extend_schema_field(FindingRelatedFieldsSerializer)
     @swagger_serializer_method(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
         request = self.context.get('request', None)
@@ -913,7 +919,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             return None
 
-    def get_display_status(self, obj):
+    def get_display_status(self, obj) -> str:
         return obj.status()
 
     # Overriding this to push add Push to JIRA functionality
@@ -973,6 +979,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             return NoteSerializer, {'many': True, 'read_only': True}
         return super().build_relational_field(field_name, relation_info)
 
+    @extend_schema_field(BurpRawRequestResponseSerializer)
     @swagger_serializer_method(serializer_or_field=BurpRawRequestResponseSerializer)
     def get_request_response(self, obj):
         # burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)

@@ -1,3 +1,4 @@
+from drf_spectacular.types import OpenApiTypes
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -47,7 +48,7 @@ from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.authorization.roles_permissions import Permissions, Roles
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 
 logger = logging.getLogger(__name__)
@@ -143,7 +144,7 @@ class EngagementViewSet(mixins.ListModelMixin,
         request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
     @extend_schema(
-        request=no_body,
+        request=OpenApiTypes.NONE,
         responses={status.HTTP_200_OK: ""}
     )
     @action(detail=True, methods=["post"])
@@ -152,6 +153,10 @@ class EngagementViewSet(mixins.ListModelMixin,
         close_engagement(eng)
         return HttpResponse()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_200_OK: ""}
+    )
     @swagger_auto_schema(
         request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
@@ -636,6 +641,9 @@ class FindingViewSet(prefetch.PrefetchListMixin,
             return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_200_OK)
 
+    @extend_schema(parameters=[
+                                OpenApiParameter("new_fid", OpenApiTypes.INT, OpenApiParameter.PATH),
+                              ],)
     @swagger_auto_schema(
         responses={status.HTTP_200_OK: ""},
         request_body=no_body
