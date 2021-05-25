@@ -89,9 +89,7 @@ def get_item(vulnerability, test):
     else:
         title = vulnerability['summary']
 
-    references = ""
-    for reference in vulnerability['references']:
-        references += reference + "\n"
+    references = "\n".join(vulnerability['references'])
 
     # component has several parts separated by colons. Last part is the version, everything else is the name
     splitComponent = vulnerability['vulnerable_component'].split(':')
