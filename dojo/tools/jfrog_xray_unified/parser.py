@@ -81,7 +81,7 @@ def get_item(vulnerability, test):
 
     if 'fixed_versions' in vulnerability and len(vulnerability['fixed_versions']) > 0:
         mitigation = "Versions containing a fix:\n"
-        mitigation = mitigation + "</br>".join(vulnerability['fixed_versions'])
+        mitigation = mitigation + "\n".join(vulnerability['fixed_versions'])
 
     if 'external_advisory_source' in vulnerability and 'external_advisory_severity' in vulnerability:
         extra_desc = vulnerability['external_advisory_source'] + ": " + vulnerability['external_advisory_severity']
