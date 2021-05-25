@@ -407,6 +407,10 @@ Import JSON report.
 
 Reports can be imported in the CSV, and .nessus (XML) report formats.
 
+### Nessus WAS (Tenable)
+
+Reports can be imported in the CSV, and .nessus (XML) report formats.
+
 ### Netsparker
 
 Vulnerabilities List - JSON report
@@ -652,6 +656,10 @@ JSON report of SSLyze version 3 scan
 ### Testssl Scan
 
 Import CSV output of testssl scan report.
+
+### Terrascan
+
+Import JSON output of terrascan scan report <https://github.com/accurics/terrascan>
 
 ### Trivy
 
