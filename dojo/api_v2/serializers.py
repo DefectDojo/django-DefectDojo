@@ -439,6 +439,12 @@ class ProductGroupSerializer(serializers.ModelSerializer):
 
         return data
 
+    def validate(self, data):
+        if self.context['request'].method in ['POST', 'PATCH']:
+            products = Product.objects.filter(prod_type=data.get('prod_type'), name=data.get('name'))
+            if products.count() > 0:
+                raise ValidationError('Product name for the same type already exists')
+        return data
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
 
