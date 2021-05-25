@@ -684,8 +684,8 @@ class Product(models.Model):
 
     class Meta:
         ordering = ('name',)
-        constraints =  [
-            models.UniqueConstraint(fields=['name','prod_type'], name='product_constrain' )
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'prod_type'], name='product_constraint')
         ]
 
     @cached_property

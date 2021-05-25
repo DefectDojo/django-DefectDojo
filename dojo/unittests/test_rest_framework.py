@@ -628,6 +628,24 @@ class ProductTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'prod_type': 2}
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_create_negative_duplicated(self):
+        response = self.client.post(
+            reverse('product-list'), {
+                "name": 'Python How-to',
+                "prod_type": 1,
+                "description": "Python how to"
+            })
+        self.assertEqual(400, response.status_code)
+
+    def test_create_product_same_name(self):
+        response = self.client.post(
+            reverse('product-list'), {
+                "name": 'Python How-to',
+                "prod_type": 2,
+                "description": "Python how to"
+            })
+        self.assertEqual(201, response.status_code)
+
 
 class StubFindingsTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
@@ -850,3 +868,6 @@ class ReimportScanTest(DojoAPITestCase):
             })
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code, response.content[:1000])
+
+
+
