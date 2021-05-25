@@ -61,10 +61,11 @@ def get_item(vulnerability, test):
 
     cveIndex = highestCvssV3Index
 
-    cve = "No CVE on file"
-    cvss_v3 = "No CVSS v3 score."
+    cve = None
+    cvss_v3 = "No CVSS v3 score."  # for justification field
+    cvssv3 = None  # for actual cvssv3 field
     cvss_v2 = "No CVSS v2 score."
-    mitigation = "N/A"
+    mitigation = None
     extra_desc = ""
 
     cves = vulnerability.get('cves', [])
@@ -74,6 +75,7 @@ def get_item(vulnerability, test):
             cve = worstCve['cve']
         if 'cvss_v3_vector' in worstCve:
             cvss_v3 = worstCve['cvss_v3_vector']
+            cvssv3 = cvss_v3
         if 'cvss_v2_vector' in worstCve:
             cvss_v2 = worstCve['cvss_v2_vector']
 
@@ -112,6 +114,6 @@ def get_item(vulnerability, test):
         dynamic_finding=False,
         references=references,
         impact=severity,
-        cvssv3=cvss_v3)
+        cvssv3=cvssv3)
 
     return finding

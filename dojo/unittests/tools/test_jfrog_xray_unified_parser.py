@@ -103,8 +103,7 @@ class TestJFrogXrayUnifiedParser(TestCase):
         # 0 fixed verisons
         item = [i for i in findings if i.title[:11] == "XRAY-100015"][0]
         self.assertEquals("CVE-2020-13790", item.cve)
-        self.assertIsNotNone(item.mitigation)
-        self.assertEqual(item.mitigation, "N/A")
+        self.assertIsNone(item.mitigation)
 
         # 1 fixed version
         item = [i for i in findings if i.title[:11] == "XRAY-100646"][0]
@@ -162,8 +161,7 @@ class TestJFrogXrayUnifiedParser(TestCase):
         self.assertEquals("Medium", item.severity)
         self.assertEquals("SQLite 3.32.2 has a use", item.description[:23])
         self.assertEquals(" is too late.", item.description[-13:])
-        self.assertIsNotNone(item.mitigation)
-        self.assertGreater(len(item.mitigation), 0)
+        self.assertIsNone(item.mitigation)
         self.assertEquals("alpine://3.12:sqlite-libs", item.component_name)
         self.assertEquals("3.32.1-r0", item.component_version)
         self.assertEquals("dockerhub-remote/kiwigrid/k8s-sidecar/sha256__7cba93c3dde21c78fe07ee3f8ed8d82d05bf00415392606401df8a7d72057b5b/", item.file_path)
@@ -182,8 +180,7 @@ class TestJFrogXrayUnifiedParser(TestCase):
         self.assertEquals("High", item.severity)
         self.assertEquals("The X.509 GeneralName", item.description[:21])
         self.assertEquals("(Affected 1.0.2-1.0.2w).", item.description[-24:])
-        self.assertIsNotNone(item.mitigation)
-        self.assertGreater(len(item.mitigation), 0)
+        self.assertIsNone(item.mitigation)
         self.assertEquals("deb://ubuntu:bionic:libssl1.1", item.component_name)
         self.assertEquals("1.1.1-1ubuntu2.1~18.04.6", item.component_version)
         self.assertEquals("dockerhub-remote/library/mongo/sha256__31f6433f7cfcd2180483e40728cbf97142df1e85de36d80d75c93e5e7fe10405/", item.file_path)
@@ -216,14 +213,13 @@ class TestJFrogXrayUnifiedParser(TestCase):
 
         # maven
         item = [i for i in findings if i.title[:11] == "XRAY-126663"][0]
-        self.assertEquals("No CVE on file", item.cve)  # has cvss score but no cve??
+        self.assertIsNone(item.cve)  # has cvss score but no cve??
         self.assertEquals("XRAY-126663 - FasterXML jackson", item.title[:31])
         self.assertEquals("Expansion Remote Issue", item.title[-22:])
         self.assertEquals("High", item.severity)
         self.assertEquals("FasterXML jackson", item.description[:17])
         self.assertEquals("sensitive information.", item.description[-22:])
-        self.assertIsNotNone(item.mitigation)
-        self.assertGreater(len(item.mitigation), 0)
+        self.assertIsNone(item.mitigation)
         self.assertEquals("gav://com.fasterxml.jackson.core:jackson-databind", item.component_name)
         self.assertEquals("2.10.4", item.component_version)
         self.assertEquals("elastic-docker-remote/elasticsearch/elasticsearch/7.9.1-amd64/", item.file_path)
@@ -282,8 +278,7 @@ class TestJFrogXrayUnifiedParser(TestCase):
         self.assertEquals("Medium", item.severity)
         self.assertEquals("alter.c in SQLite", item.description[:17])
         self.assertEquals("TABLE statements.\n\nRed Hat Severity: Moderate", item.description[-45:])
-        self.assertIsNotNone(item.mitigation)
-        self.assertGreater(len(item.mitigation), 0)
+        self.assertIsNone(item.mitigation)
         self.assertEquals("rpm://7:sqlite:0", item.component_name)
         self.assertEquals("3.7.17-8.el7_7.1", item.component_version)
         self.assertEquals("elastic-docker-remote/elasticsearch/elasticsearch/7.9.1-amd64/", item.file_path)
