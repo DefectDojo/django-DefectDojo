@@ -34,6 +34,7 @@ class JFrogXrayUnifiedParser(object):
 
         return list(items.values())
 
+
 def get_item(vulnerability, test):
     # Some items have multiple CVEs for some reason, so get the CVE with the highest CVSSv3 score.
     # Note: the xray v2 importer just took the first CVE in the list, that doesn't seem ideal though
