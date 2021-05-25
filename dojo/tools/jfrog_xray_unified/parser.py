@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from dojo.models import Finding
 
@@ -93,6 +94,8 @@ def get_item(vulnerability, test):
 
     references = "\n".join(vulnerability['references'])
 
+    scan_time = datetime.strptime(vulnerability['artifact_scan_time'], "%Y-%m-%dT%H:%M:%S%z")
+
     # component has several parts separated by colons. Last part is the version, everything else is the name
     splitComponent = vulnerability['vulnerable_component'].split(':')
     component_name = ":".join(splitComponent[:-1])
@@ -114,6 +117,8 @@ def get_item(vulnerability, test):
         dynamic_finding=False,
         references=references,
         impact=severity,
-        cvssv3=cvssv3)
+        cvssv3=cvssv3,
+        date=scan_time,
+        vuln_id_from_tool=vulnerability['issue_id'])
 
     return finding
