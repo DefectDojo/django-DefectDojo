@@ -246,14 +246,18 @@
                                       </sup>
                                   {% endif %}
                                 </td>
-                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a>
-                                  <sup>
-                                      {% for tag in e.product.tags.all %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color"
-                                             href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                      {% endfor %}
-                                  </sup>
-                                </td>
+                                {% if e.product %}
+                                    <td><a href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a>
+                                    <sup>
+                                        {% for tag in e.product.tags.all %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                    </sup>
+                                    </td>
+                                {% else %}
+                                    <td>None</td>
+                                {% endif %}
                                 <td>
                                   {% if e.active_finding_count > 0 %}
                                   <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_finding_count }}</a>
