@@ -175,8 +175,7 @@ class NessusWASXMLParser(object):
 
                     find.unsaved_endpoints.append(Endpoint(protocol=protocol
                                                            host=fqdn if fqdn else ip
-                                                           port=port,
-                                                           protocol=protocol))
+                                                           port=port))
 
         return list(dupes.values())
 
