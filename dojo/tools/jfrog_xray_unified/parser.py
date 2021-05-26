@@ -100,6 +100,10 @@ def get_item(vulnerability, test):
     splitComponent = vulnerability['vulnerable_component'].split(':')
     component_name = ":".join(splitComponent[:-1])
     component_version = splitComponent[-1:][0]
+    # remove package type from component name
+    component_name = component_name.split("://", 1)[1]
+
+    tags=["packagetype_" + vulnerability['package_type']]
 
     # create the finding object
     finding = Finding(
@@ -119,6 +123,7 @@ def get_item(vulnerability, test):
         impact=severity,
         cvssv3=cvssv3,
         date=scan_time,
-        vuln_id_from_tool=vulnerability['issue_id'])
+        vuln_id_from_tool=vulnerability['issue_id'],
+        tags=tags)
 
     return finding
