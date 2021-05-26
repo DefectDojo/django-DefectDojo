@@ -81,13 +81,11 @@ class NessusWASCSVParser(object):
                 find.unsaved_endpoints = list()
                 dupes[dupe_key] = find
             # manage endpoints
-            endpoint = Endpoint(host='localhost')
-            if 'Host' in row:
-                endpoint.host = row.get('Host')
-            if 'Port' in row:
-                endpoint.port = row.get('Port')
-            if 'Protocol' in row:
-                endpoint.protocol = row.get('Protocol').lower()
+            endpoint = Endpoint(
+                protocol=row.get('Protocol').lower() if 'Protocol' in row else None,
+                host=row.get('Host', row.get('IP Address', 'localhost')),
+                port=row.get('Port')
+            )
             find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())
@@ -175,11 +173,10 @@ class NessusWASXMLParser(object):
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port if port is not None else ""),
+                    find.unsaved_endpoints.append(Endpoint(protocol=protocol
+                                                           host=fqdn if fqdn else ip
+                                                           port=port,
                                                            protocol=protocol))
-                    if fqdn is not None:
-                        find.unsaved_endpoints.append(Endpoint(host=fqdn,
-                                                               protocol=protocol))
 
         return list(dupes.values())
 
