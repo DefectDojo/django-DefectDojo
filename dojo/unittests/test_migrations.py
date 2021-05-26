@@ -106,11 +106,6 @@ class TestEndpointMigration(MigratorTestCase):
             ).pk,
         }
 
-        self.endpoints_eps_noproduct = {
-            'short': Endpoint.objects.create(protocol='http', host='foo.bar.eps').pk,
-            'long': Endpoint.objects.create(protocol='http', host='foo.bar.eps', port=80).pk,
-        }
-
     def test_migration_endpoint(self):
         Endpoint = self.new_state.apps.get_model('dojo', 'Endpoint')
         Endpoint_Status = self.new_state.apps.get_model('dojo', 'Endpoint_Status')
@@ -160,10 +155,3 @@ class TestEndpointMigration(MigratorTestCase):
         )
         self.assertEqual(eps.count(), 1)
         self.assertFalse(eps[0].mitigated)
-
-        low_id = Endpoint.objects.filter(id=min(self.endpoints_eps_noproduct.values()))
-        logger.debug("Low id: {}".format(list(low_id)))
-        self.assertEqual(low_id.count(), 1)
-        high_id = Endpoint.objects.filter(id=max(self.endpoints_eps_noproduct.values()))
-        logger.debug("High id: {}".format(list(high_id)))
-        self.assertEqual(high_id.count(), 0)
