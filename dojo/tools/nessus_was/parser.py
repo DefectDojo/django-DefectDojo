@@ -173,8 +173,8 @@ class NessusWASXMLParser(object):
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    find.unsaved_endpoints.append(Endpoint(protocol=protocol
-                                                           host=fqdn if fqdn else ip
+                    find.unsaved_endpoints.append(Endpoint(protocol=protocol,
+                                                           host=fqdn if fqdn else ip,
                                                            port=port))
 
         return list(dupes.values())
