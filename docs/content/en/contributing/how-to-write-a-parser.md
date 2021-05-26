@@ -35,6 +35,7 @@ $ docker-compose build --build-arg uid=1000
 |`dojo/tools/<parser_dir>/__init__.py`          | Empty file for class initialization
 |`dojo/tools/<parser_dir>/parser.py`            | The meat. This is where you write your actual parser
 |`dojo/unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
+|`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
 
 
 ## Template Generator
@@ -59,6 +60,9 @@ Parsers may have many fields, out of which many of them may be optional.
 
 Always make sure you include checks to avoid potential `KeyError` errors (e.g. field does not exist), for those fields you are not absolutely certain will always be in file that will get uploaded. These translate to 500 error, and do not look good.
 
+## Deduplication algorithm ##
+By default a new parser uses the 'legacy' deduplication algorithm documented at https://defectdojo.github.io/django-DefectDojo/usage/features/#deduplication-algorithms
+
 ## Unit tests
 
 Each parser must have unit tests, at least to test for 0 vuln, 1 vuln and many vulns. You can take a look at how other parsers have them for starters. The more quality tests, the better.
@@ -76,13 +80,13 @@ MYSQL> flush privileges;
 This local command will launch the unit test for your new parser
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.<your_unittest_py_file>.<main_class_name> -v2'
+$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.<your_unittest_py_file>.<main_class_name> -v2'
 {{< /highlight >}}
 
 Example for the blackduck hub parser:
 
 {{< highlight bash >}}
-$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
+$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.test_blackduck_csv_parser.TestBlackduckHubParser -v2'
 {{< /highlight >}}
 
 {{% alert title="Information" color="info" %}}

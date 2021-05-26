@@ -471,7 +471,7 @@
 
   <div id="add_feat" class="panel-body collapse">
 
-    {% if eng.engagement_type == "Interactive" %}
+    {% if eng.engagement_type == "Interactive" and system_settings.enable_checklists %}
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4> Checklist<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
@@ -549,6 +549,7 @@
       </div>
     {% endif %}
 
+    {% if system_settings.enable_questionnaires %}
     <div class="panel panel-default">
 
       <div class="panel-heading">
@@ -593,6 +594,7 @@
       </div>
 
     </div>
+    {% endif %}
 
     <div class="panel panel-default">
 
@@ -928,6 +930,7 @@
     </div>
 </div>
 {% endif %}
+{% if system_settings.enable_credentials %}
   <div>
     <div class="panel panel-default-secondary">
       <div class="panel-heading">
@@ -1020,6 +1023,7 @@
       </div>
     </div>
 </div>
+{% endif %}
 
 </div>
 </div>

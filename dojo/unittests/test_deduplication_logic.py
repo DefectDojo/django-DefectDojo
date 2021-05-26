@@ -633,9 +633,9 @@ class TestDuplicationLogic(TestCase):
         # first setup some finding with same unique_id in same engagement, but different test (same test_type)
         finding_new.test = Test.objects.get(id=66)
         finding_new.save()
-        print(finding_new.pk)
-        print(finding_new.hash_code)
-        print(finding_new.duplicate)
+        # print(finding_new.pk)
+        # print(finding_new.hash_code)
+        # print(finding_new.duplicate)
 
         # expect duplicate as dedupe_inside_engagement is True and the other test is in the same engagement
         self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
