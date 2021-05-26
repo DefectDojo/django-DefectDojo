@@ -386,6 +386,9 @@ class Dojo_Group(models.Model):
     description = models.CharField(max_length=4000, null=True)
     users = models.ManyToManyField(Dojo_User, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Contact(models.Model):
     name = models.CharField(max_length=100)

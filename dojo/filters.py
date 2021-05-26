@@ -2308,7 +2308,7 @@ class ProductTypeFilter(DojoFilter):
         if settings.FEATURE_AUTHORIZATION_V2:
             exclude = ['authorized_users']
         else:
-            exclude = ['members']
+            exclude = ['members', 'authorization_groups']
         include = ('name',)
 
 
