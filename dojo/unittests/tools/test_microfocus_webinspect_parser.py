@@ -31,7 +31,6 @@ class TestMicrofocusWebinspectParser(TestCase):
         self.assertEqual(1, len(item.unsaved_endpoints))
         endpoint = item.unsaved_endpoints[0]
         endpoint.clean()
-        self.assertFalse(endpoint.is_broken)
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
         self.assertIsNone(endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
@@ -55,7 +54,6 @@ class TestMicrofocusWebinspectParser(TestCase):
         self.assertEqual(1, len(item.unsaved_endpoints))
         endpoint = item.unsaved_endpoints[0]
         endpoint.clean()
-        self.assertFalse(endpoint.is_broken)
         self.assertEqual("php.vulnweb.com", endpoint.host)
         self.assertEqual(80, endpoint.port)
         self.assertIsNone(endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
@@ -83,13 +81,11 @@ class TestMicrofocusWebinspectParser(TestCase):
         self.assertEqual(2, len(item.unsaved_endpoints))
         endpoint = item.unsaved_endpoints[0]
         endpoint.clean()
-        self.assertFalse(endpoint.is_broken)
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
         self.assertIsNone(endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
         endpoint = item.unsaved_endpoints[1]
         endpoint.clean()
-        self.assertFalse(endpoint.is_broken)
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
         self.assertEqual("en-us/home", endpoint.path)  # path begins with '/' but Endpoint store "root-less" path
@@ -99,7 +95,6 @@ class TestMicrofocusWebinspectParser(TestCase):
         self.assertEqual(1, len(item.unsaved_endpoints))
         endpoint = item.unsaved_endpoints[0]
         endpoint.clean()
-        self.assertFalse(endpoint.is_broken)
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
         item = findings[2]
@@ -108,7 +103,6 @@ class TestMicrofocusWebinspectParser(TestCase):
         self.assertEqual(1, len(item.unsaved_endpoints))
         endpoint = item.unsaved_endpoints[0]
         endpoint.clean()
-        self.assertFalse(endpoint.is_broken)
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
         item = findings[3]
@@ -117,6 +111,5 @@ class TestMicrofocusWebinspectParser(TestCase):
         self.assertEqual(1, len(item.unsaved_endpoints))
         endpoint = item.unsaved_endpoints[0]
         endpoint.clean()
-        self.assertFalse(endpoint.is_broken)
         self.assertEqual("www.microfocus.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
