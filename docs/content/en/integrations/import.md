@@ -93,6 +93,10 @@ processed and made available in the \'Finding View\' page.
 
 Import HTML reports from Burp Enterprise Edition
 
+### CargoAudit Scan
+
+Import JSON output of cargo-audit scan report <https://crates.io/crates/cargo-audit>
+
 ### CCVS Report
 
 Import JSON reports from \[CCVS
@@ -209,6 +213,10 @@ Import of JSON report from
 
 Import JSON container image linter reports
 <https://github.com/goodwithtech/dockle>
+
+### Detect-secrets
+
+Import of JSON report from <https://github.com/Yelp/detect-secrets>
 
 ### ESLint
 
@@ -395,6 +403,10 @@ Export a JSON file using the API, api/v1/report\_json.
 Import JSON report.
 
 ### Nessus (Tenable)
+
+Reports can be imported in the CSV, and .nessus (XML) report formats.
+
+### Nessus WAS (Tenable)
 
 Reports can be imported in the CSV, and .nessus (XML) report formats.
 
@@ -644,6 +656,10 @@ JSON report of SSLyze version 3 scan
 
 Import CSV output of testssl scan report.
 
+### Terrascan
+
+Import JSON output of terrascan scan report <https://github.com/accurics/terrascan>
+
 ### Trivy
 
 JSON report of [trivy scanner](https://github.com/aquasecurity/trivy).
@@ -666,8 +682,11 @@ JSON output of the `twistcli` tool. Example:
 
 The CSV output from the UI is now also accepted.
 
-### Visual Code Grepper (VCG)
+### TFSec 
 
+Import of JSON report from <https://github.com/tfsec/tfsec>
+
+### Visual Code Grepper (VCG)
 VCG output can be imported in CSV or Xml formats.
 
 ### Veracode
