@@ -28,7 +28,7 @@ class TestAcunetixParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual('https', endpoint.protocol)
             self.assertEqual(443, endpoint.port)
             self.assertEqual('vijaytest.com', endpoint.host)
@@ -54,7 +54,7 @@ class TestAcunetixParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('www.itsecgames.com', endpoint.host)
@@ -86,7 +86,7 @@ class TestAcunetixParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('www.itsecgames.com', endpoint.host)
@@ -117,7 +117,7 @@ class TestAcunetixParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('www.itsecgames.com', endpoint.host)
@@ -155,14 +155,14 @@ class TestAcunetixParser(TestCase):
             self.assertEqual(3, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('example.co.id', endpoint.host)
             self.assertEqual('h/search', endpoint.path)
             endpoint = finding.unsaved_endpoints[1]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('example.co.id', endpoint.host)
@@ -192,7 +192,7 @@ class TestAcunetixParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('example.co.id', endpoint.host)

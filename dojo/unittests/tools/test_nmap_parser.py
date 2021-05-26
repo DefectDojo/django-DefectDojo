@@ -27,7 +27,7 @@ class TestNmapParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual('localhost.localdomain', endpoint.host)
             self.assertEqual(5432, endpoint.port)
             self.assertEqual('tcp', endpoint.protocol)
@@ -46,7 +46,7 @@ class TestNmapParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual('mocha2005.mochahost.com', endpoint.host)
             self.assertEqual(21, endpoint.port)
             self.assertEqual('tcp', endpoint.protocol)
@@ -105,7 +105,7 @@ class TestNmapParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual('ip-10-250-195-71.eu-west-1.compute.internal', endpoint.host)
             self.assertEqual(9100, endpoint.port)
             self.assertEqual('tcp', endpoint.protocol)
@@ -117,7 +117,7 @@ class TestNmapParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual('ip-10-250-195-71.eu-west-1.compute.internal', endpoint.host)
             self.assertEqual(31641, endpoint.port)
             self.assertEqual('tcp', endpoint.protocol)

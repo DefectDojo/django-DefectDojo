@@ -54,7 +54,7 @@ class TestNiktoParser(TestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 endpoint.clean()
-                self.assertFalse(endpoint.is_broken())
+                self.assertFalse(endpoint.is_broken)
                 self.assertEqual(443, endpoint.port)
                 self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                 self.assertEqual("public/", endpoint.path)
@@ -79,7 +79,7 @@ class TestNiktoParser(TestCase):
                 # self.assertEqual(1, len(finding.unsaved_endpoints))
                 # endpoint = finding.unsaved_endpoints[0]
                 # endpoint.clean()
-                # self.assertFalse(endpoint.is_broken())
+                # self.assertFalse(endpoint.is_broken)
                 # self.assertEqual(443, endpoint.port)
                 # self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                 # self.assertEqual("public/", endpoint.path)
@@ -90,7 +90,7 @@ class TestNiktoParser(TestCase):
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
                 endpoint.clean()
-                self.assertFalse(endpoint.is_broken())
+                self.assertFalse(endpoint.is_broken)
                 self.assertEqual(8070, endpoint.port)
                 self.assertEqual("127.0.0.1", endpoint.host)
                 self.assertEqual("examples/servlets/index.html", endpoint.path)
@@ -109,7 +109,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual(443, endpoint.port)
             self.assertEqual("www.tdh.com", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -122,7 +122,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual(443, endpoint.port)
             self.assertEqual("www.tdh.com", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -141,7 +141,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -154,7 +154,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -167,7 +167,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             endpoint.clean()
-            self.assertFalse(endpoint.is_broken())
+            self.assertFalse(endpoint.is_broken)
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
