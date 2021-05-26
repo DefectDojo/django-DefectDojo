@@ -96,9 +96,7 @@ def clean_hosts_run(apps, change):
     Endpoint_model = apps.get_model('dojo', 'Endpoint')
     Endpoint_Status_model = apps.get_model('dojo', 'Endpoint_Status')
     Product_model = apps.get_model('dojo', 'Product')
-    # when run on older versions, we haven't had the migration applied which has userinfo field added
-    # so defer that field and order by id (default ordering references userinfo field)
-    for endpoint in Endpoint_model.objects.defer('userinfo').order_by('id'):
+    for endpoint in Endpoint_model.objects.order_by('id'):
         endpoint_html_log = {
             'view': reverse('view_endpoint', args=[endpoint.pk]),
             'edit': reverse('edit_endpoint', args=[endpoint.pk]),
