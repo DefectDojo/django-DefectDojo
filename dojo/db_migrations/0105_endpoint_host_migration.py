@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # This step wasn't possible to merge with 0100_endpoint_userinfo_creation, because Unittest shows:
+        # This step wasn't possible to merge with 0104_endpoint_userinfo_creation, because Unittest shows:
         # django.db.utils.OperationalError: (1060, "Duplicate column name 'userinfo'")
         migrations.RunPython(clean_hosts)
     ]

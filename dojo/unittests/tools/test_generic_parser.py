@@ -31,10 +31,12 @@ class TestGenericParser(TestCase):
         finding = findings[0]
         self.assertEqual(5, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
+        endpoint.clean()
         self.assertEqual("vulnerable.endpoint.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
         self.assertEqual("resource1/asdf", endpoint.path)
         endpoint = finding.unsaved_endpoints[1]
+        endpoint.clean()
         self.assertEqual("vulnerable.endpoint.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
         self.assertEqual("resource2/qwerty", endpoint.path)
@@ -164,6 +166,7 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         finding = findings[0]
         self.assertEqual(1, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
+        endpoint.clean()
         self.assertEqual('localhost', endpoint.host)
         self.assertEqual(80, endpoint.port)
         self.assertEqual('http', endpoint.protocol)

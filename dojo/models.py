@@ -1124,51 +1124,91 @@ class Endpoint(models.Model):
             models.Index(fields=['product', 'mitigated']),
         ]
 
-    def __init__(self, *args, **kwargs):
-        kwargs = self.verify_and_clean(**kwargs)
-        super(Endpoint, self).__init__(*args, **kwargs)
+    def clean(self):
+        errors = []
+        if self.protocol or self.protocol == '':
+            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
+                errors.append(ValidationError('Protocol "{}" has invalid format'.format(self.protocol)))
+            if self.protocol == '':
+                self.protocol = None
 
-    def verify_and_clean(self, **kwargs):
-        if kwargs.get('protocol') or kwargs.get('protocol') == '':
-            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['protocol']):  # https://tools.ietf.org/html/rfc3986#section-3.1
-                raise ValidationError('Protocol "{}" has invalid format'.format(kwargs['protocol']))
-        if kwargs.get('userinfo') or kwargs.get('userinfo') == '':
-            if not re.match(r'^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$', kwargs['userinfo']):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
-                raise ValidationError('Userinfo "{}" has invalid format'.format(kwargs['userinfo']))
-        if kwargs.get('host') or kwargs.get('host') == '':
-            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', kwargs['host']):  # https://tools.ietf.org/html/rfc3986#section-3.2.2
+        if self.userinfo or self.userinfo == '':
+            if not re.match(r'^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$', self.userinfo):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
+                errors.append(ValidationError('Userinfo "{}" has invalid format'.format(self.userinfo)))
+            if self.userinfo == '':
+                self.userinfo = None
+
+        if self.host:
+            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.host):  # https://tools.ietf.org/html/rfc3986#section-3.2.2
                 try:
-                    validate_ipv46_address(kwargs['host'])
+                    validate_ipv46_address(self.host)
                 except ValidationError:
-                    raise ValidationError('Host "{}" has invalid format'.format(kwargs['host']))
-        if kwargs.get('port') or kwargs.get('port') == 0:
+                    errors.append(ValidationError('Host "{}" has invalid format'.format(self.host)))
+        else:
+            errors.append(ValidationError('Host must not be empty'))
+
+        if self.port or self.port == 0:
             try:
-                int_port = int(kwargs['port'])
+                int_port = int(self.port)
                 if not (0 <= int_port < 65536):
-                    raise ValidationError('Port "{}" has invalid format - out of range'.format(kwargs['port']))
-                kwargs['port'] = int_port
+                    errors.append(ValidationError('Port "{}" has invalid format - out of range'.format(self.port)))
+                self.port = int_port
             except ValueError:
-                raise ValidationError('Port "{}" has invalid format - it is not a number'.format(kwargs['port']))
-        if kwargs.get('path') or kwargs.get('path') == '':
-            while len(kwargs['path']) > 0 and kwargs['path'][0] == "/":  # Endpoint store "root-less" path
-                kwargs['path'] = kwargs['path'][1:]
-            if kwargs['path'] == '':
-                kwargs['path'] = None
-        if kwargs.get('query') or kwargs.get('query') == '':
-            if len(kwargs['query']) > 0 and kwargs['query'][0] == "?":
-                kwargs['query'] = kwargs['query'][1:]
-            if kwargs['query'] == '':
-                kwargs['query'] = None
-        if kwargs.get('fragment') or kwargs.get('fragment') == '':
-            if len(kwargs['fragment']) > 0 and kwargs['fragment'][0] == "#":
-                kwargs['fragment'] = kwargs['fragment'][1:]
-            if kwargs['fragment'] == '':
-                kwargs['fragment'] = None
-        return kwargs
+                errors.append(ValidationError('Port "{}" has invalid format - it is not a number'.format(self.port)))
+
+        if self.path or self.path == '':
+            while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
+                self.path = self.path[1:]
+            if self.path == '':
+                self.path = None
+
+        if self.query or self.query == '':
+            if len(self.query) > 0 and self.query[0] == "?":
+                self.query = self.query[1:]
+            if self.query == '':
+                self.query = None
+
+        if self.fragment or self.fragment == '':
+            if len(self.fragment) > 0 and self.fragment[0] == "#":
+                self.fragment = self.fragment[1:]
+            if self.fragment == '':
+                self.fragment = None
+
+        if errors:
+            raise ValidationError(errors)
 
     def __str__(self):
         try:
-            return self.str()
+            if self.host:
+                dummy_scheme = 'dummy-scheme'  # workaround for https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988
+                url = hyperlink.EncodedURL(
+                    scheme=self.protocol if self.protocol else dummy_scheme,
+                    userinfo=self.userinfo or '',
+                    host=self.host,
+                    port=self.port,
+                    path=tuple(self.path.split('/')) if self.path else (),
+                    query=tuple(
+                        (
+                            qe.split(u"=", 1)
+                            if u"=" in qe
+                            else (qe, None)
+                        )
+                        for qe in self.query.split(u"&")
+                    ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
+                    fragment=self.fragment or ''
+                )
+                # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
+                # Example: https://google.com and https://google.com:443
+                normalize_path = self.path  # it used to add '/' at the end of host
+                clean_url = url.normalize(scheme=True, host=True, path=normalize_path, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
+                if not self.protocol:
+                    if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
+                        clean_url = clean_url[len(dummy_scheme) + 3:]
+                    else:
+                        raise ValueError('hyperlink lib did not create URL as was expected')
+                return clean_url
+            else:
+                raise ValueError('Missing host')
         except:
             url = ''
             if self.protocol:
@@ -1196,55 +1236,17 @@ class Endpoint(models.Model):
         else:
             return NotImplemented
 
-    def str(self):
-        self.verify_and_clean(**{
-            'protocol': self.protocol,
-            'userinfo': self.userinfo,
-            'host': self.host,
-            'port': self.port,
-            'path': self.path,
-            'query': self.query,
-            'fragment': self.fragment
-        })
-        if self.host:
-            dummy_scheme = 'dummy-scheme'  # workaround for https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988
-            url = hyperlink.EncodedURL(
-                scheme=self.protocol if self.protocol else dummy_scheme,
-                userinfo=self.userinfo or '',
-                host=self.host,
-                port=self.port,
-                path=tuple(self.path.split('/')) if self.path else (),
-                query=tuple(
-                    (
-                        qe.split(u"=", 1)
-                        if u"=" in qe
-                        else (qe, None)
-                    )
-                    for qe in self.query.split(u"&")
-                ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
-                fragment=self.fragment or ''
-            )
-            # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
-            # Example: https://google.com and https://google.com:443
-            normalize_path = self.path  # it used to add '/' at the end of host
-            clean_url = url.normalize(scheme=True, host=True, path=normalize_path, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
-            if not self.protocol:
-                if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
-                    clean_url = clean_url[len(dummy_scheme) + 3:]
-                else:
-                    raise ValueError('hyperlink lib did not create URL as was expected')
-            return clean_url
-        else:
-            return ''
-
     @property
     def is_broken(self):
         try:
-            self.str()
+            self.clean()
         except:
             return True
         else:
-            return False
+            if self.product:
+                return False
+            else:
+                return True
 
     def vulnerable(self):
         return self.active_findings_count() > 0
@@ -1316,7 +1318,8 @@ class Endpoint(models.Model):
                 'url': reverse('view_endpoint', args=(self.id,))}]
         return bc
 
-    def from_uri(uri):  # This is usually used as Endpoint.from_uri('http://foo.bar/path'), so it doesn't need 'self'
+    @staticmethod
+    def from_uri(uri):
         try:
             url = hyperlink.parse(url=uri)
         except hyperlink.URLParseError as e:

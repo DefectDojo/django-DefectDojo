@@ -500,7 +500,6 @@ def migrate_endpoints_view(request):
     view_name = 'Migrate endpoints'
 
     html_log = clean_hosts_run(apps=apps, change=(request.method == 'POST'))
-    logger.info("{}".format(html_log))
 
     return render(
         request, 'dojo/migrate_endpoints.html', {

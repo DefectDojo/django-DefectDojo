@@ -1280,40 +1280,25 @@ class EditEndpointForm(forms.ModelForm):
 
         cleaned_data = super(EditEndpointForm, self).clean()
 
-        if 'host' in cleaned_data:
-            host = cleaned_data['host']
-        else:
-            raise forms.ValidationError('Please enter a valid domain name or IP address.',
-                                        code='invalid')
-
         protocol = cleaned_data['protocol']
         userinfo = cleaned_data['userinfo']
+        host = cleaned_data['host']
         port = cleaned_data['port']
         path = cleaned_data['path']
         query = cleaned_data['query']
         fragment = cleaned_data['fragment']
 
-        try:
-            Endpoint(  # Endpoint constructor validate formats
-                protocol=protocol,
-                userinfo=userinfo,
-                port=port,
-                path=path,
-                query=query,
-                fragment=fragment
-            )
-        except ValidationError as e:
-            raise forms.ValidationError('; '.join(e), code='invalid')
-
-        endpoint = endpoint_filter(protocol=protocol,
-                                           userinfo=userinfo,
-                                           host=host,
-                                           port=port,
-                                           path=path,
-                                           query=query,
-                                           fragment=fragment,
-                                           product=self.product)
-        if endpoint.count() > 0 and not self.instance:
+        endpoint = endpoint_filter(
+            protocol=protocol,
+            userinfo=userinfo,
+            host=host,
+            port=port,
+            path=path,
+            query=query,
+            fragment=fragment,
+            product=self.product
+        )
+        if endpoint.count() > 1 or (endpoint.count() == 1 and endpoint.first().pk != self.endpoint_instance.pk):
             raise forms.ValidationError(
                 'It appears as though an endpoint with this data already exists for this product.',
                 code='invalid')
@@ -1348,14 +1333,16 @@ class AddEndpointForm(forms.Form):
     def save(self):
         processed_endpoints = []
         for e in self.endpoints_to_process:
-            endpoint, created = endpoint_get_or_create(protocol=e[0],
-                                                               userinfo=e[1],
-                                                               host=e[2],
-                                                               port=e[3],
-                                                               path=e[4],
-                                                               query=e[5],
-                                                               fragment=e[6],
-                                                               product=self.product)
+            endpoint, created = endpoint_get_or_create(
+                protocol=e[0],
+                userinfo=e[1],
+                host=e[2],
+                port=e[3],
+                path=e[4],
+                query=e[5],
+                fragment=e[6],
+                product=self.product
+            )
             processed_endpoints.append(endpoint)
         return processed_endpoints
 
@@ -1376,28 +1363,32 @@ class AddEndpointForm(forms.Form):
 
         endpoints = endpoint.split()
 
+        errors = []
         for endpoint in endpoints:
             try:
                 if '://' in endpoint:  # is it full uri?
-                    endpoint = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
+                    endpoint_ins = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
                 else:
                     # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
                     # format doesn't follow RFC 3986 but users use it
-                    endpoint = Endpoint.from_uri('//' + endpoint)
-                if not endpoint.host:
-                    raise ValidationError("Host is required")
+                    endpoint_ins = Endpoint.from_uri('//' + endpoint)
+                endpoint_ins.clean()
                 self.endpoints_to_process.append([
-                    endpoint.protocol,
-                    endpoint.userinfo,
-                    endpoint.host,
-                    endpoint.port,
-                    endpoint.path,
-                    endpoint.query,
-                    endpoint.fragment
+                    endpoint_ins.protocol,
+                    endpoint_ins.userinfo,
+                    endpoint_ins.host,
+                    endpoint_ins.port,
+                    endpoint_ins.path,
+                    endpoint_ins.query,
+                    endpoint_ins.fragment
                 ])
-            except ValidationError:
-                raise forms.ValidationError('Please check items entered, one or more do not appear to be a valid URL, '
-                                            'IP address or domain (you can add also port).', code='invalid')
+            except ValidationError as ves:
+                for ve in ves:
+                    errors.append(
+                        ValidationError("Invalid endpoint {}: {}".format(endpoint, ve))
+                    )
+        if errors:
+            raise forms.ValidationError(errors)
         return cleaned_data
 
 

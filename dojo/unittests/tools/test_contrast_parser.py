@@ -27,6 +27,7 @@ class TestContrastParser(TestCase):
             self.assertIsNotNone(finding.unsaved_endpoints)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
             self.assertEqual('http', endpoint.protocol)
             self.assertEqual('0.0.0.0', endpoint.host)
             self.assertEqual('WebGoat/login.mvc', endpoint.path)
@@ -42,10 +43,12 @@ class TestContrastParser(TestCase):
             self.assertIsNotNone(finding.unsaved_endpoints)
             self.assertEqual(4, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
             self.assertEqual('http', endpoint.protocol)
             self.assertEqual('0.0.0.0', endpoint.host)
             self.assertEqual('WebGoat/services/SoapRequest', endpoint.path)
             endpoint = finding.unsaved_endpoints[1]
+            endpoint.clean()
             self.assertEqual('http', endpoint.protocol)
             self.assertEqual('0.0.0.0', endpoint.host)
             self.assertEqual('WebGoat/attack', endpoint.path)

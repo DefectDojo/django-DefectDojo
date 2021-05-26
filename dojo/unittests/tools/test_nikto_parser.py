@@ -53,6 +53,7 @@ class TestNiktoParser(TestCase):
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
+                endpoint.clean()
                 self.assertEqual(443, endpoint.port)
                 self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                 self.assertEqual("public/", endpoint.path)
@@ -76,15 +77,17 @@ class TestNiktoParser(TestCase):
                 # this one as error in URL
                 # self.assertEqual(1, len(finding.unsaved_endpoints))
                 # endpoint = finding.unsaved_endpoints[0]
+                # endpoint.clean()
                 # self.assertEqual(443, endpoint.port)
                 # self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
-                # self.assertEqual("/public/", endpoint.path)
+                # self.assertEqual("public/", endpoint.path)
             elif "/examples/servlets/index.html: Apache Tomcat default JSP pages present." == finding.title:
                 self.assertEqual("000366", finding.vuln_id_from_tool)
                 self.assertEqual(1, finding.nb_occurences)
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
+                endpoint.clean()
                 self.assertEqual(8070, endpoint.port)
                 self.assertEqual("127.0.0.1", endpoint.host)
                 self.assertEqual("examples/servlets/index.html", endpoint.path)
@@ -102,6 +105,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("www.tdh.com", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -113,6 +117,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("www.tdh.com", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -130,6 +135,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -141,6 +147,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -152,6 +159,7 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
+            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)

@@ -159,6 +159,12 @@ class DojoDefaultReImporter(object):
                 finding_count += 1
                 for endpoint in item.unsaved_endpoints:
                     try:
+                        endpoint.clean()
+                    except ValidationError as e:
+                        logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                                       "{}".format(e))
+
+                    try:
                         ep, created = endpoint_get_or_create(
                             protocol=endpoint.protocol,
                             userinfo=endpoint.userinfo,
@@ -185,6 +191,12 @@ class DojoDefaultReImporter(object):
                 if endpoints_to_add:
                     for endpoint in endpoints_to_add:
                         # TODO Not sure what happens here, we get an endpoint model and try to create it again?
+                        try:
+                            endpoint.clean()
+                        except ValidationError as e:
+                            logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                                           "{}".format(e))
+
                         try:
                             ep, created = endpoint_get_or_create(
                                 protocol=endpoint.protocol,

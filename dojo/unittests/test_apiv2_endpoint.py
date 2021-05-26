@@ -25,7 +25,7 @@ class EndpointTest(APITestCase):
             "product": 1
         }, format='json')
         self.assertEqual(r.status_code, 400, r.content[:1000])
-        self.assertIn("Host is required", r.content.decode("utf-8"))
+        self.assertIn("Host must not be empty", r.content.decode("utf-8"))
 
     def test_endpoint_add_existing(self):
         r = self.client.post(reverse('endpoint-list'), {
@@ -76,4 +76,4 @@ class EndpointTest(APITestCase):
             "host": None
         }, format='json')
         self.assertEqual(r.status_code, 400, r.content[:1000])
-        self.assertIn("Host is required. It must not be empty/undefined.", r.content.decode("utf-8"))
+        self.assertIn("Host must not be empty", r.content.decode("utf-8"))

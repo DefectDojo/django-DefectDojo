@@ -601,8 +601,6 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
         # print('EndpointSerialize.validate')
 
         if not self.context['request'].method == 'PATCH':
-            if 'host' not in data:
-                raise serializers.ValidationError('Host is required')
             if 'product' not in data:
                 raise serializers.ValidationError('Product is required')
             protocol = data.get('protocol')
@@ -617,8 +615,6 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
             protocol = data.get('protocol', self.instance.protocol)
             userinfo = data.get('userinfo', self.instance.userinfo)
             host = data.get('host', self.instance.host)
-            if not host or host == '':
-                raise serializers.ValidationError('Host is required. It must not be empty/undefined.')
             port = data.get('port', self.instance.port)
             path = data.get('path', self.instance.path)
             query = data.get('query', self.instance.query)
@@ -627,32 +623,47 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
                 raise serializers.ValidationError('Change of product is not possible')
             product = self.instance.product
 
-        try:
-            Endpoint(  # Endpoint constructor validate formats
-                protocol=protocol,
-                userinfo=userinfo,
-                host=host,
-                port=port,
-                path=path,
-                query=query,
-                fragment=fragment
-            )
-        except ValidationError as e:
-            raise serializers.ValidationError('; '.join(e), code='invalid')
+        endpoint_ins = Endpoint(
+            protocol=protocol,
+            userinfo=userinfo,
+            host=host,
+            port=port,
+            path=path,
+            query=query,
+            fragment=fragment,
+            product=product
+        )
+        endpoint_ins.clean()  # Run standard validation and clean process; can raise errors
 
-        endpoint = endpoint_filter(protocol=protocol,
-                                           userinfo=userinfo,
-                                           host=host,
-                                           port=port,
-                                           path=path,
-                                           query=query,
-                                           fragment=fragment,
-                                           product=product)
-        if endpoint.count() > 0 and not self.instance:
+        endpoint = endpoint_filter(
+            protocol=endpoint_ins.protocol,
+            userinfo=endpoint_ins.userinfo,
+            host=endpoint_ins.host,
+            port=endpoint_ins.port,
+            path=endpoint_ins.path,
+            query=endpoint_ins.query,
+            fragment=endpoint_ins.fragment,
+            product=endpoint_ins.product
+        )
+        if ((self.context['request'].method in ["PUT", "PATCH"] and
+             ((endpoint.count() > 1) or
+              (endpoint.count() == 1 and
+               endpoint.first().pk != self.instance.pk))) or
+                (self.context['request'].method in ["POST"] and endpoint.count() > 0)):
             raise serializers.ValidationError(
                 'It appears as though an endpoint with this data already '
                 'exists for this product.',
                 code='invalid')
+
+        # use clean data
+        data['protocol'] = endpoint_ins.protocol
+        data['userinfo'] = endpoint_ins.userinfo
+        data['host'] = endpoint_ins.host
+        data['port'] = endpoint_ins.port
+        data['path'] = endpoint_ins.path
+        data['query'] = endpoint_ins.query
+        data['fragment'] = endpoint_ins.fragment
+        data['product'] = endpoint_ins.product
 
         return data
 

@@ -52,13 +52,19 @@ class TestEndpointModel(TestCase):
         self.assertEqual(endpoint.host, '127.0.0.1')
 
     def test_invalid(self):
-        self.assertRaises(ValidationError, Endpoint.from_uri, 'http://127.0.1/')
+        endpoint = Endpoint.from_uri('http://127.0.1/')
+        self.assertRaises(ValidationError, endpoint.clean)
         self.assertRaises(ValidationError, Endpoint.from_uri, 'http://127.0.0.1:portNo/')
-        self.assertRaises(ValidationError, Endpoint.from_uri, 'http://127.0.0.1:-1/')
-        self.assertRaises(ValidationError, Endpoint.from_uri, 'http://127.0.0.1:66666/')
-        self.assertRaises(ValidationError, Endpoint, host='127.0.1')
-        self.assertRaises(ValidationError, Endpoint, host='127.0.0.1', port=-1)
-        self.assertRaises(ValidationError, Endpoint, host='127.0.0.1', port=66666)
+        endpoint = Endpoint.from_uri('http://127.0.0.1:-1/')
+        self.assertRaises(ValidationError, endpoint.clean)
+        endpoint = Endpoint.from_uri('http://127.0.0.1:66666/')
+        self.assertRaises(ValidationError, endpoint.clean)
+        endpoint = Endpoint(host='127.0.1')
+        self.assertRaises(ValidationError, endpoint.clean)
+        endpoint = Endpoint(host='127.0.0.1', port=-1)
+        self.assertRaises(ValidationError, endpoint.clean)
+        endpoint = Endpoint(host='127.0.0.1', port=66666)
+        self.assertRaises(ValidationError, endpoint.clean)
 
     def test_ports(self):
         # known port
