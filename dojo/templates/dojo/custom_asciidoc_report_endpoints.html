@@ -59,7 +59,7 @@
             <br>
             {% with endpoints=find|get_vulnerable_endpoints %}
                 {% if endpoints %}
-                    <p><b>==== Systems Vulnerable: ====</b><br>
+                    <p><b>==== Vulnerable Endpoints: ====</b><br>
                         {% for endpoint in endpoints %}
                             {{ endpoint }} +<br/>
                         {% endfor %}
@@ -70,7 +70,7 @@
 
             {% with endpoints=find|get_mitigated_endpoints %}
                 {% if endpoints %}
-                    <p><b>==== Systems Remediated: ====</b><br>
+                    <p><b>==== Remediated Endpoints: ====</b><br>
                         {% for endpoint in endpoints %}
                             {{ endpoint }} +<br/>
                         {% endfor %}

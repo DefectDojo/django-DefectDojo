@@ -187,8 +187,8 @@ def deduplicate_legacy(new_finding):
         # ---------------------------------------------------------
 
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            list1 = [e.host_with_port for e in new_finding.endpoints.all()]
-            list2 = [e.host_with_port for e in find.endpoints.all()]
+            list1 = [str(e) for e in new_finding.endpoints.all()]
+            list2 = [str(e) for e in find.endpoints.all()]
 
             if all(x in list1 for x in list2):
                 deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
@@ -1507,6 +1507,8 @@ class Product_Tab():
                                                           mitigated__isnull=True).count()
         self.endpoints_count = Endpoint.objects.filter(
             product=self.product).count()
+        self.endpoint_hosts_count = Endpoint.objects.filter(
+            product=self.product).values('host').distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
             enabled=True).order_by('name')
         self.engagement = None
@@ -1540,6 +1542,9 @@ class Product_Tab():
 
     def endpoints(self):
         return self.endpoints_count
+
+    def endpoint_hosts(self):
+        return self.endpoint_hosts_count
 
     def benchmark_type(self):
         return self.benchmark_type
