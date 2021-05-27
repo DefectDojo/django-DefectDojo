@@ -27,8 +27,9 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Deployment method** *(select with an `X`)*
-- [ ] Kubernetes
 - [ ] Docker
+- [ ] Kubernetes
+- [ ] GoDojo
 - [ ] setup.bash / legacy-setup.bash
 
 **Environment information**

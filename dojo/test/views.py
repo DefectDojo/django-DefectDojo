@@ -25,7 +25,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
-from dojo.models import Finding, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
+from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import
 
 from dojo.tools.factory import get_choices
@@ -126,7 +126,7 @@ def view_test(request, tid):
     product_tab.setEngagement(test.engagement)
     jira_project = jira_helper.get_jira_project(test)
 
-    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue')
+    finding_groups = test.finding_group_set.all().prefetch_related('findings', 'jira_issue', 'creator')
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
@@ -189,6 +189,7 @@ def view_test(request, tid):
                    'paged_test_imports': paged_test_imports,
                    'test_import_filter': test_import_filter,
                    'finding_groups': finding_groups,
+                   'finding_group_by_options': Finding_Group.GROUP_BY_OPTIONS,
                    })
 
 
@@ -213,7 +214,7 @@ def prefetch_for_findings(findings):
         prefetched_findings = prefetched_findings.annotate(mitigated_endpoint_count=Count('endpoint_status__id', filter=Q(endpoint_status__mitigated=True)))
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__authorized_users')
         prefetched_findings = prefetched_findings.prefetch_related('test__engagement__product__prod_type__authorized_users')
-        prefetched_findings = prefetched_findings.prefetch_related('finding_group_set')
+        prefetched_findings = prefetched_findings.prefetch_related('finding_group_set__jira_issue')
         prefetched_findings = prefetched_findings.prefetch_related('duplicate_finding')
 
     else:
@@ -271,6 +272,7 @@ def delete_test(request, tid):
         if 'id' in request.POST and str(test.id) == request.POST['id']:
             form = DeleteTestForm(request.POST, instance=test)
             if form.is_valid():
+                product = test.engagement.product
                 test.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -278,6 +280,7 @@ def delete_test(request, tid):
                                      extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % test.title,
+                                    product=product,
                                     description='The test "%s" was deleted by %s' % (test.title, request.user),
                                     url=request.build_absolute_uri(reverse('view_engagement', args=(eng.id, ))),
                                     recipients=[test.engagement.lead],
@@ -432,6 +435,7 @@ def add_findings(request, tid):
             new_finding.save(false_history=True, push_to_jira=push_to_jira)
             create_notification(event='other',
                                 title='Addition of %s' % new_finding.title,
+                                finding=new_finding,
                                 description='Finding "%s" was added by %s' % (new_finding.title, request.user),
                                 url=request.build_absolute_uri(reverse('view_finding', args=(new_finding.id,))),
                                 icon="exclamation-triangle")
@@ -691,6 +695,9 @@ def re_import_scan_results(request, tid):
             endpoints_to_add = None  # not available on reimport UI
 
             close_old_findings = form.cleaned_data.get('close_old_findings', True)
+
+            group_by = form.cleaned_data.get('group_by', None)
+
             # Tags are replaced, same behaviour as with django-tagging
             test.tags = tags
             test.version = version
@@ -712,9 +719,9 @@ def re_import_scan_results(request, tid):
                                                 endpoints_to_add=endpoints_to_add, scan_date=scan_date,
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
-                                                close_old_findings=close_old_findings)
+                                                close_old_findings=close_old_findings, group_by=group_by)
             except Exception as e:
-                # exceptions are already logged by the importer
+                logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
                 error = True
 

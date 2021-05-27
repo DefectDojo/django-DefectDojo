@@ -271,6 +271,7 @@ def delete_engagement(request, eid):
         if 'id' in request.POST and str(engagement.id) == request.POST['id']:
             form = DeleteEngagementForm(request.POST, instance=engagement)
             if form.is_valid():
+                product = engagement.product
                 engagement.delete()
                 messages.add_message(
                     request,
@@ -279,6 +280,7 @@ def delete_engagement(request, eid):
                     extra_tags='alert-success')
                 create_notification(event='other',
                                     title='Deletion of %s' % engagement.name,
+                                    product=product,
                                     description='The engagement "%s" was deleted by %s' % (engagement.name, request.user),
                                     url=request.build_absolute_uri(reverse('view_engagements', args=(product.id, ))),
                                     recipients=[engagement.lead],
@@ -414,7 +416,7 @@ def prefetch_for_view_tests(tests):
         prefetched = prefetched.annotate(count_findings_test_all=Count('finding__id', distinct=True))
         prefetched = prefetched.annotate(count_findings_test_active=Count('finding__id', filter=Q(finding__active=True), distinct=True))
         prefetched = prefetched.annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True), distinct=True))
+        prefetched = prefetched.annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_mitigated=True), distinct=True))
         prefetched = prefetched.annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True))
         prefetched = prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
 
@@ -555,6 +557,8 @@ def import_scan_results(request, eid=None, pid=None):
             environment_id = request.POST.get('environment', 'Development')
             environment = Development_Environment.objects.get(id=environment_id)
 
+            group_by = form.cleaned_data.get('group_by', None)
+
             # TODO move to form validation?
             if not any(scan_type in code
                        for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
@@ -597,9 +601,9 @@ def import_scan_results(request, eid=None, pid=None):
                 test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings)
+                            close_old_findings=close_old_findings, group_by=group_by)
 
-                message = scan_type + '%s processed a total of %s findings' % (scan_type, finding_count)
+                message = f'{scan_type} processed a total of {finding_count} findings'
 
                 if close_old_findings:
                     message = message + ' and closed %d findings' % (closed_finding_count)
@@ -609,7 +613,7 @@ def import_scan_results(request, eid=None, pid=None):
                 add_success_message_to_response(message)
 
             except Exception as e:
-                # exceptions are already logged by the importer
+                logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
                 error = True
 
@@ -686,6 +690,7 @@ def reopen_eng(request, eid):
         extra_tags='alert-success')
     create_notification(event='other',
                         title='Reopening of %s' % eng.name,
+                        engagement=eng,
                         description='The engagement "%s" was reopened' % (eng.name),
                         url=reverse('view_engagement', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))

@@ -19,7 +19,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Te
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
-    BurpRawRequestResponse, FileUpload, Product_Type_Member
+    BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -37,8 +37,8 @@ from dojo.api_v2 import serializers, permissions, prefetch, schema
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
-from dojo.product_type.queries import get_authorized_product_types
-from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_product_type_members
+from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, get_authorized_product_members
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
@@ -609,6 +609,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     )
     @action(detail=True, methods=['post'], url_path=r'duplicate/reset')
     def reset_finding_duplicate_status(self, request, pk):
+        finding = self.get_object()
         checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, pk)
         if checked_duplicate_id is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -620,6 +621,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     )
     @action(detail=True, methods=['post'], url_path=r'original/(?P<new_fid>\d+)')
     def set_finding_as_original(self, request, pk, new_fid):
+        finding = self.get_object()
         success = set_finding_as_original_internal(request.user, pk, new_fid)
         if not success:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -912,7 +914,31 @@ class ProductViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
-class ProductTypeViewSet(mixins.ListModelMixin,
+class ProductMemberViewSet(prefetch.PrefetchListMixin,
+                           prefetch.PrefetchRetrieveMixin,
+                           mixins.ListModelMixin,
+                           mixins.RetrieveModelMixin,
+                           mixins.CreateModelMixin,
+                           mixins.DestroyModelMixin,
+                           mixins.UpdateModelMixin,
+                           viewsets.GenericViewSet):
+    serializer_class = serializers.ProductMemberSerializer
+    queryset = Product_Member.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product_id', 'user_id')
+    swagger_schema = prefetch.get_prefetch_schema(["product_members_list", "product_members_read"],
+        serializers.ProductMemberSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasProductMemberPermission)
+
+    def get_queryset(self):
+        return get_authorized_product_members(Permissions.Product_View).distinct()
+
+
+# Authorization: object-based
+class ProductTypeViewSet(prefetch.PrefetchListMixin,
+                         prefetch.PrefetchRetrieveMixin,
+                         mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
@@ -921,6 +947,8 @@ class ProductTypeViewSet(mixins.ListModelMixin,
     queryset = Product_Type.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name', 'critical_product', 'key_product', 'created', 'updated')
+    swagger_schema = prefetch.get_prefetch_schema(["product_types_list", "product_types_read"],
+        serializers.ProductTypeSerializer).to_schema()
     if settings.FEATURE_AUTHORIZATION_V2:
         permission_classes = (IsAuthenticated, permissions.UserHasProductTypePermission)
 
@@ -962,6 +990,37 @@ class ProductTypeViewSet(mixins.ListModelMixin,
         data = report_generate(request, product_type, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
+
+
+# Authorization: object-based
+class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
+                               prefetch.PrefetchRetrieveMixin,
+                               mixins.ListModelMixin,
+                               mixins.RetrieveModelMixin,
+                               mixins.CreateModelMixin,
+                               mixins.DestroyModelMixin,
+                               mixins.UpdateModelMixin,
+                               viewsets.GenericViewSet):
+    serializer_class = serializers.ProductTypeMemberSerializer
+    queryset = Product_Type_Member.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product_type_id', 'user_id')
+    swagger_schema = prefetch.get_prefetch_schema(["product_type_members_list", "product_type_members_read"],
+        serializers.ProductTypeMemberSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasProductTypeMemberPermission)
+
+    def get_queryset(self):
+        return get_authorized_product_type_members(Permissions.Product_Type_View).distinct()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.role == Roles.Owner:
+            owners = Product_Type_Member.objects.filter(product_type=instance.product_type, role=Roles.Owner).count()
+            if owners <= 1:
+                return Response('There must be at least one owner', status=status.HTTP_400_BAD_REQUEST)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # Authorization: object-based
@@ -1281,7 +1340,10 @@ class ImportScanView(mixins.CreateModelMixin,
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasImportPermission)
+    else:
+        permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def perform_create(self, serializer):
         engagement = serializer.validated_data['engagement']
@@ -1304,7 +1366,10 @@ class ReImportScanView(mixins.CreateModelMixin,
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasReimportPermission)
+    else:
+        permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def get_queryset(self):
         return get_authorized_tests(Permissions.Import_Scan_Result)

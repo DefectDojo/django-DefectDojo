@@ -7,13 +7,16 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
-    Test_Import_Finding_Action, Product_Type_Member
+    Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
+    Product_Group, Product_Type_Group, Dojo_Group
+
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
 from dojo.utils import is_scan_file_too_large
 from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
 from rest_framework import serializers
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils import timezone
 import base64
 import datetime
@@ -25,6 +28,8 @@ import logging
 import tagulous
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
+from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.roles_permissions import Roles, Permissions
 
 
 logger = logging.getLogger(__name__)
@@ -308,11 +313,23 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
 
+    def create(self, validated_data):
+        user = User.objects.create(**validated_data)
+        user.set_unusable_password()
+        user.save()
+        return user
+
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'first_name', 'last_name')
+
+
+class DojoGroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Dojo_Group
+        fields = '__all__'
 
 
 class NoteHistorySerializer(serializers.ModelSerializer):
@@ -365,6 +382,40 @@ class FileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProductMemberSerializer(serializers.ModelSerializer):
+
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
+
+    class Meta:
+        model = Product_Member
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            members = Product_Member.objects.filter(product=data.get('product'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Product member already exists')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Member_Add_Owner):
+            raise PermissionDenied('You are not permitted to add users as owners')
+
+        return data
+
+
+class ProductGroupSerializer(serializers.ModelSerializer):
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
+
+    class Meta:
+        model = Product_Group
+        fields = '__all__'
+
+
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -374,11 +425,13 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        exclude = ('tid', 'manager', 'prod_manager', 'tech_contact',
-                   'updated')
-        extra_kwargs = {
-            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-        }
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['tid', 'updated', 'members']
+            extra_kwargs = {
+                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+            }
+        else:
+            exclude = ['tid', 'updated', 'authorized_users']
 
     def get_findings_count(self, obj):
         return obj.findings_count
@@ -388,16 +441,45 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
-    user = UserStubSerializer(many=False, read_only=True)
+
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
 
     class Meta:
         model = Product_Type_Member
-        exclude = ['product_type']
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            members = Product_Type_Member.objects.filter(product_type=data.get('product_type'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Product type member already exists')
+        else:
+            if data.get('role') != Roles.Owner:
+                owners = Product_Type_Member.objects.filter(product_type=data.get('product_type'), role=Roles.Owner).exclude(id=self.instance.id).count()
+                if owners < 1:
+                    raise ValidationError('There must be at least one owner')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Member_Add_Owner):
+            raise PermissionDenied('You are not permitted to add users as owners')
+
+        return data
+
+
+class ProductTypeGroupSerializer(serializers.ModelSerializer):
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
+
+    class Meta:
+        model = Product_Type_Group
+        fields = '__all__'
 
 
 class ProductTypeSerializer(serializers.ModelSerializer):
-    if settings.FEATURE_AUTHORIZATION_V2:
-        members = ProductTypeMemberSerializer(source='product_type_member_set', read_only=True, many=True)
 
     class Meta:
         model = Product_Type
@@ -650,7 +732,7 @@ class FindingGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Finding_Group
-        fields = ('name', 'test', 'jira_issue')
+        fields = ('id', 'name', 'test', 'jira_issue')
 
 
 class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1041,6 +1123,8 @@ class ImportScanSerializer(serializers.Serializer):
 
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
     def save(self, push_to_jira=False):
         data = self.validated_data
         close_old_findings = data['close_old_findings']
@@ -1069,6 +1153,8 @@ class ImportScanSerializer(serializers.Serializer):
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
+        group_by = data.get('group_by', None)
+
         importer = Importer()
         try:
             test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
@@ -1079,7 +1165,8 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              branch_tag=branch_tag, build_id=build_id,
                                                                              commit_hash=commit_hash,
                                                                              push_to_jira=push_to_jira,
-                                                                             close_old_findings=close_old_findings)
+                                                                             close_old_findings=close_old_findings,
+                                                                             group_by=group_by)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -1134,7 +1221,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
 
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
     def save(self, push_to_jira=False):
+        logger.debug('push_to_jira: %s', push_to_jira)
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
@@ -1152,6 +1242,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
+        group_by = data.get('group_by', None)
+
         reimporter = ReImporter()
         try:
             test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
@@ -1160,7 +1252,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             endpoints_to_add=endpoints_to_add, scan_date=scan_date,
                                             version=version, branch_tag=branch_tag, build_id=build_id,
                                             commit_hash=commit_hash, push_to_jira=push_to_jira,
-                                            close_old_findings=close_old_findings)
+                                            close_old_findings=close_old_findings,
+                                            group_by=group_by)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:

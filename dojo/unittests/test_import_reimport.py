@@ -1,5 +1,5 @@
 from django.urls import reverse
-from dojo.models import User, Test
+from dojo.models import User, Test, Finding
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from django.test.client import Client
@@ -65,6 +65,10 @@ class ImportReimportMixin(object):
         self.veracode_same_unique_id_different_hash_code = self.scans_path + 'veracode/many_findings_same_unique_id_different_hash_code.xml'
         self.veracode_different_hash_code_different_unique_id = self.scans_path + 'veracode/many_findings_different_hash_code_different_unique_id.xml'
         self.scan_type_veracode = 'Veracode Scan'
+
+        self.clair_few_findings = self.scans_path + 'clair/few_vuln.json'
+        self.clair_empty = self.scans_path + 'clair/empty.json'
+        self.scan_type_clair = 'Clair Scan'
 
     # import zap scan, testing:
     # - import
@@ -370,7 +374,7 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(6, findings)
 
         # one mitigated (the one previously imported which has changed unique_id_from_tool)
-        findings = self.get_test_findings_api(test_id, is_Mitigated=True)
+        findings = self.get_test_findings_api(test_id, is_mitigated=True)
         self.assert_finding_count_json(1, findings)
 
         # one verified False (the new one, as reimport was done with verified false)
@@ -789,7 +793,7 @@ class ImportReimportMixin(object):
         not_mitigated = 0
         for finding in findings['results']:
             logger.debug(finding)
-            if finding['is_Mitigated']:
+            if finding['is_mitigated']:
                 mitigated += 1
             else:
                 not_mitigated += 1
@@ -857,21 +861,21 @@ class ImportReimportMixin(object):
                                                        "false_p": True,
                                                        "out_of_scope": False,
                                                        "risk_accepted": False,
-                                                       "is_Mitigated": True})
+                                                       "is_mitigated": True})
             elif 'Zap2' in finding['title']:
                 self.patch_finding_api(finding['id'], {"active": False,
                                                        "verified": False,
                                                        "false_p": False,
                                                        "out_of_scope": True,
                                                        "risk_accepted": False,
-                                                       "is_Mitigated": True})
+                                                       "is_mitigated": True})
             elif 'Zap3' in finding['title']:
                 self.patch_finding_api(finding['id'], {"active": False,
                                                        "verified": False,
                                                        "false_p": False,
                                                        "out_of_scope": False,
                                                        "risk_accepted": True,
-                                                       "is_Mitigated": True})
+                                                       "is_mitigated": True})
 
         active_findings_before = self.get_test_findings_api(test_id, active=True)
         self.assert_finding_count_json(1, active_findings_before)
@@ -901,28 +905,28 @@ class ImportReimportMixin(object):
                 self.assertTrue(finding['false_p'])
                 self.assertFalse(finding['out_of_scope'])
                 self.assertFalse(finding['risk_accepted'])
-                self.assertTrue(finding['is_Mitigated'])
+                self.assertTrue(finding['is_mitigated'])
             elif 'Zap2' in finding['title']:
                 self.assertFalse(finding['active'])
                 self.assertFalse(finding['verified'])
                 self.assertFalse(finding['false_p'])
                 self.assertTrue(finding['out_of_scope'])
                 self.assertFalse(finding['risk_accepted'])
-                self.assertTrue(finding['is_Mitigated'])
+                self.assertTrue(finding['is_mitigated'])
             elif 'Zap3' in finding['title']:
                 self.assertFalse(finding['active'])
                 self.assertFalse(finding['verified'])
                 self.assertFalse(finding['false_p'])
                 self.assertFalse(finding['out_of_scope'])
                 self.assertTrue(finding['risk_accepted'])
-                self.assertTrue(finding['is_Mitigated'])
+                self.assertTrue(finding['is_mitigated'])
             elif 'Zap5' in finding['title']:
                 self.assertTrue(finding['active'])
                 self.assertTrue(finding['verified'])
                 self.assertFalse(finding['false_p'])
                 self.assertFalse(finding['out_of_scope'])
                 self.assertFalse(finding['risk_accepted'])
-                self.assertFalse(finding['is_Mitigated'])
+                self.assertFalse(finding['is_mitigated'])
 
     # import gitlab_dep_scan_components_filename with 6 findings
     # findings 1, 2 and 3 have the same component_name (golang.org/x/crypto) and the same CVE (CVE-2020-29652), but different component_version
@@ -985,6 +989,38 @@ class ImportReimportMixin(object):
                 count = count + 1
 
         self.assertEqual(5, count)
+
+    # import clair scan, testing:
+    # parameter endpoint_to_add: each imported finding should be related to endpoint with id=1
+    # close_old_findings functionality: secony (empty) import should close all findings from the first import
+    def test_import_param_close_old_findings_with_additional_endpoint(self):
+        logger.debug('importing clair report with additional endpoint')
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
+            import0 = self.import_scan_with_params(self.clair_few_findings, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
+
+        test_id = import0['test']
+        test = self.get_test(test_id)
+        findings = self.get_test_findings_api(test_id)
+        self.log_finding_summary_json_api(findings)
+        # imported count must match count in the report
+        self.assert_finding_count_json(4, findings)
+
+        # imported findings should be active in the engagement
+        engagement_findings = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False)
+        self.assertEqual(engagement_findings.count(), 4)
+
+        # findings should have only one endpoint, added with endpoint_to_add
+        for finding in engagement_findings:
+            self.assertEqual(finding.endpoints.count(), 1)
+            self.assertEqual(finding.endpoints.first().id, 1)
+
+        # reimport exact same report
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, closed=4):
+            self.import_scan_with_params(self.clair_empty, scan_type=self.scan_type_clair, close_old_findings=True, endpoint_to_add=1)
+
+        # all findings from import0 should be closed now
+        engagement_findings_count = Finding.objects.filter(test__engagement_id=1, test__test_type=test.test_type, active=True, is_mitigated=False).count()
+        self.assertEqual(engagement_findings_count, 0)
 
 
 @override_settings(TRACK_IMPORT_HISTORY=True)
@@ -1055,7 +1091,7 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
         test = Test.objects.get(id=response.url.split('/')[-1])
         return {'test': test.id}
 
-    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, tags=None, close_old_findings=False):
+    def import_scan_with_params_ui(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True, push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -1065,11 +1101,14 @@ class ImportReimportTestUI(DojoAPITestCase, ImportReimportMixin):
                 "file": open(filename),
                 "environment": 1,
                 "version": "1.0.1",
-                # "close_old_findings": close_old_findings,
+                "close_old_findings": close_old_findings,
         }
 
         if push_to_jira is not None:
             payload['push_to_jira'] = push_to_jira
+
+        if endpoint_to_add is not None:
+            payload['endpoints'] = [endpoint_to_add]
 
         if tags is not None:
             payload['tags'] = tags

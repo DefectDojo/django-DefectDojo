@@ -7,6 +7,8 @@ from django.template.loader import render_to_string
 from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
 from dojo.celery import app
+from dojo.user.queries import get_authorized_users_for_product_and_product_type, get_authorized_users_for_product_type
+from dojo.authorization.roles_permissions import Permissions
 # from dojo.decorators import dojo_async_task, we_want_async, convert_kwargs_if_async
 
 logger = logging.getLogger(__name__)
@@ -27,20 +29,20 @@ def create_notification(event=None, **kwargs):
         # send system notifications to all admin users
 
         # parse kwargs before converting them to dicts
+        product_type = None
+        if 'product_type' in kwargs:
+            product_type = kwargs.get('product_type')
+
         product = None
         if 'product' in kwargs:
             product = kwargs.get('product')
-
-        if not product and 'engagement' in kwargs:
+        elif 'engagement' in kwargs:
             product = kwargs['engagement'].product
-
-        if not product and 'test' in kwargs:
+        elif 'test' in kwargs:
             product = kwargs['test'].engagement.product
-
-        if not product and 'finding' in kwargs:
+        elif 'finding' in kwargs:
             product = kwargs['finding'].test.engagement.product
-
-        if not product and 'obj' in kwargs:
+        elif 'obj' in kwargs:
             from dojo.utils import get_product
             product = get_product(kwargs['obj'])
 
@@ -62,30 +64,35 @@ def create_notification(event=None, **kwargs):
         # only retrieve users which have at least one notification type enabled for this event type.
         logger.debug('creating personal notifications for event: %s', event)
 
-        # get users with either global notifications, or a product specific noditiciation
-        # and all admin/superuser, they will always be notified
-        users = Dojo_User.objects.filter(is_active=True).prefetch_related(Prefetch(
-            "notifications_set",
-            queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
-            to_attr="applicable_notifications"
-        )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
-            .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True) | Q(is_staff=True)))
+        # There are notification like deleting a product type that shall not be sent to users.
+        # These notifications will have the parameter no_users=True
+        if not ('no_users' in kwargs and kwargs['no_users'] is True):
+            # get users with either global notifications, or a product specific noditiciation
+            # and all admin/superuser, they will always be notified
+            users = Dojo_User.objects.filter(is_active=True).prefetch_related(Prefetch(
+                "notifications_set",
+                queryset=Notifications.objects.filter(Q(product_id=product) | Q(product__isnull=True)),
+                to_attr="applicable_notifications"
+            )).annotate(applicable_notifications_count=Count('notifications__id', filter=Q(notifications__product_id=product) | Q(notifications__product__isnull=True)))\
+                .filter((Q(applicable_notifications_count__gt=0) | Q(is_superuser=True) | Q(is_staff=True)))
 
-        # only send to authorized users or admin/superusers
-        if product:
-            users = users.filter(Q(id__in=product.authorized_users.all()) | Q(id__in=product.prod_type.authorized_users.all()) | Q(is_superuser=True) | Q(is_staff=True))
+            # only send to authorized users or admin/superusers
+            if product:
+                users = get_authorized_users_for_product_and_product_type(users, product, Permissions.Product_View)
+            elif product_type:
+                users = get_authorized_users_for_product_type(users, product_type, Permissions.Product_Type_View)
 
-        for user in users:
-            # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
-            # kwargs.update({'user': user})
-            applicable_notifications = user.applicable_notifications
-            if user.is_staff or user.is_superuser:
-                # admin users get all system notifications
-                applicable_notifications.append(system_notifications)
+            for user in users:
+                # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
+                # kwargs.update({'user': user})
+                applicable_notifications = user.applicable_notifications
+                if user.is_staff or user.is_superuser:
+                    # admin users get all system notifications
+                    applicable_notifications.append(system_notifications)
 
-            notifications_set = Notifications.merge_notifications_list(applicable_notifications)
-            notifications_set.user = user
-            process_notifications(event, notifications_set, **kwargs)
+                notifications_set = Notifications.merge_notifications_list(applicable_notifications)
+                notifications_set.user = user
+                process_notifications(event, notifications_set, **kwargs)
 
 
 def create_description(event, *args, **kwargs):

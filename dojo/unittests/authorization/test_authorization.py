@@ -2,8 +2,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.test import TestCase, override_settings
 from unittest.mock import patch
-from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint
+from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
+    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group
 import dojo.authorization.authorization
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, \
     user_has_permission_or_403, user_has_permission, \
@@ -15,7 +15,7 @@ class TestAuthorization(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User()
+        cls.user = Dojo_User()
         cls.user.id = 1
         cls.product_type = Product_Type()
         cls.product_type.id = 1
@@ -54,6 +54,33 @@ class TestAuthorization(TestCase):
         cls.product_member_owner.user = cls.user
         cls.product_member_owner.product = cls.product
         cls.product_member_owner.role = Roles.Owner
+
+        cls.group = Dojo_Group()
+        cls.group.id = 1
+
+        cls.product_group_reader = Product_Group()
+        cls.product_group_reader.id = 1
+        cls.product_group_reader.product = cls.product
+        cls.product_group_reader.group = cls.group
+        cls.product_group_reader.role = Roles.Reader
+
+        cls.product_group_owner = Product_Group()
+        cls.product_group_owner.id = 2
+        cls.product_group_owner.product = cls.product
+        cls.product_group_owner.group = cls.group
+        cls.product_group_owner.role = Roles.Owner
+
+        cls.product_type_group_reader = Product_Type_Group()
+        cls.product_type_group_reader.id = 1
+        cls.product_type_group_reader.product_type = cls.product_type
+        cls.product_type_group_reader.group = cls.group
+        cls.product_type_group_reader.role = Roles.Reader
+
+        cls.product_type_group_owner = Product_Type_Group()
+        cls.product_type_group_owner.id = 2
+        cls.product_type_group_owner.product_type = cls.product_type
+        cls.product_type_group_owner.group = cls.group
+        cls.product_type_group_owner.role = Roles.Owner
 
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,
@@ -254,7 +281,7 @@ class TestAuthorization(TestCase):
         self.assertEqual(mock_get.call_args[1]['product'], self.product)
 
     def test_user_has_permission_product_type_member_success_same_user(self):
-        result = user_has_permission(self.user, self.product_type_member_owner, Permissions.Product_Type_Remove_Member)
+        result = user_has_permission(self.user, self.product_type_member_owner, Permissions.Product_Type_Member_Delete)
         self.assertTrue(result)
 
     @patch('dojo.models.Product_Type_Member.objects.get')
@@ -268,7 +295,7 @@ class TestAuthorization(TestCase):
         product_type_member_other_user.role = Roles.Reader
         mock_get.return_value = product_type_member_other_user
 
-        result = user_has_permission(other_user, self.product_type_member_owner, Permissions.Product_Type_Remove_Member)
+        result = user_has_permission(other_user, self.product_type_member_owner, Permissions.Product_Type_Member_Delete)
 
         self.assertFalse(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
@@ -285,14 +312,14 @@ class TestAuthorization(TestCase):
         product_type_member_other_user.role = Roles.Owner
         mock_get.return_value = product_type_member_other_user
 
-        result = user_has_permission(other_user, self.product_type_member_reader, Permissions.Product_Type_Remove_Member)
+        result = user_has_permission(other_user, self.product_type_member_reader, Permissions.Product_Type_Member_Delete)
 
         self.assertTrue(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
         self.assertEqual(mock_get.call_args[1]['product_type'], self.product_type)
 
     def test_user_has_permission_product_member_success_same_user(self):
-        result = user_has_permission(self.user, self.product_member_owner, Permissions.Product_Remove_Member)
+        result = user_has_permission(self.user, self.product_member_owner, Permissions.Product_Member_Delete)
         self.assertTrue(result)
 
     @patch('dojo.models.Product_Member.objects.get')
@@ -306,7 +333,7 @@ class TestAuthorization(TestCase):
         product_member_other_user.role = Roles.Reader
         mock_get.return_value = product_member_other_user
 
-        result = user_has_permission(other_user, self.product_member_owner, Permissions.Product_Remove_Member)
+        result = user_has_permission(other_user, self.product_member_owner, Permissions.Product_Member_Delete)
 
         self.assertFalse(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
@@ -323,8 +350,48 @@ class TestAuthorization(TestCase):
         product_member_other_user.role = Roles.Owner
         mock_get.return_value = product_member_other_user
 
-        result = user_has_permission(other_user, self.product_member_reader, Permissions.Product_Remove_Member)
+        result = user_has_permission(other_user, self.product_member_reader, Permissions.Product_Member_Delete)
 
         self.assertTrue(result)
         self.assertEqual(mock_get.call_args[1]['user'], other_user)
         self.assertEqual(mock_get.call_args[1]['product'], self.product)
+
+    @patch('dojo.models.Product_Group.objects.filter')
+    def test_user_has_group_product_no_permissions(self, mock_get):
+        mock_get.return_value = {self.product_group_reader}
+
+        result = user_has_permission(self.user, self.product, Permissions.Product_Delete)
+
+        self.assertFalse(result)
+        self.assertEqual(mock_get.call_args[1]['group__users'], self.user)
+        self.assertEqual(mock_get.call_args[1]['product'], self.product)
+
+    @patch('dojo.models.Product_Group.objects.filter')
+    def test_user_has_group_product_success(self, mock_get):
+        mock_get.return_value = {self.product_group_owner}
+
+        result = user_has_permission(self.user, self.product, Permissions.Product_Delete)
+
+        self.assertTrue(result)
+        self.assertEqual(mock_get.call_args[1]['group__users'], self.user)
+        self.assertEqual(mock_get.call_args[1]['product'], self.product)
+
+    @patch('dojo.models.Product_Type_Group.objects.filter')
+    def test_user_has_group_product_type_no_permissions(self, mock_get):
+        mock_get.return_value = {self.product_type_group_reader}
+
+        result = user_has_permission(self.user, self.product_type, Permissions.Product_Type_Delete)
+
+        self.assertFalse(result)
+        self.assertEqual(mock_get.call_args[1]['group__users'], self.user)
+        self.assertEqual(mock_get.call_args[1]['product_type'], self.product_type)
+
+    @patch('dojo.models.Product_Type_Group.objects.filter')
+    def test_user_has_group_product_type_success(self, mock_get):
+        mock_get.return_value = {self.product_type_group_owner}
+
+        result = user_has_permission(self.user, self.product_type, Permissions.Product_Type_Delete)
+
+        self.assertTrue(result)
+        self.assertEqual(mock_get.call_args[1]['group__users'], self.user)
+        self.assertEqual(mock_get.call_args[1]['product_type'], self.product_type)

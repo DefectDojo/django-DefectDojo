@@ -10,14 +10,20 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.utils import NestedObjects
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.forms import AuthenticationForm
+from django.utils.http import urlencode
 from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
-from tastypie.models import ApiKey
 
 from dojo.filters import UserFilter
-from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm
-from dojo.models import Product, Product_Type, Dojo_User, Alerts
+from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
+    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm
+from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member
 from dojo.utils import get_page_items, add_breadcrumb
+from dojo.product.queries import get_authorized_product_members_for_user
+from dojo.product_type.queries import get_authorized_product_type_members_for_user
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +101,33 @@ def api_v2_key(request):
                    })
 
 # #  user specific
+
+
+def login_view(request):
+    if not settings.SHOW_LOGIN_FORM and settings.SOCIAL_LOGIN_AUTO_REDIRECT and sum([
+        settings.GOOGLE_OAUTH_ENABLED,
+        settings.OKTA_OAUTH_ENABLED,
+        settings.AZUREAD_TENANT_OAUTH2_ENABLED,
+        settings.GITLAB_OAUTH2_ENABLED,
+        settings.AUTH0_OAUTH2_ENABLED,
+        settings.SAML2_ENABLED
+    ]) == 1:
+        if settings.GOOGLE_OAUTH_ENABLED:
+            social_auth = 'google-oauth2'
+        elif settings.OKTA_OAUTH_ENABLED:
+            social_auth = 'okta-oauth2'
+        elif settings.AZUREAD_TENANT_OAUTH2_ENABLED:
+            social_auth = 'azuread-tenant-oauth2'
+        elif settings.GITLAB_OAUTH2_ENABLED:
+            social_auth = 'gitlab'
+        elif settings.AUTH0_OAUTH2_ENABLED:
+            social_auth = 'auth0'
+        else:
+            return HttpResponseRedirect('/saml2/login')
+        return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=[social_auth]),
+                                                   urlencode({'next': request.GET.get('next')})))
+    else:
+        return LoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
 
 
 def logout_view(request):
@@ -257,14 +290,15 @@ def add_user(request):
             contact = contact_form.save(commit=False)
             contact.user = user
             contact.save()
-            if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
-                for p in form.cleaned_data['authorized_products']:
-                    p.authorized_users.add(user)
-                    p.save()
-            if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
-                for pt in form.cleaned_data['authorized_product_types']:
-                    pt.authorized_users.add(user)
-                    pt.save()
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
+                    for p in form.cleaned_data['authorized_products']:
+                        p.authorized_users.add(user)
+                        p.save()
+                if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
+                    for pt in form.cleaned_data['authorized_product_types']:
+                        pt.authorized_users.add(user)
+                        pt.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'User added successfully, you may edit if necessary.',
@@ -281,6 +315,23 @@ def add_user(request):
         'form': form,
         'contact_form': contact_form,
         'to_add': True})
+
+
+@user_passes_test(lambda u: u.is_staff)
+def view_user(request, uid):
+    user = get_object_or_404(Dojo_User, id=uid)
+    authorized_products = Product.objects.filter(authorized_users__in=[user])
+    authorized_product_types = Product_Type.objects.filter(authorized_users__in=[user])
+    product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
+    product_type_members = get_authorized_product_type_members_for_user(user, Permissions.Product_Type_View)
+
+    add_breadcrumb(title="View User", top_level=False, request=request)
+    return render(request, 'dojo/view_user.html', {
+        'user': user,
+        'authorized_products': authorized_products,
+        'authorized_product_types': authorized_product_types,
+        'product_members': product_members,
+        'product_type_members': product_type_members})
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -313,20 +364,21 @@ def edit_user(request, uid):
 
         if form.is_valid() and contact_form.is_valid():
             form.save()
-            for init_auth_prods in authed_products:
-                init_auth_prods.authorized_users.remove(user)
-                init_auth_prods.save()
-            for init_auth_prod_types in authed_product_types:
-                init_auth_prod_types.authorized_users.remove(user)
-                init_auth_prod_types.save()
-            if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
-                for p in form.cleaned_data['authorized_products']:
-                    p.authorized_users.add(user)
-                    p.save()
-            if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
-                for pt in form.cleaned_data['authorized_product_types']:
-                    pt.authorized_users.add(user)
-                    pt.save()
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                for init_auth_prods in authed_products:
+                    init_auth_prods.authorized_users.remove(user)
+                    init_auth_prods.save()
+                for init_auth_prod_types in authed_product_types:
+                    init_auth_prod_types.authorized_users.remove(user)
+                    init_auth_prod_types.save()
+                if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
+                    for p in form.cleaned_data['authorized_products']:
+                        p.authorized_users.add(user)
+                        p.save()
+                if 'authorized_product_types' in form.cleaned_data and len(form.cleaned_data['authorized_product_types']) > 0:
+                    for pt in form.cleaned_data['authorized_product_types']:
+                        pt.authorized_users.add(user)
+                        pt.save()
             contact = contact_form.save(commit=False)
             contact.user = user
             contact.save()
@@ -380,3 +432,57 @@ def delete_user(request, uid):
                    'form': form,
                    'rels': rels,
                    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def add_product_type_member(request, uid):
+    user = get_object_or_404(Dojo_User, id=uid)
+    memberform = Add_Product_Type_Member_UserForm(initial={'user': user.id})
+    if request.method == 'POST':
+        memberform = Add_Product_Type_Member_UserForm(request.POST, initial={'user': user.id})
+        if memberform.is_valid():
+            members = Product_Type_Member.objects.filter(product_type=memberform.instance.product_type, user=memberform.instance.user)
+            if members.count() > 0:
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'Product type member already exists.',
+                                    extra_tags='alert-warning')
+            else:
+                memberform.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Product type member added successfully.',
+                                    extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_user', args=(uid, )))
+    add_breadcrumb(title="Add Product Type Member", top_level=False, request=request)
+    return render(request, 'dojo/new_product_type_member_user.html', {
+        'user': user,
+        'form': memberform,
+    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def add_product_member(request, uid):
+    user = get_object_or_404(Dojo_User, id=uid)
+    memberform = Add_Product_Member_UserForm(initial={'user': user.id})
+    if request.method == 'POST':
+        memberform = Add_Product_Member_UserForm(request.POST, initial={'user': user.id})
+        if memberform.is_valid():
+            members = Product_Member.objects.filter(product=memberform.instance.product, user=memberform.instance.user)
+            if members.count() > 0:
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'Product member already exists.',
+                                    extra_tags='alert-warning')
+            else:
+                memberform.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Product member added successfully.',
+                                    extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_user', args=(uid, )))
+    add_breadcrumb(title="Add Product Member", top_level=False, request=request)
+    return render(request, 'dojo/new_product_member_user.html', {
+        'user': user,
+        'form': memberform,
+    })

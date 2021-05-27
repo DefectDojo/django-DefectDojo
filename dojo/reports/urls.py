@@ -4,8 +4,6 @@ from dojo.reports import views
 
 urlpatterns = [
     #  reports
-    url(r'^reports$',
-        views.reports, name='reports'),
     url(r'^product/type/(?P<ptid>\d+)/report$',
         views.product_type_report, name='product_type_report'),
     url(r'^product/(?P<pid>\d+)/report$',
@@ -20,16 +18,6 @@ urlpatterns = [
         name='endpoint_report'),
     url(r'^product/report$',
         views.product_findings_report, name='product_findings_report'),
-    url(r'^reports/(?P<rid>\d+)/download$', views.download_report,
-        name='download_report'),
-    url(r'^reports/(?P<rid>\d+)/delete', views.delete_report,
-        name='delete_report'),
-    url(r'^reports/(?P<rid>\d+)/status', views.report_status,
-        name='report_status'),
-    url(r'^reports/(?P<rid>\d+)/regen', views.regen_report,
-        name='regen_report'),
-    url(r'^reports/(?P<rid>\d+)/revoke', views.revoke_report,
-        name='revoke_report'),
     url(r'^reports/cover$',
         views.report_cover_page, name='report_cover_page'),
     url(r'^reports/builder$',

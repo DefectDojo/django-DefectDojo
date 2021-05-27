@@ -1,3 +1,4 @@
+import re
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
@@ -13,13 +14,15 @@ def check_post_permission(request, post_model, post_pk, post_permission):
         return True
 
 
-def check_object_permission(request, object, get_permission, put_permission, delete_permission):
+def check_object_permission(request, object, get_permission, put_permission, delete_permission, post_permission=None):
     if request.method == 'GET':
         return user_has_permission(request.user, object, get_permission)
     elif request.method == 'PUT' or request.method == 'PATCH':
         return user_has_permission(request.user, object, put_permission)
     elif request.method == 'DELETE':
         return user_has_permission(request.user, object, delete_permission)
+    elif request.method == 'POST':
+        return user_has_permission(request.user, object, post_permission)
     else:
         return False
 
@@ -89,19 +92,52 @@ class UserHasEndpointStatusPermission(permissions.BasePermission):
 
 
 class UserHasEngagementPermission(permissions.BasePermission):
+    # Permission checks for related objects (like notes or metadata) can be moved
+    # into a seperate class, when the legacy authorization will be removed.
+    path_engagement_post = re.compile(r'^/api/v2/engagements/$')
+    path_engagement = re.compile(r'^/api/v2/engagements/\d+/$')
+
     def has_permission(self, request, view):
-        return check_post_permission(request, Product, 'product', Permissions.Engagement_Add)
+        if UserHasEngagementPermission.path_engagement_post.match(request.path) or \
+           UserHasEngagementPermission.path_engagement.match(request.path):
+            return check_post_permission(request, Product, 'product', Permissions.Engagement_Add)
+        else:
+            # related object only need object permission
+            return True
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Delete)
+        if UserHasEngagementPermission.path_engagement_post.match(request.path) or \
+           UserHasEngagementPermission.path_engagement.match(request.path):
+            return check_object_permission(request, obj, Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Delete)
+        else:
+            return check_object_permission(request, obj, Permissions.Engagement_View, Permissions.Engagement_Edit, Permissions.Engagement_Edit, Permissions.Engagement_Edit)
 
 
 class UserHasFindingPermission(permissions.BasePermission):
+    # Permission checks for related objects (like notes or metadata) can be moved
+    # into a seperate class, when the legacy authorization will be removed.
+    path_finding_post = re.compile(r'^/api/v2/findings/$')
+    path_finding = re.compile(r'^/api/v2/findings/\d+/$')
+
     def has_permission(self, request, view):
-        return check_post_permission(request, Test, 'test', Permissions.Finding_Add)
+        if UserHasFindingPermission.path_finding_post.match(request.path) or \
+           UserHasFindingPermission.path_finding.match(request.path):
+            return check_post_permission(request, Test, 'test', Permissions.Finding_Add)
+        else:
+            # related object only need object permission
+            return True
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Delete)
+        if UserHasFindingPermission.path_finding_post.match(request.path) or \
+           UserHasFindingPermission.path_finding.match(request.path):
+            return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Delete)
+        else:
+            return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Edit, Permissions.Finding_Edit)
+
+
+class UserHasImportPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Engagement, 'engagement', Permissions.Import_Scan_Result)
 
 
 class UserHasProductPermission(permissions.BasePermission):
@@ -110,6 +146,14 @@ class UserHasProductPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(request, obj, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Delete)
+
+
+class UserHasProductMemberPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Product, 'product', Permissions.Product_Manage_Members)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Product_View, Permissions.Product_Manage_Members, Permissions.Product_Member_Delete)
 
 
 class UserHasProductTypePermission(permissions.BasePermission):
@@ -123,12 +167,39 @@ class UserHasProductTypePermission(permissions.BasePermission):
         return check_object_permission(request, obj, Permissions.Product_Type_View, Permissions.Product_Type_Edit, Permissions.Product_Type_Delete)
 
 
-class UserHasTestPermission(permissions.BasePermission):
+class UserHasProductTypeMemberPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(request, Engagement, 'engagement', Permissions.Test_Add)
+        return check_post_permission(request, Product_Type, 'product_type', Permissions.Product_Type_Manage_Members)
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete)
+        return check_object_permission(request, obj, Permissions.Product_Type_View, Permissions.Product_Type_Manage_Members, Permissions.Product_Type_Member_Delete)
+
+
+class UserHasReimportPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Test, 'test', Permissions.Import_Scan_Result)
+
+
+class UserHasTestPermission(permissions.BasePermission):
+    # Permission checks for related objects (like notes or metadata) can be moved
+    # into a seperate class, when the legacy authorization will be removed.
+    path_tests_post = re.compile(r'^/api/v2/tests/$')
+    path_tests = re.compile(r'^/api/v2/tests/\d+/$')
+
+    def has_permission(self, request, view):
+        if UserHasTestPermission.path_tests_post.match(request.path) or \
+           UserHasTestPermission.path_tests.match(request.path):
+            return check_post_permission(request, Engagement, 'engagement', Permissions.Test_Add)
+        else:
+            # related object only need object permission
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        if UserHasTestPermission.path_tests_post.match(request.path) or \
+           UserHasTestPermission.path_tests.match(request.path):
+            return check_object_permission(request, obj, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete)
+        else:
+            return check_object_permission(request, obj, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Edit, Permissions.Test_Edit)
 
 
 class UserHasTestImportPermission(permissions.BasePermission):
