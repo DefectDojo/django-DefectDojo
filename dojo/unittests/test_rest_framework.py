@@ -223,27 +223,11 @@ class SchemaChecker():
 
             if properties is not None:
                 for name, prop in properties.items():
-
-                    # TODO tags is of type TagList
-                    # {'type': 'array', 'items': {'type': 'string'}}
-                    # schema to check:
-                    # {'type': 'string'}
-                    # item3#item0 should be of type string but value was of type <class 'dojo.api_v2.serializers.TagList'>
-
-                    if name in ['tags']:
-                        obj_child = obj.get(name, None)
-                        if obj_child is not None:
-                            print('checking tags: ', obj_child)
-                            print('prop:', prop)
-                            # self._with_prefix(name, _check, prop, obj_child)
-                            _check(prop, obj_child)
-
-                    if name not in ['tags']:
-                        obj_child = obj.get(name, None)
-                        if obj_child is not None:
-                            # print('checking child: ', name, obj_child)
-                            # self._with_prefix(name, _check, prop, obj_child)
-                            _check(prop, obj_child)
+                    obj_child = obj.get(name, None)
+                    if obj_child is not None:
+                        # print('checking child: ', name, obj_child)
+                        # self._with_prefix(name, _check, prop, obj_child)
+                        _check(prop, obj_child)
 
                 for child_name in obj.keys():
                     # TODO prefetch mixins not picked up by spectcular?
