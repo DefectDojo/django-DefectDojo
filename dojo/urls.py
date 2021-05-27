@@ -8,8 +8,6 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.http import HttpResponse
-
-
 from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
@@ -141,8 +139,6 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    #  tastypie api
-    url(r'^%sapi/' % get_system_setting('url_prefix'), include(v1_api.urls)),
     #  Django Rest Framework API v2
     url(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
     # action history
