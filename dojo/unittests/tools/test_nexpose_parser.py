@@ -9,7 +9,11 @@ class TestNexposeParser(TestCase):
         testfile = open("dojo/unittests/scans/nexpose/no_vuln.xml")
         parser = NexposeParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(0, len(findings))
+        self.assertEqual(1, len(findings))
+        # vuln 1
+        finding = findings[0]
+        self.assertEqual("Info", finding.severity)
+        self.assertEqual("Host Up", finding.title)
 
     def test_nexpose_parser_has_many_finding(self):
         test = Test()
@@ -19,7 +23,7 @@ class TestNexposeParser(TestCase):
         parser = NexposeParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(17, len(findings))
+        self.assertEqual(32, len(findings))
         # vuln 1
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
@@ -39,28 +43,38 @@ class TestNexposeParser(TestCase):
         endpoint = finding.unsaved_endpoints[0]
         self.assertIsNone(endpoint.port)
         self.assertIsNone(endpoint.protocol)
-        # vuln 3
-        finding = findings[3]
+        # vuln 5
+        finding = findings[5]
         self.assertEqual("Default SSH password: root password \"root\"", finding.title)
         self.assertEqual(1, len(finding.unsaved_endpoints))
-        # vuln 3 - endpoint
+        # vuln 5 - endpoint
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(22, endpoint.port)
         self.assertEqual("ssh", endpoint.protocol)
-        # vuln 16
-        finding = findings[16]
+        # vuln 27
+        finding = findings[27]
         self.assertEqual("TLS/SSL Server Supports DES and IDEA Cipher Suites", finding.title)
         self.assertEqual(1, len(finding.unsaved_endpoints))
-        # vuln 16 - endpoint
+        # vuln 27 - endpoint
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(443, endpoint.port)
         self.assertIsNone(endpoint.protocol)
+        # vuln 31
+        finding = findings[31]
+        self.assertEqual("Open port udp/137", finding.title)
+        self.assertIn('udp/137 port is open with "CIFS Name Service" service', finding.description)
+        self.assertIn('cifs name service', finding.unsaved_tags)
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        # vuln 31 - endpoint
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual(137, endpoint.port)
+        self.assertEqual('cifs name service', endpoint.protocol)
 
     def test_nexpose_parser_tests_outside_endpoint(self):
         testfile = open("dojo/unittests/scans/nexpose/report_auth.xml")
         parser = NexposeParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(4, len(findings))
+        self.assertEqual(5, len(findings))
         # vuln 0
         finding = findings[0]
         self.assertEqual("High", finding.severity)
@@ -84,22 +98,10 @@ class TestNexposeParser(TestCase):
         testfile = open("dojo/unittests/scans/nexpose/dns.xml")
         parser = NexposeParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
-        # vuln 0
-        finding = findings[0]
-        self.assertEqual("DNS server allows cache snooping", finding.title)
-        self.assertEqual(2, len(finding.unsaved_endpoints))
-        self.assertEqual('dns', str(finding.unsaved_endpoints[0].protocol))
-        self.assertEqual('tcp', str(finding.unsaved_endpoints[0].fragment))
-        self.assertEqual('dns', str(finding.unsaved_endpoints[1].protocol))
-        self.assertEqual('udp', str(finding.unsaved_endpoints[1].fragment))
-        # TODO uncomment these lines when PR #4188 will be done
-        # self.assertEqual('dns://192.168.1.1#tcp', str(finding.unsaved_endpoints[0]))
-        # self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[1]))
-
+        self.assertEqual(6, len(findings))
         # vuln 1
         finding = findings[1]
-        self.assertEqual("Nameserver Processes Recursive Queries", finding.title)
+        self.assertEqual("DNS server allows cache snooping", finding.title)
         self.assertEqual(2, len(finding.unsaved_endpoints))
         self.assertEqual('dns', str(finding.unsaved_endpoints[0].protocol))
         self.assertEqual('tcp', str(finding.unsaved_endpoints[0].fragment))
@@ -111,6 +113,18 @@ class TestNexposeParser(TestCase):
 
         # vuln 2
         finding = findings[2]
+        self.assertEqual("Nameserver Processes Recursive Queries", finding.title)
+        self.assertEqual(2, len(finding.unsaved_endpoints))
+        self.assertEqual('dns', str(finding.unsaved_endpoints[0].protocol))
+        self.assertEqual('tcp', str(finding.unsaved_endpoints[0].fragment))
+        self.assertEqual('dns', str(finding.unsaved_endpoints[1].protocol))
+        self.assertEqual('udp', str(finding.unsaved_endpoints[1].fragment))
+        # TODO uncomment these lines when PR #4188 will be done
+        # self.assertEqual('dns://192.168.1.1#tcp', str(finding.unsaved_endpoints[0]))
+        # self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[1]))
+
+        # vuln 4
+        finding = findings[4]
         self.assertEqual("DNS Traffic Amplification", finding.title)
         self.assertEqual(1, len(finding.unsaved_endpoints))
         self.assertEqual('dns', str(finding.unsaved_endpoints[0].protocol))
