@@ -3,7 +3,6 @@ import hashlib
 import io
 import json
 
-import hyperlink
 from dateutil.parser import parse
 from dojo.models import Endpoint, Finding
 
@@ -96,17 +95,7 @@ class GenericParser(object):
 
             # manage endpoints
             if 'Url' in row:
-                url = hyperlink.parse(row['Url'])
-                endpoint = Endpoint(
-                    protocol=url.scheme,
-                    host=url.host + (":" + str(url.port)) if url.port is not None else "",
-                    path="/".join(url.path),
-                )
-                if url.query:
-                    endpoint.query = url.query
-                if url.fragment:
-                    endpoint.fragment = url.fragment
-                finding.unsaved_endpoints = [endpoint]
+                finding.unsaved_endpoints = [Endpoint.from_uri(row['Url'])]
 
             # manage internal de-duplication
             key = hashlib.sha256("|".join([
