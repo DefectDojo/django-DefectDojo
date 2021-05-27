@@ -10,6 +10,8 @@ createRedisSecret: false
 createMysqlSecret: false
 # create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
+# Track configuration updates will automaticly respin application Pods to load new configuration
+trackConfig: false
 # Configuration value to select database type
 # Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
@@ -110,7 +112,7 @@ django:
     enabled: true
     activateTLS: true
     secretName: defectdojo-tls
-    annotations:
+    annotations: {}
       # Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...)
       # kubernetes.io/ingress.class: nginx
       # Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts
