@@ -1855,6 +1855,9 @@ class ObtainAuthTokenExtended(rest_framework.authtoken.views.ObtainAuthToken):
                                 status=status.HTTP_403_FORBIDDEN)
 
             user = get_object_or_404(User, username=target_user)
+            # simple way to rotate token
+            if Token.objects.filter(user=user).count() > 0:
+                Token.objects.get(user=user).delete()
 
         token, created = Token.objects.get_or_create(user=user)
         return Response({
