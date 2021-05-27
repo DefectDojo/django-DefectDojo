@@ -35,6 +35,7 @@ $ docker-compose build --build-arg uid=1000
 |`dojo/tools/<parser_dir>/__init__.py`          | Empty file for class initialization
 |`dojo/tools/<parser_dir>/parser.py`            | The meat. This is where you write your actual parser
 |`dojo/unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
+|`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
 
 
 ## Template Generator
@@ -58,6 +59,9 @@ Read [more](https://github.com/DefectDojo/cookiecutter-scanner-parser) on the te
 Parsers may have many fields, out of which many of them may be optional.
 
 Always make sure you include checks to avoid potential `KeyError` errors (e.g. field does not exist), for those fields you are not absolutely certain will always be in file that will get uploaded. These translate to 500 error, and do not look good.
+
+## Deduplication algorithm ##
+By default a new parser uses the 'legacy' deduplication algorithm documented at https://defectdojo.github.io/django-DefectDojo/usage/features/#deduplication-algorithms
 
 ## Unit tests
 

@@ -802,7 +802,13 @@ def edit_finding(request, fid):
             # any existing finding should be updated
             push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
 
-            new_finding.save(push_to_jira=push_to_jira)
+            # if we're removing the "duplicate" in the edit finding screen
+            # do not relaunch deduplication, otherwise, it's never taken into account
+            if old_finding.duplicate and not new_finding.duplicate:
+                new_finding.duplicate_finding = None
+                new_finding.save(push_to_jira=push_to_jira, dedupe_option=False)
+            else:
+                new_finding.save(push_to_jira=push_to_jira)
 
             # we only push the group after storing the finding to make sure
             # the updated data of the finding is pushed as part of the group

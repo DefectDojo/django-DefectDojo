@@ -1520,10 +1520,10 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
-        host = endpoint.host_no_port
+        host = endpoint.host
         report_name = "Endpoint Report: " + host
         report_type = "Endpoint"
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+        endpoints = Endpoint.objects.filter(host=host,
                                             product=endpoint.product).distinct()
         report_title = "Endpoint Report"
         report_subtitle = host

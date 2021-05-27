@@ -10,6 +10,9 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.utils import NestedObjects
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.forms import AuthenticationForm
+from django.utils.http import urlencode
 from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
 
@@ -98,6 +101,33 @@ def api_v2_key(request):
                    })
 
 # #  user specific
+
+
+def login_view(request):
+    if not settings.SHOW_LOGIN_FORM and settings.SOCIAL_LOGIN_AUTO_REDIRECT and sum([
+        settings.GOOGLE_OAUTH_ENABLED,
+        settings.OKTA_OAUTH_ENABLED,
+        settings.AZUREAD_TENANT_OAUTH2_ENABLED,
+        settings.GITLAB_OAUTH2_ENABLED,
+        settings.AUTH0_OAUTH2_ENABLED,
+        settings.SAML2_ENABLED
+    ]) == 1:
+        if settings.GOOGLE_OAUTH_ENABLED:
+            social_auth = 'google-oauth2'
+        elif settings.OKTA_OAUTH_ENABLED:
+            social_auth = 'okta-oauth2'
+        elif settings.AZUREAD_TENANT_OAUTH2_ENABLED:
+            social_auth = 'azuread-tenant-oauth2'
+        elif settings.GITLAB_OAUTH2_ENABLED:
+            social_auth = 'gitlab'
+        elif settings.AUTH0_OAUTH2_ENABLED:
+            social_auth = 'auth0'
+        else:
+            return HttpResponseRedirect('/saml2/login')
+        return HttpResponseRedirect('{}?{}'.format(reverse('social:begin', args=[social_auth]),
+                                                   urlencode({'next': request.GET.get('next')})))
+    else:
+        return LoginView.as_view(template_name='dojo/login.html', authentication_form=AuthenticationForm)(request)
 
 
 def logout_view(request):

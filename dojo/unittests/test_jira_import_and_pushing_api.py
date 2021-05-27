@@ -453,7 +453,7 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assert_jira_issue_count_in_test(test_id, 1)
         self.assert_jira_group_issue_count_in_test(test_id, 1)
 
-        print(finding_details)
+        # print(finding_details)
 
         # no way to set finding group easily via API yet
         Finding_Group.objects.get(id=finding_group_id).findings.add(Finding.objects.get(id=new_finding_json['id']))

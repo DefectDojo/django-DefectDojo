@@ -408,7 +408,7 @@ def report_widget_factory(json_data=None, request=None, user=None, finding_notes
             from dojo.endpoint.views import get_endpoint_ids
             ids = get_endpoint_ids(endpoints)
 
-            endpoints = Endpoint.objects.filter(id__in=ids)
+            endpoints = Endpoint.objects.filter(id__in=endpoints)
             endpoints = EndpointFilter(d, queryset=endpoints, user=request.user)
             user_id = user.id if user is not None else None
             endpoints = EndpointList(request=request, endpoints=endpoints, finding_notes=finding_notes,

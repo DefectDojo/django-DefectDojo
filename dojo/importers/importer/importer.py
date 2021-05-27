@@ -2,9 +2,10 @@ import datetime
 from dojo.importers import utils as importer_utils
 from dojo.models import Test, Finding, \
     Test_Type, \
-    Endpoint, BurpRawRequestResponse, \
+    BurpRawRequestResponse, \
     Endpoint_Status, \
     Test_Import
+from dojo.endpoint.utils import endpoint_get_or_create
 
 from dojo.utils import get_current_user, max_safe
 
@@ -113,9 +114,17 @@ class DojoDefaultImporter(object):
 
             for endpoint in item.unsaved_endpoints:
                 try:
-                    ep, created = Endpoint.objects.get_or_create(
+                    endpoint.clean()
+                except ValidationError as e:
+                    logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                                   "{}".format(e))
+
+                try:
+                    ep, created = endpoint_get_or_create(
                         protocol=endpoint.protocol,
+                        userinfo=endpoint.userinfo,
                         host=endpoint.host,
+                        port=endpoint.port,
                         path=endpoint.path,
                         query=endpoint.query,
                         fragment=endpoint.fragment,
@@ -139,9 +148,17 @@ class DojoDefaultImporter(object):
                     logger.debug('adding endpoint %s', endpoint)
                     # TODO Not sure what happens here, we get an endpoint model and try to create it again?
                     try:
-                        ep, created = Endpoint.objects.get_or_create(
+                        endpoint.clean()
+                    except ValidationError as e:
+                        logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                                       "{}".format(e))
+
+                    try:
+                        ep, created = endpoint_get_or_create(
                             protocol=endpoint.protocol,
+                            userinfo=endpoint.userinfo,
                             host=endpoint.host,
+                            port=endpoint.port,
                             path=endpoint.path,
                             query=endpoint.query,
                             fragment=endpoint.fragment,

@@ -14,12 +14,11 @@ django-multiselectfield==0.1.12
 django-polymorphic==3.0.0
 django-crispy-forms==1.11.2
 django_extensions==3.1.3
-django-rest-swagger==2.2.0
 django-slack==5.16.2
 django-tagging==0.5.0
 django-watson==1.5.5
 django-prometheus==2.1.0
-Django==3.1.8
+Django==3.1.11
 djangorestframework==3.12.4
 gunicorn==20.1.0
 html2text==2020.1.16
@@ -48,10 +47,10 @@ titlecase==2.0.0
 social-auth-app-django==4.0.0
 social-auth-core==4.1.0
 Python-jose==3.2.0
-gitpython==3.1.16
+gitpython==3.1.17
 debugpy==1.3.0
 python-gitlab==2.7.1
-google-auth==1.30.0
+google-auth==1.30.1
 google-api-python-client==1.12.8
 google-auth-oauthlib==0.4.4
 drf_yasg==1.20.0
@@ -70,3 +69,4 @@ PyJWT==2.1.0
 cvss==2.2
 django-fieldsignals==0.6.0
 hyperlink==21.0.0
+django-test-migrations==1.1.0
