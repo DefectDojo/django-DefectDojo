@@ -109,7 +109,7 @@ env = environ.Env(
     DD_SAML2_LOGOUT_URL=(str, ''),
     # Metadata is required for SAML, choose either remote url or local file path
     DD_SAML2_METADATA_AUTO_CONF_URL=(str, ''),
-    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''), # ex. '/public/share/idp_metadata.xml'
+    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),  # ex. '/public/share/idp_metadata.xml'
     # Optional, default is SITE_URL + /saml2/metadata/
     DD_SAML2_ENTITY_ID=(str, ''),
     # Allow to create user that are not already in the Django database
@@ -788,7 +788,7 @@ if env('DD_SAML2_ENABLED'):
             'company': 'Yaco Sistemas',
             'email_address': 'angel@yaco.es',
             'contact_type': 'administrative'},
-            ],
+        ],
         # you can set multilanguage information here
         'organization': {
             'name': [('Yaco Sistemas', 'es'), ('Yaco Systems', 'en')],
