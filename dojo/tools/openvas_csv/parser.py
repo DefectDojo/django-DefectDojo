@@ -290,7 +290,7 @@ class OpenVASCsvParser(object):
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.sha256((finding.unsaved_endpoints[0].get_normalized_url() + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
+                key = hashlib.sha256((str(finding.unsaved_endpoints[0]) + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
                 if key not in dupes:
                     dupes[key] = finding

@@ -1,7 +1,6 @@
 
 import re
 import socket
-from urllib.parse import urlparse
 
 import hyperlink
 from defusedxml import ElementTree as ET
@@ -33,7 +32,7 @@ class ZapParser(object):
         items = list()
         for node in tree.findall('site'):
             site = Site(node)
-            main_host = Endpoint(host=site.name + (":" + site.port) if site.port is not None else "")
+            main_host = Endpoint(host=site.host, port=site.port)
             for item in site.items:
                 severity = item.riskdesc.split(' ', 1)[0]
                 references = ''
@@ -56,13 +55,8 @@ class ZapParser(object):
 
                 find.unsaved_endpoints = [main_host]
                 for i in item.items:
-                    parts = urlparse(i['uri'])
-                    find.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
-                                                           host=parts.netloc[:500],
-                                                           path=parts.path[:500],
-                                                           query=parts.query[:1000],
-                                                           fragment=parts.fragment[:500],
-                                                           ))
+                    endpoint = Endpoint.from_uri(i['uri'])
+                    find.unsaved_endpoints.append(endpoint)
                 items.append(find)
         return items
 

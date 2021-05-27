@@ -1853,7 +1853,10 @@ class EndpointFilter(DojoFilter):
     product = ModelMultipleChoiceFilter(
         queryset=Product.objects.none(),
         label="Product")
+    protocol = CharFilter(lookup_expr='icontains')
+    userinfo = CharFilter(lookup_expr='icontains')
     host = CharFilter(lookup_expr='icontains')
+    port = NumberFilter()
     path = CharFilter(lookup_expr='icontains')
     query = CharFilter(lookup_expr='icontains')
     fragment = CharFilter(lookup_expr='icontains')
@@ -1999,7 +2002,10 @@ class ApiAppAnalysisFilter(DojoFilter):
 
 
 class EndpointReportFilter(DojoFilter):
+    protocol = CharFilter(lookup_expr='icontains')
+    userinfo = CharFilter(lookup_expr='icontains')
     host = CharFilter(lookup_expr='icontains')
+    port = NumberFilter()
     path = CharFilter(lookup_expr='icontains')
     query = CharFilter(lookup_expr='icontains')
     fragment = CharFilter(lookup_expr='icontains')
@@ -2306,7 +2312,7 @@ class ProductTypeFilter(DojoFilter):
         if settings.FEATURE_AUTHORIZATION_V2:
             exclude = ['authorized_users']
         else:
-            exclude = ['members']
+            exclude = ['members', 'authorization_groups']
         include = ('name',)
 
 

@@ -106,27 +106,59 @@ class RoleDoesNotExistError(Exception):
         self.message = message
 
 
-@cache_for_request
 def get_product_member(user, product):
-    try:
-        return Product_Member.objects.get(user=user, product=product)
-    except Product_Member.DoesNotExist:
-        return None
+    return get_product_member_dict(user).get(product.id)
 
 
 @cache_for_request
+def get_product_member_dict(user):
+    pm_dict = {}
+    for product_member in Product_Member.objects.select_related('product').filter(user=user):
+        pm_dict[product_member.product.id] = product_member
+    return pm_dict
+
+
 def get_product_type_member(user, product_type):
-    try:
-        return Product_Type_Member.objects.get(user=user, product_type=product_type)
-    except Product_Type_Member.DoesNotExist:
-        return None
+    return get_product_type_member_dict(user).get(product_type.id)
 
 
 @cache_for_request
+def get_product_type_member_dict(user):
+    ptm_dict = {}
+    for product_type_member in Product_Type_Member.objects.select_related('product_type').filter(user=user):
+        ptm_dict[product_type_member.product_type.id] = product_type_member
+    return ptm_dict
+
+
 def get_product_groups(user, product):
-    return Product_Group.objects.filter(product=product, group__users=user)
+    return get_product_groups_dict(user).get(product.id, [])
 
 
 @cache_for_request
+def get_product_groups_dict(user):
+    pg_dict = {}
+    for product_group in Product_Group.objects.select_related('product').filter(group__users=user):
+        if pg_dict.get(product_group.product.id) is None:
+            pgu_list = []
+        else:
+            pgu_list = pg_dict[product_group.product.id]
+        pgu_list.append(product_group)
+        pg_dict[product_group.product.id] = pgu_list
+    return pg_dict
+
+
 def get_product_type_groups(user, product_type):
-    return Product_Type_Group.objects.filter(product_type=product_type, group__users=user)
+    return get_product_type_groups_dict(user).get(product_type.id, [])
+
+
+@cache_for_request
+def get_product_type_groups_dict(user):
+    pgt_dict = {}
+    for product_type_group in Product_Type_Group.objects.select_related('product_type').filter(group__users=user):
+        if pgt_dict.get(product_type_group.product_type.id) is None:
+            pgtu_list = []
+        else:
+            pgtu_list = pgt_dict[product_type_group.product_type.id]
+        pgtu_list.append(product_type_group)
+        pgt_dict[product_type_group.product_type.id] = pgtu_list
+    return pgt_dict

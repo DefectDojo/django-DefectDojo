@@ -4,6 +4,8 @@ import re
 from defusedxml.ElementTree import parse
 
 from dojo.models import Endpoint, Finding
+from django.core.validators import validate_ipv46_address
+from django.core.exceptions import ValidationError
 
 
 class OpenscapParser(object):
@@ -89,7 +91,15 @@ class OpenscapParser(object):
                     finding.cve = cves[0]
                 finding.unsaved_endpoints = []
                 for ip in ips:
-                    finding.unsaved_endpoints.append(Endpoint(host=ip))
+                    try:
+                        validate_ipv46_address(ip)
+                        endpoint = Endpoint(host=ip)
+                    except ValidationError:
+                        if '://' in ip:
+                            endpoint = Endpoint.from_uri(ip)
+                        else:
+                            endpoint = Endpoint.from_uri('//' + ip)
+                    finding.unsaved_endpoints.append(endpoint)
 
                 dupe_key = hashlib.sha256(references.encode('utf-8')).hexdigest()
                 if dupe_key in dupes:

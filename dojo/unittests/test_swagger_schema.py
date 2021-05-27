@@ -349,7 +349,7 @@ class EndpointTest(BaseClass.SchemaTest):
         self.model = Endpoint
         self.serializer = EndpointSerializer
         self.field_transformers = {
-            "path": lambda v: v + "transformed/"
+            "path": lambda v: (v if v else '') + "transformed/"
         }
 
 

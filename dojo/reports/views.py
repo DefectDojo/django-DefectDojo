@@ -11,7 +11,6 @@ from django_filters.filters import _truncate
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 
-from dojo.endpoint.views import get_endpoint_ids
 from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, \
     EndpointFilter, now
 from dojo.forms import ReportOptionsForm
@@ -57,9 +56,6 @@ def report_builder(request):
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
                                         ).distinct()
-    ids = get_endpoint_ids(endpoints)
-
-    endpoints = Endpoint.objects.filter(id__in=ids)
 
     endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
@@ -128,7 +124,7 @@ def report_findings(request):
     title_words = get_words_for_field(findings.qs, 'title')
     component_words = get_words_for_field(findings.qs, 'component_name')
 
-    paged_findings = get_page_items(request, findings.qs.order_by('numerical_severity'), 25)
+    paged_findings = get_page_items(request, findings.qs.distinct().order_by('numerical_severity'), 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -147,7 +143,6 @@ def report_findings(request):
 
 
 def report_endpoints(request):
-    user = Dojo_User.objects.get(id=request.user.id)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
                                         finding__false_p=False,
@@ -155,9 +150,6 @@ def report_endpoints(request):
                                         finding__out_of_scope=False,
                                         ).distinct()
 
-    ids = get_endpoint_ids(endpoints)
-
-    endpoints = Endpoint.objects.filter(id__in=ids)
     endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
@@ -228,8 +220,6 @@ def product_endpoint_report(request, pid):
                                            finding__duplicate=False,
                                            finding__out_of_scope=False,
                                            ).values_list('id', flat=True)
-
-    # ids = get_endpoint_ids(endpoints)
 
     endpoints = prefetch_related_endpoints_for_report(Endpoint.objects.filter(id__in=endpoint_ids))
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
@@ -354,9 +344,6 @@ def generate_report(request, obj):
     test = None
     endpoint = None
     endpoints = None
-    endpoint_all_findings = None
-    endpoint_monthly_counts = None
-    endpoint_active_findings = None
     accepted_findings = None
     open_findings = None
     closed_findings = None
@@ -413,6 +400,7 @@ def generate_report(request, obj):
     if include_disclaimer and len(disclaimer) == 0:
         disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
+    host_view = "host_view" in request.GET
     report_name = str(obj)
     report_type = type(obj).__name__
     add_breadcrumb(title="Generate Report", top_level=False, request=request)
@@ -454,8 +442,8 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'endpoint_opened_per_month': endpoint_monthly_counts[
                        'opened_per_period'] if endpoint_monthly_counts is not None else [],
-                   'endpoint_active_findings': findings.qs.order_by('numerical_severity'),
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'endpoint_active_findings': findings.qs.distinct().order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -479,13 +467,12 @@ def generate_report(request, obj):
         ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        ids = get_endpoint_ids(Endpoint.objects.filter(product=product).distinct())
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        endpoints = Endpoint.objects.filter(product=product).distinct()
         context = {'product': product,
                    'engagements': engagements,
                    'tests': tests,
                    'report_name': report_name,
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -511,13 +498,12 @@ def generate_report(request, obj):
 
         ids = set(finding.id for finding in findings.qs)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        ids = get_endpoint_ids(Endpoint.objects.filter(product=engagement.product).distinct())
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
 
         context = {'engagement': engagement,
                    'tests': tests,
                    'report_name': report_name,
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -542,7 +528,7 @@ def generate_report(request, obj):
 
         context = {'test': test,
                    'report_name': report_name,
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -557,21 +543,26 @@ def generate_report(request, obj):
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
-        host = endpoint.host_no_port
-        report_name = "Endpoint Report: " + host
+        if host_view:
+            report_name = "Endpoint Host Report: " + endpoint.host
+            endpoints = Endpoint.objects.filter(host=endpoint.host,
+                                                product=endpoint.product).distinct()
+            report_title = "Endpoint Host Report"
+            report_subtitle = endpoint.host
+        else:
+            report_name = "Endpoint Report: " + str(endpoint)
+            endpoints = Endpoint.objects.filter(pk=endpoint.id).distinct()
+            report_title = "Endpoint Report"
+            report_subtitle = str(endpoint)
         report_type = "Endpoint"
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
-                                            product=endpoint.product).distinct()
         template = 'dojo/endpoint_pdf_report.html'
-        report_title = "Endpoint Report"
-        report_subtitle = host
         findings = ReportFindingFilter(request.GET,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
         context = {'endpoint': endpoint,
                    'endpoints': endpoints,
                    'report_name': report_name,
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -592,7 +583,7 @@ def generate_report(request, obj):
         report_title = "Finding Report"
         report_subtitle = ''
 
-        context = {'findings': findings.qs.order_by('numerical_severity'),
+        context = {'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'report_name': report_name,
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
@@ -620,7 +611,7 @@ def generate_report(request, obj):
                            'engagement': engagement,
                            'test': test,
                            'endpoint': endpoint,
-                           'findings': findings.qs.order_by('numerical_severity'),
+                           'findings': findings.qs.distinct().order_by('numerical_severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
@@ -632,6 +623,7 @@ def generate_report(request, obj):
                            'title': report_title,
                            'user_id': request.user.id,
                            'host': report_url_resolver(request),
+                           'host_view': host_view,
                            'context': context,
                            })
         elif report_format == 'HTML':
@@ -644,7 +636,7 @@ def generate_report(request, obj):
                            'test': test,
                            'endpoint': endpoint,
                            'endpoints': endpoints,
-                           'findings': findings.qs.order_by('numerical_severity'),
+                           'findings': findings.qs.distinct().order_by('numerical_severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
@@ -656,12 +648,13 @@ def generate_report(request, obj):
                            'title': report_title,
                            'user_id': request.user.id,
                            'host': "",
+                           'host_view': host_view,
                            'context': context,
                            })
 
         else:
             raise Http404()
-    paged_findings = get_page_items(request, findings.qs.order_by('numerical_severity'), 25)
+    paged_findings = get_page_items(request, findings.qs.distinct().order_by('numerical_severity'), 25)
 
     product_tab = None
     if engagement:
@@ -673,7 +666,10 @@ def generate_report(request, obj):
     elif product:
         product_tab = Product_Tab(product.id, title="Product Report", tab="findings")
     elif endpoints:
-        product_tab = Product_Tab(endpoint.product.id, title="Endpoint Report", tab="endpoints")
+        if host_view:
+            product_tab = Product_Tab(endpoint.product.id, title="Endpoint Host Report", tab="endpoints")
+        else:
+            product_tab = Product_Tab(endpoint.product.id, title="Endpoint Report", tab="endpoints")
 
     return render(request, 'dojo/request_report.html',
                   {'product_type': product_type,
@@ -685,6 +681,7 @@ def generate_report(request, obj):
                    'findings': findings,
                    'paged_findings': paged_findings,
                    'report_form': report_form,
+                   'host_view': host_view,
                    'context': context,
                    })
 
