@@ -2,7 +2,7 @@
 version: '3.7'
 services:
   nginx:
-    image: busybox:1.33.0-musl
+    image: busybox:1.33.1-musl
     entrypoint: ['echo', 'skipping', 'nginx']
     volumes:
       - defectdojo_media_unittest:/usr/share/nginx/html/media
@@ -16,13 +16,13 @@ services:
       DD_TEST_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
       DD_DATABASE_NAME: ${DD_TEST_DATABASE_NAME:-test_defectdojo}
   celerybeat:
-    image: busybox:1.33.0-musl
+    image: busybox:1.33.1-musl
     entrypoint: ['echo', 'skipping', 'celery beat']
   celeryworker:
-    image: busybox:1.33.0-musl
+    image: busybox:1.33.1-musl
     entrypoint: ['echo', 'skipping', 'celery worker']
   initializer:
-    image: busybox:1.33.0-musl
+    image: busybox:1.33.1-musl
     entrypoint: ['echo', 'skipping', 'initializer']
 
   mysql:

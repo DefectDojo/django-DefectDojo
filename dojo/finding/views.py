@@ -58,11 +58,11 @@ OPEN_FINDINGS_QUERY = Q(active=True)
 VERIFIED_FINDINGS_QUERY = Q(active=True, verified=True)
 OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
 FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
-INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_Mitigated=False, false_p=False, out_of_scope=False)
+INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_mitigated=False, false_p=False, out_of_scope=False)
 ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
 NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
-CLOSED_FINDINGS_QUERY = Q(is_Mitigated=True)
+CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 
 
 def open_findings_filter(request, queryset, user, pid):
@@ -430,7 +430,7 @@ def close_finding(request, fid):
                 now = timezone.now()
                 finding.mitigated = now
                 finding.mitigated_by = request.user
-                finding.is_Mitigated = True
+                finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 endpoint_status = finding.endpoint_status.all()
@@ -501,7 +501,7 @@ def defect_finding_review(request, fid):
                 finding.active = False
                 finding.mitigated = now
                 finding.mitigated_by = request.user
-                finding.is_Mitigated = True
+                finding.is_mitigated = True
                 finding.last_reviewed = finding.mitigated
                 finding.last_reviewed_by = request.user
                 finding.endpoints.clear()
@@ -565,7 +565,7 @@ def reopen_finding(request, fid):
     finding.active = True
     finding.mitigated = None
     finding.mitigated_by = request.user
-    finding.is_Mitigated = False
+    finding.is_mitigated = False
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     endpoint_status = finding.endpoint_status.all()
@@ -721,6 +721,10 @@ def edit_finding(request, fid):
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
 
+            if 'group' in form.cleaned_data:
+                finding_group = form.cleaned_data['group']
+                finding_helper.update_finding_group(new_finding, finding_group)
+
             if 'risk_accepted' in form.cleaned_data and form['risk_accepted'].value():
                 if new_finding.test.engagement.product.enable_simple_risk_acceptance:
                     ra_helper.simple_risk_accept(new_finding, perform_save=False)
@@ -804,7 +808,13 @@ def edit_finding(request, fid):
             # any existing finding should be updated
             push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
 
-            new_finding.save(push_to_jira=push_to_jira)
+            # if we're removing the "duplicate" in the edit finding screen
+            # do not relaunch deduplication, otherwise, it's never taken into account
+            if old_finding.duplicate and not new_finding.duplicate:
+                new_finding.duplicate_finding = None
+                new_finding.save(push_to_jira=push_to_jira, dedupe_option=False)
+            else:
+                new_finding.save(push_to_jira=push_to_jira)
 
             # we only push the group after storing the finding to make sure
             # the updated data of the finding is pushed as part of the group
@@ -930,7 +940,7 @@ def request_finding_review(request, fid):
             finding.notes.add(new_note)
             finding.active = False
             finding.verified = False
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             finding.under_review = True
             finding.review_requested_by = user
             finding.last_reviewed = now
@@ -1894,7 +1904,7 @@ def finding_bulk_update_all(request, pid=None):
                             find.verified = form.cleaned_data['verified']
                             find.false_p = form.cleaned_data['false_p']
                             find.out_of_scope = form.cleaned_data['out_of_scope']
-                            find.is_Mitigated = form.cleaned_data['is_Mitigated']
+                            find.is_mitigated = form.cleaned_data['is_mitigated']
                             find.last_reviewed = timezone.now()
                             find.last_reviewed_by = request.user
 
@@ -1966,6 +1976,23 @@ def finding_bulk_update_all(request, pid=None):
 
                     if skipped:
                         add_success_message_to_response('Skipped %s findings when removing from any finding group, findings not part of any group' % (skipped))
+
+                    # refresh findings from db
+                    finds = finds.all()
+
+                if form.cleaned_data['finding_group_by']:
+                    logger.debug('finding_group_by checked!')
+                    logger.debug(form.cleaned_data)
+                    finding_group_by_option = form.cleaned_data['finding_group_by_option']
+                    logger.debug('finding_group_by_option: %s', finding_group_by_option)
+
+                    finding_groups, grouped, skipped, groups_created = finding_helper.group_findings_by(finds, finding_group_by_option)
+
+                    if grouped:
+                        add_success_message_to_response('Grouped %d findings into %d (%d newly created) finding groups' % (grouped, len(finding_groups), groups_created))
+
+                    if skipped:
+                        add_success_message_to_response('Skipped %s findings when grouping by %s as these findings were already in an existing group' % (skipped, finding_group_by_option))
 
                     # refresh findings from db
                     finds = finds.all()
@@ -2173,8 +2200,8 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     finding = get_object_or_404(Finding, id=finding_id)
     new_original = get_object_or_404(Finding, id=new_original_id)
 
-    if new_original.test.engagement != new_original.test.engagement:
-        if new_original.test.engagement.deduplication_on_engagement or new_original.test.engagement.deduplication_on_engagement:
+    if finding.test.engagement != new_original.test.engagement:
+        if finding.test.engagement.deduplication_on_engagement or new_original.test.engagement.deduplication_on_engagement:
             return False
 
     if finding.duplicate or finding.original_finding.all():

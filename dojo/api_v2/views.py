@@ -609,6 +609,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     )
     @action(detail=True, methods=['post'], url_path=r'duplicate/reset')
     def reset_finding_duplicate_status(self, request, pk):
+        finding = self.get_object()
         checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, pk)
         if checked_duplicate_id is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -620,6 +621,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     )
     @action(detail=True, methods=['post'], url_path=r'original/(?P<new_fid>\d+)')
     def set_finding_as_original(self, request, pk, new_fid):
+        finding = self.get_object()
         success = set_finding_as_original_internal(request.user, pk, new_fid)
         if not success:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -1518,10 +1520,10 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
-        host = endpoint.host_no_port
+        host = endpoint.host
         report_name = "Endpoint Report: " + host
         report_type = "Endpoint"
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+        endpoints = Endpoint.objects.filter(host=host,
                                             product=endpoint.product).distinct()
         report_title = "Endpoint Report"
         report_subtitle = host

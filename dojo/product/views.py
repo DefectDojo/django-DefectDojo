@@ -15,6 +15,8 @@ from django.utils import timezone
 from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
+
+from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
@@ -105,7 +107,7 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.prefetch_related('prod_type__members')
         active_endpoint_query = Endpoint.objects.filter(
             finding__active=True,
-            finding__mitigated__isnull=True)
+            finding__mitigated__isnull=True).distinct()
         prefetched_prods = prefetched_prods.prefetch_related(
             Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
         prefetched_prods = prefetched_prods.prefetch_related('tags')
@@ -330,19 +332,19 @@ def finding_querys(request, prod):
                                          duplicate=False,
                                          out_of_scope=False,
                                          active=True,
-                                         is_Mitigated=False)
+                                         is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
-                                             is_Mitigated=False)
+                                             is_mitigated=False)
     filters['closed'] = findings_qs.filter(date__range=[start_date, end_date],
                                            false_p=False,
                                            duplicate=False,
                                            out_of_scope=False,
                                            active=False,
-                                           is_Mitigated=True)
+                                           is_mitigated=True)
     filters['false_positive'] = findings_qs.filter(date__range=[start_date, end_date],
                                                    false_p=True,
                                                    duplicate=False,
@@ -684,7 +686,7 @@ def prefetch_for_view_engagements(engagements, recent_test_day_count):
         count_findings_all=Count('test__finding__id'),
         count_findings_open=Count('test__finding__id', filter=Q(test__finding__active=True)),
         count_findings_open_verified=Count('test__finding__id', filter=Q(test__finding__active=True) & Q(test__finding__verified=True)),
-        count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_Mitigated=True)),
+        count_findings_close=Count('test__finding__id', filter=Q(test__finding__is_mitigated=True)),
         count_findings_duplicate=Count('test__finding__id', filter=Q(test__finding__duplicate=True)),
         count_findings_accepted=Count('test__finding__id', filter=Q(test__finding__risk_accepted=True)),
     )
@@ -900,6 +902,7 @@ def delete_product(request, pid):
     form = DeleteProductForm(instance=product)
 
     if request.method == 'POST':
+        logger.debug('delete_product: POST')
         if 'id' in request.POST and str(product.id) == request.POST['id']:
             form = DeleteProductForm(request.POST, instance=product)
             if form.is_valid():
@@ -915,13 +918,22 @@ def delete_product(request, pid):
                                     description='The product "%s" was deleted by %s' % (product.name, request.user),
                                     url=request.build_absolute_uri(reverse('product')),
                                     icon="exclamation-triangle")
+                logger.debug('delete_product: POST RETURN')
                 return HttpResponseRedirect(reverse('product'))
+            else:
+                logger.debug('delete_product: POST INVALID FORM')
+                logger.error(form.errors)
+
+    logger.debug('delete_product: GET')
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)
     collector.collect([product])
     rels = collector.nested()
 
     product_tab = Product_Tab(pid, title="Product", tab="settings")
+
+    logger.debug('delete_product: GET RENDER')
+
     return render(request, 'dojo/delete_product.html',
                   {'product': product,
                    'form': form,
@@ -1184,9 +1196,11 @@ def ad_hoc_finding(request, pid):
                 new_finding.endpoint_status.add(eps)
 
             for endpoint in new_finding.unsaved_endpoints:
-                ep, created = Endpoint.objects.get_or_create(
+                ep, created = endpoint_get_or_create(
                     protocol=endpoint.protocol,
+                    userinfo=endpoint.userinfo,
                     host=endpoint.host,
+                    port=endpoint.port,
                     path=endpoint.path,
                     query=endpoint.query,
                     fragment=endpoint.fragment,
@@ -1199,9 +1213,11 @@ def ad_hoc_finding(request, pid):
                 new_finding.endpoints.add(ep)
                 new_finding.endpoint_status.add(eps)
             for endpoint in form.cleaned_data['endpoints']:
-                ep, created = Endpoint.objects.get_or_create(
+                ep, created = endpoint_get_or_create(
                     protocol=endpoint.protocol,
+                    userinfo=endpoint.userinfo,
                     host=endpoint.host,
+                    port=endpoint.port,
                     path=endpoint.path,
                     query=endpoint.query,
                     fragment=endpoint.fragment,

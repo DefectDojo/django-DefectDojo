@@ -1,7 +1,6 @@
 import re
 import hashlib
 import logging
-from urllib.parse import urlparse
 
 from defusedxml.ElementTree import parse
 
@@ -42,9 +41,7 @@ class WapitiParser(object):
             '0': 'Info',
         }
 
-        host = root.findtext('report_infos/info[@name="target"]')
-        if host.endswith("/"):
-            host = host[:-1]
+        url = root.findtext('report_infos/info[@name="target"]')
 
         dupes = dict()
         for vulnerability in root.findall('vulnerabilities/vulnerability'):
@@ -82,14 +79,7 @@ class WapitiParser(object):
                 )
                 if cwe:
                     finding.cwe = cwe
-                url = urlparse(host)
-                finding.unsaved_endpoints = [Endpoint(host=url.netloc)]
-                if url.scheme:
-                    finding.unsaved_endpoints[0].protocol = url.scheme
-                if url.port:
-                    finding.unsaved_endpoints[0].port = url.port
-                if entry.findtext('path'):
-                    finding.unsaved_endpoints[0].path = entry.findtext('path')
+                finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
                 finding.unsaved_req_resp = [{"req": entry.findtext('http_request'), "resp": ""}]
 
