@@ -243,7 +243,7 @@ def simple_search(request):
                 endpoints = authorized_endpoints
                 endpoints = apply_tag_filters(endpoints, operators)
 
-                endpoints = endpoints.filter(Q(host__icontains=keywords_query) | Q(path__icontains=keywords_query) | Q(fqdn__icontains=keywords_query) | Q(protocol__icontains=keywords_query))
+                endpoints = endpoints.filter(Q(host__icontains=keywords_query) | Q(path__icontains=keywords_query) | Q(protocol__icontains=keywords_query) | Q(query__icontains=keywords_query) | Q(fragment__icontains=keywords_query))
                 endpoints = prefetch_for_endpoints(endpoints)
                 endpoints = endpoints[:max_results]
             else:
