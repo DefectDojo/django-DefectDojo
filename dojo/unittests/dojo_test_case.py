@@ -523,7 +523,7 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         response = self.do_finding_tags_api(self.client.post, finding_id, tags)
         return response.data
 
-    def do_finding_remove_tags_api(self, http_method, finding_id, tags=None, expected_response_status_code=200):
+    def do_finding_remove_tags_api(self, http_method, finding_id, tags=None, expected_response_status_code=204):
         data = None
         if tags:
             data = {'tags': tags}

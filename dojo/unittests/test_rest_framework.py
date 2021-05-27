@@ -105,8 +105,7 @@ class SchemaChecker():
         if not condition:
             self._has_failed = True
             self._register_error(message)
-            print(message)
-            raise ValueError('valentijn')
+            # print(message)
 
     def _get_prefix(self):
         return '#'.join(self._prefix)
@@ -126,14 +125,14 @@ class SchemaChecker():
         return self._components['schemas'][ref_name]
 
     def _check_has_required_fields(self, required_fields, obj):
-        if not required_fields:
-            print('no required fields')
+        # if not required_fields:
+        #     print('no required fields')
 
         for required_field in required_fields:
             # passwords are writeOnly, but this is not supported by Swagger / OpenAPIv2
             # TODO check this for OpenAPI3
             if required_field != 'password':
-                print('checking field: ', required_field)
+                # print('checking field: ', required_field)
                 field = f"{self._get_prefix()}#{required_field}"
                 self._check_or_fail(obj is not None and required_field in obj, f"{field} is required but was not returned")
 
@@ -200,11 +199,11 @@ class SchemaChecker():
 
     def check(self, schema, obj):
         def _check(schema, obj):
-            print('schema to check:')
-            print(schema)
+            # print('schema to check:')
+            # print(schema)
             schema = self._resolve_if_ref(schema)
-            print('resolved schema to check:')
-            print(schema)
+            # print('resolved schema to check:')
+            # print(schema)
             self._check_type(schema, obj)
 
             # print('type check ok')
@@ -218,9 +217,9 @@ class SchemaChecker():
                 return
 
             properties = schema.get("properties", None)
-            print(properties)
-            if not properties:
-                print('no properties')
+            # print(properties)
+            # if not properties:
+            #     print('no properties')
 
             if properties is not None:
                 for name, prop in properties.items():
@@ -231,18 +230,18 @@ class SchemaChecker():
                     # {'type': 'string'}
                     # item3#item0 should be of type string but value was of type <class 'dojo.api_v2.serializers.TagList'>
 
-                    # TODO request_response mimic from swagger
-                    # checking child:  request_response {'req_resp': []}
-                    # schema to check:
-                    # {'type': 'string', 'readOnly': True}
-                    # resolved schema to check:
-                    # {'type': 'string', 'readOnly': True}
-                    # should be of type string but value was of type <class 'rest_framework.utils.serializer_helpers.ReturnDict'>
-
-                    if name not in ['tags', 'request_response']:
+                    if name in ['tags']:
                         obj_child = obj.get(name, None)
                         if obj_child is not None:
-                            print('checking child: ', name, obj_child)
+                            print('checking tags: ', obj_child)
+                            print('prop:', prop)
+                            # self._with_prefix(name, _check, prop, obj_child)
+                            _check(prop, obj_child)
+
+                    if name not in ['tags']:
+                        obj_child = obj.get(name, None)
+                        if obj_child is not None:
+                            # print('checking child: ', name, obj_child)
                             # self._with_prefix(name, _check, prop, obj_child)
                             _check(prop, obj_child)
 
@@ -311,8 +310,8 @@ class BaseClass():
             detail_path = '{id}/' if detail else ''
             endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/{detail_path}")]
             schema = endpoints_schema[method]['responses'][status_code]['content']['application/json']['schema']
-            print('schema:')
-            print(schema)
+            # print('schema:')
+            # print(schema)
             obj = response.data
             self.check_schema(schema, obj)
 
@@ -344,11 +343,11 @@ class BaseClass():
                 check_for_tags = self.payload.get('tags', None)
 
             response = self.client.get(self.url, format='json')
-            print('response')
-            print(vars(response))
+            # print('response')
+            # print(vars(response))
 
-            print('response.data')
-            print(response.data)
+            # print('response.data')
+            # print(response.data)
             # tags must be present in last entry, the one we created
             if check_for_tags:
                 tags_found = False
@@ -426,8 +425,8 @@ class BaseClass():
             current_objects = self.client.get(self.url, format='json').data
             relative_url = self.url + '%s/' % current_objects['results'][0]['id']
             response = self.client.patch(relative_url, self.update_fields)
-            print('patch response.data')
-            print(response.data)
+            # print('patch response.data')
+            # print(response.data)
 
             self.assertEqual(200, response.status_code, response.content[:1000])
 
@@ -452,8 +451,8 @@ class BaseClass():
             response = self.client.put(
                 relative_url, self.payload)
             self.assertEqual(200, response.status_code, response.content[:1000])
-            print('put response.data')
-            print(response.data)
+            # print('put response.data')
+            # print(response.data)
 
             self.check_schema_response('put', '200', response, detail=True)
 
@@ -625,8 +624,8 @@ class FindingRequestResponseTest(DojoAPITestCase):
 
     def test_request_response_get(self):
         response = self.client.get('/api/v2/findings/7/request_response/', format='json')
-        print('response.data:')
-        print(response.data)
+        # print('response.data:')
+        # print(response.data)
         self.assertEqual(200, response.status_code, response.content[:1000])
 
 
@@ -716,9 +715,9 @@ class FindingsTest(BaseClass.RESTEndpointTest):
     def test_duplicate(self):
         # Reassign duplicate
         result = self.client.post(self.url + "2/original/3/")
-        assert result.status_code == status.HTTP_200_OK, "Could not move duplicate"
+        self.assertEqual(result.status_code, status.HTTP_204_NO_CONTENT, "Could not move duplicate")
         result = self.client.get(self.url + "2/")
-        assert result.status_code == status.HTTP_200_OK, "Could not check new duplicate"
+        self.assertEqual(result.status_code, status.HTTP_200_OK, "Could not check new duplicate")
         result_json = result.json()
         assert result_json["duplicate"]
         assert result_json["duplicate_finding"] == 3
@@ -732,9 +731,9 @@ class FindingsTest(BaseClass.RESTEndpointTest):
 
         # Reset duplicate
         result = self.client.post(self.url + "2/duplicate/reset/")
-        assert result.status_code == status.HTTP_200_OK, "Could not reset duplicate"
+        self.assertEqual(result.status_code, status.HTTP_204_NO_CONTENT, "Could not reset duplicate")
         new_result = self.client.get(self.url + "2/")
-        assert result.status_code == status.HTTP_200_OK, "Could not check reset duplicate status"
+        self.assertEqual(result.status_code, status.HTTP_204_NO_CONTENT, "Could not check reset duplicate status")
         result_json = new_result.json()
         assert not result_json["duplicate"]
         assert result_json["duplicate_finding"] is None

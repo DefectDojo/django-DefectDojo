@@ -48,7 +48,7 @@ from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.authorization.roles_permissions import Permissions, Roles
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
 
 
 logger = logging.getLogger(__name__)
@@ -71,6 +71,10 @@ class EndPointViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         return get_authorized_endpoints(Permissions.Endpoint_View).distinct()
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -140,12 +144,12 @@ class EngagementViewSet(mixins.ListModelMixin,
                                                     'risk_acceptance',
                                                     'files').distinct()
 
-    @swagger_auto_schema(
-        request_body=no_body, responses={status.HTTP_200_OK: ""}
-    )
     @extend_schema(
         request=OpenApiTypes.NONE,
         responses={status.HTTP_200_OK: ""}
+    )
+    @swagger_auto_schema(
+        request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
     @action(detail=True, methods=["post"])
     def close(self, request, pk=None):
@@ -166,6 +170,10 @@ class EngagementViewSet(mixins.ListModelMixin,
         reopen_engagement(eng)
         return HttpResponse()
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -190,15 +198,6 @@ class EngagementViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @swagger_auto_schema(
-        method='get',
-        responses={status.HTTP_200_OK: serializers.EngagementToNotesSerializer}
-    )
-    @swagger_auto_schema(
-        methods=['post'],
-        request_body=serializers.AddNewNoteOptionSerializer,
-        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
-    )
     @extend_schema(
         methods=['GET'],
         responses={status.HTTP_200_OK: serializers.EngagementToNotesSerializer}
@@ -206,6 +205,15 @@ class EngagementViewSet(mixins.ListModelMixin,
     @extend_schema(
         methods=['POST'],
         request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.EngagementToNotesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post'],
+        request_body=serializers.AddNewNoteOptionSerializer,
         responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
     )
     @action(detail=True, methods=["get", "post"])
@@ -243,9 +251,18 @@ class EngagementViewSet(mixins.ListModelMixin,
         return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.EngagementToFilesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.FileSerializer}
+    )
     @swagger_auto_schema(
         method='get',
-        responses={status.HTTP_200_OK: serializers.EngagementToFilesSerializer}
+        responses={status.HTTP_200_OK: serializers.FileSerializer}
     )
     @swagger_auto_schema(
         methods=['post', 'patch'],
@@ -390,6 +407,15 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         else:
             return serializers.FindingSerializer
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.TagSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.TagSerializer,
+        responses={status.HTTP_201_CREATED: serializers.TagSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.TagSerializer}
@@ -422,6 +448,15 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.BurpRawRequestResponseSerializer,
+        responses={status.HTTP_201_CREATED: serializers.BurpRawRequestResponseSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
@@ -463,6 +498,15 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         serialized_burps = serializers.BurpRawRequestResponseSerializer({'req_resp': burp_list})
         return Response(serialized_burps.data)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer}
@@ -512,6 +556,15 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.FindingToFilesSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
@@ -558,9 +611,13 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         return Response(serialized_files,
                 status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=serializers.FindingNoteSerializer,
+        responses={status.HTTP_204_NO_CONTENT: ""}
+    )
     @swagger_auto_schema(
         request_body=serializers.FindingNoteSerializer,
-        responses={status.HTTP_200_OK: ""}
+        responses={status.HTTP_204_NO_CONTENT: ""}
     )
     @action(detail=True, methods=["patch"])
     def remove_note(self, request, pk=None):
@@ -583,12 +640,17 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                 status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"Success": "Selected Note has been Removed successfully"},
-            status=status.HTTP_200_OK)
+            status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        methods=['PUT', 'PATCH'],
+        request=serializers.TagSerializer,
+        responses={status.HTTP_204_NO_CONTENT: ""},
+    )
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
         methods=['put', 'patch'],
-        request_body=serializers.TagSerializer
+        request_body=serializers.TagSerializer,
+        responses={status.HTTP_204_NO_CONTENT: ""},
     )
     @action(detail=True, methods=["put", "patch"])
     def remove_tags(self, request, pk=None):
@@ -613,25 +675,32 @@ class FindingViewSet(prefetch.PrefetchListMixin,
             finding.tags = new_tags
             finding.save()
             return Response({"success": "Tag(s) Removed"},
-                status=status.HTTP_200_OK)
+                status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(delete_tags.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        responses={status.HTTP_200_OK: serializers.FindingSerializer(many=True)}
+    )
     @swagger_auto_schema(
         responses={status.HTTP_200_OK: serializers.FindingSerializer(many=True)}
     )
     @action(detail=True, methods=['get'], url_path=r'duplicate')
-    def get_duplicate_status(self, request, pk):
+    def get_duplicate_cluster(self, request, pk):
         finding = self.get_object()
         result = duplicate_cluster(request, finding)
         serializer = serializers.FindingSerializer(instance=result, many=True,
                                                    context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_204_NO_CONTENT: ""},
+    )
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
-        request_body=no_body
+        request_body=no_body,
+        responses={status.HTTP_204_NO_CONTENT: ""},
     )
     @action(detail=True, methods=['post'], url_path=r'duplicate/reset')
     def reset_finding_duplicate_status(self, request, pk):
@@ -639,13 +708,17 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, pk)
         if checked_duplicate_id is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @extend_schema(parameters=[
-                                OpenApiParameter("new_fid", OpenApiTypes.INT, OpenApiParameter.PATH),
-                              ],)
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        parameters=[
+            OpenApiParameter("new_fid", OpenApiTypes.INT, OpenApiParameter.PATH)
+        ],
+        responses={status.HTTP_204_NO_CONTENT: ""},
+    )
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
+        responses={status.HTTP_204_NO_CONTENT: ""},
         request_body=no_body
     )
     @action(detail=True, methods=['post'], url_path=r'original/(?P<new_fid>\d+)')
@@ -654,8 +727,12 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         success = set_finding_as_original_internal(request.user, pk, new_fid)
         if not success:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -732,6 +809,51 @@ class FindingViewSet(prefetch.PrefetchListMixin,
 
         return Response("Metadata deleted", status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if finding does not exist"),
+        },
+    )
+    @extend_schema(
+        methods=['DELETE'],
+        parameters=[
+            OpenApiParameter("name", OpenApiTypes.INT, OpenApiParameter.QUERY, required=True,
+                                description="name of the metadata to retrieve. If name is empty, return all the \
+                                    metadata associated with the finding")
+        ],
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(description="Returned if the metadata was correctly deleted"),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if finding does not exist"),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Returned if there was a problem with the metadata information"),
+        },
+        # manual_parameters=[openapi.Parameter(
+        #     name="name", in_=openapi.IN_QUERY,  type=openapi.TYPE_STRING,
+        #     description="name of the metadata to retrieve. If name is empty, return all the \
+        #                     metadata associated with the finding")]
+    )
+    @extend_schema(
+        methods=['PUT'],
+        request=serializers.FindingMetaSerializer,
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if finding does not exist"),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Returned if there was a problem with the metadata information"),
+        },
+        # manual_parameters=[openapi.Parameter(
+        #     name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
+        #     description="name of the metadata to edit")],
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.FindingMetaSerializer,
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if finding does not exist"),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Returned if there was a problem with the metadata information"),
+        },
+    )
     @swagger_auto_schema(
         responses={
             status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True),
@@ -772,7 +894,8 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         methods=['post'],
         request_body=serializers.FindingMetaSerializer
     )
-    @action(detail=True, methods=["post", "put", "delete", "get"])
+    @action(detail=True, methods=["post", "put", "delete", "get"],
+            filter_backends=[], pagination_class=None)
     def metadata(self, request, pk=None):
         finding = self.get_object()
 
@@ -945,6 +1068,10 @@ class ProductViewSet(prefetch.PrefetchListMixin,
     #     serializer = self.serializer_class(queryset, many=True)
     #     return Response(serializer.data)
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -1024,6 +1151,10 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
             member.role = Roles.Owner
             member.save()
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -1148,6 +1279,10 @@ class TestsViewSet(mixins.ListModelMixin,
         else:
             return serializers.TestSerializer
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -1172,6 +1307,15 @@ class TestsViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.TestToNotesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.TestToNotesSerializer}
@@ -1216,6 +1360,15 @@ class TestsViewSet(mixins.ListModelMixin,
         return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.TestToFilesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.FileSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.TestToFilesSerializer}

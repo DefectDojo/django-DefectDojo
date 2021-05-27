@@ -39,30 +39,7 @@ logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
-class TagList(list):
-    def __init__(self, *args, **kwargs):
-        pretty_print = kwargs.pop("pretty_print", True)
-        list.__init__(self, *args, **kwargs)
-        self.pretty_print = pretty_print
-
-    def __add__(self, rhs):
-        return TagList(list.__add__(self, rhs))
-
-    def __getitem__(self, item):
-        result = list.__getitem__(self, item)
-        try:
-            return TagList(result)
-        except TypeError:
-            return result
-
-    def __str__(self):
-        if self.pretty_print:
-            return json.dumps(
-                self, sort_keys=True, indent=4, separators=(',', ': '))
-        else:
-            return json.dumps(self)
-
-
+@extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
 class TagListSerializerField(serializers.ListField):
     child = serializers.CharField()
     default_error_messages = {
@@ -119,35 +96,15 @@ class TagListSerializerField(serializers.ListField):
         # return data
 
     def to_representation(self, value):
-        if not isinstance(value, TagList):
-
+        if not isinstance(value, list):
             # we can't use isinstance because TagRelatedManager is non-existing class
             # it cannot be imported or referenced, so we fallback to string comparison
             if type(value).__name__ == 'TagRelatedManager':
-                # if self.order_by:
-                #     tags = value.all().order_by(*self.order_by)
-                # else:
-                #     tags = value.all()
-                # value = [tag.name for tag in tags]
-
                 value = value.get_tag_list()
-
             elif isinstance(value, str):
                 value = tagulous.utils.parse_tags(value)
-
-            # elif len(value) > 0 and isinstance(value[0], Tag):
-            #     raise ValueError('unreachable code?!')
-            #     print('to_representation4: ' + str(value))
-            #     # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
-            #     tags = value
-            #     value = [tag.name for tag in tags]
-            #     if self.order_by:
-            #         # the only possible ordering is by name, so we order after creating the list
-            #         value = sorted(value)
             else:
-                raise ValueError('unable to convert %s into TagList' % type(value).__name__)
-
-            value = TagList(value, pretty_print=self.pretty_print)
+                raise ValueError('unable to convert %s into list of tags' % type(value).__name__)
         return value
 
 
