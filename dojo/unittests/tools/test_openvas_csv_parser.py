@@ -26,7 +26,6 @@ class TestOpenVASUploadCsvParser(TestCase):
             self.assertEqual("tcp", findings[0].unsaved_endpoints[0].protocol)
             self.assertEqual(22, findings[0].unsaved_endpoints[0].port)
 
-
     def test_openvas_csv_many_vuln(self):
         with open("dojo/unittests/scans/openvas/many_vuln.csv") as f:
             test = Test()
