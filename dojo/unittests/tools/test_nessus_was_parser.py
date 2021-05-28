@@ -18,7 +18,7 @@ class TestNessusWASParser(TestCase):
         self.assertEqual(5, len(findings))
         for i in [0, 1, 2, 3, 4]:
             finding = findings[i]
-            self.assertEqual('TCP', finding.unsaved_endpoints[0].protocol)
+            self.assertEqual('http', finding.unsaved_endpoints[0].protocol)
             self.assertIsNone(finding.cwe)
         finding = findings[0]
         self.assertEqual('High', finding.severity)
@@ -30,7 +30,7 @@ class TestNessusWASParser(TestCase):
         findings = parser.get_findings(testfile, self.create_test())
         self.assertEqual(1, len(findings))
         finding = findings[0]
-        self.assertEqual('TCP', finding.unsaved_endpoints[0].protocol)
+        self.assertEqual('http', finding.unsaved_endpoints[0].protocol)
         self.assertIsNone(finding.cwe)
         self.assertEqual('High', finding.severity)
         self.assertEqual('Cross-Site Scripting (XSS)', finding.title)
