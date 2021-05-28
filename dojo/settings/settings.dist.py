@@ -77,6 +77,7 @@ env = environ.Env(
     DD_CREDENTIAL_AES_256_KEY=(str, '.'),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
     DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
+    DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
     DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
     DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_AUTH0_KEY=(str, ''),
@@ -110,6 +111,7 @@ env = environ.Env(
     DD_SAML2_ENTITY_ID=(str, ''),
     DD_SAML2_LOGOUT_URL=(str, ''),
     DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
+    DD_SAML2_CREATE_USER=(bool, True),
     DD_SAML2_NEW_USER_PROFILE=(dict, {
         # The default group name when a new user logs in
         'USER_GROUPS': [],
@@ -392,6 +394,7 @@ SOCIAL_AUTH_PIPELINE = (
 CLASSIC_AUTH_ENABLED = True
 # Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
 SHOW_LOGIN_FORM = env('DD_SOCIAL_AUTH_SHOW_LOGIN_FORM')
+SOCIAL_LOGIN_AUTO_REDIRECT = env('DD_SOCIAL_LOGIN_AUTO_REDIRECT')
 
 SOCIAL_AUTH_STRATEGY = 'social_django.strategy.DjangoStrategy'
 SOCIAL_AUTH_STORAGE = 'social_django.models.DjangoStorage'
@@ -440,6 +443,7 @@ SAML2_AUTH = {
     'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
     # Optional settings below
     'DEFAULT_NEXT_URL': env('DD_SAML2_DEFAULT_NEXT_URL'),
+    'CREATE_USER': env('DD_SAML2_CREATE_USER'),
     'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
     'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
 }
@@ -639,7 +643,6 @@ INSTALLED_APPS = (
     'multiselectfield',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_swagger',
     'dbbackup',
     'django_celery_results',
     'social_django',
@@ -785,6 +788,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # Including the severity in the hash_code keeps those findings not duplicate
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
+    'CargoAudit Scan': ['cve', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
@@ -807,10 +811,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Symfony Security Check': ['title', 'cve'],
     'DSOP Scan': ['cve'],
     'Acunetix Scan': ['title', 'description'],
+    'Terrascan Scan': ['vuln_id_from_tool', 'title', 'severity', 'file_path', 'line', 'component_name'],
     'Trivy Scan': ['title', 'severity', 'cve', 'cwe'],
+    'TFSec Scan': ['severity', 'vuln_id_from_tool', 'file_path', 'line'],
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
-    'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line']
+    'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -859,41 +865,43 @@ DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE = 'unique_id_from_tool_or_hash_code
 # Key = the scan_type from factory.py (= the test_type)
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
-    'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
     'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'CargoAudit Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
-    'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
-    'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
-    'Clair Scan': DEDUPE_ALGO_HASH_CODE,
-    'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
+    'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
-    'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
-    'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
-    'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
-    'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    'IntSights Report': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
+    'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
     'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
-    'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
+    'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
     'Qualys Scan': DEDUPE_ALGO_HASH_CODE,
-    'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
-    'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
-    'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
+    'PHP Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
+    'Clair Scan': DEDUPE_ALGO_HASH_CODE,
+    'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
+    'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
+    'DSOP Scan': DEDUPE_ALGO_HASH_CODE,
+    'Terrascan Scan': DEDUPE_ALGO_HASH_CODE,
     'Trivy Scan': DEDUPE_ALGO_HASH_CODE,
-    'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
-    'WhiteHat Sentinel': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
-    'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
-    'ZAP Scan': DEDUPE_ALGO_HASH_CODE,
+    'TFSec Scan': DEDUPE_ALGO_HASH_CODE,
+    'HackerOne Cases': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    'Snyk Scan': DEDUPE_ALGO_HASH_CODE,
+    'GitLab Dependency Scanning Report': DEDUPE_ALGO_HASH_CODE,
+    'Safety Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
+    'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
+    'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -991,7 +999,7 @@ LOGGING = {
         },
         'dojo.specific-loggers.deduplication': {
             'handlers': [r'%s' % LOGGING_HANDLER],
-            'level': '%s' % 'DEBUG',
+            'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
         'MARKDOWN': {

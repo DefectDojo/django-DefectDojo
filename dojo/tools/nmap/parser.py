@@ -53,7 +53,7 @@ class NmapParser(object):
 
             for port_element in host.findall("ports/port"):
                 protocol = port_element.attrib['protocol']
-                endpoint = Endpoint(host=ip, fqdn=fqdn, protocol=protocol)
+                endpoint = Endpoint(host=fqdn if fqdn else ip, protocol=protocol)
                 if 'portid' in port_element.attrib and port_element.attrib['portid'].isdigit():
                     endpoint.port = int(port_element.attrib['portid'])
 

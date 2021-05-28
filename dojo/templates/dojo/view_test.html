@@ -798,10 +798,11 @@
                                 <i class="fa dojo-sup fa-sitemap has-popover" data-html="true" data-trigger="hover" data-content="
                                     {% for endpoint_status in finding.endpoint_status.all %}
                                         {% if endpoint_status.mitigated %}
-                                            &#10003; {{ endpoint_status.endpoint }}<br/>
+                                            &#10003;
                                         {% else %}
-                                            &#10005; {{ endpoint_status.endpoint }}<br/>
+                                            &#10005;
                                         {% endif %}
+                                         {{ endpoint_status.endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}<br/>
                                     {% endfor %}
                                 " data-placement="right" data-container="body" data-original-title="Endpoints ({{finding.active_endpoint_count}} Active, {{finding.mitigated_endpoint_count}} Mitigated)" title=""></i>
                               {% endif %}
@@ -985,6 +986,7 @@
     </div>
 
     <!--Cred Begin-->
+    {% if system_settings.enable_credentials %}
     <div class="row">
     <div class="col-md-12" id="cred">
         <div class="panel panel-default">
@@ -1078,6 +1080,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 <!--Cred end -->
 
 <!--Files beign -->

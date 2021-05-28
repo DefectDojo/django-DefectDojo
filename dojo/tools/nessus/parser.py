@@ -112,14 +112,11 @@ class NessusCSVParser(object):
                 find.unsaved_endpoints = list()
                 dupes[dupe_key] = find
             # manage endpoints
-            endpoint = Endpoint(host='localhost')
-            if 'Host' in row:
-                endpoint.host = row.get('Host')
-            elif 'IP Address' in row:
-                endpoint.host = row.get('IP Address')
-            endpoint.port = row.get('Port')
-            if 'Protocol' in row:
-                endpoint.protocol = row.get('Protocol').lower()
+            endpoint = Endpoint(
+                          protocol=row.get('Protocol').lower() if 'Protocol' in row else None,
+                          host=row.get('Host', row.get('IP Address', 'localhost')),
+                          port=row.get('Port')
+                        )
             find.unsaved_endpoints.append(endpoint)
         return list(dupes.values())
 
@@ -211,8 +208,11 @@ class NessusXMLParser(object):
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port if port is not None else ""),
-                                                           protocol=protocol))
+                    find.unsaved_endpoints.append(Endpoint(
+                        protocol=protocol,
+                        host=ip,
+                        port=port
+                    ))
                     if fqdn is not None:
                         find.unsaved_endpoints.append(Endpoint(host=fqdn,
                                                                protocol=protocol))

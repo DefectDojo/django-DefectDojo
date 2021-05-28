@@ -1,6 +1,6 @@
 import datetime
 from django.test import TestCase
-from dojo.models import Test, Engagement, Product
+from dojo.models import Test, Engagement, Product, Finding
 from dojo.tools.generic.parser import GenericParser
 
 
@@ -31,10 +31,14 @@ class TestGenericParser(TestCase):
         finding = findings[0]
         self.assertEqual(5, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
-        self.assertEqual("vulnerable.endpoint.com:443", endpoint.host)
+        endpoint.clean()
+        self.assertEqual("vulnerable.endpoint.com", endpoint.host)
+        self.assertEqual(443, endpoint.port)
         self.assertEqual("resource1/asdf", endpoint.path)
         endpoint = finding.unsaved_endpoints[1]
-        self.assertEqual("vulnerable.endpoint.com:443", endpoint.host)
+        endpoint.clean()
+        self.assertEqual("vulnerable.endpoint.com", endpoint.host)
+        self.assertEqual(443, endpoint.port)
         self.assertEqual("resource2/qwerty", endpoint.path)
         self.assertEqual("https", endpoint.protocol)
 
@@ -162,7 +166,9 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         finding = findings[0]
         self.assertEqual(1, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
-        self.assertEqual('localhost:80', endpoint.host)
+        endpoint.clean()
+        self.assertEqual('localhost', endpoint.host)
+        self.assertEqual(80, endpoint.port)
         self.assertEqual('http', endpoint.protocol)
         self.assertEqual('default.aspx', endpoint.path)
         self.assertIsNone(endpoint.query)
@@ -349,11 +355,11 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
     def test_column_order_is_flexible(self):
         content1 = """\
 Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified
-11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,True,True
+11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,References,True,True
 """
         content2 = """\
 Verified,Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active
-True,11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,True
+True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,References,True
 """
         file1 = TestFile("findings.csv", content1)
         file2 = TestFile("findings.csv", content2)
@@ -370,3 +376,49 @@ True,11/7/2015,Title,0,Url,Severity,Description,Mitigation,Impact,References,Tru
         fields2 = {k: v for k, v in finding2.__dict__.items() if k != '_state'}
 
         self.assertEqual(fields1, fields2)
+
+    def test_parse_json(self):
+        file = open("dojo/unittests/scans/generic/generic_report1.json")
+        parser = GenericParser()
+        findings = parser.get_findings(file, Test())
+        self.assertEqual(2, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("test title", finding.title)
+            self.assertEqual(True, finding.active)
+            self.assertEqual(True, finding.verified)
+            self.assertEqual(False, finding.duplicate)
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+            self.assertEqual("CVE-2020-36234", finding.cve)
+            self.assertEqual(261, finding.cwe)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
+            self.assertIn("security", finding.tags)
+            self.assertIn("network", finding.tags)
+            self.assertEqual("3287f2d0-554f-491b-8516-3c349ead8ee5", finding.unique_id_from_tool)
+            self.assertEqual("TEST1", finding.vuln_id_from_tool)
+        with self.subTest(i=1):
+            finding = findings[1]
+            self.assertEqual("test title2", finding.title)
+            self.assertEqual(True, finding.active)
+            self.assertEqual(False, finding.verified)
+            self.assertEqual(False, finding.duplicate)
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+
+    def test_parse_json2(self):
+        file = open("dojo/unittests/scans/generic/generic_report2.json")
+        parser = GenericParser()
+        findings = parser.get_findings(file, Test())
+        self.assertEqual(2, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("test title3", finding.title)
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+            self.assertEqual("CVE-2020-36234", finding.cve)
+            self.assertEqual(261, finding.cwe)
+            self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N", finding.cvssv3)
+            self.assertEqual("Some mitigation", finding.mitigation)
+        with self.subTest(i=1):
+            finding = findings[1]
+            self.assertEqual("test title4", finding.title)
+            self.assertIn(finding.severity, Finding.SEVERITIES)
+            self.assertEqual("Some mitigation", finding.mitigation)
