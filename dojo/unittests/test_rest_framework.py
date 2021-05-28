@@ -922,3 +922,39 @@ class UserAPITokenTest(DojoAPITestCase):
                 "target_user": "user2"
             })
         self.assertEqual(response.status_code, 403)
+
+    @override_settings(FEATURE_AUTHORIZATION_V2=True)
+    @override_settings(FEATURE_SUPERADMIN_TOKEN_FETCH=True)
+    def test_if_token_rotated_for_superadmin(self):
+        response = self.client.post(
+            reverse('api_token_auth'), {
+                "username": 'admin',
+                "password": 'admin',
+                "target_user": "user1"
+            })
+        token1 = response.data['token']
+        response = self.client.post(
+            reverse('api_token_auth'), {
+                "username": 'admin',
+                "password": 'admin',
+                "target_user": "user1"
+            })
+        token2 = response.data['token']
+        self.assertNotEqual(token1, token2)
+
+    @override_settings(FEATURE_AUTHORIZATION_V2=True)
+    @override_settings(FEATURE_SUPERADMIN_TOKEN_FETCH=True)
+    def test_if_token_equal_for_user(self):
+        response = self.client.post(
+            reverse('api_token_auth'), {
+                "username": 'user1',
+                "password": 'user1',
+            })
+        token1 = response.data['token']
+        response = self.client.post(
+            reverse('api_token_auth'), {
+                "username": 'user1',
+                "password": 'user1',
+            })
+        token2 = response.data['token']
+        self.assertEqual(token1, token2)
