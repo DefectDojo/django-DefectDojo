@@ -13,6 +13,9 @@ unset DD_DATABASE_URL
 python3 manage.py makemigrations dojo
 python3 manage.py migrate
 
+# will print any warnings to stderr
+python3 manage.py spectacular > /dev/null
+
 echo "Swagger Schema Tests - Broken"
 echo "------------------------------------------------------------"
 python3 manage.py test dojo.unittests -v 3 --no-input --tag broken && true
