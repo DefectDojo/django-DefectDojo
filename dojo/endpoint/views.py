@@ -12,85 +12,67 @@ from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from django.db.models import Q, QuerySet, Count
+
+from dojo.endpoint.utils import clean_hosts_run
 from dojo.filters import EndpointFilter
 from dojo.forms import EditEndpointForm, \
     DeleteEndpointForm, AddEndpointForm, DojoMetaDataForm
 from dojo.models import Product, Endpoint, Finding, DojoMeta, Endpoint_Status
-from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, get_system_setting, Product_Tab, \
-    calculate_grade, redirect, add_error_message_to_response
+from dojo.utils import get_page_items, add_breadcrumb, get_period_counts, Product_Tab, calculate_grade, redirect, \
+    add_error_message_to_response
 from dojo.notifications.helper import create_notification
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.endpoint.queries import get_authorized_endpoints
+from django.apps import apps
+
 
 logger = logging.getLogger(__name__)
 
 
-def vulnerable_endpoints(request):
-    endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
-                                 finding__duplicate=False, finding__out_of_scope=False, mitigated=False).prefetch_related('product', 'product__tags', 'tags').distinct()
-    endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
+def process_endpoints_view(request, host_view=False, vulnerable=False):
 
-    product = None
-    if 'product' in request.GET:
-        p = request.GET.getlist('product', [])
-        if len(p) == 1:
-            product = get_object_or_404(Product, id=p[0])
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                if not user_is_authorized(request.user, 'view', product):
-                    raise PermissionDenied
-            else:
-                user_has_permission_or_403(request.user, product, Permissions.Product_View)
-
-    ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
-    endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
-    endpoints_query = endpoints.qs.order_by('host')
-    paged_endpoints = get_page_items(request, endpoints_query, 25)
-    add_breadcrumb(title="Vulnerable Endpoints", top_level=not len(request.GET), request=request)
-
-    product_tab = None
-    if product:
-        product_tab = Product_Tab(product.id, "Vulnerable Endpoints", tab="endpoints")
-    return render(
-        request, 'dojo/endpoints.html', {
-            'product_tab': product_tab,
-            "endpoints": paged_endpoints,
-            "filtered": endpoints,
-            "name": "Vulnerable Endpoints",
-        })
-
-
-def all_endpoints(request):
-    endpoints = Endpoint.objects.prefetch_related('product', 'tags', 'product__tags')
-    endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
-    show_uri = get_system_setting('display_endpoint_uri')
-
-    product = None
-    if 'product' in request.GET:
-        p = request.GET.getlist('product', [])
-        if len(p) == 1:
-            product = get_object_or_404(Product, id=p[0])
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                if not user_is_authorized(request.user, 'view', product):
-                    raise PermissionDenied
-            else:
-                user_has_permission_or_403(request.user, product, Permissions.Product_View)
-
-    if show_uri:
-        endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
-        paged_endpoints = get_page_items(request, endpoints.qs, 25)
+    if vulnerable:
+        endpoints = Endpoint.objects.filter(finding__active=True, finding__verified=True, finding__false_p=False,
+                                     finding__duplicate=False, finding__out_of_scope=False, mitigated=False)
     else:
+        endpoints = Endpoint.objects.all()
+
+    endpoints = endpoints.prefetch_related('product', 'product__tags', 'tags').distinct()
+    endpoints = get_authorized_endpoints(Permissions.Endpoint_View, endpoints, request.user)
+
+    if host_view:
         ids = get_endpoint_ids(EndpointFilter(request.GET, queryset=endpoints, user=request.user).qs)
         endpoints = EndpointFilter(request.GET, queryset=endpoints.filter(id__in=ids), user=request.user)
-        paged_endpoints = get_page_items(request, endpoints.qs, 25)
-    add_breadcrumb(title="All Endpoints", top_level=not len(request.GET), request=request)
+    else:
+        endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
+
+    paged_endpoints = get_page_items(request, endpoints.qs, 25)
+
+    if vulnerable:
+        view_name = "Vulnerable"
+    else:
+        view_name = "All"
+
+    if host_view:
+        view_name += " Endpoint Hosts"
+    else:
+        view_name += " Endpoints"
+
+    add_breadcrumb(title=view_name, top_level=not len(request.GET), request=request)
 
     product_tab = None
-    view_name = "All Endpoints"
-    if product:
-        view_name = "Endpoints"
-        product_tab = Product_Tab(product.id, "Endpoints", tab="endpoints")
+    if 'product' in request.GET:
+        p = request.GET.getlist('product', [])
+        if len(p) == 1:
+            product = get_object_or_404(Product, id=p[0])
+            if not settings.FEATURE_AUTHORIZATION_V2:
+                if not user_is_authorized(request.user, 'view', product):
+                    raise PermissionDenied
+            else:
+                user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            product_tab = Product_Tab(product.id, view_name, tab="endpoints")
 
     return render(
         request, 'dojo/endpoints.html', {
@@ -98,7 +80,7 @@ def all_endpoints(request):
             "endpoints": paged_endpoints,
             "filtered": endpoints,
             "name": view_name,
-            "show_uri": show_uri,
+            "host_view": host_view,
             "product_tab": product_tab
         })
 
@@ -107,11 +89,7 @@ def get_endpoint_ids(endpoints):
     hosts = []
     ids = []
     for e in endpoints:
-        if ":" in e.host:
-            host_no_port = e.host[:e.host.index(':')]
-        else:
-            host_no_port = e.host
-        key = host_no_port + '-' + str(e.product.id)
+        key = e.host + '-' + str(e.product.id)
         if key in hosts:
             continue
         else:
@@ -120,23 +98,38 @@ def get_endpoint_ids(endpoints):
     return ids
 
 
-@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
-def view_endpoint(request, eid):
+def all_endpoints(request):
+    return process_endpoints_view(request, host_view=False, vulnerable=False)
+
+
+def all_endpoint_hosts(request):
+    return process_endpoints_view(request, host_view=True, vulnerable=False)
+
+
+def vulnerable_endpoints(request):
+    return process_endpoints_view(request, host_view=False, vulnerable=True)
+
+
+def vulnerable_endpoint_hosts(request):
+    return process_endpoints_view(request, host_view=True, vulnerable=True)
+
+
+def process_endpoint_view(request, eid, host_view=False):
     endpoint = get_object_or_404(Endpoint, id=eid)
-    host = endpoint.host_no_port
-    endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
-                                        product=endpoint.product).distinct()
 
-    endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
+    if host_view:
+        endpoints = endpoint.host_endpoints()
+        endpoint_metadata = None
+        all_findings = endpoint.host_findings()
+        active_findings = endpoint.host_active_findings()
+        closed_findings = endpoint.host_closed_findings()
+    else:
+        endpoints = None
+        endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
+        all_findings = endpoint.findings()
+        active_findings = endpoint.active_findings()
+        closed_findings = endpoint.closed_findings()
 
-    all_findings = Finding.objects.filter(endpoints__in=endpoints).distinct()
-
-    active_findings = Finding.objects.filter(endpoints__in=endpoints,
-                                             active=True,
-                                             verified=True).distinct()
-
-    closed_findings = Finding.objects.filter(endpoints__in=endpoints,
-                                             mitigated__isnull=False).distinct()
     if all_findings:
         start_date = timezone.make_aware(datetime.combine(all_findings.last().date, datetime.min.time()))
     else:
@@ -158,7 +151,7 @@ def view_endpoint(request, eid):
     if active_findings.count() != 0:
         vulnerable = True
 
-    product_tab = Product_Tab(endpoint.product.id, "Endpoint", tab="endpoints")
+    product_tab = Product_Tab(endpoint.product.id, "Host" if host_view else "Endpoint", tab="endpoints")
     return render(request,
                   "dojo/view_endpoint.html",
                   {"endpoint": endpoint,
@@ -169,7 +162,18 @@ def view_endpoint(request, eid):
                    'opened_per_month': monthly_counts['opened_per_period'],
                    'endpoint_metadata': endpoint_metadata,
                    'vulnerable': vulnerable,
+                   'host_view': host_view,
                    })
+
+
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
+def view_endpoint(request, eid):
+    return process_endpoint_view(request, eid, host_view=False)
+
+
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
+def view_endpoint_host(request, eid):
+    return process_endpoint_view(request, eid, host_view=True)
 
 
 @user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'change')
@@ -220,7 +224,7 @@ def delete_endpoint(request, eid):
                                     title='Deletion of %s' % endpoint,
                                     product=product,
                                     description='The endpoint "%s" was deleted by %s' % (endpoint, request.user),
-                                    url=request.build_absolute_uri(reverse('endpoints')),
+                                    url=request.build_absolute_uri(reverse('endpoint')),
                                     icon="exclamation-triangle")
                 return HttpResponseRedirect(reverse('view_product', args=(product.id,)))
 
@@ -264,7 +268,7 @@ def add_endpoint(request, pid):
                 resp += '<script type="text/javascript">window.close();</script>'
                 return HttpResponse(resp)
             else:
-                return HttpResponseRedirect(reverse('endpoints') + "?product=" + pid)
+                return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
 
     product_tab = None
     if '_popup' not in request.GET:
@@ -298,7 +302,7 @@ def add_product_endpoint(request):
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('endpoints') + "?product=%s" % form.product.id)
+            return HttpResponseRedirect(reverse('endpoint') + "?product=%s" % form.product.id)
     add_breadcrumb(title="Add Endpoint", top_level=False, request=request)
     return render(request,
                   'dojo/add_endpoint.html',
@@ -442,7 +446,7 @@ def endpoint_bulk_update_all(request, pid=None):
                                      messages.ERROR,
                                      'Unable to process bulk update. Required fields were not selected.',
                                      extra_tags='alert-danger')
-    return HttpResponseRedirect(reverse('endpoints', args=()))
+    return HttpResponseRedirect(reverse('endpoint', args=()))
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
@@ -489,3 +493,17 @@ def prefetch_for_endpoints(endpoints):
         logger.debug('unable to prefetch because query was already executed')
 
     return endpoints
+
+
+def migrate_endpoints_view(request):
+
+    view_name = 'Migrate endpoints'
+
+    html_log = clean_hosts_run(apps=apps, change=(request.method == 'POST'))
+
+    return render(
+        request, 'dojo/migrate_endpoints.html', {
+            'product_tab': None,
+            "name": view_name,
+            "html_log": html_log
+        })

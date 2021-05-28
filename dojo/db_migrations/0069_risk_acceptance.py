@@ -64,7 +64,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='product',
             name='enable_full_risk_acceptance',
-            field=models.BooleanField(default=True, help_text='Allows full risk acceptanc using a risk acceptance form, expiration date, uploaded proof, etc.'),
+            field=models.BooleanField(default=True, help_text='Allows full risk acceptance using a risk acceptance form, expiration date, uploaded proof, etc.'),
         ),
         migrations.AddField(
             model_name='product',

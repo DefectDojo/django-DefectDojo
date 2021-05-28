@@ -566,7 +566,7 @@ class JIRAWebhookTest(DojoTestCase):
         response = self.client.post(reverse('jira_web_hook_secret', args=(self.correct_secret, )),
                                     body,
                                     content_type="application/json")
-        print(response.content)
+        # print(response.content)
 
         self.assertEqual(200, response.status_code, response.content[:1000])
         self.assertEqual(b'Comment for engagement ignored', response.content)

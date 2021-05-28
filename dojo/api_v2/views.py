@@ -19,7 +19,8 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Te
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
-    BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member
+    BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
+    Product_Group, Product_Type_Group
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -37,8 +38,10 @@ from dojo.api_v2 import serializers, permissions, prefetch, schema
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_product_type_members
-from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, get_authorized_product_members
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_product_type_members, \
+    get_authorized_product_type_groups
+from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, \
+    get_authorized_product_members, get_authorized_product_groups
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
@@ -46,6 +49,45 @@ from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpo
 from dojo.authorization.roles_permissions import Permissions, Roles
 
 logger = logging.getLogger(__name__)
+
+
+# Authorization: superuser
+class DojoGroupViewSet(mixins.ListModelMixin,
+                                mixins.RetrieveModelMixin,
+                                mixins.DestroyModelMixin,
+                                mixins.UpdateModelMixin,
+                                mixins.CreateModelMixin,
+                                viewsets.GenericViewSet):
+    serializer_class = serializers.DojoGroupSerializer
+    queryset = Dojo_Group.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name')
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+    @swagger_auto_schema(
+        method='post',
+        responses={status.HTTP_200_OK: "User added"},
+        request_body=no_body
+    )
+    @swagger_auto_schema(
+        method='delete',
+        responses={status.HTTP_200_OK: "User removed"},
+        request_body=no_body
+    )
+    @action(detail=True, methods=['post', 'delete'], url_path=r'users/(?P<user_id>\d+)')
+    def add_user(self, request, pk, user_id):
+        dojo_group = self.get_object()
+        user = get_object_or_404(Dojo_User, id=user_id)
+        if request.method == 'POST':
+            dojo_group.users.add(user)
+            dojo_group.save()
+            return Response(status=status.HTTP_200_OK)
+        if request.method == 'DELETE':
+            if user not in dojo_group.users.all():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            dojo_group.users.remove(user)
+            dojo_group.save()
+            return Response(status=status.HTTP_200_OK)
 
 
 # Authorization: object-based
@@ -934,6 +976,38 @@ class ProductMemberViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_product_members(Permissions.Product_View).distinct()
 
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+# Authorization: object-based
+class ProductGroupViewSet(prefetch.PrefetchListMixin,
+                          prefetch.PrefetchRetrieveMixin,
+                          mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+                          mixins.CreateModelMixin,
+                          mixins.DestroyModelMixin,
+                          mixins.UpdateModelMixin,
+                          viewsets.GenericViewSet):
+    serializer_class = serializers.ProductGroupSerializer
+    queryset = Product_Group.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product_id', 'group_id')
+    swagger_schema = prefetch.get_prefetch_schema(["product_groups_list", "product_groups_read"],
+        serializers.ProductGroupSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasProductGroupPermission)
+
+    def get_queryset(self):
+        return get_authorized_product_groups(Permissions.Product_Group_View).distinct()
+
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 # Authorization: object-based
 class ProductTypeViewSet(prefetch.PrefetchListMixin,
@@ -960,6 +1034,7 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
         serializer.save()
         if settings.FEATURE_AUTHORIZATION_V2:
             product_type_data = serializer.data
+            product_type_data.pop('authorization_groups')
             product_type_data.pop('members')
             member = Product_Type_Member()
             member.user = self.request.user
@@ -1021,6 +1096,38 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
                 return Response('There must be at least one owner', status=status.HTTP_400_BAD_REQUEST)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+# Authorization: object-based
+class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
+                              prefetch.PrefetchRetrieveMixin,
+                              mixins.ListModelMixin,
+                              mixins.RetrieveModelMixin,
+                              mixins.CreateModelMixin,
+                              mixins.DestroyModelMixin,
+                              mixins.UpdateModelMixin,
+                              viewsets.GenericViewSet):
+    serializer_class = serializers.ProductTypeGroupSerializer
+    queryset = Product_Type_Group.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product_type_id', 'group_id')
+    swagger_schema = prefetch.get_prefetch_schema(["product_type_groups_list", "product_type_groups_read"],
+        serializers.ProductTypeGroupSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasProductTypeGroupPermission)
+
+    def get_queryset(self):
+        return get_authorized_product_type_groups(Permissions.Product_Type_Group_View).distinct()
+
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 # Authorization: object-based
@@ -1520,10 +1627,10 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
-        host = endpoint.host_no_port
+        host = endpoint.host
         report_name = "Endpoint Report: " + host
         report_type = "Endpoint"
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+        endpoints = Endpoint.objects.filter(host=host,
                                             product=endpoint.product).distinct()
         report_title = "Endpoint Report"
         report_subtitle = host
