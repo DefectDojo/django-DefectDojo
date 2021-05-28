@@ -145,8 +145,10 @@ class NessusXMLParser(object):
                         port = item.attrib["port"]
 
                     protocol = None
-                    if str(item.attrib["protocol"]):
-                        protocol = item.attrib["protocol"]
+                    if str(item.attrib["svc_name"]):
+                        protocol = re.sub(r'[^A-Za-z0-9\-\+]+', "", item.attrib["svc_name"])
+                        if protocol == 'www':
+                            protocol = 'http'
 
                     description = ""
                     plugin_output = None
@@ -208,9 +210,16 @@ class NessusXMLParser(object):
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    find.unsaved_endpoints.append(Endpoint(protocol=protocol,
-                                                           host=fqdn if fqdn else ip,
-                                                           port=port))
+                    if '://' in fqdn:
+                        endpoint = Endpoint.from_uri(fqdn)
+                    else:
+                        if protocol == 'general':
+                            endpoint = Endpoint(host=fqdn if fqdn else ip)
+                        else:
+                            endpoint = Endpoint(protocol=protocol,
+                                                host=fqdn if fqdn else ip,
+                                                port=port)
+                    find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())
 
