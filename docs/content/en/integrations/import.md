@@ -703,7 +703,7 @@ there is an extremely low false-positive rate.
 
 Use the WhiteHat Sentinel *vuln* API and query below to fetch vulnerabilities for the site in question.
 
-`vuln?query_site={site_id}&format=json&display_attack_vectors=all&display_custom_risk=1&display_risk=1&display_description=custom&display_solution=1`
+`vuln?query_site={site_id}&format=json&display_attack_vectors=open&display_request=1&display_response=0&display_body=0&display_description=custom&display_solution=1&display_custom_risk=1&display_risk=1&display_body_match=0&display_headers=0&query_status=open`
 
 The JSON output from this API can be saved to a file for manual import, or be imported directly via the Defect Dojo API.
 

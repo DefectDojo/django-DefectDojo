@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import re
@@ -39,15 +40,15 @@ class WhiteHatSentinelParser(object):
         if 'collection' not in findings_collection.keys() or not findings_collection['collection']:
             raise ValueError('collection key not present or there were not findings present.')
 
-        dojo_findings = []
 
-        # Loop through each vuln from WhiteHat
-        for whitehat_vuln in findings_collection['collection']:
-            # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo findings
-            dojo_finding = self._convert_whitehat_sentinel_vuln_to_dojo_finding(whitehat_vuln, test)
+        # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo findings
+        dojo_findings = self._convert_whitehat_sentinel_vulns_to_dojo_finding(findings_collection['collection'], test)
 
-            # Append DefectDojo findings to list
-            dojo_findings.append(dojo_finding)
+        # # Loop through each vuln from WhiteHat
+        # for whitehat_vuln in findings_collection['collection']:
+        #
+        #     # Append DefectDojo findings to list
+        #     dojo_findings.append(dojo_finding)
         return dojo_findings
 
     def _convert_whitehat_severity_id_to_dojo_severity(self, whitehat_severity_id: int) -> Union[str, None]:
@@ -164,7 +165,7 @@ class WhiteHatSentinelParser(object):
                 query = parsed_url.query
                 fragment = parsed_url.fragment
                 path = parsed_url.path
-                port = ""
+                port = parsed_url.port
                 try:
                     host, port = parsed_url.netloc.split(':')
                 except ValueError:
@@ -182,60 +183,71 @@ class WhiteHatSentinelParser(object):
 
         return endpoints_list
 
-    def _convert_whitehat_sentinel_vuln_to_dojo_finding(self, whitehat_sentinel_vuln, test):
+    def _convert_whitehat_sentinel_vulns_to_dojo_finding(self, whitehat_sentinel_vulns:[dict], test:str):
         """
         Converts a WhiteHat Sentinel vuln to a DefectDojo finding
 
         Args:
-            whitehat_sentinel_vuln: The vuln dictionary from WhiteHat Sentinel vuln API
+            whitehat_sentinel_vulns: The vuln dictionary from WhiteHat Sentinel vuln API
             test: The test ID that the DefectDojo finding should be associated with
         Returns: A DefectDojo Finding object
         """
+        dupes = dict()
 
-        date_created = whitehat_sentinel_vuln['found'].split('T')[0]
-        mitigated_ts = whitehat_sentinel_vuln.get('closed'.split('T')[0], None)
-        cwe = self._parse_cwe_from_tags(whitehat_sentinel_vuln['attack_vectors'][0].get('scanner_tags', []))
-        description_ref = self._parse_description(whitehat_sentinel_vuln['description'])
-        description = description_ref['description']
-        references = f"{description_ref['reference_link']}\nhttps://source.whitehatsec.com/asset-management/site" \
-                     f"-summary/{whitehat_sentinel_vuln['site']}/findings/{whitehat_sentinel_vuln['id']}"
-        steps = whitehat_sentinel_vuln['description'].get('description_prepend', '')
-        solution = self._parse_solution(whitehat_sentinel_vuln['solution'])
-        risk_id = whitehat_sentinel_vuln.get('custom_risk') if whitehat_sentinel_vuln.get(
-            'custom_risk') else whitehat_sentinel_vuln.get('risk')
-        severity = self._convert_whitehat_severity_id_to_dojo_severity(risk_id)
-        false_positive = whitehat_sentinel_vuln.get('status') == 'invalid'
+        for whitehat_vuln in whitehat_sentinel_vulns:
 
-        # WhiteHat has the following statuses: open, closed, out of scope, accepted, invalid, mitigated.
-        # Out of scope is considered active because the vulnerability is valid, just not for the specified WhiteHat
-        # Asset. This is often the case when a vulnerability is found in a sister product like an authentication or
-        # notification service.
-        active = whitehat_sentinel_vuln.get('status') in ('open', 'out of scope')
-        is_mitigated = not active
+            date_created = whitehat_vuln['found'].split('T')[0]
+            mitigated_ts = whitehat_vuln.get('closed'.split('T')[0], None)
+            cwe = self._parse_cwe_from_tags(whitehat_vuln['attack_vectors'][0].get('scanner_tags', []))
+            description_ref = self._parse_description(whitehat_vuln['description'])
+            description = description_ref['description']
+            references = f"https://source.whitehatsec.com/asset-management/site" \
+                         f"-summary/{whitehat_vuln['site']}/findings/{whitehat_vuln['id']}" \
+                         f"\n{description_ref['reference_link']}"
+            steps = whitehat_vuln['description'].get('description_prepend', '')
+            solution = self._parse_solution(whitehat_vuln['solution'])
+            risk_id = whitehat_vuln.get('custom_risk') if whitehat_vuln.get(
+                'custom_risk') else whitehat_vuln.get('risk')
+            severity = self._convert_whitehat_severity_id_to_dojo_severity(risk_id)
+            false_positive = whitehat_vuln.get('status') == 'invalid'
 
-        finding = Finding(title=whitehat_sentinel_vuln['class'],
-                          test=test,
-                          cwe=cwe,
-                          active=active,
-                          verified=True,
-                          description=description,
-                          steps_to_reproduce=steps,
-                          mitigation=solution,
-                          references=references,
-                          severity=severity,
-                          false_p=false_positive,
-                          date=date_created,
-                          is_mitigated=is_mitigated,
-                          mitigated=mitigated_ts,
-                          last_reviewed=whitehat_sentinel_vuln.get('lastRetested', None),
-                          dynamic_finding=True,
-                          created=date_created,
-                          unique_id_from_tool=whitehat_sentinel_vuln['id']
-                          )
 
-        # Get Endpoints from Attack Vectors
-        endpoints = self._convert_attack_vectors_to_endpoints(whitehat_sentinel_vuln['attack_vectors'])
+            active = whitehat_vuln.get('status') in ('open')
+            is_mitigated = not active
 
-        finding.unsaved_endpoints = endpoints
+            dupe_key = hashlib.md5(whitehat_vuln["id"].encode("utf-8")).hexdigest()
 
-        return finding
+            if dupe_key in dupes:
+                finding = dupes[dupe_key]
+                dupes[dupe_key] = finding
+
+            else:
+                dupes[dupe_key] = True
+
+                finding = Finding(title=whitehat_vuln['class'],
+                                  test=test,
+                                  cwe=cwe,
+                                  active=active,
+                                  verified=True,
+                                  description=description,
+                                  steps_to_reproduce=steps,
+                                  mitigation=solution,
+                                  references=references,
+                                  severity=severity,
+                                  false_p=false_positive,
+                                  date=date_created,
+                                  is_mitigated=is_mitigated,
+                                  mitigated=mitigated_ts,
+                                  last_reviewed=whitehat_vuln.get('lastRetested', None),
+                                  dynamic_finding=True,
+                                  created=date_created,
+                                  unique_id_from_tool=whitehat_vuln['id']
+                                  )
+
+                # Get Endpoints from Attack Vectors
+                endpoints = self._convert_attack_vectors_to_endpoints(whitehat_vuln['attack_vectors'])
+
+                finding.unsaved_endpoints = endpoints
+                dupes[dupe_key] = finding
+
+        return dupes.values()
