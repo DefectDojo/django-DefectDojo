@@ -16,7 +16,7 @@ unset DD_DATABASE_URL
 #   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 # fi
 
-python3 manage.py spectacular --fail-on-warnings || {
+python3 manage.py spectacular --fail-on-warn || {
     cat <<-EOF
 
 ********************************************************************************
