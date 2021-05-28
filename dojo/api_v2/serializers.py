@@ -305,9 +305,18 @@ class UserStubSerializer(serializers.ModelSerializer):
 
 
 class DojoGroupSerializer(serializers.ModelSerializer):
+    users = UserStubSerializer(many=True, read_only=True)
+
     class Meta:
         model = Dojo_Group
         fields = '__all__'
+
+
+class AddUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('id', 'username')
 
 
 class NoteHistorySerializer(serializers.ModelSerializer):
@@ -372,15 +381,27 @@ class ProductMemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        if self.context['request'].method == 'POST':
+        if self.instance is not None and \
+                data.get('product') != self.instance.product and \
+                not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a member to this product')
+
+        if self.instance is None or \
+                data.get('product') != self.instance.product or \
+                data.get('user') != self.instance.user:
             members = Product_Member.objects.filter(product=data.get('product'), user=data.get('user'))
             if members.count() > 0:
-                raise ValidationError('Product member already exists')
+                raise ValidationError('Product_Member already exists')
 
         if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Member_Add_Owner):
-            raise PermissionDenied('You are not permitted to add users as owners')
+            raise PermissionDenied('You are not permitted to add a member as Owner to this product')
 
         return data
+
+    def validate_role(self, value):
+        if not Roles.has_value(value):
+            raise ValidationError('Role {} does not exist'.format(value))
+        return value
 
 
 class ProductGroupSerializer(serializers.ModelSerializer):
@@ -392,6 +413,29 @@ class ProductGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Group
         fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product') != self.instance.product and \
+                not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Group_Add):
+            raise PermissionDenied('You are not permitted to add a group to this product')
+
+        if self.instance is None or \
+                data.get('product') != self.instance.product or \
+                data.get('group') != self.instance.group:
+            members = Product_Group.objects.filter(product=data.get('product'), group=data.get('group'))
+            if members.count() > 0:
+                raise ValidationError('Product_Group already exists')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a group as Owner to this product')
+
+        return data
+
+    def validate_role(self, value):
+        if not Roles.has_value(value):
+            raise ValidationError('Role {} does not exist'.format(value))
+        return value
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
@@ -406,20 +450,35 @@ class ProductTypeMemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        if self.context['request'].method == 'POST':
+        if self.instance is not None and \
+                data.get('product_type') != self.instance.product_type and \
+                not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a member to this product type')
+
+        if self.instance is None or \
+                data.get('product_type') != self.instance.product_type or \
+                data.get('user') != self.instance.user:
             members = Product_Type_Member.objects.filter(product_type=data.get('product_type'), user=data.get('user'))
             if members.count() > 0:
-                raise ValidationError('Product type member already exists')
-        else:
-            if data.get('role') != Roles.Owner:
+                raise ValidationError('Product_Type_Member already exists')
+
+        if data.get('role') != Roles.Owner:
+            if self.instance is None:
+                owners = Product_Type_Member.objects.filter(product_type=data.get('product_type'), role=Roles.Owner).count()
+            else:
                 owners = Product_Type_Member.objects.filter(product_type=data.get('product_type'), role=Roles.Owner).exclude(id=self.instance.id).count()
-                if owners < 1:
-                    raise ValidationError('There must be at least one owner')
+            if owners < 1:
+                raise ValidationError('There must be at least one owner')
 
         if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Member_Add_Owner):
-            raise PermissionDenied('You are not permitted to add users as owners')
+            raise PermissionDenied('You are not permitted to add a member as Owner to this product type')
 
         return data
+
+    def validate_role(self, value):
+        if not Roles.has_value(value):
+            raise ValidationError('Role {} does not exist'.format(value))
+        return value
 
 
 class ProductTypeGroupSerializer(serializers.ModelSerializer):
@@ -431,6 +490,29 @@ class ProductTypeGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type_Group
         fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product_type') != self.instance.product_type and \
+                not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Group_Add):
+            raise PermissionDenied('You are not permitted to add a group to this product type')
+
+        if self.instance is None or \
+                data.get('product_type') != self.instance.product_type or \
+                data.get('group') != self.instance.group:
+            members = Product_Type_Group.objects.filter(product_type=data.get('product_type'), group=data.get('group'))
+            if members.count() > 0:
+                raise ValidationError('Product_Type_Group already exists')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a group as Owner to this product type')
+
+        return data
+
+    def validate_role(self, value):
+        if not Roles.has_value(value):
+            raise ValidationError('Role {} does not exist'.format(value))
+        return value
 
 
 class ProductTypeSerializer(serializers.ModelSerializer):
