@@ -15,7 +15,6 @@ from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 import dateutil.relativedelta
 import datetime
-from urllib.parse import urlparse
 import bleach
 import git
 from django.conf import settings
@@ -84,10 +83,6 @@ def markdown_render(value):
 @register.filter(name='url_shortner')
 def url_shortner(value):
     return_value = str(value)
-    url = urlparse(return_value)
-
-    if url.path and len(url.path) != 1:
-        return_value = url.path
     if len(return_value) > 50:
         return_value = "..." + return_value[-47:]
 

@@ -42,8 +42,8 @@ The generic upgrade method for docker-compose follows these steps:
 -   Stop DefectDojo: `docker-compose stop`
 -   Re-start DefectDojo, allowing for container recreation:
     `docker-compose up -d`
--   This will run the database migrations to bring your database schema 
-    up to date for the latest release.
+-   Database migrations will be run automatically by the initializer.
+    Check the output via `docker-compose logs initializer` or relevant k8s command
 -   If you have the initializer disabled (or if you want to be on the
     safe side), run the migration command:
     `docker-compose exec uwsgi /bin/bash -c 'python manage.py migrate`
@@ -60,10 +60,16 @@ Replace the first step above with this one: `docker-compose build`
 
 ## Upgrading to DefectDojo Version 2.0.x.
 
-WARNING: Upgrade to 1.15.x first before upgrading to 2.0.0, otherwise you will brick you instance.
+Follow the usual steps to upgrade as described above.
 
-WARNING: Run `docker-compose exec uwsgi ./manage.py endpoint_pre-migration_check` before upgrading to check if
-your endpoints can be migrated succesfully. ([#4188](https://github.com/DefectDojo/django-DefectDojo/pull/4188))
+AFTER UPGRADING
+- Usual migration process (`python manage.py migrate`) try to migrate all endpoints to new format and merge duplicates.
+- All broken endpoints (which weren't possible to migrate) have red flag 🚩 in standard list of endpoints.
+- Check if all your endpoints was migrated successfully, go to: https://<defect-dojo-url>/endpoint/migrate.
+- Alternatively, this can be run as management command:  `docker-compose exec uwsgi ./manage.py endpoint_migration --dry-run`
+- When all endpoint will be fixed (there is not broken endpoint), press "Run migration" in https://<defect-dojo-url>/endpoint/migrate
+- Or, you can run management command: `docker-compose exec uwsgi ./manage.py endpoint_migration`
+- Details about endpoint migration / improvements in https://github.com/DefectDojo/django-DefectDojo/pull/4473
 
 We decided to name this version 2.0.0 because we did some big cleanups in this release:
 
@@ -72,7 +78,7 @@ We decided to name this version 2.0.0 because we did some big cleanups in this r
 - Rename Finding.is_Mitigated field to Finding.is_mitigated ([#3854](https://github.com/DefectDojo/django-DefectDojo/pull/4854))
 - Remove everything related to the old tagging library ([#4419](https://github.com/DefectDojo/django-DefectDojo/pull/4419))
 - Remove S0/S1/S2../S5 severity display option ([#4415](https://github.com/DefectDojo/django-DefectDojo/pull/4415))
-- Refactor EndPoint handling/formatting ([#4188](https://github.com/DefectDojo/django-DefectDojo/pull/4188))
+- Refactor EndPoint handling/formatting ([#4473](https://github.com/DefectDojo/django-DefectDojo/pull/4473))
 - Upgrade to Django 3.x ([#3632](https://github.com/DefectDojo/django-DefectDojo/pull/3632))
 - PDF Reports removed ([#4418](https://github.com/DefectDojo/django-DefectDojo/pull/4418))
 
