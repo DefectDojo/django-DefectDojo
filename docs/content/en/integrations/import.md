@@ -577,6 +577,10 @@ providers. Scan results are located at
 Multiple scans will create multiple files if they are runing agains
 different Cloud projects. See <https://github.com/nccgroup/ScoutSuite>
 
+### Semgrep JSON Report
+
+Import Semgrep output (--json)
+
 ### SKF Scan
 
 Output of SKF Sprint summary export.
