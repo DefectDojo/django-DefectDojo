@@ -686,7 +686,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     @swagger_auto_schema(
         responses={status.HTTP_200_OK: serializers.FindingSerializer(many=True)}
     )
-    @action(detail=True, methods=['get'], url_path=r'duplicate')
+    @action(detail=True, methods=['get'], url_path=r'duplicate', filter_backends=[], pagination_class=None)
     def get_duplicate_cluster(self, request, pk):
         finding = self.get_object()
         result = duplicate_cluster(request, finding)

@@ -217,9 +217,6 @@ class SchemaChecker():
                 return
 
             properties = schema.get("properties", None)
-            # print(properties)
-            # if not properties:
-            #     print('no properties')
 
             if properties is not None:
                 for name, prop in properties.items():
@@ -232,7 +229,7 @@ class SchemaChecker():
                 for child_name in obj.keys():
                     # TODO prefetch mixins not picked up by spectcular?
                     if child_name not in ['prefetch']:
-                        if child_name not in properties.keys():
+                        if not properties or child_name not in properties.keys():
                             self._has_failed = True
                             self._register_error(f'unexpected property "{child_name}" found')
 
