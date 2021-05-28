@@ -165,7 +165,7 @@ jobs:
              helm install \
                defectdojo \
                ./helm/defectdojo \
-               --set django.ingress.enabled=false \
+               --set django.ingress.enabled=true \
                --set imagePullPolicy=Never \
                ${{ steps.set.outputs[matrix.databases] }} \
                ${{ steps.set.outputs[matrix.brokers] }} \
