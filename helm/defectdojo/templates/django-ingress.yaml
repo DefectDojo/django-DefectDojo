@@ -43,9 +43,9 @@ spec:
         {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
         - pathType: Prefix
           {{- if .Values.django.ingress.path }}
-          - path: {{ .Values.django.ingress.path }}
+          path: {{ .Values.django.ingress.path }}
           {{- else }}
-          - path: "/"
+          path: "/"
           {{- end }}
           backend:
             service:
