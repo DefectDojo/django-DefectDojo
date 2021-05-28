@@ -189,8 +189,6 @@ class NexposeParser(object):
                     'name': 'Host Up',
                     'desc': 'Host is up because it replied on ICMP request or some TCP/UDP port is up',
                     'severity': 'Info',
-                    'resolution': 'N/A',
-                    'vector': 'No impact provided',
                 })
 
                 for names in node.findall('names'):
@@ -229,8 +227,6 @@ class NexposeParser(object):
                                                                                           svc['port'],
                                                                                           service.get('name')),
                                     'severity': 'Info',
-                                    'resolution': 'N/A',
-                                    'vector': 'No impact provided',
                                     'tags': [
                                         re.sub("[^A-Za-z0-9]+", "-", service.get('name').lower()).rstrip('-')
                                     ] if service.get('name') != "<unknown>" else []
@@ -288,8 +284,8 @@ class NexposeParser(object):
                            description=html2text.html2text(
                                vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln.get('pluginOutput', '').strip()),
                            severity=vuln['severity'],
-                           mitigation=html2text.html2text(vuln['resolution']),
-                           impact=vuln['vector'],
+                           mitigation=html2text.html2text(vuln.get('resolution')) if vuln.get('resolution') else None,
+                           impact=vuln.get('vector') if vuln.get('vector') else None,
                            test=test,
                            false_p=False,
                            duplicate=False,
