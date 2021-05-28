@@ -62,6 +62,9 @@ Replace the first step above with this one: `docker-compose build`
 
 Follow the usual steps to upgrade as described above.
 
+BEFORE UPGRADING
+- If you are using SAML2 checkout the new [documentaion](https://defectdojo.github.io/django-DefectDojo/integrations/social-authentication/#saml-20) and update you settings following the migration section. We replaced [django-saml2-auth](https://github.com/fangli/django-saml2-auth) with [djangosaml2](https://github.com/IdentityPython/djangosaml2).
+
 AFTER UPGRADING
 - Usual migration process (`python manage.py migrate`) try to migrate all endpoints to new format and merge duplicates.
 - All broken endpoints (which weren't possible to migrate) have red flag 🚩 in standard list of endpoints.
