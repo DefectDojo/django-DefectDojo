@@ -66,3 +66,6 @@ class TestAwsProwlerParser(TestCase):
         self.assertEqual("Show report generation info", findings[0].title)
         self.assertEqual("Info", findings[0].severity)
         self.assertEqual(1032, findings[0].cwe)
+        self.assertEqual("Ensure IAM password policy requires at least one uppercase letter (Scored)", findings[6].title)
+        self.assertEqual("Medium", findings[6].severity)
+        self.assertEqual(1032, findings[6].cwe)

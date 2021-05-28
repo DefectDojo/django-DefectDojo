@@ -1,8 +1,9 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% load static %}
 
-{% if user|is_authorized_for_change:finding %}
+{% if user|is_authorized_for_change:finding or finding|has_object_permission:"Finding_Edit" %}
     {% comment %} {{ similar_finding.related_actions }} {% endcomment %}
     {% if similar_finding.related_actions.0.action == 'None'%}
         <span title="{{similar_finding.related_actions.0.reason}}">None</span>

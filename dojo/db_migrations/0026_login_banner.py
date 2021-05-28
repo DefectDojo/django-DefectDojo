@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('banner_enable', models.BooleanField(blank=True, default=False, null=True)),
-                ('banner_message', models.CharField(default='', help_text='This message will be displayed on the login page', max_length=500)),
+                ('banner_message', models.CharField(default='', help_text="This message will be displayed on the login page. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>", max_length=500)),
             ],
         ),
     ]

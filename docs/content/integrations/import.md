@@ -23,10 +23,25 @@ Aqua
 
 JSON report format.
 
+Anchore Grype (anchore_grype)
+---------------------
+
+Anchore Grype JSON report format generated with `-o json` option.
+
+```
+grype defectdojo/defectdojo-django:1.13.1 -o json > many_vulns.json
+```
+
 Arachni Scanner
 ---------------
 
-Arachni JSON report format.
+Arachni Web Scanner (http://arachni-scanner.com/wiki)
+
+Reports are generated with `arachni_reporter` tool this way:
+
+```
+arachni_reporter --reporter 'json' js.com.afr
+```
 
 AppSpider (Rapid7)
 ------------------
@@ -126,6 +141,11 @@ Crashtest Security
 
 Import JSON Report Import XML Report in JUnit Format
 
+CredScan Report
+---------------
+
+Import CSV credential scanner reports
+
 Contrast Scanner
 ----------------
 
@@ -134,12 +154,43 @@ CSV Report
 Checkmarx
 ---------
 
-Detailed XML Report
+- `Checkmarx Scan`, `Checkmarx Scan detailed`: XML report from Checkmarx SAST (source code analysis)
+- `Checkmarx OSA`: json report from Checkmarx Open Source Analysis (dependencies analysis)
+To generate the OSA report using Checkmarx CLI:
+`./runCxConsole.sh OsaScan -v -CxServer <...> -CxToken <..> -projectName <...>  -enableOsa -OsaLocationPath <lib_folder> -OsaJson <output_folder>`
+That will generate three files, two of which are needed for defectdojo. Build the file for defectdojo with the jq utility:
+`jq -s . CxOSAVulnerabilities.json CxOSALibraries.json`
+
 
 Choctaw Hog parser
 ------------------
 
 From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
+
+CycloneDX
+---------
+
+CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security contexts and supply chain component analysis.
+
+From: https://www.cyclonedx.org/
+
+Example with Anchore Grype:
+```
+./grype defectdojo/defectdojo-django:1.13.1 -o cyclonedx > report.xml
+```
+
+Example with `cyclonedx-bom` tool:
+```
+pip install cyclonedx-bom
+cyclonedx-py
+```
+```
+  Usage:  cyclonedx-py [OPTIONS]
+  Options:
+    -i <path> - the alternate filename to a frozen requirements.txt
+    -o <path> - the bom file to create
+    -j        - generate JSON instead of XML
+```
 
 DawnScanner
 -----------
@@ -210,7 +261,12 @@ Import Gitleaks findings in JSON format.
 GitLab SAST Report
 ------------------
 
-Import SAST Report vulnerabilities in JSON format.
+Import SAST Report vulnerabilities in JSON format: https://docs.gitlab.com/ee/user/application_security/sast/#reports-json-format
+
+GitLab Dependency Scanning Report
+---------------------------------
+
+Import Dependency Scanning Report vulnerabilities in JSON format: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#reports-json-format
 
 Github Vulnerability
 --------------------
@@ -312,7 +368,14 @@ Use the full XML export template from Nexpose.
 Nikto
 -----
 
-XML output
+Nikto web server scanner - https://cirt.net/Nikto2
+
+The current parser support 3 sources:
+ - XML output (old)
+ - new XML output (with nxvmlversion=\"1.2\" type)
+ - JSON output
+
+See: https://github.com/sullo/nikto
 
 Nmap
 ----
@@ -410,7 +473,7 @@ report as follows
 ``` {.sourceCode .JSON}
 {
     "url_endpoint": "https://api.riskrecon.com/v1",
-    "api_key": "you-api-key", 
+    "api_key": "you-api-key",
     "companies": [
         {
             "name": "Company 1",
@@ -521,15 +584,21 @@ Follow below steps to setup API Import:
 
 1.  Configure the Sonarqube Authentication details by navigating to
     Configuration-\>Tool Configuration. Note the url should be in the
-    formation of <http://>\<sonarqube\_hostname\>/api. Select the tool
-    type to SonarQube.
+    formation of <http(s)://>\<sonarqube\_hostname\>/api. Select the tool
+    type to SonarQube. By default tool will import vulnerabilities only,
+    but additional filters can be setup using Extras field separated by commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
 2.  In the Product settings fill the details for the SonarQube Project
     Key (Key name can be found by navigating to a specific project and
     selecting the value from the url
-    <http://>\<sonarqube\_host\>/dashboard?id=\<key\_name\>
-3.  Once all of the above setting are made , the API Import should be
-    able to auto import all vulnerability information from the sonarqube
+    <http(s)://>\<sonarqube\_host\>/dashboard?id=\<key\_name\>
+3.  Once all of the above setting are made, the API Import should be
+    able to auto import all vulnerability information from the SonarQube
     instance.
+
+**NOTE**: If `https` is in use for the SonarQube than certificate should be
+trusted by DD instance. 
+
+
 
 SpotBugs
 --------
@@ -616,6 +685,23 @@ Wpscan Scanner
 --------------
 
 Import JSON report.
+
+Wfuzz JSON importer
+-------------------
+
+Import the result of Wfuzz (https://github.com/xmendez/wfuzz) if you export in JSON the result (`wfuzz  -o json -f myJSONReport.json,json ` ).
+
+The return code matching are directly put in Severity as follow(this is hardcoded in the parser actually). 
+
+```
+HTTP Return Code | Severity
+---------------------------
+200              |  High
+401              |  Medium
+403              |  Medium
+407              |  Medium
+500              |  Low
+```
 
 Xanitizer
 ---------

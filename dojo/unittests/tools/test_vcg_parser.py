@@ -138,7 +138,6 @@ class TestVCGXmlParser(TestCase):
         vcgscan = ElementTree.fromstring(single_finding)
         finding = self.parser.parse_issue(vcgscan.findall("CodeIssue")[0], Test())
         self.assertEqual("Info", finding.severity)
-        self.assertEqual("S4", finding.numerical_severity)
         self.assertEqual("Comment Indicates Potentially Unfinished Code", finding.title)
 
 
@@ -198,7 +197,6 @@ class TestVCGCsvParser(TestCase):
 
         self.assertIsNotNone(finding)
         self.assertEqual("Info", finding.severity)
-        self.assertEqual("S4", finding.numerical_severity)
         self.assertEqual("Comment Indicates Potentially Unfinished Code", finding.title)
 
 

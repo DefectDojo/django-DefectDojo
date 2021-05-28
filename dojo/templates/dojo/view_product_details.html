@@ -2,6 +2,7 @@
 {% load static %}
 {% load humanize %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% block add_styles %}
   .chart {height: 160px}
 {% endblock %}
@@ -21,14 +22,14 @@
                             <span class="caret"></span>
                         </button>
               <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                {% if user|is_authorized_for_change:prod %}
+                {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
                   <li role="presentation">
                     <a class="" href="{% url 'edit_product' prod.id %}">
                                           <i class="fa fa-pencil-square-o"></i> Edit
                                       </a>
                   </li>
                 {% endif %}
-                {% if user|is_authorized_for_staff:prod %}
+                {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:prod %}
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="" href="{% url 'add_meta_data' prod.id %}">
@@ -59,7 +60,7 @@
                       <i class="fa fa-file-text-o"></i> Product Report
                   </a>
                 </li>
-                {% if user|is_authorized_for_staff:prod %}
+                {% if prod|has_object_permission:"Benchmark_Edit" or user|is_authorized_for_staff:prod %}
                   {% if system_settings.enable_benchmark and benchmark_type %}
                     <li role="separator" class="divider"></li>
                     {% for bt in benchmark_type %}
@@ -70,6 +71,8 @@
                     </li>
                     {% endfor %} 
                   {% endif %}
+                {% endif %}
+                {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:prod %}
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a href="{% url 'action_history' prod|content_type prod.id %}">
@@ -77,7 +80,7 @@
                     </a>
                   </li>
                 {% endif %}
-                {% if user|is_authorized_for_delete:prod %}
+                {% if prod|has_object_permission:"Product_Delete" or user|is_authorized_for_delete:prod %}
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
                     <a class="text-danger" href="{% url 'delete_product' prod.id %}">
@@ -151,7 +154,9 @@
     </div>
   </div>
 </div>
-      <!-- Benchmark Tab -->
+
+<!-- Benchmark Tab -->
+{% if system_settings.enable_benchmark %}
 <div class="row">
   <div class="col-md-12">
     <div class="panel panel-default">
@@ -183,6 +188,97 @@
     </div>
   </div>
 </div>
+{% endif %}
+
+{% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h4 class="pull-left">Members</h4>
+                {% if prod|has_object_permission:"Product_Manage_Members" %}
+                <div class="dropdown pull-right">
+                    <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductMember"
+                            data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Member">
+                        <span class="fa fa-bars"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation">
+                            <a id="addProductMember" href="{% url 'add_product_member' prod.id %}">
+                                <i class="fa fa-plus"></i> Add User
+                            </a>
+                        </li>
+                    </ul>
+                    &nbsp;
+                    <a href="https://defectdojo.github.io/django-DefectDojo/basics/permissions/" target="_blank">
+                        <i class="fa fa-question-circle text-low"></i></a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% if product_members or product_type_members %}
+            <div class="table-responsive">
+                <table class="tablesorter-bootstrap table table-condensed table-striped">
+                    <thead>
+                    <tr>
+                        <th label="Actions"></th>
+                        <th>User</th>
+                        <th>Source</th>
+                        <th>Role</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for member in product_members %}
+                        <tr>
+                            <td>
+                                <ul>
+                                <li class="dropdown" style="list-style:none;position:absolute">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                    <ul class="dropdown-menu">
+                                        {% if prod|has_object_permission:"Product_Manage_Members" %}
+                                        <li>
+                                            <a name="editProductMember" href="{% url 'edit_product_member' member.id %}">
+                                            <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                        </li>
+                                        {% endif %}
+                                        {% if member|has_object_permission:"Product_Member_Delete" %}
+                                        <li>
+                                            <a name="deleteProductMember" href="{% url 'delete_product_member' member.id %}">
+                                            <i class="fa fa-trash"></i> Delete</a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </li>
+                                </ul>
+                            </td>
+                            <td name="member_user">{{ member.user|full_name }}</td>
+                            <td>Product member</td>
+                            <td name="member_role">{% role_as_string member.role %}</td>
+                        </tr>
+                    {% endfor %}
+                    {% for member in product_type_members %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td>{{ member.user|full_name }}</td>
+                            <td>
+                                <a class="" href="{% url 'view_product_type' member.product_type.id %}">
+                                    {{ member.product_type|product_type_name }}
+                                </a>
+                            </td>
+                            <td>{% role_as_string member.role %}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="panel-body">
+                <small class="text-muted"><em>No members found.</em></small>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
 </div>
 <!-- Meta Data -->
 <div class="col-md-4">
@@ -308,6 +404,7 @@
             <td><strong>Technical Contact</strong></td>
             <td>{% if prod.technical_contact != "0" %}{{ prod.technical_contact | default:"Unknown" }}{% endif %}</td>
           </tr>
+          {% if not 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
           <tr>
             <td><strong>Authorized Users</strong></td>
             <td>
@@ -333,6 +430,7 @@
               {% endif %}
             </td>
           </tr>
+          {% endif %}
         </tbody>
       </table>
     </div>
@@ -353,7 +451,6 @@
           <tr>
               <td id="saving_notifications">&nbsp;</td>
               <td class="centered">Slack</td>
-              <td class="centered">Microsoft Teams</td>
               <td class="centered">Mail</td>
               <td class="centered">Alert</td>
           </tr>
@@ -365,7 +462,9 @@
               {% endif %}
             </td>
             {% for pk,c in field.field.widget.choices %}
+            {% if c != "msteams" %}
             <td class="centered"><input id="{{ field.name }}_{{ c }}" type="checkbox" name="{{ field.name }}" {% if c in field.value %}checked{% endif %} value="{{ c }}"/></td>
+            {% endif %}
             {% endfor %}
          </tr>
           {% endfor %}
