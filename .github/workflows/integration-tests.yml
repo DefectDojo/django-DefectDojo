@@ -114,7 +114,7 @@ jobs:
         run: docker-compose up --exit-code-from integration-tests integration-tests
 
       - name: Logs
-        run: docker-compose logs --tail="2500" celeryworker
+        run: docker-compose logs --tail="2500"
 
       - name: Shutdown
         if: always()
