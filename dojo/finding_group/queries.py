@@ -1,7 +1,8 @@
 from crum import get_current_user
 from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
-from dojo.models import Finding_Group, Product_Member, Product_Type_Member
+from dojo.models import Finding_Group, Product_Member, Product_Type_Member, \
+    Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission
 
 
@@ -34,12 +35,24 @@ def get_authorized_finding_groups(permission, queryset=None, user=None):
             product=OuterRef('test__engagement__product_id'),
             user=user,
             role__in=roles)
+        authorized_product_type_groups = Product_Type_Group.objects.filter(
+            product_type=OuterRef('test__engagement__product__prod_type_id'),
+            group__users=user,
+            role__in=roles)
+        authorized_product_groups = Product_Group.objects.filter(
+            product=OuterRef('test__engagement__product_id'),
+            group__users=user,
+            role__in=roles)
         finding_groups = finding_groups.annotate(
             test__engagement__product__prod_type__member=Exists(authorized_product_type_roles),
-            test__engagement__product__member=Exists(authorized_product_roles))
+            test__engagement__product__member=Exists(authorized_product_roles),
+            test__engagement__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
+            test__engagement__product__authorized_group=Exists(authorized_product_groups))
         finding_groups = finding_groups.filter(
             Q(test__engagement__product__prod_type__member=True) |
-            Q(test__engagement__product__member=True))
+            Q(test__engagement__product__member=True) |
+            Q(test__engagement__product__prod_type__authorized_group=True) |
+            Q(test__engagement__product__authorized_group=True))
     else:
         if not user.is_staff:
             finding_groups = finding_groups.filter(
