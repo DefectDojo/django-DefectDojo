@@ -2,8 +2,10 @@
 import os
 from datetime import timedelta
 from celery.schedules import crontab
-
+from dojo import __version__
 import environ
+
+
 root = environ.Path(__file__) - 3  # Three folders back
 
 # reference: https://pypi.org/project/django-environ/
@@ -598,8 +600,8 @@ SWAGGER_SETTINGS = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Defect Dojo API v2',
-    'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy.',
-    'VERSION': '2.0.0',
+    'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.',
+    'VERSION': __version__,
     # OTHER SETTINGS
     # the following set to False could help some client generators
     # 'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
