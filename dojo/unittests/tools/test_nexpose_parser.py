@@ -1,7 +1,6 @@
 from django.test import TestCase
 from dojo.tools.nexpose.parser import NexposeParser
 from dojo.models import Test, Engagement, Product
-from django.core.exceptions import ValidationError
 
 
 class TestNexposeParser(TestCase):

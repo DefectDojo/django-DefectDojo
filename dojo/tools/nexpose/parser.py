@@ -1,4 +1,5 @@
-import html2text, re
+import html2text
+import re
 from defusedxml import ElementTree
 
 from dojo.models import Finding, Endpoint
@@ -205,10 +206,9 @@ class NexposeParser(object):
                         }
                         for services in endpoint.findall('services'):
                             for service in services.findall('service'):
-                                svc['name'] = re.sub("[^A-Za-z0-9\-\+]+", "-", re.sub("\(.*?\)?\)", "", service\
-                                                                    .get('name')\
-                                                                    .lower()
-                                                     ))[:10].strip('-') if service.get('name') != "<unknown>" else None
+                                svc['name'] = re.sub(r'[^A-Za-z0-9\-\+]+', "-",
+                                                        re.sub(r'\(.*?\)?\)', "", service.get('name').lower())
+                                                     )[:10].strip('-') if service.get('name') != "<unknown>" else None
                                 # 1. get
                                 # 2. lower
                                 # 3. remove brackets with its content
