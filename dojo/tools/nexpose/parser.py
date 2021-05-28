@@ -1,4 +1,4 @@
-import html2text
+import html2text, re
 from defusedxml import ElementTree
 
 from dojo.models import Finding, Endpoint
@@ -205,7 +205,17 @@ class NexposeParser(object):
                         }
                         for services in endpoint.findall('services'):
                             for service in services.findall('service'):
-                                svc['name'] = service.get('name')
+                                svc['name'] = re.sub("[^A-Za-z0-9\-\+]+", "-", re.sub("\(.*?\)?\)", "", service\
+                                                                    .get('name')\
+                                                                    .lower()
+                                                     ))[:10].strip('-') if service.get('name') != "<unknown>" else None
+                                # 1. get
+                                # 2. lower
+                                # 3. remove brackets with its content
+                                # 4. replace sequance of non-(alphanum,-,+) chars by '-'
+                                # 5. cut (max 10 chars) - limitation of protocol field in models.Endpoint
+                                # 6. strip
+
                                 svc['vulns'] = self.parse_tests_type(service, vulns)
 
                                 for configs in service.findall('configurations'):
@@ -214,13 +224,16 @@ class NexposeParser(object):
                                             svc['version'] = config.get('name')
 
                                 svc['vulns'].append({
-                                    'name': 'Open port {}/{}'.format(svc['protocol'], svc['port']),
-                                    'desc': '{}/{} port is open with "{}" service'.format(svc['protocol'], svc['port'],
-                                                                                         svc['name']),
+                                    'name': 'Open port {}/{}'.format(svc['protocol'].upper(), svc['port']),
+                                    'desc': '{}/{} port is open with "{}" service'.format(svc['protocol'],
+                                                                                          svc['port'],
+                                                                                          service.get('name')),
                                     'severity': 'Info',
                                     'resolution': 'N/A',
                                     'vector': 'No impact provided',
-                                    'tags': [svc['name'].lower()]
+                                    'tags': [
+                                        re.sub("[^A-Za-z0-9]+", "-", service.get('name').lower()).rstrip('-')
+                                    ] if service.get('name') != "<unknown>" else []
                                 })
 
                         host['services'].append(svc)
@@ -250,8 +263,8 @@ class NexposeParser(object):
                     endpoint = Endpoint(
                         host=host['name'],
                         port=service['port'],
-                        protocol=service['name'].lower() if service['name'] != "<unknown>" else None,
-                        fragment=service['protocol'].lower() if service['name'].lower() == "dns" else None
+                        protocol=service['name'],
+                        fragment=service['protocol'].lower() if service['name'] == "dns" else None
                         # A little dirty hack but in case of DNS it is important to know if vulnerability is on TCP or UDP
                     )
                     find.unsaved_endpoints.append(endpoint)

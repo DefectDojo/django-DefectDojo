@@ -1,6 +1,7 @@
 from django.test import TestCase
 from dojo.tools.nexpose.parser import NexposeParser
 from dojo.models import Test, Engagement, Product
+from django.core.exceptions import ValidationError
 
 
 class TestNexposeParser(TestCase):
@@ -9,7 +10,13 @@ class TestNexposeParser(TestCase):
         testfile = open("dojo/unittests/scans/nexpose/no_vuln.xml")
         parser = NexposeParser()
         findings = parser.get_findings(testfile, Test())
+
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
         self.assertEqual(1, len(findings))
+
         # vuln 1
         finding = findings[0]
         self.assertEqual("Info", finding.severity)
@@ -23,7 +30,13 @@ class TestNexposeParser(TestCase):
         parser = NexposeParser()
         findings = parser.get_findings(testfile, test)
         testfile.close()
-        self.assertEqual(32, len(findings))
+
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
+        self.assertEqual(38, len(findings))
+
         # vuln 1
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
@@ -33,60 +46,106 @@ class TestNexposeParser(TestCase):
         self.assertIn("https://www.securityfocus.com/bid/10183", finding.references)  # BID: 10183
         self.assertIn("https://www.kb.cert.org/vuls/id/415294.html", finding.references)  # CERT-VN: 415294
         self.assertIn("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2004-0230", finding.references)  # CVE: CVE-2004-0230
+
         # vuln 2
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
         self.assertEqual("TCP timestamp response", finding.title)
         self.assertIsNone(finding.cve)
         self.assertEqual(5, len(finding.unsaved_endpoints))
+
         # vuln 2 - endpoint
         endpoint = finding.unsaved_endpoints[0]
         self.assertIsNone(endpoint.port)
         self.assertIsNone(endpoint.protocol)
+
         # vuln 5
         finding = findings[5]
         self.assertEqual("Default SSH password: root password \"root\"", finding.title)
         self.assertEqual(1, len(finding.unsaved_endpoints))
+
         # vuln 5 - endpoint
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(22, endpoint.port)
         self.assertEqual("ssh", endpoint.protocol)
+
+        # vuln 26
+        finding = findings[26]
+        self.assertIn("radius (RADIUS authentication protocol (RFC\n2138))", finding.description)
+        self.assertEqual("radius-radius-authentication-protocol-rfc-2138", finding.unsaved_tags[0])
+        self.assertEqual("radius", finding.unsaved_endpoints[0].protocol)
+
         # vuln 27
         finding = findings[27]
+        self.assertIn("nfs_acl", finding.description)
+        self.assertEqual("nfs-acl", finding.unsaved_tags[0])
+        self.assertEqual("nfs-acl", finding.unsaved_endpoints[0].protocol)
+
+        # vuln 29
+        finding = findings[29]
+        self.assertIn("Backup Exec Agent Browser", finding.description)
+        self.assertEqual("backup-exec-agent-browser", finding.unsaved_tags[0])
+        self.assertEqual("backup-exe", finding.unsaved_endpoints[0].protocol)
+
+        # vuln 31
+        finding = findings[31]
+        self.assertIn("sun-answerbook (Sun Answerbook HTTP server)", finding.description)
+        self.assertEqual("sun-answerbook-sun-answerbook-http-server", finding.unsaved_tags[0])
+        self.assertEqual("sun-answer", finding.unsaved_endpoints[0].protocol)
+
+        # vuln 32
+        finding = findings[32]
+        self.assertIn("HP JetDirect Data", finding.description)
+        self.assertEqual("hp-jetdirect-data", finding.unsaved_tags[0])
+        self.assertEqual("hp-jetdire", finding.unsaved_endpoints[0].protocol)
+
+        # vuln 33
+        finding = findings[33]
         self.assertEqual("TLS/SSL Server Supports DES and IDEA Cipher Suites", finding.title)
         self.assertEqual(1, len(finding.unsaved_endpoints))
-        # vuln 27 - endpoint
+
+        # vuln 33 - endpoint
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(443, endpoint.port)
         self.assertIsNone(endpoint.protocol)
-        # vuln 31
-        finding = findings[31]
-        self.assertEqual("Open port udp/137", finding.title)
+
+        # vuln 37
+        finding = findings[37]
+        self.assertEqual("Open port UDP/137", finding.title)
         self.assertIn('udp/137 port is open with "CIFS Name Service" service', finding.description)
-        self.assertIn('cifs name service', finding.unsaved_tags)
+        self.assertIn('cifs-name-service', finding.unsaved_tags)
         self.assertEqual(1, len(finding.unsaved_endpoints))
-        # vuln 31 - endpoint
+
+        # vuln 37 - endpoint
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(137, endpoint.port)
-        self.assertEqual('cifs name service', endpoint.protocol)
+        self.assertEqual('cifs-name', endpoint.protocol)
 
     def test_nexpose_parser_tests_outside_endpoint(self):
         testfile = open("dojo/unittests/scans/nexpose/report_auth.xml")
         parser = NexposeParser()
+
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
         self.assertEqual(5, len(findings))
+
         # vuln 0
         finding = findings[0]
         self.assertEqual("High", finding.severity)
         self.assertEqual("ICMP redirection enabled", finding.title)
         self.assertIsNone(finding.cve)
         self.assertEqual(4, len(finding.unsaved_endpoints))
+
         # vuln 1
         finding = findings[1]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("No password for Grub", finding.title)
         self.assertIsNone(finding.cve)
         self.assertEqual(4, len(finding.unsaved_endpoints))
+
         # vuln 2
         finding = findings[2]
         self.assertEqual("Low", finding.severity)
@@ -98,6 +157,11 @@ class TestNexposeParser(TestCase):
         testfile = open("dojo/unittests/scans/nexpose/dns.xml")
         parser = NexposeParser()
         findings = parser.get_findings(testfile, Test())
+
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
         self.assertEqual(6, len(findings))
         # vuln 1
         finding = findings[1]
