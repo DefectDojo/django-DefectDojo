@@ -170,9 +170,8 @@ class TestNexposeParser(TestCase):
         self.assertEqual('tcp', str(finding.unsaved_endpoints[0].fragment))
         self.assertEqual('dns', str(finding.unsaved_endpoints[1].protocol))
         self.assertEqual('udp', str(finding.unsaved_endpoints[1].fragment))
-        # TODO uncomment these lines when PR #4188 will be done
-        # self.assertEqual('dns://192.168.1.1#tcp', str(finding.unsaved_endpoints[0]))
-        # self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[1]))
+        self.assertEqual('dns://192.168.1.1#tcp', str(finding.unsaved_endpoints[0]))
+        self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[1]))
 
         # vuln 2
         finding = findings[2]
@@ -182,9 +181,8 @@ class TestNexposeParser(TestCase):
         self.assertEqual('tcp', str(finding.unsaved_endpoints[0].fragment))
         self.assertEqual('dns', str(finding.unsaved_endpoints[1].protocol))
         self.assertEqual('udp', str(finding.unsaved_endpoints[1].fragment))
-        # TODO uncomment these lines when PR #4188 will be done
-        # self.assertEqual('dns://192.168.1.1#tcp', str(finding.unsaved_endpoints[0]))
-        # self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[1]))
+        self.assertEqual('dns://192.168.1.1#tcp', str(finding.unsaved_endpoints[0]))
+        self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[1]))
 
         # vuln 4
         finding = findings[4]
@@ -192,5 +190,4 @@ class TestNexposeParser(TestCase):
         self.assertEqual(1, len(finding.unsaved_endpoints))
         self.assertEqual('dns', str(finding.unsaved_endpoints[0].protocol))
         self.assertEqual('udp', str(finding.unsaved_endpoints[0].fragment))
-        # TODO uncomment this line when PR #4188 will be done
-        # self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[0]))
+        self.assertEqual('dns://192.168.1.1#udp', str(finding.unsaved_endpoints[0]))
