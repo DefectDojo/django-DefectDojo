@@ -138,6 +138,7 @@ class FindingTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Finding marked for review and reviewers notified.'))
 
+    @on_exception_html_source_logger
     def test_clear_review_from_finding(self):
         # login to site, password set to fetch from environ
         driver = self.driver
