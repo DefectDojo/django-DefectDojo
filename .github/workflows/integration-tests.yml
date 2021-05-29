@@ -114,8 +114,7 @@ jobs:
         run: docker-compose up --exit-code-from integration-tests integration-tests
 
       - name: Logs
-        if: failure()
-        run: docker-compose logs --tail="2500" uwsgi
+        run: docker-compose logs --tail="2500"
 
       - name: Shutdown
         if: always()

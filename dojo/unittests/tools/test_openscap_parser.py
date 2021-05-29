@@ -17,6 +17,9 @@ class TestOpenscapParser(TestCase):
         parser = OpenscapParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
 
     def test_openscap_parser_with_many_vuln_has_many_findings(self):
@@ -24,6 +27,9 @@ class TestOpenscapParser(TestCase):
         parser = OpenscapParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(31, len(findings))
         finding = findings[0]
         self.assertEqual("RHSA-2017:3315: kernel security and bug fix update (Moderate)", finding.title)
@@ -44,6 +50,9 @@ class TestOpenscapParser(TestCase):
         parser = OpenscapParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("IOS 12 - no IP finger service", finding.title)
