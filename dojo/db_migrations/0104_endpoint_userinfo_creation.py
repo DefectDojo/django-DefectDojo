@@ -20,6 +20,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(move_fqdn_to_host),
         migrations.AlterModelOptions(
             name='endpoint',
             options={'ordering': ['product', 'host', 'protocol', 'port', 'userinfo', 'path', 'query', 'fragment']},
@@ -51,7 +52,6 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, help_text="The location of the resource, it must not start with a '/'. "
                                                          "For example endpoint/420/edit", max_length=500, null=True),
         ),
-        migrations.RunPython(move_fqdn_to_host),
         migrations.RemoveField(
             model_name='endpoint',
             name='fqdn',
