@@ -10,8 +10,7 @@ from django.http import Http404, HttpResponseForbidden
 from django_filters.filters import _truncate
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, \
+from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
     EndpointFilter, now
 from dojo.forms import ReportOptionsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
@@ -49,7 +48,7 @@ def report_url_resolver(request):
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = get_authorized_findings(Permissions.Finding_View)
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
+    findings = ReportFindingFilter(request.GET, queryset=findings)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
                                         finding__false_p=False,
@@ -119,10 +118,10 @@ def custom_report(request):
 def report_findings(request):
     findings = Finding.objects.filter()
 
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
+    findings = ReportFindingFilter(request.GET, queryset=findings)
 
-    title_words = get_words_for_field(findings.qs, 'title')
-    component_words = get_words_for_field(findings.qs, 'component_name')
+    title_words = get_words_for_field(Finding, 'title')
+    component_words = get_words_for_field(Finding, 'component_name')
 
     paged_findings = get_page_items(request, findings.qs.distinct().order_by('numerical_severity'), 25)
 
@@ -575,7 +574,7 @@ def generate_report(request, obj):
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
     elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet":
-        findings = ReportAuthedFindingFilter(request.GET,
+        findings = ReportFindingFilter(request.GET,
                                              queryset=prefetch_related_findings_for_report(obj).distinct())
         report_name = 'Finding'
         report_type = 'Finding'
