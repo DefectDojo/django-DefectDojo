@@ -12,6 +12,9 @@ class TestOpenVASUploadCsvParser(TestCase):
             test.engagement.product = Product()
             parser = OpenVASCsvParser()
             findings = parser.get_findings(f, test)
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
             self.assertEqual(1, len(findings))
             # finding
             self.assertEqual("SSH Weak Encryption Algorithms Supported", findings[0].title)

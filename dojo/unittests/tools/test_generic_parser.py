@@ -27,16 +27,17 @@ class TestGenericParser(TestCase):
         file = open("dojo/unittests/scans/generic/generic_report1.csv")
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual(5, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
-        endpoint.clean()
         self.assertEqual("vulnerable.endpoint.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
         self.assertEqual("resource1/asdf", endpoint.path)
         endpoint = finding.unsaved_endpoints[1]
-        endpoint.clean()
         self.assertEqual("vulnerable.endpoint.com", endpoint.host)
         self.assertEqual(443, endpoint.port)
         self.assertEqual("resource2/qwerty", endpoint.path)
@@ -162,11 +163,13 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual(1, len(finding.unsaved_endpoints))
         endpoint = finding.unsaved_endpoints[0]
-        endpoint.clean()
         self.assertEqual('localhost', endpoint.host)
         self.assertEqual(80, endpoint.port)
         self.assertEqual('http', endpoint.protocol)
@@ -184,6 +187,9 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual('High', findings[0].severity)
 
     def test_parsed_finding_with_invalid_severity_has_info_severity(self):
@@ -196,6 +202,9 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual('Info', findings[0].severity)
 
     def test_parsed_finding_has_description(self):
@@ -208,6 +217,9 @@ Code Line: Response.Write(output);",None,,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(
             'FileName: default.aspx.cs\nDescription: Potential XSS Vulnerability\nLine:18\nCode Line: Response.Write(output);',
             findings[0].description)
@@ -222,6 +234,9 @@ Code Line: Response.Write(output);","None Currently Available",,,TRUE,FALSE
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual('None Currently Available',
                          findings[0].mitigation)
 
@@ -235,6 +250,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual('Impact is currently unknown',
                          findings[0].impact)
 
@@ -248,6 +266,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual('Finding has references.', findings[0].references)
 
     def test_parsed_finding_has_positive_active_status(self):
@@ -260,6 +281,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(True, findings[0].active)
 
     def test_parsed_finding_has_negative_active_status(self):
@@ -272,6 +296,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, None, None)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(False, findings[0].active)
 
     def test_parsed_finding_has_positive_verified_status(self):
@@ -284,6 +311,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(True, findings[0].verified)
 
     def test_parsed_finding_has_negative_verified_status(self):
@@ -296,6 +326,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, None, None)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(False, findings[0].verified)
 
     def test_parsed_finding_has_positive_false_positive_status(self):
@@ -308,6 +341,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(True, findings[0].false_p)
 
     def test_parsed_finding_has_negative_false_positive_status(self):
@@ -320,6 +356,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(False, findings[0].false_p)
 
     def test_parsed_finding_is_duplicate_has_positive_value(self):
@@ -332,6 +371,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(True, findings[0].duplicate)
 
     def test_parsed_finding_is_duplicate_has_negative_value(self):
@@ -344,6 +386,9 @@ Code Line: Response.Write(output);","None Currently Available","Impact is curren
         file = TestFile("findings.csv", content)
         parser = GenericParser()
         findings = parser.get_findings(file, self.test, True, True)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(False, findings[0].duplicate)
 
     def test_missing_columns_is_fine(self):
@@ -366,8 +411,14 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
 
         parser1 = GenericParser()
         findings1 = parser1.get_findings(file1, self.test, True, True)
+        for finding in findings1:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         parser2 = GenericParser()
         findings2 = parser2.get_findings(file2, self.test, True, True)
+        for finding in findings2:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
 
         finding1 = findings1[0]
         finding2 = findings2[0]
@@ -381,6 +432,9 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         file = open("dojo/unittests/scans/generic/generic_report1.json")
         parser = GenericParser()
         findings = parser.get_findings(file, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(2, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -408,6 +462,9 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
         file = open("dojo/unittests/scans/generic/generic_report2.json")
         parser = GenericParser()
         findings = parser.get_findings(file, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(2, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
