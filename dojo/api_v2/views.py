@@ -386,16 +386,19 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     list=extend_schema(parameters=[
             OpenApiParameter("related_fields", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False,
                                 description="Expand finding external relations (engagement, environment, product, \
-                                            product_type, test, test_type)")
+                                            product_type, test, test_type)"),
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
     ],
     ),
     retrieve=extend_schema(parameters=[
             OpenApiParameter("related_fields", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False,
                                 description="Expand finding external relations (engagement, environment, product, \
-                                            product_type, test, test_type)")
+                                            product_type, test, test_type)"),
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
     ],
     )
-
 )
 class FindingViewSet(prefetch.PrefetchListMixin,
                      prefetch.PrefetchRetrieveMixin,
@@ -1065,10 +1068,6 @@ class DojoMetaViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-# @method_decorator(name='list', decorator=swagger_auto_schema(
-#     operation_description="valentijns verified list operation",
-#     parameters={}
-# ))
 class DjangoFilterDescriptionInspector(CoreAPICompatInspector):
     def get_filter_parameters(self, filter_backend):
         if isinstance(filter_backend, DjangoFilterBackend):
@@ -1083,6 +1082,18 @@ class DjangoFilterDescriptionInspector(CoreAPICompatInspector):
         return NotHandled
 
 
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 @method_decorator(name='list', decorator=swagger_auto_schema(
     filter_inspectors=[DjangoFilterDescriptionInspector]
 ))
@@ -1143,6 +1154,18 @@ class ProductViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class ProductMemberViewSet(prefetch.PrefetchListMixin,
                            prefetch.PrefetchRetrieveMixin,
                            mixins.ListModelMixin,
@@ -1170,6 +1193,18 @@ class ProductMemberViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class ProductGroupViewSet(prefetch.PrefetchListMixin,
                           prefetch.PrefetchRetrieveMixin,
                           mixins.ListModelMixin,
@@ -1197,6 +1232,18 @@ class ProductGroupViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class ProductTypeViewSet(prefetch.PrefetchListMixin,
                          prefetch.PrefetchRetrieveMixin,
                          mixins.ListModelMixin,
@@ -1259,6 +1306,18 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
                                prefetch.PrefetchRetrieveMixin,
                                mixins.ListModelMixin,
@@ -1295,6 +1354,18 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
                               prefetch.PrefetchRetrieveMixin,
                               mixins.ListModelMixin,
@@ -1539,6 +1610,18 @@ class TestTypesViewSet(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class TestImportViewSet(prefetch.PrefetchListMixin,
                       prefetch.PrefetchRetrieveMixin,
                       mixins.ListModelMixin,

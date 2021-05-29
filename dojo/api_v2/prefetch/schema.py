@@ -1,3 +1,4 @@
+from dojo.api_v2.serializers import ProductSerializer
 from drf_yasg import openapi, utils
 from .prefetcher import _Prefetcher
 from .utils import _get_prefetchable_fields
@@ -6,7 +7,7 @@ from ..schema.utils import LazySchemaRef
 
 
 def get_prefetch_schema(methods, serializer):
-    """ Return a composable swagger schema that contains in the query the fields that can be prefetch from the model
+    """ Swagger / OpenAPI v2 (drf-yasg) Return a composable swagger schema that contains in the query the fields that can be prefetch from the model
         supported by the serializer and in the reponse the structure of these fields in a new top-level attribute
         named prefetch.
 
@@ -32,3 +33,40 @@ def get_prefetch_schema(methods, serializer):
         schema = schema.composeWith(extra_schema.ExtraResponseField(method, prefetch_response))
 
     return schema
+
+
+def prefetch_postprocessing_hook(result, generator, request, public):
+    """ OpenAPI v3 (drf-spectacular) Some endpoints are using the PrefetchListMixin and PrefetchRetrieveMixin.
+    These have nothing to do with Django prefetch_related.
+    The endpoints have an @extend_schema configured with an extra parameter 'prefetch'
+    This parameter contains an array of relations to prefetch. These prefetched models
+    will be returned in an additional property in the response.
+    The below processor ensures the result schema matches this.
+    """
+    paths = result.get('paths', {})
+    for path in paths:
+        if 'get' in paths[path]:
+            for parameter in paths[path]['get']['parameters']:
+                if parameter['name'] == 'prefetch':
+                    print('prefetch param found for ', path, parameter['name'] == 'prefetch')
+                    fields = _get_prefetchable_fields(ProductSerializer())
+
+                    field_names = [name for name, _ in fields]
+
+                    parameter['schema']['type'] = 'array'
+                    parameter['schema']['items'] = {
+                        'type': "string",
+                        'enum': field_names
+                    }
+
+                    prefetcher = _Prefetcher()
+                    field_to_serializer = dict([(name, prefetcher._find_serializer(field)) for name, field in fields])
+                    fields_to_refname = dict([(name, utils.get_serializer_ref_name(serializer()))
+                        for name, serializer in field_to_serializer.items()])
+                    properties = dict([(name, dict([("type", "object"), ("readOnly", True), ("additionalProperties", dict([("$ref", "#/components/schemas/" + fields_to_refname[name])]))]))
+                        for name in field_names])
+                    ref = paths[path]['get']['responses']['200']['content']['application/json']['schema']['$ref']
+                    component_name = ref.split('/')[-1]
+                    result['components']['schemas'][component_name]['properties']['prefetch'] = dict([("type", "object"), ("properties", properties)])
+
+    return result

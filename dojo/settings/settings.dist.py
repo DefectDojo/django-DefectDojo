@@ -605,7 +605,7 @@ SPECTACULAR_SETTINGS = {
     # OTHER SETTINGS
     # the following set to False could help some client generators
     # 'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
-    'POSTPROCESSING_HOOKS': []
+    'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook']
 }
 
 # ------------------------------------------------------------------------------
