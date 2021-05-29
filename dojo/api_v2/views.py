@@ -381,18 +381,6 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     permission_classes = (IsAdminUser, DjangoModelPermissions)
 
 
-def _finding_related_fields_decorator():
-    return swagger_auto_schema(
-        responses={status.HTTP_200_OK: serializers.FindingSerializer},
-        manual_parameters=[
-            openapi.Parameter(
-                name="related_fields",
-                in_=openapi.IN_QUERY,
-                description="Expand finding external relations (engagement, environment, product, product_type, test, test_type)",
-                type=openapi.TYPE_BOOLEAN)
-        ])
-
-
 # Authorization: object-based
 @extend_schema_view(
     list=extend_schema(parameters=[
@@ -400,7 +388,14 @@ def _finding_related_fields_decorator():
                                 description="Expand finding external relations (engagement, environment, product, \
                                             product_type, test, test_type)")
     ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("related_fields", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False,
+                                description="Expand finding external relations (engagement, environment, product, \
+                                            product_type, test, test_type)")
+    ],
     )
+
 )
 class FindingViewSet(prefetch.PrefetchListMixin,
                      prefetch.PrefetchRetrieveMixin,
