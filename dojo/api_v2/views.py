@@ -51,7 +51,7 @@ from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
 from dojo.authorization.roles_permissions import Permissions, Roles
-from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 
 
 logger = logging.getLogger(__name__)
@@ -394,6 +394,14 @@ def _finding_related_fields_decorator():
 
 
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("related_fields", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False,
+                                description="Expand finding external relations (engagement, environment, product, \
+                                            product_type, test, test_type)")
+    ],
+    )
+)
 class FindingViewSet(prefetch.PrefetchListMixin,
                      prefetch.PrefetchRetrieveMixin,
                      mixins.UpdateModelMixin,
