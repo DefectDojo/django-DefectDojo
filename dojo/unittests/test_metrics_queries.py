@@ -173,10 +173,9 @@ class EndpointQueriesTest(TestCase):
 
     def test_endpoint_queries(self):
         if settings.FEATURE_AUTHORIZATION_V2:
-            # One more query to read usercontactinfo for global_role
-            num_queries = 73
+            num_queries = 71
         else:
-            num_queries = 67
+            num_queries = 65
         # Queries over Finding and Endpoint_Status
         with self.assertNumQueries(num_queries):
             product_types = []
