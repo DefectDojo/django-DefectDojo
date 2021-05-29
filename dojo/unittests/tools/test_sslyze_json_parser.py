@@ -10,6 +10,9 @@ class TestSslyzeJSONParser(TestCase):
         testfile = open("dojo/unittests/scans/sslyze/one_target_one_vuln.json")
         parser = SslyzeParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
 
     def test_parse_json_file_with_one_target_has_zero_vuln(self):
@@ -22,16 +25,25 @@ class TestSslyzeJSONParser(TestCase):
         testfile = open("dojo/unittests/scans/sslyze/one_target_one_vuln.json")
         parser = SSLyzeJSONParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
 
     def test_parse_json_file_with_one_target_has_four_vuln(self):
         testfile = open("dojo/unittests/scans/sslyze/one_target_many_vuln.json")
         parser = SSLyzeJSONParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(4, len(findings))
 
     def test_parse_json_file_with_two_target_has_many_vuln(self):
         testfile = open("dojo/unittests/scans/sslyze/two_targets_two_vuln.json")
         parser = SSLyzeJSONParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(2, len(findings))

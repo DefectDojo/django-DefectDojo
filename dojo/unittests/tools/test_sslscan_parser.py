@@ -16,9 +16,15 @@ class TestSslscanParser(TestCase):
         parser = SslscanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
 
     def test_parse_file_with_multiple_vuln_has_multiple_finding(self):
         testfile = open("dojo/unittests/scans/sslscan/sslscan_many_vuln.xml")
         parser = SslscanParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(2, len(findings))
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()

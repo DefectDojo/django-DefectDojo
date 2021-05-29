@@ -178,7 +178,7 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
-                            <th>Test Type</th>
+                            <th>Title</th>
                             <th>Product</th>
                             <th>Engagement</th>
                             <th>Date</th>
@@ -191,7 +191,7 @@
                             {% if test.id %}
                             <tr>
                                 <td><a class="search-finding"
-                                       href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
+                                       href="{% url 'view_test' test.id %}">{{ test }}</a>
                                     <sup>
                                         {% for tag in test.tags.all %}
                                             <a title="Search {{ tag }}" class="tag-label tag-color"
