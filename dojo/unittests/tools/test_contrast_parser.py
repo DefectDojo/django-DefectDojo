@@ -15,6 +15,9 @@ class TestContrastParser(TestCase):
         testfile = open("dojo/unittests/scans/contrast/contrast-node-goat.csv")
         parser = ContrastParser()
         findings = parser.get_findings(testfile, test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(18, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -27,7 +30,6 @@ class TestContrastParser(TestCase):
             self.assertIsNotNone(finding.unsaved_endpoints)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertEqual('http', endpoint.protocol)
             self.assertEqual('0.0.0.0', endpoint.host)
             self.assertEqual('WebGoat/login.mvc', endpoint.path)
@@ -43,12 +45,10 @@ class TestContrastParser(TestCase):
             self.assertIsNotNone(finding.unsaved_endpoints)
             self.assertEqual(4, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertEqual('http', endpoint.protocol)
             self.assertEqual('0.0.0.0', endpoint.host)
             self.assertEqual('WebGoat/services/SoapRequest', endpoint.path)
             endpoint = finding.unsaved_endpoints[1]
-            endpoint.clean()
             self.assertEqual('http', endpoint.protocol)
             self.assertEqual('0.0.0.0', endpoint.host)
             self.assertEqual('WebGoat/attack', endpoint.path)
@@ -60,6 +60,9 @@ class TestContrastParser(TestCase):
         testfile = open("dojo/unittests/scans/contrast/vulnerabilities2020-09-21.csv")
         parser = ContrastParser()
         findings = parser.get_findings(testfile, test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
             finding = findings[0]

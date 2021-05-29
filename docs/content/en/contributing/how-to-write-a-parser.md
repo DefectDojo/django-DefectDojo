@@ -93,6 +93,17 @@ $ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.
 If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests -v2'`
 {{% /alert %}}
 
+### Endpoint validation
+
+Some types of parsers create a list of endpoints that are vulnerable (they are stored in `finding.unsaved_endpoints`). DefectDojo requires storing endpoints in a specific format (which follow RFCs). Endpoints that do not follow this format can be stored but they will be marked as broken (red flag 🚩in UI). To be sure your parse store endpoints in the correct format run the `.clean()` function for all endpoints in unit tests
+
+```python
+findings = parser.get_findings(testfile, Test())
+for finding in findings:
+    for endpoint in finding.unsaved_endpoints:
+        endpoint.clean()
+```
+
 ## Other files that could be involved
 
 ### Change to the model
