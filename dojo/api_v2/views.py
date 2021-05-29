@@ -70,6 +70,12 @@ class DojoGroupViewSet(mixins.ListModelMixin,
     filter_fields = ('id', 'name')
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
+    @extend_schema(
+        parameters=[
+                OpenApiParameter("user_id", OpenApiTypes.INT, OpenApiParameter.PATH, required=True,
+                                    description="ID of the user to add."),
+        ],
+    )
     @swagger_auto_schema(
         method='post',
         responses={status.HTTP_200_OK: "User added"},

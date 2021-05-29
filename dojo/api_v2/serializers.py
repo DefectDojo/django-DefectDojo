@@ -484,7 +484,7 @@ class ProductTypeMemberSerializer(serializers.ModelSerializer):
 class ProductTypeGroupSerializer(serializers.ModelSerializer):
     role_name = serializers.SerializerMethodField()
 
-    def get_role_name(self, obj):
+    def get_role_name(self, obj) -> str:
         return Roles(obj.role).name
 
     class Meta:
