@@ -30,6 +30,21 @@ def on_exception_html_source_logger(func):
     return wrapper
 
 
+def set_suite_settings(suite, jira=False, github=False, block_execution=False):
+    if jira:
+        suite.addTest(BaseTestCase('enable_jira'))
+    else:
+        suite.addTest(BaseTestCase('disable_jira'))
+    if github:
+        suite.addTest(BaseTestCase('enable_github'))
+    else:
+        suite.addTest(BaseTestCase('disable_github'))
+    if block_execution:
+        suite.addTest(BaseTestCase('enable_block_execution'))
+    else:
+        suite.addTest(BaseTestCase('disable_block_execution'))
+
+
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
