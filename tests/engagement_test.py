@@ -89,6 +89,7 @@ class EngagementTest(BaseTestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(EngagementTest('test_add_new_engagement'))
     suite.addTest(EngagementTest('test_edit_created_new_engagement'))

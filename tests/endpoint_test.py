@@ -81,6 +81,7 @@ def suite():
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(EndpointTest('test_create_endpoint'))
     suite.addTest(EndpointTest('test_edit_endpoint'))
