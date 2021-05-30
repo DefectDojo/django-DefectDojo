@@ -112,7 +112,6 @@ class SchemaChecker():
 
     def _check_type(self, schema, obj):
         schema_type = schema["type"]
-        # print(schema)
         is_nullable = schema.get("x-nullable", False) or schema.get("readOnly", False)
 
         def _check_helper(check):
@@ -144,7 +143,6 @@ class SchemaChecker():
     def check(self, schema, obj):
         def _check(schema, obj):
             schema = self._resolve_if_ref(schema)
-            # print(schema)
             self._check_type(schema, obj)
 
             required_fields = schema.get("required", [])

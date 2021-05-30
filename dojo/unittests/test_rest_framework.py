@@ -52,14 +52,7 @@ def get_open_api3_json_schema():
     from drf_spectacular.validation import validate_schema
     validate_schema(schema)
 
-    # print('schema:')
-    # print(schema)
-
     return schema
-
-    # renderer = OpenApiJsonRenderer()
-    # output = renderer.render(schema, renderer_context={})
-    # return output
 
 
 def skipIfNotSubclass(baseclass):
@@ -166,7 +159,6 @@ class SchemaChecker():
             # },
             return schema
         schema_type = schema["type"]
-        # print(schema)
         is_nullable = schema.get("x-nullable", False) or schema.get("readOnly", False)
 
         def _check_helper(check):
@@ -199,19 +191,11 @@ class SchemaChecker():
 
     def check(self, schema, obj):
         def _check(schema, obj):
-            # print('schema to check:')
-            # print(schema)
             schema = self._resolve_if_ref(schema)
-            # print('resolved schema to check:')
-            # print(schema)
             self._check_type(schema, obj)
-
-            # print('type check ok')
 
             required_fields = schema.get("required", [])
             self._check_has_required_fields(required_fields, obj)
-
-            # print('required fields ok')
 
             if obj is None:
                 return
@@ -291,20 +275,8 @@ class BaseClass():
             detail_path = '{id}/' if detail else ''
             endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/{detail_path}")]
             schema = endpoints_schema[method]['responses'][status_code]['content']['application/json']['schema']
-            # print('schema:')
-            # print(schema)
             obj = response.data
             self.check_schema(schema, obj)
-
-        # def construct_response_data(self, obj_id):
-        #     obj = self.model.objects.get(id=obj_id)
-        #     request = APIView().initialize_request(APIRequestFactory().request())
-        #     serialized_obj = self.serializer(context={"request": request}).to_representation(obj)
-
-        #     for name, transformer in self.field_transformers.items():
-        #         serialized_obj[name] = transformer(serialized_obj[name])
-
-        #     return serialized_obj
 
         @skipIfNotSubclass(ListModelMixin)
         def test_list(self):
@@ -346,14 +318,6 @@ class BaseClass():
 
             self.check_schema_response('get', '200', response)
 
-            # endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/")]
-            # schema = endpoints_schema['get']['responses']['200']['content']['application/json']['schema']
-            # print('schema:')
-            # print(schema)
-            # obj = response.data
-
-            # self.check_schema(schema, obj)
-
         @skipIfNotSubclass(CreateModelMixin)
         def test_create(self):
             length = self.endpoint_model.objects.count()
@@ -371,14 +335,6 @@ class BaseClass():
                     self.assertTrue(tag in response.data['tags'])
 
             self.check_schema_response('post', '201', response)
-
-            # endpoints_schema = self.schema["paths"][format_url(f"/{self.endpoint_path}/")]
-            # schema = endpoints_schema['post']['responses']['201']['content']['application/json']['schema']
-            # print('schema:')
-            # print(schema)
-            # obj = response.data
-
-            # self.check_schema(schema, obj)
 
         @skipIfNotSubclass(RetrieveModelMixin)
         def test_detail(self):
