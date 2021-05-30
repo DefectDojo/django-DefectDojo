@@ -126,7 +126,7 @@ Of course, nothing prevents you from having more files than the `parser.py` file
 
 ## Example PRs
 
-If you want to take a look at previous parsers that are now part of DefectDojo, take a look at https://github.com/DefectDojo/django-DefectDojo/pulls?q=is%3Apr+label%3A%22import+scans%22+
+If you want to take a look at previous parsers that are now part of DefectDojo, take a look at https://github.com/DefectDojo/django-DefectDojo/pulls?q=is%3Apr+sort%3Aupdated-desc+label%3A%22Import+Scans%22+is%3Aclosed
 
 ## Update the GitHub pages documentation
 
