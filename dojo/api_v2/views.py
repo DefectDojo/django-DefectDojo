@@ -537,9 +537,6 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                     burp_rr.clean()
                     burp_rr.save()
             else:
-                print('error')
-                print('request.data:')
-                print(request.data)
                 return Response(burps.errors,
                     status=status.HTTP_400_BAD_REQUEST)
 
