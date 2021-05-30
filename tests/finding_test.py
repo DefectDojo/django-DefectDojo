@@ -359,6 +359,8 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
         suite.addTest(FindingTest('enable_github'))
     if block_execution:
         suite.addTest(FindingTest('enable_block_execution'))
+    else:
+        suite.addTest(FindingTest('disable_block_execution'))
 
     # Add each test the the suite to be run
     # success and failure is output by the test

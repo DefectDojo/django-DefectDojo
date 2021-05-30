@@ -501,11 +501,11 @@ def add_dedupe_tests_to_suite(suite):
 
 def suite():
     suite = unittest.TestSuite()
+    suite.addTest(DedupeTest('disable_block_execution'))
     add_dedupe_tests_to_suite(suite)
     suite.addTest(DedupeTest('enable_jira'))
     suite.addTest(DedupeTest('enable_github'))
-    # block mode no longer needed, so good to actually test in non block mode so celery does the dedupe
-    # suite.addTest(DedupeTest('enable_block_execution'))
+    suite.addTest(DedupeTest('enable_block_execution'))
     add_dedupe_tests_to_suite(suite)
     return suite
 
