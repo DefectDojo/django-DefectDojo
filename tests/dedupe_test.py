@@ -465,8 +465,18 @@ class DedupeTest(BaseTestCase):
         self.check_nb_duplicates(1)
 
 
-def add_dedupe_tests_to_suite(suite):
+def add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase('test_login'))
+
+    if jira:
+        suite.addTest(FindingTest('enable_jira'))
+    if github:
+        suite.addTest(FindingTest('enable_github'))
+    if block_execution:
+        suite.addTest(FindingTest('enable_block_execution'))
+    else:
+        suite.addTest(FindingTest('disable_block_execution'))
+
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(DedupeTest('test_enable_deduplication'))
     # Test same scanners - same engagement - static - dedupe
@@ -501,12 +511,8 @@ def add_dedupe_tests_to_suite(suite):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(DedupeTest('disable_block_execution'))
-    add_dedupe_tests_to_suite(suite)
-    suite.addTest(DedupeTest('enable_jira'))
-    suite.addTest(DedupeTest('enable_github'))
-    suite.addTest(DedupeTest('enable_block_execution'))
-    add_dedupe_tests_to_suite(suite)
+    add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False)
+    add_dedupe_tests_to_suite(suite, jira=True, github=True, block_execution=True)
     return suite
 
 
