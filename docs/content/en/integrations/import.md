@@ -247,7 +247,7 @@ Attributes supported for CSV:
  - CVSSV3
  - Url
 
-Exemple of JSON format:
+Example of JSON format:
 
 ```JSON
 {
