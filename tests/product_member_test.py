@@ -169,6 +169,7 @@ def suite():
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(UserTest('test_create_user'))
     suite.addTest(ProductMemberTest('test_user_add_product_member'))

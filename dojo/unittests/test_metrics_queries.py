@@ -168,7 +168,7 @@ class EndpointQueriesTest(TestCase):
 
     def test_endpoint_queries(self):
         # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(67):
+        with self.assertNumQueries(65):
             product_types = []
             endpoint_queries = views.endpoint_querys(
                 product_types,

@@ -30,7 +30,7 @@ from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
 from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
     duplicate_cluster
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, \
+from dojo.filters import ReportFindingFilter, \
     ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
     ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
 from dojo.risk_acceptance import api as ra_api
@@ -1944,7 +1944,7 @@ def report_generate(request, obj, options):
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
     elif type(obj).__name__ == "CastTaggedQuerySet":
-        findings = ReportAuthedFindingFilter(request.GET,
+        findings = ReportFindingFilter(request.GET,
                                              queryset=prefetch_related_findings_for_report(obj).distinct())
 
         report_name = 'Finding'
