@@ -378,7 +378,7 @@ class UserContactInfo(models.Model):
     slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
-    
+
 
 class Role(models.Model):
     name = models.CharField(max_length=255, unique=True)
