@@ -35,6 +35,7 @@ $ docker-compose build --build-arg uid=1000
 |`dojo/tools/<parser_dir>/__init__.py`          | Empty file for class initialization
 |`dojo/tools/<parser_dir>/parser.py`            | The meat. This is where you write your actual parser
 |`dojo/unittests/scans/<parser_dir>/{many_vulns,no_vuln,one_vuln}.json` | Sample files containing meaningful data for unit tests. The minimal set.
+|`dojo/settings/settings.dist.py`               | If you want to use a modern hashcode based deduplication algorithm
 
 
 ## Template Generator
@@ -58,6 +59,9 @@ Read [more](https://github.com/DefectDojo/cookiecutter-scanner-parser) on the te
 Parsers may have many fields, out of which many of them may be optional.
 
 Always make sure you include checks to avoid potential `KeyError` errors (e.g. field does not exist), for those fields you are not absolutely certain will always be in file that will get uploaded. These translate to 500 error, and do not look good.
+
+## Deduplication algorithm ##
+By default a new parser uses the 'legacy' deduplication algorithm documented at https://defectdojo.github.io/django-DefectDojo/usage/features/#deduplication-algorithms
 
 ## Unit tests
 
@@ -89,6 +93,17 @@ $ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests.tools.
 If you want to run all unit tests, simply run `$ docker-compose exec uwsgi bash -c 'python manage.py test dojo.unittests -v2'`
 {{% /alert %}}
 
+### Endpoint validation
+
+Some types of parsers create a list of endpoints that are vulnerable (they are stored in `finding.unsaved_endpoints`). DefectDojo requires storing endpoints in a specific format (which follow RFCs). Endpoints that do not follow this format can be stored but they will be marked as broken (red flag 🚩in UI). To be sure your parse store endpoints in the correct format run the `.clean()` function for all endpoints in unit tests
+
+```python
+findings = parser.get_findings(testfile, Test())
+for finding in findings:
+    for endpoint in finding.unsaved_endpoints:
+        endpoint.clean()
+```
+
 ## Other files that could be involved
 
 ### Change to the model
@@ -111,7 +126,7 @@ Of course, nothing prevents you from having more files than the `parser.py` file
 
 ## Example PRs
 
-If you want to take a look at previous parsers that are now part of DefectDojo, take a look at https://github.com/DefectDojo/django-DefectDojo/pulls?q=is%3Apr+label%3A%22import+scans%22+
+If you want to take a look at previous parsers that are now part of DefectDojo, take a look at https://github.com/DefectDojo/django-DefectDojo/pulls?q=is%3Apr+sort%3Aupdated-desc+label%3A%22Import+Scans%22+is%3Aclosed
 
 ## Update the GitHub pages documentation
 

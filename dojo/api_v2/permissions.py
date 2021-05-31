@@ -1,4 +1,6 @@
 import re
+
+from rest_framework.exceptions import ParseError
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
@@ -8,6 +10,8 @@ from dojo.authorization.roles_permissions import Permissions
 
 def check_post_permission(request, post_model, post_pk, post_permission):
     if request.method == 'POST':
+        if request.data.get(post_pk) is None:
+            raise ParseError('Attribute \'{}\' is required'.format(post_pk))
         object = get_object_or_404(post_model, pk=request.data.get(post_pk))
         return user_has_permission(request.user, object, post_permission)
     else:
@@ -156,6 +160,14 @@ class UserHasProductMemberPermission(permissions.BasePermission):
         return check_object_permission(request, obj, Permissions.Product_View, Permissions.Product_Manage_Members, Permissions.Product_Member_Delete)
 
 
+class UserHasProductGroupPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Product, 'product', Permissions.Product_Group_Add)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Product_Group_View, Permissions.Product_Group_Edit, Permissions.Product_Group_Delete)
+
+
 class UserHasProductTypePermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method == 'POST':
@@ -173,6 +185,14 @@ class UserHasProductTypeMemberPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(request, obj, Permissions.Product_Type_View, Permissions.Product_Type_Manage_Members, Permissions.Product_Type_Member_Delete)
+
+
+class UserHasProductTypeGroupPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Product_Type, 'product_type', Permissions.Product_Type_Group_Add)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Product_Type_Group_View, Permissions.Product_Type_Group_Edit, Permissions.Product_Type_Group_Delete)
 
 
 class UserHasReimportPermission(permissions.BasePermission):

@@ -15,8 +15,10 @@ from django.utils import timezone
 from django.db.models import Sum, Count, Q, Max
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS, connection
+
+from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
+from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
@@ -105,7 +107,7 @@ def prefetch_for_product(prods):
         prefetched_prods = prefetched_prods.prefetch_related('prod_type__members')
         active_endpoint_query = Endpoint.objects.filter(
             finding__active=True,
-            finding__mitigated__isnull=True)
+            finding__mitigated__isnull=True).distinct()
         prefetched_prods = prefetched_prods.prefetch_related(
             Prefetch('endpoint_set', queryset=active_endpoint_query, to_attr='active_endpoints'))
         prefetched_prods = prefetched_prods.prefetch_related('tags')
@@ -277,7 +279,7 @@ def finding_querys(request, prod):
         # 'test__test_type',
         # 'risk_acceptance_set',
         'reporter')
-    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
+    findings = MetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
@@ -310,7 +312,7 @@ def finding_querys(request, prod):
     # risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod)).prefetch_related('accepted_findings')
     # filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
 
-    from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
+    from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY
     filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY).distinct()
 
     filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
@@ -390,7 +392,7 @@ def endpoint_querys(request, prod):
         'finding__test__engagement__risk_acceptance',
         'finding__risk_acceptance_set',
         'finding__reporter').annotate(severity=F('finding__severity'))
-    endpoints = ProductMetricsEndpointFilter(request.GET, queryset=endpoints_query)
+    endpoints = MetricsEndpointFilter(request.GET, queryset=endpoints_query)
     endpoints_qs = queryset_check(endpoints)
     filters['form'] = endpoints.form
 
@@ -1194,9 +1196,11 @@ def ad_hoc_finding(request, pid):
                 new_finding.endpoint_status.add(eps)
 
             for endpoint in new_finding.unsaved_endpoints:
-                ep, created = Endpoint.objects.get_or_create(
+                ep, created = endpoint_get_or_create(
                     protocol=endpoint.protocol,
+                    userinfo=endpoint.userinfo,
                     host=endpoint.host,
+                    port=endpoint.port,
                     path=endpoint.path,
                     query=endpoint.query,
                     fragment=endpoint.fragment,
@@ -1209,9 +1213,11 @@ def ad_hoc_finding(request, pid):
                 new_finding.endpoints.add(ep)
                 new_finding.endpoint_status.add(eps)
             for endpoint in form.cleaned_data['endpoints']:
-                ep, created = Endpoint.objects.get_or_create(
+                ep, created = endpoint_get_or_create(
                     protocol=endpoint.protocol,
+                    userinfo=endpoint.userinfo,
                     host=endpoint.host,
+                    port=endpoint.port,
                     path=endpoint.path,
                     query=endpoint.query,
                     fragment=endpoint.fragment,
