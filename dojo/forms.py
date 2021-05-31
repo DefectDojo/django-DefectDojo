@@ -29,7 +29,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member
+    Product_Member, Global_Role
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -1608,23 +1608,27 @@ class DeleteUserForm(forms.ModelForm):
 
 
 class UserContactInfoForm(forms.ModelForm):
-    if settings.FEATURE_AUTHORIZATION_V2:
-        blank_choice = [(None, '----------')]
-        global_role = forms.ChoiceField(choices=blank_choice + Roles.choices(), required=False,
-            help_text='The global role will be applied to all product types and products.')
-
     class Meta:
         model = UserContactInfo
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['user', 'slack_user_id', 'global_role']
-        else:
-            exclude = ['user', 'slack_user_id']
+        exclude = ['user', 'slack_user_id']
+
+
+class GlobalRoleForm(forms.ModelForm):
+    if settings.FEATURE_AUTHORIZATION_V2:
+        blank_choice = [(None, '----------')]
+        role = forms.ChoiceField(choices=blank_choice + Roles.choices(), required=False,
+            help_text='The global role will be applied to all product types and products.',
+            label="Global role")
+
+    class Meta:
+        model = Global_Role
+        exclude = ['user', 'group']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        user = get_current_user()
-        if not user.is_superuser:
-            self.fields['global_role'].disabled = True
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            self.fields['role'].disabled = True
 
 
 def get_years():

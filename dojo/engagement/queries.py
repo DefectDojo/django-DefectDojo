@@ -20,11 +20,11 @@ def get_authorized_engagements(permission):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Engagement.objects.all()
 
-        if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
+        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role, permission):
             return Engagement.objects.all()
 
         for group in get_groups(user):
-            if role_has_permission(group.global_role, permission):
+            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role, permission):
                 return Engagement.objects.all()
 
         roles = get_roles_for_permission(permission)

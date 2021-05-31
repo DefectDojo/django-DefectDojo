@@ -24,11 +24,11 @@ def get_authorized_tests(permission, product=None):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Test.objects.all()
 
-        if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
+        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role, permission):
             return Test.objects.all()
 
         for group in get_groups(user):
-            if role_has_permission(group.global_role, permission):
+            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role, permission):
                 return Test.objects.all()
 
         roles = get_roles_for_permission(permission)
@@ -82,11 +82,11 @@ def get_authorized_test_imports(permission):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Test_Import.objects.all()
 
-        if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
+        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role, permission):
             return Test_Import.objects.all()
 
         for group in get_groups(user):
-            if role_has_permission(group.global_role, permission):
+            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role, permission):
                 return Test_Import.objects.all()
 
         roles = get_roles_for_permission(permission)

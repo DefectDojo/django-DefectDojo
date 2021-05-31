@@ -19,7 +19,7 @@ from rest_framework.authtoken.models import Token
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
-    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm
+    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm
 from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.product.queries import get_authorized_product_members_for_user
@@ -196,33 +196,43 @@ def alertcount(request):
 
 def view_profile(request):
     user = get_object_or_404(Dojo_User, pk=request.user.id)
-    user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
-    if user_contact is not None:
-        previous_global_role = user_contact.global_role
-    else:
-        previous_global_role = None
     form = DojoUserForm(instance=user)
+
+    user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
     if user_contact is None:
         contact_form = UserContactInfoForm()
     else:
         contact_form = UserContactInfoForm(instance=user_contact)
+
+    global_role = user.global_role if hasattr(user, 'global_role') else None
+    if global_role is None:
+        previous_global_role = None
+        global_role_form = GlobalRoleForm()
+    else:
+        previous_global_role = global_role.role
+        global_role_form = GlobalRoleForm(instance=global_role)
+
     if request.method == 'POST':
         form = DojoUserForm(request.POST, instance=user)
         contact_form = UserContactInfoForm(request.POST, instance=user_contact)
-        if form.is_valid() and contact_form.is_valid():
+        global_role_form = GlobalRoleForm(request.POST, instance=global_role)
+        if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
             form.save()
             contact = contact_form.save(commit=False)
+            contact.user = user
+            contact.save()
             request_user = get_current_user()
-            if contact.global_role != previous_global_role and not request_user.is_superuser:
-                contact.global_role = previous_global_role
+            global_role = global_role_form.save(commit=False)
+            if global_role.role != previous_global_role and not request_user.is_superuser:
+                global_role.role = previous_global_role
                 messages.add_message(request,
                                     messages.WARNING,
                                     'Only superusers are allowed to change their global role.',
                                     extra_tags='alert-warning')
-            contact.user = user
-            if contact.global_role == '':
-                contact.global_role = None
-            contact.save()
+            if global_role.role == '':
+                global_role.role = None
+            global_role.user = user
+            global_role.save()
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -234,7 +244,8 @@ def view_profile(request):
         'metric': False,
         'user': user,
         'form': form,
-        'contact_form': contact_form})
+        'contact_form': contact_form,
+        'global_role_form': global_role_form})
 
 
 def change_password(request):
@@ -291,21 +302,26 @@ def add_user(request):
         form.fields['is_superuser'].widget.attrs['disabled'] = True
         form.fields['is_active'].widget.attrs['disabled'] = True
     contact_form = UserContactInfoForm()
+    global_role_form = GlobalRoleForm()
     user = None
 
     if request.method == 'POST':
         form = AddDojoUserForm(request.POST)
         contact_form = UserContactInfoForm(request.POST)
-        if form.is_valid() and contact_form.is_valid():
+        global_role_form = GlobalRoleForm(request.POST)
+        if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
             user = form.save(commit=False)
             user.set_unusable_password()
             user.active = True
             user.save()
             contact = contact_form.save(commit=False)
             contact.user = user
-            if contact.global_role == '':
-                contact.global_role = None
             contact.save()
+            global_role = global_role_form.save(commit=False)
+            if global_role.role == '':
+                global_role.role = None
+            global_role.user = user
+            global_role.save()
             if not settings.FEATURE_AUTHORIZATION_V2:
                 if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
                     for p in form.cleaned_data['authorized_products']:
@@ -330,6 +346,7 @@ def add_user(request):
         'name': 'Add User',
         'form': form,
         'contact_form': contact_form,
+        'global_role_form': global_role_form,
         'to_add': True})
 
 
@@ -365,11 +382,16 @@ def edit_user(request, uid):
         form.fields['is_active'].widget.attrs['disabled'] = True
 
     user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
-
     if user_contact is None:
         contact_form = UserContactInfoForm()
     else:
         contact_form = UserContactInfoForm(instance=user_contact)
+
+    global_role = user.global_role if hasattr(user, 'global_role') else None
+    if global_role is None:
+        global_role_form = GlobalRoleForm()
+    else:
+        global_role_form = GlobalRoleForm(instance=global_role)
 
     if request.method == 'POST':
         form = AddDojoUserForm(request.POST, instance=user)
@@ -378,7 +400,12 @@ def edit_user(request, uid):
         else:
             contact_form = UserContactInfoForm(request.POST, instance=user_contact)
 
-        if form.is_valid() and contact_form.is_valid():
+        if global_role is None:
+            global_role_form = GlobalRoleForm(request.POST)
+        else:
+            global_role_form = GlobalRoleForm(request.POST, instance=global_role)
+
+        if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
             form.save()
             if not settings.FEATURE_AUTHORIZATION_V2:
                 for init_auth_prods in authed_products:
@@ -396,10 +423,13 @@ def edit_user(request, uid):
                         pt.authorized_users.add(user)
                         pt.save()
             contact = contact_form.save(commit=False)
-            if contact.global_role == '':
-                contact.global_role = None
             contact.user = user
             contact.save()
+            global_role = global_role_form.save(commit=False)
+            if global_role.role == '':
+                global_role.role = None
+            global_role.user = user
+            global_role.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'User saved successfully.',
@@ -414,6 +444,7 @@ def edit_user(request, uid):
         'name': 'Edit User',
         'form': form,
         'contact_form': contact_form,
+        'global_role_form': global_role_form,
         'to_edit': user})
 
 

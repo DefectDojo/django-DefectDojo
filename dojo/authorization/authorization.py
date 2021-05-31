@@ -14,11 +14,11 @@ def user_has_permission(user, obj, permission):
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return True
 
-    if hasattr(user, 'usercontactinfo') and role_has_permission(user.usercontactinfo.global_role, permission):
+    if hasattr(user, 'global_role') and role_has_permission(user.global_role.role, permission):
         return True
 
     for group in get_groups(user):
-        if role_has_permission(group.global_role, permission):
+        if hasattr(group, 'global_role') and role_has_permission(group.global_role.role, permission):
             return True
 
     if isinstance(obj, Product_Type):
@@ -179,4 +179,4 @@ def get_product_type_groups_dict(user):
 
 @cache_for_request
 def get_groups(user):
-    return Dojo_Group.objects.filter(users=user)
+    return Dojo_Group.objects.select_related('global_role').filter(users=user)
