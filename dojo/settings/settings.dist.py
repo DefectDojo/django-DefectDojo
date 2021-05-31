@@ -173,22 +173,7 @@ env = environ.Env(
 
     # Feature toggle for new authorization, which is incomplete at the moment.
     # Don't set it to True for productive environments!
-    DD_FEATURE_AUTHORIZATION_V2=(bool, False),
-    # When enabled, staff users have full access to all product types and products
-    DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
-
-    # Feature toggle to show legacy list of PDF reports
-    # You need to have wkhtmltopdf installed on your system to generate PDF reports
-    DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
-
-    DD_FEATURE_FINDING_GROUPS=(bool, False),
-    DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
-    DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
-
-    # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
-    # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
-    # Set to True to revert to the old behaviour where all duplicates are deleted
-    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, True)
+    DD_FEATURE_NEW_AUTHORIZATION=(bool, False)
 )
 
 
@@ -790,11 +775,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'Dependency Check Scan': ['cve', 'cwe', 'file_path', 'endpoints'],
-    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
-    'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
-    'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
-    # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
+    'Dependency Check Scan': ['cve', 'file_path', 'endpoints'],
+    'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'vuln_id_from_tool'],
+    'Nessus Scan': ['title', 'severity', 'cve', 'cwe', 'endpoints'],
+    # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvment: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
