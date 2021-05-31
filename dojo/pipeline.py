@@ -86,6 +86,14 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                 product, created = Product.objects.get_or_create(name=project_name, prod_type=product_type)
                 if not settings.FEATURE_AUTHORIZATION_V2:
                     product.authorized_users.add(user)
+                    if settings.GITLAB_PROJECT_IMPORT_TAGS:
+                        tags = [",".join(project.tag_list) for project in projects if project.path_with_namespace == project_name]
+                        if len(tags) > 0:
+                            product.tags = tags[0]
+                    if settings.GITLAB_PROJECT_IMPORT_URL:
+                        url = [project.web_url for project in projects if project.path_with_namespace == project_name]
+                        if len(url) > 0:
+                            product.description = "[" + url[0] + "](" + url[0] + ")"
                     product.save()
                 else:
                     product_member, created = Product_Member.objects.get_or_create(product=product, user=user)
