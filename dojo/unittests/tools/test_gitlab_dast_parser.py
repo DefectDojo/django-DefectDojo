@@ -7,13 +7,13 @@ from dojo.models import Test
 class TestGitlabSastParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
-        testfile = open("dojo/unittests/scans/gitlab_dast/gl-dast-report-0-vuln.json")
+        testfile = open("dojo/unittests/scans/gitlab_dast/gl-dast-report-zero-vuln.json")
         parser = GitlabDastParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_finding(self):
-        testfile = open("dojo/unittests/scans/gitlab_dast/gl-dast-report-1-vuln.json")
+        testfile = open("dojo/unittests/scans/gitlab_dast/gl-dast-report-one-vuln.json")
         parser = GitlabDastParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
