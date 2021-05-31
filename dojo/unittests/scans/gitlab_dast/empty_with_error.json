@@ -1,5 +1,0 @@
-{"type":"warning","data":"package.json: No license field"}
-{"type":"warning","data":"No license field"}
-{"type":"error","data":"An unexpected error occurred: \"https://registry.yarnpkg.com/-/npm/v1/security/audits: tunneling socket could not be established, cause=connect ECONNREFUSED 127.0.0.1:80\"."}
-{"type":"info","data":"If you think this is a bug, please open a bug report with the information provided in \"/yarn-error.log\"."}
-{"type":"info","data":"Visit https://yarnpkg.com/en/docs/cli/audit for documentation about this command."}
