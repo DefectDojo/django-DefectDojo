@@ -10,8 +10,13 @@ createRedisSecret: false
 createMysqlSecret: false
 # create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
-# Track configuration updates will automaticly respin application Pods to load new configuration
-trackConfig: false
+# Track configuration  (trackConfig) updates will automatically respin application Pods to load new configuration
+# can be:
+# - disabled, default
+# - enabled, enables tracking configuration changes based on SHA256
+# - forced, will always respin -> helm3 fature Need double check)
+#trackConfig: disabled
+
 # Configuration value to select database type
 # Option to use "postgresql" or "mysql" database type, by default "mysql" is chosen
 # Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select

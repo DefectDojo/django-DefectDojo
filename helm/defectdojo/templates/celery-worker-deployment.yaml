@@ -26,6 +26,13 @@ spec:
       {{- with .Values.celery.worker.annotations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/extra-secret.yaml") . | sha256sum }}
+      {{- else if eq (.Values.trackConfig | default "disabled") "forced" }}
+        rollme: {{ randAlphaNum 5 | quote }}
+      {{- end }}
     spec:
       serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
@@ -54,7 +61,7 @@ spec:
         {{- if .Values.securityContext.enabled }}
         securityContext:
           {{- toYaml .Values.securityContext.djangoSecurityContext | nindent 10 }}
-        {{- end }}        
+        {{- end }}
         command: ['/entrypoint-celery-worker.sh']
         envFrom:
         - configMapRef:
