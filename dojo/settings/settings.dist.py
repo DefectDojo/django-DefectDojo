@@ -98,11 +98,11 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ''),
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
-    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
-    DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
-    DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
-    DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
+    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, True),
+    DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, True),
+    DD_SOCIAL_AUTH_GITLAB_KEY=(str, '41901ae9f3e4e470928934983ad92315d0a4d9c2dc17f28b9dc44719ee842180'),
+    DD_SOCIAL_AUTH_GITLAB_SECRET=(str, 'd1dd6c371c017fc1b0b947a5d77c118a0b61563c705fee1def4bc7bca3eba1a9'),
+    DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://git.rvision.pro'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
     DD_SAML2_ENABLED=(bool, False),
     DD_SAML2_METADATA_AUTO_CONF_URL=(str, ''),
@@ -186,7 +186,7 @@ env = environ.Env(
     # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
     # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
     # Set to True to revert to the old behaviour where all duplicates are deleted
-    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False)
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, True)
 )
 
 
@@ -799,7 +799,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
-    'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
+    'Dependency Check Scan': ['cve', 'cwe', 'file_path', 'endpoints'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],

@@ -9,7 +9,7 @@ if [ "${GENERATE_TLS_CERTIFICATE}" = true ]; then
       -newkey rsa:4096 \
       -keyout /etc/nginx/ssl/nginx.key \
       -out /etc/nginx/ssl/nginx.crt \
-      -subj "/C=DE/ST=City/L=City/O=Global Security/OU=IT Department/CN=nginx"
+      -subj "/C=RU/ST=Moscow/L=Moscow/O=RVision/OU=QA/CN=defect-dojo.rvision.local"
 fi
 
 if [ "${USE_TLS}" = true ]; then
