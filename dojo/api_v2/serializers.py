@@ -341,6 +341,11 @@ class DojoGroupSerializer(serializers.ModelSerializer):
         model = Dojo_Group
         fields = '__all__'
 
+    def validate_global_role(self, value):
+        if not Roles.has_value(value):
+            raise ValidationError('Role {} does not exist'.format(value))
+        return value
+
 
 class AddUserSerializer(serializers.ModelSerializer):
 
