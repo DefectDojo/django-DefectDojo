@@ -1,0 +1,835 @@
+{
+  "@generated": "Mon, 17 May 2021 15:52:12",
+  "@version": "D-2020-08-26",
+  "remediations": [],
+  "scan": {
+    "end_time": "2021-05-17T15:52:12",
+    "messages": [],
+    "scanned_resources": [
+      {
+        "method": "GET",
+        "type": "url",
+        "url": "http://nginx/page1.html"
+      },
+      {
+        "method": "GET",
+        "type": "url",
+        "url": "http://nginx/page2.html"
+      }
+    ],
+    "scanner": {
+      "id": "zaproxy",
+      "name": "OWASP Zed Attack Proxy (ZAP)",
+      "url": "https://www.zaproxy.org",
+      "version": "D-2020-08-26",
+      "vendor": {
+        "name": "GitLab"
+      }
+    },
+    "start_time": "2021-05-17T15:52:00",
+    "status": "success",
+    "type": "dast"
+  },
+  "site": [
+    {
+      "@host": "nginx",
+      "@name": "http://nginx",
+      "@port": "80",
+      "@ssl": "false",
+      "alerts": [
+        {
+          "alert": "Content Security Policy (CSP) Header Not Set",
+          "confidence": "3",
+          "count": "2",
+          "cweid": "16",
+          "desc": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page \u2014 covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+          "instances": [
+            {
+              "attack": "",
+              "evidence": "",
+              "method": "GET",
+              "param": "",
+              "uri": "http://nginx/page1.html"
+            },
+            {
+              "attack": "",
+              "evidence": "",
+              "method": "GET",
+              "param": "",
+              "uri": "http://nginx/page2.html"
+            }
+          ],
+          "name": "Content Security Policy (CSP) Header Not Set",
+          "otherinfo": "",
+          "pluginid": "10038",
+          "reference": "<p>https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy</p><p>https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html</p><p>http://www.w3.org/TR/CSP/</p><p>http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html</p><p>http://www.html5rocks.com/en/tutorials/security/content-security-policy/</p><p>http://caniuse.com/#feat=contentsecuritypolicy</p><p>http://content-security-policy.com/</p>",
+          "riskcode": "2",
+          "riskdesc": "Medium (High)",
+          "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header, to achieve optimal browser support: \"Content-Security-Policy\" for Chrome 25+, Firefox 23+ and Safari 7+, \"X-Content-Security-Policy\" for Firefox 4.0+ and Internet Explorer 10+, and \"X-WebKit-CSP\" for Chrome 14+ and Safari 6+.</p>",
+          "sourceid": "3"
+        },
+        {
+          "alert": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+          "confidence": "3",
+          "count": "2",
+          "cweid": "200",
+          "desc": "<p>The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.</p>",
+          "instances": [
+            {
+              "attack": "",
+              "evidence": "nginx/1.17.6",
+              "method": "GET",
+              "param": "",
+              "uri": "http://nginx/page1.html"
+            },
+            {
+              "attack": "",
+              "evidence": "nginx/1.17.6",
+              "method": "GET",
+              "param": "",
+              "uri": "http://nginx/page2.html"
+            }
+          ],
+          "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+          "otherinfo": "",
+          "pluginid": "10036",
+          "reference": "<p>http://httpd.apache.org/docs/current/mod/core.html#servertokens</p><p>http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007</p><p>http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx</p><p>http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html</p>",
+          "riskcode": "1",
+          "riskdesc": "Low (High)",
+          "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details.</p>",
+          "sourceid": "3"
+        },
+        {
+          "alert": "X-Content-Type-Options Header Missing",
+          "confidence": "2",
+          "count": "2",
+          "cweid": "16",
+          "desc": "<p>The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.</p>",
+          "instances": [
+            {
+              "attack": "",
+              "evidence": "",
+              "method": "GET",
+              "param": "X-Content-Type-Options",
+              "uri": "http://nginx/page1.html"
+            },
+            {
+              "attack": "",
+              "evidence": "",
+              "method": "GET",
+              "param": "X-Content-Type-Options",
+              "uri": "http://nginx/page2.html"
+            }
+          ],
+          "name": "X-Content-Type-Options Header Missing",
+          "otherinfo": "<p>This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type.</p><p>At \"High\" threshold this scan rule will not alert on client or server error responses.</p>",
+          "pluginid": "10021",
+          "reference": "<p>http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx</p><p>https://owasp.org/www-community/Security_Headers</p>",
+          "riskcode": "1",
+          "riskdesc": "Low (Medium)",
+          "solution": "<p>Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.</p><p>If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.</p>",
+          "sourceid": "3"
+        }
+      ]
+    }
+  ],
+  "spider": {
+    "progress": "100",
+    "result": {
+      "urlsInScope": [
+        {
+          "method": "",
+          "processed": "",
+          "reasonNotProcessed": "",
+          "statusCode": "",
+          "statusReason": "",
+          "url": ""
+        }
+      ],
+      "urlsIoError": [],
+      "urlsOutOfScope": []
+    },
+    "state": "FINISHED"
+  },
+  "version": "13.1.0",
+  "vulnerabilities": [
+    {
+      "category": "dast",
+      "confidence": "High",
+      "cve": "10038",
+      "description": "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page \u2014 covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.",
+      "discovered_at": "2021-05-17T15:52:06.459",
+      "evidence": {
+        "request": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://nginx/page1.html"
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200
+        },
+        "summary": ""
+      },
+      "id": "9e0a66e6-2c77-45ad-b312-5ff6067ccf3d",
+      "identifiers": [
+        {
+          "name": "Content Security Policy (CSP) Header Not Set",
+          "type": "ZAProxy_PluginId",
+          "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+          "value": "10038"
+        },
+        {
+          "name": "CWE-16",
+          "type": "CWE",
+          "url": "https://cwe.mitre.org/data/definitions/16.html",
+          "value": "16"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy"
+        },
+        {
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html"
+        },
+        {
+          "url": "http://www.w3.org/TR/CSP/"
+        },
+        {
+          "url": "http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html"
+        },
+        {
+          "url": "http://www.html5rocks.com/en/tutorials/security/content-security-policy/"
+        },
+        {
+          "url": "http://caniuse.com/#feat=contentsecuritypolicy"
+        },
+        {
+          "url": "http://content-security-policy.com/"
+        }
+      ],
+      "location": {
+        "hostname": "http://nginx",
+        "method": "GET",
+        "param": "",
+        "path": "/page1.html"
+      },
+      "message": "Content Security Policy (CSP) Header Not Set",
+      "scanner": {
+        "id": "zaproxy",
+        "name": "ZAProxy"
+      },
+      "severity": "Medium",
+      "solution": "Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header, to achieve optimal browser support: \"Content-Security-Policy\" for Chrome 25+, Firefox 23+ and Safari 7+, \"X-Content-Security-Policy\" for Firefox 4.0+ and Internet Explorer 10+, and \"X-WebKit-CSP\" for Chrome 14+ and Safari 6+."
+    },
+    {
+      "category": "dast",
+      "confidence": "High",
+      "cve": "10038",
+      "description": "Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page \u2014 covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.",
+      "discovered_at": "2021-05-17T15:52:06.484",
+      "evidence": {
+        "request": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://nginx/page2.html"
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200
+        },
+        "summary": ""
+      },
+      "id": "9cdaead7-09ff-434c-8ee4-7883c505bfe3",
+      "identifiers": [
+        {
+          "name": "Content Security Policy (CSP) Header Not Set",
+          "type": "ZAProxy_PluginId",
+          "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+          "value": "10038"
+        },
+        {
+          "name": "CWE-16",
+          "type": "CWE",
+          "url": "https://cwe.mitre.org/data/definitions/16.html",
+          "value": "16"
+        }
+      ],
+      "links": [
+        {
+          "url": "https://developer.mozilla.org/en-US/docs/Web/Security/CSP/Introducing_Content_Security_Policy"
+        },
+        {
+          "url": "https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html"
+        },
+        {
+          "url": "http://www.w3.org/TR/CSP/"
+        },
+        {
+          "url": "http://w3c.github.io/webappsec/specs/content-security-policy/csp-specification.dev.html"
+        },
+        {
+          "url": "http://www.html5rocks.com/en/tutorials/security/content-security-policy/"
+        },
+        {
+          "url": "http://caniuse.com/#feat=contentsecuritypolicy"
+        },
+        {
+          "url": "http://content-security-policy.com/"
+        }
+      ],
+      "location": {
+        "hostname": "http://nginx",
+        "method": "GET",
+        "param": "",
+        "path": "/page2.html"
+      },
+      "message": "Content Security Policy (CSP) Header Not Set",
+      "scanner": {
+        "id": "zaproxy",
+        "name": "ZAProxy"
+      },
+      "severity": "Medium",
+      "solution": "Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header, to achieve optimal browser support: \"Content-Security-Policy\" for Chrome 25+, Firefox 23+ and Safari 7+, \"X-Content-Security-Policy\" for Firefox 4.0+ and Internet Explorer 10+, and \"X-WebKit-CSP\" for Chrome 14+ and Safari 6+."
+    },
+    {
+      "category": "dast",
+      "confidence": "High",
+      "cve": "10036",
+      "description": "The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.",
+      "discovered_at": "2021-05-17T15:52:06.459",
+      "evidence": {
+        "request": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://nginx/page1.html"
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200
+        },
+        "summary": "nginx/1.17.6"
+      },
+      "id": "f295f4fa-c3ff-4bbb-9aaa-0efe85e23291",
+      "identifiers": [
+        {
+          "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+          "type": "ZAProxy_PluginId",
+          "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+          "value": "10036"
+        },
+        {
+          "name": "CWE-200",
+          "type": "CWE",
+          "url": "https://cwe.mitre.org/data/definitions/200.html",
+          "value": "200"
+        }
+      ],
+      "links": [
+        {
+          "url": "http://httpd.apache.org/docs/current/mod/core.html#servertokens"
+        },
+        {
+          "url": "http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007"
+        },
+        {
+          "url": "http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx"
+        },
+        {
+          "url": "http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html"
+        }
+      ],
+      "location": {
+        "hostname": "http://nginx",
+        "method": "GET",
+        "param": "",
+        "path": "/page1.html"
+      },
+      "message": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "scanner": {
+        "id": "zaproxy",
+        "name": "ZAProxy"
+      },
+      "severity": "Low",
+      "solution": "Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details."
+    },
+    {
+      "category": "dast",
+      "confidence": "High",
+      "cve": "10036",
+      "description": "The web/application server is leaking version information via the \"Server\" HTTP response header. Access to such information may facilitate attackers identifying other vulnerabilities your web/application server is subject to.",
+      "discovered_at": "2021-05-17T15:52:06.484",
+      "evidence": {
+        "request": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://nginx/page2.html"
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200
+        },
+        "summary": "nginx/1.17.6"
+      },
+      "id": "e103432f-abb8-4b87-9189-e5e040a84e90",
+      "identifiers": [
+        {
+          "name": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+          "type": "ZAProxy_PluginId",
+          "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+          "value": "10036"
+        },
+        {
+          "name": "CWE-200",
+          "type": "CWE",
+          "url": "https://cwe.mitre.org/data/definitions/200.html",
+          "value": "200"
+        }
+      ],
+      "links": [
+        {
+          "url": "http://httpd.apache.org/docs/current/mod/core.html#servertokens"
+        },
+        {
+          "url": "http://msdn.microsoft.com/en-us/library/ff648552.aspx#ht_urlscan_007"
+        },
+        {
+          "url": "http://blogs.msdn.com/b/varunm/archive/2013/04/23/remove-unwanted-http-response-headers.aspx"
+        },
+        {
+          "url": "http://www.troyhunt.com/2012/02/shhh-dont-let-your-response-headers.html"
+        }
+      ],
+      "location": {
+        "hostname": "http://nginx",
+        "method": "GET",
+        "param": "",
+        "path": "/page2.html"
+      },
+      "message": "Server Leaks Version Information via \"Server\" HTTP Response Header Field",
+      "scanner": {
+        "id": "zaproxy",
+        "name": "ZAProxy"
+      },
+      "severity": "Low",
+      "solution": "Ensure that your web server, application server, load balancer, etc. is configured to suppress the \"Server\" header or provide generic details."
+    },
+    {
+      "category": "dast",
+      "confidence": "Medium",
+      "cve": "10021",
+      "description": "The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.",
+      "discovered_at": "2021-05-17T15:52:06.459",
+      "evidence": {
+        "request": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://nginx/page1.html"
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200
+        },
+        "summary": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type. At \"High\" threshold this scan rule will not alert on client or server error responses."
+      },
+      "id": "524efaba-b4a7-465b-a045-07538ccc7e1b",
+      "identifiers": [
+        {
+          "name": "X-Content-Type-Options Header Missing",
+          "type": "ZAProxy_PluginId",
+          "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+          "value": "10021"
+        },
+        {
+          "name": "CWE-16",
+          "type": "CWE",
+          "url": "https://cwe.mitre.org/data/definitions/16.html",
+          "value": "16"
+        }
+      ],
+      "links": [
+        {
+          "url": "http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx"
+        },
+        {
+          "url": "https://owasp.org/www-community/Security_Headers"
+        }
+      ],
+      "location": {
+        "hostname": "http://nginx",
+        "method": "GET",
+        "param": "X-Content-Type-Options",
+        "path": "/page1.html"
+      },
+      "message": "X-Content-Type-Options Header Missing",
+      "scanner": {
+        "id": "zaproxy",
+        "name": "ZAProxy"
+      },
+      "severity": "Low",
+      "solution": "Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages. If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing."
+    },
+    {
+      "category": "dast",
+      "confidence": "Medium",
+      "cve": "10021",
+      "description": "The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.",
+      "discovered_at": "2021-05-17T15:52:06.484",
+      "evidence": {
+        "request": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "method": "GET",
+          "url": "http://nginx/page2.html"
+        },
+        "response": {
+          "headers": [
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            },
+            {
+              "name": "Content-Length",
+              "value": "0"
+            },
+            {
+              "name": "Host",
+              "value": "nginx"
+            },
+            {
+              "name": "Pragma",
+              "value": "no-cache"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+            },
+            {
+              "name": "Via",
+              "value": "GitLab DAST/ZAP v1.53.0"
+            }
+          ],
+          "reason_phrase": "OK",
+          "status_code": 200
+        },
+        "summary": "This issue still applies to error type pages (401, 403, 500, etc.) as those pages are often still affected by injection issues, in which case there is still concern for browsers sniffing pages away from their actual content type. At \"High\" threshold this scan rule will not alert on client or server error responses."
+      },
+      "id": "a3e2f6af-8466-4130-820b-6d150f28b213",
+      "identifiers": [
+        {
+          "name": "X-Content-Type-Options Header Missing",
+          "type": "ZAProxy_PluginId",
+          "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+          "value": "10021"
+        },
+        {
+          "name": "CWE-16",
+          "type": "CWE",
+          "url": "https://cwe.mitre.org/data/definitions/16.html",
+          "value": "16"
+        }
+      ],
+      "links": [
+        {
+          "url": "http://msdn.microsoft.com/en-us/library/ie/gg622941%28v=vs.85%29.aspx"
+        },
+        {
+          "url": "https://owasp.org/www-community/Security_Headers"
+        }
+      ],
+      "location": {
+        "hostname": "http://nginx",
+        "method": "GET",
+        "param": "X-Content-Type-Options",
+        "path": "/page2.html"
+      },
+      "message": "X-Content-Type-Options Header Missing",
+      "scanner": {
+        "id": "zaproxy",
+        "name": "ZAProxy"
+      },
+      "severity": "Low",
+      "solution": "Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages. If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing."
+    }
+  ]
+}
