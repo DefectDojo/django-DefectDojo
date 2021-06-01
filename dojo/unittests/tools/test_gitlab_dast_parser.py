@@ -21,6 +21,7 @@ Numerical Severity:
     not above: S5
 """
 
+
 class TestGitlabDastParser(TestCase):
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
@@ -58,7 +59,7 @@ class TestGitlabDastParser(TestCase):
 
         self.assertEqual("High", finding.severity)
         self.assertEqual("S1", finding.numerical_severity)
-        self.assertEqual("", finding.mitigation) # no solution proposed
+        self.assertEqual("", finding.mitigation)  # no solution proposed
 
         self.assertEqual(359, finding.cwe)
         self.assertEqual("10062", finding.cve)
@@ -100,7 +101,7 @@ class TestGitlabDastParser(TestCase):
         self.assertEqual("Medium", finding.severity)
         self.assertEqual("S2", finding.numerical_severity)
         self.assertTrue("Ensure that your web server," in finding.mitigation)
-        
+
         self.assertEqual(16, finding.cwe)
         self.assertEqual("10038", finding.cve)
 

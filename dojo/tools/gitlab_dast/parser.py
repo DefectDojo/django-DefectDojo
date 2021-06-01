@@ -125,9 +125,9 @@ def get_item(vuln, test):
         )
     else:
         endpoint = None
-    
+
     # TODO: found_by
-    
+
     # severity
     severity = vuln["severity"]
     if severity is None:
@@ -140,7 +140,7 @@ def get_item(vuln, test):
         mitigation = vuln["solution"]
 
     cve = vuln["cve"]
-    
+
     references = ""
     for ref in vuln["identifiers"]:
         if ref["type"].lower() == "cwe":
@@ -171,6 +171,7 @@ def get_item(vuln, test):
     finding.unsaved_endpoints = [endpoint]
 
     return finding
+
 
 def get_confidence_numeric(confidence):
     switcher = {
