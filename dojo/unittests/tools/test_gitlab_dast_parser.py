@@ -1,6 +1,5 @@
 from django.test import TestCase
 from dojo.tools.gitlab_dast.parser import GitlabDastParser
-# from dojo.tools.{ cookiecutter.tool_name }}.parser import GitLab DAST ReportParser
 from dojo.models import Test
 
 """
@@ -40,7 +39,7 @@ class TestGitlabDastParser(TestCase):
         # endpoint validation
         for endpoint in finding.unsaved_endpoints:
             endpoint.clean()
-        
+
         self.assertEqual("5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool)
         self.assertEqual(3, finding.scanner_confidence)
         # vulnerability does not have a name: fallback to using id as a title
@@ -56,18 +55,18 @@ class TestGitlabDastParser(TestCase):
         # self.assertEqual(scanner.name, f"id: zaproxy\nname: ZAProxy")
         # self.assertTrue(not scanner.static_tool)
         # self.assertTrue(scanner.dynamic_tool)
-        
+
         self.assertEqual("High", finding.severity)
         self.assertEqual("S1", finding.numerical_severity)
         self.assertEqual("", finding.mitigation) # no solution proposed
-        
+
         self.assertEqual(359, finding.cwe)
         self.assertEqual("10062", finding.cve)
-        
+
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual("http", endpoint.protocol)
         self.assertEqual(80, endpoint.port)
-        
+
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("dojo/unittests/scans/gitlab_dast/gitlab_dast_many_vul.json")
         parser = GitlabDastParser()
@@ -79,7 +78,7 @@ class TestGitlabDastParser(TestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        
+
         # the first one is done above
         finding = findings[1]
         self.assertEqual("87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool)

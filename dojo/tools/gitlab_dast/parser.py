@@ -2,11 +2,12 @@ import json
 from datetime import datetime
 from urllib.parse import urlparse
 
-from dojo.models import Finding, Endpoint, Test_Type
+from dojo.models import Finding, Endpoint
+
 
 class GitlabDastParser(object):
     """
-    Import GitLab DAST Report in JSON N format
+    Import GitLab DAST Report in JSON format
     """
 
     def get_scan_types(self):
@@ -38,7 +39,6 @@ class GitlabDastParser(object):
                 items[item.unique_id_from_tool] = item
 
         return list(items.values())
-        
 
     def get_findings(self, file, test):
         if file is None:
@@ -59,20 +59,21 @@ class GitlabDastParser(object):
         else:
             return "Info"
 
+
 # iterating through properties of each vulnerability
 def get_item(vuln, test):
 
     if vuln["category"] != "dast":
         return None
-    
+
     # scanner_confidence
     scanner_confidence = get_confidence_numeric(vuln["confidence"])
 
     # id
     if "id" in vuln:
         unique_id_from_tool = vuln["id"]
-    else: # deprecated
-        unique_id_from_tool = vuln["cve"]    
+    else:  # deprecated
+        unique_id_from_tool = vuln["cve"]
 
     # title
     if "name" in vuln:
@@ -115,12 +116,12 @@ def get_item(vuln, test):
         path = o.path
 
         endpoint = Endpoint(
-            protocol = protocol,
-            host = host,
-            port = port,
-            query = query,
-            fragment = fragment,
-            path = path
+            protocol=protocol,
+            host=host,
+            port=port,
+            query=query,
+            fragment=fragment,
+            path=path
         )
     else:
         endpoint = None
@@ -129,11 +130,11 @@ def get_item(vuln, test):
     
     # severity
     severity = vuln["severity"]
-    if severity == None:
+    if severity is None:
         severity = "Unknown"
 
     # numerical_severity
-    numerical_severity = Finding.get_numerical_severity(severity)    
+    numerical_severity = Finding.get_numerical_severity(severity)
 
     if "solution" in vuln:
         mitigation = vuln["solution"]
@@ -153,18 +154,18 @@ def get_item(vuln, test):
             references += '\n'
 
     finding = Finding(
-        test = test, # Test
-        unique_id_from_tool = unique_id_from_tool, # str
-        scanner_confidence = scanner_confidence, # int
-        title = title, # str
-        description = description, # str
-        date = date, # datetime object
-        references = references, # str (identifiers)
-        severity = severity, # str
-        numerical_severity = numerical_severity, # str
-        mitigation = mitigation, # str (solution)
-        cwe = cwe, # int
-        cve = cve # str
+        test=test,  # Test
+        unique_id_from_tool=unique_id_from_tool,  # str
+        scanner_confidence=scanner_confidence,  # int
+        title=title,  # str
+        description=description,  # str
+        date=date,  # datetime object
+        references=references,  # str (identifiers)
+        severity=severity,  # str
+        numerical_severity=numerical_severity,  # str
+        mitigation=mitigation,  # str (solution)
+        cwe=cwe,  # int
+        cve=cve  # str
     )
 
     finding.unsaved_endpoints = [endpoint]
