@@ -175,12 +175,12 @@ def get_item(vuln, test):
 
 def get_confidence_numeric(confidence):
     switcher = {
-        'Confirmed': 1,    # Certain
-        'High': 3,         # Firm
-        'Medium': 4,       # Firm
-        'Low': 6,          # Tentative
-        'Experimental': 7, # Tentative
-        'Unknown': 8,      # Tentative
-        'Ignore': 10,      # Tentative
+        'Confirmed': 1,     # Certain
+        'High': 3,          # Firm
+        'Medium': 4,        # Firm
+        'Low': 6,           # Tentative
+        'Experimental': 7,  # Tentative
+        'Unknown': 8,       # Tentative
+        'Ignore': 10,       # Tentative
     }
     return switcher.get(confidence, None)
