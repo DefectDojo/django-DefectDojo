@@ -35,12 +35,12 @@ class AwsSecurityHubParser(object):
 
 
 def get_item(finding, test):
-    finding_id = finding.get('Id', "").split('/')[-1]
+    finding_id = finding.get('Id', "")
     title = finding.get('Title', "")
     severity = finding.get('Severity', {}).get('Label', 'INFORMATIONAL').title()
     description = finding.get('Description', "")
     resources = finding.get('Resources', "")
-    resource_id = resources[0]['Id']
+    resource_id = resources[0]['Id'].split(':')[-1]
     mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
     false_p = False
