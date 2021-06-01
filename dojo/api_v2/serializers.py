@@ -10,7 +10,7 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
-    Product_Group, Product_Type_Group, Dojo_Group, Role
+    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
@@ -341,7 +341,38 @@ class DojoGroupSerializer(serializers.ModelSerializer):
         model = Dojo_Group
         fields = '__all__'
 
-    def validate_global_role(self, value):
+
+class GlobalRoleSerializer(serializers.ModelSerializer):
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
+
+    class Meta:
+        model = Global_Role
+        fields = '__all__'
+
+    def validate(self, data):
+        user = None
+        group = None
+
+        if self.instance is not None:
+            user = self.instance.user
+            group = self.instance.group
+
+        if 'user' in data:
+            user = data.get('user')
+        if 'group' in data:
+            group = data.get('group')
+
+        if user is None and group is None:
+            raise ValidationError("Global_Role must have either user or group")
+        if user is not None and group is not None:
+            raise ValidationError("Global_Role cannot have both user and group")
+
+        return data
+
+    def validate_role(self, value):
         if not Roles.has_value(value):
             raise ValidationError('Role {} does not exist'.format(value))
         return value
