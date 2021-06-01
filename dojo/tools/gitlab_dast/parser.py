@@ -1,7 +1,6 @@
 import json
 from datetime import datetime
-from urllib.parse import urlparse
-
+import hyperlink
 from dojo.models import Finding, Endpoint
 
 
@@ -98,8 +97,15 @@ def get_item(vuln, test):
     # endpoint
     location = vuln["location"]
     if "hostname" in location and "path" in location:
-        url = f"{location['hostname']}{location['path']}"
+        url_str = f"{location['hostname']}{location['path']}"
+        url = hyperlink.parse(url_str)
         endpoint = Endpoint.from_uri(url)
+        print("Using url as an arg:")
+        print("Endpoint: " + str(endpoint))
+
+        print("Using str as an arg:")
+        endpoint2 = Endpoint.from_uri(url_str)
+        print("Endpoint: " + str(endpoint2))
     else:
         endpoint = None
 
