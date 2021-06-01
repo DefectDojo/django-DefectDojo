@@ -46,4 +46,4 @@ python3 manage.py test dojo.unittests -v 3 --no-input --tag broken && true
 
 echo "Unit Tests"
 echo "------------------------------------------------------------"
-python3 manage.py test dojo.unittests -v 3 --no-input --exclude-tag broken
+python3 manage.py test dojo.unittests -v 3 --keepdb --no-input --exclude-tag broken

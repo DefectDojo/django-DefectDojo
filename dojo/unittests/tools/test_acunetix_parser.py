@@ -11,6 +11,9 @@ class TestAcunetixParser(TestCase):
         testfile = open("dojo/unittests/scans/acunetix/one_finding.xml")
         parser = AcunetixParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -27,7 +30,6 @@ class TestAcunetixParser(TestCase):
             # check endpoints
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertEqual('https', endpoint.protocol)
             self.assertEqual(443, endpoint.port)
             self.assertEqual('vijaytest.com', endpoint.host)
@@ -37,6 +39,9 @@ class TestAcunetixParser(TestCase):
         testfile = open("dojo/unittests/scans/acunetix/many_findings.xml")
         parser = AcunetixParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(4, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -52,7 +57,6 @@ class TestAcunetixParser(TestCase):
             # check endpoints
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('www.itsecgames.com', endpoint.host)
@@ -83,7 +87,6 @@ class TestAcunetixParser(TestCase):
             # check endpoints
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('www.itsecgames.com', endpoint.host)
@@ -113,7 +116,6 @@ class TestAcunetixParser(TestCase):
             # check endpoints
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('www.itsecgames.com', endpoint.host)
@@ -132,6 +134,9 @@ class TestAcunetixParser(TestCase):
         testfile = open("dojo/unittests/scans/acunetix/XML_http_example_co_id_.xml")
         parser = AcunetixParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(7, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -150,13 +155,11 @@ class TestAcunetixParser(TestCase):
             # check endpoints
             self.assertEqual(3, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('example.co.id', endpoint.host)
             self.assertEqual('h/search', endpoint.path)
             endpoint = finding.unsaved_endpoints[1]
-            endpoint.clean()
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('example.co.id', endpoint.host)
@@ -185,7 +188,6 @@ class TestAcunetixParser(TestCase):
             # check endpoints
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertIsNone(endpoint.protocol)
             self.assertIsNone(endpoint.port)
             self.assertEqual('example.co.id', endpoint.host)

@@ -108,8 +108,8 @@ def view_test(request, tid):
         else:
             form = NoteForm()
 
-    title_words = get_words_for_field(findings.qs, 'title')
-    component_words = get_words_for_field(findings.qs, 'component_name')
+    title_words = get_words_for_field(Finding, 'title')
+    component_words = get_words_for_field(Finding, 'component_name')
 
     # test_imports = test.test_import_set.all()
     test_imports = Test_Import.objects.filter(test=test)
@@ -646,7 +646,7 @@ def search(request, tid):
     templates = TemplateFindingFilter(request.GET, queryset=templates)
     paged_templates = get_page_items(request, templates.qs, 25)
 
-    title_words = get_words_for_field(templates.qs, 'title')
+    title_words = get_words_for_field(Finding_Template, 'title')
 
     add_breadcrumb(parent=test, title="Add From Template", top_level=False, request=request)
     return render(request, 'dojo/templates.html',

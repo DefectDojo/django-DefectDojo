@@ -1,7 +1,7 @@
 # requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.23
 bleach==3.3.0
-celery==4.4.7
+celery==5.1.0
 coverage==5.5
 defusedxml==0.7.1
 django_celery_results==2.0.1
@@ -22,7 +22,7 @@ Django==3.1.11
 djangorestframework==3.12.4
 gunicorn==20.1.0
 html2text==2020.1.16
-humanize==3.5.0
+humanize==3.6.0
 jira==3.0.1
 PyGithub==1.55
 lxml==4.6.3
@@ -37,9 +37,9 @@ python-dateutil==2.8.1
 pytz==2021.1
 redis==3.5.3
 requests==2.25.1
-sqlalchemy==1.4.15  # Required by Celery broker transport
+sqlalchemy==1.4.17  # Required by Celery broker transport
 supervisor==4.2.2
-urllib3==1.26.4
+urllib3==1.26.5
 uWSGI==2.0.19.1
 vobject==0.9.6.1
 whitenoise==5.2.0
