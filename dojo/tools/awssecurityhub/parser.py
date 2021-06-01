@@ -40,7 +40,7 @@ def get_item(finding, test):
     severity = finding.get('Severity', {}).get('Label', 'INFORMATIONAL').title()
     description = finding.get('Description', "")
     resources = finding.get('Resources', "")
-    resource_id = resources[0]['Id'].split(':')[-1]
+    resource_id = resources[0]['Id']
     mitigation = finding.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
     references = finding.get('Remediation', {}).get('Recommendation', {}).get('Url')
     false_p = False
