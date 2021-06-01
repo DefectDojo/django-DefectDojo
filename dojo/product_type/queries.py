@@ -1,7 +1,7 @@
 from crum import get_current_user
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Q
 from django.conf import settings
-from dojo.models import Product_Type, Product_Type_Member
+from dojo.models import Product_Type, Product_Type_Member, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, user_has_permission
 
 
@@ -22,8 +22,14 @@ def get_authorized_product_types(permission):
         authorized_roles = Product_Type_Member.objects.filter(product_type=OuterRef('pk'),
             user=user,
             role__in=roles)
-        product_types = Product_Type.objects.annotate(member=Exists(authorized_roles)).order_by('name')
-        product_types = product_types.filter(member=True)
+        authorized_groups = Product_Type_Group.objects.filter(
+            product_type=OuterRef('pk'),
+            group__users=user,
+            role__in=roles)
+        product_types = Product_Type.objects.annotate(
+            member=Exists(authorized_roles),
+            authorized_group=Exists(authorized_groups)).order_by('name')
+        product_types = product_types.filter(Q(member=True) | Q(authorized_group=True))
     else:
         if user.is_staff:
             product_types = Product_Type.objects.all().order_by('name')
@@ -71,3 +77,19 @@ def get_authorized_product_type_members_for_user(user, permission):
 
     product_types = get_authorized_product_types(permission)
     return Product_Type_Member.objects.filter(user=user, product_type__in=product_types)
+
+
+def get_authorized_product_type_groups(permission):
+    user = get_current_user()
+
+    if user is None:
+        return Product_Type_Group.objects.none()
+
+    if user.is_superuser:
+        return Product_Type_Group.objects.all()
+
+    if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+        return Product_Type_Group.objects.all()
+
+    product_types = get_authorized_product_types(permission)
+    return Product_Type_Group.objects.filter(product_type__in=product_types)
