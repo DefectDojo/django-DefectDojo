@@ -47,8 +47,8 @@ class TestGitlabDastParser(TestCase):
         self.assertEqual("5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.title)
         self.assertIsInstance(finding.description, str)
 
-        date = finding.date.strftime("%Y-%m-%dT%H:%M:%S")
-        self.assertEqual("2021-04-23T15:46:40", date)
+        date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
+        self.assertEqual("2021-04-23T15:46:40.615000", date)
         self.assertIsInstance(finding.references, str)
 
         # uncomment when done fixing parser.py
@@ -58,7 +58,6 @@ class TestGitlabDastParser(TestCase):
         # self.assertTrue(scanner.dynamic_tool)
 
         self.assertEqual("High", finding.severity)
-        self.assertEqual("S1", finding.numerical_severity)
         self.assertEqual("", finding.mitigation)  # no solution proposed
 
         self.assertEqual(359, finding.cwe)
@@ -88,8 +87,8 @@ class TestGitlabDastParser(TestCase):
         self.assertEqual("87e98ddf-7d75-444a-be6d-45400151a0fe", finding.title)
         self.assertIsInstance(finding.description, str)
 
-        date = finding.date.strftime("%Y-%m-%dT%H:%M:%S")
-        self.assertEqual("2021-04-23T15:46:40", date)
+        date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
+        self.assertEqual("2021-04-23T15:46:40.644000", date)
         self.assertIsInstance(finding.references, str)
 
         # uncomment when done fixing parser.py
@@ -99,7 +98,6 @@ class TestGitlabDastParser(TestCase):
         # self.assertTrue(scanner.dynamic_tool)
 
         self.assertEqual("Medium", finding.severity)
-        self.assertEqual("S2", finding.numerical_severity)
         self.assertTrue("Ensure that your web server," in finding.mitigation)
 
         self.assertEqual(16, finding.cwe)

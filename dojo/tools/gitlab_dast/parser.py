@@ -91,8 +91,7 @@ def get_item(vuln, test):
 
     # date
     if "discovered_at" in vuln:
-        temp = vuln["discovered_at"][:-4]
-        date = datetime.strptime(temp, "%Y-%m-%dT%H:%M:%S")
+        date = datetime.strptime(vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f")
     else:
         date = None
 
@@ -100,46 +99,22 @@ def get_item(vuln, test):
     location = vuln["location"]
     if "hostname" in location and "path" in location:
         url = f"{location['hostname']}{location['path']}"
-
-        o = urlparse(url)
-        protocol = o.scheme
-
-        port = 80
-        if protocol == "https":
-            port = 443
-        if o.port is not None:
-            port = o.port
-
-        host = o.netloc
-        query = o.query
-        fragment = o.fragment
-        path = o.path
-
-        endpoint = Endpoint(
-            protocol=protocol,
-            host=host,
-            port=port,
-            query=query,
-            fragment=fragment,
-            path=path
-        )
+        endpoint = Endpoint.from_uri(url)
     else:
         endpoint = None
 
     # TODO: found_by
 
     # severity
-    severity = vuln["severity"]
-    if severity is None:
-        severity = "Unknown"
-
-    # numerical_severity
-    numerical_severity = Finding.get_numerical_severity(severity)
+    severity = ""
+    if "severity" in vuln:
+        severity = vuln["severity"]
 
     if "solution" in vuln:
         mitigation = vuln["solution"]
 
     cve = vuln["cve"]
+    cwe = 0
 
     references = ""
     for ref in vuln["identifiers"]:
@@ -161,13 +136,14 @@ def get_item(vuln, test):
         description=description,  # str
         date=date,  # datetime object
         references=references,  # str (identifiers)
-        severity=severity,  # str
-        numerical_severity=numerical_severity,  # str
         mitigation=mitigation,  # str (solution)
-        cwe=cwe,  # int
         cve=cve  # str
     )
 
+    if severity:
+        finding.severity = severity
+    if cwe != 0:
+        finding.cwe = cwe
     finding.unsaved_endpoints = [endpoint]
 
     return finding
