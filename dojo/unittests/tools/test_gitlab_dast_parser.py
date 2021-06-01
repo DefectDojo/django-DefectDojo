@@ -51,6 +51,7 @@ class TestGitlabDastParser(TestCase):
         self.assertEqual("2021-04-23T15:46:40", date)
         self.assertIsInstance(finding.references, str)
 
+        # uncomment when done fixing parser.py
         # scanner = finding.found_by
         # self.assertEqual(scanner.name, f"id: zaproxy\nname: ZAProxy")
         # self.assertTrue(not scanner.static_tool)
@@ -91,6 +92,7 @@ class TestGitlabDastParser(TestCase):
         self.assertEqual("2021-04-23T15:46:40", date)
         self.assertIsInstance(finding.references, str)
 
+        # uncomment when done fixing parser.py
         # scanner = finding.found_by
         # self.assertEqual(scanner.name, f"id: zaproxy\nname: ZAProxy")
         # self.assertTrue(not scanner.static_tool)

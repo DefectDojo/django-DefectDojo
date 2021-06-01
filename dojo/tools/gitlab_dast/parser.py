@@ -125,10 +125,7 @@ def get_item(vuln, test):
     else:
         endpoint = None
     
-    # found_by (scanner)
-    found_by = Test_Type(
-        name = f"id: {vuln['scanner']['id']}\nname: {vuln['scanner']['name']}"
-    )
+    # TODO: found_by
     
     # severity
     severity = vuln["severity"]
@@ -163,7 +160,6 @@ def get_item(vuln, test):
         description = description, # str
         date = date, # datetime object
         references = references, # str (identifiers)
-        # found_by = found_by, # Test_Type
         severity = severity, # str
         numerical_severity = numerical_severity, # str
         mitigation = mitigation, # str (solution)
