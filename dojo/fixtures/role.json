@@ -1,0 +1,37 @@
+[
+    {
+        "model": "dojo.role",
+        "pk": 1,
+        "fields": {
+            "name": "API_Importer"
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 2,
+        "fields": {
+            "name": "Writer"
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 3,
+        "fields": {
+            "name": "Maintainer"
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 4,
+        "fields": {
+            "name": "Owner"
+        }
+    },
+    {
+        "model": "dojo.role",
+        "pk": 5,
+        "fields": {
+            "name": "Reader"
+        }
+    }
+]

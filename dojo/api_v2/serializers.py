@@ -10,7 +10,7 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
-    Product_Group, Product_Type_Group, Dojo_Group
+    Product_Group, Product_Type_Group, Dojo_Group, Role
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
@@ -327,6 +327,13 @@ class UserStubSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'first_name', 'last_name')
 
 
+class RoleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Role
+        fields = '__all__'
+
+
 class DojoGroupSerializer(serializers.ModelSerializer):
     users = UserStubSerializer(many=True, read_only=True)
 
@@ -394,11 +401,6 @@ class FileSerializer(serializers.ModelSerializer):
 
 class ProductMemberSerializer(serializers.ModelSerializer):
 
-    role_name = serializers.SerializerMethodField()
-
-    def get_role_name(self, obj):
-        return Roles(obj.role).name
-
     class Meta:
         model = Product_Member
         fields = '__all__'
@@ -421,17 +423,8 @@ class ProductMemberSerializer(serializers.ModelSerializer):
 
         return data
 
-    def validate_role(self, value):
-        if not Roles.has_value(value):
-            raise ValidationError('Role {} does not exist'.format(value))
-        return value
-
 
 class ProductGroupSerializer(serializers.ModelSerializer):
-    role_name = serializers.SerializerMethodField()
-
-    def get_role_name(self, obj):
-        return Roles(obj.role).name
 
     class Meta:
         model = Product_Group
@@ -454,11 +447,6 @@ class ProductGroupSerializer(serializers.ModelSerializer):
             raise PermissionDenied('You are not permitted to add a group as Owner to this product')
 
         return data
-
-    def validate_role(self, value):
-        if not Roles.has_value(value):
-            raise ValidationError('Role {} does not exist'.format(value))
-        return value
 
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -486,11 +474,6 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
-
-    role_name = serializers.SerializerMethodField()
-
-    def get_role_name(self, obj):
-        return Roles(obj.role).name
 
     class Meta:
         model = Product_Type_Member
@@ -522,17 +505,8 @@ class ProductTypeMemberSerializer(serializers.ModelSerializer):
 
         return data
 
-    def validate_role(self, value):
-        if not Roles.has_value(value):
-            raise ValidationError('Role {} does not exist'.format(value))
-        return value
-
 
 class ProductTypeGroupSerializer(serializers.ModelSerializer):
-    role_name = serializers.SerializerMethodField()
-
-    def get_role_name(self, obj):
-        return Roles(obj.role).name
 
     class Meta:
         model = Product_Type_Group
@@ -555,11 +529,6 @@ class ProductTypeGroupSerializer(serializers.ModelSerializer):
             raise PermissionDenied('You are not permitted to add a group as Owner to this product type')
 
         return data
-
-    def validate_role(self, value):
-        if not Roles.has_value(value):
-            raise ValidationError('Role {} does not exist'.format(value))
-        return value
 
 
 class ProductTypeSerializer(serializers.ModelSerializer):

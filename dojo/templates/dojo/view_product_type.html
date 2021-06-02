@@ -183,7 +183,7 @@
                                             </ul>
                                         </td>
                                         <td name="member_user">{{ member.user.get_full_name }}</td>
-                                        <td name="member_role">{% role_as_string member.role %}</td>
+                                        <td name="member_role">{{ member.role }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

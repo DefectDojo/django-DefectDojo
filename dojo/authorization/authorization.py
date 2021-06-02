@@ -17,11 +17,11 @@ def user_has_permission(user, obj, permission):
     if isinstance(obj, Product_Type):
         # Check if the user has a role for the product type with the requested permissions
         member = get_product_type_member(user, obj)
-        if member is not None and role_has_permission(member.role, permission):
+        if member is not None and role_has_permission(member.role.id, permission):
             return True
         # Check if the user is in a group with a role for the product type with the requested permissions
         for product_type_group in get_product_type_groups(user, obj):
-            if role_has_permission(product_type_group.role, permission):
+            if role_has_permission(product_type_group.role.id, permission):
                 return True
         return False
     elif (isinstance(obj, Product) and
@@ -32,11 +32,11 @@ def user_has_permission(user, obj, permission):
 
         # Check if the user has a role for the product with the requested permissions
         member = get_product_member(user, obj)
-        if member is not None and role_has_permission(member.role, permission):
+        if member is not None and role_has_permission(member.role.id, permission):
             return True
         # Check if the user is in a group with a role for the product with the requested permissions
         for product_group in get_product_groups(user, obj):
-            if role_has_permission(product_group.role, permission):
+            if role_has_permission(product_group.role.id, permission):
                 return True
         return False
     elif isinstance(obj, Engagement) and permission in Permissions.get_engagement_permissions():

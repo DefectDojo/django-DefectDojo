@@ -191,8 +191,6 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_Type_MemberForm, self).__init__(*args, **kwargs)
@@ -309,8 +307,6 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_MemberForm, self).__init__(*args, **kwargs)

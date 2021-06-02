@@ -1476,7 +1476,7 @@ def add_product_member(request, pid):
                                     messages.WARNING,
                                     'Product member already exists.',
                                     extra_tags='alert-warning')
-            elif memberform.instance.role == Roles.Owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
+            elif memberform.instance.role.id == Roles.Owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to add users as owners.',
@@ -1503,7 +1503,7 @@ def edit_product_member(request, memberid):
     if request.method == 'POST':
         memberform = Edit_Product_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
-            if member.role == Roles.Owner and not user_has_permission(request.user, member.product, Permissions.Product_Member_Add_Owner):
+            if member.role.id == Roles.Owner and not user_has_permission(request.user, member.product, Permissions.Product_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to make users to owners.',

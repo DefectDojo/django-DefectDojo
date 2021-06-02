@@ -13,7 +13,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
+from dojo.models import Product, Product_Type, Engagement, Role, Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
@@ -49,6 +49,17 @@ from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpo
 from dojo.authorization.roles_permissions import Permissions, Roles
 
 logger = logging.getLogger(__name__)
+
+
+# Authorization: authenticated users
+class RoleViewSet(mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin,
+                  viewsets.GenericViewSet):
+    serializer_class = serializers.RoleSerializer
+    queryset = Role.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name')
+    permission_classes = (IsAuthenticated, )
 
 
 # Authorization: superuser

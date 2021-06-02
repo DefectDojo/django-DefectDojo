@@ -183,7 +183,7 @@ def add_product_type_member(request, ptid):
                                     messages.WARNING,
                                     'Product type member already exists.',
                                     extra_tags='alert-warning')
-            elif memberform.instance.role == Roles.Owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
+            elif memberform.instance.role.id == Roles.Owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to add users as owners.',
@@ -209,8 +209,8 @@ def edit_product_type_member(request, memberid):
     if request.method == 'POST':
         memberform = Edit_Product_Type_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
-            if member.role != Roles.Owner:
-                owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).exclude(id=member.id).count()
+            if member.role.id != Roles.Owner:
+                owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=member.role).exclude(id=member.id).count()
                 if owners < 1:
                     messages.add_message(request,
                                         messages.SUCCESS,
@@ -220,7 +220,7 @@ def edit_product_type_member(request, memberid):
                         return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
                     else:
                         return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
-            if member.role == Roles.Owner and not user_has_permission(request.user, member.product_type, Permissions.Product_Type_Member_Add_Owner):
+            if member.role.id == Roles.Owner and not user_has_permission(request.user, member.product_type, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to make users to owners.',
@@ -249,8 +249,8 @@ def delete_product_type_member(request, memberid):
     if request.method == 'POST':
         memberform = Delete_Product_Type_MemberForm(request.POST, instance=member)
         member = memberform.instance
-        if member.role == Roles.Owner:
-            owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).count()
+        if member.role.id == Roles.Owner:
+            owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=member.role).count()
             if owners <= 1:
                 messages.add_message(request,
                                     messages.SUCCESS,
