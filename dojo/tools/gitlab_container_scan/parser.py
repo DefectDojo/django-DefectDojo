@@ -1,7 +1,6 @@
 import hashlib
 import json
-from urllib.parse import urlparse
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding
 
 
 class GitlabContainerScanParser(object):
@@ -43,8 +42,10 @@ class GitlabContainerScanParser(object):
             cwe = ""
             for id in vulnerability['identifiers']:
                 try:
-                    if id['type'] == "cve": cve = id['value']
-                    if id['type'] == "cwe": cwe = id['value']
+                    if id['type'] == "cve":
+                        cve = id['value']
+                    if id['type'] == "cwe":
+                        cwe = id['value']
                 except:
                     pass
 

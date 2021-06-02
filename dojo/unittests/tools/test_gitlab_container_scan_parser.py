@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dojo.tools.gitlab_container_scan.parser import GitlabContainerScanParser
-from dojo.models import Engagement, Product, Test
+from dojo.models import Test
 
 
 class TestGitlabContainerScanParser(TestCase):
