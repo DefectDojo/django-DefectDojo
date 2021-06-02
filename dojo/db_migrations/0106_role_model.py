@@ -15,10 +15,13 @@ class Migration(migrations.Migration):
         call_command('loaddata', 'role')
 
     operations = [
+        # Needed to change the id of the Reader role from 0 to 5 to avoid an error with MySQL
         migrations.RunSQL("UPDATE dojo_product_member SET role = 5 WHERE (role = 0)"),
         migrations.RunSQL("UPDATE dojo_product_group SET role = 5 WHERE (role = 0)"),
         migrations.RunSQL("UPDATE dojo_product_type_member SET role = 5 WHERE (role = 0)"),
         migrations.RunSQL("UPDATE dojo_product_type_group SET role = 5 WHERE (role = 0)"),
+
+        # Create the table for the role
         migrations.CreateModel(
             name='Role',
             fields=[
@@ -26,7 +29,11 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255, unique=True)),
             ],
         ),
+
+        # Insert the five predefined roles in the database
         migrations.RunPython(populate_roles),
+
+        # Only now we can alter the remaining tables, otherwise we would break referential integrity
         migrations.AlterField(
             model_name='product_group',
             name='role',
