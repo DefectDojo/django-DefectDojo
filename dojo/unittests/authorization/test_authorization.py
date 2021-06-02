@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group
+    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role
 import dojo.authorization.authorization
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, \
     user_has_permission_or_403, user_has_permission, \
@@ -38,22 +38,22 @@ class TestAuthorization(TestCase):
         cls.product_type_member_reader = Product_Type_Member()
         cls.product_type_member_reader.user = cls.user
         cls.product_type_member_reader.product_type = cls.product_type
-        cls.product_type_member_reader.role = Roles.Reader
+        cls.product_type_member_reader.role = Role.objects.get(id=Roles.Reader)
 
         cls.product_type_member_owner = Product_Type_Member()
         cls.product_type_member_owner.user = cls.user
         cls.product_type_member_owner.product_type = cls.product_type
-        cls.product_type_member_owner.role = Roles.Owner
+        cls.product_type_member_owner.role = Role.objects.get(id=Roles.Owner)
 
         cls.product_member_reader = Product_Member()
         cls.product_member_reader.user = cls.user
         cls.product_member_reader.product = cls.product
-        cls.product_member_reader.role = Roles.Reader
+        cls.product_member_reader.role = Role.objects.get(id=Roles.Reader)
 
         cls.product_member_owner = Product_Member()
         cls.product_member_owner.user = cls.user
         cls.product_member_owner.product = cls.product
-        cls.product_member_owner.role = Roles.Owner
+        cls.product_member_owner.role = Role.objects.get(id=Roles.Owner)
 
         cls.group = Dojo_Group()
         cls.group.id = 1
@@ -62,25 +62,25 @@ class TestAuthorization(TestCase):
         cls.product_group_reader.id = 1
         cls.product_group_reader.product = cls.product
         cls.product_group_reader.group = cls.group
-        cls.product_group_reader.role = Roles.Reader
+        cls.product_group_reader.role = Role.objects.get(id=Roles.Reader)
 
         cls.product_group_owner = Product_Group()
         cls.product_group_owner.id = 2
         cls.product_group_owner.product = cls.product
         cls.product_group_owner.group = cls.group
-        cls.product_group_owner.role = Roles.Owner
+        cls.product_group_owner.role = Role.objects.get(id=Roles.Owner)
 
         cls.product_type_group_reader = Product_Type_Group()
         cls.product_type_group_reader.id = 1
         cls.product_type_group_reader.product_type = cls.product_type
         cls.product_type_group_reader.group = cls.group
-        cls.product_type_group_reader.role = Roles.Reader
+        cls.product_type_group_reader.role = Role.objects.get(id=Roles.Reader)
 
         cls.product_type_group_owner = Product_Type_Group()
         cls.product_type_group_owner.id = 2
         cls.product_type_group_owner.product_type = cls.product_type
         cls.product_type_group_owner.group = cls.group
-        cls.product_type_group_owner.role = Roles.Owner
+        cls.product_type_group_owner.role = Role.objects.get(id=Roles.Owner)
 
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,
@@ -292,7 +292,7 @@ class TestAuthorization(TestCase):
         product_type_member_other_user.id = 2
         product_type_member_other_user.user = other_user
         product_type_member_other_user.product_type = self.product_type
-        product_type_member_other_user.role = Roles.Reader
+        product_type_member_other_user.role = Role.objects.get(id=Roles.Reader)
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [product_type_member_other_user]
 
@@ -309,7 +309,7 @@ class TestAuthorization(TestCase):
         product_type_member_other_user.id = 2
         product_type_member_other_user.user = other_user
         product_type_member_other_user.product_type = self.product_type
-        product_type_member_other_user.role = Roles.Owner
+        product_type_member_other_user.role = Role.objects.get(id=Roles.Owner)
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [product_type_member_other_user]
 
@@ -330,7 +330,7 @@ class TestAuthorization(TestCase):
         product_member_other_user.id = 2
         product_member_other_user.user = other_user
         product_member_other_user.product = self.product
-        product_member_other_user.role = Roles.Reader
+        product_member_other_user.role = Role.objects.get(id=Roles.Reader)
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [product_member_other_user]
 
@@ -347,7 +347,7 @@ class TestAuthorization(TestCase):
         product_member_other_user.id = 2
         product_member_other_user.user = other_user
         product_member_other_user.product = self.product
-        product_member_other_user.role = Roles.Owner
+        product_member_other_user.role = Role.objects.get(id=Roles.Owner)
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [product_member_other_user]
 

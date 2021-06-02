@@ -10,7 +10,7 @@ from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
     Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm
-from dojo.models import Product_Type, Product_Type_Member
+from dojo.models import Product_Type, Product_Type_Member, Role
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
@@ -79,7 +79,7 @@ def add_product_type(request):
                 member = Product_Type_Member()
                 member.user = request.user
                 member.product_type = product_type
-                member.role = Roles.Owner
+                member.role = Role.objects.get(id=Roles.Owner)
                 member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -210,7 +210,7 @@ def edit_product_type_member(request, memberid):
         memberform = Edit_Product_Type_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
             if member.role.id != Roles.Owner:
-                owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=member.role).exclude(id=member.id).count()
+                owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).exclude(id=member.id).count()
                 if owners < 1:
                     messages.add_message(request,
                                         messages.SUCCESS,
@@ -250,7 +250,7 @@ def delete_product_type_member(request, memberid):
         memberform = Delete_Product_Type_MemberForm(request.POST, instance=member)
         member = memberform.instance
         if member.role.id == Roles.Owner:
-            owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=member.role).count()
+            owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).count()
             if owners <= 1:
                 messages.add_message(request,
                                     messages.SUCCESS,

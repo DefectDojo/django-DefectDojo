@@ -13,14 +13,14 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.models import Product, Product_Type, Engagement, Role, Test, Test_Import, Test_Type, Finding, \
+from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
-    Product_Group, Product_Type_Group
+    Product_Group, Product_Type_Group, Role
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -1050,7 +1050,7 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
             member = Product_Type_Member()
             member.user = self.request.user
             member.product_type = Product_Type(**product_type_data)
-            member.role = Roles.Owner
+            member.role = Role.objects.get(id=Roles.Owner)
             member.save()
 
     @swagger_auto_schema(
@@ -1101,7 +1101,7 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.role == Roles.Owner:
+        if instance.role.id == Roles.Owner:
             owners = Product_Type_Member.objects.filter(product_type=instance.product_type, role=Roles.Owner).count()
             if owners <= 1:
                 return Response('There must be at least one owner', status=status.HTTP_400_BAD_REQUEST)

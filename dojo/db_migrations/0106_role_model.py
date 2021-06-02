@@ -28,6 +28,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255, unique=True)),
             ],
+            options={'ordering': ('name',)},
         ),
 
         # Insert the five predefined roles in the database

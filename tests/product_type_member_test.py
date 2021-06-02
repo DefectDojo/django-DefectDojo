@@ -22,6 +22,8 @@ class ProductTypeMemberTest(BaseTestCase):
             driver.find_element_by_id("addProductTypeMember").click()
             # Select the product type 'Research and Development'
             Select(driver.find_element_by_id("id_product_type")).select_by_visible_text("Research and Development")
+            # Select the role 'Reader'
+            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
             # "Click" the submit button to complete the transaction
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
             # Assert the message to determine success status
@@ -100,6 +102,8 @@ class ProductTypeMemberTest(BaseTestCase):
             driver.find_element_by_id("addProductTypeMember").click()
             # Select the user 'propersahm'
             Select(driver.find_element_by_id("id_user")).select_by_visible_text("Proper Samuel (propersahm)")
+            # Select the role 'Reader'
+            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
             # "Click" the submit button to complete the transaction
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
             # Assert the message to determine success status
