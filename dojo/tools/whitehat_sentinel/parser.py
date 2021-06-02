@@ -3,7 +3,6 @@ import json
 import logging
 import re
 from typing import Union, List
-from urllib.parse import urlparse
 
 from dojo.models import Finding, Endpoint
 

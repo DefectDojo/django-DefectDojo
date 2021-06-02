@@ -57,7 +57,7 @@ FINDING_STATUS = (('verified', 'Verified'),
 class SelectWithPop(forms.Select):
     def render(self, name, *args, **kwargs):
         html = super(SelectWithPop, self).render(name, *args, **kwargs)
-        popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/'\
+        popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' \
                      + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
 
         return mark_safe(popup_plus)
@@ -903,11 +903,13 @@ class AddFindingForm(forms.ModelForm):
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = (
-    'title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response',
-    'steps_to_reproduce',
-    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate',
-    'out_of_scope',
-    'risk_accepted', 'under_defect_review')
+        'title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request',
+        'response',
+        'steps_to_reproduce',
+        'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p',
+        'duplicate',
+        'out_of_scope',
+        'risk_accepted', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -967,11 +969,13 @@ class AdHocFindingForm(forms.ModelForm):
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = (
-    'title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response',
-    'steps_to_reproduce',
-    'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p', 'duplicate',
-    'out_of_scope',
-    'risk_accepted', 'under_defect_review', 'sla_start_date')
+        'title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request',
+        'response',
+        'steps_to_reproduce',
+        'severity_justification', 'endpoints', 'references', 'is_template', 'active', 'verified', 'false_p',
+        'duplicate',
+        'out_of_scope',
+        'risk_accepted', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
@@ -1110,11 +1114,11 @@ class FindingForm(forms.ModelForm):
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = (
-    'title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description',
-    'mitigation', 'impact',
-    'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
-    'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
-    'out_of_scope', 'risk_accept', 'under_defect_review')
+        'title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description',
+        'mitigation', 'impact',
+        'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
+        'is_template', 'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+        'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
@@ -1133,8 +1137,8 @@ class FindingForm(forms.ModelForm):
         # when adding from template, we don't have access to the test. quickfix for now to just hide simple risk
         # acceptance
         if not hasattr(self.instance, 'test') or (
-                not self.instance.risk_accepted and not
-        self.instance.test.engagement.product.enable_simple_risk_acceptance):
+                                                not self.instance.risk_accepted and not
+                                                self.instance.test.engagement.product.enable_simple_risk_acceptance):
             del self.fields['risk_accepted']
         else:
             if self.instance.risk_accepted:
@@ -1154,6 +1158,8 @@ class FindingForm(forms.ModelForm):
         if self.instance.duplicate:
             self.fields[
                 'duplicate'].help_text = "Original finding that is being duplicated here (readonly). Use view finding " \
+                                         "" \
+                                         "" \
                                          "page to manage duplicate relationships. Unchecking duplicate here will " \
                                          "reset this findings duplicate status, but will trigger deduplication logic."
         else:
@@ -1889,8 +1895,7 @@ class JIRAForm(forms.ModelForm):
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
             message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, ' \
-                      'Network connection. Details in alert on top right. ' + str(
-                e)
+                      'Network connection. Details in alert on top right. ' + str(e)
             self.add_error('username', message)
             self.add_error('password', message)
 
@@ -1919,8 +1924,7 @@ class ExpressJIRAForm(forms.ModelForm):
         except Exception as e:
             # form only used by admins, so we can show full error message using str(e) which can help debug any problems
             message = 'Unable to authenticate to JIRA. Please check the URL, username, password, captcha challenge, ' \
-                      'Network connection. Details in alert on top right. ' + str(
-                e)
+                      'Network connection. Details in alert on top right. ' + str(e)
             self.add_error('username', message)
             self.add_error('password', message)
 
@@ -2482,7 +2486,7 @@ class JIRAFindingForm(forms.Form):
                 if len(jira_issues) > 0:
                     raise ValidationError(
                         'JIRA issue ' + jira_issue_key_new + ' already linked to ' + reverse('view_finding', args=(
-                        jira_issues[0].finding_id,)))
+                            jira_issues[0].finding_id,)))
 
     jira_issue = forms.CharField(required=False, label="Linked JIRA Issue",
                                  validators=[validators.RegexValidator(
