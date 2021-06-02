@@ -17,7 +17,7 @@ from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
 
 from dojo.filters import UserFilter
-from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
+from dojo.forms import DojoUserForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
     Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm
 from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member
 from dojo.utils import get_page_items, add_breadcrumb
@@ -284,7 +284,7 @@ def add_user(request):
         contact_form = UserContactInfoForm(request.POST)
         if form.is_valid() and contact_form.is_valid():
             user = form.save(commit=False)
-            user.set_unusable_password()
+            user.set_password(request.POST['password'])
             user.active = True
             user.save()
             contact = contact_form.save(commit=False)
@@ -339,7 +339,7 @@ def edit_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authed_products = Product.objects.filter(authorized_users__in=[user])
     authed_product_types = Product_Type.objects.filter(authorized_users__in=[user])
-    form = AddDojoUserForm(instance=user, initial={
+    form = EditDojoUserForm(instance=user, initial={
         'authorized_products': authed_products,
         'authorized_product_types': authed_product_types
     })
@@ -356,7 +356,7 @@ def edit_user(request, uid):
         contact_form = UserContactInfoForm(instance=user_contact)
 
     if request.method == 'POST':
-        form = AddDojoUserForm(request.POST, instance=user)
+        form = EditDojoUserForm(request.POST, instance=user)
         if user_contact is None:
             contact_form = UserContactInfoForm(request.POST)
         else:

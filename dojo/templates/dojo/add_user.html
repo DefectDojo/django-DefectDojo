@@ -3,16 +3,6 @@
 
 {% block content %}
     <h3> {{ name }} {% if to_edit %}- {{ to_edit.username }}{% endif %}</h3>
-    <div class="alert alert-info" role="alert">
-        By default all users are created with an unusable password. If a password is needed it can be set using the
-        {% if to_edit %}
-            <a href="{% url 'admin:auth_user_change' to_edit.id %}"><b>Admin interface</b></a>
-        {% else %}
-            Admin interface
-        {% endif %}.
-    </div>
-
-
     <form class="form-horizontal" method="post">{% csrf_token %}
         <fieldset>
             <legend>Default Information</legend>
