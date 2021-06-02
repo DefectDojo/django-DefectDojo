@@ -34,4 +34,4 @@ class TestAwsSecurityHubParser(TestCase):
             parser = AwsSecurityHubParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual("de861909-2d26-4e45-bd86-19d2ab6ceef1",
-                findings[0].id)
+                findings[0].vuln_id_from_tool)
