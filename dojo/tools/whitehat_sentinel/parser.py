@@ -40,7 +40,6 @@ class WhiteHatSentinelParser(object):
         if 'collection' not in findings_collection.keys() or not findings_collection['collection']:
             raise ValueError('collection key not present or there were not findings present.')
 
-
         # Convert a WhiteHat Vuln with Attack Vectors to a list of DefectDojo findings
         dojo_findings = self._convert_whitehat_sentinel_vulns_to_dojo_finding(findings_collection['collection'], test)
 
@@ -158,32 +157,11 @@ class WhiteHatSentinelParser(object):
 
         # This should be in the Endpoint class should it not?
         for attack_vector in attack_vectors:
-            try:
-                url = attack_vector['request']['url']
-                parsed_url = urlparse(url)
-                protocol = parsed_url.scheme
-                query = parsed_url.query
-                fragment = parsed_url.fragment
-                path = parsed_url.path
-                port = parsed_url.port
-                try:
-                    host, port = parsed_url.netloc.split(':')
-                except ValueError:
-                    host = parsed_url.netloc
-
-                endpoints_list.append(Endpoint(host=host,
-                                               port=port,
-                                               path=path,
-                                               protocol=protocol,
-                                               query=query,
-                                               fragment=fragment)
-                                      )
-            except Exception:
-                pass
+            endpoints_list.append(Endpoint.from_uri(attack_vector['request']['url']))
 
         return endpoints_list
 
-    def _convert_whitehat_sentinel_vulns_to_dojo_finding(self, whitehat_sentinel_vulns:[dict], test:str):
+    def _convert_whitehat_sentinel_vulns_to_dojo_finding(self, whitehat_sentinel_vulns: [dict], test: str):
         """
         Converts a WhiteHat Sentinel vuln to a DefectDojo finding
 
@@ -210,7 +188,6 @@ class WhiteHatSentinelParser(object):
                 'custom_risk') else whitehat_vuln.get('risk')
             severity = self._convert_whitehat_severity_id_to_dojo_severity(risk_id)
             false_positive = whitehat_vuln.get('status') == 'invalid'
-
 
             active = whitehat_vuln.get('status') in ('open')
             is_mitigated = not active
