@@ -117,7 +117,7 @@ def get_product_member(user, product):
 @cache_for_request
 def get_product_member_dict(user):
     pm_dict = {}
-    for product_member in Product_Member.objects.select_related('product').filter(user=user):
+    for product_member in Product_Member.objects.select_related('product').filter(user=user).select_related('role'):
         pm_dict[product_member.product.id] = product_member
     return pm_dict
 
@@ -129,7 +129,7 @@ def get_product_type_member(user, product_type):
 @cache_for_request
 def get_product_type_member_dict(user):
     ptm_dict = {}
-    for product_type_member in Product_Type_Member.objects.select_related('product_type').filter(user=user):
+    for product_type_member in Product_Type_Member.objects.select_related('product_type').filter(user=user).select_related('role'):
         ptm_dict[product_type_member.product_type.id] = product_type_member
     return ptm_dict
 
@@ -141,7 +141,7 @@ def get_product_groups(user, product):
 @cache_for_request
 def get_product_groups_dict(user):
     pg_dict = {}
-    for product_group in Product_Group.objects.select_related('product').filter(group__users=user):
+    for product_group in Product_Group.objects.select_related('product').filter(group__users=user).select_related('role'):
         if pg_dict.get(product_group.product.id) is None:
             pgu_list = []
         else:
@@ -158,7 +158,7 @@ def get_product_type_groups(user, product_type):
 @cache_for_request
 def get_product_type_groups_dict(user):
     pgt_dict = {}
-    for product_type_group in Product_Type_Group.objects.select_related('product_type').filter(group__users=user):
+    for product_type_group in Product_Type_Group.objects.select_related('product_type').filter(group__users=user).select_related('role'):
         if pgt_dict.get(product_type_group.product_type.id) is None:
             pgtu_list = []
         else:
