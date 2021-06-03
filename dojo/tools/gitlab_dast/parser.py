@@ -87,7 +87,7 @@ def get_item(vuln, test):
     elif "description" in vuln:
         description += f"{vuln['description']}\n"
 
-    # TODO: found_by    
+    # TODO: found_by
 
     cve = vuln["cve"]
     cwe = 0
