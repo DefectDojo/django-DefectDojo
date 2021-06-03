@@ -1,4 +1,6 @@
 from drf_yasg.utils import swagger_serializer_method
+
+from dojo.endpoint.utils import endpoint_filter
 from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -7,12 +9,12 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
-    Test_Import_Finding_Action, Product_Type_Member, Product_Member
+    Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
+    Product_Group, Product_Type_Group, Dojo_Group
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
 from dojo.utils import is_scan_file_too_large
-from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -312,11 +314,32 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
 
+    def create(self, validated_data):
+        user = User.objects.create(**validated_data)
+        user.set_unusable_password()
+        user.save()
+        return user
+
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'first_name', 'last_name')
+
+
+class DojoGroupSerializer(serializers.ModelSerializer):
+    users = UserStubSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Dojo_Group
+        fields = '__all__'
+
+
+class AddUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('id', 'username')
 
 
 class NoteHistorySerializer(serializers.ModelSerializer):
@@ -371,20 +394,71 @@ class FileSerializer(serializers.ModelSerializer):
 
 class ProductMemberSerializer(serializers.ModelSerializer):
 
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
+
     class Meta:
         model = Product_Member
         fields = '__all__'
 
     def validate(self, data):
-        if self.context['request'].method == 'POST':
+        if self.instance is not None and \
+                data.get('product') != self.instance.product and \
+                not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a member to this product')
+
+        if self.instance is None or \
+                data.get('product') != self.instance.product or \
+                data.get('user') != self.instance.user:
             members = Product_Member.objects.filter(product=data.get('product'), user=data.get('user'))
             if members.count() > 0:
-                raise ValidationError('Product member already exists')
+                raise ValidationError('Product_Member already exists')
 
         if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Member_Add_Owner):
-            raise PermissionDenied('You are not permitted to add users as owners')
+            raise PermissionDenied('You are not permitted to add a member as Owner to this product')
 
         return data
+
+    def validate_role(self, value):
+        if not Roles.has_value(value):
+            raise ValidationError('Role {} does not exist'.format(value))
+        return value
+
+
+class ProductGroupSerializer(serializers.ModelSerializer):
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
+
+    class Meta:
+        model = Product_Group
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product') != self.instance.product and \
+                not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Group_Add):
+            raise PermissionDenied('You are not permitted to add a group to this product')
+
+        if self.instance is None or \
+                data.get('product') != self.instance.product or \
+                data.get('group') != self.instance.group:
+            members = Product_Group.objects.filter(product=data.get('product'), group=data.get('group'))
+            if members.count() > 0:
+                raise ValidationError('Product_Group already exists')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a group as Owner to this product')
+
+        return data
+
+    def validate_role(self, value):
+        if not Roles.has_value(value):
+            raise ValidationError('Role {} does not exist'.format(value))
+        return value
 
 
 class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -397,12 +471,12 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     class Meta:
         model = Product
         if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['tid', 'manager', 'prod_manager', 'tech_contact', 'updated', 'members']
+            exclude = ['tid', 'updated', 'members']
             extra_kwargs = {
                 'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
             }
         else:
-            exclude = ['tid', 'manager', 'prod_manager', 'tech_contact', 'updated', 'authorized_users']
+            exclude = ['tid', 'updated', 'authorized_users']
 
     def get_findings_count(self, obj):
         return obj.findings_count
@@ -413,25 +487,79 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
 
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
+
     class Meta:
         model = Product_Type_Member
         fields = '__all__'
 
     def validate(self, data):
-        if self.context['request'].method == 'POST':
+        if self.instance is not None and \
+                data.get('product_type') != self.instance.product_type and \
+                not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a member to this product type')
+
+        if self.instance is None or \
+                data.get('product_type') != self.instance.product_type or \
+                data.get('user') != self.instance.user:
             members = Product_Type_Member.objects.filter(product_type=data.get('product_type'), user=data.get('user'))
             if members.count() > 0:
-                raise ValidationError('Product type member already exists')
-        else:
-            if data.get('role') != Roles.Owner:
+                raise ValidationError('Product_Type_Member already exists')
+
+        if data.get('role') != Roles.Owner:
+            if self.instance is None:
+                owners = Product_Type_Member.objects.filter(product_type=data.get('product_type'), role=Roles.Owner).count()
+            else:
                 owners = Product_Type_Member.objects.filter(product_type=data.get('product_type'), role=Roles.Owner).exclude(id=self.instance.id).count()
-                if owners < 1:
-                    raise ValidationError('There must be at least one owner')
+            if owners < 1:
+                raise ValidationError('There must be at least one owner')
 
         if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Member_Add_Owner):
-            raise PermissionDenied('You are not permitted to add users as owners')
+            raise PermissionDenied('You are not permitted to add a member as Owner to this product type')
 
         return data
+
+    def validate_role(self, value):
+        if not Roles.has_value(value):
+            raise ValidationError('Role {} does not exist'.format(value))
+        return value
+
+
+class ProductTypeGroupSerializer(serializers.ModelSerializer):
+    role_name = serializers.SerializerMethodField()
+
+    def get_role_name(self, obj):
+        return Roles(obj.role).name
+
+    class Meta:
+        model = Product_Type_Group
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product_type') != self.instance.product_type and \
+                not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Group_Add):
+            raise PermissionDenied('You are not permitted to add a group to this product type')
+
+        if self.instance is None or \
+                data.get('product_type') != self.instance.product_type or \
+                data.get('group') != self.instance.group:
+            members = Product_Type_Group.objects.filter(product_type=data.get('product_type'), group=data.get('group'))
+            if members.count() > 0:
+                raise ValidationError('Product_Type_Group already exists')
+
+        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a group as Owner to this product type')
+
+        return data
+
+    def validate_role(self, value):
+        if not Roles.has_value(value):
+            raise ValidationError('Role {} does not exist'.format(value))
+        return value
 
 
 class ProductTypeSerializer(serializers.ModelSerializer):
@@ -553,80 +681,71 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def validate(self, data):
         # print('EndpointSerialize.validate')
-        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}" \
-                  "|655[0-2][0-9]|6553[0-5])"
 
         if not self.context['request'].method == 'PATCH':
-            if ('host' not in data or
-                    'protocol' not in data or
-                    'path' not in data or
-                    'query' not in data or
-                    'fragment' not in data):
-                raise serializers.ValidationError(
-                    'Please provide valid host, protocol, path, query and '
-                    'fragment')
-            protocol = data['protocol']
-            path = data['path']
-            query = data['query']
-            fragment = data['fragment']
-            host = data['host']
+            if 'product' not in data:
+                raise serializers.ValidationError('Product is required')
+            protocol = data.get('protocol')
+            userinfo = data.get('userinfo')
+            host = data.get('host')
+            port = data.get('port')
+            path = data.get('path')
+            query = data.get('query')
+            fragment = data.get('fragment')
+            product = data.get('product')
         else:
             protocol = data.get('protocol', self.instance.protocol)
+            userinfo = data.get('userinfo', self.instance.userinfo)
+            host = data.get('host', self.instance.host)
+            port = data.get('port', self.instance.port)
             path = data.get('path', self.instance.path)
             query = data.get('query', self.instance.query)
             fragment = data.get('fragment', self.instance.fragment)
-            host = data.get('host', self.instance.host)
-        product = data.get('product', None)
+            if 'product' in data and data['product'] != self.instance.product:
+                raise serializers.ValidationError('Change of product is not possible')
+            product = self.instance.product
 
-        from urllib.parse import urlunsplit
-        if protocol:
-            endpoint = urlunsplit((protocol, host, path, query, fragment))
-        else:
-            endpoint = host
+        endpoint_ins = Endpoint(
+            protocol=protocol,
+            userinfo=userinfo,
+            host=host,
+            port=port,
+            path=path,
+            query=query,
+            fragment=fragment,
+            product=product
+        )
+        endpoint_ins.clean()  # Run standard validation and clean process; can raise errors
 
-        from django.core import exceptions
-        from django.core.validators import RegexValidator
-        import re
-        try:
-            url_validator = URLValidator()
-            url_validator(endpoint)
-        except exceptions.ValidationError:
-            try:
-                # do we have a port number?
-                regex = re.compile(port_re)
-                host = endpoint
-                if regex.findall(endpoint):
-                    for g in regex.findall(endpoint):
-                        host = re.sub(port_re, '', host)
-                validate_ipv46_address(host)
-            except exceptions.ValidationError:
-                try:
-                    validate_hostname = RegexValidator(
-                        regex=r'[a-zA-Z0-9-_]*\.[a-zA-Z]{2,6}')
-                    # do we have a port number?
-                    regex = re.compile(port_re)
-                    host = endpoint
-                    if regex.findall(endpoint):
-                        for g in regex.findall(endpoint):
-                            host = re.sub(port_re, '', host)
-                    validate_hostname(host)
-                except:  # noqa
-                    raise serializers.ValidationError(
-                        'It does not appear as though this endpoint is a '
-                        'valid URL or IP address.',
-                        code='invalid')
-
-        endpoint = Endpoint.objects.filter(protocol=protocol,
-                                           host=host,
-                                           path=path,
-                                           query=query,
-                                           fragment=fragment,
-                                           product=product)
-        if endpoint.count() > 0 and not self.instance:
+        endpoint = endpoint_filter(
+            protocol=endpoint_ins.protocol,
+            userinfo=endpoint_ins.userinfo,
+            host=endpoint_ins.host,
+            port=endpoint_ins.port,
+            path=endpoint_ins.path,
+            query=endpoint_ins.query,
+            fragment=endpoint_ins.fragment,
+            product=endpoint_ins.product
+        )
+        if ((self.context['request'].method in ["PUT", "PATCH"] and
+             ((endpoint.count() > 1) or
+              (endpoint.count() == 1 and
+               endpoint.first().pk != self.instance.pk))) or
+                (self.context['request'].method in ["POST"] and endpoint.count() > 0)):
             raise serializers.ValidationError(
                 'It appears as though an endpoint with this data already '
                 'exists for this product.',
                 code='invalid')
+
+        # use clean data
+        data['protocol'] = endpoint_ins.protocol
+        data['userinfo'] = endpoint_ins.userinfo
+        data['host'] = endpoint_ins.host
+        data['port'] = endpoint_ins.port
+        data['path'] = endpoint_ins.path
+        data['query'] = endpoint_ins.query
+        data['fragment'] = endpoint_ins.fragment
+        data['product'] = endpoint_ins.product
 
         return data
 
@@ -687,7 +806,7 @@ class FindingGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Finding_Group
-        fields = ('name', 'test', 'jira_issue')
+        fields = ('id', 'name', 'test', 'jira_issue')
 
 
 class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -1078,6 +1197,8 @@ class ImportScanSerializer(serializers.Serializer):
 
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
     def save(self, push_to_jira=False):
         data = self.validated_data
         close_old_findings = data['close_old_findings']
@@ -1106,6 +1227,8 @@ class ImportScanSerializer(serializers.Serializer):
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
+        group_by = data.get('group_by', None)
+
         importer = Importer()
         try:
             test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
@@ -1116,7 +1239,8 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              branch_tag=branch_tag, build_id=build_id,
                                                                              commit_hash=commit_hash,
                                                                              push_to_jira=push_to_jira,
-                                                                             close_old_findings=close_old_findings)
+                                                                             close_old_findings=close_old_findings,
+                                                                             group_by=group_by)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -1171,7 +1295,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
 
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
     def save(self, push_to_jira=False):
+        logger.debug('push_to_jira: %s', push_to_jira)
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
@@ -1189,6 +1316,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
+        group_by = data.get('group_by', None)
+
         reimporter = ReImporter()
         try:
             test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
@@ -1197,7 +1326,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             endpoints_to_add=endpoints_to_add, scan_date=scan_date,
                                             version=version, branch_tag=branch_tag, build_id=build_id,
                                             commit_hash=commit_hash, push_to_jira=push_to_jira,
-                                            close_old_findings=close_old_findings)
+                                            close_old_findings=close_old_findings,
+                                            group_by=group_by)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:

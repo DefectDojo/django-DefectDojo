@@ -22,7 +22,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual("Medium", finding.severity)
         self.assertEqual(123, finding.cwe)
         self.assertEqual("catname", finding.title)
-        self.assertFalse(finding.is_Mitigated)
+        self.assertFalse(finding.is_mitigated)
         self.assertEqual("sourcefilepathMyApp2.java", finding.file_path)
         self.assertEqual(2, finding.line)
         self.assertEqual("app-12345_issue-1", finding.unique_id_from_tool)
@@ -31,7 +31,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertIsNone(finding.cwe)
         self.assertEqual("CVE-1234-1234", finding.cve)
         self.assertEqual("Vulnerable component: library:1234", finding.title)
-        self.assertFalse(finding.is_Mitigated)
+        self.assertFalse(finding.is_mitigated)
 
     def test_parse_file_with_multiple_finding(self):
         testfile = open("dojo/unittests/scans/veracode/many_findings.xml")
@@ -42,7 +42,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual("Medium", finding.severity)
         self.assertEqual(123, finding.cwe)
         self.assertEqual("catname", finding.title)
-        self.assertFalse(finding.is_Mitigated)
+        self.assertFalse(finding.is_mitigated)
         self.assertEqual("sourcefilepathMyApp.java", finding.file_path)
         self.assertEqual(2, finding.line)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
@@ -51,12 +51,12 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertIsNone(finding.cwe)
         self.assertEqual("CVE-1234-1234", finding.cve)
         self.assertEqual("Vulnerable component: library:1234", finding.title)
-        self.assertFalse(finding.is_Mitigated)
+        self.assertFalse(finding.is_mitigated)
         finding = findings[2]
         self.assertEqual("High", finding.severity)
         self.assertEqual("CVE-5678-5678", finding.cve)
         self.assertEqual("Vulnerable component: library1:1234", finding.title)
-        self.assertFalse(finding.is_Mitigated)
+        self.assertFalse(finding.is_mitigated)
 
     def test_parse_file_with_multiple_finding2(self):
         testfile = open("dojo/unittests/scans/veracode/veracode_scan.xml")
@@ -91,6 +91,6 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
-        self.assertTrue(finding.is_Mitigated)
+        self.assertTrue(finding.is_mitigated)
         self.assertEqual(datetime.datetime(2020, 6, 1, 10, 2, 1), finding.mitigated)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)

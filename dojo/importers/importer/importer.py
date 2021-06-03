@@ -2,9 +2,10 @@ import datetime
 from dojo.importers import utils as importer_utils
 from dojo.models import Test, Finding, \
     Test_Type, \
-    Endpoint, BurpRawRequestResponse, \
+    BurpRawRequestResponse, \
     Endpoint_Status, \
     Test_Import
+from dojo.endpoint.utils import endpoint_get_or_create
 
 from dojo.utils import get_current_user, max_safe
 
@@ -13,6 +14,8 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 import dojo.notifications.helper as notifications_helper
+import dojo.finding.helper as finding_helper
+import dojo.jira_link.helper as jira_helper
 import base64
 import logging
 
@@ -54,7 +57,7 @@ class DojoDefaultImporter(object):
         return test
 
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, now=timezone.now()):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now()):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
@@ -87,6 +90,9 @@ class DojoDefaultImporter(object):
             item.updated = now
             item.save(dedupe_option=False)
 
+            if settings.FEATURE_FINDING_GROUPS and group_by:
+                finding_helper.add_finding_to_auto_group(item, group_by)
+
             if (hasattr(item, 'unsaved_req_resp') and
                     len(item.unsaved_req_resp) > 0):
                 for req_resp in item.unsaved_req_resp:
@@ -108,9 +114,17 @@ class DojoDefaultImporter(object):
 
             for endpoint in item.unsaved_endpoints:
                 try:
-                    ep, created = Endpoint.objects.get_or_create(
+                    endpoint.clean()
+                except ValidationError as e:
+                    logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                                   "{}".format(e))
+
+                try:
+                    ep, created = endpoint_get_or_create(
                         protocol=endpoint.protocol,
+                        userinfo=endpoint.userinfo,
                         host=endpoint.host,
+                        port=endpoint.port,
                         path=endpoint.path,
                         query=endpoint.query,
                         fragment=endpoint.fragment,
@@ -134,9 +148,17 @@ class DojoDefaultImporter(object):
                     logger.debug('adding endpoint %s', endpoint)
                     # TODO Not sure what happens here, we get an endpoint model and try to create it again?
                     try:
-                        ep, created = Endpoint.objects.get_or_create(
+                        endpoint.clean()
+                    except ValidationError as e:
+                        logger.warning("DefectDojo is storing broken endpoint because cleaning wasn't successful: "
+                                       "{}".format(e))
+
+                    try:
+                        ep, created = endpoint_get_or_create(
                             protocol=endpoint.protocol,
+                            userinfo=endpoint.userinfo,
                             host=endpoint.host,
+                            port=endpoint.port,
                             path=endpoint.path,
                             query=endpoint.query,
                             fragment=endpoint.fragment,
@@ -158,7 +180,15 @@ class DojoDefaultImporter(object):
                 item.tags = item.unsaved_tags
 
             new_findings.append(item)
-            item.save(push_to_jira=push_to_jira)
+            # to avoid pushing a finding group multiple times, we push those outside of the loop
+            if settings.FEATURE_FINDING_GROUPS and item.finding_group:
+                item.save()
+            else:
+                item.save(push_to_jira=push_to_jira)
+
+        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+            for finding_group in set([finding.finding_group for finding in new_findings if finding.finding_group is not None]):
+                jira_helper.push_to_jira(finding_group)
 
         return new_findings
 
@@ -186,7 +216,7 @@ class DojoDefaultImporter(object):
 
         for old_finding in old_findings:
             old_finding.active = False
-            old_finding.is_Mitigated = True
+            old_finding.is_mitigated = True
             old_finding.mitigated = scan_date_time
             old_finding.notes.create(author=user,
                                         entry="This finding has been automatically closed"
@@ -200,7 +230,17 @@ class DojoDefaultImporter(object):
                 status.save()
 
             old_finding.tags.add('stale')
-            old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
+
+            # to avoid pushing a finding group multiple times, we push those outside of the loop
+            if settings.FEATURE_FINDING_GROUPS and old_finding.finding_group:
+                # don't try to dedupe findings that we are closing
+                old_finding.save(dedupe_option=False)
+            else:
+                old_finding.save(dedupe_option=False, push_to_jira=push_to_jira)
+
+        if settings.FEATURE_FINDING_GROUPS and push_to_jira:
+            for finding_group in set([finding.finding_group for finding in old_findings if finding.finding_group is not None]):
+                jira_helper.push_to_jira(finding_group)
 
         return old_findings
 
@@ -230,7 +270,9 @@ class DojoDefaultImporter(object):
 
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False):
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None):
+
+        logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
         user = user or get_current_user()
 
@@ -251,7 +293,7 @@ class DojoDefaultImporter(object):
         new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                     verified, minimum_severity=minimum_severity,
                                                     endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                    now=now)
+                                                    group_by=group_by, now=now)
 
         closed_findings = []
         if close_old_findings:

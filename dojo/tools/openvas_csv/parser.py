@@ -2,7 +2,6 @@
 import csv
 import hashlib
 import io
-import socket
 
 from dateutil.parser import parse
 
@@ -85,26 +84,30 @@ class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
         super(ProtocolColumnMappingStrategy, self).__init__()
 
     def map_column_value(self, finding, column_value):
-        finding.unsaved_endpoints[0].protocol = column_value
+        if column_value:  # do not store empty protocol
+            finding.unsaved_endpoints[0].protocol = column_value
 
 
-class UrlColumnMappingStrategy(ColumnMappingStrategy):
+class IpColumnMappingStrategy(ColumnMappingStrategy):
 
     def __init__(self):
         self.mapped_column = 'ip'
-        super(UrlColumnMappingStrategy, self).__init__()
-
-    def is_valid_ipv4_address(self, address):
-        valid = True
-        try:
-            socket.inet_aton(address.strip())
-        except:
-            valid = False
-
-        return valid
+        super(IpColumnMappingStrategy, self).__init__()
 
     def map_column_value(self, finding, column_value):
-        finding.unsaved_endpoints[0].host = column_value
+        if not finding.unsaved_endpoints[0].host:  # process only if host is not already defined (by field hostname)
+            finding.unsaved_endpoints[0].host = column_value
+
+
+class HostnameColumnMappingStrategy(ColumnMappingStrategy):
+
+    def __init__(self):
+        self.mapped_column = 'hostname'
+        super(HostnameColumnMappingStrategy, self).__init__()
+
+    def map_column_value(self, finding, column_value):
+        if column_value:  # do not override IP if hostname is empty
+            finding.unsaved_endpoints[0].host = column_value
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -211,7 +214,8 @@ class OpenVASCsvParser(object):
         date_column_strategy = DateColumnMappingStrategy()
         title_column_strategy = TitleColumnMappingStrategy()
         cwe_column_strategy = CweColumnMappingStrategy()
-        url_column_strategy = UrlColumnMappingStrategy()
+        ip_column_strategy = IpColumnMappingStrategy()
+        hostname_column_strategy = HostnameColumnMappingStrategy()
         severity_column_strategy = SeverityColumnMappingStrategy()
         description_column_strategy = DescriptionColumnMappingStrategy()
         mitigation_column_strategy = MitigationColumnMappingStrategy()
@@ -234,8 +238,9 @@ class OpenVASCsvParser(object):
         mitigation_column_strategy.successor = impact_column_strategy
         description_column_strategy.successor = mitigation_column_strategy
         severity_column_strategy.successor = description_column_strategy
-        url_column_strategy.successor = severity_column_strategy
-        cwe_column_strategy.successor = url_column_strategy
+        ip_column_strategy.successor = severity_column_strategy
+        hostname_column_strategy.successor = ip_column_strategy
+        cwe_column_strategy.successor = hostname_column_strategy
         title_column_strategy.successor = cwe_column_strategy
         date_column_strategy.successor = title_column_strategy
 
@@ -290,7 +295,7 @@ class OpenVASCsvParser(object):
                 if finding.description is None:
                     finding.description = ""
 
-                key = hashlib.sha256((finding.unsaved_endpoints[0].get_normalized_url() + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
+                key = hashlib.sha256((str(finding.unsaved_endpoints[0]) + '|' + finding.severity + '|' + finding.title + '|' + finding.description).encode('utf-8')).hexdigest()
 
                 if key not in dupes:
                     dupes[key] = finding
