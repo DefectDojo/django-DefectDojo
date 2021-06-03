@@ -1600,6 +1600,7 @@ class AddDojoUserForm(forms.ModelForm):
             exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
                        'authorized_products', 'authorized_product_types']
 
+
 class EditDojoUserForm(forms.ModelForm):
     if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_products = forms.ModelMultipleChoiceField(
