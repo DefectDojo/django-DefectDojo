@@ -1142,7 +1142,7 @@ class Endpoint(models.Model):
                 self.userinfo = None
 
         if self.host:
-            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.host):  # https://tools.ietf.org/html/rfc3986#section-3.2.2
+            if not re.match(r'^[A-Za-z0-9][A-Za-z0-9_\.\-\+]+$', self.host):
                 try:
                     validate_ipv46_address(self.host)
                 except ValidationError:
