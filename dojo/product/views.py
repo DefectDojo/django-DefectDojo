@@ -38,7 +38,7 @@ from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from django.conf import settings
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type
@@ -1476,7 +1476,7 @@ def add_product_member(request, pid):
                                     messages.WARNING,
                                     'Product member already exists.',
                                     extra_tags='alert-warning')
-            elif memberform.instance.role.id == Roles.Owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
+            elif memberform.instance.role.is_owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to add users as owners.',
@@ -1503,7 +1503,7 @@ def edit_product_member(request, memberid):
     if request.method == 'POST':
         memberform = Edit_Product_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
-            if member.role.id == Roles.Owner and not user_has_permission(request.user, member.product, Permissions.Product_Member_Add_Owner):
+            if member.role.is_owner and not user_has_permission(request.user, member.product, Permissions.Product_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to make users to owners.',

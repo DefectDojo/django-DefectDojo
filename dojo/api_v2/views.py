@@ -46,7 +46,7 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
@@ -1050,7 +1050,7 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
             member = Product_Type_Member()
             member.user = self.request.user
             member.product_type = Product_Type(**product_type_data)
-            member.role = Role.objects.get(id=Roles.Owner)
+            member.role = Role.objects.get(is_owner=True)
             member.save()
 
     @swagger_auto_schema(
@@ -1101,8 +1101,8 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.role.id == Roles.Owner:
-            owners = Product_Type_Member.objects.filter(product_type=instance.product_type, role=Roles.Owner).count()
+        if instance.role.is_owner:
+            owners = Product_Type_Member.objects.filter(product_type=instance.product_type, role__is_owner=True).count()
             if owners <= 1:
                 return Response('There must be at least one owner', status=status.HTTP_400_BAD_REQUEST)
         self.perform_destroy(instance)
