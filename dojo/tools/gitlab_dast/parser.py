@@ -87,30 +87,7 @@ def get_item(vuln, test):
     elif "description" in vuln:
         description += f"{vuln['description']}\n"
 
-    # date
-    if "discovered_at" in vuln:
-        date = datetime.strptime(vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f")
-    else:
-        date = None
-
-    # endpoint
-    location = vuln["location"]
-    if "hostname" in location and "path" in location:
-        url_str = f"{location['hostname']}{location['path']}"
-        # url = hyperlink.parse(url_str) -- not used
-        endpoint = Endpoint.from_uri(url_str)
-    else:
-        endpoint = None
-
-    # TODO: found_by
-
-    # severity
-    severity = ""
-    if "severity" in vuln:
-        severity = vuln["severity"]
-
-    if "solution" in vuln:
-        mitigation = vuln["solution"]
+    # TODO: found_by    
 
     cve = vuln["cve"]
     cwe = 0
@@ -133,18 +110,32 @@ def get_item(vuln, test):
         scanner_confidence=scanner_confidence,  # int
         title=title,  # str
         description=description,  # str
-        date=date,  # datetime object
         references=references,  # str (identifiers)
-        mitigation=mitigation,  # str (solution)
         cve=cve  # str
     )
 
-    if severity:
-        finding.severity = severity
+    # date
+    if "discovered_at" in vuln:
+        finding.date = datetime.strptime(vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f")
+
+    # severity
+    if "severity" in vuln:
+        finding.severity = vuln["severity"]
+
+    # mitigation
+    if "solution" in vuln:
+        finding.mitigation = vuln["solution"]
+
+    # cwe
     if cwe != 0:
         finding.cwe = cwe
-    if endpoint:
-        finding.unsaved_endpoints = [endpoint]
+
+    # endpoint
+    location = vuln["location"]
+    if "hostname" in location and "path" in location:
+        url_str = f"{location['hostname']}{location['path']}"
+        # url = hyperlink.parse(url_str) -- not used
+        finding.unsaved_endpoints = [Endpoint.from_uri(url_str)]
 
     return finding
 
