@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load authorization_tags %}
+
+{% block content %}
+<h3 id="id_heading"> Group {{ group.name }}</h3>
+<div class="row">
+    <div id="tests" class="col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading tight">
+                <div class="clearfix">
+                    <h3 class="pull-left">Group Information</h3>
+                    <div class="dropdown pull-right">
+                        <div class="btn-group">
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    aria-label="Actions" data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-bars"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                {% if request.user.is_superuser %}
+                                <li>
+                                    <a class="" href="{% url 'edit_group' group.id %}">
+                                        <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                </li>
+                                <li role="separator" class="divider"></li>
+                                <li>
+                                    <a class="" href="{% url 'delete_group' group.id %}" id="deleteUser">
+                                        <i class="fa fa-trash"></i> Delete</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <tr>
+                        <td><strong>Group Name</strong></td>
+                        <td>{{ group.name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Group Description</strong></td>
+                        <td>{{ group.description }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default-secondary">
+            <div class="panel-heading">
+                <h3 class="panel-title"><span class="fa fa-info-circle fa-fw" aria-hidden="true"></span>
+                    Metadata
+                </h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <tbody>
+                        <tr>
+                            <td style="width: 200px;"><strong>Number of Users</strong></td>
+                            <td>
+                                {{ group.users|length }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
