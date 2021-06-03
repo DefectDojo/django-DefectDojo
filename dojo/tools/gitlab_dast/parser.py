@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-import hyperlink
 from dojo.models import Finding, Endpoint
 
 
@@ -98,8 +97,8 @@ def get_item(vuln, test):
     location = vuln["location"]
     if "hostname" in location and "path" in location:
         url_str = f"{location['hostname']}{location['path']}"
-        url = hyperlink.parse(url_str)
-        endpoint = Endpoint.from_uri(url)
+        # url = hyperlink.parse(url_str) -- not used
+        endpoint = Endpoint.from_uri(url_str)
     else:
         endpoint = None
 
@@ -144,7 +143,8 @@ def get_item(vuln, test):
         finding.severity = severity
     if cwe != 0:
         finding.cwe = cwe
-    finding.unsaved_endpoints = [endpoint]
+    if endpoint:
+        finding.unsaved_endpoints = [endpoint]
 
     return finding
 
