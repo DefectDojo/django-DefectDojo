@@ -1,4 +1,3 @@
-from os import linesep
 from django.test import TestCase
 from dojo.tools.gitlab_secret_detection_report.parser import (
     GitlabSecretDetectionReportParser,
