@@ -276,3 +276,12 @@ def delete_product_type_member(request, memberid):
         'memberid': memberid,
         'form': memberform,
     })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def edit_product_type_group(request, groupid):
+    print("placeholder")
+
+@user_passes_test(lambda u: u.is_superuser)
+def delete_product_type_group(request, groupid):
+    print("placeholder")

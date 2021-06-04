@@ -47,7 +47,81 @@
                 </table>
             </div>
         </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h4 class="pull-left">Product Type Groups</h4>
+                {% if request.user.is_superuser %}
+                <div class="dropdown pull-right">
+                    <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddProductTypeGroup"
+                            data-toggle="dropdown" aria-expanded="true">
+                        <span class="fa fa-bars"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu2">
+                        <li role="presentation">
+                            <a id="addProductTypeGroup" href="{% url 'add_product_type_group' group.id %}">
+                                <i class="fa fa-plus"></i> Add Product Type
+                            </a>
+                        </li>
+                    </ul>
+                    &nbsp;
+                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                        <i class="fa fa-question-circle text-low"></i></a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% if product_types %}
+        <div class="table-responsive">
+            <table class="tablesorter-bootstrap table table-condensed table-striped">
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Product Type</th>
+                    <th>Role</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for product_type_group in product_types %}
+                <tr>
+                    <td>
+                        <ul>
+                            <li class="dropdown" style="list-style:none;position:absolute">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductTypeMember"
+                                   aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                <ul class="dropdown-menu">
+                                    {% if product_type_group.product_type|has_object_permission:"Product_Type_Manage_Members" %}
+                                    <li>
+                                        <a name="editProductTypeGroup" href="{% url 'edit_product_type_group' product_type_group.id %}">
+                                            <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                    </li>
+                                    {% endif %}
+                                    {% if product_type_group|has_object_permission:"Product_Type_Member_Delete" %}
+                                    <li>
+                                        <a name="deleteProductTypeMember" href="{% url 'delete_product_type_group' product_type_group.id %}">
+                                            <i class="fa fa-trash"></i> Delete</a>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </li>
+                        </ul>
+                    </td>
+                    <td name="member_product_type"><a href="{% url 'view_product_type' product_type_group.product_type.id %}">{{ member.product_type }}</a></td>
+                    <td name="member_product_type_role">{% role_as_string product_type_group.role %}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="panel-body">
+            <small class="text-muted"><em>No product type groups found.</em></small>
+        </div>
+        {% endif %}
+        </div>
     </div>
+
     <div class="col-md-4">
         <div class="panel panel-default-secondary">
             <div class="panel-heading">
