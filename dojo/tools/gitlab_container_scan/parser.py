@@ -1,5 +1,6 @@
 import hashlib
 import json
+import textwrap
 from dojo.models import Finding
 
 
@@ -35,16 +36,6 @@ class GitlabContainerScanParser(object):
             description = vulnerability["description"]
             severity = self.normalise_severity(vulnerability["severity"])
 
-            # Get CVE & CWE
-            cve = ""
-            cwe = ""
-            for id in vulnerability["identifiers"]:
-                if "type" in id:
-                    if id.get("type") == "cve":
-                        cve = id["value"]
-                    if id.get("type") == "cwe":
-                        cwe = id["value"]
-
             component_name = ""
             component_version = ""
             try:
@@ -65,17 +56,19 @@ class GitlabContainerScanParser(object):
             )
 
             # Add component fields if not empty
-            if cve != "":
-                finding.cve = cve
-            if cwe != "":
-                finding.cwe = cwe
+            for id in vulnerability["identifiers"]:
+                if "type" in id:
+                    if id.get("type") == "cve":
+                        finding.cve = id["value"]
+                    if id.get("type") == "cwe":
+                        finding.cwe = id["value"]
             if component_name != "":
-                finding.component_name = component_name[:190] + (
-                    component_name[190:] and "..."
+                finding.component_name = textwrap.shorten(
+                    component_name, width=190, placeholder="..."
                 )
             if component_version != "":
-                finding.component_version = component_version[:90] + (
-                    component_version[90:] and "..."
+                finding.component_version = textwrap.shorten(
+                    component_version, width=90, placeholder="..."
                 )
 
             if "solution" in vulnerability:
