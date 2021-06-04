@@ -12,7 +12,7 @@ urlpatterns = [
         name='delete_group'),
     url(r'^group/add$', views.add_group, name='add_group'),
     url(r'^group/(?P<gid>\d+)/add_product_group', views.add_product_group,
-        name='add_product_group'),
+        name='add_product_group_group'),
     url(r'^group/(?P<gid>\d+)/add_product_type_group', views.add_product_type_group,
-        name='add_product_type_group'),
+        name='add_product_type_group_group'),
 ]
