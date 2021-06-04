@@ -726,12 +726,5 @@
         },
         "model": "dojo.test_type",
         "pk": 195
-    },
-    {
-        "fields": {
-            "name": "GitLab Container Scaning Report"
-        },
-        "model": "dojo.test_type",
-        "pk": 196
     }
 ]

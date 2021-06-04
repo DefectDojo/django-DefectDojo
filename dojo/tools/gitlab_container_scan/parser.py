@@ -26,40 +26,31 @@ class GitlabContainerScanParser(object):
         dupes = dict()
 
         # This is required by schema - it won't be null / undefined
-        date = data['scan']['end_time']
+        date = data["scan"]["end_time"]
 
         # Vulnerabilities is stored on vulnerabilities key
-        vulnerabilities = data['vulnerabilities']
+        vulnerabilities = data["vulnerabilities"]
         for vulnerability in vulnerabilities:
-            # node = data[vulnerability]
-            # if not node['pass']:
-            title = vulnerability['message']
-            description = vulnerability['description']
-            severity = self.normalise_severity(vulnerability['severity'])
+            title = vulnerability["message"]
+            description = vulnerability["description"]
+            severity = self.normalise_severity(vulnerability["severity"])
 
             # Get CVE & CWE
             cve = ""
             cwe = ""
-            for id in vulnerability['identifiers']:
-                try:
-                    if id['type'] == "cve":
-                        cve = id['value']
-                    if id['type'] == "cwe":
-                        cwe = id['value']
-                except:
-                    pass
+            for id in vulnerability["identifiers"]:
+                if "type" in id:
+                    if id.get("type") == "cve":
+                        cve = id["value"]
+                    if id.get("type") == "cwe":
+                        cwe = id["value"]
 
             component_name = ""
             component_version = ""
             try:
-                component_name = vulnerability['location']['dependency']['package']['name']
-                component_version = vulnerability['location']['dependency']['version']
-            except:
-                pass
-
-            solution = ""
-            try:
-                solution = vulnerability["solution"]
+                dependency = vulnerability["location"]["dependency"]
+                component_name = dependency["package"]["name"]
+                component_version = dependency["version"]
             except:
                 pass
 
@@ -69,28 +60,35 @@ class GitlabContainerScanParser(object):
                 test=test,
                 description=description,
                 severity=severity,
-                cve=cve,
-                cwe=cwe,
                 static_finding=True,
                 dynamic_finding=False,
             )
 
             # Add component fields if not empty
+            if cve != "":
+                finding.cve = cve
+            if cwe != "":
+                finding.cwe = cwe
             if component_name != "":
-                finding.component_name = component_name[:190] + (component_name[190:] and '...')
+                finding.component_name = component_name[:190] + (
+                    component_name[190:] and "..."
+                )
             if component_version != "":
-                finding.component_version = component_version[:90] + (component_version[90:] and '...')
+                finding.component_version = component_version[:90] + (
+                    component_version[90:] and "..."
+                )
 
-            # Add mitigation if possible
-            if solution != "":
-                finding.mitigation = solution
+            if "solution" in vulnerability:
+                finding.mitigation = vulnerability["solution"]
 
             # internal de-duplication via description + title
-            dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
+            dupe_key = hashlib.sha256(
+                str(description + title).encode("utf-8")
+            ).hexdigest()
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if finding.description:
-                    find.description += "\n" + finding.description
+                    find.description += "\n\n-----\n\n" + finding.description
                 find.unsaved_endpoints.extend(finding.unsaved_endpoints)
                 dupes[dupe_key] = find
             else:
@@ -101,8 +99,8 @@ class GitlabContainerScanParser(object):
     def normalise_severity(self, severity):
         """
         Normalise GitLab's severity to DefectDojo's
-        (Critical, High, Medium, Low, Unknown, Info) -> (Critical, High, Medium, Low, Informational)
+        (Critical, High, Medium, Low, Unknown, Info) -> (Critical, High, Medium, Low, Info)
         """
-        if severity == "Unknown" or severity == "Info":
-            return "Informational"
+        if severity == "Unknown":
+            return "Info"
         return severity
