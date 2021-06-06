@@ -2,15 +2,11 @@ from enum import IntEnum
 
 
 class Roles(IntEnum):
-    Reader = 0
+    Reader = 5
     API_Importer = 1
     Writer = 2
     Maintainer = 3
     Owner = 4
-
-    @classmethod
-    def choices(cls):
-        return [(key.value, key.name) for key in cls]
 
     @classmethod
     def has_value(cls, value):
