@@ -47,12 +47,14 @@ def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     products = get_authorized_products_for_group(group)
     product_types = get_authorized_product_types_for_group(group)
+    users = group.users
 
     add_breadcrumb(title="View Group", top_level=False, request=request)
     return render(request, 'dojo/view_group.html', {
         'group': group,
         'products': products,
-        'product_types': product_types
+        'product_types': product_types,
+        'users': users
     })
 
 
@@ -76,4 +78,8 @@ def add_product_group(request):
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_product_type_group(request):
+    print("placeholder")
+
+@user_passes_test(lambda u: u.is_superuser)
+def add_user_to_group(request):
     print("placeholder")

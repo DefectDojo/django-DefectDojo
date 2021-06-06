@@ -196,6 +196,32 @@
             {% endif %}
         </div>
 
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4 class="pull-left">Users</h4>
+                    {% if request.user.is_superuser %}
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddGroupUser"
+                                data-toggle="dropdown" aria-expanded="true" aria-label="Add Group User">
+                            <span class="fa fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            <li role="presentation">
+                                <a id="addGroupUser" href="{% url 'add_user_to_group' group.id %}">
+                                    <i class="fa fa-plus"></i> Add User
+                                </a>
+                            </li>
+                        </ul>
+                        &nbsp;
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                            <i class="fa fa-question-circle text-low"></i></a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
         {% endif %}
     </div>
     <div class="col-md-4">

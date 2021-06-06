@@ -15,4 +15,6 @@ urlpatterns = [
         name='add_product_group_group'),
     url(r'^group/(?P<gid>\d+)/add_product_type_group', views.add_product_type_group,
         name='add_product_type_group_group'),
+    url(r'group/(?P<gid>\d+)/add_user_to_group', views.add_user_to_group,
+        name='add_user_to_group')
 ]
