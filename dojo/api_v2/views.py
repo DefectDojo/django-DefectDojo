@@ -1016,6 +1016,7 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
                          mixins.RetrieveModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
+                         mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.none()
