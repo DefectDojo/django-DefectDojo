@@ -30,12 +30,27 @@ class GenericParser(object):
         data = json.load(filename)
         findings = list()
         for item in data['findings']:
+            # remove endpoints of the dictionnary
+            unsaved_endpoints = None
+            if "endpoints" in item:
+                unsaved_endpoints = item["endpoints"]
+                del item["endpoints"]
+
             finding = Finding(**item)
             # manage active/verified overrride
             if active is not None:
                 finding.active = active
             if verified is not None:
                 finding.verified = verified
+
+            # manage endpoints
+            if unsaved_endpoints:
+                finding.unsaved_endpoints = []
+                for item in unsaved_endpoints:
+                    if type(item) is str:
+                        finding.unsaved_endpoints.append(Endpoint.from_uri(item))
+                    else:
+                        finding.unsaved_endpoints.append(Endpoint(**item))
             findings.append(finding)
         return findings
 

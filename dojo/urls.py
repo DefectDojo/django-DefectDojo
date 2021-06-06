@@ -19,7 +19,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
     SonarqubeProductViewSet, RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
-    DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet
+    DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -83,6 +83,7 @@ if settings.FEATURE_AUTHORIZATION_V2:
     v2_api.register(r'product_members', ProductMemberViewSet)
     v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
     v2_api.register(r'product_groups', ProductGroupViewSet)
+    v2_api.register(r'roles', RoleViewSet)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
 v2_api.register(r'sonarqube_product_configurations', SonarqubeProductViewSet)
