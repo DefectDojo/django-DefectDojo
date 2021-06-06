@@ -161,7 +161,7 @@
                                 </ul>
                             </td>
                             <td name="member_product_type"><a href="{% url 'view_product_type' member.product_type.id %}">{{ member.product_type }}</a></td>
-                            <td name="member_product_type_role">{% role_as_string member.role %}</td>
+                            <td name="member_product_type_role">{{ member.role }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -234,7 +234,7 @@
                                 </ul>
                             </td>
                             <td name="member_product"><a href="{% url 'view_product' member.product.id %}">{{ member.product }}</a></td>
-                            <td name="member_product_role">{% role_as_string member.role %}</td>
+                            <td name="member_product_role">{{ member.role }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
