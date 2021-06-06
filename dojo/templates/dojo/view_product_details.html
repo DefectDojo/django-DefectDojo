@@ -253,7 +253,7 @@
                             </td>
                             <td name="member_user">{{ member.user.get_full_name }}</td>
                             <td>Product member</td>
-                            <td name="member_role">{% role_as_string member.role %}</td>
+                            <td name="member_role">{{ member.role }}</td>
                         </tr>
                     {% endfor %}
                     {% for member in product_type_members %}
@@ -263,10 +263,10 @@
                             <td>{{ member.user.get_full_name }}</td>
                             <td>
                                 <a class="" href="{% url 'view_product_type' member.product_type.id %}">
-                                    {{ member.product_type|product_type_name }}
+                                    {{ member.product_type }}
                                 </a>
                             </td>
-                            <td>{% role_as_string member.role %}</td>
+                            <td>{{ member.role }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

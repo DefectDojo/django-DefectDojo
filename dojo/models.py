@@ -380,6 +380,17 @@ class UserContactInfo(models.Model):
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
+class Role(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    is_owner = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
+
+
 class Dojo_Group(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True)
@@ -808,25 +819,25 @@ class Product(models.Model):
 class Product_Member(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Group(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Member(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Group(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Tool_Type(models.Model):
