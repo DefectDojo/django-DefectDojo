@@ -8,6 +8,9 @@ class TestOutpost24Parser(TestCase):
         with open(filename) as file:
             parser = Outpost24Parser()
             findings = parser.get_findings(file, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
             self.assertEquals(item_count, len(findings))
             if item_count > 0:
                 for item in findings:

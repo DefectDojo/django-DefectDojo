@@ -112,14 +112,11 @@ class NessusCSVParser(object):
                 find.unsaved_endpoints = list()
                 dupes[dupe_key] = find
             # manage endpoints
-            endpoint = Endpoint(host='localhost')
-            if 'Host' in row:
-                endpoint.host = row.get('Host')
-            elif 'IP Address' in row:
-                endpoint.host = row.get('IP Address')
-            endpoint.port = row.get('Port')
-            if 'Protocol' in row:
-                endpoint.protocol = row.get('Protocol').lower()
+            endpoint = Endpoint(
+                          protocol=row.get('Protocol').lower() if 'Protocol' in row else None,
+                          host=row.get('Host', row.get('IP Address', 'localhost')),
+                          port=row.get('Port')
+                        )
             find.unsaved_endpoints.append(endpoint)
         return list(dupes.values())
 
@@ -148,8 +145,10 @@ class NessusXMLParser(object):
                         port = item.attrib["port"]
 
                     protocol = None
-                    if str(item.attrib["protocol"]):
-                        protocol = item.attrib["protocol"]
+                    if str(item.attrib["svc_name"]):
+                        protocol = re.sub(r'[^A-Za-z0-9\-\+]+', "", item.attrib["svc_name"])
+                        if protocol == 'www':
+                            protocol = 'http'
 
                     description = ""
                     plugin_output = None
@@ -211,11 +210,16 @@ class NessusXMLParser(object):
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    find.unsaved_endpoints.append(Endpoint(host=ip + (":" + port if port is not None else ""),
-                                                           protocol=protocol))
-                    if fqdn is not None:
-                        find.unsaved_endpoints.append(Endpoint(host=fqdn,
-                                                               protocol=protocol))
+                    if '://' in fqdn:
+                        endpoint = Endpoint.from_uri(fqdn)
+                    else:
+                        if protocol == 'general':
+                            endpoint = Endpoint(host=fqdn if fqdn else ip)
+                        else:
+                            endpoint = Endpoint(protocol=protocol,
+                                                host=fqdn if fqdn else ip,
+                                                port=port)
+                    find.unsaved_endpoints.append(endpoint)
 
         return list(dupes.values())
 
@@ -246,9 +250,9 @@ class NessusParser(object):
 
     def get_findings(self, filename, test):
 
-        if filename.name.lower().endswith('.xml'):
+        if filename.name.lower().endswith('.xml') or filename.name.lower().endswith('.nessus'):
             return NessusXMLParser().get_findings(filename, test)
         elif filename.name.lower().endswith('.csv'):
             return NessusCSVParser().get_findings(filename, test)
         else:
-            raise ValueError('Unknown File Format')
+            raise ValueError('Filename extension not recognized. Use .xml, .nessus or .csv')

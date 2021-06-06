@@ -130,4 +130,6 @@ docker/extra_settings/*
 helm/defectdojo/charts
 
 # generates files for github pages
-public
+docs/public
+docs/node_modules
+docs/resources

@@ -14,7 +14,7 @@ class AnchoreGrypeParser(object):
         return ["anchore_grype"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Anchore Grype"
+        return "anchore_grype"
 
     def get_description_for_scan_types(self, scan_type):
         return "A vulnerability scanner for container images and filesystems. JSON report generated with '-o json' format"
@@ -53,7 +53,7 @@ class AnchoreGrypeParser(object):
                     dynamic_finding=False,
                     component_name=purl.name,
                     component_version=purl.version,
-                    unique_id_from_tool=cve,
+                    vuln_id_from_tool=cve,
                     nb_occurences=1,
                 )
         return list(dupes.values())

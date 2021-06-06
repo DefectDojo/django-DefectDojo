@@ -1,7 +1,6 @@
 import json
 import logging
 import base64
-from urllib.parse import urlparse
 
 from dojo.models import Endpoint, Finding
 
@@ -74,13 +73,7 @@ class BurpApiParser(object):
                     finding.scanner_confidence = convert_confidence(issue)
                 # manage endpoints
                 if "origin" in issue and "path" in issue:
-                    parts = urlparse(issue.get("origin") + issue.get("path"))
-                    finding.unsaved_endpoints = [Endpoint(protocol=parts.scheme,
-                                                            host=parts.netloc,
-                                                            path=parts.path,
-                                                            query=parts.query,
-                                                            fragment=parts.fragment)
-                                                 ]
+                    finding.unsaved_endpoints = [Endpoint.from_uri(issue.get("origin") + issue.get("path"))]
                 finding.unsaved_req_resp = []
                 for evidence in issue.get('evidence', []):
                     if not evidence.get('type') in ['InformationListEvidence', "FirstOrderEvidence"]:

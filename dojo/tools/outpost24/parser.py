@@ -21,7 +21,7 @@ class Outpost24Parser(object):
     def get_findings(self, file, test):
         tree = ElementTree.parse(file)
         items = list()
-        for detail in tree.iterfind('//detaillist/detail'):
+        for detail in tree.iterfind('.//detaillist/detail'):
             # finding details
             title = detail.findtext('name')
             # date = detail.findtext('date') # can be used for Finding.date?
