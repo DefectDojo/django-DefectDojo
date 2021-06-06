@@ -535,7 +535,6 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         finding = self.get_object()
 
         if request.method == 'POST':
-            print(isinstance(request.data, list))
             burps = serializers.BurpRawRequestResponseSerializer(data=request.data, many=isinstance(request.data, list))
             if burps.is_valid():
                 for pair in burps.validated_data['req_resp']:
@@ -1086,7 +1085,6 @@ class DjangoFilterDescriptionInspector(CoreAPICompatInspector):
         if isinstance(filter_backend, DjangoFilterBackend):
             result = super(DjangoFilterDescriptionInspector, self).get_filter_parameters(filter_backend)
             for param in result:
-                print('param: ', param)
                 if not param.get('description', ''):
                     param.description = "Filter the returned list by {field_name}".format(field_name=param.name)
 
