@@ -343,10 +343,6 @@ class DojoGroupSerializer(serializers.ModelSerializer):
 
 
 class GlobalRoleSerializer(serializers.ModelSerializer):
-    role_name = serializers.SerializerMethodField()
-
-    def get_role_name(self, obj):
-        return Roles(obj.role).name
 
     class Meta:
         model = Global_Role
@@ -371,11 +367,6 @@ class GlobalRoleSerializer(serializers.ModelSerializer):
             raise ValidationError("Global_Role cannot have both user and group")
 
         return data
-
-    def validate_role(self, value):
-        if not Roles.has_value(value):
-            raise ValidationError('Role {} does not exist'.format(value))
-        return value
 
 
 class AddUserSerializer(serializers.ModelSerializer):

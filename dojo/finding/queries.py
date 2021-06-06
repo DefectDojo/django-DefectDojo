@@ -27,11 +27,11 @@ def get_authorized_findings(permission, queryset=None, user=None):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return findings
 
-        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role, permission):
+        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
             return findings
 
         for group in get_groups(user):
-            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role, permission):
+            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
                 return findings
 
         roles = get_roles_for_permission(permission)
@@ -82,11 +82,11 @@ def get_authorized_stub_findings(permission):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Stub_Finding.objects.all()
 
-        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role, permission):
+        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
             return Stub_Finding.objects.all()
 
         for group in get_groups(user):
-            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role, permission):
+            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
                 return Stub_Finding.objects.all()
 
         roles = get_roles_for_permission(permission)

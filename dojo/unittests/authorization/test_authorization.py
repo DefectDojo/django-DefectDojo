@@ -23,7 +23,7 @@ class TestAuthorization(TestCase):
         cls.global_role_user = Global_Role()
         cls.global_role_user.id = 1
         cls.global_role_user.user = cls.user2
-        cls.global_role_user.role = Roles.Reader
+        cls.global_role_user.role = Role.objects.get(id=Roles.Reader)
 
         cls.product_type = Product_Type()
         cls.product_type.id = 1
@@ -100,7 +100,7 @@ class TestAuthorization(TestCase):
         cls.global_role_group = Global_Role()
         cls.global_role_group.id = 2
         cls.global_role_group.group = cls.group2
-        cls.global_role_group.role = Roles.Maintainer
+        cls.global_role_group.role = Role.objects.get(id=Roles.Maintainer)
 
         cls.user3 = Dojo_User()
         cls.user3.id = 2
@@ -452,6 +452,7 @@ class TestAuthorization(TestCase):
     @patch('dojo.models.Dojo_Group.objects')
     def test_user_in_group_with_global_role_no_permission(self, mock_foo):
         mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [self.group2]
 
         result = user_has_permission(self.user3, self.product, Permissions.Product_Delete)
@@ -460,6 +461,7 @@ class TestAuthorization(TestCase):
 
     @patch('dojo.models.Dojo_Group.objects')
     def test_user_in_group_with_global_role_success(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [self.group2]
 

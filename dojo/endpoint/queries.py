@@ -27,11 +27,11 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return endpoints
 
-        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role, permission):
+        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
             return endpoints
 
         for group in get_groups(user):
-            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role, permission):
+            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
                 return endpoints
 
         roles = get_roles_for_permission(permission)
@@ -87,11 +87,11 @@ def get_authorized_endpoint_status(permission, queryset=None, user=None):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return endpoint_status
 
-        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role, permission):
+        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
             return endpoint_status
 
         for group in get_groups(user):
-            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role, permission):
+            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
                 return endpoint_status
 
         roles = get_roles_for_permission(permission)

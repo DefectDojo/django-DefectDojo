@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dojo', '0105_endpoint_host_migration'),
+        ('dojo', '0106_role_model'),
     ]
 
     operations = [
@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('group', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='dojo.dojo_group')),
                 ('user', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('role', models.IntegerField(blank=True, null=True, help_text='The global role will be applied to all product types and products.', verbose_name='Global role')),
+                ('role', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dojo.role', blank=True, null=True, help_text='The global role will be applied to all product types and products.', verbose_name='Global role')),
             ],
         ),
     ]

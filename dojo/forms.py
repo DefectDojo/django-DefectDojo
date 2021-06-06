@@ -1614,11 +1614,6 @@ class UserContactInfoForm(forms.ModelForm):
 
 
 class GlobalRoleForm(forms.ModelForm):
-    if settings.FEATURE_AUTHORIZATION_V2:
-        blank_choice = [(None, '----------')]
-        role = forms.ChoiceField(choices=blank_choice + Roles.choices(), required=False,
-            help_text='The global role will be applied to all product types and products.',
-            label="Global role")
 
     class Meta:
         model = Global_Role

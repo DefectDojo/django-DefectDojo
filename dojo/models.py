@@ -403,7 +403,7 @@ class Dojo_Group(models.Model):
 class Global_Role(models.Model):
     user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
     group = models.OneToOneField(Dojo_Group, null=True, blank=True, on_delete=models.CASCADE)
-    role = models.IntegerField(blank=True, null=True, help_text="The global role will be applied to all product types and products.", verbose_name="Global role")
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, help_text="The global role will be applied to all product types and products.", verbose_name="Global role")
 
 
 class Contact(models.Model):
