@@ -23,6 +23,8 @@ class ProductMemberTest(BaseTestCase):
             driver.find_element_by_id("addProductMember").click()
             # Select the product type 'Research and Development'
             Select(driver.find_element_by_id("id_product")).select_by_visible_text("QA Test")
+            # Select the role 'Reader'
+            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
             # "Click" the submit button to complete the transaction
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
             # Assert the message to determine success status
@@ -48,7 +50,7 @@ class ProductMemberTest(BaseTestCase):
             # Open the menu to manage members and click the 'Edit' button
             driver.find_elements_by_name("dropdownManageProductMember")[0].click()
             driver.find_elements_by_name("editProductMember")[0].click()
-            # Select the role 'Owner'
+            # Select the role 'Maintainer'
             Select(driver.find_element_by_id("id_role")).select_by_visible_text("Maintainer")
             # "Click" the submit button to complete the transaction
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
@@ -100,6 +102,8 @@ class ProductMemberTest(BaseTestCase):
             driver.find_element_by_id("addProductMember").click()
             # Select the user 'propersahm'
             Select(driver.find_element_by_id("id_user")).select_by_visible_text("Proper Samuel (propersahm)")
+            # Select the role 'Reader'
+            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
             # "Click" the submit button to complete the transaction
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
             # Assert the message to determine success status
@@ -125,7 +129,7 @@ class ProductMemberTest(BaseTestCase):
             # Open the menu to manage members and click the 'Edit' button
             driver.find_elements_by_name("dropdownManageProductMember")[0].click()
             driver.find_elements_by_name("editProductMember")[0].click()
-            # Select the role 'Owner'
+            # Select the role 'Maintainer'
             Select(driver.find_element_by_id("id_role")).select_by_visible_text("Maintainer")
             # "Click" the submit button to complete the transaction
             driver.find_element_by_css_selector("input.btn.btn-primary").click()

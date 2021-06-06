@@ -39,7 +39,7 @@ import logging
 from crum import get_current_user
 from dojo.utils import get_system_setting, get_product
 from django.conf import settings
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
@@ -191,8 +191,6 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_Type_MemberForm, self).__init__(*args, **kwargs)
@@ -309,8 +307,6 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_MemberForm, self).__init__(*args, **kwargs)
