@@ -1,4 +1,3 @@
-from dojo.api_v2.serializers import ProductSerializer
 from drf_yasg import openapi, utils
 from .prefetcher import _Prefetcher
 from .utils import _get_prefetchable_fields
@@ -35,6 +34,17 @@ def get_prefetch_schema(methods, serializer):
     return schema
 
 
+def _get_path_to_GET_serializer_map(generator):
+    path_to_GET_serializer = dict()
+    for path, path_pattern, method, view in generator._get_paths_and_endpoints():
+        print(path, path_pattern, method, view)
+        if method == 'GET':
+            if hasattr(view, 'get_serializer_class'):
+                path_to_GET_serializer[path] = view.get_serializer_class()
+
+    return path_to_GET_serializer
+
+
 def prefetch_postprocessing_hook(result, generator, request, public):
     """ OpenAPI v3 (drf-spectacular) Some endpoints are using the PrefetchListMixin and PrefetchRetrieveMixin.
     These have nothing to do with Django prefetch_related.
@@ -43,13 +53,15 @@ def prefetch_postprocessing_hook(result, generator, request, public):
     will be returned in an additional property in the response.
     The below processor ensures the result schema matches this.
     """
+
+    serializer_classes = _get_path_to_GET_serializer_map(generator)
+
     paths = result.get('paths', {})
     for path in paths:
         if 'get' in paths[path]:
             for parameter in paths[path]['get']['parameters']:
                 if parameter['name'] == 'prefetch':
-                    print('prefetch param found for ', path, parameter['name'] == 'prefetch')
-                    fields = _get_prefetchable_fields(ProductSerializer())
+                    fields = _get_prefetchable_fields(serializer_classes[path])
 
                     field_names = [name for name, _ in fields]
 

@@ -466,7 +466,7 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                                                     'test__engagement__product__prod_type').distinct()
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.request and self.request.method == 'POST':
             return serializers.FindingCreateSerializer
         else:
             return serializers.FindingSerializer
@@ -1423,7 +1423,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
         return get_authorized_stub_findings(Permissions.Finding_View).distinct()
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.request and self.request.method == 'POST':
             return serializers.StubFindingCreateSerializer
         else:
             return serializers.StubFindingSerializer
@@ -1467,7 +1467,7 @@ class TestsViewSet(mixins.ListModelMixin,
                                                 'files').distinct()
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.request and self.request.method == 'POST':
             if self.action == 'accept_risks':
                 return ra_api.AcceptedRiskSerializer
             return serializers.TestCreateSerializer
