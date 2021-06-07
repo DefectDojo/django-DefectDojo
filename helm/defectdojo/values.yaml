@@ -14,7 +14,7 @@ createPostgresqlSecret: false
 # can be:
 # - disabled, default
 # - enabled, enables tracking configuration changes based on SHA256
-# - forced, will always respin -> helm3 feature (Need to double check)
+# - forced, will always respin -> helm3 feature only (alternative in helm2 use: --recreate-pods)
 # trackConfig: disabled
 
 # Configuration value to select database type
