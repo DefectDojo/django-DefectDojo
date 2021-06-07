@@ -1,4 +1,4 @@
-name: k8s deployment
+name: k8s upgrade
 on:
   pull_request:
   push:
@@ -129,12 +129,13 @@ jobs:
       - name: Load images from artifacts
         uses: actions/download-artifact@v2
 
-      - name: Load docker images
-        run: |-
-             eval $(minikube docker-env)
-             docker load -i nginx/nginx_img
-             docker load -i django/django_img
-             docker images
+# it should be dropped to later stage
+#      - name: Load docker images
+#        run: |-
+#             eval $(minikube docker-env)
+#             docker load -i nginx/nginx_img
+#             docker load -i django/django_img
+#             docker images
 
       - name: Configure HELM repos
         run: |-
@@ -161,11 +162,10 @@ jobs:
                defectdojo \
                ./helm/defectdojo \
                --set django.ingress.enabled=true \
-               --set imagePullPolicy=Never \
+               --set imagePullPolicy=Always \
                ${{ steps.set.outputs[matrix.databases] }} \
                ${{ steps.set.outputs[matrix.brokers] }} \
                --set createSecret=true \
-              #  --set imagePullSecrets=defectdojoregistrykey
 
       - name: Check deployment status
         run: |-
@@ -233,5 +233,5 @@ jobs:
                done
                exit 1
              else
-               echo "DD K8S successfully deployed"
+               echo "DD K8S successfully deployed from from prod repo"
              fi
