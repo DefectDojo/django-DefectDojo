@@ -169,7 +169,7 @@ jobs:
              kubectl get ingress
              kubectl get services
 
-      - name: Check Stable Application
+      - name: Check Stable Application and do upgrade than check it 
         run: |-
              to_complete () {
                kubectl wait --for=$1 $2 --timeout=500s --selector=$3 2>/tmp/test || true
@@ -237,8 +237,7 @@ jobs:
              fi
              }
              login_check
-      - name: Deploying Dev Django application with ${{ matrix.databases }} ${{ matrix.brokers }}
-        run: |-
+             echo "Doing upgrade from dev"
              helm upgrade --install \
                defectdojo \
                ./helm/defectdojo \
@@ -246,7 +245,7 @@ jobs:
                --set imagePullPolicy=Never \
                ${{ steps.set.outputs[matrix.databases] }} \
                ${{ steps.set.outputs[matrix.brokers] }} \
-      - name: Checking the upgrade
-        run: |-
+
+             echo "Checking upgrade"
              wait_for
              login_check
