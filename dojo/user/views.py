@@ -422,8 +422,6 @@ def edit_user(request, uid):
             contact.user = user
             contact.save()
             global_role = global_role_form.save(commit=False)
-            if global_role.role == '':
-                global_role.role = None
             global_role.user = user
             global_role.save()
             messages.add_message(request,
