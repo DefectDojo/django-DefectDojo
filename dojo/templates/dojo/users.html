@@ -113,7 +113,7 @@
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
                                 {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
-                                <td>{{ u.global_role.role }}</td>
+                                <td>{% if u.global_role.role %} {{ u.global_role.role }} {% endif %}</td>
                                 {% endif %}
                                 </tr>
                         {% endfor %}

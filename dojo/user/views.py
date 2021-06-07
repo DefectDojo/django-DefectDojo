@@ -229,8 +229,6 @@ def view_profile(request):
                                     messages.WARNING,
                                     'Only superusers are allowed to change their global role.',
                                     extra_tags='alert-warning')
-            if global_role.role == '':
-                global_role.role = None
             global_role.user = user
             global_role.save()
 
@@ -318,8 +316,6 @@ def add_user(request):
             contact.user = user
             contact.save()
             global_role = global_role_form.save(commit=False)
-            if global_role.role == '':
-                global_role.role = None
             global_role.user = user
             global_role.save()
             if not settings.FEATURE_AUTHORIZATION_V2:

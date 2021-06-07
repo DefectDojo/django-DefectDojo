@@ -327,7 +327,7 @@
                         {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                         <tr>
                             <td style="width: 200px;"><strong>Global role</strong></td>
-                            <td>{{ user.global_role.role }}</td>
+                            <td>{% if user.global_role.role %} {{ user.global_role.role }} {% endif %}</td>
                         </tr>
                         {% endif %}
                     </tbody>
