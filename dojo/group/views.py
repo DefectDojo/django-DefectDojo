@@ -24,7 +24,8 @@ from dojo.utils import get_page_items, add_breadcrumb
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.authorization.roles_permissions import Permissions
-from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group
+from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group, \
+    get_members_for_group
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     products = get_authorized_products_for_group(group)
     product_types = get_authorized_product_types_for_group(group)
-    users = group.users
+    users = group.users.all()
 
     add_breadcrumb(title="View Group", top_level=False, request=request)
     return render(request, 'dojo/view_group.html', {
@@ -72,14 +73,22 @@ def delete_group(request, gid):
 def add_group(request):
     print("placeholder")
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def add_product_group(request):
     print("placeholder")
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_product_type_group(request):
     print("placeholder")
 
+
 @user_passes_test(lambda u: u.is_superuser)
-def add_user_to_group(request):
+def add_member_to_group(request):
+    print("placeholder")
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def delete_group_member(request):
     print("placeholder")
