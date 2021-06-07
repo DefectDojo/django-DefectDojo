@@ -84,7 +84,7 @@ jobs:
           context: .
           push: false
           tags: |
-            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
+            ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:dev
           file: Dockerfile.${{ env.docker-image }}
           outputs: type=docker,dest=${{ env.docker-image }}_img
           cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
@@ -129,13 +129,13 @@ jobs:
       - name: Load images from artifacts
         uses: actions/download-artifact@v2
 
-# it should be dropped to later stage
-#      - name: Load docker images
-#        run: |-
-#             eval $(minikube docker-env)
-#             docker load -i nginx/nginx_img
-#             docker load -i django/django_img
-#             docker images
+
+      - name: Load dev docker images
+        run: |-
+             eval $(minikube docker-env)
+             docker load -i nginx/nginx_img
+             docker load -i django/django_img
+             docker images
 
       - name: Configure HELM repos
         run: |-
@@ -152,11 +152,7 @@ jobs:
               echo ::set-output name=redis:: "${{ env.HELM_REDIS_BROKER_SETTINGS }}"
               echo ::set-output name=rabbit:: "${{ env.HELM_RABBIT_BROKER_SETTINGS }}"
 
-      # - name: Create image pull Secrets
-      #   run: |-
-      #         kubectl create secret docker-registry defectdojoregistrykey --docker-username=${{ secrets.DOCKERHUB_USERNAME }} --docker-password=${{ secrets.DOCKERHUB_TOKEN }}
-      #         kubectl get secrets
-      - name: Deploying Djano application with ${{ matrix.databases }} ${{ matrix.brokers }}
+      - name: Deploying Stable Django application with ${{ matrix.databases }} ${{ matrix.brokers }}
         run: |-
              helm install \
                defectdojo \
@@ -167,13 +163,13 @@ jobs:
                ${{ steps.set.outputs[matrix.brokers] }} \
                --set createSecret=true \
 
-      - name: Check deployment status
+      - name: Check Stable deployment status
         run: |-
              kubectl get pods
              kubectl get ingress
              kubectl get services
 
-      - name: Check Application
+      - name: Check Stable Application
         run: |-
              to_complete () {
                kubectl wait --for=$1 $2 --timeout=500s --selector=$3 2>/tmp/test || true
@@ -188,6 +184,7 @@ jobs:
                fi
                return ${?}
              }
+             wait_for () {
              echo "Waiting for init job..."
              to_complete  "condition=Complete" job "defectdojo.org/component=initializer"
              echo "Waiting for celery pods..."
@@ -196,6 +193,9 @@ jobs:
              to_complete  "condition=ready" pod "defectdojo.org/component=django"
              echo "Pods up and ready to rumbole"
              kubectl get pods
+             }
+             wait_for
+             login_check () {
              RETRY=0
              while :
                do
@@ -235,3 +235,18 @@ jobs:
              else
                echo "DD K8S successfully deployed from from prod repo"
              fi
+             }
+             login_check
+      - name: Deploying Dev Django application with ${{ matrix.databases }} ${{ matrix.brokers }}
+        run: |-
+             helm upgrade --install \
+               defectdojo \
+               ./helm/defectdojo \
+               --set django.ingress.enabled=true \
+               --set imagePullPolicy=Never \
+               ${{ steps.set.outputs[matrix.databases] }} \
+               ${{ steps.set.outputs[matrix.brokers] }} \
+      - name: Checking the upgrade
+        run: |-
+             wait_for
+             login_check
