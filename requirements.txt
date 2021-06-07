@@ -18,11 +18,11 @@ django-slack==5.16.2
 django-tagging==0.5.0
 django-watson==1.5.5
 django-prometheus==2.1.0
-Django==3.1.11
+Django==3.1.12
 djangorestframework==3.12.4
 gunicorn==20.1.0
 html2text==2020.1.16
-humanize==3.6.0
+humanize==3.7.0
 jira==3.0.1
 PyGithub==1.55
 lxml==4.6.3
