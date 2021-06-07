@@ -169,7 +169,7 @@ jobs:
              kubectl get ingress
              kubectl get services
 
-      - name: Check Stable Application and do upgrade than check it 
+      - name: Check Stable Application and do upgrade, than check it
         run: |-
              to_complete () {
                kubectl wait --for=$1 $2 --timeout=500s --selector=$3 2>/tmp/test || true
@@ -233,10 +233,10 @@ jobs:
                done
                exit 1
              else
-               echo "DD K8S successfully deployed from from prod repo"
+               echo "DD K8S successfully $1"
              fi
              }
-             login_check
+             login_check deployed
              echo "Doing upgrade from dev"
              helm upgrade --install \
                defectdojo \
@@ -247,5 +247,6 @@ jobs:
                ${{ steps.set.outputs[matrix.brokers] }} \
 
              echo "Checking upgrade"
+             sleep 10
              wait_for
-             login_check
+             login_check upgraded
