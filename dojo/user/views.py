@@ -441,17 +441,18 @@ def add_product_type_member(request, uid):
     if request.method == 'POST':
         memberform = Add_Product_Type_Member_UserForm(request.POST, initial={'user': user.id})
         if memberform.is_valid():
-            members = Product_Type_Member.objects.filter(product_type=memberform.instance.product_type, user=memberform.instance.user)
-            if members.count() > 0:
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    'Product type member already exists.',
-                                    extra_tags='alert-warning')
-            else:
-                memberform.save()
+            if 'product_types' in memberform.cleaned_data and len(memberform.cleaned_data['product_types']) > 0:
+                for product_type in memberform.cleaned_data['product_types']:
+                    existing_members = Product_Type_Member.objects.filter(product_type=product_type, user=user)
+                    if existing_members.count() == 0:
+                        product_type_member = Product_Type_Member()
+                        product_type_member.product_type = product_type
+                        product_type_member.user = user
+                        product_type_member.role = memberform.cleaned_data['role']
+                        product_type_member.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'Product type member added successfully.',
+                                    'Product type members added successfully.',
                                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_user', args=(uid, )))
     add_breadcrumb(title="Add Product Type Member", top_level=False, request=request)
@@ -468,19 +469,20 @@ def add_product_member(request, uid):
     if request.method == 'POST':
         memberform = Add_Product_Member_UserForm(request.POST, initial={'user': user.id})
         if memberform.is_valid():
-            members = Product_Member.objects.filter(product=memberform.instance.product, user=memberform.instance.user)
-            if members.count() > 0:
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    'Product member already exists.',
-                                    extra_tags='alert-warning')
-            else:
-                memberform.save()
-                messages.add_message(request,
-                                    messages.SUCCESS,
-                                    'Product member added successfully.',
-                                    extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_user', args=(uid, )))
+            if 'products' in memberform.cleaned_data and len(memberform.cleaned_data['products']) > 0:
+                for product in memberform.cleaned_data['products']:
+                    existing_members = Product_Member.objects.filter(product=product, user=user)
+                    if existing_members.count() == 0:
+                        product_member = Product_Member()
+                        product_member.product = product
+                        product_member.user = user
+                        product_member.role = memberform.cleaned_data['role']
+                        product_member.save()
+            messages.add_message(request,
+                                messages.SUCCESS,
+                                'Product members added successfully.',
+                                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_user', args=(uid, )))
     add_breadcrumb(title="Add Product Member", top_level=False, request=request)
     return render(request, 'dojo/new_product_member_user.html', {
         'user': user,
