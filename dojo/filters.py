@@ -740,6 +740,7 @@ class ProductEngagementFilter(DojoFilter):
 
 
 class ApiEngagementFilter(DojoFilter):
+    product__prod_type = NumberInFilter(field_name='product__prod_type', lookup_expr='in')
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
                              help_text='Comma seperated list of exact tags')
