@@ -252,6 +252,6 @@ jobs:
              kubectl get pods  -o jsonpath="{.items[*].spec.containers[*].image}"
 
              echo "Checking upgrade"
-             sleep 20
+             sleep 60
              wait_for
              login_check upgraded
