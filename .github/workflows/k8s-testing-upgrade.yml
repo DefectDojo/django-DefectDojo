@@ -168,6 +168,8 @@ jobs:
              kubectl get pods
              kubectl get ingress
              kubectl get services
+             echo "List images"
+             kubectl get pods  -o jsonpath="{.items[*].spec.containers[*].image}"
 
       - name: Check Stable Application and do upgrade, than check it
         run: |-
@@ -245,6 +247,9 @@ jobs:
                --set imagePullPolicy=Never \
                ${{ steps.set.outputs[matrix.databases] }} \
                ${{ steps.set.outputs[matrix.brokers] }} \
+
+             echo "List images"
+             kubectl get pods  -o jsonpath="{.items[*].spec.containers[*].image}"
 
              echo "Checking upgrade"
              sleep 10
