@@ -1528,8 +1528,6 @@ class NoteTypeViewSet(mixins.ListModelMixin,
 class NotesViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
-                   mixins.CreateModelMixin,
-                   mixins.DestroyModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.NoteSerializer
     queryset = Notes.objects.all()
