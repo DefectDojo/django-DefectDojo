@@ -95,7 +95,7 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                                 product.tags = ",".join(project.tag_list)
                             if hasattr(project, 'web_url') and len(project.web_url) > 0:
                                 product.description = "[" + project.web_url + "](" + project.web_url + ")"
-                     product.save()
+                    product.save()
                 else:
                     product_member, created = Product_Member.objects.get_or_create(product=product, user=user)
                     if created:
