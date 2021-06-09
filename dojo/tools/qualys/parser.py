@@ -253,8 +253,6 @@ class QualysParser(object):
         return "Qualys WebGUI output files can be imported in XML format."
 
     def get_findings(self, file, test):
-
-
         if file.name.lower().endswith('.csv'):
             return csv_parser.parse_csv(file)
         else:

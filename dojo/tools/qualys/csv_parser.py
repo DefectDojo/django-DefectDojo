@@ -1,6 +1,5 @@
 import csv
 import io
-import logging
 from datetime import datetime
 
 from dojo.models import Finding, Endpoint
@@ -29,11 +28,10 @@ def parse_csv(csv_file) -> [Finding]:
     report_findings = get_report_findings(csv_reader)
     dojo_findings = build_findings_from_dict(report_findings)
 
-
     return dojo_findings
 
 
-def get_report_findings(csv_reader) ->[dict]:
+def get_report_findings(csv_reader) -> [dict]:
     """
     Filters out the unneded information at the beginning of the Qualys CSV report.
     Args:
@@ -52,6 +50,14 @@ def get_report_findings(csv_reader) ->[dict]:
     return report_findings
 
 
+def get_references(cve_list):
+    if cve_list:
+        return '\n'.join(
+            [f'https://cve.mitre.org/cgi-bin/cvename.cgi?name={cve.strip()}' for cve in cve_list.split(',')])
+    else:
+        return None
+
+
 def build_findings_from_dict(report_findings) -> [Finding]:
     """
     Takes a Dict built from CSV and creates a Finding object
@@ -60,24 +66,27 @@ def build_findings_from_dict(report_findings) -> [Finding]:
     Returns:
 
     """
-    severity_lookup = {1: 'Informational', 2: 'Low', 3: 'Medium', 4: 'High', 5: ' Critical'}
+    severity_lookup = {'1': 'Informational', '2': 'Low', '3': 'Medium', '4': 'High', '5': 'Critical'}
 
     dojo_findings = []
 
     for report_finding in report_findings:
-        if report_finding['FQDN']:
-            endpoint = Endpoint.from_uri(report_finding['FQDN'])
+
+        if report_finding.get('FQDN'):
+            endpoint = Endpoint.from_uri(report_finding.get('FQDN'))
         else:
-            endpoint = Endpoint.from_uri(report_finding['IP'])
+            endpoint = Endpoint(host=report_finding['IP'])
 
         finding = Finding(
             title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
             mitigation=report_finding['Solution'],
             description=report_finding['Threat'],
             severity=severity_lookup.get(report_finding['Severity'], 'Informational'),
+            references=get_references(report_finding['CVE ID']),
             impact=report_finding['Impact'],
             date=datetime.strptime(report_finding['Last Detected'], "%m/%d/%Y %H:%M:%S").date(),
-            vuln_id_from_tool=report_finding['QID']
+            vuln_id_from_tool=report_finding['QID'],
+            cvssv3_score = report_finding['CVSS3']
         )
 
         if report_finding['Date Last Fixed']:

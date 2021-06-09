@@ -561,9 +561,24 @@ see
 
 ### Qualys Scan
 
+#### Qualys Scan Report (XML)
+
 Qualys output files can be imported in API XML format. Qualys output
 files can be imported in WebGUI XML format.
 
+#### Qualys Scan Report (CSV)
+Qualys Scan Report in CSV format. Include the following detailed results in the Report Template
+```
+ Vulnerability Details
+     Threat
+     Impact
+   Solution
+        Patches and Workarounds
+        Virtual Patches and Mitigating Controls
+     Compliance
+     Exploitability
+     Associated Malware
+```
 ### Qualys Webapp Scan
 
 Qualys WebScan output files can be imported in XML format.
