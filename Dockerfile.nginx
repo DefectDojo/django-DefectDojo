@@ -70,6 +70,7 @@ ARG uid=1001
 ARG appuser=defectdojo
 COPY --from=collectstatic /app/static/ /usr/share/nginx/html/static/
 COPY wsgi_params nginx/nginx.conf nginx/nginx_TLS.conf /etc/nginx/
+COPY nginx/ssl/ /etc/nginx/ssl/
 COPY docker/entrypoint-nginx.sh /
 RUN \
   apk add --no-cache openssl && \
