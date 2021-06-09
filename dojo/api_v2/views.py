@@ -340,6 +340,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
                               mixins.UpdateModelMixin,
                               mixins.CreateModelMixin,
+                              mixins.DestroyModelMixin,
                               viewsets.GenericViewSet):
     serializer_class = serializers.FindingTemplateSerializer
     queryset = Finding_Template.objects.all()
@@ -1147,6 +1148,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
                           mixins.CreateModelMixin,
                           mixins.UpdateModelMixin,
+                          mixins.DestroyModelMixin,
                           viewsets.GenericViewSet):
     serializer_class = serializers.StubFindingSerializer
     queryset = Stub_Finding.objects.none()
@@ -1325,6 +1327,7 @@ class TestsViewSet(mixins.ListModelMixin,
 class TestTypesViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
+                       mixins.DestroyModelMixin,
                        mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.TestTypeSerializer
@@ -1338,6 +1341,8 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                       prefetch.PrefetchRetrieveMixin,
                       mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.CreateModelMixin,
                       mixins.DestroyModelMixin,
                       viewsets.GenericViewSet):
     serializer_class = serializers.TestImportSerializer
@@ -1523,6 +1528,8 @@ class NoteTypeViewSet(mixins.ListModelMixin,
 class NotesViewSet(mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
                    mixins.UpdateModelMixin,
+                   mixins.CreateModelMixin,
+                   mixins.DestroyModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.NoteSerializer
     queryset = Notes.objects.all()
