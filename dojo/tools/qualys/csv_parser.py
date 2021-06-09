@@ -86,7 +86,7 @@ def build_findings_from_dict(report_findings) -> [Finding]:
             impact=report_finding['Impact'],
             date=datetime.strptime(report_finding['Last Detected'], "%m/%d/%Y %H:%M:%S").date(),
             vuln_id_from_tool=report_finding['QID'],
-            cvssv3_score = report_finding['CVSS3']
+            cvssv3_score=report_finding['CVSS3']
         )
 
         if report_finding['Date Last Fixed']:
