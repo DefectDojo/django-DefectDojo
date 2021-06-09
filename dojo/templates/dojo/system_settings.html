@@ -2,12 +2,14 @@
 {% load static %}
 
 {% block add_styles %}
+    {{ block.super }}
 .chosen-container {
     width: 70% !important;
 }
 {% endblock %}
 
 {% block content %}
+    {{ block.super }}
 <div class="row">
     <h3> System Status </h3>
     <br>

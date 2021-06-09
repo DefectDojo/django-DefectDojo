@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+    {{ block.super }}
     <form method="GET" id="calfilter" action="/calendar">
         <div class="container-fluid chosen-container side-by-side">
             <div class="row">

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load get_attribute %}
 {% block content %}
+    {{ block.super }}
     <h3> Add Child Rules </h3>
     <form class="form-horizontal" action="{%  url 'Add Child' pid %}" method="post">{% csrf_token %}
         {% for f in form %}

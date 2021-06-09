@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+    {{ block.super }}
  {{ block.super }}
     <h3> Add Tracked Files to a Product</h3>
     <form class="form-horizontal" action="{% url 'new_object' pid %}" method="post">{% csrf_token %}

@@ -5,11 +5,13 @@
 {% load authorization_tags %}
 {% load static %}
 {% block add_styles %}
+    {{ block.super }}
     .tooltip-inner {
       max-width: 350px;
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
 
 <div class="row">
   <div class="col-md-8">

@@ -2,11 +2,13 @@
 {% load static %}
 {% load display_tags %}
 {% block add_styles %}
+    {{ block.super }}
 .chosen-container {
     width: 70% !important;
 }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Add Tests</h3>
     <form class="form-horizontal" action="" enctype="multipart/form-data" method="post">
 	{% csrf_token %}
