@@ -76,12 +76,12 @@ def build_findings_from_dict(report_findings) -> [Finding]:
             description=report_finding['Threat'],
             severity=severity_lookup.get(report_finding['Severity'], 'Informational'),
             impact=report_finding['Impact'],
-            date=datetime.strptime(report_finding['Last Detected'], "%Y-%m-%dT%H:%M:%SZ").date(),
+            date=datetime.strptime(report_finding['Last Detected'], "%m/%d/%Y %H:%M:%S").date(),
             vuln_id_from_tool=report_finding['QID']
         )
 
         if report_finding['Date Last Fixed']:
-            finding.mitigated = datetime.strptime(report_finding['Date Last Fixed'], "%Y-%m-%dT%H:%M:%SZ").date()
+            finding.mitigated = datetime.strptime(report_finding['Date Last Fixed'], "%m/%d/%Y %H:%M:%S").date()
             finding.is_Mitigated = True
         else:
             finding.is_Mitigated = False
