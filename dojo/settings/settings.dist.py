@@ -9,7 +9,7 @@ root = environ.Path(__file__) - 3  # Three folders back
 # reference: https://pypi.org/project/django-environ/
 env = environ.Env(
     # Set casting and default values
-    DD_SITE_URL=(str, 'http://localhost:8080'),
+    DD_SITE_URL=(str, 'https://defect-dojo.rvision.local/'),
     DD_DEBUG=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ''),
@@ -920,7 +920,8 @@ JIRA_ISSUE_TYPE_CHOICES_CONFIG = (
     ('Epic', 'Epic'),
     ('Spike', 'Spike'),
     ('Bug', 'Bug'),
-    ('Security', 'Security')
+    ('Security', 'Security'),
+    ('Vulnerability','Vulnerability')
 )
 
 JIRA_SSL_VERIFY = env('DD_JIRA_SSL_VERIFY')
