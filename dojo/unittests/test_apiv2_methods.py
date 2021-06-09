@@ -4,12 +4,9 @@ from rest_framework.test import APITestCase, force_authenticate
 from drf_yasg.generators import OpenAPISchemaGenerator
 from drf_yasg.openapi import Info
 from dojo.models import Dojo_User
-
-
 from dojo.urls import v2_api
 
 SWAGGER_SCHEMA_GENERATOR = OpenAPISchemaGenerator(Info("defectdojo", "v2"))
-BASE_API_URL = "/api/v2"
 
 
 class ApiEndpointMethods(APITestCase):
