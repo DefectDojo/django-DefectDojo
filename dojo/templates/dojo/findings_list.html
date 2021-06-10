@@ -3,7 +3,6 @@
 {% load display_tags %}
 {% load static %}
 {% block content %}
-    {{ block.super }}
     {% comment %} include inherits the current context so findings, filtered and other variables {% endcomment %}
     {% include "dojo/findings_list_snippet.html" %}
 {% endblock %}
