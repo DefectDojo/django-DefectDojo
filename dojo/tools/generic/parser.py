@@ -48,9 +48,15 @@ class GenericParser(object):
                 finding.unsaved_endpoints = []
                 for item in unsaved_endpoints:
                     if type(item) is str:
-                        finding.unsaved_endpoints.append(Endpoint.from_uri(item))
+                        if '://' in item:  # is the host full uri?
+                            endpoint = Endpoint.from_uri(item)
+                            # can raise exception if the host is not valid URL
+                        else:
+                            endpoint = Endpoint.from_uri('//' + item)
+                            # can raise exception if there is no way to parse the host
                     else:
-                        finding.unsaved_endpoints.append(Endpoint(**item))
+                        endpoint = Endpoint(**item)
+                    finding.unsaved_endpoints.append(endpoint)
             findings.append(finding)
         return findings
 
