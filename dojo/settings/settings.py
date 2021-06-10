@@ -22,5 +22,4 @@ from split_settings.tools import optional, include
 include(
     'settings.dist.py',
     optional('local_settings.py'),
-    optional('dark_mode_settings.py')
 )
