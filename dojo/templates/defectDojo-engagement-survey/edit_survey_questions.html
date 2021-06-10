@@ -18,6 +18,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript">
         $(function () {
             $("#id_questions").bind("DOMSubtreeModified", function() {

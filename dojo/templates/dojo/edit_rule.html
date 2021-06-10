@@ -13,6 +13,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 <script type="application/javascript">
     $(document).ready(function() {
         $('#id_applied_field).empty();

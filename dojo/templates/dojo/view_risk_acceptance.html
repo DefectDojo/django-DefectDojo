@@ -331,6 +331,7 @@
 {% endblock %}
 
 {% block postscript %}
+    {{ block.super }}
 {% if not edit_mode %}
     <script type="text/javascript">
         // keyboard shortcuts

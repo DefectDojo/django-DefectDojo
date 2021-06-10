@@ -38,6 +38,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     {% if to_add or to_edit and not to_edit.is_staff %}
         <script type="application/javascript">
             $(function () {

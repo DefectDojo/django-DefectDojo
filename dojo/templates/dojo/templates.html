@@ -157,6 +157,7 @@
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         $(function () {
             $('button.template-delete').on('click', function (e) {

@@ -76,6 +76,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         $(function () {
             $(".chosen-select").chosen({disable_search_threshold: 10});

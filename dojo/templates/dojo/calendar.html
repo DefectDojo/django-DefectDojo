@@ -32,6 +32,7 @@
     <br/><br/>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
           $(function () {
             $('#caltype').change(function() { $('#calfilter').attr('action', '/calendar/' + $(this).val()); });

@@ -96,6 +96,7 @@
 </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         function highlight_level(desired_level) {
             $( ".level2_select" ).removeClass("level2");

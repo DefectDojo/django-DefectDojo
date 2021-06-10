@@ -403,6 +403,7 @@
     </div> <!-- /container -->
 {% endblock %}
 {% block js %}
+    {{ block.super }}
 
     <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
     <!-- Flot Charts JavaScript -->
