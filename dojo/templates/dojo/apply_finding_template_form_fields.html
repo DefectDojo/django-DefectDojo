@@ -2,11 +2,9 @@
 {% load event_tags %}
 {% load get_attribute %}
 {% block css %}
-    {{ block.super }}
     {{ form.media.css }}
 {% endblock %}
 {% block js %}
-    {{ block.super }}
     {{ form.media.js }}
 {% endblock %}
 {% if form.non_field_errors %}
