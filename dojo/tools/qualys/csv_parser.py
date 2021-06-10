@@ -97,7 +97,7 @@ def build_findings_from_dict(report_findings) -> [Finding]:
 
         finding.active = report_finding['Vuln Status'] in ('Active', 'Re-Opened', 'New')
         finding.verified = True
-        finding.unsaved_endpoints = [endpoint.clean()]
+        finding.unsaved_endpoints = [endpoint]
 
         dojo_findings.append(finding)
 
