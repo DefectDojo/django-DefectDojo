@@ -116,7 +116,9 @@ class GenericParser(object):
 
             # manage endpoints
             if 'Url' in row:
-                finding.unsaved_endpoints = [Endpoint.from_uri(row['Url'])]
+                finding.unsaved_endpoints = [Endpoint.from_uri(row['Url'])
+                                             if '://' in row['Url'] else
+                                             Endpoint.from_uri("//" + row['Url'])]
 
             # manage internal de-duplication
             key = hashlib.sha256("|".join([
