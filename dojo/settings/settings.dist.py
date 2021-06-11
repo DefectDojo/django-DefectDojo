@@ -2,8 +2,10 @@
 import os
 from datetime import timedelta
 from celery.schedules import crontab
-
+from dojo import __version__
 import environ
+
+
 root = environ.Path(__file__) - 3  # Three folders back
 
 # reference: https://pypi.org/project/django-environ/
@@ -569,6 +571,7 @@ DJANGO_ADMIN_ENABLED = env('DD_DJANGO_ADMIN_ENABLED')
 # ------------------------------------------------------------------------------
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.TokenAuthentication',
@@ -595,6 +598,16 @@ SWAGGER_SETTINGS = {
     'DOC_EXPANSION': "none",
     'JSON_EDITOR': True,
     'SHOW_REQUEST_HEADERS': True,
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Defect Dojo API v2',
+    'DESCRIPTION': 'Defect Dojo - Open Source vulnerability Management made easy. Prefetch related parameters/responses not yet in the schema.',
+    'VERSION': __version__,
+    # OTHER SETTINGS
+    # the following set to False could help some client generators
+    # 'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': False,
+    'POSTPROCESSING_HOOKS': ['dojo.api_v2.prefetch.schema.prefetch_postprocessing_hook']
 }
 
 # ------------------------------------------------------------------------------
@@ -649,6 +662,7 @@ INSTALLED_APPS = (
     'django_celery_results',
     'social_django',
     'drf_yasg',
+    'drf_spectacular',
     'tagulous'
 )
 
