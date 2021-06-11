@@ -20,7 +20,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Te
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
-    Product_Group, Product_Type_Group, Role
+    Product_Group, Product_Type_Group, Role, Global_Role
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -99,6 +99,24 @@ class DojoGroupViewSet(mixins.ListModelMixin,
             dojo_group.users.remove(user)
             dojo_group.save()
             return Response(status=status.HTTP_200_OK)
+
+
+# Authorization: superuser
+class GlobalRoleViewSet(prefetch.PrefetchListMixin,
+                        prefetch.PrefetchRetrieveMixin,
+                        mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.UpdateModelMixin,
+                        mixins.CreateModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = serializers.GlobalRoleSerializer
+    queryset = Global_Role.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'user', 'group', 'role')
+    swagger_schema = prefetch.get_prefetch_schema(["global_roles_list", "global_roles_read"],
+        serializers.GlobalRoleSerializer).to_schema()
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
 # Authorization: object-based

@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role
+    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role
 import dojo.authorization.authorization
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, \
     user_has_permission_or_403, user_has_permission, \
@@ -17,21 +17,34 @@ class TestAuthorization(TestCase):
     def setUpTestData(cls):
         cls.user = Dojo_User()
         cls.user.id = 1
+
+        cls.user2 = Dojo_User()
+        cls.user2.id = 2
+        cls.global_role_user = Global_Role()
+        cls.global_role_user.id = 1
+        cls.global_role_user.user = cls.user2
+        cls.global_role_user.role = Role.objects.get(id=Roles.Reader)
+
         cls.product_type = Product_Type()
         cls.product_type.id = 1
         cls.product_type_member = Product_Type_Member()
         cls.product_type_member.id = 1
+
         cls.product = Product()
         cls.product.id = 1
         cls.product_member = Product_Member()
         cls.product_member.id = 1
         cls.product.prod_type = cls.product_type
+
         cls.engagement = Engagement()
         cls.engagement.product = cls.product
+
         cls.test = Test()
         cls.test.engagement = cls.engagement
+
         cls.finding = Finding()
         cls.finding.test = cls.test
+
         cls.endpoint = Endpoint()
         cls.endpoint.product = cls.product
 
@@ -81,6 +94,16 @@ class TestAuthorization(TestCase):
         cls.product_type_group_owner.product_type = cls.product_type
         cls.product_type_group_owner.group = cls.group
         cls.product_type_group_owner.role = Role.objects.get(id=Roles.Owner)
+
+        cls.group2 = Dojo_Group()
+        cls.group2.id = 2
+        cls.global_role_group = Global_Role()
+        cls.global_role_group.id = 2
+        cls.global_role_group.group = cls.group2
+        cls.global_role_group.role = Role.objects.get(id=Roles.Maintainer)
+
+        cls.user3 = Dojo_User()
+        cls.user3.id = 2
 
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,
@@ -417,3 +440,31 @@ class TestAuthorization(TestCase):
 
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(group__users=self.user)
+
+    def test_user_has_global_role_no_permission(self):
+        result = user_has_permission(self.user2, self.product, Permissions.Product_Delete)
+        self.assertFalse(result)
+
+    def test_user_has_global_role_success(self):
+        result = user_has_permission(self.user2, self.product, Permissions.Product_View)
+        self.assertTrue(result)
+
+    @patch('dojo.models.Dojo_Group.objects')
+    def test_user_in_group_with_global_role_no_permission(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.group2]
+
+        result = user_has_permission(self.user3, self.product, Permissions.Product_Delete)
+        self.assertFalse(result)
+        mock_foo.filter.assert_called_with(users=self.user3)
+
+    @patch('dojo.models.Dojo_Group.objects')
+    def test_user_in_group_with_global_role_success(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.group2]
+
+        result = user_has_permission(self.user3, self.product, Permissions.Product_Edit)
+        self.assertTrue(result)
+        mock_foo.filter.assert_called_with(users=self.user3)
