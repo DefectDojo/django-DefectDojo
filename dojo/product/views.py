@@ -1471,22 +1471,24 @@ def add_product_member(request, pid):
     if request.method == 'POST':
         memberform = Add_Product_MemberForm(request.POST, initial={'product': product.id})
         if memberform.is_valid():
-            members = Product_Member.objects.filter(product=product, user=memberform.instance.user)
-            if members.count() > 0:
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    'Product member already exists.',
-                                    extra_tags='alert-warning')
-            elif memberform.instance.role.is_owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
+            if memberform.cleaned_data['role'].is_owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to add users as owners.',
                                     extra_tags='alert-warning')
             else:
-                memberform.save()
+                if 'users' in memberform.cleaned_data and len(memberform.cleaned_data['users']) > 0:
+                    for user in memberform.cleaned_data['users']:
+                        existing_members = Product_Member.objects.filter(product=product, user=user)
+                        if existing_members.count() == 0:
+                            product_member = Product_Member()
+                            product_member.product = product
+                            product_member.user = user
+                            product_member.role = memberform.cleaned_data['role']
+                            product_member.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'Product member added successfully.',
+                                    'Product members added successfully.',
                                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product', args=(pid, )))
     product_tab = Product_Tab(pid, title="Add Product Member", tab="settings")

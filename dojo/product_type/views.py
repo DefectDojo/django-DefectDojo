@@ -177,22 +177,24 @@ def add_product_type_member(request, ptid):
     if request.method == 'POST':
         memberform = Add_Product_Type_MemberForm(request.POST, initial={'product_type': pt.id})
         if memberform.is_valid():
-            members = Product_Type_Member.objects.filter(product_type=pt, user=memberform.instance.user)
-            if members.count() > 0:
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    'Product type member already exists.',
-                                    extra_tags='alert-warning')
-            elif memberform.instance.role.is_owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
+            if memberform.cleaned_data['role'].is_owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to add users as owners.',
                                     extra_tags='alert-warning')
             else:
-                memberform.save()
+                if 'users' in memberform.cleaned_data and len(memberform.cleaned_data['users']) > 0:
+                    for user in memberform.cleaned_data['users']:
+                        members = Product_Type_Member.objects.filter(product_type=pt, user=user)
+                        if members.count() == 0:
+                            product_type_member = Product_Type_Member()
+                            product_type_member.product_type = pt
+                            product_type_member.user = user
+                            product_type_member.role = memberform.cleaned_data['role']
+                            product_type_member.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'Product type member added successfully.',
+                                    'Product type members added successfully.',
                                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
     add_breadcrumb(title="Add Product Type Member", top_level=False, request=request)
