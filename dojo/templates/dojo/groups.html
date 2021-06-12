@@ -79,7 +79,7 @@
                             {% endif %}
                             <td><a href="{% url 'view_group' g.id %}">{{ g.name }}</a></td>
                             <td>{{ g.description }}</td>
-                            <td>{{ g.users|length }}</td>
+                            <td>{{ g.users.all|length }}</td>
                         </tr>
                         {% endfor %}
                     </table>
