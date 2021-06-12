@@ -9,7 +9,7 @@
         <div class="panel panel-default">
             <div class="panel-heading tight">
                 <div class="clearfix">
-                    <h3 class="pull-left">Group Information</h3>
+                    <h3 class="pull-left">Description</h3>
                     <div class="dropdown pull-right">
                         <div class="btn-group">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
@@ -34,20 +34,77 @@
                     </div>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <tr>
-                        <td><strong>Group Name</strong></td>
-                        <td>{{ group.name }}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Group Description</strong></td>
-                        <td>{{ group.description }}</td>
-                    </tr>
-                </table>
+            <div class="panel-body">
+                {{ group.description|markdown_render }}
             </div>
         </div>
         {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4 class="pull-left">Members</h4>
+                    {% if request.user.is_superuser %}
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddGroupMember"
+                                data-toggle="dropdown" aria-expanded="true" aria-label="Add Group Member">
+                            <span class="fa fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                            <li role="presentation">
+                                <a id="addProductMember" href="{% url 'add_member' group.id %}">
+                                    <i class="fa fa-plus"></i> Add Member
+                                </a>
+                            </li>
+                        </ul>
+                        &nbsp;
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                            <i class="fa fa-question-circle text-low"></i></a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if group.users.all %}
+            <div class="table-responsive">
+                <table class="tablesorter-bootstrap table table-condensed table-striped">
+                    <thead>
+                    <tr>
+                        <th label="Actions"></th>
+                        <th>User</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for member in group.users.all %}
+                    <tr>
+                        <td>
+                            <ul>
+                                <li class="dropdown" style="list-style:none;position:absolute">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageGroupMembers">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                    <ul class="dropdown-menu">
+                                        {% if request.user.is_superuser %}
+                                        <li>
+                                            <a name="deleteGroupMember" href="{% url 'delete_group_member' member.id %}">
+                                                <i class="fa fa-trash"></i> Delete</a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </li>
+                            </ul>
+                        </td>
+                        <td name="member_user">{{ member.get_full_name }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="panel-body">
+                <small class="text-muted"><em>No members found.</em></small>
+            </div>
+            {% endif %}
+        </div>
+
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
@@ -191,71 +248,6 @@
             {% else %}
             <div class="panel-body">
                 <small class="text-muted"><em>No product groups found.</em></small>
-            </div>
-            {% endif %}
-        </div>
-
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <div class="clearfix">
-                    <h4 class="pull-left">Members</h4>
-                    {% if request.user.is_superuser %}
-                    <div class="dropdown pull-right">
-                        <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddGroupMember"
-                                data-toggle="dropdown" aria-expanded="true" aria-label="Add Group Member">
-                            <span class="fa fa-bars"></span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            <li role="presentation">
-                                <a id="addProductMember" href="{% url 'add_group_member_group' group.id %}">
-                                    <i class="fa fa-plus"></i> Add Member
-                                </a>
-                            </li>
-                        </ul>
-                        &nbsp;
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                            <i class="fa fa-question-circle text-low"></i></a>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% if group.users.all %}
-            <div class="table-responsive">
-                <table class="tablesorter-bootstrap table table-condensed table-striped">
-                    <thead>
-                    <tr>
-                        <th label="Actions"></th>
-                        <th>User</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for member in group.users.all %}
-                    <tr>
-                        <td>
-                            <ul>
-                                <li class="dropdown" style="list-style:none;position:absolute">
-                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageGroupMembers">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
-                                    <ul class="dropdown-menu">
-                                        {% if request.user.is_superuser %}
-                                        <li>
-                                            <a name="deleteGroupMember" href="{% url 'delete_group_member' member.id %}">
-                                                <i class="fa fa-trash"></i> Delete</a>
-                                        </li>
-                                        {% endif %}
-                                    </ul>
-                                </li>
-                            </ul>
-                        </td>
-                        <td name="member_user">{{ member.get_full_name }}</td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="panel-body">
-                <small class="text-muted"><em>No members found.</em></small>
             </div>
             {% endif %}
         </div>
