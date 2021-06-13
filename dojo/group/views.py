@@ -24,6 +24,7 @@ from dojo.group.queries import get_authorized_products_for_group, get_authorized
 
 logger = logging.getLogger(__name__)
 
+
 @user_passes_test(lambda u: u.is_staff)
 def group(request):
     groups = Dojo_Group.objects.order_by('name')
@@ -35,7 +36,7 @@ def group(request):
                   {'groups': paged_groups,
                    'filtered': groups,
                    'name': 'All Groups',
-                  })
+                   })
 
 
 @user_passes_test(lambda u: u.is_staff)
@@ -56,7 +57,27 @@ def view_group(request, gid):
 
 @user_passes_test(lambda u: u.is_superuser)
 def edit_group(request, gid):
-    print("placeholder")
+    group = get_object_or_404(Dojo_Group, id=gid)
+    form = DojoGroupForm(instance=group)
+
+    if request.method == 'POST':
+        form = DojoGroupForm(request.POST, instance=group)
+        if form.is_valid():
+            form.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Group saved successfully.',
+                                 extra_tags='alert-success')
+        else:
+            messages.add_message(request,
+                                 messages.ERROR,
+                                 'Group was not saved successfully.',
+                                 extra_tags='alert_danger')
+
+    add_breadcrumb(title="Edit Group", top_level=False, request=request)
+    return render(request, "dojo/add_group.html", {
+        'form': form
+    })
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -70,10 +91,19 @@ def add_group(request):
     group = None
 
     if request.method == 'POST':
-        form = AddDojoUserForm(request.POST)
+        form = DojoGroupForm(request.POST)
         if form.is_valid():
             group = form.save(commit=False)
             group.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Group was added successfully, you may edit if necessary.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('edit_group', args=(group.id,)))
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 'Group was not added successfully.',
+                                 extra_tags='alert-danger')
 
     add_breadcrumb(title="Add Group", top_level=False, request=request)
     return render(request, "dojo/add_group.html", {
