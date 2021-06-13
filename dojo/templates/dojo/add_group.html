@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load static %}
+
+{% block content %}
+
+<form class="form-horizontal" method="post">{% csrf_token %}
+  <fieldset>
+    <legend>Default Information</legend>
+    {% include "dojo/form_fields.html" with form=form %}
+  </fieldset>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <input class="btn btn-primary" type="submit" name="add_group" value="Submit"/>
+    </div>
+  </div>
+</form>
+{% endblock %}
+{% block postscript %}
+{% endblock %}

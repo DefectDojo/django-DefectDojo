@@ -17,15 +17,10 @@ from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
 
 from dojo.filters import GroupFilter
-from dojo.forms import DojoUserForm, AddDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
-    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm
-from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group
+from dojo.forms import AddDojoUserForm, DojoGroupForm
+from dojo.models import Dojo_Group
 from dojo.utils import get_page_items, add_breadcrumb
-from dojo.product.queries import get_authorized_product_members_for_user
-from dojo.product_type.queries import get_authorized_product_type_members_for_user
-from dojo.authorization.roles_permissions import Permissions
-from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group, \
-    get_members_for_group
+from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +66,19 @@ def delete_group(request, gid):
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_group(request):
-    print("placeholder")
+    form = DojoGroupForm
+    group = None
+
+    if request.method == 'POST':
+        form = AddDojoUserForm(request.POST)
+        if form.is_valid():
+            group = form.save(commit=False)
+            group.save()
+
+    add_breadcrumb(title="Add Group", top_level=False, request=request)
+    return render(request, "dojo/add_group.html", {
+        'form': form
+    })
 
 
 @user_passes_test(lambda u: u.is_superuser)

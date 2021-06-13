@@ -29,7 +29,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role
+    Product_Member, Global_Role, Dojo_Group
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -1591,6 +1591,11 @@ class MetricsFilterForm(forms.Form):
         if exclude_product_types:
             del self.fields['exclude_product_types']
 
+
+class DojoGroupForm(forms.ModelForm):
+    class Meta:
+        model = Dojo_Group
+        exclude = ['users']
 
 class DojoUserForm(forms.ModelForm):
     class Meta:
