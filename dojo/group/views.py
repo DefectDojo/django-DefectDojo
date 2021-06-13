@@ -17,7 +17,7 @@ from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
 
 from dojo.filters import GroupFilter
-from dojo.forms import AddDojoUserForm, DojoGroupForm
+from dojo.forms import DojoGroupForm, DeleteGroupForm
 from dojo.models import Dojo_Group
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group
@@ -82,7 +82,29 @@ def edit_group(request, gid):
 
 @user_passes_test(lambda u: u.is_superuser)
 def delete_group(request, gid):
-    print("placeholder")
+    group = get_object_or_404(Dojo_Group, id=gid)
+    form = DeleteGroupForm(instance=group)
+
+    if request.method == 'POST':
+        if 'id' in request.POST and str(group.id) == request.POST['id']:
+            form = DeleteGroupForm(request.POST, instance=group)
+            if form.is_valid():
+                group.delete()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Group and relationships successfully removed.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('groups'))
+
+    collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+    collector.collect([group])
+    rels = collector.nested()
+    add_breadcrumb(title="Delete Group", top_level=False, request=request)
+    return render(request, 'dojo/delete_group.html',{
+        'to_delete': group,
+        'form': form,
+        'rels': rels
+    })
 
 
 @user_passes_test(lambda u: u.is_superuser)

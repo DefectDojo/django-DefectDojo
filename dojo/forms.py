@@ -1597,6 +1597,14 @@ class DojoGroupForm(forms.ModelForm):
         model = Dojo_Group
         exclude = ['users']
 
+
+class DeleteGroupForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+    class Meta:
+        model = Dojo_Group
+        fields = ['id']
+
 class DojoUserForm(forms.ModelForm):
     class Meta:
         model = Dojo_User
