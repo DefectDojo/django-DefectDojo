@@ -41,6 +41,8 @@ class OpenscapParser(object):
         test_result = tree.find('./{0}TestResult'.format(namespace))
         ips = []
         # append all target in a list.
+        for ip in test_result.findall('./{0}target'.format(namespace)):
+            ips.append(ip.text)
         for ip in test_result.findall('./{0}target-address'.format(namespace)):
             ips.append(ip.text)
 
