@@ -722,10 +722,10 @@ jszip@^3.6.0:
     readable-stream "~2.3.6"
     set-immediate-shim "~1.0.1"
 
-justgage@^1.4.2:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/justgage/-/justgage-1.4.2.tgz#4910f26f418a599e958af26f4860448d1ed1994f"
-  integrity sha512-21SyCBko3VXT8bWPzD4XqpoJsUDNYh0yQHkVXqdW7gMXc2U4taMqwdKNKwqCwRJ/KYoYPVi/FMPZDz8mlTTnVA==
+justgage@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/justgage/-/justgage-1.5.0.tgz#b378fb680fb4d68fc244ef41f8dc2e38d6f9eb16"
+  integrity sha512-9BqZ+OQ+XrxoMg74U7NMnG8sdjlIreHAQ6uWBzqooAOjoVl2tVCoXg4BrZT9rkK+anRuGXacUtY/BgEKPhxbCQ==
   dependencies:
     raphael "^2.3.0"
 
