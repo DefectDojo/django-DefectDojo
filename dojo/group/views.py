@@ -17,8 +17,8 @@ from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
 
 from dojo.filters import GroupFilter
-from dojo.forms import DojoGroupForm, DeleteGroupForm
-from dojo.models import Dojo_Group
+from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, Add_Product_Type_Group_GroupForm
+from dojo.models import Dojo_Group, Product_Group, Product_Type_Group
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group
 
@@ -134,20 +134,60 @@ def add_group(request):
 
 
 @user_passes_test(lambda u: u.is_superuser)
-def add_product_group(request):
-    print("placeholder")
+def add_product_group(request, gid):
+    group = get_object_or_404(Dojo_Group, id=gid)
+    group_form = Add_Product_Group_GroupForm(initial={'group': group.id})
+
+    if request.method == 'POST':
+        group_form = Add_Product_Group_GroupForm(request.POST, initial={'group': group.id})
+        if group_form.is_valid():
+            if 'products' in group_form.cleaned_data and len(group_form.cleaned_data['products']) > 0:
+                for product in group_form.cleaned_data['products']:
+                    existing_groups = Product_Group.objects.filter(product=product, group=group)
+                    if existing_groups.count() == 0:
+                        product_group = Product_Group()
+                        product_group.product = product
+                        product_group.group = group
+                        product_group.role = group_form.cleaned_data['role']
+                        product_group.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Product group added successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_group', args=(gid, )))
+
+    add_breadcrumb(title="Add Product Group", top_level=False, request=request)
+    return render(request, 'dojo/new_product_group_group.html', {
+        'group': group,
+        'form': group_form
+    })
 
 
 @user_passes_test(lambda u: u.is_superuser)
-def add_product_type_group(request):
-    print("placeholder")
+def add_product_type_group(request, gid):
+    group = get_object_or_404(Dojo_Group, id=gid)
+    group_form = Add_Product_Type_Group_GroupForm(initial={'group': group.id})
 
+    if request.method == 'POST':
+        group_form = Add_Product_Type_Group_GroupForm(request.POST, initial={'group': group.id})
+        if group_form.is_valid():
+            if 'product_types' in group_form.cleaned_data and len(group_form.cleaned_data['product_types']) > 0:
+                for product_type in group_form.cleaned_data['product_types']:
+                    existing_groups = Product_Type_Group.objects.filter(product_type=product_type)
+                    if existing_groups.count() == 0:
+                        product_type_group = Product_Type_Group()
+                        product_type_group.product_type = product_type
+                        product_type_group.group = group
+                        product_type_group.role = group_form.cleaned_data['role']
+                        product_type_group.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Product type groups added successfully.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_group', args=(gid, )))
 
-@user_passes_test(lambda u: u.is_superuser)
-def add_member_to_group(request):
-    print("placeholder")
-
-
-@user_passes_test(lambda u: u.is_superuser)
-def delete_group_member(request):
-    print("placeholder")
+    add_breadcrumb(title="Add Product Type Group", top_level=False, request=request)
+    return render(request, 'dojo/new_product_type_group_group.html', {
+        'group': group,
+        'form': group_form,
+    })

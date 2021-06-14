@@ -1565,3 +1565,7 @@ def edit_product_group(request, groupid):
 @user_passes_test(lambda u: u.is_superuser)
 def delete_product_group(request, groupid):
     print("placeholder")
+
+@user_passes_test(lambda u: u.is_superuser)
+def add_product_group(request, pid):
+    print("placeholder")

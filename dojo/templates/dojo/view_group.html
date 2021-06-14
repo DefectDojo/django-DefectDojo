@@ -46,19 +46,6 @@
                     <h4 class="pull-left">Members</h4>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
-                        <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddGroupMember"
-                                data-toggle="dropdown" aria-expanded="true" aria-label="Add Group Member">
-                            <span class="fa fa-bars"></span>
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            <li role="presentation">
-                                <a id="addProductMember" href="{% url 'add_member' group.id %}">
-                                    <i class="fa fa-plus"></i> Add Member
-                                </a>
-                            </li>
-                        </ul>
-                        &nbsp;
                         <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                             <i class="fa fa-question-circle text-low"></i></a>
                     </div>
@@ -84,8 +71,8 @@
                                     <ul class="dropdown-menu">
                                         {% if request.user.is_superuser %}
                                         <li>
-                                            <a name="deleteGroupMember" href="{% url 'delete_group_member' member.id %}">
-                                                <i class="fa fa-trash"></i> Delete</a>
+                                            <a name="edit_group" href="{% url 'edit_group' group.id %}">
+                                                <i class="fa fa-pencil-square-o"></i>Edit Group</a>
                                         </li>
                                         {% endif %}
                                     </ul>
@@ -164,7 +151,7 @@
                                 </li>
                             </ul>
                         </td>
-                        <td name="member_product_type"><a href="{% url 'view_product_type' product_type_group.product_type.id %}">{{ member.product_type }}</a></td>
+                        <td name="member_product_type"><a href="{% url 'view_product_type' product_type_group.product_type.id %}">{{ product_type_group.product_type }}</a></td>
                         <td name="member_product_type_role">{{ product_type_group.role }}</td>
                     </tr>
                     {% endfor %}

@@ -29,7 +29,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role, Dojo_Group
+    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -256,6 +256,7 @@ class Delete_Dev_EnvironmentForm(forms.ModelForm):
     class Meta:
         model = Development_Environment
         fields = ['id']
+
 
 
 class ProductForm(forms.ModelForm):
@@ -1593,9 +1594,21 @@ class MetricsFilterForm(forms.Form):
 
 
 class DojoGroupForm(forms.ModelForm):
+
+    users = forms.ModelMultipleChoiceField(
+        queryset=None,
+        required=False, label="Users"
+    )
+
+    def __init__(self, *args, **kwargs):
+        non_staff = Dojo_User.objects.exclude(is_staff=True) \
+            .exclude(is_active=False).order_by('first_name', 'last_name')
+        super(DojoGroupForm, self).__init__(*args, **kwargs)
+        self.fields['users'].queryset = non_staff
+
     class Meta:
         model = Dojo_Group
-        exclude = ['users']
+        fields = ['name', 'description', 'users']
 
 
 class DeleteGroupForm(forms.ModelForm):
@@ -1604,6 +1617,67 @@ class DeleteGroupForm(forms.ModelForm):
     class Meta:
         model = Dojo_Group
         fields = ['id']
+
+
+class Add_Product_GroupForm(forms.ModelForm):
+    group = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_GroupForm, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
+        current_members = Product_Group.objects.filter(product=self.initial["product"]).values_list('group', flat=True)
+        self.fields['groups'].queryset = Dojo_Group.objects.exclude(
+            Q(id__in=current_members)).order_by('name')
+
+    class Meta:
+        model = Product_Group
+        fields = ['product', 'group', 'role']
+
+
+class Add_Product_Group_GroupForm(forms.ModelForm):
+    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label='Products')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Group_GroupForm, self).__init__(*args, **kwargs)
+        current_members = Product_Group.objects.filter(group=self.initial["group"]).values_list('product', flat=True)
+        self.fields['products'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
+            .exclude(id__in=current_members)
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Group
+        fields = ['products', 'group', 'role']
+
+
+class Add_Product_Type_GroupForm(forms.ModelForm):
+    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Type_GroupForm, self).__init__(*args, **kwargs)
+        current_members = Product_Type_Group.objects.filter(product_type=self.initial["product_type"]).values_list('group', flat=True)
+        self.fields['groups'].queryset = Dojo_Group.objects.exclude(
+            Q(id__in=current_members)).order_by('name')
+        self.fields['product_type'].disabled = True
+
+    class Meta:
+        model = Product_Type_Group
+        fields = ['product_type', 'group', 'role']
+
+
+class Add_Product_Type_Group_GroupForm(forms.ModelForm):
+    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label='Product Types')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Type_Group_GroupForm, self).__init__(*args, **kwargs)
+        current_members = Product_Type_Group.objects.filter(group=self.initial['group']).values_list('product_type', flat=True)
+        self.fields['product_types'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
+            .exclude(id__in=current_members)
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Type_Group
+        fields = ['product_types', 'group', 'role']
+
 
 class DojoUserForm(forms.ModelForm):
     class Meta:
