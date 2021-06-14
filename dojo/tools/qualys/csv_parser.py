@@ -67,7 +67,6 @@ def build_findings_from_dict(report_findings) -> [Finding]:
 
     """
     severity_lookup = {'1': 'Info', '2': 'Low', '3': 'Medium', '4': 'High', '5': 'Critical'}
-
     dojo_findings = []
 
     for report_finding in report_findings:
