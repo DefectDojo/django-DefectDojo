@@ -32,21 +32,6 @@ class Migration(migrations.Migration):
             field=models.CharField(blank=True, max_length=4000, null=True),
         ),
         migrations.AlterField(
-            model_name='engagement',
-            name='status',
-            field=models.CharField(blank=True, choices=[('Not Started', 'Not Started'), ('Blocked', 'Blocked'), ('Cancelled', 'Cancelled'), ('Completed', 'Completed'), ('In Progress', 'In Progress'), ('On Hold', 'On Hold'), ('Waiting for Resource', 'Waiting for Resource')], default='', max_length=2000, null=True),
-        ),
-        migrations.AlterField(
-            model_name='finding',
-            name='cvssv3',
-            field=models.TextField(blank=True, help_text='Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw.', max_length=117, null=True, validators=[django.core.validators.RegexValidator(message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'", regex='^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]')], verbose_name='CVSS v3'),
-        ),
-        migrations.AlterField(
-            model_name='finding_template',
-            name='cvssv3',
-            field=models.TextField(blank=True, max_length=117, null=True, validators=[django.core.validators.RegexValidator(message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'", regex='^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]')]),
-        ),
-        migrations.AlterField(
             model_name='language_type',
             name='color',
             field=models.CharField(blank=True, max_length=7, null=True, verbose_name='HTML color'),
