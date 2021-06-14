@@ -976,7 +976,7 @@ class Engagement(models.Model):
     notes = models.ManyToManyField(Notes, blank=True, editable=False)
     files = models.ManyToManyField(FileUpload, blank=True, editable=False)
     status = models.CharField(editable=True, max_length=2000, default='',
-                              null=True, blank=True,
+                              null=True,
                               choices=ENGAGEMENT_STATUS_CHOICES)
     progress = models.CharField(max_length=100,
                                 default='threat_model', editable=False)
@@ -1574,7 +1574,6 @@ class Finding(models.Model):
     cvssv3 = models.TextField(validators=[cvssv3_regex],
                               max_length=117,
                               null=True,
-                              blank=True,
                               verbose_name="CVSS v3",
                               help_text="Common Vulnerability Scoring System version 3 (CVSSv3) score associated with this flaw.")
     cvssv3_score = models.FloatField(null=True,
@@ -2534,7 +2533,7 @@ class Finding_Template(models.Model):
                                message="Vulnerability ID must be entered in the format: 'ABC-9999-9999'.")
     cve = models.CharField(validators=[cve_regex], max_length=28, null=True, blank=False)
     cvssv3_regex = RegexValidator(regex=r'^AV:[NALP]|AC:[LH]|PR:[UNLH]|UI:[NR]|S:[UC]|[CIA]:[NLH]', message="CVSS must be entered in format: 'AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'")
-    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True, blank=True)
+    cvssv3 = models.TextField(validators=[cvssv3_regex], max_length=117, null=True)
     severity = models.CharField(max_length=200, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     mitigation = models.TextField(null=True, blank=True)
