@@ -70,4 +70,4 @@ cvss==2.3
 django-fieldsignals==0.6.0
 hyperlink==21.0.0
 django-test-migrations==1.1.0
-drf-spectacular==0.16.0
+drf-spectacular==0.17.1
