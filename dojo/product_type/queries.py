@@ -55,6 +55,15 @@ def get_authorized_members_for_product_type(product_type, permission):
         return None
 
 
+def get_authorized_groups_for_product_type(product_type, permission):
+    user = get_current_user()
+
+    if user.is_superuser or user_has_permission(user, product_type, permission):
+        return Product_Type_Group.objects.filter(product_type=product_type).order_by('group__name')
+    else:
+        return None
+
+
 def get_authorized_product_type_members(permission):
     user = get_current_user()
 

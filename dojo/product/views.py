@@ -41,8 +41,8 @@ from dojo.authorization.authorization import user_has_permission, user_has_permi
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product.queries import get_authorized_products, get_authorized_members_for_product
-from dojo.product_type.queries import get_authorized_members_for_product_type
+from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
+from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +139,8 @@ def view_product(request, pid):
     prod = get_object_or_404(prod_query, id=pid)
     product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
     product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
+    product_groups = get_authorized_groups_for_product(prod, Permissions.Product_View)
+    product_type_groups = get_authorized_groups_for_product_type(prod.prod_type, Permissions.Product_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
@@ -202,6 +204,8 @@ def view_product(request, pid):
         'benchmarks': benchmarks,
         'product_members': product_members,
         'product_type_members': product_type_members,
+        'product_groups': product_groups,
+        'product_type_groups': product_type_groups,
         'personal_notifications_form': personal_notifications_form})
 
 
@@ -1558,7 +1562,7 @@ def delete_product_member(request, memberid):
 
 
 @user_passes_test(lambda u: u.is_superuser)
-def edit_product_group(request, groupid):
+def edit_product_group(request, pid):
     print("placeholder")
 
 

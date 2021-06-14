@@ -9,8 +9,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
-    Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm
-from dojo.models import Product_Type, Product_Type_Member, Role
+    Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm, Add_Product_Type_GroupForm
+from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
@@ -19,7 +19,8 @@ from django.conf import settings
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type, \
+    get_authorized_groups_for_product_type
 from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)
@@ -100,12 +101,14 @@ def add_product_type(request):
 def view_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_View)
+    groups = get_authorized_groups_for_product_type(pt, Permissions.Product_Type_View)
     products = get_authorized_products(Permissions.Product_View).filter(prod_type=pt)
     add_breadcrumb(title="View Product Type", top_level=False, request=request)
     return render(request, 'dojo/view_product_type.html', {
         'name': 'View Product Type',
         'pt': pt,
         'products': products,
+        'groups': groups,
         'members': members})
 
 
@@ -280,11 +283,18 @@ def delete_product_type_member(request, memberid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'ptid')
+def add_product_type_group(request, ptid):
+    product_type = get_object_or_404(Product_Type, pk=ptid)
+    group_form = Add_Product_Type_GroupForm(initial={'product_type': product_type.id})
+
+
+
+@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'ptid')
 def edit_product_type_group(request, groupid):
     print("placeholder")
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'ptid')
 def delete_product_type_group(request, groupid):
     print("placeholder")
