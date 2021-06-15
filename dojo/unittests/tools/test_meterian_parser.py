@@ -5,6 +5,12 @@ from dojo.tools.meterian.parser import MeterianParser
 
 class TestMeterianParser(TestCase):
 
+    def test_meterianParser_invalid_security_report_raise_ValueError_exception(self):
+        with self.assertRaises(ValueError):
+            testfile = open("dojo/unittests/scans/meterian/report_invalid.json")
+            parser = MeterianParser()
+            findings = parser.get_findings(testfile, Test())
+
     def test_meterianParser_report_has_no_finding(self):
         testfile = open("dojo/unittests/scans/meterian/report_no_vulns.json")
 
@@ -42,6 +48,7 @@ class TestMeterianParser(TestCase):
         finding = findings[0]
         self.assertEqual(1, len(findings))
         self.assertEqual("date-and-time:0.6.3", finding.title)
+        self.assertEqual("2021-06-02", finding.date)
         self.assertEqual("High", finding.severity)
         self.assertEqual("Issue severity of: **High** from a base " +
             "CVSS score of: **7.5**", finding.severity_justification)
@@ -54,11 +61,11 @@ class TestMeterianParser(TestCase):
         self.assertEqual(400, finding.cwe)
         self.assertTrue(finding.mitigation.startswith("## Remediation"))
         self.assertTrue("Upgrade date-and-time to version 0.14.2 or higher." in finding.mitigation)
-        self.assertTrue("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-26289" in finding.references)
-        self.assertTrue("https://nvd.nist.gov/vuln/detail/CVE-2020-26289" in finding.references)
-        self.assertTrue("https://www.npmjs.com/package/date-and-time" in finding.references)
-        self.assertTrue("https://github.com/knowledgecode/date-and-time/security/advisories/GHSA-r92x-f52r-x54g" in finding.references)
-        self.assertTrue("https://github.com/knowledgecode/date-and-time/commit/9e4b501eacddccc8b1f559fb414f48472ee17c2a" in finding.references)
+        self.assertTrue("https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-26289" in finding.references, "found " + finding.references)
+        self.assertTrue("https://nvd.nist.gov/vuln/detail/CVE-2020-26289" in finding.references, "found " + finding.references)
+        self.assertTrue("https://www.npmjs.com/package/date-and-time" in finding.references, "found " + finding.references)
+        self.assertTrue("https://github.com/knowledgecode/date-and-time/security/advisories/GHSA-r92x-f52r-x54g" in finding.references, "found " + finding.references)
+        self.assertTrue("https://github.com/knowledgecode/date-and-time/commit/9e4b501eacddccc8b1f559fb414f48472ee17c2a" in finding.references, "found " + finding.references)
         self.assertTrue("Manifest file", finding.file_path)
         self.assertEqual(["nodejs"], finding.tags)
 
@@ -82,14 +89,5 @@ class TestMeterianParser(TestCase):
         testfile.close()
 
         self.assertEqual(2, len(findings))
-        self.assertTrue(self.findings_contains_tag(findings, "nodejs"))
-        self.assertTrue(self.findings_contains_tag(findings, "ruby"))
-
-    def findings_contains_tag(self, findings, tag):
-        found = False
-        for finding in findings:
-            if finding.tags == [tag]:
-                found = True
-                break
-
-        return found
+        self.assertIn("nodejs", findings[0].tags)
+        self.assertIn("ruby", findings[1].tags)

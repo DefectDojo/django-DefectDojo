@@ -1,6 +1,6 @@
 import json
-from urllib.parse import urlparse
 
+from datetime import datetime
 from dojo.models import Finding
 
 
@@ -17,15 +17,24 @@ class MeterianParser(object):
 
     def get_findings(self, report, test):
         findings = []
-        report_json = self.parse_json(report)
 
-        security_reports = report_json["reports"]["security"]["reports"]
+        report_json = json.load(report)
+        security_reports = self.get_security_reports(report_json)
+        scan_date = str(datetime.fromisoformat(report_json["timestamp"]).date())
         for single_security_report in security_reports:
-            findings += self.do_get_findings(single_security_report, test)
+            findings += self.do_get_findings(single_security_report, scan_date, test)
 
         return findings
 
-    def do_get_findings(self, single_security_report, test):
+    def get_security_reports(self, report_json):
+        if "reports" in report_json:
+            if "security" in report_json["reports"]:
+                if "reports" in report_json["reports"]["security"]:
+                    return report_json["reports"]["security"]["reports"]
+
+        raise ValueError("Malformed report: the security reports are missing.")
+
+    def do_get_findings(self, single_security_report, scan_date, test):
         findings = []
         language = single_security_report["language"]
         for dependency_report in single_security_report["reports"]:
@@ -38,6 +47,7 @@ class MeterianParser(object):
                 severity = self.get_severity(advisory)
                 finding = Finding(
                     title=finding_title,
+                    date=scan_date,
                     test=test,
                     severity=severity,
                     severity_justification="Issue severity of: **" + severity + "** from a base " +
@@ -106,34 +116,11 @@ class MeterianParser(object):
 
         return severity
 
-    def uri_validator(self, url):
-        try:
-            result = urlparse(url)
-            return all([result.scheme, result.netloc, result.path])
-        except:
-            return False
-
     def get_reference_url(self, link_obj):
-        maybe_url = link_obj["url"]
+        url = link_obj["url"]
+        if link_obj["type"] == "CVE":
+            url = "https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + link_obj["url"]
+        elif link_obj["type"] == "NVD":
+            url = "https://nvd.nist.gov/vuln/detail/" + link_obj["url"]
 
-        if self.uri_validator(maybe_url):
-            return maybe_url
-        elif self.uri_validator(maybe_url) is False:
-            if link_obj["type"] == "CVE":
-                return "https://cve.mitre.org/cgi-bin/cvename.cgi?name=" + link_obj["url"]
-            if link_obj["type"] == "NVD":
-                return "https://nvd.nist.gov/vuln/detail/" + link_obj["url"]
-
-        return None
-
-    def parse_json(self, json_input):
-        try:
-            data = json_input.read()
-            try:
-                json_element = json.loads(str(data, 'utf-8'))
-            except:
-                json_element = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        return json_element
+        return url
