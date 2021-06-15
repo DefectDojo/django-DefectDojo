@@ -186,8 +186,10 @@ def get_item(result, rules, artifacts, run_date):
         dynamic_finding=False,  # by definition
         file_path=file_path,
         line=line,
-        vuln_id_from_tool=result['ruleId'],
     )
+
+    if 'ruleId' in result:
+        finding.vuln_id_from_tool = result['ruleId']
 
     if run_date:
         finding.date = run_date
