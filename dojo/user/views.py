@@ -19,7 +19,7 @@ from rest_framework.authtoken.models import Token
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
-    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm
+    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm
 from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.product.queries import get_authorized_product_members_for_user
