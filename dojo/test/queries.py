@@ -3,7 +3,8 @@ from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Test, Product_Member, Product_Type_Member, Test_Import, \
     Product_Group, Product_Type_Group
-from dojo.authorization.authorization import get_roles_for_permission
+from dojo.authorization.authorization import get_roles_for_permission, role_has_permission, \
+    get_groups
 
 
 def get_authorized_tests(permission, product=None):
@@ -22,6 +23,13 @@ def get_authorized_tests(permission, product=None):
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Test.objects.all()
+
+        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
+            return Test.objects.all()
+
+        for group in get_groups(user):
+            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
+                return Test.objects.all()
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -73,6 +81,13 @@ def get_authorized_test_imports(permission):
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Test_Import.objects.all()
+
+        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
+            return Test_Import.objects.all()
+
+        for group in get_groups(user):
+            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
+                return Test_Import.objects.all()
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(

@@ -10,14 +10,14 @@ from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
     Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm
-from dojo.models import Product_Type, Product_Type_Member
+from dojo.models import Product_Type, Product_Type_Member, Role
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.conf import settings
 from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type
 from dojo.product.queries import get_authorized_products
@@ -79,7 +79,7 @@ def add_product_type(request):
                 member = Product_Type_Member()
                 member.user = request.user
                 member.product_type = product_type
-                member.role = Roles.Owner
+                member.role = Role.objects.get(is_owner=True)
                 member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -177,22 +177,24 @@ def add_product_type_member(request, ptid):
     if request.method == 'POST':
         memberform = Add_Product_Type_MemberForm(request.POST, initial={'product_type': pt.id})
         if memberform.is_valid():
-            members = Product_Type_Member.objects.filter(product_type=pt, user=memberform.instance.user)
-            if members.count() > 0:
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    'Product type member already exists.',
-                                    extra_tags='alert-warning')
-            elif memberform.instance.role == Roles.Owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
+            if memberform.cleaned_data['role'].is_owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to add users as owners.',
                                     extra_tags='alert-warning')
             else:
-                memberform.save()
+                if 'users' in memberform.cleaned_data and len(memberform.cleaned_data['users']) > 0:
+                    for user in memberform.cleaned_data['users']:
+                        members = Product_Type_Member.objects.filter(product_type=pt, user=user)
+                        if members.count() == 0:
+                            product_type_member = Product_Type_Member()
+                            product_type_member.product_type = pt
+                            product_type_member.user = user
+                            product_type_member.role = memberform.cleaned_data['role']
+                            product_type_member.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'Product type member added successfully.',
+                                    'Product type members added successfully.',
                                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
     add_breadcrumb(title="Add Product Type Member", top_level=False, request=request)
@@ -209,8 +211,8 @@ def edit_product_type_member(request, memberid):
     if request.method == 'POST':
         memberform = Edit_Product_Type_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
-            if member.role != Roles.Owner:
-                owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).exclude(id=member.id).count()
+            if not member.role.is_owner:
+                owners = Product_Type_Member.objects.filter(product_type=member.product_type, role__is_owner=True).exclude(id=member.id).count()
                 if owners < 1:
                     messages.add_message(request,
                                         messages.SUCCESS,
@@ -220,7 +222,7 @@ def edit_product_type_member(request, memberid):
                         return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
                     else:
                         return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
-            if member.role == Roles.Owner and not user_has_permission(request.user, member.product_type, Permissions.Product_Type_Member_Add_Owner):
+            if member.role.is_owner and not user_has_permission(request.user, member.product_type, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to make users to owners.',
@@ -249,8 +251,8 @@ def delete_product_type_member(request, memberid):
     if request.method == 'POST':
         memberform = Delete_Product_Type_MemberForm(request.POST, instance=member)
         member = memberform.instance
-        if member.role == Roles.Owner:
-            owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).count()
+        if member.role.is_owner:
+            owners = Product_Type_Member.objects.filter(product_type=member.product_type, role__is_owner=True).count()
             if owners <= 1:
                 messages.add_message(request,
                                     messages.SUCCESS,
