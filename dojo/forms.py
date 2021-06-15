@@ -1581,7 +1581,7 @@ class DojoUserForm(forms.ModelForm):
 
 
 class AddDojoUserForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
+    password = forms.CharField(widget=forms.PasswordInput, required=False)
     if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_products = forms.ModelMultipleChoiceField(
             queryset=Product.objects.all(), required=False,

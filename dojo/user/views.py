@@ -232,6 +232,12 @@ def change_password(request):
                             password=current_pwd)
         if user is not None:
             if user.is_active:
+                if not new_pwd:
+                    messages.add_message(request, messages.ERROR, 'New password field may not be left blank.', extra_tags='alert-danger')
+                    return render(request, 'dojo/change_pwd.html', {'error': ''})
+                if not confirm_pwd:
+                    messages.add_message(request, messages.ERROR, 'Confirm password field may not be left blank.', extra_tags='alert-danger')
+                    return render(request, 'dojo/change_pwd.html', {'error': ''})
                 if new_pwd != confirm_pwd:
                     messages.add_message(request, messages.ERROR, 'Passwords do not match.', extra_tags='alert-danger')
                     return render(request, 'dojo/change_pwd.html', {'error': ''})
@@ -284,7 +290,11 @@ def add_user(request):
         contact_form = UserContactInfoForm(request.POST)
         if form.is_valid() and contact_form.is_valid():
             user = form.save(commit=False)
-            user.set_password(request.POST['password'])
+            password = request.POST['password']
+            if password:
+                user.set_password(password)
+            else:
+                user.set_unusable_password()
             user.active = True
             user.save()
             contact = contact_form.save(commit=False)
