@@ -1146,13 +1146,4 @@ class ReimportScanTest(DojoAPITestCase):
             })
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code, response.content[:1000])
-<<<<<<< HEAD
-<<<<<<< HEAD
         # TODO add schema check
-=======
-
-
-
->>>>>>> Add:
-=======
->>>>>>> fix: flake
