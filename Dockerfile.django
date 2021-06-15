@@ -136,7 +136,6 @@ ENV \
   DD_UWSGI_ENDPOINT="0.0.0.0:3031" \
   DD_UWSGI_NUM_OF_PROCESSES="2" \
   DD_UWSGI_NUM_OF_THREADS="2" \
-  # DD_DJANGO_ADMIN_ENABLED="False" \
   DD_TRACK_MIGRATIONS="True" \
   DD_DJANGO_METRICS_ENABLED="False"
 RUN mkdir -p media && mkdir -p media/threat && chown -R ${uid} media
