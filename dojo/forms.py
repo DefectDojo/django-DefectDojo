@@ -1601,7 +1601,9 @@ class DojoUserForm(forms.ModelForm):
 
 
 class AddDojoUserForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=False)
+    password = forms.CharField(
+        widget=forms.PasswordInput, required=False,
+        help_text='Leave blank to set an unusable password for this user.')
     if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_products = forms.ModelMultipleChoiceField(
             queryset=Product.objects.all(), required=False,
