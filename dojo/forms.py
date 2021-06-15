@@ -29,7 +29,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member
+    Product_Member, Global_Role
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -39,7 +39,7 @@ import logging
 from crum import get_current_user
 from dojo.utils import get_system_setting, get_product
 from django.conf import settings
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
@@ -191,8 +191,6 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_Type_MemberForm, self).__init__(*args, **kwargs)
@@ -205,23 +203,35 @@ class Edit_Product_Type_MemberForm(forms.ModelForm):
         fields = ['product_type', 'user', 'role']
 
 
-class Add_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
+class Add_Product_Type_MemberForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label='Users')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
-        self.fields['user'].queryset = Dojo_User.objects.exclude(
+        self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
-        self.fields['user'].disabled = False
+        self.fields['product_type'].disabled = True
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_type', 'users', 'role']
 
 
-class Add_Product_Type_Member_UserForm(Edit_Product_Type_MemberForm):
+class Add_Product_Type_Member_UserForm(forms.ModelForm):
+    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label='Product Types')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_Member_UserForm, self).__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(user=self.initial['user']).values_list('product_type', flat=True)
-        self.fields['product_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
+        self.fields['product_types'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
             .exclude(id__in=current_members)
-        self.fields['product_type'].disabled = False
+        self.fields['user'].disabled = True
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_types', 'user', 'role']
 
 
 class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
@@ -309,8 +319,6 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_MemberForm, self).__init__(*args, **kwargs)
@@ -323,23 +331,35 @@ class Edit_Product_MemberForm(forms.ModelForm):
         fields = ['product', 'user', 'role']
 
 
-class Add_Product_MemberForm(Edit_Product_MemberForm):
+class Add_Product_MemberForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label='Users')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
         current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list('user', flat=True)
-        self.fields['user'].queryset = Dojo_User.objects.exclude(
+        self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
-        self.fields['user'].disabled = False
+
+    class Meta:
+        model = Product_Member
+        fields = ['product', 'users', 'role']
 
 
-class Add_Product_Member_UserForm(Edit_Product_MemberForm):
+class Add_Product_Member_UserForm(forms.ModelForm):
+    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label='Products')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_Member_UserForm, self).__init__(*args, **kwargs)
         current_members = Product_Member.objects.filter(user=self.initial["user"]).values_list('product', flat=True)
-        self.fields['product'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
+        self.fields['products'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
             .exclude(id__in=current_members)
-        self.fields['product'].disabled = False
+        self.fields['user'].disabled = True
+
+    class Meta:
+        model = Product_Member
+        fields = ['products', 'user', 'role']
 
 
 class Delete_Product_MemberForm(Edit_Product_MemberForm):
@@ -1634,6 +1654,19 @@ class UserContactInfoForm(forms.ModelForm):
     class Meta:
         model = UserContactInfo
         exclude = ['user', 'slack_user_id']
+
+
+class GlobalRoleForm(forms.ModelForm):
+
+    class Meta:
+        model = Global_Role
+        exclude = ['user', 'group']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            self.fields['role'].disabled = True
 
 
 def get_years():

@@ -1,4 +1,5 @@
 import logging
+from crum import get_current_user
 from django.contrib import messages
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import user_passes_test, login_required
@@ -195,20 +196,41 @@ def alertcount(request):
 
 def view_profile(request):
     user = get_object_or_404(Dojo_User, pk=request.user.id)
-    user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
     form = DojoUserForm(instance=user)
+
+    user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
     if user_contact is None:
         contact_form = UserContactInfoForm()
     else:
         contact_form = UserContactInfoForm(instance=user_contact)
+
+    global_role = user.global_role if hasattr(user, 'global_role') else None
+    if global_role is None:
+        previous_global_role = None
+        global_role_form = GlobalRoleForm()
+    else:
+        previous_global_role = global_role.role
+        global_role_form = GlobalRoleForm(instance=global_role)
+
     if request.method == 'POST':
         form = DojoUserForm(request.POST, instance=user)
         contact_form = UserContactInfoForm(request.POST, instance=user_contact)
-        if form.is_valid() and contact_form.is_valid():
+        global_role_form = GlobalRoleForm(request.POST, instance=global_role)
+        if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
             form.save()
             contact = contact_form.save(commit=False)
             contact.user = user
             contact.save()
+            request_user = get_current_user()
+            global_role = global_role_form.save(commit=False)
+            if global_role.role != previous_global_role and not request_user.is_superuser:
+                global_role.role = previous_global_role
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'Only superusers are allowed to change their global role.',
+                                    extra_tags='alert-warning')
+            global_role.user = user
+            global_role.save()
 
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -220,7 +242,8 @@ def view_profile(request):
         'metric': False,
         'user': user,
         'form': form,
-        'contact_form': contact_form})
+        'contact_form': contact_form,
+        'global_role_form': global_role_form})
 
 
 def change_password(request):
@@ -283,12 +306,14 @@ def add_user(request):
         form.fields['is_superuser'].widget.attrs['disabled'] = True
         form.fields['is_active'].widget.attrs['disabled'] = True
     contact_form = UserContactInfoForm()
+    global_role_form = GlobalRoleForm()
     user = None
 
     if request.method == 'POST':
         form = AddDojoUserForm(request.POST)
         contact_form = UserContactInfoForm(request.POST)
-        if form.is_valid() and contact_form.is_valid():
+        global_role_form = GlobalRoleForm(request.POST)
+        if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
             user = form.save(commit=False)
             password = request.POST['password']
             if password:
@@ -300,6 +325,9 @@ def add_user(request):
             contact = contact_form.save(commit=False)
             contact.user = user
             contact.save()
+            global_role = global_role_form.save(commit=False)
+            global_role.user = user
+            global_role.save()
             if not settings.FEATURE_AUTHORIZATION_V2:
                 if 'authorized_products' in form.cleaned_data and len(form.cleaned_data['authorized_products']) > 0:
                     for p in form.cleaned_data['authorized_products']:
@@ -324,6 +352,7 @@ def add_user(request):
         'name': 'Add User',
         'form': form,
         'contact_form': contact_form,
+        'global_role_form': global_role_form,
         'to_add': True})
 
 
@@ -359,11 +388,16 @@ def edit_user(request, uid):
         form.fields['is_active'].widget.attrs['disabled'] = True
 
     user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
-
     if user_contact is None:
         contact_form = UserContactInfoForm()
     else:
         contact_form = UserContactInfoForm(instance=user_contact)
+
+    global_role = user.global_role if hasattr(user, 'global_role') else None
+    if global_role is None:
+        global_role_form = GlobalRoleForm()
+    else:
+        global_role_form = GlobalRoleForm(instance=global_role)
 
     if request.method == 'POST':
         form = EditDojoUserForm(request.POST, instance=user)
@@ -372,7 +406,12 @@ def edit_user(request, uid):
         else:
             contact_form = UserContactInfoForm(request.POST, instance=user_contact)
 
-        if form.is_valid() and contact_form.is_valid():
+        if global_role is None:
+            global_role_form = GlobalRoleForm(request.POST)
+        else:
+            global_role_form = GlobalRoleForm(request.POST, instance=global_role)
+
+        if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
             form.save()
             if not settings.FEATURE_AUTHORIZATION_V2:
                 for init_auth_prods in authed_products:
@@ -392,6 +431,9 @@ def edit_user(request, uid):
             contact = contact_form.save(commit=False)
             contact.user = user
             contact.save()
+            global_role = global_role_form.save(commit=False)
+            global_role.user = user
+            global_role.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'User saved successfully.',
@@ -406,6 +448,7 @@ def edit_user(request, uid):
         'name': 'Edit User',
         'form': form,
         'contact_form': contact_form,
+        'global_role_form': global_role_form,
         'to_edit': user})
 
 
@@ -451,17 +494,18 @@ def add_product_type_member(request, uid):
     if request.method == 'POST':
         memberform = Add_Product_Type_Member_UserForm(request.POST, initial={'user': user.id})
         if memberform.is_valid():
-            members = Product_Type_Member.objects.filter(product_type=memberform.instance.product_type, user=memberform.instance.user)
-            if members.count() > 0:
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    'Product type member already exists.',
-                                    extra_tags='alert-warning')
-            else:
-                memberform.save()
+            if 'product_types' in memberform.cleaned_data and len(memberform.cleaned_data['product_types']) > 0:
+                for product_type in memberform.cleaned_data['product_types']:
+                    existing_members = Product_Type_Member.objects.filter(product_type=product_type, user=user)
+                    if existing_members.count() == 0:
+                        product_type_member = Product_Type_Member()
+                        product_type_member.product_type = product_type
+                        product_type_member.user = user
+                        product_type_member.role = memberform.cleaned_data['role']
+                        product_type_member.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'Product type member added successfully.',
+                                    'Product type members added successfully.',
                                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_user', args=(uid, )))
     add_breadcrumb(title="Add Product Type Member", top_level=False, request=request)
@@ -478,19 +522,20 @@ def add_product_member(request, uid):
     if request.method == 'POST':
         memberform = Add_Product_Member_UserForm(request.POST, initial={'user': user.id})
         if memberform.is_valid():
-            members = Product_Member.objects.filter(product=memberform.instance.product, user=memberform.instance.user)
-            if members.count() > 0:
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    'Product member already exists.',
-                                    extra_tags='alert-warning')
-            else:
-                memberform.save()
-                messages.add_message(request,
-                                    messages.SUCCESS,
-                                    'Product member added successfully.',
-                                    extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_user', args=(uid, )))
+            if 'products' in memberform.cleaned_data and len(memberform.cleaned_data['products']) > 0:
+                for product in memberform.cleaned_data['products']:
+                    existing_members = Product_Member.objects.filter(product=product, user=user)
+                    if existing_members.count() == 0:
+                        product_member = Product_Member()
+                        product_member.product = product
+                        product_member.user = user
+                        product_member.role = memberform.cleaned_data['role']
+                        product_member.save()
+            messages.add_message(request,
+                                messages.SUCCESS,
+                                'Product members added successfully.',
+                                extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_user', args=(uid, )))
     add_breadcrumb(title="Add Product Member", top_level=False, request=request)
     return render(request, 'dojo/new_product_member_user.html', {
         'user': user,

@@ -114,7 +114,7 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu2">
                             <li role="presentation">
                                 <a id="addProductTypeMember" href="{% url 'add_product_type_member_user' user.id %}">
-                                    <i class="fa fa-plus"></i> Add Product Type
+                                    <i class="fa fa-plus"></i> Add Product Types
                                 </a>
                             </li>
                         </ul>
@@ -161,7 +161,7 @@
                                 </ul>
                             </td>
                             <td name="member_product_type"><a href="{% url 'view_product_type' member.product_type.id %}">{{ member.product_type }}</a></td>
-                            <td name="member_product_type_role">{% role_as_string member.role %}</td>
+                            <td name="member_product_type_role">{{ member.role }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -187,7 +187,7 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu3">
                             <li role="presentation">
                                 <a id="addProductMember" href="{% url 'add_product_member_user' user.id %}">
-                                    <i class="fa fa-plus"></i> Add Product
+                                    <i class="fa fa-plus"></i> Add Products
                                 </a>
                             </li>
                         </ul>
@@ -234,7 +234,7 @@
                                 </ul>
                             </td>
                             <td name="member_product"><a href="{% url 'view_product' member.product.id %}">{{ member.product }}</a></td>
-                            <td name="member_product_role">{% role_as_string member.role %}</td>
+                            <td name="member_product_role">{{ member.role }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -322,6 +322,12 @@
                                 {{ authorized_product_types.all.0 }}
                                 {% endif %}
                             </td>
+                        </tr>
+                        {% endif %}
+                        {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+                        <tr>
+                            <td style="width: 200px;"><strong>Global role</strong></td>
+                            <td>{% if user.global_role.role %} {{ user.global_role.role }} {% endif %}</td>
                         </tr>
                         {% endif %}
                     </tbody>

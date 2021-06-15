@@ -380,6 +380,17 @@ class UserContactInfo(models.Model):
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
+class Role(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    is_owner = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
+
+
 class Dojo_Group(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True)
@@ -387,6 +398,12 @@ class Dojo_Group(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Global_Role(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+    group = models.OneToOneField(Dojo_Group, null=True, blank=True, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, help_text="The global role will be applied to all product types and products.", verbose_name="Global role")
 
 
 class Contact(models.Model):
@@ -808,25 +825,25 @@ class Product(models.Model):
 class Product_Member(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Group(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Member(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Group(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Tool_Type(models.Model):
@@ -1142,7 +1159,7 @@ class Endpoint(models.Model):
                 self.userinfo = None
 
         if self.host:
-            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.host):  # https://tools.ietf.org/html/rfc3986#section-3.2.2
+            if not re.match(r'^[A-Za-z0-9][A-Za-z0-9_\.\-\+]+$', self.host):
                 try:
                     validate_ipv46_address(self.host)
                 except ValidationError:
@@ -1399,7 +1416,7 @@ class Test(models.Model):
             models.Index(fields=['engagement', 'test_type']),
         ]
 
-    def test_type_name(self):
+    def test_type_name(self) -> str:
         return self.test_type.name
 
     def __str__(self):
