@@ -26,7 +26,6 @@ class WhiteHatSentinelParser(object):
 
     def get_findings(self, file, test):
 
-
         findings_collection = json.load(file)
 
         if not findings_collection.keys():
