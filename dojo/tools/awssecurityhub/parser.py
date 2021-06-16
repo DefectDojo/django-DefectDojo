@@ -69,7 +69,7 @@ def get_item(finding, test):
                       false_p=false_p,
                       unique_id_from_tool=finding_id,
                       mitigated=mitigated,
-                      is_Mitigated=is_Mitigated, 
+                      is_Mitigated=is_Mitigated,
                       )
 
     return finding
