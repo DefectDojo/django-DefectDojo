@@ -104,6 +104,8 @@ The new authorization system for Products and Product Types based on roles is th
   - If `AUTHORIZED_USERS_ALLOW_STAFF` is `True`, the user will get the *Owner* role for the respective Product or Product Type.
   - If `AUTHORIZED_USERS_ALLOW_CHANGE` or `AUTHORIZED_USERS_ALLOW_DELETE` is `True`, the user will get the *Writer* role for the respective Product or Product Type.
 
+The new authorization is active for both UI and API. Permissions set via authorized users or via the Django Admin interface are no longer taken into account.
+
 Please review the roles for your users after the upgrade to avoid an unintended permissions creep.
 
 
