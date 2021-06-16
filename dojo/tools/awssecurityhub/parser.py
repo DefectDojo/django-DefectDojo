@@ -66,6 +66,7 @@ def get_item(finding, test):
                       verified=False,
                       false_p=false_p,
                       unique_id_from_tool=finding_id,
+                      mitigated=mitigated,
                       )
 
     return finding
