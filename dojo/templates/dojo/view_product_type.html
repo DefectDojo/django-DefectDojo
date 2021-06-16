@@ -241,13 +241,13 @@
                                         <ul class="dropdown-menu">
                                             {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
                                             <li>
-                                                <a name="editProductTypeMember" href="{% url 'edit_product_type_group' group.id %}">
+                                                <a name="editProductTypeGroup" href="{% url 'edit_product_type_group' group.id %}">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                             </li>
                                             {% endif %}
                                             {% if member|has_object_permission:"Product_Type_Member_Delete" %}
                                             <li>
-                                                <a name="deleteProductTypeMember" href="{% url 'delete_product_type_group' group.id %}">
+                                                <a name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' group.id %}">
                                                     <i class="fa fa-trash"></i> Delete</a>
                                             </li>
                                             {% endif %}

@@ -285,16 +285,46 @@ def delete_product_type_member(request, memberid):
 
 @user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'ptid')
 def add_product_type_group(request, ptid):
-    product_type = get_object_or_404(Product_Type, pk=ptid)
-    group_form = Add_Product_Type_GroupForm(initial={'product_type': product_type.id})
+    pt = get_object_or_404(Product_Type, pk=ptid)
+    group_form = Add_Product_Type_GroupForm(initial={'product_type': pt.id})
+
+    if request.method == 'POST':
+        group_form = Add_Product_Type_GroupForm(request.POST, initial={'product_type': pt.id})
+        if group_form.is_valid():
+            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'You are not permitted to add groups as owners.',
+                                    extra_tags='alert-warning')
+            else:
+                if 'groups' in group_form.cleaned_data and len(group_form.cleaned_data['groups']) > 0:
+                    for group in group_form.cleaned_data['groups']:
+                        groups = Product_Type_Group.objects.filter(product_type=pt, group=group)
+                        if groups.count() == 0:
+                            product_type_group = Product_Type_Group()
+                            product_type_group.product_type = pt
+                            product_type_group.group = group
+                            product_type_group.role = group_form.cleaned_data['role']
+                            product_type_group.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Product type groups added successfully.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_product_type', args=(ptid,)))
+
+    add_breadcrumb(title="Add Product Type Group", top_level=False, request=request)
+    return render(request, 'dojo/new_product_type_group.html', {
+        'pt': pt,
+        'form': group_form,
+    })
 
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'groupid')
 def edit_product_type_group(request, groupid):
     print("placeholder")
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'groupid')
 def delete_product_type_group(request, groupid):
     print("placeholder")

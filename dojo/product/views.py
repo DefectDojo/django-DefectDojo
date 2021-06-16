@@ -23,10 +23,11 @@ from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilte
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
-                       Edit_Product_MemberForm, Delete_Product_MemberForm
+                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
+                        Product_Group
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
                        get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
 
@@ -1561,15 +1562,45 @@ def delete_product_member(request, memberid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Product_Member, Permissions.Product_Manage_Members, 'groupid')
 def edit_product_group(request, pid):
     print("placeholder")
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Product_Member, Permissions.Product_Member_Delete, 'groupid')
 def delete_product_group(request, groupid):
     print("placeholder")
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Product, Permissions.Product_Manage_Members, 'pid')
 def add_product_group(request, pid):
-    print("placeholder")
+    product = get_object_or_404(Product, pk=pid)
+    group_form = Add_Product_GroupForm(initial={'product': product.id})
+
+    if request.method == 'POST':
+        group_form = Add_Product_GroupForm(request.POST, initial={'product': product.id})
+        if group_form.is_valid():
+            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
+                messages.add_message(request,
+                                     messages.WARNING,
+                                     'You are not permitted to add groups as owners.',
+                                     extra_tags='alert-warning')
+            else:
+                if 'groups' in group_form.cleaned_data and len(group_form.cleaned_data['groups']) > 0:
+                    for group in group_form.cleaned_data['groups']:
+                        groups = Product_Group.objects.filter(product=product, group=group)
+                        if groups.count() == 0:
+                            product_group = Product_Group()
+                            product_group.product = product
+                            product_group.group = group
+                            product_group.role = group_form.cleaned_data['role']
+                            product_group.save()
+                messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'Product groups added successfully.',
+                                         extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_product', args=(pid, )))
+    add_breadcrumb(title="Add Product Group", top_level=False, request=request)
+    return render(request, 'dojo/new_product_group.html', {
+        'product': product,
+        'form': group_form
+    })

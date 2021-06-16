@@ -1620,18 +1620,18 @@ class DeleteGroupForm(forms.ModelForm):
 
 
 class Add_Product_GroupForm(forms.ModelForm):
-    group = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
 
     def __init__(self, *args, **kwargs):
         super(Add_Product_GroupForm, self).__init__(*args, **kwargs)
         self.fields['product'].disabled = True
-        current_members = Product_Group.objects.filter(product=self.initial["product"]).values_list('group', flat=True)
+        current_groups = Product_Group.objects.filter(product=self.initial["product"]).values_list('group', flat=True)
         self.fields['groups'].queryset = Dojo_Group.objects.exclude(
-            Q(id__in=current_members)).order_by('name')
+            Q(id__in=current_groups))
 
     class Meta:
         model = Product_Group
-        fields = ['product', 'group', 'role']
+        fields = ['product', 'groups', 'role']
 
 
 class Add_Product_Group_GroupForm(forms.ModelForm):
@@ -1654,14 +1654,14 @@ class Add_Product_Type_GroupForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_GroupForm, self).__init__(*args, **kwargs)
-        current_members = Product_Type_Group.objects.filter(product_type=self.initial["product_type"]).values_list('group', flat=True)
+        current_groups = Product_Type_Group.objects.filter(product_type=self.initial["product_type"]).values_list('group', flat=True)
         self.fields['groups'].queryset = Dojo_Group.objects.exclude(
-            Q(id__in=current_members)).order_by('name')
+            Q(id__in=current_groups))
         self.fields['product_type'].disabled = True
 
     class Meta:
         model = Product_Type_Group
-        fields = ['product_type', 'group', 'role']
+        fields = ['product_type', 'groups', 'role']
 
 
 class Add_Product_Type_Group_GroupForm(forms.ModelForm):
