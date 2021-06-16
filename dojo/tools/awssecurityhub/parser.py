@@ -46,6 +46,7 @@ def get_item(finding, test):
     false_p = False
 
     if finding.get('Compliance', {}).get('Status', "PASSED"):
+        is_Mitigated = True
         if finding.get('LastObservedAt', None):
             try:
                 mitigated = datetime.strptime(finding.get('LastObservedAt'), "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -55,6 +56,7 @@ def get_item(finding, test):
             mitigated = datetime.utcnow()
     else:
         mitigated = None
+        is_Mitigated = False
 
     finding = Finding(title=f"Resource: {resource_id} - {title}",
                       test=test,
@@ -67,6 +69,7 @@ def get_item(finding, test):
                       false_p=false_p,
                       unique_id_from_tool=finding_id,
                       mitigated=mitigated,
+                      is_Mitigated=is_Mitigated, 
                       )
 
     return finding
