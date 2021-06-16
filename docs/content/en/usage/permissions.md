@@ -5,10 +5,6 @@ weight: 3
 draft: false
 ---
 
-{{% alert title="Warning" color="warning" %}}
-The permissions described on this page only become active if you set the ``FEATURE_AUTHORIZATION_V2`` feature flag to ``True``. This feature is currently in beta, you should not use it in production environments.
-{{% /alert %}}
-
 ## System-wide permissions
 
 * Administrators (aka super users) have no limitations in the system. They can change all settings, manage users  and have read and write access to all data.
@@ -17,7 +13,7 @@ The permissions described on this page only become active if you set the ``FEATU
 
 ## Product and Product Type permissions
 
-Users can be assigned as members to Products and Product Types, giving them one out of five predefined roles. The roles define what kind of access a user has to functions for interacting with data of that Product or Product Type:
+Users can be assigned as members to Products and Product Types, giving them one out of five predefined roles. The role defines what kind of access a user has to functions for interacting with data of that Product or Product Type:
 
 **Product / Product Type roles:**
 
