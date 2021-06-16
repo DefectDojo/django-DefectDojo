@@ -6,7 +6,7 @@ from selenium.common.exceptions import TimeoutException
 import unittest
 import sys
 import os
-from base_test_class import BaseTestCase, on_exception_html_source_logger
+from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest, WaitForPageLoad
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -138,6 +138,7 @@ class FindingTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Finding marked for review and reviewers notified.'))
 
+    @on_exception_html_source_logger
     def test_clear_review_from_finding(self):
         # login to site, password set to fetch from environ
         driver = self.driver
@@ -352,12 +353,7 @@ class FindingTest(BaseTestCase):
 
 def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase('test_login'))
-    if jira:
-        suite.addTest(FindingTest('enable_jira'))
-    if github:
-        suite.addTest(FindingTest('enable_github'))
-    if block_execution:
-        suite.addTest(FindingTest('enable_block_execution'))
+    set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
 
     # Add each test the the suite to be run
     # success and failure is output by the test

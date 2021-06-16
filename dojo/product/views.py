@@ -18,7 +18,7 @@ from django.db import DEFAULT_DB_ALIAS, connection
 
 from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.templatetags.display_tags import get_level
-from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, ProductMetricsEndpointFilter, ProductMetricsFindingFilter, ProductComponentFilter
+from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
@@ -38,7 +38,7 @@ from dojo.components.sql_group_concat import Sql_GroupConcat
 import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from django.conf import settings
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type
@@ -279,7 +279,7 @@ def finding_querys(request, prod):
         # 'test__test_type',
         # 'risk_acceptance_set',
         'reporter')
-    findings = ProductMetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
+    findings = MetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
     findings_qs = queryset_check(findings)
     filters['form'] = findings.form
 
@@ -312,7 +312,7 @@ def finding_querys(request, prod):
     # risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod)).prefetch_related('accepted_findings')
     # filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
 
-    from dojo.finding.views import ACCEPTED_FINDINGS_QUERY
+    from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY
     filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY).distinct()
 
     filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
@@ -392,7 +392,7 @@ def endpoint_querys(request, prod):
         'finding__test__engagement__risk_acceptance',
         'finding__risk_acceptance_set',
         'finding__reporter').annotate(severity=F('finding__severity'))
-    endpoints = ProductMetricsEndpointFilter(request.GET, queryset=endpoints_query)
+    endpoints = MetricsEndpointFilter(request.GET, queryset=endpoints_query)
     endpoints_qs = queryset_check(endpoints)
     filters['form'] = endpoints.form
 
@@ -1470,22 +1470,24 @@ def add_product_member(request, pid):
     if request.method == 'POST':
         memberform = Add_Product_MemberForm(request.POST, initial={'product': product.id})
         if memberform.is_valid():
-            members = Product_Member.objects.filter(product=product, user=memberform.instance.user)
-            if members.count() > 0:
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    'Product member already exists.',
-                                    extra_tags='alert-warning')
-            elif memberform.instance.role == Roles.Owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
+            if memberform.cleaned_data['role'].is_owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to add users as owners.',
                                     extra_tags='alert-warning')
             else:
-                memberform.save()
+                if 'users' in memberform.cleaned_data and len(memberform.cleaned_data['users']) > 0:
+                    for user in memberform.cleaned_data['users']:
+                        existing_members = Product_Member.objects.filter(product=product, user=user)
+                        if existing_members.count() == 0:
+                            product_member = Product_Member()
+                            product_member.product = product
+                            product_member.user = user
+                            product_member.role = memberform.cleaned_data['role']
+                            product_member.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'Product member added successfully.',
+                                    'Product members added successfully.',
                                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product', args=(pid, )))
     product_tab = Product_Tab(pid, title="Add Product Member", tab="settings")
@@ -1503,7 +1505,7 @@ def edit_product_member(request, memberid):
     if request.method == 'POST':
         memberform = Edit_Product_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
-            if member.role == Roles.Owner and not user_has_permission(request.user, member.product, Permissions.Product_Member_Add_Owner):
+            if member.role.is_owner and not user_has_permission(request.user, member.product, Permissions.Product_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to make users to owners.',

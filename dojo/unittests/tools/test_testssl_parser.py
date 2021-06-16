@@ -15,12 +15,18 @@ class TestTestsslParser(TestCase):
         testfile = open("dojo/unittests/scans/testssl/defectdojo_one_vuln.csv")
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_many_vuln_has_many_findings(self):
         testfile = open("dojo/unittests/scans/testssl/defectdojo_many_vuln.csv")
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(100, len(findings))
         # finding 8
         # "cipherlist_AVERAGE","www.defectdojo.org/185.199.110.153","443","LOW","offered","","CWE-310"
@@ -38,6 +44,9 @@ class TestTestsslParser(TestCase):
         testfile = open("dojo/unittests/scans/testssl/many_cves.csv")
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(2, len(findings))
         finding = findings[0]
         self.assertEqual("DROWN", finding.title)
@@ -54,10 +63,16 @@ class TestTestsslParser(TestCase):
         testfile = open("dojo/unittests/scans/testssl/demo.csv")
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(12, len(findings))
 
     def test_parse_file_with_31_version2(self):
         testfile = open("dojo/unittests/scans/testssl/demo2.csv")
         parser = TestsslParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(3, len(findings))

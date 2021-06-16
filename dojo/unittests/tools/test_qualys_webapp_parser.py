@@ -3,13 +3,16 @@ from dojo.tools.qualys_webapp.parser import QualysWebAppParser
 from dojo.models import Test
 
 
-class TestPhpSymfonySecurityCheckerParser(TestCase):
+class TestQualysWebAppParser(TestCase):
 
     def test_qualys_webapp_parser_with_no_vuln_has_no_findings(self):
         testfile = open("dojo/unittests/scans/qualys_webapp/qualys_webapp_no_vuln.xml")
         parser = QualysWebAppParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         # 6 non-info findings, 17 total
         self.assertEqual(0, len([x for x in findings if x.severity != "Info"]))
         self.assertEqual(17, len(findings))
@@ -19,6 +22,9 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         parser = QualysWebAppParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         # 8 non-info findings, 14 total
         self.assertEqual(1, len([x for x in findings if x.severity != "Info"]))
         self.assertEqual(14, len(findings))
@@ -30,6 +36,9 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         parser = QualysWebAppParser()
         findings = parser.get_findings(testfile, Test())
         testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         # 3 non-info findings, 21 total
         self.assertEqual(3, len([x for x in findings if x.severity != "Info"]))
         self.assertEqual(21, len(findings))
@@ -41,6 +50,9 @@ class TestPhpSymfonySecurityCheckerParser(TestCase):
         parser = QualysWebAppParser()
         findings = parser.get_findings(testfile, Test(), True)
         testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         # 18 non-info findings, 21 total
         self.assertEqual(18, len([x for x in findings if x.severity != "Info"]))
         self.assertEqual(21, len(findings))

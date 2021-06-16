@@ -13,6 +13,9 @@ class TestNiktoParser(TestCase):
         testfile = open("dojo/unittests/scans/nikto/nikto-report-old-format.xml")
         parser = NiktoParser()
         findings = parser.get_findings(testfile, test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_no_vuln_has_no_findings(self):
@@ -29,6 +32,9 @@ class TestNiktoParser(TestCase):
         testfile = open("dojo/unittests/scans/nikto/nikto-report-one-vuln.xml")
         parser = NiktoParser()
         findings = parser.get_findings(testfile, test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
@@ -39,12 +45,18 @@ class TestNiktoParser(TestCase):
         testfile = open("dojo/unittests/scans/nikto/nikto-report-many-vuln.xml")
         parser = NiktoParser()
         findings = parser.get_findings(testfile, test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertTrue(len(findings) == 10)
 
     def test_parse_file_json_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("dojo/unittests/scans/nikto/juice-shop.json")
         parser = NiktoParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(11, len(findings))
         for finding in findings:
             if "OSVDB-3092" == finding.unique_id_from_tool:
@@ -53,7 +65,6 @@ class TestNiktoParser(TestCase):
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
-                endpoint.clean()
                 self.assertEqual(443, endpoint.port)
                 self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                 self.assertEqual("public/", endpoint.path)
@@ -68,6 +79,9 @@ class TestNiktoParser(TestCase):
         testfile = open("dojo/unittests/scans/nikto/nikto-output.xml")
         parser = NiktoParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(13, len(findings))
         for finding in findings:
             if "favicon.ico file identifies this server as: Apache Tomcat" == finding.title:
@@ -77,7 +91,6 @@ class TestNiktoParser(TestCase):
                 # this one as error in URL
                 # self.assertEqual(1, len(finding.unsaved_endpoints))
                 # endpoint = finding.unsaved_endpoints[0]
-                # endpoint.clean()
                 # self.assertEqual(443, endpoint.port)
                 # self.assertEqual("juice-shop.herokuapp.com", endpoint.host)
                 # self.assertEqual("public/", endpoint.path)
@@ -87,7 +100,6 @@ class TestNiktoParser(TestCase):
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual(1, len(finding.unsaved_endpoints))
                 endpoint = finding.unsaved_endpoints[0]
-                endpoint.clean()
                 self.assertEqual(8070, endpoint.port)
                 self.assertEqual("127.0.0.1", endpoint.host)
                 self.assertEqual("examples/servlets/index.html", endpoint.path)
@@ -96,6 +108,9 @@ class TestNiktoParser(TestCase):
         testfile = open("dojo/unittests/scans/nikto/tdh.json")
         parser = NiktoParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(8, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -105,7 +120,6 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("www.tdh.com", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -117,7 +131,6 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("www.tdh.com", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -126,6 +139,9 @@ class TestNiktoParser(TestCase):
         testfile = open("dojo/unittests/scans/nikto/tdh.xml")
         parser = NiktoParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(6, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -135,7 +151,6 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -147,7 +162,6 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
@@ -159,7 +173,6 @@ class TestNiktoParser(TestCase):
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            endpoint.clean()
             self.assertEqual(443, endpoint.port)
             self.assertEqual("64.220.43.153", endpoint.host)
             self.assertIsNone(endpoint.path)
