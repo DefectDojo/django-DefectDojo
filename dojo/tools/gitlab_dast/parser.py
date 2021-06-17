@@ -29,7 +29,7 @@ class GitlabDastParser(object):
         return tree
 
     def get_items(self, tree, test):
-        items = []
+        items = {}
 
         # iterating through each vulnerability
         for node in tree['vulnerabilities']:
