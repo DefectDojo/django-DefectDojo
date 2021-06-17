@@ -92,7 +92,7 @@ class Permissions(IntEnum):
     Product_Group_Delete = 2107
 
     Group_View = 2202
-    Group_Users_Delete = 2203
+    Group_User_Delete = 2203
     Group_Manage_Users = 2204
     Group_Add_Owner = 2205
     Group_Edit = 2206
@@ -143,11 +143,6 @@ class Permissions(IntEnum):
             Permissions.Product_Member_Delete}
 
     @classmethod
-    def get_product_type_member_permissions(cls):
-        return {Permissions.Product_Type_View, Permissions.Product_Type_Manage_Members,
-            Permissions.Product_Type_Member_Delete}
-
-    @classmethod
     def get_product_group_permissions(cls):
         return {Permissions.Product_Group_View, Permissions.Product_Group_Edit,
             Permissions.Product_Group_Delete}
@@ -159,8 +154,12 @@ class Permissions(IntEnum):
 
     @classmethod
     def get_group_permissions(cls):
-        return {Permissions.Group_View, Permissions.Group_Users_Delete, Permissions.Group_Manage_Users,
+        return {Permissions.Group_View, Permissions.Group_User_Delete, Permissions.Group_Manage_Users,
             Permissions.Group_Add_Owner, Permissions.Group_Edit, Permissions.Group_Delete}
+
+    @classmethod
+    def get_group_user_permissions(cls):
+        return {Permissions.Group_View, Permissions.Group_Manage_Users, Permissions.Group_User_Delete}
 
 
 def get_roles_with_permissions():
@@ -294,7 +293,7 @@ def get_roles_with_permissions():
             Permissions.Group_View,
             Permissions.Group_Edit,
             Permissions.Group_Manage_Users,
-            Permissions.Group_Users_Delete
+            Permissions.Group_User_Delete
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -365,7 +364,7 @@ def get_roles_with_permissions():
             Permissions.Group_View,
             Permissions.Group_Edit,
             Permissions.Group_Manage_Users,
-            Permissions.Group_Users_Delete,
+            Permissions.Group_User_Delete,
             Permissions.Group_Add_Owner,
             Permissions.Group_Delete
         }
