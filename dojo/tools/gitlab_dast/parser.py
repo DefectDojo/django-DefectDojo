@@ -43,6 +43,7 @@ class GitlabDastParser(object):
 
             if item_key in items:
                 items[item_key].unsaved_endpoints.extend(item.unsaved_endpoints)
+                items[dupes_key].nb_occurences += 1
             else:
                 items[item_key] = item
 
@@ -116,6 +117,7 @@ def get_item(vuln, test):
 
     finding = Finding(
         test=test,  # Test
+        nb_occurences=1,  # int
         unique_id_from_tool=unique_id_from_tool,  # str
         scanner_confidence=scanner_confidence,  # int
         title=title,  # str
