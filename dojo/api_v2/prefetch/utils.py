@@ -37,10 +37,7 @@ def _get_prefetchable_fields(serializer):
         serializer (Serializer): [description]
     """
     def _is_field_prefetchable(field):
-        if _is_many_to_many_relation(field):
-            # print(serializer.__class__)
-            # print('ManytoMany: ', vars(field))
-            return _is_one_to_one_relation(field) or _is_many_to_many_relation(field)
+        return _is_one_to_one_relation(field) or _is_many_to_many_relation(field)
 
     meta = getattr(serializer, "Meta", None)
     if meta is None:
