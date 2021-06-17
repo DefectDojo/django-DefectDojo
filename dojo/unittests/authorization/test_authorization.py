@@ -119,7 +119,7 @@ class TestAuthorization(TestCase):
         cls.group_user.id = 1
         cls.group_user.dojo_group = cls.group3
         cls.group_user.user = cls.user4
-        cls.group_user.role = Role.objects.get(id=Roles.Maintainer)
+        cls.group_user.role = Role.objects.get(id=Roles.Writer)
 
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,
@@ -491,16 +491,36 @@ class TestAuthorization(TestCase):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [self.group_user]
 
-        result = user_has_permission(self.user4, self.group3, Permissions.Group_Delete)
+        result = user_has_permission(self.user4, self.group3, Permissions.Group_Edit)
         self.assertFalse(result)
-        mock_foo.filter.assert_called_with(users=self.user4)
+        mock_foo.filter.assert_called_with(user=self.user4)
 
     @patch('dojo.models.Dojo_Group_User.objects')
-    def test_dojo_group_role_success(self, mock_foo):
+    def test_dojo_group_success(self, mock_foo):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.select_related.return_value = mock_foo
         mock_foo.filter.return_value = [self.group_user]
 
-        result = user_has_permission(self.user4, self.group3, Permissions.Group_Edit)
+        result = user_has_permission(self.user4, self.group3, Permissions.Group_View)
         self.assertTrue(result)
-        mock_foo.filter.assert_called_with(users=self.user4)
+        mock_foo.filter.assert_called_with(user=self.user4)
+
+    @patch('dojo.models.Dojo_Group_User.objects')
+    def test_dojo_group_user_no_permission(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.group_user]
+
+        result = user_has_permission(self.user4, self.group_user, Permissions.Group_Manage_Users)
+        self.assertFalse(result)
+        mock_foo.filter.assert_called_with(user=self.user4)
+
+    @patch('dojo.models.Dojo_Group_User.objects')
+    def test_dojo_group_user_success(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.group_user]
+
+        result = user_has_permission(self.user4, self.group_user, Permissions.Group_View)
+        self.assertTrue(result)
+        mock_foo.filter.assert_called_with(user=self.user4)

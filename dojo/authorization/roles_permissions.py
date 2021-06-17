@@ -143,6 +143,11 @@ class Permissions(IntEnum):
             Permissions.Product_Member_Delete}
 
     @classmethod
+    def get_product_type_member_permissions(cls):
+        return {Permissions.Product_Type_View, Permissions.Product_Type_Manage_Members,
+            Permissions.Product_Type_Member_Delete}
+
+    @classmethod
     def get_product_group_permissions(cls):
         return {Permissions.Product_Group_View, Permissions.Product_Group_Edit,
             Permissions.Product_Group_Delete}
