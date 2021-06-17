@@ -2,7 +2,7 @@ from django.core.exceptions import PermissionDenied
 from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
-from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
+from dojo.models import Dojo_Group_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group
 
 
@@ -72,6 +72,13 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(user, obj.product_type, permission)
     elif isinstance(obj, Product_Group) and permission in Permissions.get_product_group_permissions():
         return user_has_permission(user, obj.product, permission)
+    elif isinstance(obj, Dojo_Group) and permission in Permissions.get_group_permissions():
+        # Check if the user has a role for the group with the requested permissions
+        group_user = get_group_user(user, obj)
+        if group_user is not None and role_has_permission(group_user.role.id, permission):
+            return True
+        else:
+            return False
     else:
         raise NoAuthorizationImplementedError('No authorization implemented for class {} and permission {}'.
             format(type(obj).__name__, permission))
@@ -180,3 +187,15 @@ def get_product_type_groups_dict(user):
 @cache_for_request
 def get_groups(user):
     return Dojo_Group.objects.select_related('global_role').filter(users=user)
+
+
+def get_group_user(user, dojo_group):
+    return get_group_users_dict(user).get(dojo_group.id, [])
+
+
+@cache_for_request
+def get_group_users_dict(user):
+    gu_dict = {}
+    for group_user in Dojo_Group_User.objects.select_related('dojo_group').select_related('role').filter(users=user):
+        gu_dict[group_user.dojo_group.id] = group_user
+    return gu_dict
