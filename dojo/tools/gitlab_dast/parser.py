@@ -34,18 +34,18 @@ class GitlabDastParser(object):
         # iterating through each vulnerability
         for node in tree['vulnerabilities']:
             item = get_item(node, test)
-            
+
             item_key = hashlib.sha256("|".join([
                 item.severity,
                 item.title,
                 item.description
             ]).encode()).hexdigest()
-            
+
             if item_key in items:
                 items[item_key].unsaved_endpoints.extend(item.unsaved_endpoints)
             else:
                 items[item_key] = item
-                
+
         return list(items.values())
 
     def get_findings(self, file, test):
