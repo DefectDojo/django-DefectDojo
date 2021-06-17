@@ -1981,6 +1981,15 @@ class ToolConfigForm(forms.ModelForm):
         return form_data
 
 
+class DeleteSonarqubeConfigurationForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Sonarqube_Product
+        fields = ['id']
+
+
 class DeleteObjectsSettingsForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
