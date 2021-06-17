@@ -104,6 +104,10 @@ class TestAuthorization(TestCase):
 
         cls.user3 = Dojo_User()
         cls.user3.id = 2
+        cls.global_role_user = Global_Role()
+        cls.global_role_user.id = 3
+        cls.global_role_user.user = cls.user3
+        cls.global_role_user.role = None
 
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,

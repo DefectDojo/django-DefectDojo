@@ -14,11 +14,11 @@ def user_has_permission(user, obj, permission):
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return True
 
-    if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
+    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
         return True
 
     for group in get_groups(user):
-        if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
+        if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
             return True
 
     if isinstance(obj, Product_Type):

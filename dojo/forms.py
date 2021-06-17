@@ -418,7 +418,7 @@ class DojoMetaDataForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
-    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
+    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1].lower())
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
