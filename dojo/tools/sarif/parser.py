@@ -73,10 +73,14 @@ def get_rule_tags(rule):
 
 def get_rule_cwes(rule):
     cwes = []
-    for tag in get_rule_tags(rule):
-        matches = re.search(CWE_REGEX, tag, re.IGNORECASE)
-        if matches:
-            cwes.append(int(matches[0].split("-")[1]))
+    if 'properties' in rule and 'cwe' in rule['properties']:  # condition for njsscan
+        value = rule['properties']['cwe']
+        cwes.append(int(re.split('-|:', value)[1]))
+    else:
+        for tag in get_rule_tags(rule):
+            matches = re.search(CWE_REGEX, tag, re.IGNORECASE)
+            if matches:
+                cwes.append(int(matches[0].split("-")[1]))
     return cwes
 
 
