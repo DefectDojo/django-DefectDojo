@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0107_global_role'),
+        ('dojo', '0108_blank_fields'),
     ]
 
     operations = [
