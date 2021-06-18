@@ -61,7 +61,7 @@ class GitlabSecretDetectionReportParser(object):
                 severity=severity,
                 static_finding=True,
                 dynamic_finding=False,
-                unique_id_from_tool=vulnerabilities["id"]
+                unique_id_from_tool=vulnerability["id"]
             )
 
             if file_path != "":
