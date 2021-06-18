@@ -1,19 +1,25 @@
 from collections import OrderedDict
+from re import T
 from drf_spectacular.drainage import GENERATOR_STATS
 # from drf_spectacular.renderers import OpenApiJsonRenderer
+from unittest.mock import patch
 from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
-    BurpRawRequestResponse, DojoMeta, FileUpload
+    BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
+    Role, Product_Type_Member, Product_Member, Product_Type_Group, \
+    Product_Group, Global_Role
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
     StubFindingsViewSet, TestsViewSet, \
     ToolConfigurationsViewSet, ToolProductSettingsViewSet, ToolTypesViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
-    EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet
+    EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet, ProductTypeViewSet, \
+    DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
+    ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet
 from json import dumps
 from django.urls import reverse
 from rest_framework import status
@@ -28,6 +34,7 @@ from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from drf_spectacular.settings import spectacular_settings
 import logging
 import pathlib
+from dojo.authorization.roles_permissions import Permissions
 
 
 logger = logging.getLogger(__name__)
@@ -449,6 +456,44 @@ class BaseClass():
                         self.assertTrue(value in objs["prefetch"][field])
 
             # TODO add schema check
+
+        @patch('dojo.api_v2.permissions.user_has_permission')
+        @skipIfNotSubclass(UpdateModelMixin)
+        def test_update_not_authorized(self, mock_foo):
+            if not self.object_permission:
+                self.skipTest('Authorization is not object based')
+
+            mock_foo.return_value = False
+
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+
+            response = self.client.patch(relative_url, self.update_fields)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock_foo.assert_called_with(User.objects.get(username='admin'),
+                self.endpoint_model.objects.get(id=current_objects['results'][0]['id']),
+                self.permission_update)
+
+            response = self.client.put(relative_url, self.payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            mock_foo.assert_called_with(User.objects.get(username='admin'),
+                self.endpoint_model.objects.get(id=current_objects['results'][0]['id']),
+                self.permission_update)
+
+    class MemberEndpointTest(RESTEndpointTest):
+        def __init__(self, *args, **kwargs):
+            BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+        def test_update(self):
+            current_objects = self.client.get(self.url, format='json').data
+            relative_url = self.url + '%s/' % current_objects['results'][0]['id']
+            response = self.client.patch(relative_url, self.update_fields)
+            self.assertEqual(405, response.status_code, response.content[:1000])
+
+            response = self.client.put(
+                relative_url, self.payload)
+            self.assertEqual(200, response.status_code, response.content[:1000])
+            self.check_schema_response('put', '200', response, detail=True)
 
 
 class AppAnalysisTest(BaseClass.RESTEndpointTest):
@@ -895,6 +940,11 @@ class ProductTest(BaseClass.RESTEndpointTest):
             "tags": ["mytag, yourtag"]
         }
         self.update_fields = {'prod_type': 2}
+        self.object_permission = True
+        self.permission_view = Permissions.Product_View
+        self.permission_create = Permissions.Product_Type_Add_Product
+        self.permission_update = Permissions.Product_Edit
+        self.permission_delete = Permissions.Product_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1129,3 +1179,132 @@ class ReimportScanTest(DojoAPITestCase):
         self.assertEqual(length, Test.objects.all().count())
         self.assertEqual(201, response.status_code, response.content[:1000])
         # TODO add schema check
+
+
+class ProductTypeTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Type
+        self.endpoint_path = 'product_types'
+        self.viewname = 'product_type'
+        self.viewset = ProductTypeViewSet
+        self.payload = {
+            "name": "Test Product Type",
+            "description": "Test",
+            "key_product": True,
+            "critical_product": False
+        }
+        self.update_fields = {'description': "changed"}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class DojoGroupsTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Dojo_Group
+        self.endpoint_path = 'dojo_groups'
+        self.viewname = 'dojo_group'
+        self.viewset = DojoGroupViewSet
+        self.payload = {
+            "name": "Test Group",
+            "description": "Test",
+        }
+        self.update_fields = {'description': "changed"}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class RolesTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Role
+        self.endpoint_path = 'roles'
+        self.viewname = 'role'
+        self.viewset = RoleViewSet
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class GlobalRolesTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Global_Role
+        self.endpoint_path = 'global_roles'
+        self.viewname = 'global_role'
+        self.viewset = GlobalRoleViewSet
+        self.payload = {
+            "user": 2,
+            "role": 2
+        }
+        self.update_fields = {'role': 3}
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Type_Member
+        self.endpoint_path = 'product_type_members'
+        self.viewname = 'product_type_member'
+        self.viewset = ProductTypeMemberViewSet
+        self.payload = {
+            "product_type": 1,
+            "user": 3,
+            "role": 2
+        }
+        self.update_fields = {'role': 3}
+        BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ProductMemberTest(BaseClass.MemberEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Member
+        self.endpoint_path = 'product_members'
+        self.viewname = 'product_member'
+        self.viewset = ProductMemberViewSet
+        self.payload = {
+            "product": 3,
+            "user": 2,
+            "role": 2
+        }
+        self.update_fields = {'role': 3}
+        BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Type_Group
+        self.endpoint_path = 'product_type_groups'
+        self.viewname = 'product_type_group'
+        self.viewset = ProductTypeGroupViewSet
+        self.payload = {
+            "product_type": 1,
+            "group": 2,
+            "role": 2
+        }
+        self.update_fields = {'role': 3}
+        BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ProductGroupTest(BaseClass.MemberEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Product_Group
+        self.endpoint_path = 'product_groups'
+        self.viewname = 'product_group'
+        self.viewset = ProductGroupViewSet
+        self.payload = {
+            "product": 1,
+            "group": 2,
+            "role": 2
+        }
+        self.update_fields = {'role': 3}
+        BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)

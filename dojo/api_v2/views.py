@@ -1244,6 +1244,14 @@ class ProductMemberViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_product_members(Permissions.Product_View).distinct()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {'message': 'Patch function is not offered in this path.'}
@@ -1283,6 +1291,14 @@ class ProductGroupViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_product_groups(Permissions.Product_Group_View).distinct()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {'message': 'Patch function is not offered in this path.'}
@@ -1406,6 +1422,14 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {'message': 'Patch function is not offered in this path.'}
@@ -1445,6 +1469,14 @@ class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_product_type_groups(Permissions.Product_Type_Group_View).distinct()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {'message': 'Patch function is not offered in this path.'}
