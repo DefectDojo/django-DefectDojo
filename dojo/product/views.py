@@ -23,7 +23,7 @@ from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilte
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
-                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form
+                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
@@ -1562,8 +1562,9 @@ def delete_product_member(request, memberid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Manage_Members, 'groupid')
+@user_is_authorized(Product_Group, Permissions.Product_Group_Edit, 'groupid')
 def edit_product_group(request, groupid):
+    logger.exception(groupid)
     group = get_object_or_404(Product_Group, pk=groupid)
     groupform = Edit_Product_Group_Form(instance=group)
 
@@ -1594,9 +1595,29 @@ def edit_product_group(request, groupid):
 
 
 
-@user_is_authorized(Product, Permissions.Product_Member_Delete, 'groupid')
+@user_is_authorized(Product_Group, Permissions.Product_Group_Delete, 'groupid')
 def delete_product_group(request, groupid):
-    print("placeholder")
+    group = get_object_or_404(Product_Group, pk=groupid)
+    groupform = Delete_Product_GroupForm(instance=group)
+
+    if request.method == 'POST':
+        groupform = Delete_Product_GroupForm(request.POST, instance=group)
+        group = groupform.instance
+        group.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Product group deleted successfully.',
+                             extra_tags='alert-success')
+        if is_title_in_breadcrumbs('View Group'):
+            return HttpResponseRedirect(reverse('view_group', args=(group.group.id, )))
+        else:
+            return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
+
+    add_breadcrumb(title="Delete Product Group", top_level=False, request=request)
+    return render(request, 'dojo/delete_product_group.html', {
+        'groupid': groupid,
+        'form': groupform
+    })
 
 @user_is_authorized(Product, Permissions.Product_Manage_Members, 'pid')
 def add_product_group(request, pid):

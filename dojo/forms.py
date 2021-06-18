@@ -1662,6 +1662,12 @@ class Edit_Product_Group_Form(forms.ModelForm):
         fields = ['product', 'group', 'role']
 
 
+class Delete_Product_GroupForm(Edit_Product_Group_Form):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Product_GroupForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
+
+
 class Add_Product_Type_GroupForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
 
