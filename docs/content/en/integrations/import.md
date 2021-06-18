@@ -43,6 +43,14 @@ arachni_reporter --reporter 'json' js.com.afr
 Use the VulnerabilitiesSummary.xml file found in the zipped report
 download.
 
+### AuditJS (OSSIndex)
+
+AuditJS scanning tool using OSSIndex database and generated with `--json` or `-j` option (<https://www.npmjs.com/package/auditjs>).
+
+{{< highlight bash >}}
+auditjs ossi --json > auditjs_report.json
+{{< /highlight >}}
+
 ### AWS Security Hub
 
 The JSON output from AWS Security Hub exported with the `aws securityhub get-findings` (<https://docs.aws.amazon.com/cli/latest/reference/securityhub/get-findings.html>)
@@ -196,12 +204,12 @@ OWASP Dependency Check output can be imported in Xml format.
 
 ### Dependency Track
 
-Dependency Track has implemented a DefectDojo integration. Information about 
-how to configure the integration is documented here: 
+Dependency Track has implemented a DefectDojo integration. Information about
+how to configure the integration is documented here:
 https://docs.dependencytrack.org/integrations/defectdojo/
 
 Alternatively, the Finding Packaging Format (FPF) from OWASP Dependency Track can be
-imported in JSON format. See here for more info on this JSON format: 
+imported in JSON format. See here for more info on this JSON format:
 <https://docs.dependencytrack.org/integrations/file-formats/>
 
 ### DrHeader
@@ -317,16 +325,16 @@ XML Scan Result File from Immuniweb Scan.
 IntSights Report
 --------------
 
-IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.). 
+IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.).
 
 ### Manual Import
-Use the Export CSV feature in the IntSights Threat Command GUI to create an *IntSights Alerts.csv* file. This CSV 
+Use the Export CSV feature in the IntSights Threat Command GUI to create an *IntSights Alerts.csv* file. This CSV
 file can then be imported into Defect Dojo.
 
 ### Automated Import
 
-The IntSights `get-complete-alert` API only returns details for a single alert. To automate the process, 
-individually fetch details for each alert and append to a list. The list is then saved as the value for the key 
+The IntSights `get-complete-alert` API only returns details for a single alert. To automate the process,
+individually fetch details for each alert and append to a list. The list is then saved as the value for the key
 "Alerts". This JSON object can then be imported into Defect Dojo.
 
 Example:
@@ -682,7 +690,7 @@ JSON output of the `twistcli` tool. Example:
 
 The CSV output from the UI is now also accepted.
 
-### TFSec 
+### TFSec
 
 Import of JSON report from <https://github.com/tfsec/tfsec>
 
