@@ -1,7 +1,10 @@
 import hashlib
 import json
-from urllib.parse import urlparse
-from dojo.models import Endpoint, Finding
+import logging
+
+from dojo.models import Finding
+
+logger = logging.getLogger(__name__)
 
 
 class GitlabAPIFuzzingParser(object):
@@ -24,13 +27,10 @@ class GitlabAPIFuzzingParser(object):
         data = json.load(file)
 
         dupes = dict()
-
         vulnerabilities = data["vulnerabilities"]
         for vulnerability in vulnerabilities:
-
-            title = vulnerability["name"]
+            title = vulnerability["name"] + " - " + vulnerability["id"]
             severity = self.normalise_severity(vulnerability["severity"])
-
             description = vulnerability["category"]
             try:
                 location = vulnerability["location"]
