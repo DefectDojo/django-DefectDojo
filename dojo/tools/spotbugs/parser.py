@@ -4,9 +4,8 @@ __email__ = "bigorigor.ua@gmail.com"
 __status__ = "Development"
 
 import re
-
+import html2text
 from defusedxml import ElementTree as ET
-
 from dojo.models import Finding
 
 
@@ -22,7 +21,8 @@ class SpotbugsParser(object):
         return "XML report of textui cli."
 
     def get_findings(self, filename, test):
-        bug_patterns = dict()
+        mitigation_patterns = dict()
+        reference_patterns = dict()
         dupes = dict()
 
         SEVERITY = {
@@ -34,10 +34,53 @@ class SpotbugsParser(object):
         tree = ET.parse(filename)
         root = tree.getroot()
 
-        for pattern in root.findall('BugPattern'):
-            plain_pattern = re.sub(r'<[b-z/]*?>|<a|</a>|href=', '', ET.tostring(pattern.find('Details'), method='text').decode('utf-8'))
-            bug_patterns[pattern.get('type')] = plain_pattern
+        html_parser = html2text.HTML2Text()
+        html_parser.ignore_links = False
 
+        # Parse <BugPattern> tags
+        for pattern in root.findall('BugPattern'):
+            # Parse <BugPattern>...<Details> html content
+            html_text = html_parser.handle(
+                ET.tostring(
+                    pattern.find('Details'),
+                    method='text'
+                ).decode('utf-8')
+            )
+
+            # Parse mitigation from html
+            mitigation = ''
+            i = 0
+            for line in html_text.splitlines():
+                i += 1
+                # Break loop when references are reached
+                if 'Reference' in line:
+                    break
+                # Add a string before the code indicating that it's just an example, NOT the actual scanned code
+                if ('Vulnerable Code:' in line) or ('Insecure configuration:' in line) or ('Code at risk:' in line):
+                    mitigation += '\n\n#### Example\n'
+                # Add line to mitigation
+                mitigation += line + '\n'
+            # Add mitigations to dictionary
+            mitigation_patterns[pattern.get('type')] = mitigation
+
+            # Parse references from html
+            reference = ''
+            #   Sometimes there's a breakline in the middle of the reference,
+            #   so the splitlines method ends up breaking it in two.
+            #   We solve this problem by joining all references and adding breaklines with regex.
+            # Start loop where the previous loop ended
+            for line in html_text.splitlines()[i:]:
+                # Concatenate all references in one big string
+                reference += line + ' '
+            # Add breakline between each reference
+            #   regex: turns ')  [' into ')\n['
+            #      ')': reference ends
+            #      '[': reference starts
+            reference = re.sub(r'(?<=\))(.*?)(?=\[)', '\n', reference)
+            # Add references to dictionary
+            reference_patterns[pattern.get('type')] = reference
+
+        # Parse <BugInstance> tags
         for bug in root.findall('BugInstance'):
             desc = ''
             for message in bug.itertext():
@@ -49,7 +92,8 @@ class SpotbugsParser(object):
             cwe = bug.get('cweid', default=0)
             severity = SEVERITY[bug.get('priority')]
             description = desc
-            mitigation = bug_patterns[bug.get('type')]
+            mitigation = mitigation_patterns[bug.get('type')]
+            references = reference_patterns[bug.get('type')]
 
             # find the source line and file on the buginstance
             source_line = None
@@ -69,6 +113,7 @@ class SpotbugsParser(object):
                     severity=severity,
                     description=description,
                     mitigation=mitigation,
+                    references=references,
                     test=test,
                     static_finding=True,
                     line=source_line,

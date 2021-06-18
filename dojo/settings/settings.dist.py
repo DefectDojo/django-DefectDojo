@@ -18,7 +18,7 @@ env = environ.Env(
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_LOGIN_URL=(str, '/login'),
-    DD_DJANGO_ADMIN_ENABLED=(bool, False),
+    DD_DJANGO_ADMIN_ENABLED=(bool, True),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
     DD_SECURE_SSL_REDIRECT=(bool, False),
@@ -835,6 +835,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
     'Scout Suite Scan': ['title', 'severity', 'description'],
+    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -859,6 +860,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Trivy Scan': True,
     'SpotBugs Scan': False,
     'Scout Suite Scan': True,
+    'Meterian Scan': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -923,6 +925,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
     'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
     'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
+    'Meterian Scan': DEDUPE_ALGO_HASH_CODE
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
