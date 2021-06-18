@@ -43,7 +43,7 @@ urllib3==1.26.5
 uWSGI==2.0.19.1
 vobject==0.9.6.1
 whitenoise==5.2.0
-titlecase==2.0.0
+titlecase==2.2.0
 social-auth-app-django==4.0.0
 social-auth-core==4.1.0
 Python-jose==3.3.0
