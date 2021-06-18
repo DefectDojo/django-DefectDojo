@@ -68,7 +68,7 @@ class GitlabSecretDetectionReportParser(object):
             if line != -1:
                 finding.line = line
             if raw_source_code != "":
-                finding.references = raw_source_code
+                finding.description += "\n" + raw_source_code
 
             # internal de-duplication
             dupe_key = hashlib.sha256(

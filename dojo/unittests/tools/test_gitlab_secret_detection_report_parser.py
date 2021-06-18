@@ -32,7 +32,7 @@ class TestGitlabSecretDetectionReportParser(TestCase):
         self.assertEqual(5, first_finding.line)
         self.assertEqual("Critical", first_finding.severity)
         self.assertEqual("README.md", first_finding.file_path)
-        self.assertEqual("AKIAIOSFODNN7EXAMPLE", first_finding.references)
+        self.assertEqual("AWS\nAKIAIOSFODNN7EXAMPLE", first_finding.description)
 
     def test_gitlab_secret_detection_report_parser_with_many_vuln_has_many_findings(
         self,
