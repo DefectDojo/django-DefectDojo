@@ -4,6 +4,9 @@ import re
 from dojo.models import Finding
 
 class AuditJSParser(object):
+    """Parser for AuditJS Scan tool"""
+
+
     def get_scan_types(self):
         return ["AuditJS Scan"]
 
