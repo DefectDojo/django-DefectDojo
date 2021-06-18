@@ -57,9 +57,9 @@ class AuditJSParser(object):
             if dependency['vulnerabilities']:
                 # Get vulnerability data from JSON and setup variables
                 for vulnerability in dependency['vulnerabilities']:
-                    unique_id_from_tool = title = description = cvss = cvssVector = cve = cvss_version = cwe = references = severity = None
+                    vuln_id_from_tool = title = description = cvss = cvssVector = cve = cvss_version = cwe = references = severity = None
                     if "id" in vulnerability:
-                        unique_id_from_tool = vulnerability["id"]
+                        vuln_id_from_tool = vulnerability["id"]
                     if 'title' in vulnerability:
                         title = vulnerability['title']
                         # Find CWE in title in form "CWE-****"
@@ -108,11 +108,11 @@ class AuditJSParser(object):
                         component_version=component_version,
                         static_finding=True,
                         dynamic_finding=False,
-                        unique_id_from_tool=unique_id_from_tool,
+                        vuln_id_from_tool=vuln_id_from_tool,
                     )
 
                     # internal de-duplication
-                    dupe_key = hashlib.sha256(str(unique_id_from_tool + title + description + component_version).encode('utf-8')).hexdigest()
+                    dupe_key = hashlib.sha256(str(vuln_id_from_tool + title + description + component_version).encode('utf-8')).hexdigest()
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
                         if finding.description:
