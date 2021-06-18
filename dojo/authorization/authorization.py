@@ -3,7 +3,7 @@ from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group
+    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group
 
 
 def user_has_permission(user, obj, permission):
@@ -13,6 +13,13 @@ def user_has_permission(user, obj, permission):
 
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return True
+
+    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+        return True
+
+    for group in get_groups(user):
+        if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
+            return True
 
     if isinstance(obj, Product_Type):
         # Check if the user has a role for the product type with the requested permissions
@@ -88,6 +95,8 @@ def get_roles_for_permission(permission):
 
 
 def role_has_permission(role, permission):
+    if role is None:
+        return False
     if not Roles.has_value(role):
         raise RoleDoesNotExistError('Role {} does not exist'.format(role))
     roles = get_roles_with_permissions()
@@ -166,3 +175,8 @@ def get_product_type_groups_dict(user):
         pgtu_list.append(product_type_group)
         pgt_dict[product_type_group.product_type.id] = pgtu_list
     return pgt_dict
+
+
+@cache_for_request
+def get_groups(user):
+    return Dojo_Group.objects.select_related('global_role').filter(users=user)

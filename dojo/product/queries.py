@@ -3,7 +3,8 @@ from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Product, Product_Member, Product_Type_Member, App_Analysis, \
     DojoMeta, Product_Group, Product_Type_Group
-from dojo.authorization.authorization import get_roles_for_permission, user_has_permission
+from dojo.authorization.authorization import get_roles_for_permission, user_has_permission, \
+    role_has_permission, get_groups
 
 
 def get_authorized_products(permission, user=None):
@@ -20,6 +21,13 @@ def get_authorized_products(permission, user=None):
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Product.objects.all().order_by('name')
+
+        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+            return Product.objects.all().order_by('name')
+
+        for group in get_groups(user):
+            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
+                return Product.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -77,6 +85,9 @@ def get_authorized_product_members(permission):
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Product_Member.objects.all()
 
+    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+        return Product_Member.objects.all()
+
     products = get_authorized_products(permission)
     return Product_Member.objects.filter(product__in=products)
 
@@ -91,6 +102,9 @@ def get_authorized_product_members_for_user(user, permission):
         return Product_Member.objects.filter(user=user)
 
     if request_user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
+        return Product_Member.objects.all(user=user)
+
+    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
         return Product_Member.objects.all(user=user)
 
     products = get_authorized_products(permission)
@@ -125,6 +139,13 @@ def get_authorized_app_analysis(permission):
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return App_Analysis.objects.all().order_by('name')
+
+        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+            return App_Analysis.objects.all().order_by('name')
+
+        for group in get_groups(user):
+            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
+                return App_Analysis.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -173,6 +194,13 @@ def get_authorized_dojo_meta(permission):
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return DojoMeta.objects.all().order_by('name')
+
+        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+            return DojoMeta.objects.all().order_by('name')
+
+        for group in get_groups(user):
+            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
+                return DojoMeta.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
         product_authorized_product_type_roles = Product_Type_Member.objects.filter(
