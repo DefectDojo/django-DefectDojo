@@ -16,18 +16,32 @@ class AuditJSParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "AuditJS Scanning tool using SonaType OSSIndex database with JSON output format"
 
-    def get_severity(self, cvss):
+    # By default, we assume we are using CVSS Version 2.0 (AuditJS always specifies when it's V3)
+    def get_severity(self, cvss, cvss_version="2.0"):
         cvss = float(cvss)
-        if cvss > 0 and cvss < 4:
-            return "Low"
-        elif cvss >= 4 and cvss < 7:
-            return "Medium"
-        elif cvss >= 7 and cvss < 9:
-            return "High"
-        elif cvss >= 9:
-            return "Critical"
+        cvss_version = float(cvss_version[:1])
+        # If CVSS Version 3 and above
+        if cvss_version >= 3:
+            if cvss > 0 and cvss < 4:
+                return "Low"
+            elif cvss >= 4 and cvss < 7:
+                return "Medium"
+            elif cvss >= 7 and cvss < 9:
+                return "High"
+            elif cvss >= 9:
+                return "Critical"
+            else:
+                return "Informational"
+        # If CVSS Version prior to 3
         else:
-            return "Informational"
+            if cvss > 0 and cvss < 4:
+                return "Low"
+            elif cvss >= 4 and cvss < 7:
+                return "Medium"
+            elif cvss >= 7 and cvss <= 10:
+                return "High"
+            else:
+                return "Informational"
 
     def get_findings(self, filename, test):
         data = json.load(filename)
@@ -43,30 +57,39 @@ class AuditJSParser(object):
             if dependency['vulnerabilities']:
                 # Get vulnerability data from JSON and setup variables
                 for vulnerability in dependency['vulnerabilities']:
-                    unique_id_from_tool = title = description = cvss = cvssVector = cve = references = severity = ""
-                    cwe = None
+                    unique_id_from_tool = title = description = cvss = cvssVector = cve = cvss_version = cwe = references = severity = None
                     if "id" in vulnerability:
                         unique_id_from_tool = vulnerability["id"]
                     if 'title' in vulnerability:
                         title = vulnerability['title']
+                        # Find CWE in title in form "CWE-****"
                         cwe_find = re.findall(r"^CWE-[0-9]{1,4}", title)
                         if cwe_find:
                             cwe = int(cwe_find[0][4:])
+                            # title = title.split(":")[1][1:] Unsure if AuditJS can specify both CWE and CVE at the same time
                     if 'description' in vulnerability:
                         description = vulnerability['description']
                     if 'cvssScore' in vulnerability:
                         cvss = vulnerability['cvssScore']
-                        severity = self.get_severity(cvss)
                     # CVSS Vector not always given
                     if 'cvssVector' in vulnerability:
-                        # If it's version 3.0
-                        if vulnerability['cvssVector'][5:8] == "3.0":
-                            cvssVector = vulnerability['cvssVector']
-                            description = description + "\n\nCVSS V3 Vector: " + cvssVector
+                        # Find if CVSS Version is specfied
+                        cvss_version = re.findall(r"^CVSS:[0-9]", vulnerability['cvssVector'])
+                        if cvss_version:
+                            severity = self.get_severity(cvss, vulnerability['cvssVector'][5:8])
+                            # If it's version 3.0 and above
+                            if vulnerability['cvssVector'][5] == "3":
+                                cvssVector = vulnerability['cvssVector'][9:]
+                                description = description + "\n\nCVSS V3 Vector: " + cvssVector
                         else:
+                            severity = self.get_severity(cvss)
                             description = description + "\n\nCVSS Vector: " + vulnerability['cvssVector']
+                    else:
+                        # Calculated based on CVSS V2
+                        severity = self.get_severity(cvss)
                     if 'cve' in vulnerability:
                         cve = vulnerability['cve']
+                        # title = title.split(":")[1][1:]
                     if 'reference' in vulnerability:
                         references = vulnerability['reference']
 

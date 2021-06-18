@@ -21,6 +21,7 @@
           "title": "Unverified Certificate",
           "description": "> When using SSL to connect to a MySQL server, the SSL procedure implemented does not actually check if the remote server has a trusted certificate or not.\n> \n> -- [github.com](https://github.com/mysqljs/mysql/issues/816)",
           "cvssScore": 9.5,
+          "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
           "reference": "https://ossindex.sonatype.org/vulnerability/da5a3b11-c75b-48e7-9c28-1123f0a492bf?component-type=npm&component-name=mysql&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
         }
       ]

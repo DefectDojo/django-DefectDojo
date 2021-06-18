@@ -24,6 +24,7 @@ class TestAuditJSParser(TestCase):
         self.assertEqual("mysql", findings[0].component_name)
         self.assertEqual("2.0.0", findings[0].component_version)
         self.assertEqual(9.5, findings[0].cvssv3_score)
+        self.assertEqual("Critical", findings[0].severity)
 
     def test_auditjs_parser_with_many_vuln_has_many_findings(self):
         testfile = open("dojo/unittests/scans/auditjs/auditjs_many_vul.json")
