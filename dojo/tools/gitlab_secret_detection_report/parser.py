@@ -1,3 +1,4 @@
+from enum import unique
 import hashlib
 import json
 from dojo.models import Finding
@@ -61,6 +62,7 @@ class GitlabSecretDetectionReportParser(object):
                 severity=severity,
                 static_finding=True,
                 dynamic_finding=False,
+                unique_id_from_tool=vulnerabilities["id"]
             )
 
             if file_path != "":
