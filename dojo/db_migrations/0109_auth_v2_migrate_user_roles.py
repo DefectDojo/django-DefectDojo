@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0107_global_role'),
+        ('dojo', '0108_blank_fields'),
     ]
 
     def migrate_users(apps, schema_editor):
