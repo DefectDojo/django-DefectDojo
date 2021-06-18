@@ -23,7 +23,7 @@ from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilte
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
-                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm
+                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
@@ -1562,12 +1562,39 @@ def delete_product_member(request, memberid):
     })
 
 
-@user_is_authorized(Product_Member, Permissions.Product_Manage_Members, 'groupid')
-def edit_product_group(request, pid):
-    print("placeholder")
+@user_is_authorized(Product, Permissions.Product_Manage_Members, 'groupid')
+def edit_product_group(request, groupid):
+    group = get_object_or_404(Product_Group, pk=groupid)
+    groupform = Edit_Product_Group_Form(instance=group)
+
+    if request.method == 'POST':
+        groupform = Edit_Product_Group_Form(request.POST, instance=group)
+        if groupform.is_valid():
+            if group.role.is_owner and not user_has_permission(request.user, group.product, Permissions.Product_Member_Add_Owner):
+                messages.add_message(request,
+                                     messages.WARNING,
+                                     'You are not permitted to make groups owners.',
+                                     extra_tags='alert-warning')
+            else:
+                groupform.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Product group updated successfully.',
+                                     extra_tags='alert-success')
+                if is_title_in_breadcrumbs('View Group'):
+                    return HttpResponseRedirect(reverse('view_group', args=(group.group.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
+
+    add_breadcrumb(title="Edit Product Group", top_level=False, request=request)
+    return render(request, 'dojo/edit_product_group.html', {
+        'groupid': groupid,
+        'form': groupform
+    })
 
 
-@user_is_authorized(Product_Member, Permissions.Product_Member_Delete, 'groupid')
+
+@user_is_authorized(Product, Permissions.Product_Member_Delete, 'groupid')
 def delete_product_group(request, groupid):
     print("placeholder")
 

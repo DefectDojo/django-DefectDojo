@@ -1649,6 +1649,19 @@ class Add_Product_Group_GroupForm(forms.ModelForm):
         fields = ['products', 'group', 'role']
 
 
+class Edit_Product_Group_Form(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Edit_Product_Group_Form, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
+        self.fields['group'].queryset = Dojo_Group.objects.order_by('name')
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Group
+        fields = ['product', 'group', 'role']
+
+
 class Add_Product_Type_GroupForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
 
