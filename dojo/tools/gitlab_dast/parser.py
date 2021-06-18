@@ -43,7 +43,7 @@ class GitlabDastParser(object):
 
             if item_key in items:
                 items[item_key].unsaved_endpoints.extend(item.unsaved_endpoints)
-                items[dupes_key].nb_occurences += 1
+                items[item_key].nb_occurences += 1
             else:
                 items[item_key] = item
 
