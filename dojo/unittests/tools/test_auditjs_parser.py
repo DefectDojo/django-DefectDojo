@@ -23,6 +23,7 @@ class TestAuditJSParser(TestCase):
         self.assertEqual(1, len(findings))
         self.assertEqual("mysql", findings[0].component_name)
         self.assertEqual("2.0.0", findings[0].component_version)
+        self.assertEqual(9.5, findings[0].cvssv3_score)
 
     def test_auditjs_parser_with_many_vuln_has_many_findings(self):
         testfile = open("dojo/unittests/scans/auditjs/auditjs_many_vul.json")
@@ -33,6 +34,10 @@ class TestAuditJSParser(TestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
         self.assertEqual(13, len(findings))
+        self.assertEqual("connect", findings[0].component_name)
+        self.assertEqual("2.6.0", findings[0].component_version)
+        self.assertEqual(5.4, findings[0].cvssv3_score)
+
 
     # Couldn't manage to generate an output with errors using AuditJS
     # def test_auditjs_parser_empty_with_error(self):
