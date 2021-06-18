@@ -252,6 +252,11 @@ Import Gosec Scanner findings in JSON format.
 
 Import Gitleaks findings in JSON format.
 
+### GitLab DAST Report
+
+Import DAST Report vulnerabilities in JSON format.
+REF: https://docs.gitlab.com/ee/user/application_security/dast/
+
 ### GitLab SAST Report
 
 Import SAST Report vulnerabilities in JSON format: https://docs.gitlab.com/ee/user/application_security/sast/#reports-json-format
