@@ -52,7 +52,7 @@ class TestsslParser(object):
                 if '-' in row['cwe']:
                     finding.cwe = int(row['cwe'].split('-')[1].strip())
                 # manage endpoint
-                finding.unsaved_endpoints = [Endpoint(host=row['fqdn/ip'].split("/")[-1])]
+                finding.unsaved_endpoints = [Endpoint(host=row['fqdn/ip'].split("/")[0])]
                 if row.get('port') and row['port'].isdigit():
                     finding.unsaved_endpoints[0].port = int(row['port'])
 

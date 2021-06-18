@@ -27,8 +27,7 @@ from itertools import chain
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 
-from dojo.filters import OpenFindingFilter, OpenFindingSuperFilter, AcceptedFindingFilter, AcceptedFindingSuperFilter, \
-    ClosedFindingFilter, ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
+from dojo.filters import OpenFindingFilter, AcceptedFindingFilter, ClosedFindingFilter, TemplateFindingFilter, SimilarFindingFilter
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
@@ -54,61 +53,46 @@ from dojo.finding.queries import get_authorized_findings
 
 logger = logging.getLogger(__name__)
 
-OPEN_FINDINGS_QUERY = Q(active=True)
-VERIFIED_FINDINGS_QUERY = Q(active=True, verified=True)
-OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
-FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
-INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_mitigated=False, false_p=False, out_of_scope=False)
-ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
-NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
-WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
-CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
-
 
 def open_findings_filter(request, queryset, user, pid):
-    if user.is_staff:
-        return OpenFindingSuperFilter(request.GET, queryset=queryset, user=user, pid=pid)
-    else:
-        return OpenFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
+    return OpenFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
 def accepted_findings_filter(request, queryset, user, pid):
-    filter_class = AcceptedFindingSuperFilter if user.is_staff else AcceptedFindingFilter
-    return filter_class(request.GET, queryset=queryset, pid=pid)
+    return AcceptedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
 def closed_findings_filter(request, queryset, user, pid):
-    filter_class = ClosedFindingSuperFilter if user.is_staff else ClosedFindingFilter
-    return filter_class(request.GET, queryset=queryset, pid=pid)
+    return ClosedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
 def open_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=OPEN_FINDINGS_QUERY, prefetch_type='open')
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=finding_helper.OPEN_FINDINGS_QUERY, prefetch_type='open')
 
 
 def verified_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Verified", query_filter=VERIFIED_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Verified", query_filter=finding_helper.VERIFIED_FINDINGS_QUERY)
 
 
 def out_of_scope_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Out of Scope", query_filter=OUT_OF_SCOPE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Out of Scope", query_filter=finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY)
 
 
 def false_positive_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="False Positive", query_filter=FALSE_POSITIVE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="False Positive", query_filter=finding_helper.FALSE_POSITIVE_FINDINGS_QUERY)
 
 
 def inactive_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=INACTIVE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=finding_helper.INACTIVE_FINDINGS_QUERY)
 
 
 def accepted_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=ACCEPTED_FINDINGS_QUERY,
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=finding_helper.ACCEPTED_FINDINGS_QUERY,
                     django_filter=accepted_findings_filter)
 
 
 def closed_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=finding_helper.CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
                     django_filter=closed_findings_filter)
 
 
@@ -121,15 +105,16 @@ django_filter=open_findings_filter, prefetch_type='all'):
     jira_project = None
     github_config = None
 
-    tags = Finding.tags.tag_model.objects.all()
-
     findings = get_authorized_findings(Permissions.Finding_View)
+    # print('View: ', view)
     if view == "All":
         filter_name = "All"
     else:
+        print('Filtering!', view)
         findings = findings.filter(query_filter)
 
     findings = findings.order_by(order_by)
+    # print('findings.query1', findings.query)
 
     if pid:
         product = get_object_or_404(Product, id=pid)
@@ -151,12 +136,21 @@ django_filter=open_findings_filter, prefetch_type='all'):
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
+    print('findings.query2', findings.query)
+    # print(django_filter)
     findings_filter = django_filter(request, findings, request.user, pid)
 
-    title_words = get_words_for_field(findings_filter.qs, 'title')
-    component_words = get_words_for_field(findings_filter.qs, 'component_name')
+    print('findings.query3', findings_filter.qs.query)
 
-    paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs, prefetch_type), 25)
+    print('done')
+
+    title_words = get_words_for_field(Finding, 'title')
+    component_words = get_words_for_field(Finding, 'component_name')
+
+    # trick to prefetch after paging to avoid huge join generated by select count(*) from Paginator
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list, prefetch_type)
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
@@ -808,7 +802,13 @@ def edit_finding(request, fid):
             # any existing finding should be updated
             push_to_jira = push_to_jira and not push_group_to_jira and not new_finding.has_jira_issue
 
-            new_finding.save(push_to_jira=push_to_jira)
+            # if we're removing the "duplicate" in the edit finding screen
+            # do not relaunch deduplication, otherwise, it's never taken into account
+            if old_finding.duplicate and not new_finding.duplicate:
+                new_finding.duplicate_finding = None
+                new_finding.save(push_to_jira=push_to_jira, dedupe_option=False)
+            else:
+                new_finding.save(push_to_jira=push_to_jira)
 
             # we only push the group after storing the finding to make sure
             # the updated data of the finding is pushed as part of the group
@@ -1091,7 +1091,7 @@ def find_template_to_apply(request, fid):
     paged_templates = get_page_items(request, templates.qs, 25)
 
     # just query all templates as this weird ordering above otherwise breaks Django ORM
-    title_words = get_words_for_field(Finding_Template.objects.all(), 'title')
+    title_words = get_words_for_field(Finding_Template, 'title')
     product_tab = Product_Tab(test.engagement.product.id, title="Apply Template to Finding", tab="findings")
     return render(
         request, 'dojo/templates.html', {

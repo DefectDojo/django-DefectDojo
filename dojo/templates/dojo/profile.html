@@ -1,11 +1,24 @@
 {% extends "base.html" %}
+{% load display_tags %}
 {% block content %}
     <h3> User Profile - {{ user.get_full_name }}</h3>
     <div class="row">
         <div class="col-md-7">
             <form class="form-horizontal" method="post">{% csrf_token %}
-                {% include "dojo/form_fields.html" with form=form %}
-                {% include "dojo/form_fields.html" with form=contact_form %}
+                <fieldset>
+                    <legend>Default Information</legend>
+                    {% include "dojo/form_fields.html" with form=form %}
+                </fieldset>
+                        <fieldset>
+                    <legend>Additional Contact Information</legend>
+                    {% include "dojo/form_fields.html" with form=contact_form %}
+                </fieldset>
+                {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+                <fieldset>
+                    <legend>Global Role</legend>
+                    {% include "dojo/form_fields.html" with form=global_role_form %}
+                </fieldset>
+                {% endif %}
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         <input class="btn btn-primary" type="submit" value="Submit"/>
@@ -23,7 +36,7 @@
             {% if user.has_usable_password %}
                 <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">Change Password</a>
             {% endif %}
-            <a class="btn btn-sm btn-primary" href="{% url 'api_key' %}">API Key</a>
+            <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">API Key</a>
         </div>
     </div>
     </div>

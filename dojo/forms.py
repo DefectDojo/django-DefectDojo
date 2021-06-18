@@ -1,7 +1,6 @@
 import os
 import re
 from datetime import datetime, date
-from urllib.parse import urlsplit, urlunsplit
 import pickle
 from crispy_forms.bootstrap import InlineRadios, InlineCheckboxes
 from crispy_forms.helper import FormHelper
@@ -11,7 +10,6 @@ from django.db.models import Count, Q
 from dateutil.relativedelta import relativedelta
 from django import forms
 from django.core import validators
-from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
 from django.forms import utils as form_utils
@@ -21,6 +19,7 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
+from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, FindingImage, \
@@ -30,7 +29,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member
+    Product_Member, Global_Role
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -40,7 +39,7 @@ import logging
 from crum import get_current_user
 from dojo.utils import get_system_setting, get_product
 from django.conf import settings
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
@@ -192,8 +191,6 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_Type_MemberForm, self).__init__(*args, **kwargs)
@@ -206,23 +203,35 @@ class Edit_Product_Type_MemberForm(forms.ModelForm):
         fields = ['product_type', 'user', 'role']
 
 
-class Add_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
+class Add_Product_Type_MemberForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label='Users')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
-        self.fields['user'].queryset = Dojo_User.objects.exclude(
+        self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
-        self.fields['user'].disabled = False
+        self.fields['product_type'].disabled = True
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_type', 'users', 'role']
 
 
-class Add_Product_Type_Member_UserForm(Edit_Product_Type_MemberForm):
+class Add_Product_Type_Member_UserForm(forms.ModelForm):
+    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label='Product Types')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_Member_UserForm, self).__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(user=self.initial['user']).values_list('product_type', flat=True)
-        self.fields['product_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
+        self.fields['product_types'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
             .exclude(id__in=current_members)
-        self.fields['product_type'].disabled = False
+        self.fields['user'].disabled = True
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_types', 'user', 'role']
 
 
 class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
@@ -310,8 +319,6 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_MemberForm, self).__init__(*args, **kwargs)
@@ -324,23 +331,35 @@ class Edit_Product_MemberForm(forms.ModelForm):
         fields = ['product', 'user', 'role']
 
 
-class Add_Product_MemberForm(Edit_Product_MemberForm):
+class Add_Product_MemberForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label='Users')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
         current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list('user', flat=True)
-        self.fields['user'].queryset = Dojo_User.objects.exclude(
+        self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
-        self.fields['user'].disabled = False
+
+    class Meta:
+        model = Product_Member
+        fields = ['product', 'users', 'role']
 
 
-class Add_Product_Member_UserForm(Edit_Product_MemberForm):
+class Add_Product_Member_UserForm(forms.ModelForm):
+    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label='Products')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_Member_UserForm, self).__init__(*args, **kwargs)
         current_members = Product_Member.objects.filter(user=self.initial["user"]).values_list('product', flat=True)
-        self.fields['product'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
+        self.fields['products'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
             .exclude(id__in=current_members)
-        self.fields['product'].disabled = False
+        self.fields['user'].disabled = True
+
+    class Meta:
+        model = Product_Member
+        fields = ['products', 'user', 'role']
 
 
 class Delete_Product_MemberForm(Edit_Product_MemberForm):
@@ -399,7 +418,7 @@ class DojoMetaDataForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
-    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
+    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1].lower())
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -1265,7 +1284,6 @@ class FindingBulkUpdateForm(forms.ModelForm):
 
 
 class EditEndpointForm(forms.ModelForm):
-
     class Meta:
         model = Endpoint
         exclude = ['product']
@@ -1279,61 +1297,28 @@ class EditEndpointForm(forms.ModelForm):
             self.product = self.endpoint_instance.product
 
     def clean(self):
-        from django.core.validators import URLValidator, validate_ipv46_address
 
-        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
         cleaned_data = super(EditEndpointForm, self).clean()
 
-        if 'host' in cleaned_data:
-            host = cleaned_data['host']
-        else:
-            raise forms.ValidationError('Please enter a valid URL or IP address.',
-                                        code='invalid')
-
         protocol = cleaned_data['protocol']
+        userinfo = cleaned_data['userinfo']
+        host = cleaned_data['host']
+        port = cleaned_data['port']
         path = cleaned_data['path']
         query = cleaned_data['query']
         fragment = cleaned_data['fragment']
 
-        if protocol and path:
-            endpoint = urlunsplit((protocol, host, path, query, fragment))
-        else:
-            endpoint = host
-
-        try:
-            url_validator = URLValidator()
-            url_validator(endpoint)
-        except forms.ValidationError:
-            try:
-                # do we have a port number?
-                regex = re.compile(port_re)
-                host = endpoint
-                if regex.findall(endpoint):
-                    for g in regex.findall(endpoint):
-                        host = re.sub(port_re, '', host)
-                validate_ipv46_address(host)
-            except forms.ValidationError:
-                try:
-                    validate_hostname = RegexValidator(regex=r'[a-zA-Z0-9-_]*\.[a-zA-Z]{2,6}')
-                    # do we have a port number?
-                    regex = re.compile(port_re)
-                    host = endpoint
-                    if regex.findall(endpoint):
-                        for g in regex.findall(endpoint):
-                            host = re.sub(port_re, '', host)
-                    validate_hostname(host)
-                except:
-                    raise forms.ValidationError(
-                        'It does not appear as though this endpoint is a valid URL or IP address.',
-                        code='invalid')
-
-        endpoint = Endpoint.objects.filter(protocol=protocol,
-                                           host=host,
-                                           path=path,
-                                           query=query,
-                                           fragment=fragment,
-                                           product=self.product)
-        if endpoint.count() > 0 and not self.instance:
+        endpoint = endpoint_filter(
+            protocol=protocol,
+            userinfo=userinfo,
+            host=host,
+            port=port,
+            path=path,
+            query=query,
+            fragment=fragment,
+            product=self.product
+        )
+        if endpoint.count() > 1 or (endpoint.count() == 1 and endpoint.first().pk != self.endpoint_instance.pk):
             raise forms.ValidationError(
                 'It appears as though an endpoint with this data already exists for this product.',
                 code='invalid')
@@ -1368,19 +1353,21 @@ class AddEndpointForm(forms.Form):
     def save(self):
         processed_endpoints = []
         for e in self.endpoints_to_process:
-            endpoint, created = Endpoint.objects.get_or_create(protocol=e[0],
-                                                               host=e[1],
-                                                               path=e[2],
-                                                               query=e[3],
-                                                               fragment=e[4],
-                                                               product=self.product)
+            endpoint, created = endpoint_get_or_create(
+                protocol=e[0],
+                userinfo=e[1],
+                host=e[2],
+                port=e[3],
+                path=e[4],
+                query=e[5],
+                fragment=e[6],
+                product=self.product
+            )
             processed_endpoints.append(endpoint)
         return processed_endpoints
 
     def clean(self):
-        from django.core.validators import URLValidator, validate_ipv46_address
 
-        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])"
         cleaned_data = super(AddEndpointForm, self).clean()
 
         if 'endpoint' in cleaned_data and 'product' in cleaned_data:
@@ -1395,47 +1382,33 @@ class AddEndpointForm(forms.Form):
                                         code='invalid')
 
         endpoints = endpoint.split()
-        count = 0
-        error = False
+
+        errors = []
         for endpoint in endpoints:
             try:
-                url_validator = URLValidator()
-                url_validator(endpoint)
-                protocol, host, path, query, fragment = urlsplit(endpoint)
-                self.endpoints_to_process.append([protocol, host, path, query, fragment])
-            except forms.ValidationError:
-                try:
-                    # do we have a port number?
-                    host = endpoint
-                    regex = re.compile(port_re)
-                    if regex.findall(endpoint):
-                        for g in regex.findall(endpoint):
-                            host = re.sub(port_re, '', host)
-                    validate_ipv46_address(host)
-                    protocol, host, path, query, fragment = ("", endpoint, "", "", "")
-                    self.endpoints_to_process.append([protocol, host, path, query, fragment])
-                except forms.ValidationError:
-                    try:
-                        regex = re.compile(
-                            r'^(?:(?:[A-Z0-9](?:[A-Z0-9-_]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}(?<!-)\.?)|'  # domain...
-                            r'localhost|'  # localhost...
-                            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|'  # ...or ipv4
-                            r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'  # ...or ipv6
-                            r'(?::\d+)?'  # optional port
-                            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-                        validate_hostname = RegexValidator(regex=regex)
-                        validate_hostname(host)
-                        protocol, host, path, query, fragment = (None, host, None, None, None)
-                        if "/" in host or "?" in host or "#" in host:
-                            # add a fake protocol just to join, wont use in update to database
-                            host_with_protocol = "http://" + host
-                            p, host, path, query, fragment = urlsplit(host_with_protocol)
-                        self.endpoints_to_process.append([protocol, host, path, query, fragment])
-                    except forms.ValidationError:
-                        raise forms.ValidationError(
-                            'Please check items entered, one or more do not appear to be a valid URL or IP address.',
-                            code='invalid')
-
+                if '://' in endpoint:  # is it full uri?
+                    endpoint_ins = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
+                else:
+                    # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
+                    # format doesn't follow RFC 3986 but users use it
+                    endpoint_ins = Endpoint.from_uri('//' + endpoint)
+                endpoint_ins.clean()
+                self.endpoints_to_process.append([
+                    endpoint_ins.protocol,
+                    endpoint_ins.userinfo,
+                    endpoint_ins.host,
+                    endpoint_ins.port,
+                    endpoint_ins.path,
+                    endpoint_ins.query,
+                    endpoint_ins.fragment
+                ])
+            except ValidationError as ves:
+                for ve in ves:
+                    errors.append(
+                        ValidationError("Invalid endpoint {}: {}".format(endpoint, ve))
+                    )
+        if errors:
+            raise forms.ValidationError(errors)
         return cleaned_data
 
 
@@ -1628,6 +1601,29 @@ class DojoUserForm(forms.ModelForm):
 
 
 class AddDojoUserForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput, required=False,
+        help_text='Leave blank to set an unusable password for this user.')
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        authorized_products = forms.ModelMultipleChoiceField(
+            queryset=Product.objects.all(), required=False,
+            help_text='Select the products this user should have access to.')
+        authorized_product_types = forms.ModelMultipleChoiceField(
+            queryset=Product_Type.objects.all(), required=False,
+            help_text='Select the product types this user should have access to.')
+
+    class Meta:
+        model = Dojo_User
+        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active',
+                  'is_staff', 'is_superuser']
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions']
+        else:
+            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
+                       'authorized_products', 'authorized_product_types']
+
+
+class EditDojoUserForm(forms.ModelForm):
     if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_products = forms.ModelMultipleChoiceField(
             queryset=Product.objects.all(), required=False,
@@ -1641,12 +1637,10 @@ class AddDojoUserForm(forms.ModelForm):
         fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
         if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['password', 'last_login', 'groups',
-                    'date_joined', 'user_permissions']
+            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions']
         else:
-            exclude = ['password', 'last_login', 'groups',
-                    'date_joined', 'user_permissions',
-                    'authorized_products', 'authorized_product_types']
+            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
+                       'authorized_products', 'authorized_product_types']
 
 
 class DeleteUserForm(forms.ModelForm):
@@ -1662,6 +1656,19 @@ class UserContactInfoForm(forms.ModelForm):
     class Meta:
         model = UserContactInfo
         exclude = ['user', 'slack_user_id']
+
+
+class GlobalRoleForm(forms.ModelForm):
+
+    class Meta:
+        model = Global_Role
+        exclude = ['user', 'group']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            self.fields['role'].disabled = True
 
 
 def get_years():
@@ -2212,8 +2219,7 @@ class JIRAProjectForm(forms.ModelForm):
                 # once a jira project config is attached to an engagement, we can't go back to inheriting
                 # because the config needs to remain in place for the existing jira issues
                 self.fields['inherit_from_product'].disabled = True
-                self.fields['inherit_from_product'].help_text = 'Once an engagement has a JIRA Project stored, you can no   t switch back to inheritance to avoid breaking existing JIRA issues'
-
+                self.fields['inherit_from_product'].help_text = 'Once an engagement has a JIRA Project stored, you cannot switch back to inheritance to avoid breaking existing JIRA issues'
                 self.fields['jira_instance'].disabled = False
                 self.fields['project_key'].disabled = False
                 self.fields['issue_template_dir'].disabled = False

@@ -11,12 +11,18 @@ class TestNmapParser(TestCase):
         testfile = open("dojo/unittests/scans/nmap/nmap_0port.xml")
         parser = NmapParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_single_open_ports_has_single_finding(self):
         testfile = open("dojo/unittests/scans/nmap/nmap_1port.xml")
         parser = NmapParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
 
         with self.subTest(i=0):
@@ -26,7 +32,7 @@ class TestNmapParser(TestCase):
             self.assertEqual(datetime.datetime(2014, 3, 29, 14, 46, 56), finding.date)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual('127.0.0.1', endpoint.host)
+            self.assertEqual('localhost.localdomain', endpoint.host)
             self.assertEqual(5432, endpoint.port)
             self.assertEqual('tcp', endpoint.protocol)
 
@@ -34,6 +40,9 @@ class TestNmapParser(TestCase):
         testfile = open("dojo/unittests/scans/nmap/nmap_multiple_port.xml")
         parser = NmapParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(13, len(findings))
 
         with self.subTest(i=0):
@@ -43,7 +52,7 @@ class TestNmapParser(TestCase):
             self.assertEqual(datetime.datetime(2016, 5, 16, 17, 56, 59), finding.date)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual('198.38.82.159', endpoint.host)
+            self.assertEqual('mocha2005.mochahost.com', endpoint.host)
             self.assertEqual(21, endpoint.port)
             self.assertEqual('tcp', endpoint.protocol)
 
@@ -51,6 +60,9 @@ class TestNmapParser(TestCase):
         testfile = open("dojo/unittests/scans/nmap/nmap_script_vulners.xml")
         parser = NmapParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(3, len(findings))
 
         self.assertEqual("Medium", findings[0].severity)
@@ -72,6 +84,9 @@ class TestNmapParser(TestCase):
         testfile = open("dojo/unittests/scans/nmap/issue4406.xml")
         parser = NmapParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(67, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -100,7 +115,7 @@ class TestNmapParser(TestCase):
             self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual('10.250.195.71', endpoint.host)
+            self.assertEqual('ip-10-250-195-71.eu-west-1.compute.internal', endpoint.host)
             self.assertEqual(9100, endpoint.port)
             self.assertEqual('tcp', endpoint.protocol)
         with self.subTest(i=66):
@@ -110,6 +125,6 @@ class TestNmapParser(TestCase):
             self.assertEqual(datetime.datetime(2021, 4, 29, 9, 26, 36), finding.date)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
-            self.assertEqual('10.250.195.71', endpoint.host)
+            self.assertEqual('ip-10-250-195-71.eu-west-1.compute.internal', endpoint.host)
             self.assertEqual(31641, endpoint.port)
             self.assertEqual('tcp', endpoint.protocol)
