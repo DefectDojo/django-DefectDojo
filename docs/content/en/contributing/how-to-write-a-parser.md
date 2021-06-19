@@ -105,7 +105,7 @@ Good example:
 
 ### Do not parse CVSS by hand (vector, score or severity)
 
-Data can have `CVSS` vectors or scores. Don't try to right again your own CVSS score algorythm.
+Data can have `CVSS` vectors or scores. Don't try to write your own CVSS score algorithm.
 For parser, we rely in module `cvss`.
 
 It's easy to use and will make the parser aligned with the rest of the code.
