@@ -1600,6 +1600,10 @@ class DojoGroupForm(forms.ModelForm):
         required=False, label="Users"
     )
 
+    name = forms.CharField(max_length=255, required=True)
+    description = forms.CharField(widget=forms.Textarea(attrs={}),
+                                  required=True)
+
     def __init__(self, *args, **kwargs):
         non_staff = Dojo_User.objects.exclude(is_staff=True) \
             .exclude(is_active=False).order_by('first_name', 'last_name')
