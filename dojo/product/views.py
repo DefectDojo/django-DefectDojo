@@ -1611,6 +1611,8 @@ def delete_product_group(request, groupid):
         if is_title_in_breadcrumbs('View Group'):
             return HttpResponseRedirect(reverse('view_group', args=(group.group.id, )))
         else:
+            # TODO: If user was in the group that was deleted and no longer has access, redirect back to product listing
+            #  page
             return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
 
     add_breadcrumb(title="Delete Product Group", top_level=False, request=request)

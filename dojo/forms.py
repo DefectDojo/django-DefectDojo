@@ -1698,6 +1698,25 @@ class Add_Product_Type_Group_GroupForm(forms.ModelForm):
         fields = ['product_types', 'group', 'role']
 
 
+class Edit_Product_Type_Group_Form(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Edit_Product_Type_Group_Form, self).__init__(*args, **kwargs)
+        self.fields['product_type'].disabled = True
+        self.fields['group'].queryset = Dojo_Group.objects.order_by('name')
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Type_Group
+        fields = ['product_type', 'group', 'role']
+
+
+class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Product_Type_GroupForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
+
+
 class DojoUserForm(forms.ModelForm):
     class Meta:
         model = Dojo_User
