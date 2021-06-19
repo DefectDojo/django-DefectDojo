@@ -10,7 +10,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
-    Product_Group, Global_Role
+    Product_Group, Global_Role, Dojo_Group_User
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -19,7 +19,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     UsersViewSet, ImportScanView, NoteTypeViewSet, AppAnalysisViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet, ProductTypeViewSet, \
     DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
-    ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet
+    ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
+    DojoGroupUserViewSet
 from json import dumps
 from django.urls import reverse
 from rest_framework import status
@@ -1378,7 +1379,40 @@ class DojoGroupsTest(BaseClass.RESTEndpointTest):
             "description": "Test",
         }
         self.update_fields = {'description': "changed"}
-        self.object_permission = False
+        self.object_permission = True
+        self.permission_check_class = Dojo_Group
+        self.permission_check_id = 1
+        self.permission_update = Permissions.Group_Edit
+        self.permission_delete = Permissions.Group_Delete
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create_not_authorized(self):
+        self.setUp_not_authorized()
+
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(403, response.status_code, response.content[:1000])
+
+
+class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Dojo_Group_User
+        self.endpoint_path = 'dojo_group_users'
+        self.viewname = 'dojo_group_user'
+        self.viewset = DojoGroupUserViewSet
+        self.payload = {
+            "dojo_group": 1,
+            "user": 3,
+            "role": 4
+        }
+        self.update_fields = {'role': 3}
+        self.object_permission = True
+        self.permission_check_class = Dojo_Group_User
+        self.permission_check_id = 1
+        self.permission_create = Permissions.Group_Manage_Users
+        self.permission_update = Permissions.Group_Manage_Users
+        self.permission_delete = Permissions.Group_User_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

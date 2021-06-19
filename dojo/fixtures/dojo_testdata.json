@@ -2270,6 +2270,15 @@
   },
   {
     "pk": 1,
+    "model": "dojo.dojo_group_user",
+    "fields": {
+      "dojo_group": 1,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
     "model": "dojo.product_group",
     "fields": {
       "product": 1,
