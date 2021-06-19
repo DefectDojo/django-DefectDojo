@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from re import T
 from drf_spectacular.drainage import GENERATOR_STATS
 # from drf_spectacular.renderers import OpenApiJsonRenderer
 from unittest.mock import patch, ANY
