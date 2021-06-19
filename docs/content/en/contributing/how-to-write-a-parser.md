@@ -103,7 +103,7 @@ Good example:
        finding.cve = data["mykey"]
 ```
 
-### Do not parser CVSS by hand (vector, score or severity)
+### Do not parse CVSS by hand (vector, score or severity)
 
 Data can have `CVSS` vectors or scores. Don't try to right again your own CVSS score algorythm.
 For parser, we rely in module `cvss`.
