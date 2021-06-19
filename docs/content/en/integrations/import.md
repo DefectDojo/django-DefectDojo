@@ -196,12 +196,12 @@ OWASP Dependency Check output can be imported in Xml format.
 
 ### Dependency Track
 
-Dependency Track has implemented a DefectDojo integration. Information about 
-how to configure the integration is documented here: 
+Dependency Track has implemented a DefectDojo integration. Information about
+how to configure the integration is documented here:
 https://docs.dependencytrack.org/integrations/defectdojo/
 
 Alternatively, the Finding Packaging Format (FPF) from OWASP Dependency Track can be
-imported in JSON format. See here for more info on this JSON format: 
+imported in JSON format. See here for more info on this JSON format:
 <https://docs.dependencytrack.org/integrations/file-formats/>
 
 ### DrHeader
@@ -388,16 +388,16 @@ XML Scan Result File from Immuniweb Scan.
 IntSights Report
 --------------
 
-IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.). 
+IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.).
 
 ### Manual Import
-Use the Export CSV feature in the IntSights Threat Command GUI to create an *IntSights Alerts.csv* file. This CSV 
+Use the Export CSV feature in the IntSights Threat Command GUI to create an *IntSights Alerts.csv* file. This CSV
 file can then be imported into Defect Dojo.
 
 ### Automated Import
 
-The IntSights `get-complete-alert` API only returns details for a single alert. To automate the process, 
-individually fetch details for each alert and append to a list. The list is then saved as the value for the key 
+The IntSights `get-complete-alert` API only returns details for a single alert. To automate the process,
+individually fetch details for each alert and append to a list. The list is then saved as the value for the key
 "Alerts". This JSON object can then be imported into Defect Dojo.
 
 Example:
@@ -460,6 +460,10 @@ Import JSON reports of Kubernetes CIS benchmark scans.
 ### KICS Scanner
 
 Import of JSON report from <https://github.com/Checkmarx/kics>
+
+### Meterian Scanner
+
+The Meterian JSON report output file can be imported.
 
 ### Microfocus Webinspect Scanner
 
@@ -757,7 +761,7 @@ JSON output of the `twistcli` tool. Example:
 
 The CSV output from the UI is now also accepted.
 
-### TFSec 
+### TFSec
 
 Import of JSON report from <https://github.com/tfsec/tfsec>
 
@@ -798,6 +802,10 @@ HTTP Return Code | Severity
 
 Import XML findings list report, preferably with parameter
 \'generateDetailsInFindingsListReport=true\'.
+
+### Yarn Audit
+
+Import Yarn Audit scan report in JSON format. Use something like `yarn audit --json > yarn_report.json`.
 
 ### Zed Attack Proxy
 

@@ -419,7 +419,7 @@ class DojoMetaDataForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
-    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
+    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1].lower())
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -1726,6 +1726,29 @@ class DojoUserForm(forms.ModelForm):
 
 
 class AddDojoUserForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput, required=False,
+        help_text='Leave blank to set an unusable password for this user.')
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        authorized_products = forms.ModelMultipleChoiceField(
+            queryset=Product.objects.all(), required=False,
+            help_text='Select the products this user should have access to.')
+        authorized_product_types = forms.ModelMultipleChoiceField(
+            queryset=Product_Type.objects.all(), required=False,
+            help_text='Select the product types this user should have access to.')
+
+    class Meta:
+        model = Dojo_User
+        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active',
+                  'is_staff', 'is_superuser']
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions']
+        else:
+            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
+                       'authorized_products', 'authorized_product_types']
+
+
+class EditDojoUserForm(forms.ModelForm):
     if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_products = forms.ModelMultipleChoiceField(
             queryset=Product.objects.all(), required=False,
@@ -1739,12 +1762,10 @@ class AddDojoUserForm(forms.ModelForm):
         fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
         if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['password', 'last_login', 'groups',
-                    'date_joined', 'user_permissions']
+            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions']
         else:
-            exclude = ['password', 'last_login', 'groups',
-                    'date_joined', 'user_permissions',
-                    'authorized_products', 'authorized_product_types']
+            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
+                       'authorized_products', 'authorized_product_types']
 
 
 class DeleteUserForm(forms.ModelForm):
