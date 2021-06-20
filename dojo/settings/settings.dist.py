@@ -175,7 +175,7 @@ env = environ.Env(
 
     # Feature toggle for new authorization, which is incomplete at the moment.
     # Don't set it to True for productive environments!
-    DD_FEATURE_AUTHORIZATION_V2=(bool, False),
+    DD_FEATURE_AUTHORIZATION_V2=(bool, True),
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
@@ -835,7 +835,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
     'Scout Suite Scan': ['title', 'severity', 'description'],
-    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
+    'AWS Security Hub Scan': ['unique_id_from_tool'],
+    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity']
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -860,6 +861,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Trivy Scan': True,
     'SpotBugs Scan': False,
     'Scout Suite Scan': True,
+    'AWS Security Hub Scan': True,
     'Meterian Scan': True
 }
 
@@ -925,6 +927,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
     'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
     'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
+    'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE
 }
 
