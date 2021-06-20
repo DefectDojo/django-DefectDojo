@@ -1593,7 +1593,6 @@ def edit_product_group(request, groupid):
     })
 
 
-
 @user_is_authorized(Product_Group, Permissions.Product_Group_Delete, 'groupid')
 def delete_product_group(request, groupid):
     group = get_object_or_404(Product_Group, pk=groupid)
@@ -1619,6 +1618,7 @@ def delete_product_group(request, groupid):
         'groupid': groupid,
         'form': groupform
     })
+
 
 @user_is_authorized(Product, Permissions.Product_Group_Add, 'pid')
 def add_product_group(request, pid):

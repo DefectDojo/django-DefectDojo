@@ -258,7 +258,6 @@ class Delete_Dev_EnvironmentForm(forms.ModelForm):
         fields = ['id']
 
 
-
 class ProductForm(forms.ModelForm):
     name = forms.CharField(max_length=255, required=True)
     description = forms.CharField(widget=forms.Textarea(attrs={}),
@@ -1609,6 +1608,7 @@ class DeleteGroupForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
     class Meta:
+
         model = Dojo_Group
         fields = ['id']
 

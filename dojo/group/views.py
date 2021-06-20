@@ -1,8 +1,8 @@
 import logging
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
@@ -95,7 +95,7 @@ def delete_group(request, gid):
     collector.collect([group])
     rels = collector.nested()
     add_breadcrumb(title="Delete Group", top_level=False, request=request)
-    return render(request, 'dojo/delete_group.html',{
+    return render(request, 'dojo/delete_group.html', {
         'to_delete': group,
         'form': form,
         'rels': rels
@@ -162,6 +162,7 @@ def add_group_member(request, gid):
         'group': group,
         'form': groupform
     })
+
 
 @user_is_authorized(Dojo_Group_User, Permissions.Group_Manage_Users, 'mid')
 def edit_group_member(request, mid):

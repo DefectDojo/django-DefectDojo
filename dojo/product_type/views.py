@@ -372,8 +372,6 @@ def delete_product_type_group(request, groupid):
             #  types page
             return HttpResponseRedirect(reverse('view_product_type', args=(group.product_type.id, )))
 
-
-
     add_breadcrumb("Delete Product Type Group", top_level=False, request=request)
     return render(request, 'dojo/delete_product_type_group.html', {
         'groupid': groupid,
