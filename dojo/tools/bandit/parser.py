@@ -47,7 +47,6 @@ class BanditParser(object):
                 file_path=item["filename"],
                 line=item["line_number"],
                 date=find_date,
-                references=item["more_info"],
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=":".join([item["test_name"], item["test_id"]]),
@@ -58,6 +57,8 @@ class BanditParser(object):
                 finding.scanner_confidence = self.convert_confidence(
                     item.get("issue_confidence")
                 )
+            if "more_info" in item:
+                finding.references = item.get["more_info"]
 
             dupe_key = finding.vuln_id_from_tool
 
