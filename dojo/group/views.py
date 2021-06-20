@@ -1,26 +1,20 @@
 import logging
 from django.contrib import messages
-from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import user_passes_test, login_required
-from django.core import serializers
-from django.core.exceptions import PermissionDenied
 from django.urls import reverse
-from django.conf import settings
-from django.db.models import Q
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.admin.utils import NestedObjects
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.forms import AuthenticationForm
-from django.utils.http import urlencode
 from django.db import DEFAULT_DB_ALIAS
-from rest_framework.authtoken.models import Token
-
+from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.authorization import user_has_permission
 from dojo.filters import GroupFilter
-from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, Add_Product_Type_Group_GroupForm
-from dojo.models import Dojo_Group, Product_Group, Product_Type_Group
+from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, Add_Product_Type_Group_GroupForm, \
+                        Add_Group_MemberForm
+from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_User
 from dojo.utils import get_page_items, add_breadcrumb
-from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group
+from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group, \
+                                get_users_for_group
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +38,7 @@ def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     products = get_authorized_products_for_group(group)
     product_types = get_authorized_product_types_for_group(group)
-    users = group.users.all()
+    users = get_users_for_group(group)
 
     add_breadcrumb(title="View Group", top_level=False, request=request)
     return render(request, 'dojo/view_group.html', {
@@ -130,6 +124,42 @@ def add_group(request):
     add_breadcrumb(title="Add Group", top_level=False, request=request)
     return render(request, "dojo/add_group.html", {
         'form': form
+    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def add_group_member(request, gid):
+    group = get_object_or_404(Dojo_Group, id=gid)
+    groupform = Add_Group_MemberForm(initial={'dojo_group': group.id})
+
+    if request.method == 'POST':
+        groupform = Add_Group_MemberForm(request.POST, initial={'dojo_group': group.id})
+        if groupform.is_valid():
+            if groupform.cleaned_data['role'].is_owner and not user_has_permission(request.user, group, Permissions.Group_Add_Owner):
+                messages.add_message(request,
+                                     messages.WARNING,
+                                     'You are not permitted to add users as owners.',
+                                     extra_tags='alert-warning')
+            else:
+                if 'users' in groupform.cleaned_data and len(groupform.cleaned_data['users']) > 0:
+                    for user in groupform.cleaned_data['users']:
+                        existing_users = Dojo_Group_User.objects.filter(dojo_group=group, user=user)
+                        if existing_users.count() == 0:
+                            group_user = Dojo_Group_User()
+                            group_user.dojo_group = group
+                            group_user.user = user
+                            group_user.role = groupform.cleaned_data['role']
+                            group_user.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Group members added successfully.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_group', args=(gid, )))
+
+    add_breadcrumb(title="Add Group Member", top_level=False, request=request)
+    return render(request, 'dojo/new_group_member.html', {
+        'group': group,
+        'form': groupform
     })
 
 

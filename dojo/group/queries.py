@@ -51,6 +51,12 @@ def get_authorized_group_users(permission):
     return Dojo_Group_User.objects.filter(dojo_group__in=groups)
 
 
+def get_users_for_group(group):
+    users = Dojo_Group_User.objects \
+        .filter(dojo_group=group)
+    return users
+
+
 def get_authorized_products_for_group(group):
     products = Product_Group.objects \
         .filter(group=group)
