@@ -1620,7 +1620,7 @@ def delete_product_group(request, groupid):
         'form': groupform
     })
 
-@user_is_authorized(Product, Permissions.Product_Manage_Members, 'pid')
+@user_is_authorized(Product, Permissions.Product_Group_Add, 'pid')
 def add_product_group(request, pid):
     product = get_object_or_404(Product, pk=pid)
     group_form = Add_Product_GroupForm(initial={'product': product.id})

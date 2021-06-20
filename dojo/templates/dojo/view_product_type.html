@@ -200,7 +200,7 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">Groups</h4>
-                        {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
+                        {% if pt|has_object_permission:"Product_Type_Group_Add" %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductTypeGroup"
                                     data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Type Group">
@@ -239,13 +239,13 @@
                                     <li class="dropdown" style="list-style:none;position:absolute">
                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                         <ul class="dropdown-menu">
-                                            {% if pt|has_object_permission:"Product_Type_Manage_Members" %}
+                                            {% if pt|has_object_permission:"Product_Type_Group_Edit" %}
                                             <li>
                                                 <a name="editProductTypeGroup" href="{% url 'edit_product_type_group' group.id %}">
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                             </li>
                                             {% endif %}
-                                            {% if member|has_object_permission:"Product_Type_Member_Delete" %}
+                                            {% if member|has_object_permission:"Product_Type_Group_Delete" %}
                                             <li>
                                                 <a name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' group.id %}">
                                                     <i class="fa fa-trash"></i> Delete</a>

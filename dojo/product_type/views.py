@@ -284,7 +284,7 @@ def delete_product_type_member(request, memberid):
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, 'ptid')
+@user_is_authorized(Product_Type, Permissions.Product_Type_Group_Add, 'ptid')
 def add_product_type_group(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     group_form = Add_Product_Type_GroupForm(initial={'product_type': pt.id})
@@ -320,7 +320,6 @@ def add_product_type_group(request, ptid):
     })
 
 
-
 @user_is_authorized(Product_Type_Group, Permissions.Product_Type_Group_Edit, 'groupid')
 def edit_product_type_group(request, groupid):
     group = get_object_or_404(Product_Type_Group, pk=groupid)
@@ -352,7 +351,7 @@ def edit_product_type_group(request, groupid):
     })
 
 
-@user_is_authorized(Product_Type_Group, Permissions.Product_Type_Group_Edit, 'groupid')
+@user_is_authorized(Product_Type_Group, Permissions.Product_Type_Group_Delete, 'groupid')
 def delete_product_type_group(request, groupid):
     group = get_object_or_404(Product_Type_Group, pk=groupid)
     groupform = Delete_Product_Type_GroupForm(instance=group)

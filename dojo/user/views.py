@@ -198,6 +198,7 @@ def alertcount(request):
 def view_profile(request):
     user = get_object_or_404(Dojo_User, pk=request.user.id)
     form = DojoUserForm(instance=user)
+    groups = get_groups_for_user(user)
 
     user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
     if user_contact is None:
@@ -244,7 +245,8 @@ def view_profile(request):
         'user': user,
         'form': form,
         'contact_form': contact_form,
-        'global_role_form': global_role_form})
+        'global_role_form': global_role_form,
+        'groups': groups})
 
 
 def change_password(request):

@@ -8,6 +8,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.filters import GroupFilter
 from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, Add_Product_Type_Group_GroupForm, \
                         Add_Group_MemberForm, Edit_Group_MemberForm, Delete_Group_MemberForm
@@ -33,7 +34,7 @@ def group(request):
                    })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Dojo_Group, Permissions.Group_View, 'gid')
 def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     products = get_authorized_products_for_group(group)
@@ -49,7 +50,7 @@ def view_group(request, gid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Dojo_Group, Permissions.Group_Edit, 'gid')
 def edit_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     form = DojoGroupForm(instance=group)
@@ -74,7 +75,7 @@ def edit_group(request, gid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Dojo_Group, Permissions.Group_Delete, 'gid')
 def delete_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     form = DeleteGroupForm(instance=group)
@@ -127,7 +128,7 @@ def add_group(request):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Dojo_Group, Permissions.Group_Manage_Users, 'gid')
 def add_group_member(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     groupform = Add_Group_MemberForm(initial={'dojo_group': group.id})
@@ -162,7 +163,7 @@ def add_group_member(request, gid):
         'form': groupform
     })
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Dojo_Group_User, Permissions.Group_Manage_Users, 'mid')
 def edit_group_member(request, mid):
     member = get_object_or_404(Dojo_Group_User, pk=mid)
     memberform = Edit_Group_MemberForm(instance=member)
@@ -193,7 +194,7 @@ def edit_group_member(request, mid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_is_authorized(Dojo_Group_User, Permissions.Group_User_Delete, 'mid')
 def delete_group_member(request, mid):
     member = get_object_or_404(Dojo_Group_User, pk=mid)
     memberform = Delete_Group_MemberForm(instance=member)
