@@ -162,6 +162,15 @@ def add_group_member(request, gid):
         'form': groupform
     })
 
+@user_passes_test(lambda u: u.is_superuser)
+def edit_group_member(request, memberid):
+    print("placeholder")
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def delete_group_member(request, memberid):
+    print("placeholder")
+
 
 @user_passes_test(lambda u: u.is_superuser)
 def add_product_group(request, gid):

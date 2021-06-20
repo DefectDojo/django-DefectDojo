@@ -129,11 +129,11 @@
             <div class="table-responsive">
                 <table class="tablesorter-bootstrap table table-condensed table-striped">
                     <thead>
-                    <tr>
-                        <th></th>
-                        <th>Product Type</th>
-                        <th>Role</th>
-                    </tr>
+                        <tr>
+                            <th></th>
+                            <th>Product Type</th>
+                            <th>Role</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for member in product_type_members %}
@@ -246,6 +246,81 @@
             </div>
             {% endif %}
         </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4 class="pull-left">Groups</h4>
+                    {% if request.user.is_superuser %}
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
+                                data-toggle="dropdown" aria-expanded="true">
+                            <span class="fa fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
+                            <li role="presentation">
+                                <a id="addGroupUser" href="{% url 'add_group_member_user' user.id %}">
+                                    <i class="fa fa-plus"></i> Add Groups
+                                </a>
+                            </li>
+                        </ul>
+                        &nbsp;
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                            <i class="fa fa-question-circle text-low"></i></a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if groups %}
+            <div class="table-responsive">
+                <table class="tablesorter-bootstrap table table-condensed table-striped">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Group</th>
+                        <th>Role</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for group in groups %}
+                    <tr>
+                        <td>
+                            <ul>
+                                <li class="dropdown" style="list-style:none;position:absolute">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductTypeMember"
+                                       aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                    <ul class="dropdown-menu">
+                                        {% if group.dojo_group|has_object_permission:"Group_Manage_Users" %}
+                                        <li>
+                                            <a name="editProductTypeMember" href="{% url 'edit_group_member' group.id %}">
+                                                <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                        </li>
+                                        {% endif %}
+                                        {% if group|has_object_permission:"Group_User_Delete" %}
+                                        <li>
+                                            <a name="deleteProductTypeMember" href="{% url 'delete_group_member' group.id %}">
+                                                <i class="fa fa-trash"></i> Delete</a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </li>
+                            </ul>
+                        </td>
+                        <td name="group_name"><a href="{% url 'view_group' group.dojo_group.id %}">{{ group.dojo_group }}</a></td>
+                        <td name="group_role">{{ group.role }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="panel-body">
+                <small class="text-muted"><em>No groups found.</em></small>
+            </div>
+            {% endif %}
+        </div>
+
         {% endif %}
     </div>
     <div class="col-md-4">

@@ -1630,6 +1630,23 @@ class Add_Group_MemberForm(forms.ModelForm):
         fields = ['dojo_group', 'users', 'role']
 
 
+class Add_Group_Member_UserForm(forms.ModelForm):
+    dojo_groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Group_Member_UserForm, self).__init__(*args, **kwargs)
+        self.fields['user'].disabled = True
+        current_groups = Dojo_Group_User.objects.filter(user=self.initial['user']).values_list('dojo_group', flat=True)
+        self.fields['dojo_groups'].queryset = Dojo_Group.objects.exclude(
+            Q(id__in=current_groups)
+        )
+        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+
+    class Meta:
+        model = Dojo_Group_User
+        fields = ['dojo_groups', 'role', 'user']
+
+
 class Add_Product_GroupForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
 
@@ -1665,7 +1682,6 @@ class Edit_Product_Group_Form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(Edit_Product_Group_Form, self).__init__(*args, **kwargs)
         self.fields['product'].disabled = True
-        self.fields['group'].queryset = Dojo_Group.objects.order_by('name')
         self.fields['group'].disabled = True
 
     class Meta:
@@ -1714,7 +1730,6 @@ class Edit_Product_Type_Group_Form(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(Edit_Product_Type_Group_Form, self).__init__(*args, **kwargs)
         self.fields['product_type'].disabled = True
-        self.fields['group'].queryset = Dojo_Group.objects.order_by('name')
         self.fields['group'].disabled = True
 
     class Meta:
