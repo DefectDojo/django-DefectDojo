@@ -1647,6 +1647,24 @@ class Add_Group_Member_UserForm(forms.ModelForm):
         fields = ['dojo_groups', 'role', 'user']
 
 
+class Edit_Group_MemberForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(Edit_Group_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['dojo_group'].disabled = True
+        self.fields['user'].disabled = True
+        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+
+    class Meta:
+        model = Dojo_Group_User
+        fields = ['dojo_group', 'user', 'role']
+
+
+class Delete_Group_MemberForm(Edit_Group_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Group_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
+
+
 class Add_Product_GroupForm(forms.ModelForm):
     groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
 

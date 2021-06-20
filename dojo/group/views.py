@@ -10,9 +10,9 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission
 from dojo.filters import GroupFilter
 from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, Add_Product_Type_Group_GroupForm, \
-                        Add_Group_MemberForm
+                        Add_Group_MemberForm, Edit_Group_MemberForm, Delete_Group_MemberForm
 from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_User
-from dojo.utils import get_page_items, add_breadcrumb
+from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group, \
                                 get_users_for_group
 
@@ -163,13 +163,63 @@ def add_group_member(request, gid):
     })
 
 @user_passes_test(lambda u: u.is_superuser)
-def edit_group_member(request, memberid):
-    print("placeholder")
+def edit_group_member(request, mid):
+    member = get_object_or_404(Dojo_Group_User, pk=mid)
+    memberform = Edit_Group_MemberForm(instance=member)
+
+    if request.method == 'POST':
+        memberform = Edit_Group_MemberForm(request.POST, instance=member)
+        if memberform.is_valid():
+            if member.role.is_owner and not user_has_permission(request.user, member.dojo_group, Permissions.Group_Add_Owner):
+                messages.add_message(request,
+                                     messages.WARNING,
+                                     'You are not permitted to make users owners.',
+                                     extra_tags='alert-warning')
+            else:
+                memberform.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Group member updated successfully',
+                                     extra_tags='alert-success')
+                if is_title_in_breadcrumbs('View User'):
+                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_group', args=(member.dojo_group.id, )))
+
+    add_breadcrumb(title="Edit a Group Member", top_level=False, request=request)
+    return render(request, 'dojo/edit_group_member.html', {
+        'memberid': mid,
+        'form': memberform
+    })
 
 
 @user_passes_test(lambda u: u.is_superuser)
-def delete_group_member(request, memberid):
-    print("placeholder")
+def delete_group_member(request, mid):
+    member = get_object_or_404(Dojo_Group_User, pk=mid)
+    memberform = Delete_Group_MemberForm(instance=member)
+
+    if request.method == 'POST':
+        memberform = Delete_Group_MemberForm(request.POST, instance=member)
+        member = memberform.instance
+        user = member.user
+        member.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Group member deleted successfully.',
+                             extra_tags='alert-success')
+        if is_title_in_breadcrumbs('View User'):
+            return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+        else:
+            if user == request.user:
+                return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+            else:
+                return HttpResponseRedirect(reverse('view_group', args=(member.dojo_group.id, )))
+
+    add_breadcrumb("Delete a group member", top_level=False, request=request)
+    return render(request, 'dojo/delete_group_member.html', {
+        'memberid': mid,
+        'form': memberform
+    })
 
 
 @user_passes_test(lambda u: u.is_superuser)
