@@ -1,4 +1,3 @@
-
 import json
 import dateutil.parser
 
@@ -6,7 +5,6 @@ from dojo.models import Finding
 
 
 class BanditParser(object):
-
     def get_scan_types(self):
         return ["Bandit Scan"]
 
@@ -20,48 +18,57 @@ class BanditParser(object):
         data = json.load(filename)
 
         dupes = dict()
+
+        find_date = None
         if "generated_at" in data:
             find_date = dateutil.parser.parse(data["generated_at"])
 
         for item in data["results"]:
 
-            findingdetail = "\n".join([
-                "**Test Name:** `" + item["test_name"] + "`",
-                "**Test ID:** `" + item["test_id"] + "`",
-                "**Filename:** `" + item["filename"] + "`",
-                "**Line number:** `" + str(item["line_number"]) + "`",
-                "**Issue Confidence:** `" + item["issue_confidence"] + "`",
-                "**Code:**",
-                "```\n" + str(item.get("code")).replace('```', '\\`\\`\\`') + "\n```",
-            ])
+            findingdetail = "\n".join(
+                [
+                    "**Test Name:** `" + item["test_name"] + "`",
+                    "**Test ID:** `" + item["test_id"] + "`",
+                    "**Filename:** `" + item["filename"] + "`",
+                    "**Line number:** `" + str(item["line_number"]) + "`",
+                    "**Issue Confidence:** `" + item["issue_confidence"] + "`",
+                    "**Code:**",
+                    "```\n" +
+                    str(item.get("code")).replace("```", "\\`\\`\\`") +
+                    "\n```",
+                ]
+            )
 
-            sev = item["issue_severity"].title()
-
-            find = Finding(
+            finding = Finding(
                 title=item["issue_text"],
                 test=test,
                 description=findingdetail,
-                severity=sev,
+                severity=item["issue_severity"].title(),
                 file_path=item["filename"],
                 line=item["line_number"],
                 date=find_date,
+                references=item["more_info"],
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=":".join([item["test_name"], item["test_id"]]),
                 nb_occurences=1,
             )
             # manage confidence
-            confidence = self.convert_confidence(item.get('issue_confidence'))
-            if confidence:
-                find.scanner_confidence = confidence
+            if "issue_confidence" in item:
+                finding.scanner_confidence = self.convert_confidence(
+                    item.get("issue_confidence")
+                )
 
-            dupe_key = item["issue_text"] + item["filename"] + str(item["line_number"])
+            dupe_key = finding.vuln_id_from_tool
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
-                find.nb_occurences += find.nb_occurences
+                find.file_path = None  # as there is more than one file we remove this data
+                find.line = 0
+                find.description += "\n-----\n\n" + finding.description
+                find.nb_occurences += 1
             else:
-                dupes[dupe_key] = find
+                dupes[dupe_key] = finding
 
         return list(dupes.values())
 
