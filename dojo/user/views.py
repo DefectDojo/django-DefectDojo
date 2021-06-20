@@ -560,9 +560,9 @@ def add_group_member(request, uid):
                     if existing_groups.count() == 0:
                         group_member = Dojo_Group_User()
                         group_member.dojo_group = dojo_group
-                        dojo_group.user = user
-                        dojo_group.role = memberform.cleaned_data['role']
-                        dojo_group.save()
+                        group_member.user = user
+                        group_member.role = memberform.cleaned_data['role']
+                        group_member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Groups added successfully.',
