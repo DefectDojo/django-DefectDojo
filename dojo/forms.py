@@ -1607,7 +1607,7 @@ class DojoGroupForm(forms.ModelForm):
 class DeleteGroupForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
-    
+
     class Meta:
         model = Dojo_Group
         fields = ['id']
