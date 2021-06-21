@@ -52,15 +52,11 @@ class TestTrustwaveFusionAPIParser(TestCase):
 
         finding = findings[0]
         self.assertEqual("0123456:id", finding.unique_id_from_tool)
-        # vulnerability does not have a name: fallback to using id as a title
         self.assertEqual("Website Detected", finding.title)
         self.assertEqual(
             "Information/Service Discovery; CVEs: no match", finding.description
         )
-
         date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f%z")
         self.assertEqual("2021-06-15T07:48:08.727000+0000", date)
-
         self.assertEqual("Info", finding.severity)
-
         self.assertIsNone(finding.cve)  # should be none since CVE is "CVE-NO-MATCH"
