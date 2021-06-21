@@ -26,7 +26,7 @@ class TestTrustwaveFusionAPIParser(TestCase):
         self.assertEqual(
             "Vulnerability/Missing Patch; CVEs: CVE-2017-7529", finding.description
         )
-        self.assertEqual(str(findings[0].unsaved_endpoints[0]), "https://google.com")
+        self.assertEqual(str(finding.unsaved_endpoints[0]), "https://google.com")
 
         finding = findings[1]
         self.assertEqual(2566, finding.cve)  # We use the first cve
@@ -34,7 +34,7 @@ class TestTrustwaveFusionAPIParser(TestCase):
             "Cryptography/Weak Cryptography; CVEs: CVE-2013-2566, CVE-2015-2808",
             finding.description,
         )
-        self.assertEqual(str(findings[1].unsaved_endpoints[0]), "https://google.com")
+        self.assertEqual(str(finding.unsaved_endpoints[0]), "https://google.com")
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open(
