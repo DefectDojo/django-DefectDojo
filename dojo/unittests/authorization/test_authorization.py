@@ -117,7 +117,7 @@ class TestAuthorization(TestCase):
 
         cls.group_user = Dojo_Group_User()
         cls.group_user.id = 1
-        cls.group_user.dojo_group = cls.group3
+        cls.group_user.group = cls.group3
         cls.group_user.user = cls.user4
         cls.group_user.role = Role.objects.get(id=Roles.Writer)
 

@@ -140,7 +140,7 @@ def view_product(request, pid):
     product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
     product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     product_groups = get_authorized_groups_for_product(prod, Permissions.Product_View)
-    product_type_groups = get_authorized_groups_for_product_type(prod.prod_type, Permissions.Product_View)
+    product_type_groups = get_authorized_groups_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
@@ -1570,7 +1570,7 @@ def edit_product_group(request, groupid):
     if request.method == 'POST':
         groupform = Edit_Product_Group_Form(request.POST, instance=group)
         if groupform.is_valid():
-            if group.role.is_owner and not user_has_permission(request.user, group.product, Permissions.Product_Member_Add_Owner):
+            if group.role.is_owner and not user_has_permission(request.user, group.product, Permissions.Product_Group_Add_Owner):
                 messages.add_message(request,
                                      messages.WARNING,
                                      'You are not permitted to make groups owners.',
@@ -1586,10 +1586,11 @@ def edit_product_group(request, groupid):
                 else:
                     return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
 
-    add_breadcrumb(title="Edit Product Group", top_level=False, request=request)
+    product_tab = Product_Tab(group.product.id, title="Edit Product Group", tab="settings")
     return render(request, 'dojo/edit_product_group.html', {
         'groupid': groupid,
-        'form': groupform
+        'form': groupform,
+        'product_tab': product_tab,
     })
 
 
@@ -1613,10 +1614,11 @@ def delete_product_group(request, groupid):
             #  page
             return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
 
-    add_breadcrumb(title="Delete Product Group", top_level=False, request=request)
+    product_tab = Product_Tab(group.product.id, title="Delete Product Group", tab="settings")
     return render(request, 'dojo/delete_product_group.html', {
         'groupid': groupid,
-        'form': groupform
+        'form': groupform,
+        'product_tab': product_tab,
     })
 
 
@@ -1628,7 +1630,7 @@ def add_product_group(request, pid):
     if request.method == 'POST':
         group_form = Add_Product_GroupForm(request.POST, initial={'product': product.id})
         if group_form.is_valid():
-            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, product, Permissions.Product_Member_Add_Owner):
+            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, product, Permissions.Product_Group_Add_Owner):
                 messages.add_message(request,
                                      messages.WARNING,
                                      'You are not permitted to add groups as owners.',
@@ -1648,8 +1650,9 @@ def add_product_group(request, pid):
                                          'Product groups added successfully.',
                                          extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product', args=(pid, )))
-    add_breadcrumb(title="Add Product Group", top_level=False, request=request)
+    product_tab = Product_Tab(pid, title="Edit Product Group", tab="settings")
     return render(request, 'dojo/new_product_group.html', {
         'product': product,
-        'form': group_form
+        'form': group_form,
+        'product_tab': product_tab,
     })

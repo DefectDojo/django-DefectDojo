@@ -292,7 +292,7 @@ def add_product_type_group(request, ptid):
     if request.method == 'POST':
         group_form = Add_Product_Type_GroupForm(request.POST, initial={'product_type': pt.id})
         if group_form.is_valid():
-            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
+            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Group_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to add groups as owners.',
@@ -328,7 +328,7 @@ def edit_product_type_group(request, groupid):
     if request.method == 'POST':
         groupform = Edit_Product_Type_Group_Form(request.POST, instance=group)
         if groupform.is_valid():
-            if group.role.is_owner and not user_has_permission(request.user, group.product_type, Permissions.Product_Type_Member_Add_Owner):
+            if group.role.is_owner and not user_has_permission(request.user, group.product_type, Permissions.Product_Type_Group_Add_Owner):
                 messages.add_message(request,
                                      messages.WARNING,
                                      'You are not permitted to make groups owners.',
@@ -359,7 +359,6 @@ def delete_product_type_group(request, groupid):
     if request.method == 'POST':
         groupform = Delete_Product_Type_GroupForm(request.POST, instance=group)
         group = groupform.instance
-        dojo_group = group.group
         group.delete()
         messages.add_message(request,
                              messages.SUCCESS,

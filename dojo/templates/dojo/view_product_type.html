@@ -245,7 +245,7 @@
                                                     <i class="fa fa-pencil-square-o"></i> Edit</a>
                                             </li>
                                             {% endif %}
-                                            {% if member|has_object_permission:"Product_Type_Group_Delete" %}
+                                            {% if pt|has_object_permission:"Product_Type_Group_Delete" %}
                                             <li>
                                                 <a name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' group.id %}">
                                                     <i class="fa fa-trash"></i> Delete</a>

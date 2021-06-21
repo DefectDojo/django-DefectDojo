@@ -12,17 +12,17 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.filters import GroupFilter
 from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, Add_Product_Type_Group_GroupForm, \
                         Add_Group_MemberForm, Edit_Group_MemberForm, Delete_Group_MemberForm
-from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_User
+from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_User, Role
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
-from dojo.group.queries import get_authorized_products_for_group, get_authorized_product_types_for_group, \
-                                get_users_for_group
+from dojo.group.queries import get_authorized_groups, get_product_groups_for_group, \
+    get_product_type_groups_for_group, get_group_users_for_group
 
 logger = logging.getLogger(__name__)
 
 
 @user_passes_test(lambda u: u.is_staff)
 def group(request):
-    groups = Dojo_Group.objects.order_by('name')
+    groups = get_authorized_groups(Permissions.Group_View)
     groups = GroupFilter(request.GET, queryset=groups)
     paged_groups = get_page_items(request, groups.qs, 25)
     add_breadcrumb(title="All Groups", top_level=True, request=request)
@@ -37,9 +37,9 @@ def group(request):
 @user_is_authorized(Dojo_Group, Permissions.Group_View, 'gid')
 def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
-    products = get_authorized_products_for_group(group)
-    product_types = get_authorized_product_types_for_group(group)
-    users = get_users_for_group(group)
+    products = get_product_groups_for_group(group)
+    product_types = get_product_type_groups_for_group(group)
+    users = get_group_users_for_group(group)
 
     add_breadcrumb(title="View Group", top_level=False, request=request)
     return render(request, 'dojo/view_group.html', {
@@ -102,7 +102,7 @@ def delete_group(request, gid):
     })
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_staff)
 def add_group(request):
     form = DojoGroupForm
     group = None
@@ -112,11 +112,16 @@ def add_group(request):
         if form.is_valid():
             group = form.save(commit=False)
             group.save()
+            member = Dojo_Group_User()
+            member.user = request.user
+            member.group = group
+            member.role = Role.objects.get(is_owner=True)
+            member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Group was added successfully, you may edit if necessary.',
+                                 'Group was added successfully.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('edit_group', args=(group.id,)))
+            return HttpResponseRedirect(reverse('view_group', args=(group.id,)))
         else:
             messages.add_message(request, messages.ERROR,
                                  'Group was not added successfully.',
@@ -131,10 +136,10 @@ def add_group(request):
 @user_is_authorized(Dojo_Group, Permissions.Group_Manage_Users, 'gid')
 def add_group_member(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
-    groupform = Add_Group_MemberForm(initial={'dojo_group': group.id})
+    groupform = Add_Group_MemberForm(initial={'group': group.id})
 
     if request.method == 'POST':
-        groupform = Add_Group_MemberForm(request.POST, initial={'dojo_group': group.id})
+        groupform = Add_Group_MemberForm(request.POST, initial={'group': group.id})
         if groupform.is_valid():
             if groupform.cleaned_data['role'].is_owner and not user_has_permission(request.user, group, Permissions.Group_Add_Owner):
                 messages.add_message(request,
@@ -144,10 +149,10 @@ def add_group_member(request, gid):
             else:
                 if 'users' in groupform.cleaned_data and len(groupform.cleaned_data['users']) > 0:
                     for user in groupform.cleaned_data['users']:
-                        existing_users = Dojo_Group_User.objects.filter(dojo_group=group, user=user)
+                        existing_users = Dojo_Group_User.objects.filter(group=group, user=user)
                         if existing_users.count() == 0:
                             group_user = Dojo_Group_User()
-                            group_user.dojo_group = group
+                            group_user.group = group
                             group_user.user = user
                             group_user.role = groupform.cleaned_data['role']
                             group_user.save()
@@ -172,7 +177,18 @@ def edit_group_member(request, mid):
     if request.method == 'POST':
         memberform = Edit_Group_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
-            if member.role.is_owner and not user_has_permission(request.user, member.dojo_group, Permissions.Group_Add_Owner):
+            if not member.role.is_owner:
+                owners = Dojo_Group_User.objects.filter(group=member.group, role__is_owner=True).exclude(id=member.id).count()
+                if owners < 1:
+                    messages.add_message(request,
+                                        messages.WARNING,
+                                        'There must be at least one owner for group {}.'.format(member.group.name),
+                                        extra_tags='alert-warning')
+                    if is_title_in_breadcrumbs('View User'):
+                        return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                    else:
+                        return HttpResponseRedirect(reverse('view_group', args=(member.group.id, )))
+            if member.role.is_owner and not user_has_permission(request.user, member.group, Permissions.Group_Add_Owner):
                 messages.add_message(request,
                                      messages.WARNING,
                                      'You are not permitted to make users owners.',
@@ -186,7 +202,7 @@ def edit_group_member(request, mid):
                 if is_title_in_breadcrumbs('View User'):
                     return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
                 else:
-                    return HttpResponseRedirect(reverse('view_group', args=(member.dojo_group.id, )))
+                    return HttpResponseRedirect(reverse('view_group', args=(member.group.id, )))
 
     add_breadcrumb(title="Edit a Group Member", top_level=False, request=request)
     return render(request, 'dojo/edit_group_member.html', {
@@ -203,6 +219,18 @@ def delete_group_member(request, mid):
     if request.method == 'POST':
         memberform = Delete_Group_MemberForm(request.POST, instance=member)
         member = memberform.instance
+        if member.role.is_owner:
+            owners = Dojo_Group_User.objects.filter(group=member.group, role__is_owner=True).count()
+            if owners <= 1:
+                messages.add_message(request,
+                                    messages.WARNING,
+                                        'There must be at least one owner for group {}.'.format(member.group.name),
+                                    extra_tags='alert-warning')
+                if is_title_in_breadcrumbs('View User'):
+                    return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_group', args=(member.group.id, )))
+
         user = member.user
         member.delete()
         messages.add_message(request,
@@ -213,9 +241,9 @@ def delete_group_member(request, mid):
             return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
         else:
             if user == request.user:
-                return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
+                return HttpResponseRedirect(reverse('groups'))
             else:
-                return HttpResponseRedirect(reverse('view_group', args=(member.dojo_group.id, )))
+                return HttpResponseRedirect(reverse('view_group', args=(member.group.id, )))
 
     add_breadcrumb("Delete a group member", top_level=False, request=request)
     return render(request, 'dojo/delete_group_member.html', {
