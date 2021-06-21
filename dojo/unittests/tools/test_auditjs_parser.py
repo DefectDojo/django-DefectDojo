@@ -38,3 +38,13 @@ class TestAuditJSParser(TestCase):
         self.assertEqual("connect", findings[0].component_name)
         self.assertEqual("2.6.0", findings[0].component_version)
         self.assertEqual(5.4, findings[0].cvssv3_score)
+
+    def test_auditjs_parser_empty_with_error(self):
+        with self.assertRaises(ValueError) as context:
+            testfile = open("dojo/unittests/scans/auditjs/empty_with_error.json")
+            parser = AuditJSParser()
+            parser.get_findings(testfile, Test())
+            testfile.close()
+            self.assertTrue(
+                "Invalid JSON format. Are you sure you used --json option ?" in str(context.exception)
+            )

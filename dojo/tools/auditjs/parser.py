@@ -1,7 +1,10 @@
 import hashlib
 import json
+from json.decoder import JSONDecodeError
 import re
 from dojo.models import Finding
+from cvss import CVSS3, CVSS2
+import cvss.parser
 
 
 class AuditJSParser(object):
@@ -16,35 +19,25 @@ class AuditJSParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "AuditJS Scanning tool using SonaType OSSIndex database with JSON output format"
 
-    # By default, we assume we are using CVSS Version 2.0 (AuditJS always specifies when it's V3)
-    def get_severity(self, cvss, cvss_version="2.0"):
+    # Used only in the case we do not have CVSS Vector
+    def get_severity(self, cvss):
         cvss = float(cvss)
-        cvss_version = float(cvss_version[:1])
-        # If CVSS Version 3 and above
-        if cvss_version >= 3:
-            if cvss > 0 and cvss < 4:
-                return "Low"
-            elif cvss >= 4 and cvss < 7:
-                return "Medium"
-            elif cvss >= 7 and cvss < 9:
-                return "High"
-            elif cvss >= 9:
-                return "Critical"
-            else:
-                return "Informational"
-        # If CVSS Version prior to 3
+        if cvss > 0 and cvss < 4:
+            return "Low"
+        elif cvss >= 4 and cvss < 7:
+            return "Medium"
+        elif cvss >= 7 and cvss < 9:
+            return "High"
+        elif cvss >= 9:
+            return "Critical"
         else:
-            if cvss > 0 and cvss < 4:
-                return "Low"
-            elif cvss >= 4 and cvss < 7:
-                return "Medium"
-            elif cvss >= 7 and cvss <= 10:
-                return "High"
-            else:
-                return "Informational"
+            return "Informational"
 
     def get_findings(self, filename, test):
-        data = json.load(filename)
+        try:
+            data = json.load(filename)
+        except JSONDecodeError:
+            raise ValueError("Invalid JSON format. Are you sure you used --json option ?")
         dupes = dict()
 
         for dependency in data:
@@ -57,7 +50,7 @@ class AuditJSParser(object):
             if dependency['vulnerabilities']:
                 # Get vulnerability data from JSON and setup variables
                 for vulnerability in dependency['vulnerabilities']:
-                    vuln_id_from_tool = title = description = cvss = cvssVector = cve = cvss_version = cwe = references = severity = None
+                    vuln_id_from_tool = title = description = cvss_score = cvss_vector = cve = cwe = references = severity = None
                     if "id" in vulnerability:
                         vuln_id_from_tool = vulnerability["id"]
                     if 'title' in vulnerability:
@@ -70,23 +63,20 @@ class AuditJSParser(object):
                     if 'description' in vulnerability:
                         description = vulnerability['description']
                     if 'cvssScore' in vulnerability:
-                        cvss = vulnerability['cvssScore']
-                    # CVSS Vector not always given
+                        cvss_score = vulnerability['cvssScore']
                     if 'cvssVector' in vulnerability:
-                        # Find if CVSS Version is specfied
-                        cvss_version = re.findall(r"^CVSS:[0-9]", vulnerability['cvssVector'])
-                        if cvss_version:
-                            severity = self.get_severity(cvss, vulnerability['cvssVector'][5:8])
-                            # If it's version 3.0 and above
-                            if vulnerability['cvssVector'][5] == "3":
-                                cvssVector = vulnerability['cvssVector'][9:]
-                                description = description + "\n\nCVSS V3 Vector: " + cvssVector
-                        else:
-                            severity = self.get_severity(cvss)
-                            description = description + "\n\nCVSS Vector: " + vulnerability['cvssVector']
+                        cvss_vectors = cvss.parser.parse_cvss_from_text(vulnerability['cvssVector'])
+                        if len(cvss_vectors) > 0 and type(cvss_vectors[0]) == CVSS3:
+                            # Only set finding vector if it's version 3
+                            cvss_vector = cvss_vectors[0].clean_vector()
+                            severity = cvss_vectors[0].severities()[0]
+                        elif len(cvss_vectors) > 0 and type(cvss_vectors[0]) == CVSS2:
+                            # Otherwise add it to description
+                            description = description + "\nCVSS V2 Vector:" + cvss_vectors[0].clean_vector()
+                            severity = cvss_vectors[0].severities()[0]
                     else:
-                        # Calculated based on CVSS V2
-                        severity = self.get_severity(cvss)
+                        # If there is no vector, calculate severity based on score and CVSS V3 (AuditJS does not always include it)
+                        severity = self.get_severity(cvss_score)
                     if 'cve' in vulnerability:
                         cve = vulnerability['cve']
                         # title = title.split(":")[1][1:]
@@ -98,8 +88,8 @@ class AuditJSParser(object):
                         test=test,
                         cve=cve,
                         cwe=cwe,
-                        cvssv3=cvssVector,
-                        cvssv3_score=cvss,
+                        cvssv3=cvss_vector,
+                        cvssv3_score=cvss_score,
                         description=description,
                         severity=severity,
                         references=references,
