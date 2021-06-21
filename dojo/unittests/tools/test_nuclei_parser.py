@@ -15,6 +15,11 @@ class TestNucleiParser(TestCase):
         testfile = open("dojo/unittests/scans/nuclei/many_findings.json")
         parser = NucleiParser()
         findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
+
         self.assertEqual(9, len(findings))
 
         with self.subTest(i=0):
@@ -123,8 +128,3 @@ class TestNucleiParser(TestCase):
             self.assertEqual(None, finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(3306, finding.unsaved_endpoints[0].port)
-
-        testfile.close()
-        for finding in findings:
-            for endpoint in finding.unsaved_endpoints:
-                endpoint.clean()
