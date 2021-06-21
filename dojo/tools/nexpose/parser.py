@@ -205,7 +205,7 @@ class NexposeParser(object):
                         }
                         for services in endpoint.findall('services'):
                             for service in services.findall('service'):
-                                svc['name'] = service.get('name','').lower()
+                                svc['name'] = service.get('name', '').lower()
                                 svc['vulns'] = self.parse_tests_type(service, vulns)
 
                                 for configs in service.findall('configurations'):
@@ -251,7 +251,7 @@ class NexposeParser(object):
                     endpoint = Endpoint(
                         host=host['name'],
                         port=service['port'],
-                        protocol= service['name'] if service['name'] in SCHEME_PORT_MAP else service['protocol'],
+                        protocol=service['name'] if service['name'] in SCHEME_PORT_MAP else service['protocol'],
                         fragment=service['protocol'].lower() if service['name'] == "dns" else None
                         # A little dirty hack but in case of DNS it is important to know if vulnerability is on TCP or UDP
                     )
