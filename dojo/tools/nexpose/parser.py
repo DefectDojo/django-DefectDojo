@@ -206,12 +206,12 @@ class NexposeParser(object):
                             for service in services.findall('service'):
                                 svc['name'] = re.sub(r'[^A-Za-z0-9\-\+]+', "-",
                                                         re.sub(r'\(.*?\)?\)', "", service.get('name').lower())
-                                                     )[:10].strip('-') if service.get('name') != "<unknown>" else None
+                                                     )[:20].strip('-') if service.get('name') != "<unknown>" else None
                                 # 1. get
                                 # 2. lower
                                 # 3. remove brackets with its content
                                 # 4. replace sequance of non-(alphanum,-,+) chars by '-'
-                                # 5. cut (max 10 chars) - limitation of protocol field in models.Endpoint
+                                # 5. cut (max 20 chars) - limitation of protocol field in models.Endpoint
                                 # 6. strip
 
                                 svc['vulns'] = self.parse_tests_type(service, vulns)
