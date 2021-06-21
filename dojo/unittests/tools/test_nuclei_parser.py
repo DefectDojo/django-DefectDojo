@@ -123,3 +123,8 @@ class TestNucleiParser(TestCase):
             self.assertEqual(None, finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(3306, finding.unsaved_endpoints[0].port)
+
+        testfile.close()
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
