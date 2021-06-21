@@ -24,7 +24,7 @@ class TestNucleiParser(TestCase):
 
         with self.subTest(i=0):
             finding = findings[0]
-            self.assertEqual("OpenSSH 5.3 Detection: nuclei-example.com:22", finding.title)
+            self.assertEqual("OpenSSH 5.3 Detection", finding.title)
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
@@ -35,7 +35,7 @@ class TestNucleiParser(TestCase):
 
         with self.subTest(i=1):
             finding = findings[1]
-            self.assertEqual("nginx version detect: https://nuclei-example.com", finding.title)
+            self.assertEqual("nginx version detect", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
@@ -47,7 +47,7 @@ class TestNucleiParser(TestCase):
 
         with self.subTest(i=2):
             finding = findings[2]
-            self.assertEqual("phpMyAdmin setup page: https://nuclei-example.com/phpmyadmin/setup/index.php", finding.title)
+            self.assertEqual("phpMyAdmin setup page", finding.title)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
@@ -59,7 +59,7 @@ class TestNucleiParser(TestCase):
 
         with self.subTest(i=3):
             finding = findings[3]
-            self.assertEqual("Wappalyzer Technology Detection: http://127.0.0.1:8080/WebGoat", finding.title)
+            self.assertEqual("Wappalyzer Technology Detection", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(3, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
@@ -71,7 +71,7 @@ class TestNucleiParser(TestCase):
 
         with self.subTest(i=4):
             finding = findings[4]
-            self.assertEqual("Wappalyzer Technology Detection: http://127.0.0.1:9090/WebWolf", finding.title)
+            self.assertEqual("Wappalyzer Technology Detection", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(2, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
@@ -83,7 +83,7 @@ class TestNucleiParser(TestCase):
 
         with self.subTest(i=5):
             finding = findings[5]
-            self.assertEqual("Wappalyzer Technology Detection: https://nuclei-example.com", finding.title)
+            self.assertEqual("Wappalyzer Technology Detection", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(6, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
@@ -95,7 +95,7 @@ class TestNucleiParser(TestCase):
 
         with self.subTest(i=6):
             finding = findings[6]
-            self.assertEqual("WAF Detection: https://nuclei-example.com/", finding.title)
+            self.assertEqual("WAF Detection", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(2, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
@@ -107,7 +107,7 @@ class TestNucleiParser(TestCase):
 
         with self.subTest(i=7):
             finding = findings[7]
-            self.assertEqual("phpMyAdmin Panel: https://nuclei-example.com/phpmyadmin/", finding.title)
+            self.assertEqual("phpMyAdmin Panel", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
@@ -119,7 +119,7 @@ class TestNucleiParser(TestCase):
 
         with self.subTest(i=8):
             finding = findings[8]
-            self.assertEqual("MySQL DB with enabled native password: nuclei-example.com:3306", finding.title)
+            self.assertEqual("MySQL DB with enabled native password", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)

@@ -46,7 +46,7 @@ class NucleiParser(object):
                 ip = item.get('ip')
 
                 dupe_key = hashlib.sha256(
-                    (template_id + type + host + ip + matched).encode('utf-8')
+                    (template_id + type + host + ip).encode('utf-8')
                 ).hexdigest()
 
                 if dupe_key in dupes:
@@ -54,7 +54,7 @@ class NucleiParser(object):
                     finding.nb_occurences += 1
                 else:
                     finding = Finding(
-                        title=f"{name}: {matched}",
+                        title=f"{name}",
                         test=test,
                         severity=severity,
                         nb_occurences=1,
