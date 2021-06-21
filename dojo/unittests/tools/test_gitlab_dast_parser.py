@@ -81,30 +81,25 @@ class TestGitlabDastParser(TestCase):
 
         # the first one is done above
         finding = findings[1]
+        # must-have fields
+        self.assertEqual(3, finding.scanner_confidence)
+        self.assertTrue("Content Security Policy (CSP)" in finding.description)
+        self.assertEqual(10038, finding.cve)
+        self.assertEqual(False, finding.static_finding)
+        self.assertEqual(True, finding.dynamic_finding)
+
+        # conditional fields
+        date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
+        self.assertEqual("2021-04-23T15:46:40.644000", date)
         self.assertEqual(
             "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool
         )
-        self.assertEqual(3, finding.scanner_confidence)
         # vulnerability does not have a name: fallback to using id as a title
-        self.assertEqual("87e98ddf-7d75-444a-be6d-45400151a0fe", finding.title)
-        self.assertIsInstance(finding.description, str)
-
-        date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
-        self.assertEqual("2021-04-23T15:46:40.644000", date)
-        self.assertIsInstance(finding.references, str)
-
-        # uncomment when done fixing parser.py
-        # scanner = finding.found_by
-        # self.assertEqual(scanner.name, f"id: zaproxy\nname: ZAProxy")
-        # self.assertTrue(not scanner.static_tool)
-        # self.assertTrue(scanner.dynamic_tool)
-
-        self.assertEqual("Medium", finding.severity)
-        self.assertTrue("Ensure that your web server," in finding.mitigation)
-
+        self.assertEqual(finding.unique_id_from_tool, finding.title)
         self.assertEqual(16, finding.cwe)
-        self.assertEqual("10038", finding.cve)
-
-        # endpoint = finding.unsaved_endpoints[0]
-        # self.assertEqual("http", endpoint.protocol)
-        # self.assertEqual(80, endpoint.port)
+        self.assertTrue("http://www.w3.org/Tr/CSP/" in finding.references)
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual(
+            str(finding.unsaved_endpoints[0]), "http://api-server/v1/tree/10"
+        )
+        self.assertTrue("Ensure that your web server," in finding.mitigation)

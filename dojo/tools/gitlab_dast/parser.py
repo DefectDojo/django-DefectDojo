@@ -69,25 +69,11 @@ class GitlabDastParser(object):
 
 # iterating through properties of each vulnerability
 def get_item(vuln, test):
-
     if vuln["category"] != "dast":
         return None
 
     # scanner_confidence
     scanner_confidence = get_confidence_numeric(vuln["confidence"])
-
-    # id
-    if "id" in vuln:
-        unique_id_from_tool = vuln["id"]
-    else:  # deprecated
-        unique_id_from_tool = vuln["cve"]
-
-    # title
-    if "name" in vuln:
-        title = vuln["name"]
-    # fallback to using id as a title
-    else:
-        title = unique_id_from_tool
 
     # description
     description = f"Scanner: {vuln['scanner']['name']}\n"
@@ -96,56 +82,59 @@ def get_item(vuln, test):
     elif "description" in vuln:
         description += f"{vuln['description']}\n"
 
-    # TODO: found_by
-
-    cve = vuln["cve"]
-    cwe = 0
-
-    references = ""
-    for ref in vuln["identifiers"]:
-        if ref["type"].lower() == "cwe":
-            cwe = int(ref["value"])
-        else:
-            references += f"Identifier type: {ref['type']}\n"
-            references += f"Name: {ref['name']}\n"
-            references += f"Value: {ref['value']}\n"
-            if "url" in ref:
-                references += f"URL: {ref['url']}\n"
-            references += "\n"
+    cve = int(vuln["cve"])
 
     finding = Finding(
         test=test,  # Test
         nb_occurences=1,  # int
-        unique_id_from_tool=unique_id_from_tool,  # str
         scanner_confidence=scanner_confidence,  # int
-        title=title,  # str
         description=description,  # str
-        references=references,  # str (identifiers)
-        cve=cve,  # str
+        cve=cve,  # int
+        static_finding=False,
+        dynamic_finding=True,
     )
 
     # date
     if "discovered_at" in vuln:
         finding.date = datetime.strptime(vuln["discovered_at"], "%Y-%m-%dT%H:%M:%S.%f")
 
+    # id
+    if "id" in vuln:
+        finding.unique_id_from_tool = vuln["id"]
+
+    # title
+    if "name" in vuln:
+        finding.title = vuln["name"]
+    # fallback to using id as a title
+    else:
+        finding.title = finding.unique_id_from_tool
+
+    # cwe
+    for identifier in vuln["identifiers"]:
+        if "cwe" == identifier["type"].lower():
+            finding.cwe = identifier["value"]
+            break
+
+    # references
+    if vuln["links"]:
+        ref = ""
+        for link in vuln["links"]:
+            ref += f"{link['url']}\n"
+        ref = ref[:-1]
+
     # severity
     if "severity" in vuln:
         finding.severity = vuln["severity"]
-
-    # mitigation
-    if "solution" in vuln:
-        finding.mitigation = vuln["solution"]
-
-    # cwe
-    if cwe != 0:
-        finding.cwe = cwe
 
     # endpoint
     location = vuln["location"]
     if "hostname" in location and "path" in location:
         url_str = f"{location['hostname']}{location['path']}"
-        # url = hyperlink.parse(url_str) -- not used
         finding.unsaved_endpoints = [Endpoint.from_uri(url_str)]
+
+    # mitigation
+    if "solution" in vuln:
+        finding.mitigation = vuln["solution"]
 
     return finding
 
