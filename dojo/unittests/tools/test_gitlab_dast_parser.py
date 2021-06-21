@@ -22,7 +22,6 @@ Numerical Severity:
 
 
 class TestGitlabDastParser(TestCase):
-
     def test_parse_file_with_no_vuln_has_no_findings(self):
         testfile = open("dojo/unittests/scans/gitlab_dast/gitlab_dast_zero_vul.json")
         parser = GitlabDastParser()
@@ -40,7 +39,9 @@ class TestGitlabDastParser(TestCase):
         for endpoint in finding.unsaved_endpoints:
             endpoint.clean()
 
-        self.assertEqual("5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool)
+        self.assertEqual(
+            "5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.unique_id_from_tool
+        )
         self.assertEqual(3, finding.scanner_confidence)
         # vulnerability does not have a name: fallback to using id as a title
         self.assertEqual("5ec00bbc-2e53-44cb-83e9-3d35365277e3", finding.title)
@@ -80,7 +81,9 @@ class TestGitlabDastParser(TestCase):
 
         # the first one is done above
         finding = findings[1]
-        self.assertEqual("87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool)
+        self.assertEqual(
+            "87e98ddf-7d75-444a-be6d-45400151a0fe", finding.unique_id_from_tool
+        )
         self.assertEqual(3, finding.scanner_confidence)
         # vulnerability does not have a name: fallback to using id as a title
         self.assertEqual("87e98ddf-7d75-444a-be6d-45400151a0fe", finding.title)

@@ -22,7 +22,7 @@ class GitlabDastParser(object):
     def parse_json(self, file):
         data = file.read()
         try:
-            tree = json.loads(str(data, 'utf-8'))
+            tree = json.loads(str(data, "utf-8"))
         except:
             tree = json.loads(data)
 
@@ -32,14 +32,12 @@ class GitlabDastParser(object):
         items = {}
 
         # iterating through each vulnerability
-        for node in tree['vulnerabilities']:
+        for node in tree["vulnerabilities"]:
             item = get_item(node, test)
 
-            item_key = hashlib.sha256("|".join([
-                item.severity,
-                item.title,
-                item.description
-            ]).encode()).hexdigest()
+            item_key = hashlib.sha256(
+                "|".join([item.severity, item.title, item.description]).encode()
+            ).hexdigest()
 
             if item_key in items:
                 items[item_key].unsaved_endpoints.extend(item.unsaved_endpoints)
@@ -113,7 +111,7 @@ def get_item(vuln, test):
             references += f"Value: {ref['value']}\n"
             if "url" in ref:
                 references += f"URL: {ref['url']}\n"
-            references += '\n'
+            references += "\n"
 
     finding = Finding(
         test=test,  # Test
@@ -123,7 +121,7 @@ def get_item(vuln, test):
         title=title,  # str
         description=description,  # str
         references=references,  # str (identifiers)
-        cve=cve  # str
+        cve=cve,  # str
     )
 
     # date
@@ -154,12 +152,12 @@ def get_item(vuln, test):
 
 def get_confidence_numeric(confidence):
     switcher = {
-        'Confirmed': 1,     # Certain
-        'High': 3,          # Firm
-        'Medium': 4,        # Firm
-        'Low': 6,           # Tentative
-        'Experimental': 7,  # Tentative
-        'Unknown': 8,       # Tentative
-        'Ignore': 10,       # Tentative
+        "Confirmed": 1,  # Certain
+        "High": 3,  # Firm
+        "Medium": 4,  # Firm
+        "Low": 6,  # Tentative
+        "Experimental": 7,  # Tentative
+        "Unknown": 8,  # Tentative
+        "Ignore": 10,  # Tentative
     }
     return switcher.get(confidence, None)
