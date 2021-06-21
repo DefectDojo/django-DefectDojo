@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
+{% load authorization_tags %}
 {% block content %}
     {% load display_tags %}
     <div class="row">
@@ -10,7 +11,7 @@
                         {{ name }}
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                            {% if request.user.is_superuser %}
+                            {% if request.user.is_staff %}
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
                                 <span class="fa fa-wrench"></span>
@@ -48,7 +49,6 @@
                         </tr>
                         {% for g in groups %}
                         <tr>
-                            {% if request.user.is_staff %}
                             <td>
                                 <ul>
                                     <li class="dropdown" style="list-style:none;position:absolute">
@@ -59,12 +59,14 @@
                                                     <i class="fa fa-list-alt"></i> View
                                                 </a>
                                             </li>
-                                            {% if request.user.is_superuser %}
+                                            {% if g|has_object_permission:"Group_Edit" %}
                                             <li role="presentation">
                                                 <a class="" href="{% url 'edit_group' g.id %}" id="editGroup">
                                                     <i class="fa fa-pencil-square-o"></i> Edit </a>
                                                 </a>
                                             </li>
+                                            {% endif %}
+                                            {% if g|has_object_permission:"Group_Delete" %}
                                             <li role="separator" class="divider"></li>
                                             <li role="presentation">
                                                 <a class="" href="{% url 'delete_group' g.id %}">
@@ -76,7 +78,6 @@
                                     </li>
                                 </ul>
                             </td>
-                            {% endif %}
                             <td><a href="{% url 'view_group' g.id %}">{{ g.name }}</a></td>
                             <td>{{ g.description }}</td>
                             <td>{{ g.users.all|length }}</td>

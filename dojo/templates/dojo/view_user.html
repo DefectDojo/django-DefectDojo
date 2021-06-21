@@ -279,7 +279,7 @@
                     <tr>
                         <th></th>
                         <th>Group</th>
-                        <th>Role</th>
+                        <th>Group role</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -291,7 +291,7 @@
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductTypeMember"
                                        aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
-                                        {% if group.dojo_group|has_object_permission:"Group_Manage_Users" %}
+                                        {% if group.group|has_object_permission:"Group_Manage_Users" %}
                                         <li>
                                             <a name="editProductTypeMember" href="{% url 'edit_group_member' group.id %}">
                                                 <i class="fa fa-pencil-square-o"></i> Edit</a>
@@ -307,7 +307,7 @@
                                 </li>
                             </ul>
                         </td>
-                        <td name="group_name"><a href="{% url 'view_group' group.dojo_group.id %}">{{ group.dojo_group }}</a></td>
+                        <td name="group_name"><a href="{% url 'view_group' group.group.id %}">{{ group.group }}</a></td>
                         <td name="group_role">{{ group.role }}</td>
                     </tr>
                     {% endfor %}

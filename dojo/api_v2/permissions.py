@@ -52,7 +52,7 @@ class UserHasDojoGroupPermission(permissions.BasePermission):
 
 class UserHasDojoGroupUserPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(request, Dojo_Group, 'dojo_group', Permissions.Group_Manage_Users)
+        return check_post_permission(request, Dojo_Group, 'group', Permissions.Group_Manage_Users)
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Manage_Users, Permissions.Group_User_Delete)

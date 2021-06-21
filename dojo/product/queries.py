@@ -5,6 +5,8 @@ from dojo.models import Product, Product_Member, Product_Type_Member, App_Analys
     DojoMeta, Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, user_has_permission, \
     role_has_permission, get_groups
+from dojo.group.queries import get_authorized_groups
+from dojo.authorization.roles_permissions import Permissions
 
 
 def get_authorized_products(permission, user=None):
@@ -77,7 +79,8 @@ def get_authorized_groups_for_product(product, permission):
     user = get_current_user()
 
     if user.is_superuser or user_has_permission(user, product, permission):
-        return Product_Group.objects.filter(product=product).order_by('group__name')
+        authorized_groups = get_authorized_groups(Permissions.Group_View)
+        return Product_Group.objects.filter(product=product, group__in=authorized_groups).order_by('group__name')
     else:
         return None
 

@@ -23,7 +23,7 @@ from dojo.forms import DojoUserForm, AddDojoUserForm, EditDojoUserForm, DeleteUs
 from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_User
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.product.queries import get_authorized_product_members_for_user
-from dojo.user.queries import get_groups_for_user
+from dojo.group.queries import get_authorized_group_users_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.authorization.roles_permissions import Permissions
 
@@ -198,7 +198,6 @@ def alertcount(request):
 def view_profile(request):
     user = get_object_or_404(Dojo_User, pk=request.user.id)
     form = DojoUserForm(instance=user)
-    groups = get_groups_for_user(user)
 
     user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
     if user_contact is None:
@@ -245,8 +244,7 @@ def view_profile(request):
         'user': user,
         'form': form,
         'contact_form': contact_form,
-        'global_role_form': global_role_form,
-        'groups': groups})
+        'global_role_form': global_role_form})
 
 
 def change_password(request):
@@ -366,7 +364,7 @@ def view_user(request, uid):
     authorized_product_types = Product_Type.objects.filter(authorized_users__in=[user])
     product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
     product_type_members = get_authorized_product_type_members_for_user(user, Permissions.Product_Type_View)
-    groups = get_groups_for_user(user)
+    groups = get_authorized_group_users_for_user(user)
 
     add_breadcrumb(title="View User", top_level=False, request=request)
     return render(request, 'dojo/view_user.html', {
@@ -556,12 +554,12 @@ def add_group_member(request, uid):
     if request.method == 'POST':
         memberform = Add_Group_Member_UserForm(request.POST, initial={'user': user.id})
         if memberform.is_valid():
-            if 'dojo_groups' in memberform.cleaned_data and len(memberform.cleaned_data['dojo_groups']) > 0:
-                for dojo_group in memberform.cleaned_data['dojo_groups']:
-                    existing_groups = Dojo_Group_User.objects.filter(user=user, dojo_group=dojo_group)
+            if 'groups' in memberform.cleaned_data and len(memberform.cleaned_data['groups']) > 0:
+                for group in memberform.cleaned_data['groups']:
+                    existing_groups = Dojo_Group_User.objects.filter(user=user, group=group)
                     if existing_groups.count() == 0:
                         group_member = Dojo_Group_User()
-                        group_member.dojo_group = dojo_group
+                        group_member.group = group
                         group_member.user = user
                         group_member.role = memberform.cleaned_data['role']
                         group_member.save()

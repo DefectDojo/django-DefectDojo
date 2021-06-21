@@ -79,9 +79,9 @@ def user_has_permission(user, obj, permission):
     elif isinstance(obj, Dojo_Group_User) and permission in Permissions.get_group_user_permissions():
         if permission == Permissions.Group_User_Delete:
             # Every user is allowed to remove himself
-            return obj.user == user or user_has_permission(user, obj.dojo_group, permission)
+            return obj.user == user or user_has_permission(user, obj.group, permission)
         else:
-            return user_has_permission(user, obj.dojo_group, permission)
+            return user_has_permission(user, obj.group, permission)
     else:
         raise NoAuthorizationImplementedError('No authorization implemented for class {} and permission {}'.
             format(type(obj).__name__, permission))
@@ -192,13 +192,13 @@ def get_groups(user):
     return Dojo_Group.objects.select_related('global_role').filter(users=user)
 
 
-def get_group_user(user, dojo_group):
-    return get_group_users_dict(user).get(dojo_group.id)
+def get_group_user(user, group):
+    return get_group_users_dict(user).get(group.id)
 
 
 @cache_for_request
 def get_group_users_dict(user):
     gu_dict = {}
-    for group_user in Dojo_Group_User.objects.select_related('dojo_group').select_related('role').filter(user=user):
-        gu_dict[group_user.dojo_group.id] = group_user
+    for group_user in Dojo_Group_User.objects.select_related('group').select_related('role').filter(user=user):
+        gu_dict[group_user.group.id] = group_user
     return gu_dict

@@ -18,11 +18,13 @@
                                 <span class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                                {% if request.user.is_superuser %}
+                                {% if group|has_object_permission:"Group_Edit" %}
                                 <li>
                                     <a class="" href="{% url 'edit_group' group.id %}">
                                         <i class="fa fa-pencil-square-o"></i> Edit</a>
                                 </li>
+                                {% endif %}
+                                {% if group|has_object_permission:"Group_Delete" %}
                                 <li role="separator" class="divider"></li>
                                 <li>
                                     <a class="" href="{% url 'delete_group' group.id %}" id="deleteUser">
@@ -54,7 +56,7 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu2">
                             <li role="presentation">
                                 <a id="addGroupMember" href="{% url 'add_group_member' group.id %}">
-                                    <i class="fa fa-plus"></i> Add Group Member
+                                    <i class="fa fa-plus"></i> Add Users
                                 </a>
                             </li>
                         </ul>
@@ -71,7 +73,7 @@
                     <tr>
                         <th label="Actions"></th>
                         <th>User</th>
-                        <th>Role</th>
+                        <th>Group role</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -85,7 +87,7 @@
                                         {% if group|has_object_permission:"Group_Manage_Users" %}
                                         <li>
                                             <a name="editGroupMember" href="{% url 'edit_group_member' member.id %}">
-                                                <i class="fa fa-pencil-square-o"></i>Edit Group</a>
+                                                <i class="fa fa-pencil-square-o"></i>Edit</a>
                                         </li>
                                         {% endif %}
                                         {% if member|has_object_permission:"Group_User_Delete" %}
@@ -126,7 +128,7 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu2">
                             <li role="presentation">
                                 <a id="addProductTypeGroup" href="{% url 'add_product_type_group_group' group.id %}">
-                                    <i class="fa fa-plus"></i> Add Product Type
+                                    <i class="fa fa-plus"></i> Add Product Types
                                 </a>
                             </li>
                         </ul>
@@ -199,7 +201,7 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu3">
                             <li role="presentation">
                                 <a id="addProductGroup" href="{% url 'add_product_group_group' group.id %}">
-                                    <i class="fa fa-plus"></i> Add Product
+                                    <i class="fa fa-plus"></i> Add Products
                                 </a>
                             </li>
                         </ul>

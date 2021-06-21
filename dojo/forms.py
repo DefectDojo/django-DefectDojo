@@ -44,6 +44,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type
+from dojo.group.queries import get_authorized_groups
 
 logger = logging.getLogger(__name__)
 
@@ -1595,8 +1596,7 @@ class MetricsFilterForm(forms.Form):
 class DojoGroupForm(forms.ModelForm):
 
     name = forms.CharField(max_length=255, required=True)
-    description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=True)
+    description = forms.CharField(widget=forms.Textarea(attrs={}), required=False)
 
     class Meta:
         model = Dojo_Group
@@ -1618,45 +1618,43 @@ class Add_Group_MemberForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(Add_Group_MemberForm, self).__init__(*args, **kwargs)
-        self.fields['dojo_group'].disabled = True
-        current_members = Dojo_Group_User.objects.filter(dojo_group=self.initial['dojo_group']).values_list('dojo_group', flat=True)
+        self.fields['group'].disabled = True
+        current_members = Dojo_Group_User.objects.filter(group=self.initial['group']).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
-            Q(id__in=current_members)
-        )
+            Q(is_superuser=True) |
+            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
         self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
 
     class Meta:
         model = Dojo_Group_User
-        fields = ['dojo_group', 'users', 'role']
+        fields = ['group', 'users', 'role']
 
 
 class Add_Group_Member_UserForm(forms.ModelForm):
-    dojo_groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
 
     def __init__(self, *args, **kwargs):
         super(Add_Group_Member_UserForm, self).__init__(*args, **kwargs)
         self.fields['user'].disabled = True
-        current_groups = Dojo_Group_User.objects.filter(user=self.initial['user']).values_list('dojo_group', flat=True)
-        self.fields['dojo_groups'].queryset = Dojo_Group.objects.exclude(
-            Q(id__in=current_groups)
-        )
+        current_groups = Dojo_Group_User.objects.filter(user=self.initial['user']).values_list('group', flat=True)
+        self.fields['groups'].queryset = Dojo_Group.objects.exclude(id__in=current_groups)
         self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
 
     class Meta:
         model = Dojo_Group_User
-        fields = ['dojo_groups', 'role', 'user']
+        fields = ['groups', 'user', 'role']
 
 
 class Edit_Group_MemberForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(Edit_Group_MemberForm, self).__init__(*args, **kwargs)
-        self.fields['dojo_group'].disabled = True
+        self.fields['group'].disabled = True
         self.fields['user'].disabled = True
         self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
 
     class Meta:
         model = Dojo_Group_User
-        fields = ['dojo_group', 'user', 'role']
+        fields = ['group', 'user', 'role']
 
 
 class Delete_Group_MemberForm(Edit_Group_MemberForm):
@@ -1672,8 +1670,9 @@ class Add_Product_GroupForm(forms.ModelForm):
         super(Add_Product_GroupForm, self).__init__(*args, **kwargs)
         self.fields['product'].disabled = True
         current_groups = Product_Group.objects.filter(product=self.initial["product"]).values_list('group', flat=True)
-        self.fields['groups'].queryset = Dojo_Group.objects.exclude(
-            Q(id__in=current_groups))
+        authorized_groups = get_authorized_groups(Permissions.Group_View)
+        authorized_groups = authorized_groups.exclude(id__in=current_groups)
+        self.fields['groups'].queryset = authorized_groups
 
     class Meta:
         model = Product_Group
@@ -1719,8 +1718,9 @@ class Add_Product_Type_GroupForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_GroupForm, self).__init__(*args, **kwargs)
         current_groups = Product_Type_Group.objects.filter(product_type=self.initial["product_type"]).values_list('group', flat=True)
-        self.fields['groups'].queryset = Dojo_Group.objects.exclude(
-            Q(id__in=current_groups))
+        authorized_groups = get_authorized_groups(Permissions.Group_View)
+        authorized_groups = authorized_groups.exclude(id__in=current_groups)
+        self.fields['groups'].queryset = authorized_groups
         self.fields['product_type'].disabled = True
 
     class Meta:

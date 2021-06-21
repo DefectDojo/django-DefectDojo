@@ -401,9 +401,9 @@ class Dojo_Group(models.Model):
 
 
 class Dojo_Group_User(models.Model):
-    dojo_group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, help_text="This role determines the permissions of the user to manage the group.", verbose_name="Group role")
 
 
 class Global_Role(models.Model):
