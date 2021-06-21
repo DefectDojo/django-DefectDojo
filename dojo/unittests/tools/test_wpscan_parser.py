@@ -19,6 +19,9 @@ class TestWpscanParser(TestCase):
         testfile = open("dojo/unittests/scans/wpscan/sample.json")
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(4, len(findings))
         finding = findings[0]
         self.assertIsNone(finding.unique_id_from_tool)  # interesting findings are not vlunerability
@@ -30,12 +33,18 @@ class TestWpscanParser(TestCase):
         testfile = open("dojo/unittests/scans/wpscan/wordpress_no_vuln.json")
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(7, len(findings))
 
     def test_parse_file_with_one_vuln_has_one_findings(self):
         testfile = open("dojo/unittests/scans/wpscan/wordpress_one_vuln.json")
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(8, len(findings))
         finding = findings[0]
         self.assertEqual("8873", finding.unique_id_from_tool)
@@ -47,6 +56,9 @@ class TestWpscanParser(TestCase):
         testfile = open("dojo/unittests/scans/wpscan/wordpress_many_vuln.json")
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(8, len(findings))
         finding = findings[0]
         self.assertEqual("8873", finding.unique_id_from_tool)
@@ -58,6 +70,9 @@ class TestWpscanParser(TestCase):
         testfile = open("dojo/unittests/scans/wpscan/wpscan.json")
         parser = WpscanParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(6, len(findings))
         finding = findings[0]
         self.assertEqual("7391118e-eef5-4ff8-a8ea-f6b65f442c63", finding.unique_id_from_tool)

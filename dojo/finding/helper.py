@@ -1,3 +1,4 @@
+from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.dispatch.dispatcher import receiver
 from dojo.celery import app
@@ -13,6 +14,16 @@ from dojo.models import Engagement, Finding, Finding_Group, System_Settings, Tes
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+OPEN_FINDINGS_QUERY = Q(active=True)
+VERIFIED_FINDINGS_QUERY = Q(active=True, verified=True)
+OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
+FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
+INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_mitigated=False, false_p=False, out_of_scope=False)
+ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
+NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
+WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
+CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 
 
 # this signal is triggered just before a finding is getting saved
@@ -37,9 +48,9 @@ def pre_save_finding_status_change(sender, instance, changed_fields=None, **kwar
 
 
 # also get signal when id is set/changed so we can process new findings
-pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_Mitigated', 'mitigated', 'mitigated_by', 'out_of_scope', 'risk_accepted'])
+pre_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['id', 'active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope', 'risk_accepted'])
 # pre_save_changed.connect(pre_save_finding_status_change, sender=Finding)
-# post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_Mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
+# post_save_changed.connect(pre_save_finding_status_change, sender=Finding, fields=['active', 'verfied', 'false_p', 'is_mitigated', 'mitigated', 'mitigated_by', 'out_of_scope'])
 
 
 def update_finding_status(new_state_finding, user, changed_fields=None):
@@ -57,9 +68,9 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
     # marked as duplicate
     # marked as original
 
-    if is_new_finding or 'is_Mitigated' in changed_fields:
+    if is_new_finding or 'is_mitigated' in changed_fields:
         # finding is being mitigated
-        if new_state_finding.is_Mitigated:
+        if new_state_finding.is_mitigated:
             # when mitigating a finding, the meta fields can only be editted if allowed
             logger.debug('finding being mitigated, set mitigated and mitigated_by fields')
 
@@ -76,7 +87,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             new_state_finding.mitigated_by = None
 
     # people may try to remove mitigated/mitigated_by by accident
-    if new_state_finding.is_Mitigated:
+    if new_state_finding.is_mitigated:
         new_state_finding.mitigated = new_state_finding.mitigated or now
         new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
 
@@ -85,7 +96,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
         if new_state_finding.active:
             new_state_finding.false_p = False
             new_state_finding.out_of_scope = False
-            new_state_finding.is_Mitigated = False
+            new_state_finding.is_mitigated = False
             new_state_finding.mitigated = None
             new_state_finding.mitigated_by = None
         else:
@@ -100,7 +111,7 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
         if new_state_finding.false_p or new_state_finding.out_of_scope:
             new_state_finding.mitigated = new_state_finding.mitigated or now
             new_state_finding.mitigated_by = new_state_finding.mitigated_by or user
-            new_state_finding.is_Mitigated = True
+            new_state_finding.is_mitigated = True
             new_state_finding.active = False
             new_state_finding.verified = False
 
@@ -160,7 +171,7 @@ def add_to_finding_group(finding_group, finds):
 def remove_from_finding_group(finds):
     removed = 0
     skipped = 0
-    affected_groups = []
+    affected_groups = set()
     for find in finds:
         groups = find.finding_group_set.all()
         if not groups:
@@ -169,11 +180,77 @@ def remove_from_finding_group(finds):
 
         for group in find.finding_group_set.all():
             group.findings.remove(find)
-            affected_groups.append(group)
+            affected_groups.add(group)
 
         removed += 1
 
     return affected_groups, removed, skipped
+
+
+def update_finding_group(finding, finding_group):
+    # finding_group = Finding_Group.objects.get(id=group)
+    if finding_group is not None:
+        if finding_group != finding.finding_group:
+            if finding.finding_group:
+                logger.debug('removing finding %d from finding_group %s', finding.id, finding.finding_group)
+                finding.finding_group.findings.remove(finding)
+            logger.debug('adding finding %d to finding_group %s', finding.id, finding_group)
+            finding_group.findings.add(finding)
+    else:
+        if finding.finding_group:
+            logger.debug('removing finding %d from finding_group %s', finding.id, finding.finding_group)
+            finding.finding_group.findings.remove(finding)
+
+
+def get_group_by_group_name(finding, finding_group_by_option):
+    if finding_group_by_option == 'component_name':
+        group_name = finding.component_name if finding.component_name else 'None'
+    elif finding_group_by_option == 'component_name+component_version':
+        group_name = '%s:%s' % ((finding.component_name if finding.component_name else 'None'),
+        (finding.component_version if finding.component_version else 'None'))
+    elif finding_group_by_option == 'file_path':
+        group_name = 'Filepath %s' % (finding.file_path if finding.file_path else 'None')
+    else:
+        raise ValueError("Invalid group_by option %s" % finding_group_by_option)
+
+    return 'Findings in: %s' % group_name
+
+
+def group_findings_by(finds, finding_group_by_option):
+    grouped = 0
+    groups_created = 0
+    groups_existing = 0
+    skipped = 0
+    affected_groups = set()
+    for find in finds:
+        if find.finding_group is not None:
+            skipped += 1
+            continue
+
+        group_name = get_group_by_group_name(find, finding_group_by_option)
+        finding_group = Finding_Group.objects.filter(name=group_name).first()
+        if not finding_group:
+            finding_group, added, skipped = create_finding_group([find], group_name)
+            groups_created += 1
+            grouped += added
+            skipped += skipped
+        else:
+            add_to_finding_group(finding_group, [find])
+            groups_existing += 1
+            grouped += 1
+
+        affected_groups.add(finding_group)
+
+    return affected_groups, grouped, skipped, groups_created
+
+
+def add_finding_to_auto_group(finding, group_by):
+    test = finding.test
+    name = get_group_by_group_name(finding, group_by)
+    finding_group, created = Finding_Group.objects.get_or_create(test=test, creator=get_current_user(), name=name)
+    if created:
+        logger.debug('Created Finding Group %d:%s for test %d:%s', finding_group.id, finding_group, test.id, test)
+    finding_group.findings.add(finding)
 
 
 @dojo_model_to_id
@@ -219,7 +296,14 @@ def post_process_finding_save(finding, dedupe_option=True, false_history=False, 
     if push_to_jira:
         logger.debug('pushing finding %s to jira from finding.save()', finding.pk)
         import dojo.jira_link.helper as jira_helper
-        jira_helper.push_to_jira(finding)
+
+        # current approach is that whenever a finding is in a group, the group will be pushed to JIRA
+        # based on feedback we could introduct another push_group_to_jira boolean everywhere
+        # but what about the push_all boolean? Let's see how this works for now and get some feedback.
+        if finding.has_jira_issue or not finding.finding_group:
+            jira_helper.push_to_jira(finding)
+        elif finding.finding_group:
+            jira_helper.push_to_jira(finding.finding_group)
 
 
 @receiver(pre_delete, sender=Finding)

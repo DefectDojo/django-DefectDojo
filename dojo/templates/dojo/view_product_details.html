@@ -205,12 +205,12 @@
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a id="addProductMember" href="{% url 'add_product_member' prod.id %}">
-                                <i class="fa fa-plus"></i> Add User
+                                <i class="fa fa-plus"></i> Add Users
                             </a>
                         </li>
                     </ul>
                     &nbsp;
-                    <a href="https://defectdojo.github.io/django-DefectDojo/basics/permissions/" target="_blank">
+                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle text-low"></i></a>
                 </div>
                 {% endif %}
@@ -251,22 +251,22 @@
                                 </li>
                                 </ul>
                             </td>
-                            <td name="member_user">{{ member.user|full_name }}</td>
+                            <td name="member_user">{{ member.user.get_full_name }}</td>
                             <td>Product member</td>
-                            <td name="member_role">{% role_as_string member.role %}</td>
+                            <td name="member_role">{{ member.role }}</td>
                         </tr>
                     {% endfor %}
                     {% for member in product_type_members %}
                         <tr>
                             <td>
                             </td>
-                            <td>{{ member.user|full_name }}</td>
+                            <td>{{ member.user.get_full_name }}</td>
                             <td>
                                 <a class="" href="{% url 'view_product_type' member.product_type.id %}">
-                                    {{ member.product_type|product_type_name }}
+                                    {{ member.product_type }}
                                 </a>
                             </td>
-                            <td>{% role_as_string member.role %}</td>
+                            <td>{{ member.role }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>

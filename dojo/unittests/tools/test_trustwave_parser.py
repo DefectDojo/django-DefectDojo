@@ -18,6 +18,9 @@ class TestTrivyParser(TestCase):
         test_file = open(sample_path("many_vulns.csv"))
         parser = TrustwaveParser()
         findings = parser.get_findings(test_file, test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(len(findings), 4)
         # finding 0
         finding = findings[0]

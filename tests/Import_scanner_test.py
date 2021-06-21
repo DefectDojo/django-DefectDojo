@@ -289,6 +289,7 @@ class ScannerTest(BaseTestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ScannerTest('test_check_test_file'))
     suite.addTest(ScannerTest('test_check_for_doc'))
     suite.addTest(ScannerTest('test_check_for_fixtures'))
