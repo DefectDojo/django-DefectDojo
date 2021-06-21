@@ -9,7 +9,7 @@ root = environ.Path(__file__) - 3  # Three folders back
 # reference: https://pypi.org/project/django-environ/
 env = environ.Env(
     # Set casting and default values
-    DD_SITE_URL=(str, 'https://defect-dojo.rvision.local/'),
+    DD_SITE_URL=(str, 'https://defect-dojo.rvision.pro/'),
     DD_DEBUG=(bool, False),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ''),
@@ -65,7 +65,7 @@ env = environ.Env(
     DD_FOOTER_VERSION=(str, ''),
     # models should be passed to celery by ID, default is False (for now)
     DD_FORCE_LOWERCASE_TAGS=(bool, True),
-    DD_MAX_TAG_LENGTH=(int, 25),
+    DD_MAX_TAG_LENGTH=(int, 50),
     DD_DATABASE_ENGINE=(str, 'django.db.backends.mysql'),
     DD_DATABASE_HOST=(str, 'mysql'),
     DD_DATABASE_NAME=(str, 'defectdojo'),
@@ -136,17 +136,17 @@ env = environ.Env(
     DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
     # Set to True if you want to allow authorized users staff access only on specific products
     # This will only apply to users with 'active' status
-    DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, False),
+    DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, True),
     # SLA Notifications via alerts and JIRA comments
     # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature
     DD_SLA_NOTIFY_ACTIVE=(bool, False),
-    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
+    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, True),
     # finetuning settings for when enabled
-    DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
+    DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, True),
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
     # maximum number of result in search as search can be an expensive operation
-    DD_SEARCH_MAX_RESULTS=(int, 100),
+    DD_SEARCH_MAX_RESULTS=(int, 200),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
@@ -179,7 +179,7 @@ env = environ.Env(
     # You need to have wkhtmltopdf installed on your system to generate PDF reports
     DD_FEATURE_REPORTS_PDF_LIST=(bool, False),
 
-    DD_FEATURE_FINDING_GROUPS=(bool, False),
+    DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
 
@@ -521,6 +521,20 @@ CSRF_COOKIE_HTTPONLY = env('DD_CSRF_COOKIE_HTTPONLY')
 SESSION_COOKIE_SECURE = env('DD_SESSION_COOKIE_SECURE')
 
 # Whether to use a secure cookie for the CSRF cookie.
+
+# Whether to use a secure cookie for the CSRF cookie.
+CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
+
+if env('DD_SECURE_PROXY_SSL_HEADER'):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+if env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS'):
+    SECURE_HSTS_SECONDS = env('DD_SECURE_HSTS_SECONDS')
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env('DD_SECURE_HSTS_INCLUDE_SUBDOMAINS')
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = env('DD_SESSION_EXPIRE_AT_BROWSER_CLOSE')
+SESSION_COOKIE_AGE = env('DD_SESSION_COOKIE_AGE')
+
 CSRF_COOKIE_SECURE = env('DD_CSRF_COOKIE_SECURE')
 
 if env('DD_SECURE_PROXY_SSL_HEADER'):
