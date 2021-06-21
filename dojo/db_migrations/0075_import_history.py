@@ -3,7 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import django_extensions.db.fields
-import django_jsonfield_backport.models
+from django.db.models import JSONField
 
 
 class Migration(migrations.Migration):
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', django_extensions.db.fields.CreationDateTimeField(auto_now_add=True, verbose_name='created')),
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(auto_now=True, verbose_name='modified')),
-                ('import_settings', django_jsonfield_backport.models.JSONField(null=True)),
+                ('import_settings', JSONField(null=True)),
                 ('version', models.CharField(blank=True, max_length=100, null=True)),
                 ('type', models.CharField(default='unknown', max_length=64, null=False)),
             ],
