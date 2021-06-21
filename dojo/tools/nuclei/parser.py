@@ -41,16 +41,20 @@ class NucleiParser(object):
                 else:
                     severity = "Low"
                 type = item.get('type')
-                host = item.get('host')
                 matched = item.get('matched')
-                ip = item.get('ip')
+                if '://' in matched:
+                    endpoint = Endpoint.from_uri(matched)
+                else:
+                    endpoint = Endpoint.from_uri('//' + matched)
 
                 dupe_key = hashlib.sha256(
-                    (template_id + type + host + ip).encode('utf-8')
+                    (template_id + type).encode('utf-8')
                 ).hexdigest()
 
                 if dupe_key in dupes:
                     finding = dupes[dupe_key]
+                    if endpoint not in finding.unsaved_endpoints:
+                        finding.unsaved_endpoints.append(endpoint)
                     finding.nb_occurences += 1
                 else:
                     finding = Finding(
@@ -65,11 +69,7 @@ class NucleiParser(object):
                         finding.unsaved_tags = info.get('tags')
                     if info.get('reference'):
                         finding.references = info.get('reference')
-                    finding.unsaved_endpoints = []
-                    if '://' in matched:
-                        endpoint = Endpoint.from_uri(matched)
-                    else:
-                        endpoint = Endpoint.from_uri('//' + matched)
-                    finding.unsaved_endpoints.append(endpoint)
+                    if endpoint not in finding.unsaved_endpoints:
+                        finding.unsaved_endpoints.append(endpoint)
                     dupes[dupe_key] = finding
             return list(dupes.values())

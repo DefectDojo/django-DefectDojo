@@ -20,7 +20,7 @@ class TestNucleiParser(TestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
 
-        self.assertEqual(9, len(findings))
+        self.assertEqual(7, len(findings))
 
         with self.subTest(i=0):
             finding = findings[0]
@@ -61,40 +61,22 @@ class TestNucleiParser(TestCase):
             finding = findings[3]
             self.assertEqual("Wappalyzer Technology Detection", finding.title)
             self.assertEqual("Info", finding.severity)
-            self.assertEqual(3, finding.nb_occurences)
+            self.assertEqual(11, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
             self.assertIsNone(finding.references)
             self.assertIsNone(finding.unsaved_tags)
             self.assertEqual("WebGoat", finding.unsaved_endpoints[0].path)
             self.assertEqual("127.0.0.1", finding.unsaved_endpoints[0].host)
             self.assertEqual(8080, finding.unsaved_endpoints[0].port)
+            self.assertEqual("WebWolf", finding.unsaved_endpoints[1].path)
+            self.assertEqual("127.0.0.1", finding.unsaved_endpoints[1].host)
+            self.assertEqual(9090, finding.unsaved_endpoints[1].port)
+            self.assertEqual(None, finding.unsaved_endpoints[2].path)
+            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[2].host)
+            self.assertEqual(443, finding.unsaved_endpoints[2].port)
 
         with self.subTest(i=4):
             finding = findings[4]
-            self.assertEqual("Wappalyzer Technology Detection", finding.title)
-            self.assertEqual("Info", finding.severity)
-            self.assertEqual(2, finding.nb_occurences)
-            self.assertIsNotNone(finding.description)
-            self.assertIsNone(finding.references)
-            self.assertIsNone(finding.unsaved_tags)
-            self.assertEqual("WebWolf", finding.unsaved_endpoints[0].path)
-            self.assertEqual("127.0.0.1", finding.unsaved_endpoints[0].host)
-            self.assertEqual(9090, finding.unsaved_endpoints[0].port)
-
-        with self.subTest(i=5):
-            finding = findings[5]
-            self.assertEqual("Wappalyzer Technology Detection", finding.title)
-            self.assertEqual("Info", finding.severity)
-            self.assertEqual(6, finding.nb_occurences)
-            self.assertIsNotNone(finding.description)
-            self.assertIsNone(finding.references)
-            self.assertIsNone(finding.unsaved_tags)
-            self.assertEqual(None, finding.unsaved_endpoints[0].path)
-            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
-            self.assertEqual(443, finding.unsaved_endpoints[0].port)
-
-        with self.subTest(i=6):
-            finding = findings[6]
             self.assertEqual("WAF Detection", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(2, finding.nb_occurences)
@@ -105,8 +87,8 @@ class TestNucleiParser(TestCase):
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(443, finding.unsaved_endpoints[0].port)
 
-        with self.subTest(i=7):
-            finding = findings[7]
+        with self.subTest(i=5):
+            finding = findings[5]
             self.assertEqual("phpMyAdmin Panel", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
@@ -117,8 +99,8 @@ class TestNucleiParser(TestCase):
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(443, finding.unsaved_endpoints[0].port)
 
-        with self.subTest(i=8):
-            finding = findings[8]
+        with self.subTest(i=6):
+            finding = findings[6]
             self.assertEqual("MySQL DB with enabled native password", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
