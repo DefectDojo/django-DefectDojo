@@ -1,14 +1,11 @@
 import json
 import hashlib
-import hyperlink
 from dojo.models import Finding, Endpoint
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
 
 
 class NucleiParser(object):
     """
-    A class that can be used to parse the nuclei JSON report file
+    A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
     """
 
     # table to match nuclei severity to DefectDojo severity
@@ -68,17 +65,11 @@ class NucleiParser(object):
                         finding.unsaved_tags = info.get('tags')
                     if info.get('reference'):
                         finding.references = info.get('reference')
-                    url_validate = URLValidator(schemes=("http", "https"))
-                    try:
-                        url_validate(matched)
-                        url = hyperlink.parse(matched)
-                        endpoint = Endpoint(
-                            path="/".join(url.path),
-                            host=url.host,
-                            port=url.port,
-                        )
-                        finding.unsaved_endpoints = [endpoint]
-                    except ValidationError:
-                        pass
+                    finding.unsaved_endpoints = []
+                    if '://' in matched:
+                        endpoint = Endpoint.from_uri(matched)
+                    else:
+                        endpoint = Endpoint.from_uri('//' + matched)
+                    finding.unsaved_endpoints.append(endpoint)
                     dupes[dupe_key] = finding
             return list(dupes.values())

@@ -25,7 +25,8 @@ class TestNucleiParser(TestCase):
             self.assertIsNotNone(finding.description)
             self.assertEqual("network,openssh", finding.unsaved_tags)
             self.assertIsNotNone(finding.references)
-            self.assertEqual([], finding.unsaved_endpoints)
+            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
+            self.assertEqual(22, finding.unsaved_endpoints[0].port)
 
         with self.subTest(i=1):
             finding = findings[1]
@@ -35,7 +36,7 @@ class TestNucleiParser(TestCase):
             self.assertIsNotNone(finding.description)
             self.assertIsNone(finding.unsaved_tags)
             self.assertIsNone(finding.references)
-            self.assertEqual("", finding.unsaved_endpoints[0].path)
+            self.assertEqual(None, finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(443, finding.unsaved_endpoints[0].port)
 
@@ -83,7 +84,7 @@ class TestNucleiParser(TestCase):
             self.assertIsNotNone(finding.description)
             self.assertIsNone(finding.references)
             self.assertIsNone(finding.unsaved_tags)
-            self.assertEqual("", finding.unsaved_endpoints[0].path)
+            self.assertEqual(None, finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(443, finding.unsaved_endpoints[0].port)
 
@@ -95,7 +96,7 @@ class TestNucleiParser(TestCase):
             self.assertIsNotNone(finding.description)
             self.assertIsNone(finding.references)
             self.assertIsNone(finding.unsaved_tags)
-            self.assertEqual("", finding.unsaved_endpoints[0].path)
+            self.assertEqual(None, finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(443, finding.unsaved_endpoints[0].port)
 
@@ -119,4 +120,6 @@ class TestNucleiParser(TestCase):
             self.assertIsNotNone(finding.description)
             self.assertIsNone(finding.references)
             self.assertEqual("network,mysql,bruteforce,db", finding.unsaved_tags)
-            self.assertEqual([], finding.unsaved_endpoints)
+            self.assertEqual(None, finding.unsaved_endpoints[0].path)
+            self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
+            self.assertEqual(3306, finding.unsaved_endpoints[0].port)
