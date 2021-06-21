@@ -69,14 +69,19 @@ def get_item(vuln, test):
     # Endpoint
     if vuln["location"]["url"] != "None":
         endpoint = Endpoint.from_uri(vuln["location"]["url"])
-        finding.unsaved_endpoints = [endpoint]
-    else:  # fallback to using old way of creating endpoints
+    elif vuln["location"]["domain"] != "None":  # fallback to using old way of creating endpoints
+        endpoint = Endpoint(
+            protocol=vuln["location"]["applicationProtocol"],
+            host=str(vuln["location"]["domain"]),
+            port=vuln["location"]["port"],
+        )
+    else:
         endpoint = Endpoint(
             protocol=vuln["location"]["applicationProtocol"],
             host=str(vuln["location"]["ip"]),
             port=vuln["location"]["port"],
         )
-        finding.unsaved_endpoints = [endpoint]
+    finding.unsaved_endpoints = [endpoint]
 
     finding.title = vuln["name"]
 
