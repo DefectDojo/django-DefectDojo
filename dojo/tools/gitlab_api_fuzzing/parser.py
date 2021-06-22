@@ -5,7 +5,6 @@ import logging
 from dojo.models import Finding
 
 
-
 class GitlabAPIFuzzingParser(object):
     """
     GitLab API Fuzzing Report
