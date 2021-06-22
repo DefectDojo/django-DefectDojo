@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0110_auth_v2_migrate_user_roles'),
+        ('dojo', '0112_group_user_rename_2'),
     ]
 
     operations = [
