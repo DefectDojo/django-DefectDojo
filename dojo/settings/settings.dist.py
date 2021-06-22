@@ -834,6 +834,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
+    'Scout Suite Scan': ['title', 'severity', 'description'],
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity']
 }
@@ -859,6 +860,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Acunetix Scan': True,
     'Trivy Scan': True,
     'SpotBugs Scan': False,
+    'Scout Suite Scan': True,
     'AWS Security Hub Scan': True,
     'Meterian Scan': True
 }
@@ -925,6 +927,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
     'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
+    'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
     'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE
 }
