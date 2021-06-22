@@ -26,18 +26,74 @@
                 </div>
             </form>
         </div>
-        <div class="col-md-4 well">
-            <ul class="list-unstyled">
-                <li><b>Last Login: </b>{{ user.last_login }}</li>
-                <li><b>Date Joined: </b>{{ user.date_joined }}</li>
-            </ul>
-            <div class="center" style="margin: auto; text-align: center;"
-            ">
-            {% if user.has_usable_password %}
-                <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">Change Password</a>
+        <div class="col-md-4">
+            <div class="well">
+                <ul class="list-unstyled">
+                    <li><b>Last Login: </b>{{ user.last_login }}</li>
+                    <li><b>Date Joined: </b>{{ user.date_joined }}</li>
+                </ul>
+                <div class="center" style="margin: auto; text-align: center;">
+                {% if user.has_usable_password %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">Change Password</a>
+                {% endif %}
+                <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">API Key</a>
+                </div>
+            </div>
+            {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="clearfix">
+                        <h4 class="pull-left">Groups</h4>
+                        {% if request.user.is_superuser %}
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-bars"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
+                                <li role="presentation">
+                                    <a id="addGroupUser" href="{% url 'add_group_member_user' user.id %}">
+                                        <i class="fa fa-plus"></i> Add Groups
+                                    </a>
+                                </li>
+                            </ul>
+                            &nbsp;
+                            <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                                <i class="fa fa-question-circle text-low"></i></a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if groups %}
+                <div class="table-responsive">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Group</th>
+                            <th>Group role</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in groups %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td name="group_name"><a href="{% url 'view_group' group.group.id %}">{{ group.group }}</a></td>
+                            <td name="group_role">{{ group.role }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>No groups found.</em></small>
+                </div>
+                {% endif %}
+            </div>
             {% endif %}
-            <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">API Key</a>
         </div>
-    </div>
     </div>
 {% endblock %}
