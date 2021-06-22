@@ -19,16 +19,25 @@ class CheckovParser(object):
         if json_output is None:
             return list()
 
-        tree = self.parse_json(json_output)
+        report = self.parse_json(json_output)
 
-        check_type = ''
-        if 'check_type' in tree:
-            check_type = tree['check_type']
+        # Turn reports with only one check_type in a list, that way we can use
+        # only the 'for' below instead of two ifs. This avoids code duplication.
+        if type(report) is not list:
+            tmp = list()
+            tmp.append(report)
+            report = tmp
 
-        if tree:
-            return [data for data in self.get_items(tree, test, check_type)]
-        else:
-            return list()
+        findings = list()
+        for tree in report:
+            check_type = ''
+            if 'check_type' in tree:
+                check_type = tree['check_type']
+
+            if tree:
+                findings += self.get_items(tree, test, check_type)
+
+        return findings
 
     def parse_json(self, json_output):
         try:
