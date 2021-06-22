@@ -51,5 +51,6 @@ def get_authorized_users_for_product_and_product_type(users, product, permission
             Q(is_superuser=True) |
             Q(is_staff=True))
 
+
 def get_groups_for_user(user):
     return Dojo_Group_User.objects.filter(user=user)

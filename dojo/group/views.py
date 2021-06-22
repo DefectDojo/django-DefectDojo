@@ -26,12 +26,11 @@ def group(request):
     groups = GroupFilter(request.GET, queryset=groups)
     paged_groups = get_page_items(request, groups.qs, 25)
     add_breadcrumb(title="All Groups", top_level=True, request=request)
-    return render(request,
-                  'dojo/groups.html',
-                  {'groups': paged_groups,
-                   'filtered': groups,
-                   'name': 'All Groups',
-                   })
+    return render(request, 'dojo/groups.html', {
+        'groups': paged_groups,
+        'filtered': groups,
+        'name': 'All Groups'
+    })
 
 
 @user_is_authorized(Dojo_Group, Permissions.Group_View, 'gid')
