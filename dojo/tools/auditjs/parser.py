@@ -50,18 +50,18 @@ class AuditJSParser(object):
             if dependency['vulnerabilities']:
                 # Get vulnerability data from JSON and setup variables
                 for vulnerability in dependency['vulnerabilities']:
-                    vuln_id_from_tool = title = description = cvss_score = cvss_vector = cve = cwe = references = severity = None
-                    if "id" in vulnerability:
-                        vuln_id_from_tool = vulnerability["id"]
-                    if 'title' in vulnerability:
+                    unique_id_from_tool = title = description = cvss_score = cvss_vector = cve = cwe = references = severity = None
+                    # Check mandatory
+                    if "id" in vulnerability and 'title' in vulnerability and 'description' in vulnerability:
+                        unique_id_from_tool = vulnerability["id"]
                         title = vulnerability['title']
+                        description = vulnerability['description']
                         # Find CWE in title in form "CWE-****"
                         cwe_find = re.findall(r"^CWE-[0-9]{1,4}", title)
                         if cwe_find:
                             cwe = int(cwe_find[0][4:])
-                            # title = title.split(":")[1][1:] Unsure if AuditJS can specify both CWE and CVE at the same time
-                    if 'description' in vulnerability:
-                        description = vulnerability['description']
+                    else:
+                        raise ValueError("Missing mandatory attributes (id, title, description). Please check your report or ask community.")
                     if 'cvssScore' in vulnerability:
                         cvss_score = vulnerability['cvssScore']
                     if 'cvssVector' in vulnerability:
@@ -79,7 +79,6 @@ class AuditJSParser(object):
                         severity = self.get_severity(cvss_score)
                     if 'cve' in vulnerability:
                         cve = vulnerability['cve']
-                        # title = title.split(":")[1][1:]
                     if 'reference' in vulnerability:
                         references = vulnerability['reference']
 
@@ -98,11 +97,11 @@ class AuditJSParser(object):
                         component_version=component_version,
                         static_finding=True,
                         dynamic_finding=False,
-                        vuln_id_from_tool=vuln_id_from_tool,
+                        unique_id_from_tool=unique_id_from_tool,
                     )
 
                     # internal de-duplication
-                    dupe_key = hashlib.sha256(str(vuln_id_from_tool + title + description + component_version).encode('utf-8')).hexdigest()
+                    dupe_key = hashlib.sha256(str(unique_id_from_tool + title + description + component_version).encode('utf-8')).hexdigest()
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
                         if finding.description:
