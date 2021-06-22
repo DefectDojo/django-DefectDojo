@@ -6,7 +6,7 @@ from dojo.models import Finding, Endpoint
 class NucleiParser(object):
     """
     A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
-    """ 
+    """
 
     def get_scan_types(self):
         return ["Nuclei Scan"]
