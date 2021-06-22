@@ -34,6 +34,6 @@ class TestGitlabAPIFuzzingParser(TestCase):
         with open(
             "dojo/unittests/scans/gitlab_api_fuzzing/gitlab_api_fuzzing_invalid.json"
         ) as testfile:
-            with self.assertRaises(Exception):
+            with self.assertRaises(ValueError):
                 parser = GitlabAPIFuzzingParser()
                 parser.get_findings(testfile, Test())
