@@ -1,6 +1,5 @@
-import hashlib
 import json
-from dojo.models import Finding, FindingAdmin
+from dojo.models import Finding
 
 
 class GitlabSecretDetectionReportParser(object):
