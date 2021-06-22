@@ -178,17 +178,22 @@ def get_item(result, rules, artifacts, run_date):
         if len(cwes_extracted) > 0:
             cwes = cwes_extracted
 
-    finding = Finding(title=textwrap.shorten(title, 150),
-                    severity=severity,
-                    description=description,
-                    mitigation=mitigation,
-                    references=references,
-                    cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
-                    cwe=cwes[-1],
-                    static_finding=True,  # by definition
-                    dynamic_finding=False,  # by definition
-                    file_path=file_path,
-                    line=line)
+    finding = Finding(
+        title=textwrap.shorten(title, 150),
+        severity=severity,
+        description=description,
+        mitigation=mitigation,
+        references=references,
+        cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
+        cwe=cwes[-1],
+        static_finding=True,  # by definition
+        dynamic_finding=False,  # by definition
+        file_path=file_path,
+        line=line,
+    )
+
+    if 'ruleId' in result:
+        finding.vuln_id_from_tool = result['ruleId']
 
     if run_date:
         finding.date = run_date
