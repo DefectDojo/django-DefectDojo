@@ -120,7 +120,7 @@ env = environ.Env(
     DD_SAML2_ATTRIBUTES_MAP=(dict, {
         # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
         'Email': ('email', ),
-        # 'UserName': ('username', ),
+        'UserName': ('username', ),
         'Firstname': ('first_name', ),
         'Lastname': ('last_name', )
     }),
@@ -680,7 +680,7 @@ vars().update(EMAIL_CONFIG)
 # To override not configurable settings, you can use local_settings.py
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
 SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
-if env('DD_SAML2_ENABLED'):
+if SAML2_ENABLED:
     import saml2
     import saml2.saml
     from os import path
