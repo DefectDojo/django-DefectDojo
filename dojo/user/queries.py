@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db.models import Q
 from dojo.models import Dojo_Group, Product_Member, Product_Type_Member, \
-    Product_Group, Product_Type_Group, Dojo_Group_Member
+    Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission
 
 
