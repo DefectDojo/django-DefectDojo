@@ -156,7 +156,7 @@ def get_item(result, rules, artifacts, run_date):
         if len(description) < 150:
             title = description
     description = ''
-    severity = get_severity('warning')
+    severity = get_severity(result.get('level', 'warning'))
     if rule is not None:
         # get the severity from the rule
         if 'defaultConfiguration' in rule:

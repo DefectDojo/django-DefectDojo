@@ -461,6 +461,10 @@ Import JSON reports of Kubernetes CIS benchmark scans.
 
 Import of JSON report from <https://github.com/Checkmarx/kics>
 
+### Meterian Scanner
+
+The Meterian JSON report output file can be imported.
+
 ### Microfocus Webinspect Scanner
 
 Import XML report

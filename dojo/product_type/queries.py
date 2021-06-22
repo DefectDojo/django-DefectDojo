@@ -19,11 +19,11 @@ def get_authorized_product_types(permission):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Product_Type.objects.all().order_by('name')
 
-        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
+        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
             return Product_Type.objects.all().order_by('name')
 
         for group in get_groups(user):
-            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
+            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
                 return Product_Type.objects.all().order_by('name')
 
         roles = get_roles_for_permission(permission)
@@ -67,7 +67,7 @@ def get_authorized_product_type_members(permission):
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Product_Type_Member.objects.all()
 
-    if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
+    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
         return Product_Type_Member.objects.all()
 
     product_types = get_authorized_product_types(permission)
@@ -86,7 +86,7 @@ def get_authorized_product_type_members_for_user(user, permission):
     if request_user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Product_Type_Member.objects.all(user=user)
 
-    if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
+    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
         return Product_Type_Member.objects.all(user=user)
 
     product_types = get_authorized_product_types(permission)

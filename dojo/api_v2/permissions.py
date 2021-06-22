@@ -1,7 +1,7 @@
 import re
 
 from rest_framework.exceptions import ParseError
-from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test
+from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from dojo.authorization.authorization import user_has_permission
@@ -37,6 +37,25 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(request, obj.product, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit)
+
+
+class UserHasDojoGroupPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return request.user.is_staff
+        else:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
+
+
+class UserHasDojoGroupUserPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Dojo_Group, 'dojo_group', Permissions.Group_Manage_Users)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Manage_Users, Permissions.Group_User_Delete)
 
 
 class UserHasDojoMetaPermission(permissions.BasePermission):
