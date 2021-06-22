@@ -4,7 +4,6 @@ import logging
 
 from dojo.models import Finding
 
-logger = logging.getLogger(__name__)
 
 
 class GitlabAPIFuzzingParser(object):
