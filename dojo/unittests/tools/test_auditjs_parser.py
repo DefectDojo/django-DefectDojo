@@ -41,7 +41,8 @@ class TestAuditJSParser(TestCase):
         for finding in findings:
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
-        self.assertEqual(13, len(findings))
+        # Notice that there are 13 vulnerabilities but 1 duplicate in this report
+        self.assertEqual(12, len(findings))
         self.assertEqual("connect", findings[0].component_name)
         self.assertEqual("2.6.0", findings[0].component_version)
         self.assertEqual(5.4, findings[0].cvssv3_score)

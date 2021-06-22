@@ -1,4 +1,3 @@
-import hashlib
 import json
 from json.decoder import JSONDecodeError
 import re
@@ -101,7 +100,7 @@ class AuditJSParser(object):
                     )
 
                     # internal de-duplication
-                    dupe_key = hashlib.sha256(str(unique_id_from_tool + title + description + component_version).encode('utf-8')).hexdigest()
+                    dupe_key = unique_id_from_tool
                     if dupe_key in dupes:
                         find = dupes[dupe_key]
                         if finding.description:
