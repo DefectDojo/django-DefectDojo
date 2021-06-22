@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.db.models import Sum, Count, Q, Max
@@ -1592,6 +1592,9 @@ def edit_sonarqube(request, pid, sqcid):
 
     sqc = Sonarqube_Product.objects.get(pk=sqcid)
 
+    if sqc.product.pk != pid:  # user is trying to edit SQ Config from another product (trying to by-pass auth)
+        raise Http404()
+
     if request.method == 'POST':
         sqcform = Sonarqube_ProductForm(request.POST, instance=sqc)
         if sqcform.is_valid():
@@ -1618,6 +1621,9 @@ def edit_sonarqube(request, pid, sqcid):
 def delete_sonarqube(request, pid, sqcid):
 
     sqc = Sonarqube_Product.objects.get(pk=sqcid)
+
+    if sqc.product.pk != pid:  # user is trying to delete SQ Config from another product (trying to by-pass auth)
+        raise Http404()
 
     if request.method == 'POST':
         sqcform = Sonarqube_ProductForm(request.POST)
