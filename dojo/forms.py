@@ -29,7 +29,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_User, Role
+    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -1614,19 +1614,19 @@ class DeleteGroupForm(forms.ModelForm):
 
 
 class Add_Group_MemberForm(forms.ModelForm):
-    users = forms.ModelMultipleChoiceField(queryset=Dojo_Group_User.objects.none(), required=True, label='Users')
+    users = forms.ModelMultipleChoiceField(queryset=Dojo_Group_Member.objects.none(), required=True, label='Users')
 
     def __init__(self, *args, **kwargs):
         super(Add_Group_MemberForm, self).__init__(*args, **kwargs)
         self.fields['group'].disabled = True
-        current_members = Dojo_Group_User.objects.filter(group=self.initial['group']).values_list('user', flat=True)
+        current_members = Dojo_Group_Member.objects.filter(group=self.initial['group']).values_list('user', flat=True)
         self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
         self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
 
     class Meta:
-        model = Dojo_Group_User
+        model = Dojo_Group_Member
         fields = ['group', 'users', 'role']
 
 
@@ -1636,12 +1636,12 @@ class Add_Group_Member_UserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(Add_Group_Member_UserForm, self).__init__(*args, **kwargs)
         self.fields['user'].disabled = True
-        current_groups = Dojo_Group_User.objects.filter(user=self.initial['user']).values_list('group', flat=True)
+        current_groups = Dojo_Group_Member.objects.filter(user=self.initial['user']).values_list('group', flat=True)
         self.fields['groups'].queryset = Dojo_Group.objects.exclude(id__in=current_groups)
         self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
 
     class Meta:
-        model = Dojo_Group_User
+        model = Dojo_Group_Member
         fields = ['groups', 'user', 'role']
 
 
@@ -1653,7 +1653,7 @@ class Edit_Group_MemberForm(forms.ModelForm):
         self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
 
     class Meta:
-        model = Dojo_Group_User
+        model = Dojo_Group_Member
         fields = ['group', 'user', 'role']
 
 

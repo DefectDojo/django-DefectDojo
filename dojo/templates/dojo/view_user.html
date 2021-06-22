@@ -250,7 +250,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <div class="clearfix">
-                    <h4 class="pull-left">Groups</h4>
+                    <h4 class="pull-left">Group Members</h4>
                     {% if request.user.is_superuser %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
@@ -260,19 +260,19 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
                             <li role="presentation">
-                                <a id="addGroupUser" href="{% url 'add_group_member_user' user.id %}">
+                                <a id="addGroupMember" href="{% url 'add_group_member_user' user.id %}">
                                     <i class="fa fa-plus"></i> Add Groups
                                 </a>
                             </li>
                         </ul>
                         &nbsp;
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
                             <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
                 </div>
             </div>
-            {% if groups %}
+            {% if group_members %}
             <div class="table-responsive">
                 <table class="tablesorter-bootstrap table table-condensed table-striped">
                     <thead>
@@ -283,7 +283,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for group in groups %}
+                    {% for member in group_members %}
                     <tr>
                         <td>
                             <ul>
@@ -291,15 +291,15 @@
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductTypeMember"
                                        aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
-                                        {% if group.group|has_object_permission:"Group_Manage_Users" %}
+                                        {% if member.group|has_object_permission:"Group_Manage_Members" %}
                                         <li>
-                                            <a name="editProductTypeMember" href="{% url 'edit_group_member' group.id %}">
+                                            <a name="editProductTypeMember" href="{% url 'edit_group_member' member.id %}">
                                                 <i class="fa fa-pencil-square-o"></i> Edit</a>
                                         </li>
                                         {% endif %}
-                                        {% if group|has_object_permission:"Group_User_Delete" %}
+                                        {% if member|has_object_permission:"Group_Member_Delete" %}
                                         <li>
-                                            <a name="deleteProductTypeMember" href="{% url 'delete_group_member' group.id %}">
+                                            <a name="deleteProductTypeMember" href="{% url 'delete_group_member' member.id %}">
                                                 <i class="fa fa-trash"></i> Delete</a>
                                         </li>
                                         {% endif %}
@@ -307,8 +307,8 @@
                                 </li>
                             </ul>
                         </td>
-                        <td name="group_name"><a href="{% url 'view_group' group.group.id %}">{{ group.group }}</a></td>
-                        <td name="group_role">{{ group.role }}</td>
+                        <td name="group_name"><a href="{% url 'view_group' member.group.id %}">{{ member.group }}</a></td>
+                        <td name="group_role">{{ member.role }}</td>
                     </tr>
                     {% endfor %}
                     </tbody>
@@ -316,7 +316,7 @@
             </div>
             {% else %}
             <div class="panel-body">
-                <small class="text-muted"><em>No groups found.</em></small>
+                <small class="text-muted"><em>No group members found.</em></small>
             </div>
             {% endif %}
         </div>

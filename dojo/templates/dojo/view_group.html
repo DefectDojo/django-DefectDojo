@@ -46,7 +46,7 @@
             <div class="panel-heading">
                 <div class="clearfix">
                     <h4 class="pull-left">Members</h4>
-                    {% if group|has_object_permission:"Group_Manage_Users" %}
+                    {% if group|has_object_permission:"Group_Manage_Members" %}
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
                                 data-toggle="dropdown" aria-expanded="true">
@@ -60,13 +60,13 @@
                                 </a>
                             </li>
                         </ul>
-                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
                             <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
                 </div>
             </div>
-            {% if users %}
+            {% if group_members %}
             <div class="table-responsive">
                 <table class="tablesorter-bootstrap table table-condensed table-striped">
                     <thead>
@@ -77,20 +77,20 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% for member in users %}
+                    {% for member in group_members %}
                     <tr>
                         <td>
                             <ul>
                                 <li class="dropdown" style="list-style:none;position:absolute">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageGroupMembers">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                     <ul class="dropdown-menu">
-                                        {% if group|has_object_permission:"Group_Manage_Users" %}
+                                        {% if group|has_object_permission:"Group_Manage_Members" %}
                                         <li>
                                             <a name="editGroupMember" href="{% url 'edit_group_member' member.id %}">
                                                 <i class="fa fa-pencil-square-o"></i>Edit</a>
                                         </li>
                                         {% endif %}
-                                        {% if member|has_object_permission:"Group_User_Delete" %}
+                                        {% if member|has_object_permission:"Group_Member_Delete" %}
                                         <li>
                                             <a name="deleteGroupMember" href="{% url 'delete_group_member' member.id %}">
                                                 <i class="fa fa-trash"></i> Delete</a>

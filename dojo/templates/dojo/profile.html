@@ -53,7 +53,7 @@
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
                                 <li role="presentation">
-                                    <a id="addGroupUser" href="{% url 'add_group_member_user' user.id %}">
+                                    <a id="addGroupMember" href="{% url 'add_group_member_user' user.id %}">
                                         <i class="fa fa-plus"></i> Add Groups
                                     </a>
                                 </li>
@@ -65,7 +65,7 @@
                         {% endif %}
                     </div>
                 </div>
-                {% if groups %}
+                {% if group_members %}
                 <div class="table-responsive">
                     <table class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
@@ -76,12 +76,12 @@
                         </tr>
                         </thead>
                         <tbody>
-                        {% for group in groups %}
+                        {% for member in group_members %}
                         <tr>
                             <td>
                             </td>
-                            <td name="group_name"><a href="{% url 'view_group' group.group.id %}">{{ group.group }}</a></td>
-                            <td name="group_role">{{ group.role }}</td>
+                            <td name="group_name"><a href="{% url 'view_group' member.group.id %}">{{ member.group }}</a></td>
+                            <td name="group_role">{{ member.role }}</td>
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -89,7 +89,7 @@
                 </div>
                 {% else %}
                 <div class="panel-body">
-                    <small class="text-muted"><em>No groups found.</em></small>
+                    <small class="text-muted"><em>No group members found.</em></small>
                 </div>
                 {% endif %}
             </div>

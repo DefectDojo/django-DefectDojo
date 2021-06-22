@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db.models import Q
 from dojo.models import Dojo_Group, Product_Member, Product_Type_Member, \
-    Product_Group, Product_Type_Group, Dojo_Group_User
+    Product_Group, Product_Type_Group, Dojo_Group_Member
 from dojo.authorization.authorization import get_roles_for_permission
 
 
@@ -50,7 +50,3 @@ def get_authorized_users_for_product_and_product_type(users, product, permission
             Q(id__in=product.prod_type.authorized_users.all()) |
             Q(is_superuser=True) |
             Q(is_staff=True))
-
-
-def get_groups_for_user(user):
-    return Dojo_Group_User.objects.filter(user=user)
