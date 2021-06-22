@@ -13,7 +13,7 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
-    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_User
+    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
@@ -305,31 +305,31 @@ class DojoGroupSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class DojoGroupUserSerializer(serializers.ModelSerializer):
+class DojoGroupMemberSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Dojo_Group_User
+        model = Dojo_Group_Member
         fields = '__all__'
 
     def validate(self, data):
         if self.instance is not None and \
-                data.get('dojo_group') != self.instance.dojo_group and \
-                not user_has_permission(self.context['request'].user, data.get('dojo_group'), Permissions.Group_Manage_Users):
+                data.get('group') != self.instance.group and \
+                not user_has_permission(self.context['request'].user, data.get('group'), Permissions.Group_Manage_Members):
             raise PermissionDenied('You are not permitted to add a user to this group')
 
         if self.instance is None or \
-                data.get('dojo_group') != self.instance.dojo_group or \
+                data.get('group') != self.instance.group or \
                 data.get('user') != self.instance.user:
-            members = Dojo_Group_User.objects.filter(dojo_group=data.get('dojo_group'), user=data.get('user'))
+            members = Dojo_Group_Member.objects.filter(group=data.get('group'), user=data.get('user'))
             if members.count() > 0:
-                raise ValidationError('Dojo_Group_User already exists')
+                raise ValidationError('Dojo_Group_Member already exists')
 
         if self.instance is not None and not data.get('role').is_owner:
-            owners = Dojo_Group_User.objects.filter(dojo_group=data.get('dojo_group'), role__is_owner=True).exclude(id=self.instance.id).count()
+            owners = Dojo_Group_Member.objects.filter(group=data.get('group'), role__is_owner=True).exclude(id=self.instance.id).count()
             if owners < 1:
                 raise ValidationError('There must be at least one owner')
 
-        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('dojo_group'), Permissions.Group_Add_Owner):
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('group'), Permissions.Group_Add_Owner):
             raise PermissionDenied('You are not permitted to add a user as Owner to this group')
 
         return data

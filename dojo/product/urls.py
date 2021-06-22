@@ -48,4 +48,10 @@ urlpatterns = [
         name='edit_product_member'),
     url(r'^product/member/(?P<memberid>\d+)/delete$', views.delete_product_member,
         name='delete_product_member'),
+    url(r'^product/(?P<pid>\d+)/add_group$', views.add_product_group,
+        name='add_product_group'),
+    url(r'^product/group/(?P<groupid>\d+)/edit$', views.edit_product_group,
+        name='edit_product_group'),
+    url(r'^product/group/(?P<groupid>\d+)/delete$', views.delete_product_group,
+        name='delete_product_group'),
 ]
