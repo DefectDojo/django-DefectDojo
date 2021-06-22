@@ -68,35 +68,45 @@ class TestNexposeParser(TestCase):
         self.assertEqual(22, endpoint.port)
         self.assertEqual("ssh", endpoint.protocol)
 
+        # vuln 9
+        finding = findings[9]
+        self.assertEqual("Missing HttpOnly Flag From Cookie", finding.title)
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+
+        # vuln 9 - endpoint
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual(80, endpoint.port)
+        self.assertEqual("http", endpoint.protocol)
+
         # vuln 26
         finding = findings[26]
         self.assertIn("radius (RADIUS authentication protocol (RFC\n2138))", finding.description)
         self.assertEqual("radius-radius-authentication-protocol-rfc-2138", finding.unsaved_tags[0])
-        self.assertEqual("radius", finding.unsaved_endpoints[0].protocol)
+        self.assertEqual("udp", finding.unsaved_endpoints[0].protocol)
 
         # vuln 27
         finding = findings[27]
         self.assertIn("nfs_acl", finding.description)
         self.assertEqual("nfs-acl", finding.unsaved_tags[0])
-        self.assertEqual("nfs-acl", finding.unsaved_endpoints[0].protocol)
+        self.assertEqual("tcp", finding.unsaved_endpoints[0].protocol)
 
         # vuln 29
         finding = findings[29]
         self.assertIn("Backup Exec Agent Browser", finding.description)
         self.assertEqual("backup-exec-agent-browser", finding.unsaved_tags[0])
-        self.assertEqual("backup-exe", finding.unsaved_endpoints[0].protocol)
+        self.assertEqual("tcp", finding.unsaved_endpoints[0].protocol)
 
         # vuln 31
         finding = findings[31]
         self.assertIn("sun-answerbook (Sun Answerbook HTTP server)", finding.description)
         self.assertEqual("sun-answerbook-sun-answerbook-http-server", finding.unsaved_tags[0])
-        self.assertEqual("sun-answer", finding.unsaved_endpoints[0].protocol)
+        self.assertEqual("tcp", finding.unsaved_endpoints[0].protocol)
 
         # vuln 32
         finding = findings[32]
         self.assertIn("HP JetDirect Data", finding.description)
         self.assertEqual("hp-jetdirect-data", finding.unsaved_tags[0])
-        self.assertEqual("hp-jetdire", finding.unsaved_endpoints[0].protocol)
+        self.assertEqual("tcp", finding.unsaved_endpoints[0].protocol)
 
         # vuln 33
         finding = findings[33]
@@ -106,7 +116,7 @@ class TestNexposeParser(TestCase):
         # vuln 33 - endpoint
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(443, endpoint.port)
-        self.assertIsNone(endpoint.protocol)
+        self.assertEqual("tcp", endpoint.protocol)
 
         # vuln 37
         finding = findings[37]
@@ -118,7 +128,7 @@ class TestNexposeParser(TestCase):
         # vuln 37 - endpoint
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(137, endpoint.port)
-        self.assertEqual('cifs-name', endpoint.protocol)
+        self.assertEqual('udp', endpoint.protocol)
 
     def test_nexpose_parser_tests_outside_endpoint(self):
         testfile = open("dojo/unittests/scans/nexpose/report_auth.xml")

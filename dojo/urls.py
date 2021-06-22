@@ -18,7 +18,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
     SonarqubeProductViewSet, RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
-    DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet
+    DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
+    DojoGroupMemberViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -35,6 +36,7 @@ from dojo.search.urls import urlpatterns as search_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.user.urls import urlpatterns as user_urls
+from dojo.group.urls import urlpatterns as group_urls
 from dojo.jira_link.urls import urlpatterns as jira_urls
 from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
@@ -78,6 +80,7 @@ v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
 if settings.FEATURE_AUTHORIZATION_V2:
     v2_api.register(r'dojo_groups', DojoGroupViewSet)
+    v2_api.register(r'dojo_group_members', DojoGroupMemberViewSet)
     v2_api.register(r'product_type_members', ProductTypeMemberViewSet)
     v2_api.register(r'product_members', ProductMemberViewSet)
     v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
@@ -118,6 +121,7 @@ ur += search_urls
 ur += test_type_urls
 ur += test_urls
 ur += user_urls
+ur += group_urls
 ur += jira_urls
 ur += github_urls
 ur += tool_type_urls

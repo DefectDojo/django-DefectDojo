@@ -218,7 +218,7 @@ class EndpointQueriesTest(TestCase):
                             'risk_accepted': False,
                             'endpoint_id': 2,
                             'finding_id': 2,
-                            'endpoint__product__prod_type__member': False,
+                            'endpoint__product__prod_type__member': True,
                             'endpoint__product__member': True,
                             'endpoint__product__prod_type__authorized_group': False,
                             'endpoint__product__authorized_group': False

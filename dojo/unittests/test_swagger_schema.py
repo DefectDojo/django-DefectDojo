@@ -341,7 +341,7 @@ class DevelopmentEnvironmentTest(BaseClass.SchemaTest):
 # class DojoGroupTest(BaseClass.SchemaTest):
 #     def __init__(self, *args, **kwargs):
 #         super().__init__(*args, **kwargs)
-#         self.viewname = "dojo_groups"
+#         self.viewname = "group"
 #         self.viewset = DojoGroupViewSet
 #         self.model = Dojo_Group
 #         self.serializer = DojoGroupSerializer

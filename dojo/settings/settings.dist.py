@@ -18,7 +18,7 @@ env = environ.Env(
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, '/'),
     DD_LOGIN_URL=(str, '/login'),
-    DD_DJANGO_ADMIN_ENABLED=(bool, False),
+    DD_DJANGO_ADMIN_ENABLED=(bool, True),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
     DD_SECURE_SSL_REDIRECT=(bool, False),
@@ -167,7 +167,7 @@ env = environ.Env(
 
     # Feature toggle for new authorization, which is incomplete at the moment.
     # Don't set it to True for productive environments!
-    DD_FEATURE_AUTHORIZATION_V2=(bool, False),
+    DD_FEATURE_AUTHORIZATION_V2=(bool, True),
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
@@ -945,6 +945,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Snyk Scan': ['vuln_id_from_tool', 'file_path', 'component_name', 'component_version'],
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
+    'Scout Suite Scan': ['title', 'severity', 'description'],
+    'AWS Security Hub Scan': ['unique_id_from_tool'],
+    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity']
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -968,6 +971,9 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Acunetix Scan': True,
     'Trivy Scan': True,
     'SpotBugs Scan': False,
+    'Scout Suite Scan': True,
+    'AWS Security Hub Scan': True,
+    'Meterian Scan': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -996,6 +1002,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Engine Scan': DEDUPE_ALGO_HASH_CODE,
     'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
     'Aqua Scan': DEDUPE_ALGO_HASH_CODE,
+    'AuditJS Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'CargoAudit Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
@@ -1031,6 +1038,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'GitLab SAST Report': DEDUPE_ALGO_HASH_CODE,
     'Checkov Scan': DEDUPE_ALGO_HASH_CODE,
     'SpotBugs Scan': DEDUPE_ALGO_HASH_CODE,
+    'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
+    'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Meterian Scan': DEDUPE_ALGO_HASH_CODE
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
