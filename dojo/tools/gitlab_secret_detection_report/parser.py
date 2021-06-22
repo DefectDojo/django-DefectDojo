@@ -1,6 +1,6 @@
 import hashlib
 import json
-from dojo.models import Finding
+from dojo.models import Finding, FindingAdmin
 
 
 class GitlabSecretDetectionReportParser(object):
@@ -22,8 +22,7 @@ class GitlabSecretDetectionReportParser(object):
         # Load JSON data from uploaded file
         data = json.load(file)
 
-        # Initial dataset to be deduplicate via JSON key
-        dupes = dict()
+        findings = []
 
         # This is required by schema - it won't be null / undefined
         date = data["scan"]["end_time"]
@@ -34,25 +33,7 @@ class GitlabSecretDetectionReportParser(object):
             title = vulnerability["message"]
             description = vulnerability["description"]
             severity = self.normalise_severity(vulnerability["severity"])
-
-            file_path = ""
-            try:
-                file_path = vulnerability["location"]["file"]
-            except:
-                pass
-
-            line = -1
-            try:
-                line = int(vulnerability["location"]["start_line"])
-            except:
-                pass
-
-            raw_source_code = ""
-            try:
-                raw_source_code = vulnerability["raw_source_code_extract"]
-            except:
-                pass
-
+            location = vulnerability["location"]
             finding = Finding(
                 test=test,
                 title=title,
@@ -61,30 +42,18 @@ class GitlabSecretDetectionReportParser(object):
                 severity=severity,
                 static_finding=True,
                 dynamic_finding=False,
-                unique_id_from_tool=vulnerability["id"]
+                unique_id_from_tool=vulnerability["id"],
             )
 
-            if file_path != "":
-                finding.file_path = file_path
-            if line != -1:
-                finding.line = line
-            if raw_source_code != "":
-                finding.description += "\n" + raw_source_code
+            if "file" in location:
+                finding.file_path = location["file"]
+            if "start_line" in location:
+                finding.line = int(location["start_line"])
+            if "raw_source_code_extract" in vulnerability:
+                finding.description += "\n" + vulnerability["raw_source_code_extract"]
 
-            # internal de-duplication
-            dupe_key = hashlib.sha256(
-                str(description + title).encode("utf-8")
-            ).hexdigest()
-            if dupe_key in dupes:
-                find = dupes[dupe_key]
-                if finding.description:
-                    find.description += "\n" + finding.description
-                find.unsaved_endpoints.extend(finding.unsaved_endpoints)
-                dupes[dupe_key] = find
-            else:
-                dupes[dupe_key] = finding
-
-        return list(dupes.values())
+            findings.append(finding)
+        return findings
 
     def normalise_severity(self, severity):
         """
