@@ -43,6 +43,14 @@ arachni_reporter --reporter 'json' js.com.afr
 Use the VulnerabilitiesSummary.xml file found in the zipped report
 download.
 
+### AuditJS (OSSIndex)
+
+AuditJS scanning tool using OSSIndex database and generated with `--json` or `-j` option (<https://www.npmjs.com/package/auditjs>).
+
+{{< highlight bash >}}
+auditjs ossi --json > auditjs_report.json
+{{< /highlight >}}
+
 ### AWS Security Hub
 
 The JSON output from AWS Security Hub exported with the `aws securityhub get-findings` (<https://docs.aws.amazon.com/cli/latest/reference/securityhub/get-findings.html>)
