@@ -18,7 +18,7 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_Type, Finding, Product, Test_Import, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -2000,6 +2000,16 @@ class UserFilter(DojoFilter):
                   'last_name', 'username']
         exclude = ['password', 'last_login', 'groups', 'user_permissions',
                    'date_joined']
+
+
+class GroupFilter(DojoFilter):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Dojo_Group
+        fields = ['name', 'description']
+        exclude = ['users']
 
 
 class TestImportFilter(DojoFilter):

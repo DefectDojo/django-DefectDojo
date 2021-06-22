@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_User
+    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member
 import dojo.authorization.authorization
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, \
     user_has_permission_or_403, user_has_permission, \
@@ -115,11 +115,11 @@ class TestAuthorization(TestCase):
         cls.user4 = Dojo_User()
         cls.user4.id = 4
 
-        cls.group_user = Dojo_Group_User()
-        cls.group_user.id = 1
-        cls.group_user.dojo_group = cls.group3
-        cls.group_user.user = cls.user4
-        cls.group_user.role = Role.objects.get(id=Roles.Writer)
+        cls.group_member = Dojo_Group_Member()
+        cls.group_member.id = 1
+        cls.group_member.group = cls.group3
+        cls.group_member.user = cls.user4
+        cls.group_member.role = Role.objects.get(id=Roles.Writer)
 
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,
@@ -485,42 +485,42 @@ class TestAuthorization(TestCase):
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(users=self.user3)
 
-    @patch('dojo.models.Dojo_Group_User.objects')
+    @patch('dojo.models.Dojo_Group_Member.objects')
     def test_dojo_group_no_permission(self, mock_foo):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.select_related.return_value = mock_foo
-        mock_foo.filter.return_value = [self.group_user]
+        mock_foo.filter.return_value = [self.group_member]
 
         result = user_has_permission(self.user4, self.group3, Permissions.Group_Edit)
         self.assertFalse(result)
         mock_foo.filter.assert_called_with(user=self.user4)
 
-    @patch('dojo.models.Dojo_Group_User.objects')
+    @patch('dojo.models.Dojo_Group_Member.objects')
     def test_dojo_group_success(self, mock_foo):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.select_related.return_value = mock_foo
-        mock_foo.filter.return_value = [self.group_user]
+        mock_foo.filter.return_value = [self.group_member]
 
         result = user_has_permission(self.user4, self.group3, Permissions.Group_View)
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(user=self.user4)
 
-    @patch('dojo.models.Dojo_Group_User.objects')
-    def test_dojo_group_user_no_permission(self, mock_foo):
+    @patch('dojo.models.Dojo_Group_Member.objects')
+    def test_dojo_group_member_no_permission(self, mock_foo):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.select_related.return_value = mock_foo
-        mock_foo.filter.return_value = [self.group_user]
+        mock_foo.filter.return_value = [self.group_member]
 
-        result = user_has_permission(self.user4, self.group_user, Permissions.Group_Manage_Users)
+        result = user_has_permission(self.user4, self.group_member, Permissions.Group_Manage_Members)
         self.assertFalse(result)
         mock_foo.filter.assert_called_with(user=self.user4)
 
-    @patch('dojo.models.Dojo_Group_User.objects')
-    def test_dojo_group_user_success(self, mock_foo):
+    @patch('dojo.models.Dojo_Group_Member.objects')
+    def test_dojo_group_member_success(self, mock_foo):
         mock_foo.select_related.return_value = mock_foo
         mock_foo.select_related.return_value = mock_foo
-        mock_foo.filter.return_value = [self.group_user]
+        mock_foo.filter.return_value = [self.group_member]
 
-        result = user_has_permission(self.user4, self.group_user, Permissions.Group_View)
+        result = user_has_permission(self.user4, self.group_member, Permissions.Group_View)
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(user=self.user4)
