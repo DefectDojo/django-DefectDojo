@@ -6,16 +6,7 @@ from dojo.models import Finding, Endpoint
 class NucleiParser(object):
     """
     A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
-    """
-
-    # table to match nuclei severity to DefectDojo severity
-    SEVERITY = {
-        "critical": "Critical",
-        "high": "High",
-        "medium": "Medium",
-        "low": "Low",
-        "info": "Info",
-    }
+    """ 
 
     def get_scan_types(self):
         return ["Nuclei Scan"]
@@ -36,10 +27,7 @@ class NucleiParser(object):
                 template_id = item.get('templateID')
                 info = item.get('info')
                 name = info.get('name')
-                if info.get('severity') in self.SEVERITY:
-                    severity = self.SEVERITY[info.get('severity')]
-                else:
-                    severity = "Low"
+                severity = info.get('severity').title()
                 type = item.get('type')
                 matched = item.get('matched')
                 if '://' in matched:
