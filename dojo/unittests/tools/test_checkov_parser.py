@@ -22,3 +22,10 @@ class TestCheckovParser(TestCase):
         parser = CheckovParser()
         findings = parser.get_findings(testfile, Test())
         self.assertTrue(len(findings) > 2)
+
+    def test_parse_file_with_multiple_check_type_has_multiple_check_type(self):
+        testfile = open("dojo/unittests/scans/checkov/checkov-multiple-check_type.json")
+        parser = CheckovParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertTrue('Check Type: terraform' in findings[0].description)
+        self.assertTrue('Check Type: dockerfile' in findings[11].description)
