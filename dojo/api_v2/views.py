@@ -24,7 +24,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Te
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
-    Product_Group, Product_Type_Group, Role, Global_Role
+    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -50,6 +50,7 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
+from dojo.group.queries import get_authorized_groups, get_authorized_group_members
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
 
@@ -67,49 +68,77 @@ class RoleViewSet(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated, )
 
 
-# Authorization: superuser
-class DojoGroupViewSet(mixins.ListModelMixin,
-                                mixins.RetrieveModelMixin,
-                                mixins.DestroyModelMixin,
-                                mixins.UpdateModelMixin,
-                                mixins.CreateModelMixin,
-                                viewsets.GenericViewSet):
+# Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class DojoGroupViewSet(prefetch.PrefetchListMixin,
+                       prefetch.PrefetchRetrieveMixin,
+                       mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin,
+                       mixins.UpdateModelMixin,
+                       mixins.CreateModelMixin,
+                       viewsets.GenericViewSet):
     serializer_class = serializers.DojoGroupSerializer
-    queryset = Dojo_Group.objects.all()
+    queryset = Dojo_Group.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'name')
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    swagger_schema = prefetch.get_prefetch_schema(["dojo_groups_list", "dojo_groups_read"],
+        serializers.DojoGroupSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupPermission)
 
-    @extend_schema(
-        parameters=[
-                OpenApiParameter("user_id", OpenApiTypes.INT, OpenApiParameter.PATH, required=True,
-                                    description="ID of the user to add."),
-        ],
+    def get_queryset(self):
+        return get_authorized_groups(Permissions.Group_View).distinct()
+
+
+# Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
     )
-    @swagger_auto_schema(
-        method='post',
-        responses={status.HTTP_200_OK: "User added"},
-        request_body=no_body
-    )
-    @swagger_auto_schema(
-        method='delete',
-        responses={status.HTTP_200_OK: "User removed"},
-        request_body=no_body
-    )
-    @action(detail=True, methods=['post', 'delete'], url_path=r'users/(?P<user_id>\d+)')
-    def add_user(self, request, pk, user_id):
-        dojo_group = self.get_object()
-        user = get_object_or_404(Dojo_User, id=user_id)
-        if request.method == 'POST':
-            dojo_group.users.add(user)
-            dojo_group.save()
-            return Response(status=status.HTTP_200_OK)
-        if request.method == 'DELETE':
-            if user not in dojo_group.users.all():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            dojo_group.users.remove(user)
-            dojo_group.save()
-            return Response(status=status.HTTP_200_OK)
+)
+class DojoGroupMemberViewSet(prefetch.PrefetchListMixin,
+                           prefetch.PrefetchRetrieveMixin,
+                           mixins.ListModelMixin,
+                           mixins.RetrieveModelMixin,
+                           mixins.CreateModelMixin,
+                           mixins.DestroyModelMixin,
+                           mixins.UpdateModelMixin,
+                           viewsets.GenericViewSet):
+    serializer_class = serializers.DojoGroupMemberSerializer
+    queryset = Dojo_Group_Member.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'group_id', 'user_id')
+    swagger_schema = prefetch.get_prefetch_schema(["dojo_group_members_list", "dojo_group_members_read"],
+        serializers.DojoGroupMemberSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupMemberPermission)
+
+    def get_queryset(self):
+        return get_authorized_group_members(Permissions.Group_View).distinct()
+
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 # Authorization: superuser
@@ -1215,6 +1244,14 @@ class ProductMemberViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_product_members(Permissions.Product_View).distinct()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {'message': 'Patch function is not offered in this path.'}
@@ -1254,6 +1291,14 @@ class ProductGroupViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_product_groups(Permissions.Product_Group_View).distinct()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {'message': 'Patch function is not offered in this path.'}
@@ -1377,6 +1422,14 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {'message': 'Patch function is not offered in this path.'}
@@ -1416,6 +1469,14 @@ class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_product_type_groups(Permissions.Product_Type_Group_View).distinct()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
         response = {'message': 'Patch function is not offered in this path.'}

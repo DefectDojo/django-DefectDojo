@@ -3,7 +3,7 @@ from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group
+    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group, Dojo_Group_Member
 
 
 def user_has_permission(user, obj, permission):
@@ -72,6 +72,16 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(user, obj.product_type, permission)
     elif isinstance(obj, Product_Group) and permission in Permissions.get_product_group_permissions():
         return user_has_permission(user, obj.product, permission)
+    elif isinstance(obj, Dojo_Group) and permission in Permissions.get_group_permissions():
+        # Check if the user has a role for the group with the requested permissions
+        group_member = get_group_member(user, obj)
+        return group_member is not None and role_has_permission(group_member.role.id, permission)
+    elif isinstance(obj, Dojo_Group_Member) and permission in Permissions.get_group_member_permissions():
+        if permission == Permissions.Group_Member_Delete:
+            # Every user is allowed to remove himself
+            return obj.user == user or user_has_permission(user, obj.group, permission)
+        else:
+            return user_has_permission(user, obj.group, permission)
     else:
         raise NoAuthorizationImplementedError('No authorization implemented for class {} and permission {}'.
             format(type(obj).__name__, permission))
@@ -180,3 +190,15 @@ def get_product_type_groups_dict(user):
 @cache_for_request
 def get_groups(user):
     return Dojo_Group.objects.select_related('global_role').filter(users=user)
+
+
+def get_group_member(user, group):
+    return get_group_members_dict(user).get(group.id)
+
+
+@cache_for_request
+def get_group_members_dict(user):
+    gu_dict = {}
+    for group_member in Dojo_Group_Member.objects.select_related('group').select_related('role').filter(user=user):
+        gu_dict[group_member.group.id] = group_member
+    return gu_dict

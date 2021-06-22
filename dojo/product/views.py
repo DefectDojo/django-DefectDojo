@@ -22,10 +22,12 @@ from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilte
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
-                       Edit_Product_MemberForm, Delete_Product_MemberForm, DeleteSonarqubeConfigurationForm
+                       Edit_Product_MemberForm, Delete_Product_MemberForm, DeleteSonarqubeConfigurationForm, Add_Product_GroupForm, \
+                       Edit_Product_Group_Form, Delete_Product_GroupForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
-                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member
+                        Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
+                        Product_Group
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
                        get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
 
@@ -40,8 +42,8 @@ from dojo.authorization.authorization import user_has_permission, user_has_permi
 from django.conf import settings
 from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product.queries import get_authorized_products, get_authorized_members_for_product
-from dojo.product_type.queries import get_authorized_members_for_product_type
+from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
+from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
 
 logger = logging.getLogger(__name__)
 
@@ -138,6 +140,8 @@ def view_product(request, pid):
     prod = get_object_or_404(prod_query, id=pid)
     product_members = get_authorized_members_for_product(prod, Permissions.Product_View)
     product_type_members = get_authorized_members_for_product_type(prod.prod_type, Permissions.Product_Type_View)
+    product_groups = get_authorized_groups_for_product(prod, Permissions.Product_View)
+    product_type_groups = get_authorized_groups_for_product_type(prod.prod_type, Permissions.Product_Type_View)
     personal_notifications_form = ProductNotificationsForm(
         instance=Notifications.objects.filter(user=request.user).filter(product=prod).first())
     langSummary = Languages.objects.filter(product=prod).aggregate(Sum('files'), Sum('code'), Count('files'))
@@ -201,6 +205,8 @@ def view_product(request, pid):
         'benchmarks': benchmarks,
         'product_members': product_members,
         'product_type_members': product_type_members,
+        'product_groups': product_groups,
+        'product_type_groups': product_type_groups,
         'personal_notifications_form': personal_notifications_form})
 
 
@@ -622,21 +628,6 @@ def view_product_metrics(request, pid):
                    'user': request.user})
 
 
-@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
-def view_sonarqube(request, pid):
-
-    sonarqube_queryset = Sonarqube_Product.objects.filter(product=pid)
-
-    product_tab = Product_Tab(pid, title="Sonarqube Configurations", tab="settings")
-    return render(request,
-                  'dojo/view_product_sonarqube_configuration.html',
-                  {
-                      'sonarqube_queryset': sonarqube_queryset,
-                      'product_tab': product_tab,
-                      'pid': pid
-                  })
-
-
 @user_is_authorized(Product, Permissions.Engagement_View, 'pid', 'view')
 def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
@@ -936,31 +927,6 @@ def delete_product(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def delete_sonarqube(request, pid, sqcid):
-
-    sqc = Sonarqube_Product.objects.get(pk=sqcid)
-
-    if request.method == 'POST':
-        sqcform = Sonarqube_ProductForm(request.POST)
-        sqc.delete()
-        messages.add_message(request,
-                             messages.SUCCESS,
-                             'SonarQube Configuration Deleted.',
-                             extra_tags='alert-success')
-        return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
-    else:
-        sqcform = DeleteSonarqubeConfigurationForm(instance=sqc)
-
-    product_tab = Product_Tab(pid, title="Delete SonarQube Configuration", tab="settings")
-    return render(request,
-                  'dojo/delete_product_sonarqube_configuration.html',
-                  {
-                      'form': sqcform,
-                      'product_tab': product_tab
-                  })
-
-
 @user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')
 def new_eng_for_app(request, pid, cicd=False):
     jira_project = None
@@ -1143,64 +1109,6 @@ def edit_meta_data(request, pid):
                   {'product': prod,
                    'product_tab': product_tab,
                    })
-
-
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def add_sonarqube(request, pid):
-
-    prod = Product.objects.get(id=pid)
-    if request.method == 'POST':
-        form = Sonarqube_ProductForm(request.POST)
-        if form.is_valid():
-            sonarqube_product = form.save(commit=False)
-            sonarqube_product.product = prod
-            sonarqube_product.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'SonarQube Configuration added successfully.',
-                                 extra_tags='alert-success')
-            if 'add_another' in request.POST:
-                return HttpResponseRedirect(reverse('add_sonarqube', args=(pid,)))
-            else:
-                return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
-    else:
-        form = Sonarqube_ProductForm()
-
-    product_tab = Product_Tab(pid, title="Add SonarQube Configuration", tab="settings")
-
-    return render(request,
-                  'dojo/add_product_sonarqube_configuration.html',
-                  {'form': form,
-                   'product_tab': product_tab,
-                   'product': prod,
-                   })
-
-
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
-def edit_sonarqube(request, pid, sqcid):
-
-    sqc = Sonarqube_Product.objects.get(pk=sqcid)
-
-    if request.method == 'POST':
-        sqcform = Sonarqube_ProductForm(request.POST, instance=sqc)
-        if sqcform.is_valid():
-            sqcform.save()
-
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'SonarQube Configuration Successfully Updated.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
-    else:
-        sqcform = Sonarqube_ProductForm(instance=sqc)
-
-    product_tab = Product_Tab(pid, title="Edit SonarQube Configuration", tab="settings")
-    return render(request,
-                  'dojo/edit_product_sonarqube_configuration.html',
-                  {
-                      'sqcform': sqcform,
-                      'product_tab': product_tab
-                  })
 
 
 @user_is_authorized(Product, Permissions.Finding_Add, 'pid', 'staff')
@@ -1629,5 +1537,200 @@ def delete_product_member(request, memberid):
     return render(request, 'dojo/delete_product_member.html', {
         'memberid': memberid,
         'form': memberform,
+        'product_tab': product_tab,
+    })
+
+
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+def add_sonarqube(request, pid):
+
+    prod = Product.objects.get(id=pid)
+    if request.method == 'POST':
+        form = Sonarqube_ProductForm(request.POST)
+        if form.is_valid():
+            sonarqube_product = form.save(commit=False)
+            sonarqube_product.product = prod
+            sonarqube_product.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'SonarQube Configuration added successfully.',
+                                 extra_tags='alert-success')
+            if 'add_another' in request.POST:
+                return HttpResponseRedirect(reverse('add_sonarqube', args=(pid,)))
+            else:
+                return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+    else:
+        form = Sonarqube_ProductForm()
+
+    product_tab = Product_Tab(pid, title="Add SonarQube Configuration", tab="settings")
+
+    return render(request,
+                  'dojo/add_product_sonarqube_configuration.html',
+                  {'form': form,
+                   'product_tab': product_tab,
+                   'product': prod,
+                   })
+
+
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+def view_sonarqube(request, pid):
+
+    sonarqube_queryset = Sonarqube_Product.objects.filter(product=pid)
+
+    product_tab = Product_Tab(pid, title="Sonarqube Configurations", tab="settings")
+    return render(request,
+                  'dojo/view_product_sonarqube_configuration.html',
+                  {
+                      'sonarqube_queryset': sonarqube_queryset,
+                      'product_tab': product_tab,
+                      'pid': pid
+                  })
+
+
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+def edit_sonarqube(request, pid, sqcid):
+
+    sqc = Sonarqube_Product.objects.get(pk=sqcid)
+
+    if request.method == 'POST':
+        sqcform = Sonarqube_ProductForm(request.POST, instance=sqc)
+        if sqcform.is_valid():
+            sqcform.save()
+
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'SonarQube Configuration Successfully Updated.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+    else:
+        sqcform = Sonarqube_ProductForm(instance=sqc)
+
+    product_tab = Product_Tab(pid, title="Edit SonarQube Configuration", tab="settings")
+    return render(request,
+                  'dojo/edit_product_sonarqube_configuration.html',
+                  {
+                      'sqcform': sqcform,
+                      'product_tab': product_tab
+                  })
+
+
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+def delete_sonarqube(request, pid, sqcid):
+
+    sqc = Sonarqube_Product.objects.get(pk=sqcid)
+
+    if request.method == 'POST':
+        sqcform = Sonarqube_ProductForm(request.POST)
+        sqc.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'SonarQube Configuration Deleted.',
+                             extra_tags='alert-success')
+        return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+    else:
+        sqcform = DeleteSonarqubeConfigurationForm(instance=sqc)
+
+    product_tab = Product_Tab(pid, title="Delete SonarQube Configuration", tab="settings")
+    return render(request,
+                  'dojo/delete_product_sonarqube_configuration.html',
+                  {
+                      'form': sqcform,
+                      'product_tab': product_tab
+                  })
+
+
+@user_is_authorized(Product_Group, Permissions.Product_Group_Edit, 'groupid')
+def edit_product_group(request, groupid):
+    logger.exception(groupid)
+    group = get_object_or_404(Product_Group, pk=groupid)
+    groupform = Edit_Product_Group_Form(instance=group)
+
+    if request.method == 'POST':
+        groupform = Edit_Product_Group_Form(request.POST, instance=group)
+        if groupform.is_valid():
+            if group.role.is_owner and not user_has_permission(request.user, group.product, Permissions.Product_Group_Add_Owner):
+                messages.add_message(request,
+                                     messages.WARNING,
+                                     'You are not permitted to make groups owners.',
+                                     extra_tags='alert-warning')
+            else:
+                groupform.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Product group updated successfully.',
+                                     extra_tags='alert-success')
+                if is_title_in_breadcrumbs('View Group'):
+                    return HttpResponseRedirect(reverse('view_group', args=(group.group.id, )))
+                else:
+                    return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
+
+    product_tab = Product_Tab(group.product.id, title="Edit Product Group", tab="settings")
+    return render(request, 'dojo/edit_product_group.html', {
+        'groupid': groupid,
+        'form': groupform,
+        'product_tab': product_tab,
+    })
+
+
+@user_is_authorized(Product_Group, Permissions.Product_Group_Delete, 'groupid')
+def delete_product_group(request, groupid):
+    group = get_object_or_404(Product_Group, pk=groupid)
+    groupform = Delete_Product_GroupForm(instance=group)
+
+    if request.method == 'POST':
+        groupform = Delete_Product_GroupForm(request.POST, instance=group)
+        group = groupform.instance
+        group.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Product group deleted successfully.',
+                             extra_tags='alert-success')
+        if is_title_in_breadcrumbs('View Group'):
+            return HttpResponseRedirect(reverse('view_group', args=(group.group.id, )))
+        else:
+            # TODO: If user was in the group that was deleted and no longer has access, redirect back to product listing
+            #  page
+            return HttpResponseRedirect(reverse('view_product', args=(group.product.id, )))
+
+    product_tab = Product_Tab(group.product.id, title="Delete Product Group", tab="settings")
+    return render(request, 'dojo/delete_product_group.html', {
+        'groupid': groupid,
+        'form': groupform,
+        'product_tab': product_tab,
+    })
+
+
+@user_is_authorized(Product, Permissions.Product_Group_Add, 'pid')
+def add_product_group(request, pid):
+    product = get_object_or_404(Product, pk=pid)
+    group_form = Add_Product_GroupForm(initial={'product': product.id})
+
+    if request.method == 'POST':
+        group_form = Add_Product_GroupForm(request.POST, initial={'product': product.id})
+        if group_form.is_valid():
+            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, product, Permissions.Product_Group_Add_Owner):
+                messages.add_message(request,
+                                     messages.WARNING,
+                                     'You are not permitted to add groups as owners.',
+                                     extra_tags='alert-warning')
+            else:
+                if 'groups' in group_form.cleaned_data and len(group_form.cleaned_data['groups']) > 0:
+                    for group in group_form.cleaned_data['groups']:
+                        groups = Product_Group.objects.filter(product=product, group=group)
+                        if groups.count() == 0:
+                            product_group = Product_Group()
+                            product_group.product = product
+                            product_group.group = group
+                            product_group.role = group_form.cleaned_data['role']
+                            product_group.save()
+                messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'Product groups added successfully.',
+                                         extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_product', args=(pid, )))
+    product_tab = Product_Tab(pid, title="Edit Product Group", tab="settings")
+    return render(request, 'dojo/new_product_group.html', {
+        'product': product,
+        'form': group_form,
         'product_tab': product_tab,
     })

@@ -1,7 +1,7 @@
 import re
 
 from rest_framework.exceptions import ParseError
-from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test
+from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from dojo.authorization.authorization import user_has_permission
@@ -37,6 +37,25 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(request, obj.product, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit)
+
+
+class UserHasDojoGroupPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return request.user.is_staff
+        else:
+            return True
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
+
+
+class UserHasDojoGroupMemberPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Dojo_Group, 'group', Permissions.Group_Manage_Members)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Manage_Members, Permissions.Group_Member_Delete)
 
 
 class UserHasDojoMetaPermission(permissions.BasePermission):
@@ -122,10 +141,14 @@ class UserHasFindingPermission(permissions.BasePermission):
     # into a seperate class, when the legacy authorization will be removed.
     path_finding_post = re.compile(r'^/api/v2/findings/$')
     path_finding = re.compile(r'^/api/v2/findings/\d+/$')
+    path_stub_finding_post = re.compile(r'^/api/v2/stub_findings/$')
+    path_stub_finding = re.compile(r'^/api/v2/stub_findings/\d+/$')
 
     def has_permission(self, request, view):
         if UserHasFindingPermission.path_finding_post.match(request.path) or \
-           UserHasFindingPermission.path_finding.match(request.path):
+           UserHasFindingPermission.path_finding.match(request.path) or \
+           UserHasFindingPermission.path_stub_finding_post.match(request.path) or \
+           UserHasFindingPermission.path_stub_finding.match(request.path):
             return check_post_permission(request, Test, 'test', Permissions.Finding_Add)
         else:
             # related object only need object permission
@@ -133,7 +156,9 @@ class UserHasFindingPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if UserHasFindingPermission.path_finding_post.match(request.path) or \
-           UserHasFindingPermission.path_finding.match(request.path):
+           UserHasFindingPermission.path_finding.match(request.path) or \
+           UserHasFindingPermission.path_stub_finding_post.match(request.path) or \
+           UserHasFindingPermission.path_stub_finding.match(request.path):
             return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Delete)
         else:
             return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Edit, Permissions.Finding_Edit)

@@ -394,10 +394,16 @@ class Role(models.Model):
 class Dojo_Group(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=4000, null=True, blank=True)
-    users = models.ManyToManyField(Dojo_User, blank=True)
+    users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
 
     def __str__(self):
         return self.name
+
+
+class Dojo_Group_Member(models.Model):
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, help_text="This role determines the permissions of the user to manage the group.", verbose_name="Group role")
 
 
 class Global_Role(models.Model):
@@ -1113,7 +1119,7 @@ class Endpoint_Status(models.Model):
 
 
 class Endpoint(models.Model):
-    protocol = models.CharField(null=True, blank=True, max_length=10,
+    protocol = models.CharField(null=True, blank=True, max_length=20,
                                  help_text="The communication protocol/scheme such as 'http', 'ftp', 'dns', etc.")
     userinfo = models.CharField(null=True, blank=True, max_length=500,
                               help_text="User info as 'alice', 'bob', etc.")

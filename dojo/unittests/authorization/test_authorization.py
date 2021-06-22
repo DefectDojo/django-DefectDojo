@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role
+    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member
 import dojo.authorization.authorization
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, \
     user_has_permission_or_403, user_has_permission, \
@@ -103,11 +103,23 @@ class TestAuthorization(TestCase):
         cls.global_role_group.role = Role.objects.get(id=Roles.Maintainer)
 
         cls.user3 = Dojo_User()
-        cls.user3.id = 2
+        cls.user3.id = 3
         cls.global_role_user = Global_Role()
         cls.global_role_user.id = 3
         cls.global_role_user.user = cls.user3
         cls.global_role_user.role = None
+
+        cls.group3 = Dojo_Group()
+        cls.group3.id = 3
+
+        cls.user4 = Dojo_User()
+        cls.user4.id = 4
+
+        cls.group_member = Dojo_Group_Member()
+        cls.group_member.id = 1
+        cls.group_member.group = cls.group3
+        cls.group_member.user = cls.user4
+        cls.group_member.role = Role.objects.get(id=Roles.Writer)
 
     def test_role_has_permission_exception(self):
         with self.assertRaisesMessage(RoleDoesNotExistError,
@@ -472,3 +484,43 @@ class TestAuthorization(TestCase):
         result = user_has_permission(self.user3, self.product, Permissions.Product_Edit)
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(users=self.user3)
+
+    @patch('dojo.models.Dojo_Group_Member.objects')
+    def test_dojo_group_no_permission(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.group_member]
+
+        result = user_has_permission(self.user4, self.group3, Permissions.Group_Edit)
+        self.assertFalse(result)
+        mock_foo.filter.assert_called_with(user=self.user4)
+
+    @patch('dojo.models.Dojo_Group_Member.objects')
+    def test_dojo_group_success(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.group_member]
+
+        result = user_has_permission(self.user4, self.group3, Permissions.Group_View)
+        self.assertTrue(result)
+        mock_foo.filter.assert_called_with(user=self.user4)
+
+    @patch('dojo.models.Dojo_Group_Member.objects')
+    def test_dojo_group_member_no_permission(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.group_member]
+
+        result = user_has_permission(self.user4, self.group_member, Permissions.Group_Manage_Members)
+        self.assertFalse(result)
+        mock_foo.filter.assert_called_with(user=self.user4)
+
+    @patch('dojo.models.Dojo_Group_Member.objects')
+    def test_dojo_group_member_success(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.group_member]
+
+        result = user_has_permission(self.user4, self.group_member, Permissions.Group_View)
+        self.assertTrue(result)
+        mock_foo.filter.assert_called_with(user=self.user4)

@@ -322,7 +322,12 @@
                                     <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
                                         <i class="fa fa-user fa-fw"></i>
                                         <span>Users</span>
+                                        <span class="glyphicon arrow"></span>
                                     </a>
+                                    <ul class="nav nav-second-level">
+                                        <li><a href="{% url 'users' %}"> Users </a></li>
+                                        <li><a href="{% url 'groups' %}"> Groups </a></li>
+                                    </ul>
                                 </li>
                             {% endif %}
                             {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
