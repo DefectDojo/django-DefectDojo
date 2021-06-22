@@ -9,7 +9,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
-    Product_Group, Global_Role, Dojo_Group_User
+    Product_Group, Global_Role, Dojo_Group_Member
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -19,7 +19,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet, ProductTypeViewSet, \
     DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
-    DojoGroupUserViewSet
+    DojoGroupMemberViewSet
 from json import dumps
 from django.urls import reverse
 from rest_framework import status
@@ -1396,22 +1396,22 @@ class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = Dojo_Group_User
-        self.endpoint_path = 'dojo_group_users'
-        self.viewname = 'dojo_group_user'
-        self.viewset = DojoGroupUserViewSet
+        self.endpoint_model = Dojo_Group_Member
+        self.endpoint_path = 'dojo_group_members'
+        self.viewname = 'dojo_group_member'
+        self.viewset = DojoGroupMemberViewSet
         self.payload = {
-            "dojo_group": 1,
+            "group": 1,
             "user": 3,
             "role": 4
         }
         self.update_fields = {'role': 3}
         self.object_permission = True
-        self.permission_check_class = Dojo_Group_User
+        self.permission_check_class = Dojo_Group_Member
         self.permission_check_id = 1
-        self.permission_create = Permissions.Group_Manage_Users
-        self.permission_update = Permissions.Group_Manage_Users
-        self.permission_delete = Permissions.Group_User_Delete
+        self.permission_create = Permissions.Group_Manage_Members
+        self.permission_update = Permissions.Group_Manage_Members
+        self.permission_delete = Permissions.Group_Member_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
