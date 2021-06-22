@@ -1,7 +1,7 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef
 from django.conf import settings
-from dojo.models import Dojo_Group, Dojo_Group_User, Product_Group, Product_Type_Group
+from dojo.models import Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group
 from dojo.authorization.authorization import get_roles_for_permission, role_has_permission, get_groups
 from dojo.authorization.roles_permissions import Permissions
 
@@ -26,40 +26,40 @@ def get_authorized_groups(permission):
             return Dojo_Group.objects.all().order_by('name')
 
     roles = get_roles_for_permission(permission)
-    authorized_roles = Dojo_Group_User.objects.filter(group=OuterRef('pk'),
+    authorized_roles = Dojo_Group_Member.objects.filter(group=OuterRef('pk'),
         user=user,
         role__in=roles)
     groups = Dojo_Group.objects.annotate(user=Exists(authorized_roles)).order_by('name')
     return groups.filter(user=True)
 
 
-def get_authorized_group_users(permission):
+def get_authorized_group_members(permission):
     user = get_current_user()
 
     if user is None:
-        return Dojo_Group_User.objects.none()
+        return Dojo_Group_Member.objects.none()
 
     if user.is_superuser:
-        return Dojo_Group_User.objects.all()
+        return Dojo_Group_Member.objects.all()
 
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Dojo_Group_User.objects.all()
+        return Dojo_Group_Member.objects.all()
 
     if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
-        return Dojo_Group_User.objects.all()
+        return Dojo_Group_Member.objects.all()
 
     groups = get_authorized_groups(permission)
-    return Dojo_Group_User.objects.filter(group__in=groups)
+    return Dojo_Group_Member.objects.filter(group__in=groups)
 
 
-def get_authorized_group_users_for_user(user):
+def get_authorized_group_members_for_user(user):
     groups = get_authorized_groups(Permissions.Group_View)
-    groups = Dojo_Group_User.objects.filter(user=user, group__in=groups)
-    return groups
+    group_members = Dojo_Group_Member.objects.filter(user=user, group__in=groups).order_by('group__name')
+    return group_members
 
 
-def get_group_users_for_group(group):
-    return Dojo_Group_User.objects.filter(group=group)
+def get_group_members_for_group(group):
+    return Dojo_Group_Member.objects.filter(group=group)
 
 
 def get_product_groups_for_group(group):

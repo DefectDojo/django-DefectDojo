@@ -12,10 +12,10 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.filters import GroupFilter
 from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, Add_Product_Type_Group_GroupForm, \
                         Add_Group_MemberForm, Edit_Group_MemberForm, Delete_Group_MemberForm
-from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_User, Role
+from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.group.queries import get_authorized_groups, get_product_groups_for_group, \
-    get_product_type_groups_for_group, get_group_users_for_group
+    get_product_type_groups_for_group, get_group_members_for_group
 
 logger = logging.getLogger(__name__)
 
@@ -38,14 +38,14 @@ def view_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     products = get_product_groups_for_group(group)
     product_types = get_product_type_groups_for_group(group)
-    users = get_group_users_for_group(group)
+    group_members = get_group_members_for_group(group)
 
     add_breadcrumb(title="View Group", top_level=False, request=request)
     return render(request, 'dojo/view_group.html', {
         'group': group,
         'products': products,
         'product_types': product_types,
-        'users': users
+        'group_members': group_members
     })
 
 
@@ -111,7 +111,7 @@ def add_group(request):
         if form.is_valid():
             group = form.save(commit=False)
             group.save()
-            member = Dojo_Group_User()
+            member = Dojo_Group_Member()
             member.user = request.user
             member.group = group
             member.role = Role.objects.get(is_owner=True)
@@ -132,7 +132,7 @@ def add_group(request):
     })
 
 
-@user_is_authorized(Dojo_Group, Permissions.Group_Manage_Users, 'gid')
+@user_is_authorized(Dojo_Group, Permissions.Group_Manage_Members, 'gid')
 def add_group_member(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     groupform = Add_Group_MemberForm(initial={'group': group.id})
@@ -148,13 +148,13 @@ def add_group_member(request, gid):
             else:
                 if 'users' in groupform.cleaned_data and len(groupform.cleaned_data['users']) > 0:
                     for user in groupform.cleaned_data['users']:
-                        existing_users = Dojo_Group_User.objects.filter(group=group, user=user)
+                        existing_users = Dojo_Group_Member.objects.filter(group=group, user=user)
                         if existing_users.count() == 0:
-                            group_user = Dojo_Group_User()
-                            group_user.group = group
-                            group_user.user = user
-                            group_user.role = groupform.cleaned_data['role']
-                            group_user.save()
+                            group_member = Dojo_Group_Member()
+                            group_member.group = group
+                            group_member.user = user
+                            group_member.role = groupform.cleaned_data['role']
+                            group_member.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      'Group members added successfully.',
@@ -168,16 +168,16 @@ def add_group_member(request, gid):
     })
 
 
-@user_is_authorized(Dojo_Group_User, Permissions.Group_Manage_Users, 'mid')
+@user_is_authorized(Dojo_Group_Member, Permissions.Group_Manage_Members, 'mid')
 def edit_group_member(request, mid):
-    member = get_object_or_404(Dojo_Group_User, pk=mid)
+    member = get_object_or_404(Dojo_Group_Member, pk=mid)
     memberform = Edit_Group_MemberForm(instance=member)
 
     if request.method == 'POST':
         memberform = Edit_Group_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
             if not member.role.is_owner:
-                owners = Dojo_Group_User.objects.filter(group=member.group, role__is_owner=True).exclude(id=member.id).count()
+                owners = Dojo_Group_Member.objects.filter(group=member.group, role__is_owner=True).exclude(id=member.id).count()
                 if owners < 1:
                     messages.add_message(request,
                                         messages.WARNING,
@@ -210,16 +210,16 @@ def edit_group_member(request, mid):
     })
 
 
-@user_is_authorized(Dojo_Group_User, Permissions.Group_User_Delete, 'mid')
+@user_is_authorized(Dojo_Group_Member, Permissions.Group_Member_Delete, 'mid')
 def delete_group_member(request, mid):
-    member = get_object_or_404(Dojo_Group_User, pk=mid)
+    member = get_object_or_404(Dojo_Group_Member, pk=mid)
     memberform = Delete_Group_MemberForm(instance=member)
 
     if request.method == 'POST':
         memberform = Delete_Group_MemberForm(request.POST, instance=member)
         member = memberform.instance
         if member.role.is_owner:
-            owners = Dojo_Group_User.objects.filter(group=member.group, role__is_owner=True).count()
+            owners = Dojo_Group_Member.objects.filter(group=member.group, role__is_owner=True).count()
             if owners <= 1:
                 messages.add_message(request,
                                     messages.WARNING,
