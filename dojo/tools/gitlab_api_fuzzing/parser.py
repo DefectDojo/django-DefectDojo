@@ -1,6 +1,4 @@
-import hashlib
 import json
-import logging
 
 from dojo.models import Finding
 
