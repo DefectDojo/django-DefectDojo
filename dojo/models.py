@@ -1119,7 +1119,7 @@ class Endpoint_Status(models.Model):
 
 
 class Endpoint(models.Model):
-    protocol = models.CharField(null=True, blank=True, max_length=10,
+    protocol = models.CharField(null=True, blank=True, max_length=20,
                                  help_text="The communication protocol/scheme such as 'http', 'ftp', 'dns', etc.")
     userinfo = models.CharField(null=True, blank=True, max_length=500,
                               help_text="User info as 'alice', 'bob', etc.")
