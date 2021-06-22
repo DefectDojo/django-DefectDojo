@@ -29,7 +29,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role
+    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -44,6 +44,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type
+from dojo.group.queries import get_authorized_groups
 
 logger = logging.getLogger(__name__)
 
@@ -1590,6 +1591,174 @@ class MetricsFilterForm(forms.Form):
         super(MetricsFilterForm, self).__init__(*args, **kwargs)
         if exclude_product_types:
             del self.fields['exclude_product_types']
+
+
+class DojoGroupForm(forms.ModelForm):
+
+    name = forms.CharField(max_length=255, required=True)
+    description = forms.CharField(widget=forms.Textarea(attrs={}), required=False)
+
+    class Meta:
+        model = Dojo_Group
+        fields = ['name', 'description']
+        exclude = ['users']
+
+
+class DeleteGroupForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Dojo_Group
+        fields = ['id']
+
+
+class Add_Group_MemberForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(queryset=Dojo_Group_Member.objects.none(), required=True, label='Users')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Group_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['group'].disabled = True
+        current_members = Dojo_Group_Member.objects.filter(group=self.initial['group']).values_list('user', flat=True)
+        self.fields['users'].queryset = Dojo_User.objects.exclude(
+            Q(is_superuser=True) |
+            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+
+    class Meta:
+        model = Dojo_Group_Member
+        fields = ['group', 'users', 'role']
+
+
+class Add_Group_Member_UserForm(forms.ModelForm):
+    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Group_Member_UserForm, self).__init__(*args, **kwargs)
+        self.fields['user'].disabled = True
+        current_groups = Dojo_Group_Member.objects.filter(user=self.initial['user']).values_list('group', flat=True)
+        self.fields['groups'].queryset = Dojo_Group.objects.exclude(id__in=current_groups)
+        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+
+    class Meta:
+        model = Dojo_Group_Member
+        fields = ['groups', 'user', 'role']
+
+
+class Edit_Group_MemberForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(Edit_Group_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['group'].disabled = True
+        self.fields['user'].disabled = True
+        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+
+    class Meta:
+        model = Dojo_Group_Member
+        fields = ['group', 'user', 'role']
+
+
+class Delete_Group_MemberForm(Edit_Group_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Group_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
+
+
+class Add_Product_GroupForm(forms.ModelForm):
+    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_GroupForm, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
+        current_groups = Product_Group.objects.filter(product=self.initial["product"]).values_list('group', flat=True)
+        authorized_groups = get_authorized_groups(Permissions.Group_View)
+        authorized_groups = authorized_groups.exclude(id__in=current_groups)
+        self.fields['groups'].queryset = authorized_groups
+
+    class Meta:
+        model = Product_Group
+        fields = ['product', 'groups', 'role']
+
+
+class Add_Product_Group_GroupForm(forms.ModelForm):
+    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label='Products')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Group_GroupForm, self).__init__(*args, **kwargs)
+        current_members = Product_Group.objects.filter(group=self.initial["group"]).values_list('product', flat=True)
+        self.fields['products'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
+            .exclude(id__in=current_members)
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Group
+        fields = ['products', 'group', 'role']
+
+
+class Edit_Product_Group_Form(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Edit_Product_Group_Form, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Group
+        fields = ['product', 'group', 'role']
+
+
+class Delete_Product_GroupForm(Edit_Product_Group_Form):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Product_GroupForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
+
+
+class Add_Product_Type_GroupForm(forms.ModelForm):
+    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Type_GroupForm, self).__init__(*args, **kwargs)
+        current_groups = Product_Type_Group.objects.filter(product_type=self.initial["product_type"]).values_list('group', flat=True)
+        authorized_groups = get_authorized_groups(Permissions.Group_View)
+        authorized_groups = authorized_groups.exclude(id__in=current_groups)
+        self.fields['groups'].queryset = authorized_groups
+        self.fields['product_type'].disabled = True
+
+    class Meta:
+        model = Product_Type_Group
+        fields = ['product_type', 'groups', 'role']
+
+
+class Add_Product_Type_Group_GroupForm(forms.ModelForm):
+    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label='Product Types')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Type_Group_GroupForm, self).__init__(*args, **kwargs)
+        current_members = Product_Type_Group.objects.filter(group=self.initial['group']).values_list('product_type', flat=True)
+        self.fields['product_types'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
+            .exclude(id__in=current_members)
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Type_Group
+        fields = ['product_types', 'group', 'role']
+
+
+class Edit_Product_Type_Group_Form(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Edit_Product_Type_Group_Form, self).__init__(*args, **kwargs)
+        self.fields['product_type'].disabled = True
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Type_Group
+        fields = ['product_type', 'group', 'role']
+
+
+class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Product_Type_GroupForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
 
 
 class DojoUserForm(forms.ModelForm):

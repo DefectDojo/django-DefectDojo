@@ -24,7 +24,7 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Te
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
-    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_User
+    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -50,7 +50,7 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
-from dojo.group.queries import get_authorized_groups, get_authorized_group_users
+from dojo.group.queries import get_authorized_groups, get_authorized_group_members
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from dojo.authorization.roles_permissions import Permissions
 
@@ -115,7 +115,7 @@ class DojoGroupViewSet(prefetch.PrefetchListMixin,
     ],
     )
 )
-class DojoGroupUserViewSet(prefetch.PrefetchListMixin,
+class DojoGroupMemberViewSet(prefetch.PrefetchListMixin,
                            prefetch.PrefetchRetrieveMixin,
                            mixins.ListModelMixin,
                            mixins.RetrieveModelMixin,
@@ -123,17 +123,17 @@ class DojoGroupUserViewSet(prefetch.PrefetchListMixin,
                            mixins.DestroyModelMixin,
                            mixins.UpdateModelMixin,
                            viewsets.GenericViewSet):
-    serializer_class = serializers.DojoGroupUserSerializer
-    queryset = Dojo_Group_User.objects.none()
+    serializer_class = serializers.DojoGroupMemberSerializer
+    queryset = Dojo_Group_Member.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'dojo_group_id', 'user_id')
-    swagger_schema = prefetch.get_prefetch_schema(["dojo_group_users_list", "dojo_group_users_read"],
-        serializers.DojoGroupUserSerializer).to_schema()
+    filter_fields = ('id', 'group_id', 'user_id')
+    swagger_schema = prefetch.get_prefetch_schema(["dojo_group_members_list", "dojo_group_members_read"],
+        serializers.DojoGroupMemberSerializer).to_schema()
     if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupUserPermission)
+        permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupMemberPermission)
 
     def get_queryset(self):
-        return get_authorized_group_users(Permissions.Group_View).distinct()
+        return get_authorized_group_members(Permissions.Group_View).distinct()
 
     def partial_update(self, request, pk=None):
         # Object authorization won't work if not all data is provided
