@@ -49,23 +49,13 @@ class TestGitlabDastParser(TestCase):
 
         date = finding.date.strftime("%Y-%m-%dT%H:%M:%S.%f")
         self.assertEqual("2021-04-23T15:46:40.615000", date)
-        self.assertIsInstance(finding.references, str)
-
-        # uncomment when done fixing parser.py
-        # scanner = finding.found_by
-        # self.assertEqual(scanner.name, f"id: zaproxy\nname: ZAProxy")
-        # self.assertTrue(not scanner.static_tool)
-        # self.assertTrue(scanner.dynamic_tool)
+        self.assertIsNone(finding.references)  # should be None as there are no links
 
         self.assertEqual("High", finding.severity)
         self.assertEqual("", finding.mitigation)  # no solution proposed
 
         self.assertEqual(359, finding.cwe)
-        self.assertEqual("10062", finding.cve)
-
-        # endpoint = finding.unsaved_endpoints[0]
-        # self.assertEqual("http", endpoint.protocol)
-        # self.assertEqual(80, endpoint.port)
+        self.assertEqual(10062, finding.cve)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("dojo/unittests/scans/gitlab_dast/gitlab_dast_many_vul.json")
@@ -97,7 +87,7 @@ class TestGitlabDastParser(TestCase):
         # vulnerability does not have a name: fallback to using id as a title
         self.assertEqual(finding.unique_id_from_tool, finding.title)
         self.assertEqual(16, finding.cwe)
-        self.assertTrue("http://www.w3.org/Tr/CSP/" in finding.references)
+        self.assertTrue("http://www.w3.org/TR/CSP/" in finding.references)
         self.assertEqual("Medium", finding.severity)
         self.assertEqual(
             str(finding.unsaved_endpoints[0]), "http://api-server/v1/tree/10"

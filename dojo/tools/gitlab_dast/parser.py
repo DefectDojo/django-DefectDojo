@@ -112,7 +112,7 @@ def get_item(vuln, test):
     # cwe
     for identifier in vuln["identifiers"]:
         if "cwe" == identifier["type"].lower():
-            finding.cwe = identifier["value"]
+            finding.cwe = int(identifier["value"])
             break
 
     # references
@@ -121,6 +121,7 @@ def get_item(vuln, test):
         for link in vuln["links"]:
             ref += f"{link['url']}\n"
         ref = ref[:-1]
+        finding.references = ref
 
     # severity
     if "severity" in vuln:
