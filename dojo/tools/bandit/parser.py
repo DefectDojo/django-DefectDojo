@@ -58,7 +58,7 @@ class BanditParser(object):
                     item.get("issue_confidence")
                 )
             if "more_info" in item:
-                finding.references = item.get["more_info"]
+                finding.references = item["more_info"]
 
             dupe_key = finding.vuln_id_from_tool
 
