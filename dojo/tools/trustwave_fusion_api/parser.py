@@ -69,7 +69,9 @@ def get_item(vuln, test):
     # Endpoint
     if vuln["location"]["url"] != "None":
         endpoint = Endpoint.from_uri(vuln["location"]["url"])
-    elif vuln["location"]["domain"] != "None":  # fallback to using old way of creating endpoints
+    elif (
+        vuln["location"]["domain"] != "None"
+    ):  # fallback to using old way of creating endpoints
         endpoint = Endpoint(
             protocol=vuln["location"]["applicationProtocol"],
             host=str(vuln["location"]["domain"]),
@@ -89,8 +91,8 @@ def get_item(vuln, test):
     description = vuln["classification"]
     cves = "no match"
     if "CVE-NO-MATCH" not in vuln["kb"]["cves"]:
-        cve = vuln["kb"]["cves"][0]
-        finding.cve = int(cve[9:])
+        finding.cve = vuln["kb"]["cves"][0]
+        # finding.cve = int(cve[9:])
 
         cves = ""
         for cve in vuln["kb"]["cves"]:
@@ -104,9 +106,5 @@ def get_item(vuln, test):
     date_str = vuln["updatedOn"]
     date_str = date_str[: len(date_str) - 3] + date_str[-2:]
     finding.date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
-
-    if "CVE-NO-MATCH" not in vuln["kb"]["cves"]:
-        cve = vuln["kb"]["cves"][0]
-        finding.cve = int(cve[9:])
 
     return finding

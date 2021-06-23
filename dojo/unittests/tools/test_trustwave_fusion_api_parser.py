@@ -22,14 +22,14 @@ class TestTrustwaveFusionAPIParser(TestCase):
                 endpoint.clean()
 
         finding = findings[0]
-        self.assertEqual(7529, finding.cve)
+        self.assertEqual("CVE-2017-7529", finding.cve)
         self.assertEqual(
             "Vulnerability/Missing Patch; CVEs: CVE-2017-7529", finding.description
         )
         self.assertEqual(str(finding.unsaved_endpoints[0]), "https://google.com")
 
         finding = findings[1]
-        self.assertEqual(2566, finding.cve)  # We use the first cve
+        self.assertEqual("CVE-2013-2566", finding.cve)  # We use the first cve
         self.assertEqual(
             "Cryptography/Weak Cryptography; CVEs: CVE-2013-2566, CVE-2015-2808",
             finding.description,
