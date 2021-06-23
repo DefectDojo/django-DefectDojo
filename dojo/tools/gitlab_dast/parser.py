@@ -128,7 +128,7 @@ def get_item(vuln, test):
         finding.severity = vuln["severity"]
 
     # endpoint
-    location = vuln["location"]
+    location = vuln.get("location", {})
     if "hostname" in location and "path" in location:
         url_str = f"{location['hostname']}{location['path']}"
         finding.unsaved_endpoints = [Endpoint.from_uri(url_str)]
