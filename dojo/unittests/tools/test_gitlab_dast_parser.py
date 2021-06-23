@@ -2,24 +2,6 @@ from django.test import TestCase
 from dojo.tools.gitlab_dast.parser import GitlabDastParser
 from dojo.models import Test
 
-"""
-Scanner Confidence (Numerical):
-    'Confirmed': 1,    # Certain
-    'High': 3,         # Firm
-    'Medium': 4,       # Firm
-    'Low': 6,          # Tentative
-    'Experimental': 7, # Tentative
-    'Unknown': 8,      # Tentative
-    'Ignore': 10,      # Tentative
-Numerical Severity:
-    'Critical': S0
-    'High': S1
-    'Medium': S2
-    'Low': S3
-    'Info': S4
-    not above: S5
-"""
-
 
 class TestGitlabDastParser(TestCase):
     def test_parse_file_with_no_vuln_has_no_findings(self):
@@ -89,7 +71,9 @@ class TestGitlabDastParser(TestCase):
         self.assertEqual(16, finding.cwe)
         self.assertTrue("http://www.w3.org/TR/CSP/" in finding.references)
         self.assertEqual("Medium", finding.severity)
-        self.assertEqual(
-            str(finding.unsaved_endpoints[0]), "http://api-server/v1/tree/10"
-        )
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual(str(endpoint), "http://api-server/v1/tree/10")
+        self.assertEqual(endpoint.host, "api-server")  # host port path
+        self.assertEqual(endpoint.port, 80)
+        self.assertEqual(endpoint.path, "v1/tree/10")
         self.assertTrue("Ensure that your web server," in finding.mitigation)

@@ -18,15 +18,13 @@ class GitlabDastParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "GitLab DAST Report in JSON format (option --json)."
 
-    # turning a json file to string
-    def parse_json(self, file):
-        data = file.read()
-        try:
-            tree = json.loads(str(data, "utf-8"))
-        except:
-            tree = json.loads(data)
+    def get_findings(self, file, test):
+        if file is None:
+            return None
 
-        return tree
+        # tree = self.parse_json(file)
+        # if tree:
+        return self.get_items(json.load(file), test)
 
     def get_items(self, tree, test):
         items = {}
@@ -46,14 +44,6 @@ class GitlabDastParser(object):
                 items[item_key] = item
 
         return list(items.values())
-
-    def get_findings(self, file, test):
-        if file is None:
-            return None
-
-        tree = self.parse_json(file)
-        if tree:
-            return self.get_items(tree, test)
 
     def convert_severity(self, num_severity):
         """Convert severity value"""
