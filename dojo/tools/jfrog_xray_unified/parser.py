@@ -27,7 +27,7 @@ class JFrogXrayUnifiedParser(object):
 
             for node in vulnerabilityTree:
                 item = get_item(node, test)
-                
+
                 items.append(item)
 
         return items
@@ -100,7 +100,7 @@ def get_item(vulnerability, test):
     # remove package type from component name
     component_name = component_name.split("://", 1)[1]
 
-    tags=["packagetype_" + vulnerability['package_type']]
+    tags = ["packagetype_" + vulnerability['package_type']]
 
     # create the finding object
     finding = Finding(
