@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-10">
             {% if surveys %}
@@ -126,6 +127,7 @@
 {% endblock %}
 
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript">
         $('#shareQuestionnaireModal').on('show.bs.modal', function (event) {
             var button = $(event.relatedTarget) // Button that triggered the modal

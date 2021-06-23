@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {{ block.super }}
 
 
 <div class="row">
@@ -81,6 +82,7 @@
 </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 <script>
         $(function () {
             //Ensures dropdown has proper zindex

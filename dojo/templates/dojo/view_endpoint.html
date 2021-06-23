@@ -4,6 +4,7 @@
 {% load authorization_tags %}
 {% load static %}
 {% block add_styles %}
+    {{ block.super }}
     .graph {min-height: 158px;}
     h3 { margin-top: 5px; margin-bottom: 5px; font-size: 20px; line-height: 22px;}
     .tooltip-inner {
@@ -11,6 +12,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -289,6 +291,7 @@
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <!-- Flot Charts JavaScript -->
     <script src="{% static "flot/excanvas.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.js" %}"></script>
