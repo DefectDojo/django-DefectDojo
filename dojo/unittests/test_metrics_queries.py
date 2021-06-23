@@ -48,8 +48,13 @@ class FindingQueriesTest(TestCase):
         mock_datetime = datetime(2020, 12, 9, tzinfo=timezone.utc)
         mock_timezone.return_value = mock_datetime
 
+        if settings.FEATURE_AUTHORIZATION_V2:
+            # One more query to read usercontactinfo for global_role
+            num_queries = 35
+        else:
+            num_queries = 29
         # Queries over Finding and Risk_Acceptance
-        with self.assertNumQueries(29):
+        with self.assertNumQueries(num_queries):
             product_types = []
             finding_queries = views.finding_querys(
                 product_types,
@@ -167,8 +172,12 @@ class EndpointQueriesTest(TestCase):
         )
 
     def test_endpoint_queries(self):
+        if settings.FEATURE_AUTHORIZATION_V2:
+            num_queries = 71
+        else:
+            num_queries = 65
         # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(67):
+        with self.assertNumQueries(num_queries):
             product_types = []
             endpoint_queries = views.endpoint_querys(
                 product_types,
@@ -209,8 +218,10 @@ class EndpointQueriesTest(TestCase):
                             'risk_accepted': False,
                             'endpoint_id': 2,
                             'finding_id': 2,
-                            'endpoint__product__prod_type__member': False,
-                            'endpoint__product__member': True
+                            'endpoint__product__prod_type__member': True,
+                            'endpoint__product__member': True,
+                            'endpoint__product__prod_type__authorized_group': False,
+                            'endpoint__product__authorized_group': False
                         }
                     ],
                 )
