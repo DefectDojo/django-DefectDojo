@@ -21,19 +21,16 @@ class JFrogXrayUnifiedParser(object):
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
-        items = {}
+        items = []
         if 'rows' in tree:
             vulnerabilityTree = tree['rows']
 
             for node in vulnerabilityTree:
                 item = get_item(node, test)
+                
+                items.append(item)
 
-                # Xray has a bug with duplicate results, so save to a dictionary so we only get
-                # one finding per issue_id
-                unique_key = node['issue_id']
-                items[unique_key] = item
-
-        return list(items.values())
+        return items
 
 
 def get_item(vulnerability, test):
@@ -123,7 +120,7 @@ def get_item(vulnerability, test):
         impact=severity,
         cvssv3=cvssv3,
         date=scan_time,
-        vuln_id_from_tool=vulnerability['issue_id'],
+        unique_id_from_tool=vulnerability['issue_id'],
         tags=tags)
 
     return finding
