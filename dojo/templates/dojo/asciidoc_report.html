@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {{ block.super }}
     {% load event_tags %}
     {% load display_tags %}
     {% load humanize %}
@@ -528,6 +529,7 @@
 	{% endif %}
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="text/javascript">
 
         window.onload = function () {
