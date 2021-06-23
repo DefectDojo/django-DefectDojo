@@ -37,7 +37,6 @@ class TestGitlabDastParser(TestCase):
         self.assertEqual("", finding.mitigation)  # no solution proposed
 
         self.assertEqual(359, finding.cwe)
-        self.assertEqual(10062, finding.cve)
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("dojo/unittests/scans/gitlab_dast/gitlab_dast_many_vul.json")
@@ -56,7 +55,6 @@ class TestGitlabDastParser(TestCase):
         # must-have fields
         self.assertEqual(3, finding.scanner_confidence)
         self.assertTrue("Content Security Policy (CSP)" in finding.description)
-        self.assertEqual(10038, finding.cve)
         self.assertEqual(False, finding.static_finding)
         self.assertEqual(True, finding.dynamic_finding)
 

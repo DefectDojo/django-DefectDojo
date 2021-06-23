@@ -72,14 +72,11 @@ def get_item(vuln, test):
     elif "description" in vuln:
         description += f"{vuln['description']}\n"
 
-    cve = int(vuln["cve"])
-
     finding = Finding(
         test=test,  # Test
         nb_occurences=1,  # int
         scanner_confidence=scanner_confidence,  # int
         description=description,  # str
-        cve=cve,  # int
         static_finding=False,
         dynamic_finding=True,
     )
