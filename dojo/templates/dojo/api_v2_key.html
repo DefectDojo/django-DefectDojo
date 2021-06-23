@@ -2,6 +2,7 @@
 {% load event_tags %}
 
 {% block content %}
+    {{ block.super }}
     <h2> {{ name }}</h2>
     <hr/>
     <p>Your current API key is <code>{{ key.key }}</code></p>

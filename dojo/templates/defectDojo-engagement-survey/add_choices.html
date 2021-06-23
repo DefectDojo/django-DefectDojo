@@ -1,5 +1,6 @@
 {% extends "dojo/add_related.html" %}
 {% block content %}
+    {{ block.super }}
     <h3>Add Choice</h3>
 
     <form class="form-horizontal" method="post">{% csrf_token %}
@@ -12,5 +13,6 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
 {% endblock %}
