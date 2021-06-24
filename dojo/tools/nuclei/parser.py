@@ -6,7 +6,7 @@ from dojo.models import Finding, Endpoint
 class NucleiParser(object):
     """
     A class that can be used to parse the nuclei (https://github.com/projectdiscovery/nuclei) JSON report file
-    """ 
+    """
 
     def get_scan_types(self):
         return ["Nuclei Scan"]
@@ -35,6 +35,20 @@ class NucleiParser(object):
                 else:
                     endpoint = Endpoint.from_uri('//' + matched)
 
+                finding = Finding(
+                    title=f"{name}",
+                    test=test,
+                    severity=severity,
+                    nb_occurences=1,
+                )
+                if info.get('description'):
+                    finding.description = info.get('description')
+                if info.get('tags'):
+                    finding.unsaved_tags = info.get('tags')
+                if info.get('reference'):
+                    finding.references = info.get('reference')
+                finding.unsaved_endpoints.append(endpoint)
+
                 dupe_key = hashlib.sha256(
                     (template_id + type).encode('utf-8')
                 ).hexdigest()
@@ -45,19 +59,5 @@ class NucleiParser(object):
                         finding.unsaved_endpoints.append(endpoint)
                     finding.nb_occurences += 1
                 else:
-                    finding = Finding(
-                        title=f"{name}",
-                        test=test,
-                        severity=severity,
-                        nb_occurences=1,
-                    )
-                    if info.get('description'):
-                        finding.description = info.get('description')
-                    if info.get('tags'):
-                        finding.unsaved_tags = info.get('tags')
-                    if info.get('reference'):
-                        finding.references = info.get('reference')
-                    if endpoint not in finding.unsaved_endpoints:
-                        finding.unsaved_endpoints.append(endpoint)
                     dupes[dupe_key] = finding
             return list(dupes.values())
