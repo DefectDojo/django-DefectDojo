@@ -61,24 +61,23 @@ class NetsparkerParser(object):
             dupe_key = title + item["Name"] + item["Url"]
             request = item["HttpRequest"]["Content"]
             response = item["HttpResponse"]["Content"]
-            
 
             finding = Finding(title=title,
-                               test=test,
-                               description=findingdetail,
-                               severity=sev.title(),
-                               mitigation=mitigation,
-                               impact=impact,
-                               references=references,
-                               url=url,
-                               cwe=cwe,
-                               static_finding=True)
+                              test=test,
+                              description=findingdetail,
+                              severity=sev.title(),
+                              mitigation=mitigation,
+                              impact=impact,
+                              references=references,
+                              url=url,
+                              cwe=cwe,
+                              static_finding=True)
 
             if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
                 finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
 
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
-            
+
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.unsaved_req_resp.extend(finding.unsaved_req_resp)
