@@ -45,6 +45,8 @@ class NetsparkerParser(object):
             title = ''
             group = ''
             status = ''
+            request = ''
+            response = ''
 
             title = item["Name"]
             findingdetail = cleantags(item["Description"])
@@ -57,13 +59,11 @@ class NetsparkerParser(object):
             url = item["Url"]
             impact = cleantags(item["Impact"])
             dupe_key = title + item["Name"] + item["Url"]
+            request = item["HttpRequest"]["Content"]
+            response = item["HttpResponse"]["Content"]
+            
 
-            if dupe_key in dupes:
-                find = dupes[dupe_key]
-            else:
-                dupes[dupe_key] = True
-
-                find = Finding(title=title,
+            finding = Finding(title=title,
                                test=test,
                                description=findingdetail,
                                severity=sev.title(),
@@ -73,7 +73,16 @@ class NetsparkerParser(object):
                                url=url,
                                cwe=cwe,
                                static_finding=True)
-                dupes[dupe_key] = find
-                findingdetail = ''
+
+            if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
+                finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
+
+            finding.unsaved_req_resp = [{"req": request, "resp": response}]
+            
+            if dupe_key in dupes:
+                find = dupes[dupe_key]
+                find.unsaved_req_resp.extend(finding.unsaved_req_resp)
+            else:
+                dupes[dupe_key] = finding
 
         return list(dupes.values())
