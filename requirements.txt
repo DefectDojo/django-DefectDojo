@@ -1,5 +1,5 @@
 # requirements.txt for DefectDojo using Python 3.x
-asteval==0.9.23
+asteval==0.9.25
 bleach==3.3.0
 celery==5.1.0
 coverage==5.5
@@ -37,7 +37,7 @@ python-dateutil==2.8.1
 pytz==2021.1
 redis==3.5.3
 requests==2.25.1
-sqlalchemy==1.4.18  # Required by Celery broker transport
+sqlalchemy==1.4.19  # Required by Celery broker transport
 supervisor==4.2.2
 urllib3==1.26.5
 uWSGI==2.0.19.1
@@ -50,7 +50,7 @@ Python-jose==3.3.0
 gitpython==3.1.18
 debugpy==1.3.0
 python-gitlab==2.8.0
-google-auth==1.31.0
+google-auth==1.32.0
 google-api-python-client==1.12.8
 google-auth-oauthlib==0.4.4
 drf_yasg==1.20.0

@@ -50,12 +50,12 @@ class UserHasDojoGroupPermission(permissions.BasePermission):
         return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Edit, Permissions.Group_Delete)
 
 
-class UserHasDojoGroupUserPermission(permissions.BasePermission):
+class UserHasDojoGroupMemberPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(request, Dojo_Group, 'dojo_group', Permissions.Group_Manage_Users)
+        return check_post_permission(request, Dojo_Group, 'group', Permissions.Group_Manage_Members)
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Manage_Users, Permissions.Group_User_Delete)
+        return check_object_permission(request, obj, Permissions.Group_View, Permissions.Group_Manage_Members, Permissions.Group_Member_Delete)
 
 
 class UserHasDojoMetaPermission(permissions.BasePermission):
@@ -141,10 +141,14 @@ class UserHasFindingPermission(permissions.BasePermission):
     # into a seperate class, when the legacy authorization will be removed.
     path_finding_post = re.compile(r'^/api/v2/findings/$')
     path_finding = re.compile(r'^/api/v2/findings/\d+/$')
+    path_stub_finding_post = re.compile(r'^/api/v2/stub_findings/$')
+    path_stub_finding = re.compile(r'^/api/v2/stub_findings/\d+/$')
 
     def has_permission(self, request, view):
         if UserHasFindingPermission.path_finding_post.match(request.path) or \
-           UserHasFindingPermission.path_finding.match(request.path):
+           UserHasFindingPermission.path_finding.match(request.path) or \
+           UserHasFindingPermission.path_stub_finding_post.match(request.path) or \
+           UserHasFindingPermission.path_stub_finding.match(request.path):
             return check_post_permission(request, Test, 'test', Permissions.Finding_Add)
         else:
             # related object only need object permission
@@ -152,7 +156,9 @@ class UserHasFindingPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if UserHasFindingPermission.path_finding_post.match(request.path) or \
-           UserHasFindingPermission.path_finding.match(request.path):
+           UserHasFindingPermission.path_finding.match(request.path) or \
+           UserHasFindingPermission.path_stub_finding_post.match(request.path) or \
+           UserHasFindingPermission.path_stub_finding.match(request.path):
             return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Delete)
         else:
             return check_object_permission(request, obj, Permissions.Finding_View, Permissions.Finding_Edit, Permissions.Finding_Edit, Permissions.Finding_Edit)

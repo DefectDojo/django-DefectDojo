@@ -19,10 +19,11 @@ from rest_framework.authtoken.models import Token
 
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
-    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm
-from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member
+    Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm
+from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.product.queries import get_authorized_product_members_for_user
+from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.authorization.roles_permissions import Permissions
 
@@ -197,6 +198,7 @@ def alertcount(request):
 def view_profile(request):
     user = get_object_or_404(Dojo_User, pk=request.user.id)
     form = DojoUserForm(instance=user)
+    group_members = get_authorized_group_members_for_user(user)
 
     user_contact = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
     if user_contact is None:
@@ -243,7 +245,8 @@ def view_profile(request):
         'user': user,
         'form': form,
         'contact_form': contact_form,
-        'global_role_form': global_role_form})
+        'global_role_form': global_role_form,
+        'group_members': group_members})
 
 
 def change_password(request):
@@ -363,6 +366,7 @@ def view_user(request, uid):
     authorized_product_types = Product_Type.objects.filter(authorized_users__in=[user])
     product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
     product_type_members = get_authorized_product_type_members_for_user(user, Permissions.Product_Type_View)
+    group_members = get_authorized_group_members_for_user(user)
 
     add_breadcrumb(title="View User", top_level=False, request=request)
     return render(request, 'dojo/view_user.html', {
@@ -370,7 +374,8 @@ def view_user(request, uid):
         'authorized_products': authorized_products,
         'authorized_product_types': authorized_product_types,
         'product_members': product_members,
-        'product_type_members': product_type_members})
+        'product_type_members': product_type_members,
+        'group_members': group_members})
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -540,4 +545,34 @@ def add_product_member(request, uid):
     return render(request, 'dojo/new_product_member_user.html', {
         'user': user,
         'form': memberform,
+    })
+
+
+@user_passes_test(lambda u: u.is_superuser)
+def add_group_member(request, uid):
+    user = get_object_or_404(Dojo_User, id=uid)
+    memberform = Add_Group_Member_UserForm(initial={'user': user.id})
+
+    if request.method == 'POST':
+        memberform = Add_Group_Member_UserForm(request.POST, initial={'user': user.id})
+        if memberform.is_valid():
+            if 'groups' in memberform.cleaned_data and len(memberform.cleaned_data['groups']) > 0:
+                for group in memberform.cleaned_data['groups']:
+                    existing_groups = Dojo_Group_Member.objects.filter(user=user, group=group)
+                    if existing_groups.count() == 0:
+                        group_member = Dojo_Group_Member()
+                        group_member.group = group
+                        group_member.user = user
+                        group_member.role = memberform.cleaned_data['role']
+                        group_member.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Groups added successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_user', args=(uid,)))
+
+    add_breadcrumb(title="Add Group Member", top_level=False, request=request)
+    return render(request, 'dojo/new_group_member_user.html', {
+        'user': user,
+        'form': memberform
     })
