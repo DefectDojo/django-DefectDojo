@@ -40,6 +40,7 @@ class NucleiParser(object):
                     test=test,
                     severity=severity,
                     nb_occurences=1,
+                    vuln_id_from_tool=template_id,
                 )
                 if info.get('description'):
                     finding.description = info.get('description')

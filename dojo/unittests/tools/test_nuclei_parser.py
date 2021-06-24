@@ -33,6 +33,7 @@ class TestNucleiParser(TestCase):
             self.assertIsNotNone(finding.references)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(22, finding.unsaved_endpoints[0].port)
+            self.assertEqual("openssh5.3-detect", finding.vuln_id_from_tool)
 
         with self.subTest(i=1):
             finding = findings[1]
@@ -45,6 +46,7 @@ class TestNucleiParser(TestCase):
             self.assertEqual(None, finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(443, finding.unsaved_endpoints[0].port)
+            self.assertEqual("nginx-version", finding.vuln_id_from_tool)
 
         with self.subTest(i=2):
             finding = findings[2]
@@ -57,6 +59,7 @@ class TestNucleiParser(TestCase):
             self.assertEqual("phpmyadmin/setup/index.php", finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(443, finding.unsaved_endpoints[0].port)
+            self.assertEqual("phpmyadmin-setup", finding.vuln_id_from_tool)
 
         with self.subTest(i=3):
             finding = findings[3]
@@ -75,6 +78,7 @@ class TestNucleiParser(TestCase):
             self.assertEqual(None, finding.unsaved_endpoints[2].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[2].host)
             self.assertEqual(443, finding.unsaved_endpoints[2].port)
+            self.assertEqual("tech-detect", finding.vuln_id_from_tool)
 
         with self.subTest(i=4):
             finding = findings[4]
@@ -87,6 +91,7 @@ class TestNucleiParser(TestCase):
             self.assertEqual(None, finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(443, finding.unsaved_endpoints[0].port)
+            self.assertEqual("waf-detect", finding.vuln_id_from_tool)
 
         with self.subTest(i=5):
             finding = findings[5]
@@ -99,6 +104,7 @@ class TestNucleiParser(TestCase):
             self.assertEqual("phpmyadmin/", finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(443, finding.unsaved_endpoints[0].port)
+            self.assertEqual("phpmyadmin-panel", finding.vuln_id_from_tool)
 
         with self.subTest(i=6):
             finding = findings[6]
@@ -114,3 +120,4 @@ class TestNucleiParser(TestCase):
             self.assertEqual(None, finding.unsaved_endpoints[0].path)
             self.assertEqual("nuclei-example.com", finding.unsaved_endpoints[0].host)
             self.assertEqual(3306, finding.unsaved_endpoints[0].port)
+            self.assertEqual("mysql-native-password-bruteforce", finding.vuln_id_from_tool)
