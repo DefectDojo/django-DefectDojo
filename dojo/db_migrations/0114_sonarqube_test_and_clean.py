@@ -19,6 +19,7 @@ def sq_clean(apps, schema_editor):
         sq.sonarqube_tool_config = sqtc
         sq.save()
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
