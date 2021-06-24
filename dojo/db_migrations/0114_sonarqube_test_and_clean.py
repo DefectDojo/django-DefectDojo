@@ -20,8 +20,9 @@ def sq_clean(apps, schema_editor):
         sq.save()
 
 class Migration(migrations.Migration):
+
     dependencies = [
-        ('dojo', '0108_blank_fields'),
+        ('dojo', '0113_endpoint_protocol'),
     ]
 
     operations = [
