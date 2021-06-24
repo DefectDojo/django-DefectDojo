@@ -39,7 +39,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
 def get_choices():
     res = list()
     for key in PARSERS:
-        res.append((key, key))
+        res.append((key, PARSERS[key].get_label_for_scan_types(key)))
     return tuple(res)
 
 
@@ -49,14 +49,6 @@ def requires_file(scan_type):
     # FIXME switch to method of the parser
     # parser = PARSERS[scan_type]
     return scan_type != SCAN_SONARQUBE_API
-
-
-def handles_active_verified_statuses(scan_type):
-    # FIXME switch to method of the parser
-    # parser = PARSERS[scan_type]
-    return scan_type in [
-        'Generic Findings Import', SCAN_SONARQUBE_API, 'Qualys Scan'
-    ]
 
 
 import os

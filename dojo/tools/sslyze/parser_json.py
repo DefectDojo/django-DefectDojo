@@ -248,11 +248,8 @@ def get_finding(title, description, cve, references, test, endpoint):
         title=title,
         test=test,
         cve=cve,
-        active=False,
-        verified=False,
         description=description,
         severity=severity,
-        numerical_severity=Finding.get_numerical_severity(severity),
         references=references,
         dynamic_finding=False,
         static_finding=True)

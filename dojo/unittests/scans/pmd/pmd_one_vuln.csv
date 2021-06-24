@@ -1,0 +1,2 @@
+Problem,Package,File,Priority,Line,Description,Rule set,Rule
+1,com.111.cellbridge.sim,/home/ec2-user/SAST-13-11-2020-1605287445/cell-bridge-api/.mvn/wrapper/MavenWrapperDownloader.java,3,21,"All methods are static.  Consider using a utility class instead. Alternatively, you could add a private constructor or make the class abstract to silence this warning.",Design,UseUtilityClass

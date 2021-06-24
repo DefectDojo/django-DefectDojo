@@ -140,4 +140,5 @@ ENV \
   DD_DJANGO_ADMIN_ENABLED="True" \
   DD_TRACK_MIGRATIONS="True" \
   DD_DJANGO_METRICS_ENABLED="False"
+RUN mkdir -p media && mkdir -p media/threat && chown -R ${uid} media
 ENTRYPOINT ["/entrypoint-uwsgi.sh"]

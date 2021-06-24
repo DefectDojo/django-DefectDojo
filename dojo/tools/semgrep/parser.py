@@ -1,7 +1,6 @@
 import json
 
 from dojo.models import Finding
-from dojo.tools.semgrep.models import SemgrepJSONResult
 
 
 class SemgrepParser(object):
@@ -15,26 +14,58 @@ class SemgrepParser(object):
     def get_description_for_scan_types(self, scan_type):
         return "Import Semgrep output (--json)"
 
-    def get_findings(self, filehandle, test):
-        tree = json.load(filehandle)
-        items = []
-        results = tree.get('results')
-        for item in results:
-            title = item['check_id']
-            semgrep_result = SemgrepJSONResult(item['extra'], item['path'], item['start'], item['end'])
-            findingItem = Finding(
-                title=semgrep_result.title,
-                severity=semgrep_result.severity,
-                numerical_severity=Finding.get_numerical_severity(semgrep_result.severity),
-                description=semgrep_result.message,
-                mitigation='N/A',
+    def get_findings(self, filename, test):
+        data = json.load(filename)
+
+        dupes = dict()
+
+        for item in data["results"]:
+            finding = Finding(
+                test=test,
+                title=item["check_id"],
+                severity=self.convert_severity(item["extra"]["severity"]),
+                description=item["extra"]["message"],
                 file_path=item['path'],
-                cwe=semgrep_result.cwe,
-                line=semgrep_result.start,
-                url='N/A',
-                impact='N/A',
+                line=item["start"]["line"],
                 static_finding=True,
-                test=test
+                dynamic_finding=False,
+                vuln_id_from_tool=item["check_id"],
+                nb_occurences=1,
             )
-            items.append(findingItem)
-        return items
+
+            # manage CWE
+            if 'cwe' in item["extra"]["metadata"]:
+                finding.cwe = int(item["extra"]["metadata"].get("cwe").partition(':')[0].partition('-')[2])
+
+            # manage references from metadata
+            if 'references' in item["extra"]["metadata"]:
+                finding.references = "\n".join(item["extra"]["metadata"]["references"])
+
+            # manage mitigation from metadata
+            if 'fix' in item["extra"]:
+                finding.mitigation = item["extra"]["fix"]
+            elif 'fix_regex' in item["extra"]:
+                finding.mitigation = "\n".join([
+                    "**You can automaticaly apply this regex:**",
+                    "\n```\n",
+                    json.dumps(item["extra"]["fix_regex"]),
+                    "\n```\n",
+                ])
+
+            dupe_key = finding.title + finding.file_path + str(finding.line)
+
+            if dupe_key in dupes:
+                find = dupes[dupe_key]
+                find.nb_occurences += 1
+            else:
+                dupes[dupe_key] = finding
+
+        return list(dupes.values())
+
+    def convert_severity(self, val):
+        if "WARNING" == val.upper():
+            return "Low"
+        elif "ERROR" == val.upper():
+            return "High"
+        else:
+            raise ValueError(f"Unknown value for severity: {val}")

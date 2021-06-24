@@ -1,4 +1,3 @@
-# from selenium.webdriver.support.ui import Select
 import unittest
 import sys
 from base_test_class import BaseTestCase
@@ -34,8 +33,6 @@ class UserTest(BaseTestCase):
         # Email Address
         driver.find_element_by_id("id_email").clear()
         driver.find_element_by_id("id_email").send_keys("propersam@example.com")
-        # Give user super user permissions by ticking the checkbox 'is_superuser'
-        driver.find_element_by_name("is_superuser").click()  # Clicking will mark the checkbox
         # "Click" the submit button to complete the transaction
         driver.find_element_by_css_selector("input.btn.btn-primary").click()
         # Query the site to determine if the user has been created
@@ -59,10 +56,10 @@ class UserTest(BaseTestCase):
         driver.find_element_by_id("id_username").send_keys("propersahm")
         # click on 'apply filter' button
         driver.find_element_by_css_selector("button.btn.btn-sm.btn-primary").click()
-        # only the needed user is now available proceed with clicking 'Edit' button
-        driver.find_element_by_link_text("Edit").click()
-        # Unselect Super Admin Permission from previously created user
-        # and only select Staff Permission
+        # only the needed user is now available, proceed with opening the context menu and clicking 'Edit' button
+        driver.find_element_by_id("dropdownMenuUser").click()
+        driver.find_element_by_id("editUser").click()
+        # Select Superuser and Staff Permission
         driver.find_element_by_name("is_superuser").click()
         driver.find_element_by_name("is_staff").click()
         # "Click" the submit button to complete the transaction
@@ -87,10 +84,12 @@ class UserTest(BaseTestCase):
         driver.find_element_by_id("id_username").send_keys("propersahm")
         # click on 'apply filter' button
         driver.find_element_by_css_selector("button.btn.btn-sm.btn-primary").click()
-        # only the needed user is now available proceed with clicking 'Edit' button
-        driver.find_element_by_link_text("Edit").click()
-        # "Click" the delete button to complete the transaction
-        driver.find_element_by_css_selector("a.btn.btn-danger").click()
+        # only the needed user is now available, proceed with clicking 'View' button
+        driver.find_element_by_id("dropdownMenuUser").click()
+        driver.find_element_by_id("viewUser").click()
+        # in View User dialog open the menu to click the delete entry
+        driver.find_element_by_id("dropdownMenu1").click()
+        driver.find_element_by_id("deleteUser").click()
         # confirm deletion, by clicking delete a second time
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
         # Query the site to determine if the User has been deleted

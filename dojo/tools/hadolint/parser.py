@@ -48,8 +48,6 @@ def get_item(vulnerability, test):
         severity=severity,
         description="File: {}:{}\nVulnerability ID: {}\nDetails: {}\n".format(vulnerability['file'], vulnerability['line'], vulnerability['code'], vulnerability['message']),
         mitigation="No mitigation provided",
-        active=False,
-        verified=False,
         false_p=False,
         duplicate=False,
         out_of_scope=False,

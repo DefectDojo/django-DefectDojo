@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from dojo.utils import get_system_setting, get_full_url
 from dateutil.relativedelta import relativedelta
@@ -25,9 +26,6 @@ def expire_now(risk_acceptance):
 
                 if risk_acceptance.restart_sla_expired:
                     finding.sla_start_date = timezone.now().date()
-
-                if finding.has_jira_issue:
-                    jira_helper.add_simple_jira_comment(jira_instance, finding.jira_issue, jira_comment)
 
                 finding.save(dedupe_option=False)
                 reactivated_findings.append(finding)
