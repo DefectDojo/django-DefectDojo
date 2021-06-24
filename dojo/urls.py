@@ -18,7 +18,9 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     UsersViewSet, ImportScanView, ReImportScanView, ProductTypeViewSet, DojoMetaViewSet, \
     DevelopmentEnvironmentViewSet, NotesViewSet, NoteTypeViewSet, SystemSettingsViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
-    SonarqubeProductViewSet, RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet
+    SonarqubeProductViewSet, RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
+    DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
+    DojoGroupMemberViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -35,6 +37,7 @@ from dojo.search.urls import urlpatterns as search_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.user.urls import urlpatterns as user_urls
+from dojo.group.urls import urlpatterns as group_urls
 from dojo.jira_link.urls import urlpatterns as jira_urls
 from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
@@ -53,6 +56,10 @@ from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.regulations.urls import urlpatterns as regulations
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+import logging
+logger = logging.getLogger(__name__)
 
 admin.autodiscover()
 
@@ -73,8 +80,14 @@ v2_api.register(r'jira_projects', JiraProjectViewSet)
 v2_api.register(r'products', ProductViewSet)
 v2_api.register(r'product_types', ProductTypeViewSet)
 if settings.FEATURE_AUTHORIZATION_V2:
+    v2_api.register(r'dojo_groups', DojoGroupViewSet)
+    v2_api.register(r'dojo_group_members', DojoGroupMemberViewSet)
     v2_api.register(r'product_type_members', ProductTypeMemberViewSet)
     v2_api.register(r'product_members', ProductMemberViewSet)
+    v2_api.register(r'product_type_groups', ProductTypeGroupViewSet)
+    v2_api.register(r'product_groups', ProductGroupViewSet)
+    v2_api.register(r'roles', RoleViewSet)
+    v2_api.register(r'global_roles', GlobalRoleViewSet)
 v2_api.register(r'sonarqube_issues', SonarqubeIssueViewSet)
 v2_api.register(r'sonarqube_transitions', SonarqubeIssueTransitionViewSet)
 v2_api.register(r'sonarqube_product_configurations', SonarqubeProductViewSet)
@@ -109,6 +122,7 @@ ur += search_urls
 ur += test_type_urls
 ur += test_urls
 ur += user_urls
+ur += group_urls
 ur += jira_urls
 ur += github_urls
 ur += tool_type_urls
@@ -154,9 +168,17 @@ urlpatterns = [
         name='action_history'),
     url(r'^%s' % get_system_setting('url_prefix'), include(ur)),
     url(r'^%sapi/v2/api-token-auth/' % get_system_setting('url_prefix'), tokenviews.obtain_auth_token),
+
+    # drf-yasg = OpenAPI2
     url(r'^%sapi/v2/doc/' % get_system_setting('url_prefix'), schema_view.with_ui('swagger', cache_timeout=0), name='api_v2_schema'),
+
+    # drf-spectacular = OpenAPI3
+    url(r'^%sapi/v2/oa3/schema/' % get_system_setting('url_prefix'), SpectacularAPIView.as_view(), name='schema_oa3'),
+    url(r'^%sapi/v2/oa3/swagger-ui/' % get_system_setting('url_prefix'), SpectacularSwaggerView.as_view(url=get_system_setting('url_prefix') + '/api/v2/oa3/schema/?format=json'), name='swagger-ui_oa3'),
+
     url(r'^robots.txt', lambda x: HttpResponse("User-Agent: *\nDisallow: /", content_type="text/plain"), name="robots_file"),
     url(r'^manage_files/(?P<oid>\d+)/(?P<obj_type>\w+)$', views.manage_files, name='manage_files'),
+
 ]
 
 urlpatterns += survey_urls

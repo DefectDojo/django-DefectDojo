@@ -1,0 +1,12 @@
+{
+    "findings": [
+        {
+            "endpoints": [
+                "www.example.com",
+                "localhost",
+                "127.0.0.1:80",
+                "foo.bar/path"
+            ]
+        }
+    ]
+}

@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 import unittest
 import sys
 import time
-from base_test_class import BaseTestCase, on_exception_html_source_logger
+from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 
 
 class WaitForPageLoad(object):
@@ -442,10 +442,12 @@ class ProductTest(BaseTestCase):
         driver.get(self.base_url + "metrics?date=5&view=dashboard")
 
 
-def add_product_tests_to_suite(suite):
+def add_product_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     # Add each test and the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
+    set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
+
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_edit_product_description'))
     suite.addTest(ProductTest('test_add_product_engagement'))
@@ -475,11 +477,8 @@ def add_product_tests_to_suite(suite):
 
 def suite():
     suite = unittest.TestSuite()
-    add_product_tests_to_suite(suite)
-    suite.addTest(ProductTest('enable_jira'))
-    suite.addTest(ProductTest('enable_github'))
-    suite.addTest(ProductTest('enable_block_execution'))
-    add_product_tests_to_suite(suite)
+    add_product_tests_to_suite(suite, jira=False, github=False, block_execution=False)
+    add_product_tests_to_suite(suite, jira=True, github=True, block_execution=True)
 
     return suite
 

@@ -1,10 +1,9 @@
 import csv
 import hashlib
 import io
-import hyperlink
+import json
 
 from dateutil.parser import parse
-
 from dojo.models import Endpoint, Finding
 
 
@@ -20,7 +19,48 @@ class GenericParser(object):
         return "Import Generic findings in CSV format."
 
     def get_findings(self, filename, test, active=None, verified=None):
+        if filename.name.lower().endswith(".csv"):
+            return self.get_findings_csv(filename, test, active, verified)
+        elif filename.name.lower().endswith(".json"):
+            return self.get_findings_json(filename, test, active, verified)
+        else:  # default to CSV like before
+            return self.get_findings_csv(filename, test, active, verified)
 
+    def get_findings_json(self, filename, test, active=None, verified=None):
+        data = json.load(filename)
+        findings = list()
+        for item in data['findings']:
+            # remove endpoints of the dictionnary
+            unsaved_endpoints = None
+            if "endpoints" in item:
+                unsaved_endpoints = item["endpoints"]
+                del item["endpoints"]
+
+            finding = Finding(**item)
+            # manage active/verified overrride
+            if active is not None:
+                finding.active = active
+            if verified is not None:
+                finding.verified = verified
+
+            # manage endpoints
+            if unsaved_endpoints:
+                finding.unsaved_endpoints = []
+                for item in unsaved_endpoints:
+                    if type(item) is str:
+                        if '://' in item:  # is the host full uri?
+                            endpoint = Endpoint.from_uri(item)
+                            # can raise exception if the host is not valid URL
+                        else:
+                            endpoint = Endpoint.from_uri('//' + item)
+                            # can raise exception if there is no way to parse the host
+                    else:
+                        endpoint = Endpoint(**item)
+                    finding.unsaved_endpoints.append(endpoint)
+            findings.append(finding)
+        return findings
+
+    def get_findings_csv(self, filename, test, active=None, verified=None):
         content = filename.read()
         if type(content) is bytes:
             content = content.decode('utf-8')
@@ -65,6 +105,9 @@ class GenericParser(object):
             if finding.severity == 'Unknown':
                 finding.severity = 'Info'
 
+            if "CVSSV3" in row:
+                finding.cvssv3 = row["CVSSV3"]
+
             # manage active/verified overrride
             if active:
                 finding.active = active
@@ -73,17 +116,9 @@ class GenericParser(object):
 
             # manage endpoints
             if 'Url' in row:
-                url = hyperlink.parse(row['Url'])
-                endpoint = Endpoint(
-                    protocol=url.scheme,
-                    host=url.host + (":" + str(url.port)) if url.port is not None else "",
-                    path="/".join(url.path),
-                )
-                if url.query:
-                    endpoint.query = url.query
-                if url.fragment:
-                    endpoint.fragment = url.fragment
-                finding.unsaved_endpoints = [endpoint]
+                finding.unsaved_endpoints = [Endpoint.from_uri(row['Url'])
+                                             if '://' in row['Url'] else
+                                             Endpoint.from_uri("//" + row['Url'])]
 
             # manage internal de-duplication
             key = hashlib.sha256("|".join([
