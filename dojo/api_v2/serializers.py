@@ -1312,7 +1312,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         build_id = data.get('build_id', None)
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
-        sonarqube_config = data.get('commit_hash', None)
+        sonarqube_config = data.get('sonarqube_config', None)
 
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
