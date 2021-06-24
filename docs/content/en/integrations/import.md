@@ -529,6 +529,10 @@ Node Security Platform (NSP) output file can be imported in JSON format.
 Node Package Manager (NPM) Audit plugin output file can be imported in
 JSON format. Only imports the \'advisories\' subtree.
 
+### Nuclei
+
+Import JSON output of nuclei scan report <https://github.com/projectdiscovery/nuclei>
+
 ### Openscap Vulnerability Scan
 
 Import Openscap Vulnerability Scan in XML formats.
