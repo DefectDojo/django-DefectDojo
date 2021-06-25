@@ -27,7 +27,6 @@ class SonarQubeAPI:
                 )
         self.extras = tool_config.extras
         self.session = requests.Session()
-        self.session.verify = False
         self.sonar_api_url = tool_config.url
         if tool_config.authentication_type == "Password":
             self.session.auth = (tool_config.username, prepare_for_view(tool_config.password))

@@ -30,6 +30,7 @@ class SonarQubeApiUpdaterFromSource(object):
             return
 
         client, _ = SonarQubeApiImporter.prepare_client(finding.test)
+        # we don't care about config, each finding know config was used during import
 
         issue = client.get_issue(sonarqube_issue.key)
         if issue:  # Issue could have disappeared in SQ because a previous scan has resolved the issue as fixed

@@ -22,8 +22,8 @@ from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilte
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
-                       Edit_Product_MemberForm, Delete_Product_MemberForm, DeleteSonarqubeConfigurationForm, Add_Product_GroupForm, \
-                       Edit_Product_Group_Form, Delete_Product_GroupForm
+                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm, \
+                       DeleteSonarqubeConfigurationForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
@@ -1592,7 +1592,7 @@ def edit_sonarqube(request, pid, sqcid):
 
     sqc = Sonarqube_Product.objects.get(pk=sqcid)
 
-    if sqc.product.pk != pid:  # user is trying to edit SQ Config from another product (trying to by-pass auth)
+    if sqc.product.pk != int(pid):  # user is trying to edit SQ Config from another product (trying to by-pass auth)
         raise Http404()
 
     if request.method == 'POST':
@@ -1622,7 +1622,7 @@ def delete_sonarqube(request, pid, sqcid):
 
     sqc = Sonarqube_Product.objects.get(pk=sqcid)
 
-    if sqc.product.pk != pid:  # user is trying to delete SQ Config from another product (trying to by-pass auth)
+    if sqc.product.pk != int(pid):  # user is trying to delete SQ Config from another product (trying to by-pass auth)
         raise Http404()
 
     if request.method == 'POST':

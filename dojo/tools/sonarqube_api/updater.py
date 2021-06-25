@@ -105,6 +105,7 @@ class SonarQubeApiUpdater(object):
         logger.debug("Checking if finding '{}' needs to be updated in SonarQube".format(finding))
 
         client, _ = SonarQubeApiImporter.prepare_client(finding.test)
+        # we don't care about config, each finding know config was used during import
 
         target_status = self.get_sonarqube_status_for(finding)
 
