@@ -300,7 +300,7 @@ class TestJFrogXrayUnifiedParser(TestCase):
         self.assertEquals("TABLE statements.\n\nRed Hat Severity: Moderate", item.description[-45:])
         self.assertIsNone(item.mitigation)
         self.assertEquals("7:sqlite:0", item.component_name)
-        self.assertEquals('"packagetype_rpm"', item.tags)
+        self.assertIn('packagetype_rpm', item.tags)
         self.assertEquals("3.7.17-8.el7_7.1", item.component_version)
         self.assertEquals("elastic-docker-remote/elasticsearch/elasticsearch/7.9.1-amd64/", item.file_path)
         self.assertIsNotNone(item.severity_justification)
