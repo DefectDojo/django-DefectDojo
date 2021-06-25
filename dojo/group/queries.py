@@ -40,31 +40,31 @@ def get_authorized_group_members(permission):
         return Dojo_Group_Member.objects.none()
 
     if user.is_superuser:
-        return Dojo_Group_Member.objects.all()
+        return Dojo_Group_Member.objects.all().select_related('role')
 
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Dojo_Group_Member.objects.all()
+        return Dojo_Group_Member.objects.all().select_related('role')
 
     if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
-        return Dojo_Group_Member.objects.all()
+        return Dojo_Group_Member.objects.all().select_related('role')
 
     groups = get_authorized_groups(permission)
-    return Dojo_Group_Member.objects.filter(group__in=groups)
+    return Dojo_Group_Member.objects.filter(group__in=groups).select_related('role')
 
 
 def get_authorized_group_members_for_user(user):
     groups = get_authorized_groups(Permissions.Group_View)
-    group_members = Dojo_Group_Member.objects.filter(user=user, group__in=groups).order_by('group__name')
+    group_members = Dojo_Group_Member.objects.filter(user=user, group__in=groups).order_by('group__name').select_related('role').select_related('group')
     return group_members
 
 
 def get_group_members_for_group(group):
-    return Dojo_Group_Member.objects.filter(group=group)
+    return Dojo_Group_Member.objects.filter(group=group).select_related('role')
 
 
 def get_product_groups_for_group(group):
-    return Product_Group.objects.filter(group=group)
+    return Product_Group.objects.filter(group=group).select_related('role')
 
 
 def get_product_type_groups_for_group(group):
-    return Product_Type_Group.objects.filter(group=group)
+    return Product_Type_Group.objects.filter(group=group).select_related('role')

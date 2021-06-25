@@ -70,7 +70,7 @@ def get_authorized_members_for_product(product, permission):
     user = get_current_user()
 
     if user.is_superuser or user_has_permission(user, product, permission):
-        return Product_Member.objects.filter(product=product).order_by('user__first_name', 'user__last_name')
+        return Product_Member.objects.filter(product=product).order_by('user__first_name', 'user__last_name').select_related('role')
     else:
         return None
 
@@ -80,7 +80,7 @@ def get_authorized_groups_for_product(product, permission):
 
     if user.is_superuser or user_has_permission(user, product, permission):
         authorized_groups = get_authorized_groups(Permissions.Group_View)
-        return Product_Group.objects.filter(product=product, group__in=authorized_groups).order_by('group__name')
+        return Product_Group.objects.filter(product=product, group__in=authorized_groups).order_by('group__name').select_related('role')
     else:
         return None
 
@@ -92,16 +92,16 @@ def get_authorized_product_members(permission):
         return Product_Member.objects.none()
 
     if user.is_superuser:
-        return Product_Member.objects.all()
+        return Product_Member.objects.all().select_related('role')
 
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Product_Member.objects.all()
+        return Product_Member.objects.all().select_related('role')
 
     if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
-        return Product_Member.objects.all()
+        return Product_Member.objects.all().select_related('role')
 
     products = get_authorized_products(permission)
-    return Product_Member.objects.filter(product__in=products)
+    return Product_Member.objects.filter(product__in=products).select_related('role')
 
 
 def get_authorized_product_members_for_user(user, permission):
@@ -111,16 +111,16 @@ def get_authorized_product_members_for_user(user, permission):
         return Product_Member.objects.none()
 
     if request_user.is_superuser:
-        return Product_Member.objects.filter(user=user)
+        return Product_Member.objects.filter(user=user).select_related('role').select_related('product')
 
     if request_user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Product_Member.objects.all(user=user)
+        return Product_Member.objects.filter(user=user).select_related('role').select_related('product')
 
-    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
-        return Product_Member.objects.all(user=user)
+    if hasattr(request_user, 'global_role') and request_user.global_role.role is not None and role_has_permission(request_user.global_role.role.id, permission):
+        return Product_Member.objects.filter(user=user).select_related('role').select_related('product')
 
     products = get_authorized_products(permission)
-    return Product_Member.objects.filter(user=user, product__in=products)
+    return Product_Member.objects.filter(user=user, product__in=products).select_related('role').select_related('product')
 
 
 def get_authorized_product_groups(permission):
@@ -130,13 +130,13 @@ def get_authorized_product_groups(permission):
         return Product_Group.objects.none()
 
     if user.is_superuser:
-        return Product_Group.objects.all()
+        return Product_Group.objects.all().select_related('role')
 
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return Product_Group.objects.all()
 
     products = get_authorized_products(permission)
-    return Product_Group.objects.filter(product__in=products)
+    return Product_Group.objects.filter(product__in=products).select_related('role')
 
 
 def get_authorized_app_analysis(permission):
