@@ -98,7 +98,7 @@ def get_clean_base64(value):
     if value is None:
         return ""
     try:
-        return base64.b64decode(value).decode("utf-8","replace") # wouldn't this be cleaner than below?
+        return base64.b64decode(value).decode("utf-8", "replace")  # wouldn't this be cleaner than below?
     except UnicodeDecodeError as ue:
         # decoding of UTF-8 fail when you have a binary payload in the HTTP response
         # so we just cut it to have only the header and add fake body
