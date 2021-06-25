@@ -16,20 +16,20 @@ class TestNetsparkerParser(TestCase):
             self.assertEqual('16', finding.cwe)
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
-            self.assertEqual("5.5", finding.cvssv3)
+            self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:N/A:N/E:H/RL:O/RC:C", finding.cvssv3)
 
     def test_parse_file_with_multiple_finding(self):
         testfile = open("dojo/unittests/scans/netsparker/netsparker_many_findings.json")
         parser = NetsparkerParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(40, len(findings))
+        self.assertEqual(16, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
             self.assertEqual("Medium", finding.severity)
             self.assertEqual('16', finding.cwe)
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
-            self.assertEqual("5.5", finding.cvssv3)
+            self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:N/A:N/E:H/RL:O/RC:C", finding.cvssv3)
 
         with self.subTest(i=1):
             finding = findings[1]
@@ -37,7 +37,7 @@ class TestNetsparkerParser(TestCase):
             self.assertEqual('89', finding.cwe)
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
-            self.assertEqual("10.0", finding.cvssv3)
+            self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
 
         with self.subTest(i=2):
             finding = findings[2]
@@ -45,4 +45,4 @@ class TestNetsparkerParser(TestCase):
             self.assertEqual('205', finding.cwe)
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
-            self.assertEqual("4.1", finding.cvssv3)
+            self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N/E:H/RL:O/RC:C", finding.cvssv3)
