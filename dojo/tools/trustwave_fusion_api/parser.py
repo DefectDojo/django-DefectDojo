@@ -94,7 +94,7 @@ def get_item(vuln, test):
     finding.severity = vuln["severity"].title()
 
     # Date
-    date_str = vuln["updatedOn"]
+    date_str = vuln["createdOn"]
     date_str = date_str[: len(date_str) - 3] + date_str[-2:]
     finding.date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
 
