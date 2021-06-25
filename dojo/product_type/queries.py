@@ -93,16 +93,16 @@ def get_authorized_product_type_members_for_user(user, permission):
         return Product_Type_Member.objects.none()
 
     if request_user.is_superuser:
-        return Product_Type_Member.objects.filter(user=user).select_related('role').select_related('product_type')
+        return Product_Type_Member.objects.filter(user=user).select_related('role', 'product_type')
 
     if request_user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
-        return Product_Type_Member.objects.filter(user=user).select_related('role').select_related('product_type')
+        return Product_Type_Member.objects.filter(user=user).select_related('role', 'product_type')
 
     if hasattr(request_user, 'global_role') and request_user.global_role.role is not None and role_has_permission(request_user.global_role.role.id, permission):
-        return Product_Type_Member.objects.filter(user=user).select_related('role').select_related('product_type')
+        return Product_Type_Member.objects.filter(user=user).select_related('role', 'product_type')
 
     product_types = get_authorized_product_types(permission)
-    return Product_Type_Member.objects.filter(user=user, product_type__in=product_types).select_related('role').select_related('product_type')
+    return Product_Type_Member.objects.filter(user=user, product_type__in=product_types).select_related('role', 'product_type')
 
 
 def get_authorized_product_type_groups(permission):

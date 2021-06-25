@@ -253,8 +253,7 @@ def change_password(request):
 @user_passes_test(lambda u: u.is_staff)
 def user(request):
     users = Dojo_User.objects.all() \
-        .select_related("usercontactinfo") \
-        .select_related("global_role") \
+        .select_related('usercontactinfo', 'global_role') \
         .order_by('username', 'last_name', 'first_name')
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users.qs, 25)
