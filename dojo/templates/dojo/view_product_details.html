@@ -4,9 +4,11 @@
 {% load display_tags %}
 {% load authorization_tags %}
 {% block add_styles %}
+    {{ block.super }}
   .chart {height: 160px}
 {% endblock %}
 {% block content %}
+    {{ block.super }}
 <div class="row">
   <div class="col-md-8">
     <div class="panel panel-default">
@@ -567,6 +569,7 @@
 </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
   <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
   <!-- Flot Charts JavaScript -->
   <script src="{% static "flot/excanvas.min.js" %}"></script>
