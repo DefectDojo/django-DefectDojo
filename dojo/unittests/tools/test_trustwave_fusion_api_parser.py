@@ -64,5 +64,5 @@ class TestTrustwaveFusionAPIParser(TestCase):
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(str(endpoint), "https://google.com")
         self.assertEqual(endpoint.host, "google.com")
-        self.assertisNone(endpoint.path)
+        self.assertIsNone(endpoint.path)
         self.assertEqual(endpoint.port, 443)
