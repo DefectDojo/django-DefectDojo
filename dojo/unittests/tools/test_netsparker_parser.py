@@ -1,5 +1,3 @@
-import datetime
-
 from django.test import TestCase
 from dojo.models import Test
 from dojo.tools.netsparker.parser import NetsparkerParser
