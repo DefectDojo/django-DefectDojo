@@ -21,13 +21,14 @@ class TestTrustwaveFusionAPIParser(TestCase):
             for endpoint in finding.unsaved_endpoints:
                 endpoint.clean()
 
+        # first example
         finding = findings[0]
         self.assertEqual("CVE-2017-7529", finding.cve)
         self.assertEqual(
             "Vulnerability/Missing Patch; CVEs: CVE-2017-7529", finding.description
         )
-        self.assertEqual(str(finding.unsaved_endpoints[0]), "https://google.com")
 
+        # second example
         finding = findings[1]
         self.assertEqual("CVE-2013-2566", finding.cve)  # We use the first cve
         self.assertEqual(
@@ -60,3 +61,8 @@ class TestTrustwaveFusionAPIParser(TestCase):
         self.assertEqual("2021-06-15T07:48:08.727000+0000", date)
         self.assertEqual("Info", finding.severity)
         self.assertIsNone(finding.cve)  # should be none since CVE is "CVE-NO-MATCH"
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual(str(endpoint), "https://google.com")
+        self.assertEqual(endpoint.host, "google.com")
+        self.assertisNone(endpoint.path)
+        self.assertEqual(endpoint.port, 443)
