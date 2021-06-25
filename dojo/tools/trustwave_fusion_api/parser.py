@@ -98,4 +98,8 @@ def get_item(vuln, test):
     date_str = date_str[: len(date_str) - 3] + date_str[-2:]
     finding.date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
 
+    # Component name
+    if vuln["location"]["applicationName"] != "None":
+        finding.component_name = vuln["location"]["applicationCpe"]
+
     return finding
