@@ -44,7 +44,7 @@ class TestTrustwaveFusionAPIParser(TestCase):
         parser = TrustwaveFusionAPIParser()
         findings = parser.get_findings(testfile, Test())
 
-        self.assertEqual(2, len(findings))
+        self.assertEqual(3, len(findings))  # checking dupes
 
         # endpoint validation
         for finding in findings:
@@ -61,10 +61,12 @@ class TestTrustwaveFusionAPIParser(TestCase):
         self.assertEqual("2021-06-15T07:48:08.727000+0000", date)
         self.assertEqual("Info", finding.severity)
         self.assertIsNone(finding.cve)  # should be none since CVE is "CVE-NO-MATCH"
-        self.assertIsNone(finding.component_name)
-        self.assertIsNone(finding.component_version)
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(str(endpoint), "https://google.com")
         self.assertEqual(endpoint.host, "google.com")
         self.assertIsNone(endpoint.path)
         self.assertEqual(endpoint.port, 443)
+
+        finding = findings[5]  # testing component_name and component_version
+        self.assertEqual("nginx:nginx", finding.component_name)
+        self.assertIsNone("1.20.0", finding.component_version)

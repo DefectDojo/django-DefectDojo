@@ -2,6 +2,7 @@ import json
 import hashlib
 from datetime import datetime
 from dojo.models import Finding, Endpoint
+from cpe import CPE
 
 
 class TrustwaveFusionAPIParser(object):
@@ -57,22 +58,25 @@ def get_item(vuln, test):
         nb_occurences=1,
     )
 
+    # Defining variables
+    location = vuln["location"]
+
     # Endpoint
-    if "url" in vuln["location"] and vuln["location"]["url"] != "None":
-        endpoint = Endpoint.from_uri(vuln["location"]["url"])
+    if "url" in location and location["url"] != "None":
+        endpoint = Endpoint.from_uri(location["url"])
     elif (
-        vuln["location"]["domain"] and vuln["location"]["domain"] != "None"
+        "domain" in location and location["domain"] != "None"
     ):  # fallback to using old way of creating endpoints
         endpoint = Endpoint(
-            protocol=vuln["location"]["applicationProtocol"],
-            host=str(vuln["location"]["domain"]),
-            port=vuln["location"]["port"],
+            protocol=location["applicationProtocol"],
+            host=str(location["domain"]),
+            port=location["port"],
         )
     else:  # no domain, use ip instead
         endpoint = Endpoint(
-            protocol=vuln["location"]["applicationProtocol"],
-            host=str(vuln["location"]["ip"]),
-            port=vuln["location"]["port"],
+            protocol=location["applicationProtocol"],
+            host=str(location["ip"]),
+            port=location["port"],
         )
     finding.unsaved_endpoints = [endpoint]
 
@@ -98,18 +102,14 @@ def get_item(vuln, test):
     date_str = date_str[: len(date_str) - 3] + date_str[-2:]
     finding.date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
 
-    # Component name
-    if (
-        vuln["location"]["applicationName"]
-        and vuln["location"]["applicationName"] != "None"
-    ):
-        finding.component_name = vuln["location"]["applicationName"]
-
-    # Component version
-    if (
-        vuln["location"]["applicationName"]
-        and vuln["location"]["applicationCpe"] != "None"
-    ):
-        finding.component_version = vuln["location"]["applicationCpe"]
+    # Component name and version
+    if "applicationCpe" in location and location["applicationCpe"] != "None":
+        cpe = CPE(location["applicationCpe"])
+        component_name = cpe.get_vendor()[0] + ":" if len(cpe.get_vendor()) > 0 else ""
+        component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
+        finding.component_name = component_name if component_name else None
+        finding.component_version = (
+            cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
+        )
 
     return finding
