@@ -30,12 +30,8 @@ class CheckovParser(object):
 
         findings = list()
         for tree in report:
-            check_type = ''
-            if 'check_type' in tree:
-                check_type = tree['check_type']
-
-            if tree:
-                findings += self.get_items(tree, test, check_type)
+            check_type = tree['check_type']
+            findings += self.get_items(tree, test, check_type)
 
         return findings
 
