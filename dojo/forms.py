@@ -713,7 +713,7 @@ class CheckForm(forms.ModelForm):
 
 class EngForm(forms.ModelForm):
     name = forms.CharField(
-        max_length=300, required=False,
+        max_length=300, required=True,
         help_text="Add a descriptive name to identify this engagement. " +
                   "Without a name the target start date will be used in " +
                   "listings.")

@@ -1,7 +1,7 @@
 from typing import List
 from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
-from rest_framework.fields import DictField
+from rest_framework.fields import DictField, CharField
 
 from dojo.endpoint.utils import endpoint_filter
 from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
@@ -539,6 +539,7 @@ class ProductTypeSerializer(serializers.ModelSerializer):
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
+    name = CharField(label='name', required=True, max_length=300)
     tags = TagListSerializerField(required=False)
 
     class Meta:
