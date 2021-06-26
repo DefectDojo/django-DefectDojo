@@ -966,8 +966,6 @@ def new_eng_for_app(request, pid, cicd=False):
         if form.is_valid():
             # first create the new engagement
             engagement = form.save(commit=False)
-            if not engagement.name:
-                engagement.name = str(engagement.target_start)
             engagement.threat_model = False
             engagement.api_test = False
             engagement.pen_test = False

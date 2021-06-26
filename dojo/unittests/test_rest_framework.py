@@ -665,7 +665,7 @@ class EngagementTest(BaseClass.RESTEndpointTest):
         self.payload = {
             "engagement_type": 'Interactive',
             "report_type": 1,
-            "name": "",
+            "name": "Test",
             "description": "",
             "version": "",
             "target_start": '1937-01-01',
