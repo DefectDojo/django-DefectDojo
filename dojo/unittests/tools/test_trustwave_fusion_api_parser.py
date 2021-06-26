@@ -67,6 +67,7 @@ class TestTrustwaveFusionAPIParser(TestCase):
         self.assertIsNone(endpoint.path)
         self.assertEqual(endpoint.port, 443)
 
-        finding = findings[5]  # testing component_name and component_version
+        # testing component_name and component_version
+        finding = findings[2]
         self.assertEqual("nginx:nginx", finding.component_name)
-        self.assertIsNone("1.20.0", finding.component_version)
+        self.assertEqual("1.20.0", finding.component_version)
