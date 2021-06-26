@@ -108,29 +108,21 @@ env = environ.Env(
     DD_SOCIAL_AUTH_GITLAB_API_URL=(str, 'https://gitlab.com'),
     DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ['api', 'read_user', 'openid', 'profile', 'email']),
     DD_SAML2_ENABLED=(bool, False),
-    DD_SAML2_METADATA_AUTO_CONF_URL=(str, ''),
-    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),
-    DD_SAML2_ASSERTION_URL=(str, ''),
-    DD_SAML2_ENTITY_ID=(str, ''),
+    # Optional: display the idp SAML Logout URL in DefectDojo
     DD_SAML2_LOGOUT_URL=(str, ''),
-    DD_SAML2_DEFAULT_NEXT_URL=(str, '/dashboard'),
-    DD_SAML2_CREATE_USER=(bool, True),
-    DD_SAML2_NEW_USER_PROFILE=(dict, {
-        # The default group name when a new user logs in
-        'USER_GROUPS': [],
-        # The default active status for new users
-        'ACTIVE_STATUS': True,
-        # The staff status for new users
-        'STAFF_STATUS': False,
-        # The superuser status for new users
-        'SUPERUSER_STATUS': False,
-    }),
+    # Metadata is required for SAML, choose either remote url or local file path
+    DD_SAML2_METADATA_AUTO_CONF_URL=(str, ''),
+    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ''),  # ex. '/public/share/idp_metadata.xml'
+    # Optional, default is SITE_URL + /saml2/metadata/
+    DD_SAML2_ENTITY_ID=(str, ''),
+    # Allow to create user that are not already in the Django database
+    DD_SAML2_CREATE_USER=(bool, False),
     DD_SAML2_ATTRIBUTES_MAP=(dict, {
         # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
-        'email': 'Email',
-        'username': 'UserName',
-        'first_name': 'FirstName',
-        'last_name': 'LastName',
+        'Email': ('email', ),
+        'UserName': ('username', ),
+        'Firstname': ('first_name', ),
+        'Lastname': ('last_name', )
     }),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
@@ -438,27 +430,6 @@ SOCIAL_AUTH_AUTH0_DOMAIN = env('DD_SOCIAL_AUTH_AUTH0_DOMAIN')
 SOCIAL_AUTH_AUTH0_SCOPE = env('DD_SOCIAL_AUTH_AUTH0_SCOPE')
 SOCIAL_AUTH_TRAILING_SLASH = env('DD_SOCIAL_AUTH_TRAILING_SLASH')
 
-# For more configuration and customization options, see django-saml2-auth documentation
-# https://github.com/fangli/django-saml2-auth
-SAML2_ENABLED = env('DD_SAML2_ENABLED')
-SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
-SAML2_AUTH = {
-    'ASSERTION_URL': env('DD_SAML2_ASSERTION_URL'),
-    'ENTITY_ID': env('DD_SAML2_ENTITY_ID'),
-    # Optional settings below
-    'DEFAULT_NEXT_URL': env('DD_SAML2_DEFAULT_NEXT_URL'),
-    'CREATE_USER': env('DD_SAML2_CREATE_USER'),
-    'NEW_USER_PROFILE': env('DD_SAML2_NEW_USER_PROFILE'),
-    'ATTRIBUTES_MAP': env('DD_SAML2_ATTRIBUTES_MAP'),
-}
-
-# Metadata is required, choose either remote url or local file path
-if 'DD_SAML2_METADATA_AUTO_CONF_URL' in os.environ or len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:
-    SAML2_AUTH['METADATA_AUTO_CONF_URL'] = env('DD_SAML2_METADATA_AUTO_CONF_URL')
-else:
-    SAML2_AUTH['METADATA_LOCAL_FILE_PATH'] = env('DD_SAML2_METADATA_LOCAL_FILE_PATH')
-
-
 AUTHORIZED_USERS_ALLOW_CHANGE = env('DD_AUTHORIZED_USERS_ALLOW_CHANGE')
 AUTHORIZED_USERS_ALLOW_DELETE = env('DD_AUTHORIZED_USERS_ALLOW_DELETE')
 AUTHORIZED_USERS_ALLOW_STAFF = env('DD_AUTHORIZED_USERS_ALLOW_STAFF')
@@ -487,8 +458,6 @@ LOGIN_EXEMPT_URLS = (
     r'^%sfinding/image/(?P<token>[^/]+)$' % URL_PREFIX,
     r'^%sapi/v2/' % URL_PREFIX,
     r'complete/',
-    r'saml2/login',
-    r'saml2/acs',
     r'empty_questionnaire/([\d]+)/answer'
 )
 
@@ -702,6 +671,148 @@ EMAIL_CONFIG = env.email_url(
     'DD_EMAIL_URL', default='smtp://user@:password@localhost:25')
 
 vars().update(EMAIL_CONFIG)
+
+# ------------------------------------------------------------------------------
+# SAML
+# ------------------------------------------------------------------------------
+# For more configuration and customization options, see djangosaml2 documentation
+# https://djangosaml2.readthedocs.io/contents/setup.html#configuration
+# To override not configurable settings, you can use local_settings.py
+SAML2_ENABLED = env('DD_SAML2_ENABLED')
+SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
+if SAML2_ENABLED:
+    import saml2
+    import saml2.saml
+    from os import path
+    # SSO_URL = env('DD_SSO_URL')
+    SAML_METADATA = {}
+    if len(env('DD_SAML2_METADATA_AUTO_CONF_URL')) > 0:
+        SAML_METADATA['remote'] = [{"url": env('DD_SAML2_METADATA_AUTO_CONF_URL')}]
+    if len(env('DD_SAML2_METADATA_LOCAL_FILE_PATH')) > 0:
+        SAML_METADATA['local'] = [env('DD_SAML2_METADATA_LOCAL_FILE_PATH')]
+    INSTALLED_APPS += ('djangosaml2',)
+    MIDDLEWARE.append('djangosaml2.middleware.SamlSessionMiddleware')
+    AUTHENTICATION_BACKENDS += ('djangosaml2.backends.Saml2Backend',)
+    LOGIN_EXEMPT_URLS += (r'^%ssaml2/' % URL_PREFIX,)
+    SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
+    SAML_IGNORE_LOGOUT_ERRORS = True
+    SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'username'
+    # SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
+    SAML_USE_NAME_ID_AS_USERNAME = True
+    SAML_CREATE_UNKNOWN_USER = env('DD_SAML2_CREATE_USER')
+    SAML_ATTRIBUTE_MAPPING = env('DD_SAML2_ATTRIBUTES_MAP')
+    BASEDIR = path.dirname(path.abspath(__file__))
+    if len(env('DD_SAML2_ENTITY_ID')) == 0:
+        SAML2_ENTITY_ID = '%s/saml2/metadata/' % SITE_URL
+    else:
+        SAML2_ENTITY_ID = env('DD_SAML2_ENTITY_ID')
+
+    SAML_CONFIG = {
+        # full path to the xmlsec1 binary programm
+        'xmlsec_binary': '/usr/bin/xmlsec1',
+
+        # your entity id, usually your subdomain plus the url to the metadata view
+        'entityid': '%s' % SAML2_ENTITY_ID,
+
+        # directory with attribute mapping
+        'attribute_map_dir': path.join(BASEDIR, 'attribute-maps'),
+
+        # this block states what services we provide
+        'service': {
+            # we are just a lonely SP
+            'sp': {
+                'name': 'Defect_Dojo',
+                'name_id_format': saml2.saml.NAMEID_FORMAT_TRANSIENT,
+                'want_response_signed': False,
+                'want_assertions_signed': True,
+                'force_authn': True,
+                'allow_unsolicited': True,
+
+                # For Okta add signed logout requets. Enable this:
+                # "logout_requests_signed": True,
+
+                'endpoints': {
+                    # url and binding to the assetion consumer service view
+                    # do not change the binding or service name
+                    'assertion_consumer_service': [
+                        ('%s/saml2/acs/' % SITE_URL,
+                        saml2.BINDING_HTTP_POST),
+                    ],
+                    # url and binding to the single logout service view
+                    # do not change the binding or service name
+                    'single_logout_service': [
+                        # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
+                        ('%s/saml2/ls/' % SITE_URL,
+                        saml2.BINDING_HTTP_REDIRECT),
+                        ('%s/saml2/ls/post' % SITE_URL,
+                        saml2.BINDING_HTTP_POST),
+                    ],
+                },
+
+                # attributes that this project need to identify a user
+                'required_attributes': ['Email', 'UserName'],
+
+                # attributes that may be useful to have but not required
+                'optional_attributes': ['Firstname', 'Lastname'],
+
+                # in this section the list of IdPs we talk to are defined
+                # This is not mandatory! All the IdP available in the metadata will be considered.
+                # 'idp': {
+                #     # we do not need a WAYF service since there is
+                #     # only an IdP defined here. This IdP should be
+                #     # present in our metadata
+
+                #     # the keys of this dictionary are entity ids
+                #     'https://localhost/simplesaml/saml2/idp/metadata.php': {
+                #         'single_sign_on_service': {
+                #             saml2.BINDING_HTTP_REDIRECT: 'https://localhost/simplesaml/saml2/idp/SSOService.php',
+                #         },
+                #         'single_logout_service': {
+                #             saml2.BINDING_HTTP_REDIRECT: 'https://localhost/simplesaml/saml2/idp/SingleLogoutService.php',
+                #         },
+                #     },
+                # },
+            },
+        },
+
+        # where the remote metadata is stored, local, remote or mdq server.
+        # One metadatastore or many ...
+        'metadata': SAML_METADATA,
+
+        # set to 1 to output debugging information
+        'debug': 0,
+
+        # Signing
+        # 'key_file': path.join(BASEDIR, 'private.key'),  # private part
+        # 'cert_file': path.join(BASEDIR, 'public.pem'),  # public part
+
+        # Encryption
+        # 'encryption_keypairs': [{
+        #     'key_file': path.join(BASEDIR, 'private.key'),  # private part
+        #     'cert_file': path.join(BASEDIR, 'public.pem'),  # public part
+        # }],
+
+        # own metadata settings
+        'contact_person': [
+            {'given_name': 'Lorenzo',
+            'sur_name': 'Gil',
+            'company': 'Yaco Sistemas',
+            'email_address': 'lgs@yaco.es',
+            'contact_type': 'technical'},
+            {'given_name': 'Angel',
+            'sur_name': 'Fernandez',
+            'company': 'Yaco Sistemas',
+            'email_address': 'angel@yaco.es',
+            'contact_type': 'administrative'},
+        ],
+        # you can set multilanguage information here
+        'organization': {
+            'name': [('Yaco Sistemas', 'es'), ('Yaco Systems', 'en')],
+            'display_name': [('Yaco', 'es'), ('Yaco', 'en')],
+            'url': [('http://www.yaco.es', 'es'), ('http://www.yaco.com', 'en')],
+        },
+        'valid_for': 24,  # how long is our metadata valid
+    }
 
 # ------------------------------------------------------------------------------
 # CELERY
