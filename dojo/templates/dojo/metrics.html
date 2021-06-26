@@ -3,6 +3,7 @@
 {% load display_tags %}
 {% load static %}
 {% block add_styles %}
+    {{ block.super }}
     .tabs-below > .nav-tabs,
     .tabs-right > .nav-tabs,
     .tabs-left > .nav-tabs {
@@ -111,6 +112,7 @@
     #chart_div, #chart_div5, #chart_div2, #chart_div3, #chart_div4 {height: 300px}
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <div class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading tight">
@@ -633,6 +635,7 @@
     <br/>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <!-- Flot Charts JavaScript -->
     <script src="{% static "flot/excanvas.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.js" %}"></script>

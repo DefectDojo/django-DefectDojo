@@ -232,6 +232,24 @@
   },
   {
     "pk": 1,
+    "model": "dojo.product_type_member",
+    "fields": {
+      "product_type": 1,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 2,
+    "model": "dojo.product_type_member",
+    "fields": {
+      "product_type": 1,
+      "user": 2,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
     "model": "dojo.report_type",
     "fields": {
       "name": "Type 1",
@@ -377,15 +395,6 @@
     }
   },
   {
-    "pk": 3,
-    "model": "dojo.product_member",
-    "fields": {
-      "product": 1,
-      "user": 3,
-      "role": 4
-    }
-  },
-  {
     "pk": 4,
     "model": "dojo.product_member",
     "fields": {
@@ -395,29 +404,11 @@
     }
   },
   {
-    "pk": 5,
-    "model": "dojo.product_member",
-    "fields": {
-      "product": 2,
-      "user": 3,
-      "role": 4
-    }
-  },
-  {
     "pk": 6,
     "model": "dojo.product_member",
     "fields": {
       "product": 3,
       "user": 1,
-      "role": 4
-    }
-  },
-  {
-    "pk": 7,
-    "model": "dojo.product_member",
-    "fields": {
-      "product": 3,
-      "user": 3,
       "role": 4
     }
   },
@@ -2250,6 +2241,57 @@
     "fields": {
       "user": 3,
       "created": "2018-04-16T06:54:35.940Z"
+    }
+  },
+  {
+    "pk": "1",
+    "model": "dojo.dojo_group",
+    "fields": {
+      "name": "Group 1 Testdata",
+      "description": "Testdata description"
+    }
+  },
+  {
+    "pk": "2",
+    "model": "dojo.dojo_group",
+    "fields": {
+      "name": "Group 2 Testdata",
+      "description": "Testdata description"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.product_type_group",
+    "fields": {
+      "product_type": 1,
+      "group": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.dojo_group_member",
+    "fields": {
+      "group": 1,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.product_group",
+    "fields": {
+      "product": 1,
+      "group": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.global_role",
+    "fields": {
+      "user": 1,
+      "role": 4
     }
   }
 ]

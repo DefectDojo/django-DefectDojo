@@ -24,11 +24,11 @@ def get_authorized_tests(permission, product=None):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Test.objects.all()
 
-        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
+        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
             return Test.objects.all()
 
         for group in get_groups(user):
-            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
+            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
                 return Test.objects.all()
 
         roles = get_roles_for_permission(permission)
@@ -82,11 +82,11 @@ def get_authorized_test_imports(permission):
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return Test_Import.objects.all()
 
-        if hasattr(user, 'global_role') and role_has_permission(user.global_role.role.id, permission):
+        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
             return Test_Import.objects.all()
 
         for group in get_groups(user):
-            if hasattr(group, 'global_role') and role_has_permission(group.global_role.role.id, permission):
+            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
                 return Test_Import.objects.all()
 
         roles = get_roles_for_permission(permission)

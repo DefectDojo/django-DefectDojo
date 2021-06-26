@@ -3,9 +3,11 @@
 {% load display_tags %}
 {% load static %}
 {% block add_css %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -14,6 +16,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Edit a Finding </h3>
     {% if temp %}
         <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
@@ -119,6 +122,7 @@
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>

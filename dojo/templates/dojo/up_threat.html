@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {{ block.super }}
     <form class="form-horizontal" action="{% url 'upload_threatmodel' eng.id %}" enctype="multipart/form-data"
           method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}

@@ -3,6 +3,7 @@
 {% load display_tags %}
 {% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -165,6 +166,7 @@
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 <script>
         var checkbox_count = 0;
         function check_checked_endpoint()
