@@ -50,7 +50,7 @@ class NetsparkerParser(object):
 
             title = item["Name"]
             findingdetail = cleantags(item["Description"])
-            cwe = item["Classification"]["Cwe"] if "Cwe" in item["Classification"] else None
+            cwe = int(item["Classification"]["Cwe"]) if "Cwe" in item["Classification"] else None
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
