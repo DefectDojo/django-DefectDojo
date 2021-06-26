@@ -58,17 +58,17 @@ def get_item(vuln, test):
     )
 
     # Endpoint
-    if vuln["location"]["url"] != "None":
+    if vuln["location"]["url"] and vuln["location"]["url"] != "None":
         endpoint = Endpoint.from_uri(vuln["location"]["url"])
     elif (
-        vuln["location"]["domain"] != "None"
+        vuln["location"]["domain"] and vuln["location"]["domain"] != "None"
     ):  # fallback to using old way of creating endpoints
         endpoint = Endpoint(
             protocol=vuln["location"]["applicationProtocol"],
             host=str(vuln["location"]["domain"]),
             port=vuln["location"]["port"],
         )
-    else:
+    else:  # no domain, use ip instead
         endpoint = Endpoint(
             protocol=vuln["location"]["applicationProtocol"],
             host=str(vuln["location"]["ip"]),
@@ -99,7 +99,17 @@ def get_item(vuln, test):
     finding.date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
 
     # Component name
-    if vuln["location"]["applicationName"] != "None":
-        finding.component_name = vuln["location"]["applicationCpe"]
+    if (
+        vuln["location"]["applicationName"]
+        and vuln["location"]["applicationName"] != "None"
+    ):
+        finding.component_name = vuln["location"]["applicationName"]
+
+    # Component version
+    if (
+        vuln["location"]["applicationName"]
+        and vuln["location"]["applicationCpe"] != "None"
+    ):
+        finding.component_version = vuln["location"]["applicationCpe"]
 
     return finding

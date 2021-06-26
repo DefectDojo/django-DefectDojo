@@ -62,6 +62,7 @@ class TestTrustwaveFusionAPIParser(TestCase):
         self.assertEqual("Info", finding.severity)
         self.assertIsNone(finding.cve)  # should be none since CVE is "CVE-NO-MATCH"
         self.assertIsNone(finding.component_name)
+        self.assertIsNone(finding.component_version)
         endpoint = finding.unsaved_endpoints[0]
         self.assertEqual(str(endpoint), "https://google.com")
         self.assertEqual(endpoint.host, "google.com")
