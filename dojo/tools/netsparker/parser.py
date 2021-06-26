@@ -69,7 +69,6 @@ class NetsparkerParser(object):
                               mitigation=mitigation,
                               impact=impact,
                               references=references,
-                              url=url,
                               cwe=cwe,
                               static_finding=True)
 
