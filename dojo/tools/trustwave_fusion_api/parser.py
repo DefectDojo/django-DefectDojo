@@ -58,7 +58,7 @@ def get_item(vuln, test):
     )
 
     # Endpoint
-    if vuln["location"]["url"] and vuln["location"]["url"] != "None":
+    if "url" in vuln["location"] and vuln["location"]["url"] != "None":
         endpoint = Endpoint.from_uri(vuln["location"]["url"])
     elif (
         vuln["location"]["domain"] and vuln["location"]["domain"] != "None"
