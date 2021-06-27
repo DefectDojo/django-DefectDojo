@@ -10,8 +10,9 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.filters import GroupFilter
-from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, Add_Product_Type_Group_GroupForm, \
-                        Add_Group_MemberForm, Edit_Group_MemberForm, Delete_Group_MemberForm
+from dojo.forms import DojoGroupForm, DeleteGroupForm, Add_Product_Group_GroupForm, \
+    Add_Product_Type_Group_GroupForm, Add_Group_MemberForm, Edit_Group_MemberForm, \
+    Delete_Group_MemberForm, GlobalRoleForm
 from dojo.models import Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.group.queries import get_authorized_groups, get_product_groups_for_group, \
@@ -54,10 +55,25 @@ def edit_group(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     form = DojoGroupForm(instance=group)
 
+    global_role = group.global_role if hasattr(group, 'global_role') else None
+    if global_role is None:
+        global_role_form = GlobalRoleForm()
+    else:
+        global_role_form = GlobalRoleForm(instance=global_role)
+
     if request.method == 'POST':
         form = DojoGroupForm(request.POST, instance=group)
-        if form.is_valid():
+
+        if global_role is None:
+            global_role_form = GlobalRoleForm(request.POST)
+        else:
+            global_role_form = GlobalRoleForm(request.POST, instance=global_role)
+
+        if form.is_valid() and global_role_form.is_valid():
             form.save()
+            global_role = global_role_form.save(commit=False)
+            global_role.group = group
+            global_role.save()
             messages.add_message(request,
                                  messages.SUCCESS,
                                  'Group saved successfully.',
@@ -70,7 +86,8 @@ def edit_group(request, gid):
 
     add_breadcrumb(title="Edit Group", top_level=False, request=request)
     return render(request, "dojo/add_group.html", {
-        'form': form
+        'form': form,
+        'global_role_form': global_role_form,
     })
 
 
@@ -104,13 +121,18 @@ def delete_group(request, gid):
 @user_passes_test(lambda u: u.is_staff)
 def add_group(request):
     form = DojoGroupForm
+    global_role_form = GlobalRoleForm()
     group = None
 
     if request.method == 'POST':
         form = DojoGroupForm(request.POST)
-        if form.is_valid():
+        global_role_form = GlobalRoleForm(request.POST)
+        if form.is_valid() and global_role_form.is_valid():
             group = form.save(commit=False)
             group.save()
+            global_role = global_role_form.save(commit=False)
+            global_role.group = group
+            global_role.save()
             member = Dojo_Group_Member()
             member.user = request.user
             member.group = group
@@ -128,7 +150,8 @@ def add_group(request):
 
     add_breadcrumb(title="Add Group", top_level=False, request=request)
     return render(request, "dojo/add_group.html", {
-        'form': form
+        'form': form,
+        'global_role_form': global_role_form,
     })
 
 
