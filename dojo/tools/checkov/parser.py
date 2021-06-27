@@ -17,8 +17,8 @@ class CheckovParser(object):
     def get_findings(self, json_output, test):
         findings = list()
         if json_output:
-            report = self.parse_json(json_output)
-            for tree in report:
+            deserialized = self.parse_json(json_output)
+            for tree in deserialized:
                 check_type = tree['check_type']
                 findings += self.get_items(tree, test, check_type)
 
@@ -38,18 +38,16 @@ class CheckovParser(object):
         try:
             data = json_output.read()
             try:
-                report = json.loads(str(data, 'utf-8'))
+                deserialized = json.loads(str(data, 'utf-8'))
             except:
-                report = json.loads(data)
+                deserialized = json.loads(data)
         except:
             raise Exception("Invalid format")
 
-        if type(report) is not list:
-            tmp = list()
-            tmp.append(report)
-            report = tmp
-
-        return report
+        if type(deserialized) is not list:
+            return [deserialized]
+        else:
+            return deserialized
 
     def get_items(self, tree, test, check_type):
         items = []
