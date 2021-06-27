@@ -539,7 +539,6 @@ class ProductTypeSerializer(serializers.ModelSerializer):
 
 
 class EngagementSerializer(TaggitSerializer, serializers.ModelSerializer):
-    name = CharField(label='name', required=True, max_length=300)
     tags = TagListSerializerField(required=False)
 
     class Meta:
