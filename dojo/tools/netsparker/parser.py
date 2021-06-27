@@ -1,7 +1,7 @@
 import json
 import re
 
-from dojo.models import Finding
+from dojo.models import Finding, Endpoint
 
 __author__ = "Roy Shoemake"
 __status__ = "Development"
@@ -58,7 +58,7 @@ class NetsparkerParser(object):
             references = cleantags(item["RemedyReferences"])
             url = item["Url"]
             impact = cleantags(item["Impact"])
-            dupe_key = title + item["Name"] + item["Url"]
+            dupe_key = title
             request = item["HttpRequest"]["Content"]
             response = item["HttpResponse"]["Content"]
 
@@ -76,10 +76,12 @@ class NetsparkerParser(object):
                 finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
 
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
+            finding.unsaved_endpoints = [Endpoint.from_uri(url)]
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 find.unsaved_req_resp.extend(finding.unsaved_req_resp)
+                find.unsaved_endpoints.extend(finding.unsaved_endpoints)
             else:
                 dupes[dupe_key] = finding
 
