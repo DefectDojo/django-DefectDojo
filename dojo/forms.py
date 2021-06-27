@@ -715,8 +715,7 @@ class EngForm(forms.ModelForm):
     name = forms.CharField(
         max_length=300, required=False,
         help_text="Add a descriptive name to identify this engagement. " +
-                  "Without a name the target start date will be used in " +
-                  "listings.")
+                  "Without a name the target start date will be set.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     product = forms.ModelChoiceField(label='Product',
