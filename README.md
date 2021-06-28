@@ -134,6 +134,8 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * [Cody Maffucci](https://www.linkedin.com/in/cody-maffucci)
 * Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
 * [Damien Carol](https://www.linkedin.com/in/damien-carol/)
+* [Stefan Fleckenstein](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/)
+
 
 ## Hall of Fame
 
