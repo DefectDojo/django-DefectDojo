@@ -4,9 +4,12 @@
 {% url 'view_engagement' finding.test.engagement.id as engagement_url %}
 {% url 'view_test' finding.test.id as test_url %}
 {% url 'view_finding' finding.id as finding_url %}
-*Title*: [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 
 *Defect Dojo link:* {{ finding_url|full_url }} ({{ finding.id }})
+
+{% if finding.static_finding %}
+*Source:* {{ finding.file_path }}:*{{ finding.sast_source_line }}*
+{% endif %}
 
 *Severity:* {{ finding.severity }}
 {% if finding.cwe > 0 %}
@@ -25,8 +28,6 @@
 
 *Branch/Tag:* {{ finding.test.engagement.branch_tag }}
 
-*BuildID:* {{ finding.test.engagement.build_id }}
-
 *Commit hash:* {{ finding.test.engagement.commit_hash }}
 
 {% if finding.endpoints.all %}
@@ -42,12 +43,6 @@
 {% if finding.component_name %}
 Vulnerable Component: {{finding.component_name }} - {{ finding.component_version }}
 
-{% endif %}
-{% if finding.sast_source_object %}
-Source Object: {{ finding.sast_source_object }}
-Source File: {{ finding.sast_source_file_path }}
-Source Line: {{ finding.sast_source_line }}
-Sink Object: {{ finding.sast_sink_object }}
 {% endif %}
 
 *Description*:
@@ -65,4 +60,3 @@ Sink Object: {{ finding.sast_sink_object }}
 *References*:
 {{ finding.references }}
 
-*Reporter:* [{{ finding.reporter|full_name}} ({{ finding.reporter.email }})|mailto:{{ finding.reporter.email }}]
