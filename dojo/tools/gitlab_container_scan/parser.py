@@ -1,4 +1,3 @@
-import hashlib
 import json
 import textwrap
 from dojo.models import Finding
@@ -20,11 +19,11 @@ class GitlabContainerScanParser(object):
         return "GitLab Container Scan report file can be imported in JSON format (option --json)."
 
     def get_findings(self, file, test):
+
+        findings = []
+
         # Load JSON data from uploaded file
         data = json.load(file)
-
-        # Initial dataset to be deduplicate via JSON key
-        dupes = dict()
 
         # This is required by schema - it won't be null / undefined
         date = data["scan"]["end_time"]
@@ -35,16 +34,7 @@ class GitlabContainerScanParser(object):
             title = vulnerability["message"]
             description = vulnerability["description"]
             severity = self.normalise_severity(vulnerability["severity"])
-
-            component_name = ""
-            component_version = ""
-            try:
-                dependency = vulnerability["location"]["dependency"]
-                component_name = dependency["package"]["name"]
-                component_version = dependency["version"]
-            except:
-                pass
-
+            dependency = vulnerability["location"]["dependency"]
             finding = Finding(
                 title=title,
                 date=date,
@@ -53,6 +43,7 @@ class GitlabContainerScanParser(object):
                 severity=severity,
                 static_finding=True,
                 dynamic_finding=False,
+                unique_id_from_tool=vulnerability["id"],
             )
 
             # Add component fields if not empty
@@ -62,32 +53,25 @@ class GitlabContainerScanParser(object):
                         finding.cve = id["value"]
                     if id.get("type") == "cwe":
                         finding.cwe = id["value"]
-            if component_name != "":
-                finding.component_name = textwrap.shorten(
-                    component_name, width=190, placeholder="..."
-                )
-            if component_version != "":
+
+            # Check package key before name as both is optional on GitLab schema
+            if "package" in dependency:
+                if "name" in dependency["package"]:
+                    finding.component_name = textwrap.shorten(
+                        dependency["package"]["name"], width=190, placeholder="..."
+                    )
+
+            if "version" in dependency:
                 finding.component_version = textwrap.shorten(
-                    component_version, width=90, placeholder="..."
+                    dependency["version"], width=90, placeholder="..."
                 )
 
             if "solution" in vulnerability:
                 finding.mitigation = vulnerability["solution"]
 
-            # internal de-duplication via description + title
-            dupe_key = hashlib.sha256(
-                str(description + title).encode("utf-8")
-            ).hexdigest()
-            if dupe_key in dupes:
-                find = dupes[dupe_key]
-                if finding.description:
-                    find.description += "\n\n-----\n\n" + finding.description
-                find.unsaved_endpoints.extend(finding.unsaved_endpoints)
-                dupes[dupe_key] = find
-            else:
-                dupes[dupe_key] = finding
+            findings.append(finding)
 
-        return list(dupes.values())
+        return findings
 
     def normalise_severity(self, severity):
         """

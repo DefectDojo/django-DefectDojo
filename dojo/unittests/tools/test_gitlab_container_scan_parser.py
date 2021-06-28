@@ -28,6 +28,7 @@ class TestGitlabContainerScanParser(TestCase):
         self.assertEqual("CVE-2019-3462", first_finding.cve)
         self.assertEqual("High", first_finding.severity)
         self.assertEqual("Upgrade apt from 1.4.8 to 1.4.9", first_finding.mitigation)
+        self.assertEqual("df52bc8ce9a2ae56bbcb0c4ecda62123fbd6f69b", first_finding.unique_id_from_tool)
 
     def test_gitlab_container_scan_parser_with_five_vuln_has_five_findings(self):
         testfile = open("dojo/unittests/scans/gitlab_container_scan/gl-container-scanning-report-5-vuln.json")
