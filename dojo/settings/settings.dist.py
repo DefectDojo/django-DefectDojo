@@ -117,7 +117,7 @@ env = environ.Env(
         # The default active status for new users
         'ACTIVE_STATUS': True,
         # The staff status for new users
-        'STAFF_STATUS': False,
+        'STAFF_STATUS': True,
         # The superuser status for new users
         'SUPERUSER_STATUS': False,
     }),
@@ -146,7 +146,7 @@ env = environ.Env(
     DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
     DD_SLA_NOTIFY_POST_BREACH=(int, 7),
     # maximum number of result in search as search can be an expensive operation
-    DD_SEARCH_MAX_RESULTS=(int, 200),
+    DD_SEARCH_MAX_RESULTS=(int, 400),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
     DD_MAX_AUTOCOMPLETE_WORDS=(int, 20000),
     DD_JIRA_SSL_VERIFY=(bool, True),
