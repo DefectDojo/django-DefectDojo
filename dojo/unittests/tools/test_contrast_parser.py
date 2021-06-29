@@ -15,6 +15,9 @@ class TestContrastParser(TestCase):
         testfile = open("dojo/unittests/scans/contrast/contrast-node-goat.csv")
         parser = ContrastParser()
         findings = parser.get_findings(testfile, test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(18, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
@@ -29,7 +32,7 @@ class TestContrastParser(TestCase):
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual('http', endpoint.protocol)
             self.assertEqual('0.0.0.0', endpoint.host)
-            self.assertEqual('/WebGoat/login.mvc', endpoint.path)
+            self.assertEqual('WebGoat/login.mvc', endpoint.path)
         with self.subTest(i=11):
             finding = findings[11]
             self.assertEqual(datetime.date(2018, 4, 23), finding.date.date())
@@ -44,11 +47,11 @@ class TestContrastParser(TestCase):
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual('http', endpoint.protocol)
             self.assertEqual('0.0.0.0', endpoint.host)
-            self.assertEqual('/WebGoat/services/SoapRequest', endpoint.path)
+            self.assertEqual('WebGoat/services/SoapRequest', endpoint.path)
             endpoint = finding.unsaved_endpoints[1]
             self.assertEqual('http', endpoint.protocol)
             self.assertEqual('0.0.0.0', endpoint.host)
-            self.assertEqual('/WebGoat/attack', endpoint.path)
+            self.assertEqual('WebGoat/attack', endpoint.path)
 
     def test_example2_report(self):
         test = Test()
@@ -57,6 +60,9 @@ class TestContrastParser(TestCase):
         testfile = open("dojo/unittests/scans/contrast/vulnerabilities2020-09-21.csv")
         parser = ContrastParser()
         findings = parser.get_findings(testfile, test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
         with self.subTest(i=0):
             finding = findings[0]

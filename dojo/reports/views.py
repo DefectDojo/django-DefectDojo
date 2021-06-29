@@ -1,34 +1,24 @@
 import logging
-import mimetypes
-import os
 import re
 import urllib.parse
 from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.urls import reverse
-from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, JsonResponse
-from django.http import HttpResponse
+from django.http import Http404, HttpResponseForbidden
 from django_filters.filters import _truncate
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-
-from dojo.celery import app
-from dojo.endpoint.views import get_endpoint_ids
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, EndpointReportFilter, ReportFilter, \
+from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
     EndpointFilter, now
-from dojo.forms import ReportOptionsForm, DeleteReportForm
+from dojo.forms import ReportOptionsForm
 from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
-    Dojo_User, Endpoint, Report, Risk_Acceptance
+    Dojo_User, Endpoint, Risk_Acceptance
 from dojo.reports.widgets import CoverPage, PageBreak, TableOfContents, WYSIWYGContent, FindingList, EndpointList, \
     CustomReportJsonForm, ReportOptions, report_widget_factory
-from dojo.tasks import async_pdf_report, async_custom_pdf_report
 from dojo.utils import get_page_items, add_breadcrumb, get_system_setting, get_period_counts_legacy, Product_Tab, \
-    get_words_for_field, redirect
+    get_words_for_field
 from dojo.user.helper import check_auth_users_list
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -58,16 +48,13 @@ def report_url_resolver(request):
 def report_builder(request):
     add_breadcrumb(title="Report Builder", top_level=True, request=request)
     findings = get_authorized_findings(Permissions.Finding_View)
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
+    findings = ReportFindingFilter(request.GET, queryset=findings)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
                                         finding__false_p=False,
                                         finding__duplicate=False,
                                         finding__out_of_scope=False,
                                         ).distinct()
-    ids = get_endpoint_ids(endpoints)
-
-    endpoints = Endpoint.objects.filter(id__in=ids)
 
     endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
@@ -91,14 +78,12 @@ def custom_report(request):
     if form.is_valid():
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
                                                  finding_notes=False, finding_images=False, host=host)
-        report_name = 'Custom PDF Report: ' + request.user.username
         report_format = 'AsciiDoc'
         finding_notes = True
         finding_images = True
 
         if 'report-options' in selected_widgets:
             options = selected_widgets['report-options']
-            report_name = 'Custom PDF Report: ' + options.report_name
             report_format = options.report_type
             finding_notes = (options.include_finding_notes == '1')
             finding_images = (options.include_finding_images == '1')
@@ -106,28 +91,7 @@ def custom_report(request):
         selected_widgets = report_widget_factory(json_data=request.POST['json'], request=request, user=request.user,
                                                  finding_notes=finding_notes, finding_images=finding_images, host=host)
 
-        if report_format == 'PDF':
-            report = Report(name=report_name,
-                            type="Custom",
-                            format=report_format,
-                            requester=request.user,
-                            task_id='tbd',
-                            options=request.POST['json'])
-            report.save()
-            async_custom_pdf_report.delay(report=report,
-                                          template="dojo/custom_pdf_report.html",
-                                          filename="custom_pdf_report.pdf",
-                                          host=host,
-                                          user=request.user,
-                                          uri=request.build_absolute_uri(report.get_url()),
-                                          finding_notes=finding_notes,
-                                          finding_images=finding_images)
-            messages.add_message(request, messages.SUCCESS,
-                                 'Your report is building.',
-                                 extra_tags='alert-success')
-
-            return HttpResponseRedirect(reverse('reports'))
-        elif report_format == 'AsciiDoc':
+        if report_format == 'AsciiDoc':
             widgets = list(selected_widgets.values())
             return render(request,
                           'dojo/custom_asciidoc_report.html',
@@ -154,12 +118,12 @@ def custom_report(request):
 def report_findings(request):
     findings = Finding.objects.filter()
 
-    findings = ReportAuthedFindingFilter(request.GET, queryset=findings)
+    findings = ReportFindingFilter(request.GET, queryset=findings)
 
-    title_words = get_words_for_field(findings.qs, 'title')
-    component_words = get_words_for_field(findings.qs, 'component_name')
+    title_words = get_words_for_field(Finding, 'title')
+    component_words = get_words_for_field(Finding, 'component_name')
 
-    paged_findings = get_page_items(request, findings.qs.order_by('numerical_severity'), 25)
+    paged_findings = get_page_items(request, findings.qs.distinct().order_by('numerical_severity'), 25)
 
     product_type = None
     if 'test__engagement__product__prod_type' in request.GET:
@@ -178,7 +142,6 @@ def report_findings(request):
 
 
 def report_endpoints(request):
-    user = Dojo_User.objects.get(id=request.user.id)
     endpoints = Endpoint.objects.filter(finding__active=True,
                                         finding__verified=True,
                                         finding__false_p=False,
@@ -186,9 +149,6 @@ def report_endpoints(request):
                                         finding__out_of_scope=False,
                                         ).distinct()
 
-    ids = get_endpoint_ids(endpoints)
-
-    endpoints = Endpoint.objects.filter(id__in=ids)
     endpoints = EndpointFilter(request.GET, queryset=endpoints, user=request.user)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
@@ -201,70 +161,6 @@ def report_endpoints(request):
                    })
 
 
-def download_report(request, rid):
-    report = get_object_or_404(Report, id=rid)
-    original_filename = report.file.name
-    file_path = report.file.path
-    fp = open(file_path, 'rb')
-    response = HttpResponse(fp.read())
-    fp.close()
-
-    type, encoding = mimetypes.guess_type(original_filename)
-    if type is None:
-        type = 'application/octet-stream'
-    response['Content-Type'] = type
-    response['Content-Length'] = str(os.stat(file_path).st_size)
-    if encoding is not None:
-        response['Content-Encoding'] = encoding
-
-    # To inspect details for the below code, see http://greenbytes.de/tech/tc2231/
-    if 'WebKit' in request.META['HTTP_USER_AGENT']:
-        # Safari 3.0 and Chrome 2.0 accepts UTF-8 encoded string directly.
-        filename_header = 'filename=%s' % original_filename.encode('utf-8')
-    elif 'MSIE' in request.META['HTTP_USER_AGENT']:
-        # IE does not support internationalized filename at all.
-        # It can only recognize internationalized URL, so we do the trick via routing rules.
-        filename_header = ''
-    else:
-        # For others like Firefox, we follow RFC2231 (encoding extension in HTTP headers).
-        filename_header = 'filename*=UTF-8\'\'%s' % urllib.parse.quote(original_filename.encode('utf-8'))
-    response['Content-Disposition'] = 'attachment; ' + filename_header
-    report.status = 'downloaded'
-    report.save()
-    return response
-
-
-@user_passes_test(lambda u: u.is_staff)
-def delete_report(request, rid):
-    report = get_object_or_404(Report, id=rid)
-
-    form = DeleteReportForm(instance=report)
-
-    if request.method == 'POST':
-        form = DeleteReportForm(request.POST, instance=report)
-        if form.is_valid():
-            report.file.delete()
-            report.delete()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Report deleted successfully.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('reports'))
-        else:
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'Unable to delete Report, please try again.',
-                                 extra_tags='alert-danger')
-    else:
-        return HttpResponseForbidden()
-
-
-def report_status(request, rid):
-    report = get_object_or_404(Report, id=rid)
-    return JsonResponse({'status': report.status,
-                         'id': report.id})
-
-
 def report_cover_page(request):
     report_title = request.GET.get('title', 'Report')
     report_subtitle = request.GET.get('subtitle', '')
@@ -275,72 +171,6 @@ def report_cover_page(request):
                   {'report_title': report_title,
                    'report_subtitle': report_subtitle,
                    'report_info': report_info})
-
-
-def revoke_report(request, rid):
-    report = get_object_or_404(Report, id=rid)
-
-    form = DeleteReportForm(instance=report)
-
-    if request.method == 'POST':
-        form = DeleteReportForm(request.POST, instance=report)
-        if form.is_valid():
-            app.control.revoke(report.task_id, terminate=True)
-            report.file.delete()
-            report.delete()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Report generation stopped and report deleted successfully.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('reports'))
-        else:
-            messages.add_message(request,
-                                 messages.ERROR,
-                                 'Unable to stop Report, please try again.',
-                                 extra_tags='alert-danger')
-    else:
-        return HttpResponseForbidden()
-
-
-def reports(request):
-    if request.user.is_staff:
-        reports = Report.objects.all()
-    else:
-        reports = Report.objects.filter(requester=request.user)
-
-    reports = ReportFilter(request.GET, queryset=reports)
-
-    paged_reports = get_page_items(request, reports.qs, 25)
-
-    add_breadcrumb(title="Report List", top_level=True, request=request)
-
-    return render(request,
-                  'dojo/reports.html',
-                  {'report_list': reports,
-                   'reports': paged_reports})
-
-
-def regen_report(request, rid):
-    report = get_object_or_404(Report, id=rid)
-    if report.type != 'Custom':
-        return redirect(request, report.options + "&regen=" + rid)
-    else:
-        report.datetime = timezone.now()
-        report.status = 'requested'
-        if report.requester.username != request.user.username:
-            report.requester = request.user
-        report.save()
-        async_custom_pdf_report.delay(report=report,
-                                      template="dojo/custom_pdf_report.html",
-                                      filename="custom_pdf_report.pdf",
-                                      host=report_url_resolver(request),
-                                      user=request.user,
-                                      uri=request.build_absolute_uri(report.get_url()))
-        messages.add_message(request, messages.SUCCESS,
-                             'Your report is building.',
-                             extra_tags='alert-success')
-
-        return HttpResponseRedirect(reverse('reports'))
 
 
 @user_is_authorized(Product_Type, Permissions.Product_Type_View, 'ptid', 'view')
@@ -390,8 +220,6 @@ def product_endpoint_report(request, pid):
                                            finding__out_of_scope=False,
                                            ).values_list('id', flat=True)
 
-    # ids = get_endpoint_ids(endpoints)
-
     endpoints = prefetch_related_endpoints_for_report(Endpoint.objects.filter(id__in=endpoint_ids))
     endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
@@ -409,7 +237,6 @@ def product_endpoint_report(request, pid):
     add_breadcrumb(parent=product, title="Vulnerable Product Endpoints Report", top_level=False, request=request)
     report_form = ReportOptionsForm()
 
-    filename = "product_endpoint_report.pdf"
     template = "dojo/product_endpoint_pdf_report.html"
     report_name = "Product Endpoint Report: " + str(product)
     report_title = "Product Endpoint Report"
@@ -475,53 +302,6 @@ def product_endpoint_report(request, pid):
                            'user': request.user,
                            'title': 'Generate Report',
                            })
-        elif report_format == 'PDF':
-            endpoints = endpoints.qs.order_by('finding__numerical_severity')
-            # lets create the report object and send it in to celery task
-            if 'regen' in request.GET:
-                # we should already have a report object, lets get and use it
-                report = get_object_or_404(Report, id=request.GET['regen'])
-                report.datetime = timezone.now()
-                report.status = 'requested'
-                if report.requester.username != request.user.username:
-                    report.requester = request.user
-            else:
-                report = Report(name="Product Endpoints " + str(product),
-                                type="Product Endpoint",
-                                format='PDF',
-                                requester=request.user,
-                                task_id='tbd',
-                                options=request.path + "?" + request.GET.urlencode())
-            report.save()
-            async_pdf_report.delay(report=report,
-                                   template=template,
-                                   filename=filename,
-                                   report_title=report_title,
-                                   report_subtitle=report_subtitle,
-                                   report_info=report_info,
-                                   context={'product': product,
-                                            'endpoints': endpoints,
-                                            'accepted_findings': accepted_findings,
-                                            'open_findings': open_findings,
-                                            'closed_findings': closed_findings,
-                                            'verified_findings': verified_findings,
-                                            'report_name': report_name,
-                                            'include_finding_notes': include_finding_notes,
-                                            'include_finding_images': include_finding_images,
-                                            'include_executive_summary': include_executive_summary,
-                                            'include_table_of_contents': include_table_of_contents,
-                                            'include_disclaimer': include_disclaimer,
-                                            'disclaimer': disclaimer,
-                                            'user': user,
-                                            'team_name': get_system_setting('team_name'),
-                                            'title': 'Generate Report',
-                                            'host': report_url_resolver(request),
-                                            'user_id': request.user.id},
-                                   uri=request.build_absolute_uri(report.get_url()))
-            messages.add_message(request, messages.SUCCESS,
-                                 'Your report is building.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('reports'))
         elif report_format == 'HTML':
             return render(request,
                           template,
@@ -563,9 +343,6 @@ def generate_report(request, obj):
     test = None
     endpoint = None
     endpoints = None
-    endpoint_all_findings = None
-    endpoint_monthly_counts = None
-    endpoint_active_findings = None
     accepted_findings = None
     open_findings = None
     closed_findings = None
@@ -622,12 +399,12 @@ def generate_report(request, obj):
     if include_disclaimer and len(disclaimer) == 0:
         disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
+    host_view = "host_view" in request.GET
     report_name = str(obj)
     report_type = type(obj).__name__
     add_breadcrumb(title="Generate Report", top_level=False, request=request)
     if type(obj).__name__ == "Product_Type":
         product_type = obj
-        filename = "product_type_finding_report.pdf"
         template = "dojo/product_type_pdf_report.html"
         report_name = "Product Type Report: " + str(product_type)
         report_title = "Product Type Report"
@@ -664,8 +441,8 @@ def generate_report(request, obj):
                    'report_name': report_name,
                    'endpoint_opened_per_month': endpoint_monthly_counts[
                        'opened_per_period'] if endpoint_monthly_counts is not None else [],
-                   'endpoint_active_findings': findings.qs.order_by('numerical_severity'),
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'endpoint_active_findings': findings.qs.distinct().order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -680,7 +457,6 @@ def generate_report(request, obj):
 
     elif type(obj).__name__ == "Product":
         product = obj
-        filename = "product_finding_report.pdf"
         template = "dojo/product_pdf_report.html"
         report_name = "Product Report: " + str(product)
         report_title = "Product Report"
@@ -690,13 +466,12 @@ def generate_report(request, obj):
         ids = set(finding.id for finding in findings.qs)
         engagements = Engagement.objects.filter(test__finding__id__in=ids).distinct()
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        ids = get_endpoint_ids(Endpoint.objects.filter(product=product).distinct())
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        endpoints = Endpoint.objects.filter(product=product).distinct()
         context = {'product': product,
                    'engagements': engagements,
                    'tests': tests,
                    'report_name': report_name,
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -716,20 +491,18 @@ def generate_report(request, obj):
         findings = ReportFindingFilter(request.GET, engagement=engagement,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(test__engagement=engagement)))
         report_name = "Engagement Report: " + str(engagement)
-        filename = "engagement_finding_report.pdf"
         template = 'dojo/engagement_pdf_report.html'
         report_title = "Engagement Report"
         report_subtitle = str(engagement)
 
         ids = set(finding.id for finding in findings.qs)
         tests = Test.objects.filter(finding__id__in=ids).distinct()
-        ids = get_endpoint_ids(Endpoint.objects.filter(product=engagement.product).distinct())
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        endpoints = Endpoint.objects.filter(product=engagement.product).distinct()
 
         context = {'engagement': engagement,
                    'tests': tests,
                    'report_name': report_name,
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -747,7 +520,6 @@ def generate_report(request, obj):
         test = obj
         findings = ReportFindingFilter(request.GET, engagement=test.engagement,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(test=test)))
-        filename = "test_finding_report.pdf"
         template = "dojo/test_pdf_report.html"
         report_name = "Test Report: " + str(test)
         report_title = "Test Report"
@@ -755,7 +527,7 @@ def generate_report(request, obj):
 
         context = {'test': test,
                    'report_name': report_name,
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -770,22 +542,26 @@ def generate_report(request, obj):
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
-        host = endpoint.host_no_port
-        report_name = "Endpoint Report: " + host
+        if host_view:
+            report_name = "Endpoint Host Report: " + endpoint.host
+            endpoints = Endpoint.objects.filter(host=endpoint.host,
+                                                product=endpoint.product).distinct()
+            report_title = "Endpoint Host Report"
+            report_subtitle = endpoint.host
+        else:
+            report_name = "Endpoint Report: " + str(endpoint)
+            endpoints = Endpoint.objects.filter(pk=endpoint.id).distinct()
+            report_title = "Endpoint Report"
+            report_subtitle = str(endpoint)
         report_type = "Endpoint"
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
-                                            product=endpoint.product).distinct()
-        filename = "endpoint_finding_report.pdf"
         template = 'dojo/endpoint_pdf_report.html'
-        report_title = "Endpoint Report"
-        report_subtitle = host
         findings = ReportFindingFilter(request.GET,
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
         context = {'endpoint': endpoint,
                    'endpoints': endpoints,
                    'report_name': report_name,
-                   'findings': findings.qs.order_by('numerical_severity'),
+                   'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
                    'include_executive_summary': include_executive_summary,
@@ -798,16 +574,15 @@ def generate_report(request, obj):
                    'host': report_url_resolver(request),
                    'user_id': request.user.id}
     elif type(obj).__name__ == "QuerySet" or type(obj).__name__ == "CastTaggedQuerySet":
-        findings = ReportAuthedFindingFilter(request.GET,
+        findings = ReportFindingFilter(request.GET,
                                              queryset=prefetch_related_findings_for_report(obj).distinct())
-        filename = "finding_report.pdf"
         report_name = 'Finding'
         report_type = 'Finding'
         template = 'dojo/finding_pdf_report.html'
         report_title = "Finding Report"
         report_subtitle = ''
 
-        context = {'findings': findings.qs.order_by('numerical_severity'),
+        context = {'findings': findings.qs.distinct().order_by('numerical_severity'),
                    'report_name': report_name,
                    'include_finding_notes': include_finding_notes,
                    'include_finding_images': include_finding_images,
@@ -835,7 +610,7 @@ def generate_report(request, obj):
                            'engagement': engagement,
                            'test': test,
                            'endpoint': endpoint,
-                           'findings': findings.qs.order_by('numerical_severity'),
+                           'findings': findings.qs.distinct().order_by('numerical_severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
@@ -847,40 +622,9 @@ def generate_report(request, obj):
                            'title': report_title,
                            'user_id': request.user.id,
                            'host': report_url_resolver(request),
+                           'host_view': host_view,
                            'context': context,
                            })
-
-        elif report_format == 'PDF':
-            if 'regen' in request.GET:
-                # we should already have a report object, lets get and use it
-                report = get_object_or_404(Report, id=request.GET['regen'])
-                report.datetime = timezone.now()
-                report.status = 'requested'
-                if report.requester.username != request.user.username:
-                    report.requester = request.user
-            else:
-                # lets create the report object and send it in to celery task
-                report = Report(name=report_name,
-                                type=report_type,
-                                format='PDF',
-                                requester=request.user,
-                                task_id='tbd',
-                                options=request.path + "?" + request.GET.urlencode())
-            report.save()
-            async_pdf_report.delay(report=report,
-                                   template=template,
-                                   filename=filename,
-                                   report_title=report_title,
-                                   report_subtitle=report_subtitle,
-                                   report_info=report_info,
-                                   context=context,
-                                   uri=request.build_absolute_uri(report.get_url()))
-            messages.add_message(request, messages.SUCCESS,
-                                 'Your report is building.',
-                                 extra_tags='alert-success')
-
-            return HttpResponseRedirect(reverse('reports'))
-
         elif report_format == 'HTML':
             return render(request,
                           template,
@@ -891,7 +635,7 @@ def generate_report(request, obj):
                            'test': test,
                            'endpoint': endpoint,
                            'endpoints': endpoints,
-                           'findings': findings.qs.order_by('numerical_severity'),
+                           'findings': findings.qs.distinct().order_by('numerical_severity'),
                            'include_finding_notes': include_finding_notes,
                            'include_finding_images': include_finding_images,
                            'include_executive_summary': include_executive_summary,
@@ -903,12 +647,13 @@ def generate_report(request, obj):
                            'title': report_title,
                            'user_id': request.user.id,
                            'host': "",
+                           'host_view': host_view,
                            'context': context,
                            })
 
         else:
             raise Http404()
-    paged_findings = get_page_items(request, findings.qs.order_by('numerical_severity'), 25)
+    paged_findings = get_page_items(request, findings.qs.distinct().order_by('numerical_severity'), 25)
 
     product_tab = None
     if engagement:
@@ -920,7 +665,10 @@ def generate_report(request, obj):
     elif product:
         product_tab = Product_Tab(product.id, title="Product Report", tab="findings")
     elif endpoints:
-        product_tab = Product_Tab(endpoint.product.id, title="Endpoint Report", tab="endpoints")
+        if host_view:
+            product_tab = Product_Tab(endpoint.product.id, title="Endpoint Host Report", tab="endpoints")
+        else:
+            product_tab = Product_Tab(endpoint.product.id, title="Endpoint Report", tab="endpoints")
 
     return render(request, 'dojo/request_report.html',
                   {'product_type': product_type,
@@ -932,6 +680,7 @@ def generate_report(request, obj):
                    'findings': findings,
                    'paged_findings': paged_findings,
                    'report_form': report_form,
+                   'host_view': host_view,
                    'context': context,
                    })
 
@@ -1090,7 +839,7 @@ def get_view(filter_lookup, obj_name, obj_id, view):
         elif view == 'verified':
             filter_lookup['verified'] = True
         elif view == 'closed':
-            filter_lookup['is_Mitigated'] = True
+            filter_lookup['is_mitigated'] = True
         elif view == 'accepted':
             filter_lookup['risk_accepted'] = True
         elif view == 'out_of_scope':
@@ -1104,7 +853,7 @@ def get_view(filter_lookup, obj_name, obj_id, view):
             filter_lookup['false_positive'] = False
             filter_lookup['active'] = False
             filter_lookup['duplicate'] = False
-            filter_lookup['is_Mitigated'] = False
+            filter_lookup['is_mitigated'] = False
             filter_lookup['out_of_scope'] = False
 
     return obj

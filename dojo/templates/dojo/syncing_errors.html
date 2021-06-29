@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% block content %}
+    {{ block.super }}
     {% load display_tags %}
     <p>
         Synced with "{{ sheet_title }}" sheet of Spreadsheet "{{ spreadsheet_name }}"

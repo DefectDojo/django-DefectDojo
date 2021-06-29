@@ -4,7 +4,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIClient
 
-from dojo.models import Product_Type, Product, Engagement, Test, Finding, User, Test_Type
+from dojo.models import Product_Type, Product, Engagement, Product_Type_Member, Test, Finding, User, Test_Type, Role
+from dojo.authorization.roles_permissions import Roles
 
 
 class TestBulkRiskAcceptanceApi(APITestCase):
@@ -15,6 +16,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         cls.token = Token.objects.create(user=cls.user)
         cls.product_type = Product_Type.objects.create(name='Web App')
         cls.product = Product.objects.create(prod_type=cls.product_type, name='Flopper', description='Test product')
+        Product_Type_Member.objects.create(product_type=cls.product_type, user=cls.user, role=Role.objects.get(id=Roles.Owner))
         cls.product_2 = Product.objects.create(prod_type=cls.product_type, name='Flopper2', description='Test product2')
         cls.engagement = Engagement.objects.create(product=cls.product, target_start=datetime.date(2000, 1, 1),
                                                    target_end=datetime.date(2000, 2, 1))

@@ -73,10 +73,14 @@ def get_rule_tags(rule):
 
 def get_rule_cwes(rule):
     cwes = []
-    for tag in get_rule_tags(rule):
-        matches = re.search(CWE_REGEX, tag, re.IGNORECASE)
-        if matches:
-            cwes.append(int(matches[0].split("-")[1]))
+    if 'properties' in rule and 'cwe' in rule['properties']:  # condition for njsscan
+        value = rule['properties']['cwe']
+        cwes.append(int(re.split('-|:', value)[1]))
+    else:
+        for tag in get_rule_tags(rule):
+            matches = re.search(CWE_REGEX, tag, re.IGNORECASE)
+            if matches:
+                cwes.append(int(matches[0].split("-")[1]))
     return cwes
 
 
@@ -152,7 +156,7 @@ def get_item(result, rules, artifacts, run_date):
         if len(description) < 150:
             title = description
     description = ''
-    severity = get_severity('warning')
+    severity = get_severity(result.get('level', 'warning'))
     if rule is not None:
         # get the severity from the rule
         if 'defaultConfiguration' in rule:
@@ -170,21 +174,26 @@ def get_item(result, rules, artifacts, run_date):
     # we add a special 'None' case if there is no CWE
     cwes = [0]
     if rule is not None:
-        cwes_extracted = get_rule_cwes(rule)
+        cwes_extracted = get_rule_cwes(result)
         if len(cwes_extracted) > 0:
             cwes = cwes_extracted
 
-    finding = Finding(title=textwrap.shorten(title, 150),
-                    severity=severity,
-                    description=description,
-                    mitigation=mitigation,
-                    references=references,
-                    cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
-                    cwe=cwes[0],
-                    static_finding=True,  # by definition
-                    dynamic_finding=False,  # by definition
-                    file_path=file_path,
-                    line=line)
+    finding = Finding(
+        title=textwrap.shorten(title, 150),
+        severity=severity,
+        description=description,
+        mitigation=mitigation,
+        references=references,
+        cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
+        cwe=cwes[-1],
+        static_finding=True,  # by definition
+        dynamic_finding=False,  # by definition
+        file_path=file_path,
+        line=line,
+    )
+
+    if 'ruleId' in result:
+        finding.vuln_id_from_tool = result['ruleId']
 
     if run_date:
         finding.date = run_date

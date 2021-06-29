@@ -54,6 +54,24 @@
     }
   },
   {
+    "pk": 4,
+    "model": "auth.user",
+    "fields": {
+      "username": "user3",
+      "first_name": "",
+      "last_name": "",
+      "is_active": true,
+      "is_superuser": false,
+      "is_staff": false,
+      "last_login": null,
+      "groups": [],
+      "user_permissions": [],
+      "password": "pbkdf2_sha256$36000$pe8Ff8HrBPac$Lb3ee6/R9z/aL9nM+D2AXWTpIt9Pa9kcLueXxYNy1ZY=",
+      "email": "",
+      "date_joined": "2018-04-13T07:59:51.527Z"
+    }
+  },
+  {
     "pk": "2dqr18yqu9mzb87abk0okid75w2clakl",
     "model": "sessions.session",
     "fields": {
@@ -115,7 +133,6 @@
     "pk": 1,
     "model": "dojo.system_settings",
     "fields": {
-      "s_finding_severity_naming": false,
       "jira_labels": null,
       "team_name": "",
       "url_prefix": "",
@@ -215,6 +232,24 @@
   },
   {
     "pk": 1,
+    "model": "dojo.product_type_member",
+    "fields": {
+      "product_type": 1,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 2,
+    "model": "dojo.product_type_member",
+    "fields": {
+      "product_type": 1,
+      "user": 2,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
     "model": "dojo.report_type",
     "fields": {
       "name": "Type 1",
@@ -296,12 +331,8 @@
       "technical_contact": 3,
       "product_manager": 1,
       "team_manager": 2,
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "authorized_users": [
-        1,
         2,
         3
       ],
@@ -319,10 +350,7 @@
       "technical_contact": 2,
       "product_manager": 2,
       "team_manager": 3,
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "authorized_users": [
         2,
         3
@@ -341,15 +369,47 @@
       "technical_contact": 3,
       "product_manager": 1,
       "team_manager": 3,
-      "manager": "0",
-      "tech_contact": "0",
       "tid": 0,
-      "prod_manager": "0",
       "authorized_users": [
-        1,
         3
       ],
       "description": "test product"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 1,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 2,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 1,
+      "user": 2,
+      "role": 4
+    }
+  },
+  {
+    "pk": 4,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 2,
+      "user": 2,
+      "role": 4
+    }
+  },
+  {
+    "pk": 6,
+    "model": "dojo.product_member",
+    "fields": {
+      "product": 3,
+      "user": 1,
+      "role": 4
     }
   },
   {
@@ -367,30 +427,6 @@
       "website": null,
       "website_found": null,
       "created": "2018-08-16T16:58:23.908Z"
-    }
-  },
-  {
-    "pk": 1,
-    "model": "dojo.engagement_type",
-    "fields": {
-      "name": "Type 1",
-      "id": 1
-    }
-  },
-  {
-    "pk": 2,
-    "model": "dojo.engagement_type",
-    "fields": {
-      "name": "Type 2",
-      "id": 2
-    }
-  },
-  {
-    "pk": 3,
-    "model": "dojo.engagement_type",
-    "fields": {
-      "name": "CI/CD",
-      "id": 3
     }
   },
   {
@@ -428,7 +464,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": 3,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -459,7 +494,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -490,7 +524,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-04",
@@ -524,7 +557,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -555,8 +587,7 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
-      "active": true,
+"active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
       "name": "April monthly engagement",
@@ -586,7 +617,6 @@
       "description": "test Engagement",
       "reason": null,
       "requester": null,
-      "eng_type": null,
       "active": true,
       "done_testing": false,
       "target_end": "2018-04-12",
@@ -605,10 +635,9 @@
       "product": 2,
       "protocol": "http",
       "fragment": null,
-      "fqdn": "example.com",
       "host": "127.0.0.1",
       "query": null,
-      "path": "/endpoint/420/edit/",
+      "path": "endpoint/420/edit/",
       "port": 80
     }
   },
@@ -619,10 +648,9 @@
       "product": 1,
       "protocol": "ftp",
       "fragment": null,
-      "fqdn": "www.example.com",
       "host": "localhost",
       "query": null,
-      "path": "/",
+      "path": null,
       "port": 21
     }
   },
@@ -633,8 +661,7 @@
       "product": 3,
       "protocol": "ssh",
       "fragment": null,
-      "fqdn": "www.example.com",
-      "host": "127.0.1",
+      "host": "127.0.0.1",
       "query": null,
       "path": null,
       "port": 22
@@ -1570,13 +1597,15 @@
     "pk": 2,
     "model": "dojo.jira_instance",
     "fields": {
+        "configuration_name": "Happy little JIRA 2",
         "url": "https://defectdojo.atlassian.net/",
-        "username": "YOUR USERNAME HERE",
-        "password": "YOU API TOKEN HERE",
+        "username": "YOUR USERNAME",
+        "password": "YOU API TOKEN",
         "default_issue_type": "Task",
         "epic_name_id": 10011,
         "open_status_key": 11,
         "close_status_key": 41,
+        "info_mapping_severity": "Trivial",
         "low_mapping_severity": "Low",
         "medium_mapping_severity": "Medium",
         "high_mapping_severity": "High",
@@ -1589,9 +1618,11 @@
     "pk": 3,
     "model": "dojo.jira_instance",
     "fields": {
+      "configuration_name": "Happy little JIRA 3",
       "username": "defect.dojo",
       "default_issue_type": "Task",
       "finding_text": "",
+      "info_mapping_severity": "Trivial",
       "low_mapping_severity": "test severity",
       "url": "http://www.testjira.com",
       "medium_mapping_severity": "test severity",
@@ -1607,9 +1638,11 @@
     "pk": 4,
     "model": "dojo.jira_instance",
     "fields": {
+      "configuration_name": "Happy little JIRA 4",
       "username": "defect.dojo",
       "default_issue_type": "Spike",
       "finding_text": "",
+      "info_mapping_severity": "Trivial",
       "low_mapping_severity": "test severity",
       "url": "http://www.testjira.com",
       "medium_mapping_severity": "test severity",
@@ -2208,6 +2241,57 @@
     "fields": {
       "user": 3,
       "created": "2018-04-16T06:54:35.940Z"
+    }
+  },
+  {
+    "pk": "1",
+    "model": "dojo.dojo_group",
+    "fields": {
+      "name": "Group 1 Testdata",
+      "description": "Testdata description"
+    }
+  },
+  {
+    "pk": "2",
+    "model": "dojo.dojo_group",
+    "fields": {
+      "name": "Group 2 Testdata",
+      "description": "Testdata description"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.product_type_group",
+    "fields": {
+      "product_type": 1,
+      "group": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.dojo_group_member",
+    "fields": {
+      "group": 1,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.product_group",
+    "fields": {
+      "product": 1,
+      "group": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.global_role",
+    "fields": {
+      "user": 1,
+      "role": 4
     }
   }
 ]

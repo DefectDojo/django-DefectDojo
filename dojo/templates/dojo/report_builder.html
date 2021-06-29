@@ -2,6 +2,7 @@
 {% load static %}
 {% load display_tags %}
 {% block content %}
+    {{ block.super }}
     <link href="{% static "google-code-prettify/src/prettify.css" %}" rel="stylesheet"/>
     <div class="row">
         <div class="col-md-8">
@@ -22,11 +23,7 @@
                 </div>
                 <div class="panel-footer">
                     <div class="clearfix">
-                        {% if 'FEATURE_REPORTS_PDF_LIST'|setting_enabled %}
-                            <a class="btn btn-success disabled pull-right run_report" href="#">Save and Run</a>
-                        {% else %}
-                            <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
-                        {% endif %}
+                        <a class="btn btn-success disabled pull-right run_report" href="#">Run</a>
                     </div>
                 </div>
             </div>
@@ -56,6 +53,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script src="{% static "google-code-prettify/src/prettify.js" %}"></script>
     <script src="{% static "bootstrap-wysiwyg/src/bootstrap-wysiwyg.js" %}"></script>
