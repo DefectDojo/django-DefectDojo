@@ -60,7 +60,7 @@ setup(
         'Markdown==3.3.4',
         'pandas>=0.22.0',
         'django-dbbackup>=3.2.0',
-        'whitenoise==4.1.4',
+        'whitenoise==5.2.0',
         'django-environ==0.4.5',
         'titlecase',
         'jsonlines==2.0.0'  # requred by yarn audit parser
