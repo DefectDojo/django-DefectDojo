@@ -3,6 +3,7 @@
 {% load authorization_tags %}
 
 {% block content %}
+    {{ block.super }}
     <h3 id="id_heading"> Product Type {{ pt.name }}</h3>
     <div class="row">
         <div id="tests" class="col-md-8">
@@ -137,12 +138,12 @@
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                                     <li role="presentation">
                                         <a id="addProductTypeMember" href="{% url 'add_product_type_member' pt.id %}">
-                                            <i class="fa fa-plus"></i> Add User
+                                            <i class="fa fa-plus"></i> Add Users
                                         </a>
                                     </li>
                                 </ul>
                                 &nbsp;
-                                <a href="https://defectdojo.github.io/django-DefectDojo/basics/permissions/" target="_blank">
+                                <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                                     <i class="fa fa-question-circle text-low"></i></a>
                             </div>
                             {% endif %}
@@ -182,8 +183,8 @@
                                             </li>
                                             </ul>
                                         </td>
-                                        <td name="member_user">{{ member.user|full_name }}</td>
-                                        <td name="member_role">{% role_as_string member.role %}</td>
+                                        <td name="member_user">{{ member.user.get_full_name }}</td>
+                                        <td name="member_role">{{ member.role }}</td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>
@@ -195,6 +196,80 @@
                         </div>
                     {% endif %}
                 </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="clearfix">
+                        <h4 class="pull-left">Groups</h4>
+                        {% if pt|has_object_permission:"Product_Type_Group_Add" %}
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductTypeGroup"
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Type Group">
+                                <span class="fa fa-bars"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                                <li role="presentation">
+                                    <a id="addProductTypeGroup" href="{% url 'add_product_type_group' pt.id %}">
+                                        <i class="fa fa-plus"></i> Add Groups
+                                    </a>
+                                </li>
+                            </ul>
+                            &nbsp;
+                            <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                                <i class="fa fa-question-circle text-low"></i></a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if groups %}
+                <div class="table-responsive">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Group</th>
+                            <th>Role</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for group in groups %}
+                        <tr>
+                            <td>
+                                <ul>
+                                    <li class="dropdown" style="list-style:none;position:absolute">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                        <ul class="dropdown-menu">
+                                            {% if pt|has_object_permission:"Product_Type_Group_Edit" %}
+                                            <li>
+                                                <a name="editProductTypeGroup" href="{% url 'edit_product_type_group' group.id %}">
+                                                    <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                            </li>
+                                            {% endif %}
+                                            {% if pt|has_object_permission:"Product_Type_Group_Delete" %}
+                                            <li>
+                                                <a name="deleteProductTypeGroup" href="{% url 'delete_product_type_group' group.id %}">
+                                                    <i class="fa fa-trash"></i> Delete</a>
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </td>
+                            <td name="member_user">{{ group.group.name }}</td>
+                            <td name="member_role">{{ group.role }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>No groups found.</em></small>
+                </div>
+                {% endif %}
+            </div>
+
             {% endif %}
         </div>
         <div class="col-md-4">

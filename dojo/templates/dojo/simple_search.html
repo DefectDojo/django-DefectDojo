@@ -3,6 +3,7 @@
 {% load display_tags %}
 
 {% block content %}
+    {{ block.super }}
     <h2> {{ name }} <i class="fa fa-question-circle has-popover" data-trigger="hover"
                        data-content="This simple search function will return results whose findings or finding templates
                                      title, URL, description, endpoints, tags, references, languages or technologies contain the search query and products whose
@@ -178,7 +179,7 @@
                     <table class="table table-bordered table-striped">
                         <thead>
                         <tr>
-                            <th>Test Type</th>
+                            <th>Title</th>
                             <th>Product</th>
                             <th>Engagement</th>
                             <th>Date</th>
@@ -191,7 +192,7 @@
                             {% if test.id %}
                             <tr>
                                 <td><a class="search-finding"
-                                       href="{% url 'view_test' test.id %}">{{ test.test_type }}</a>
+                                       href="{% url 'view_test' test.id %}">{{ test }}</a>
                                     <sup>
                                         {% for tag in test.tags.all %}
                                             <a title="Search {{ tag }}" class="tag-label tag-color"
@@ -237,7 +238,7 @@
                         <tbody>
                         {% for e in endpoints %}
                             <tr>
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}</a>
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                   {% if e.tags %}
                                       <sup>
                                           {% for tag in e.tags.all %}
@@ -246,14 +247,18 @@
                                       </sup>
                                   {% endif %}
                                 </td>
-                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a>
-                                  <sup>
-                                      {% for tag in e.product.tags.all %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color"
-                                             href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
-                                      {% endfor %}
-                                  </sup>
-                                </td>
+                                {% if e.product %}
+                                    <td><a href="{% url 'view_product' e.product.id %}">{{ e.product.name }}</a>
+                                    <sup>
+                                        {% for tag in e.product.tags.all %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
+                                                href="{% url 'simple_search' %}?query=product-tag:{{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                    </sup>
+                                    </td>
+                                {% else %}
+                                    <td>None</td>
+                                {% endif %}
                                 <td>
                                   {% if e.active_finding_count > 0 %}
                                   <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_finding_count }}</a>
@@ -423,7 +428,7 @@
                             <tr>
                                 <td>Endpoint</td>
                                 <td><a class="search-finding"
-                                       href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}</a>
+                                       href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                     <sup>
                                         {% for tag in endpoint.tags.all %}
                                             <a title="Search {{ tag }}" class="tag-label tag-color"
@@ -544,6 +549,7 @@
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="text/javascript">
         {% comment %} django filters do no support a "full_text" query field which is not a field of the model
         so we have to inject it clientside to qavoid duplicating the whole form with hardcoded fields etc. {% endcomment %}

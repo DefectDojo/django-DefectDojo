@@ -1,11 +1,25 @@
 {% extends "base.html" %}
+{% load display_tags %}
 {% block content %}
+    {{ block.super }}
     <h3> User Profile - {{ user.get_full_name }}</h3>
     <div class="row">
         <div class="col-md-7">
             <form class="form-horizontal" method="post">{% csrf_token %}
-                {% include "dojo/form_fields.html" with form=form %}
-                {% include "dojo/form_fields.html" with form=contact_form %}
+                <fieldset>
+                    <legend>Default Information</legend>
+                    {% include "dojo/form_fields.html" with form=form %}
+                </fieldset>
+                        <fieldset>
+                    <legend>Additional Contact Information</legend>
+                    {% include "dojo/form_fields.html" with form=contact_form %}
+                </fieldset>
+                {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+                <fieldset>
+                    <legend>Global Role</legend>
+                    {% include "dojo/form_fields.html" with form=global_role_form %}
+                </fieldset>
+                {% endif %}
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
                         <input class="btn btn-primary" type="submit" value="Submit"/>
@@ -13,18 +27,74 @@
                 </div>
             </form>
         </div>
-        <div class="col-md-4 well">
-            <ul class="list-unstyled">
-                <li><b>Last Login: </b>{{ user.last_login }}</li>
-                <li><b>Date Joined: </b>{{ user.date_joined }}</li>
-            </ul>
-            <div class="center" style="margin: auto; text-align: center;"
-            ">
-            {% if user.has_usable_password %}
-                <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">Change Password</a>
+        <div class="col-md-4">
+            <div class="well">
+                <ul class="list-unstyled">
+                    <li><b>Last Login: </b>{{ user.last_login }}</li>
+                    <li><b>Date Joined: </b>{{ user.date_joined }}</li>
+                </ul>
+                <div class="center" style="margin: auto; text-align: center;">
+                {% if user.has_usable_password %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">Change Password</a>
+                {% endif %}
+                <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">API Key</a>
+                </div>
+            </div>
+            {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="clearfix">
+                        <h4 class="pull-left">Groups</h4>
+                        {% if request.user.is_superuser %}
+                        <div class="dropdown pull-right">
+                            <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-bars"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
+                                <li role="presentation">
+                                    <a id="addGroupMember" href="{% url 'add_group_member_user' user.id %}">
+                                        <i class="fa fa-plus"></i> Add Groups
+                                    </a>
+                                </li>
+                            </ul>
+                            &nbsp;
+                            <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                                <i class="fa fa-question-circle text-low"></i></a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if group_members %}
+                <div class="table-responsive">
+                    <table class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Group</th>
+                            <th>Group role</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for member in group_members %}
+                        <tr>
+                            <td>
+                            </td>
+                            <td name="group_name"><a href="{% url 'view_group' member.group.id %}">{{ member.group }}</a></td>
+                            <td name="group_role">{{ member.role }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="panel-body">
+                    <small class="text-muted"><em>No group members found.</em></small>
+                </div>
+                {% endif %}
+            </div>
             {% endif %}
-            <a class="btn btn-sm btn-primary" href="{% url 'api_key' %}">API Key</a>
         </div>
-    </div>
     </div>
 {% endblock %}

@@ -2,6 +2,7 @@
 {% load event_tags %}
 {% load display_tags %}
 {% block content %}
+    {{ block.super }}
     <table id="content" class="table-full">
         <tr id="open">
             <td class="top">
@@ -9,10 +10,10 @@
                 <table class="table table-bordered table-condensed table-striped table-400">
                     <tr>
                         <th> Product</th>
-                        <th>{% severity_value 'Critical' %}</th>
-                        <th>{% severity_value 'High' %}</th>
-                        <th>{% severity_value 'Medium' %}</th>
-                        <th>{% severity_value 'Low' %}</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
                         <th>Total</th>
                     </tr>
                     {% for key, value in month_all_by_product.items %}
@@ -30,10 +31,10 @@
                 <table class="table table-bordered table-condensed table-striped table-400">
                     <tr>
                         <th> Product</th>
-                        <th>{% severity_value 'Critical' %}</th>
-                        <th>{% severity_value 'High' %}</th>
-                        <th>{% severity_value 'Medium' %}</th>
-                        <th>{% severity_value 'Low' %}</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
                         <th>Total</th>
                     </tr>
                     {% for key, value in week_all_by_product.items %}
@@ -53,10 +54,10 @@
                 <table class="table table-bordered table-condensed table-striped table-400">
                     <tr>
                         <th> Product</th>
-                        <th>{% severity_value 'Critical' %}</th>
-                        <th>{% severity_value 'High' %}</th>
-                        <th>{% severity_value 'Medium' %}</th>
-                        <th>{% severity_value 'Low' %}</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
                         <th>Total</th>
 
                     </tr>
@@ -75,10 +76,10 @@
                 <table class="table table-bordered table-condensed table-striped table-400">
                     <tr>
                         <th> Product</th>
-                        <th>{% severity_value 'Critical' %}</th>
-                        <th>{% severity_value 'High' %}</th>
-                        <th>{% severity_value 'Medium' %}</th>
-                        <th>{% severity_value 'Low' %}</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
                         <th>Total</th>
                     </tr>
                     {% for key, value in week_verified_by_product.items %}
@@ -97,10 +98,10 @@
                 <h4>Remaining Issues</h4>
                 <table class="table table-bordered table-condensed table-striped table-400">
                     <tr>
-                        <th>{% severity_value 'Critical' %}</th>
-                        <th>{% severity_value 'High' %}</th>
-                        <th>{% severity_value 'Medium' %}</th>
-                        <th>{% severity_value 'Low' %}</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
                         <th>Total</th>
                     </tr>
                     <tr>
@@ -118,10 +119,10 @@
                 <table class="table table-bordered table-condensed table-striped table-400">
                     <tr>
                         <th> Product</th>
-                        <th>{% severity_value 'Critical' %}</th>
-                        <th>{% severity_value 'High' %}</th>
-                        <th>{% severity_value 'Medium' %}</th>
-                        <th>{% severity_value 'Low' %}</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
                         <th>Total</th>
                     </tr>
                     {% for key, value in remaining_by_product.items %}
@@ -140,10 +141,10 @@
                 <h4>Average Time to Close (Days)</h4>
                 <table class="table table-bordered table-condensed table-striped table-400">
                     <tr>
-                        <th>{% severity_value 'Critical' %}</th>
-                        <th>{% severity_value 'High' %}</th>
-                        <th>{% severity_value 'Medium' %}</th>
-                        <th>{% severity_value 'Low' %}</th>
+                        <th>Critical</th>
+                        <th>High</th>
+                        <th>Medium</th>
+                        <th>Low</th>
                     </tr>
                     <tr>
                         <td> {{ time_to_close.S0 }} </td>

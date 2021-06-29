@@ -185,6 +185,10 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(items[0].severity, "Medium")
         self.assertEqual(items[0].component_name, "org.owasp:library")
         self.assertEqual(items[0].component_version, "6.7.8")
+        self.assertEqual(
+            items[0].mitigation,
+            "Update org.owasp:library:6.7.8 to at least the version recommended in the description"
+        )
 
     def test_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self):
         content = """<?xml version="1.0"?>
@@ -612,6 +616,10 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(items[0].description, "Description of a bad vulnerability.")
         self.assertEqual(items[0].severity, "High")
         self.assertEqual(items[0].file_path, "adapter-ear1.ear: dom4j-2.1.1.jar")
+        self.assertEqual(
+            items[0].mitigation,
+            "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description"
+        )
 
         self.assertEqual(
             items[1].title, "dom4j:2.1.1.redhat-00001 | Description of a bad vulnerability.(in adapter-ear8.ear: dom4j-2.1.1.jar)"
@@ -621,6 +629,10 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(items[1].description, "Description of a bad vulnerability.")
         self.assertEqual(items[1].severity, "High")
         self.assertEqual(items[1].file_path, "adapter-ear8.ear: dom4j-2.1.1.jar")
+        self.assertEqual(
+            items[1].mitigation,
+            "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description"
+        )
 
         self.assertEqual(
             items[2].title,
@@ -633,6 +645,10 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(
             items[2].file_path, "adapter-ear1.ear: dom4j-extensions-2.1.1.jar"
         )
+        self.assertEqual(
+            items[2].mitigation,
+            "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description"
+        )
 
         # identifier -> package url javascript, no vulnerabilitids, 3 vulnerabilities, relateddependencies without filename (pre v6.0.0)
         self.assertEqual(items[3].title, "yargs-parser:5.0.0 | 1500 Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.Parsing the argument `--foo.__proto__.bar baz'` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.(in yargs-parser:5.0.0)")
@@ -642,6 +658,10 @@ class TestDependencyCheckParser(TestCase):
         # self.assertEqual(items[1].description, "Affected versions of `yargs-parser` are vulnerable to prototype pollution. Arguments are not properly sanitized, allowing an attacker to modify the prototype of `Object`, causing the addition or modification of an existing property that will exist on all objects.Parsing the argument `--foo.__proto__.bar baz&apos;` adds a `bar` property with value `baz` to all objects. This is only exploitable if attackers have control over the arguments being passed to `yargs-parser`.")
         self.assertEqual(items[3].severity, "Low")
         self.assertEqual(items[3].file_path, "yargs-parser:5.0.0")
+        self.assertEqual(
+            items[3].mitigation,
+            "Update yargs-parser:5.0.0 to at least the version recommended in the description"
+        )
 
         self.assertEqual(items[4].title, 'yargs-parser:5.0.0 | yargs-parser could be tricked into adding or modifying properties of Object.prototype using a "__proto__" payload.(in yargs-parser:5.0.0)')
         self.assertEqual(items[4].component_name, "yargs-parser")
@@ -652,6 +672,10 @@ class TestDependencyCheckParser(TestCase):
         )
         self.assertEqual(items[4].severity, "High")
         self.assertEqual(items[4].file_path, "yargs-parser:5.0.0")
+        self.assertEqual(
+            items[4].mitigation,
+            "Update yargs-parser:5.0.0 to at least the version recommended in the description"
+        )
 
         self.assertEqual(
             items[5].title,
@@ -665,6 +689,10 @@ class TestDependencyCheckParser(TestCase):
         )
         self.assertEqual(items[5].severity, "High")
         self.assertEqual(items[5].file_path, "yargs-parser:5.0.0")
+        self.assertEqual(
+            items[5].mitigation,
+            "Update yargs-parser:5.0.0 to at least the version recommended in the description"
+        )
 
         # identifier -> cpe java
         self.assertEqual(
@@ -674,6 +702,10 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(items[6].component_version, "2.1.1.redhat-00001")
         self.assertEqual(items[6].severity, "High")
         self.assertEqual(items[6].file_path, "adapter-ear2.ear: dom4j-2.1.1.jar")
+        self.assertEqual(
+            items[6].mitigation,
+            "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description"
+        )
 
         # identifier -> maven java
         self.assertEqual(
@@ -682,6 +714,10 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(items[7].component_name, "dom4j")
         self.assertEqual(items[7].component_version, "2.1.1")
         self.assertEqual(items[7].severity, "High")
+        self.assertEqual(
+            items[7].mitigation,
+            "Update dom4j:2.1.1 to at least the version recommended in the description"
+        )
 
         # evidencecollected -> single product + single verison javascript
         self.assertEqual(
@@ -691,6 +727,10 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(items[8].component_name, "jquery")
         self.assertEqual(items[8].component_version, "3.1.1")
         self.assertEqual(items[8].severity, "High")
+        self.assertEqual(
+            items[8].mitigation,
+            "Update jquery:3.1.1 to at least the version recommended in the description"
+        )
 
         # evidencecollected -> multiple product + multiple version
         # TODO? Seems like since v6.0.0 there's always a packageurl
