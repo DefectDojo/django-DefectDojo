@@ -50,6 +50,8 @@ def get_item(vulnerability, test):
         mitigation="No mitigation provided",
         false_p=False,
         duplicate=False,
+        static_finding=True,
+        dynamic_finding=False,
         out_of_scope=False,
         mitigated=None,
         impact="No impact provided")
