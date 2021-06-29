@@ -55,7 +55,6 @@ jobs:
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
-          grep version setup.py
           grep appVersion helm/defectdojo/Chart.yaml
           grep version components/package.json
       - name: Push version changes
