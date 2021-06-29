@@ -380,13 +380,36 @@ class UserContactInfo(models.Model):
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
 
 
-class Dojo_Group(models.Model):
+class Role(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True)
-    users = models.ManyToManyField(Dojo_User, blank=True)
+    is_owner = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ('name',)
+
+
+class Dojo_Group(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True, blank=True)
+    users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Dojo_Group_Member(models.Model):
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, help_text="This role determines the permissions of the user to manage the group.", verbose_name="Group role")
+
+
+class Global_Role(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+    group = models.OneToOneField(Dojo_Group, null=True, blank=True, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, help_text="The global role will be applied to all product types and products.", verbose_name="Global role")
 
 
 class Contact(models.Model):
@@ -453,7 +476,7 @@ class Product_Type(models.Model):
          * San Francisco / New York offices
     """
     name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True)
+    description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -808,30 +831,30 @@ class Product(models.Model):
 class Product_Member(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Group(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Member(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Group(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)
-    description = models.CharField(max_length=2000, null=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
 
     class Meta:
         ordering = ['name']
@@ -843,7 +866,7 @@ class Tool_Type(models.Model):
 class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.CharField(max_length=2000, null=True)
+    url = models.CharField(max_length=2000, null=True, blank=True)
     tool_type = models.ForeignKey(Tool_Type, related_name='tool_type', on_delete=models.CASCADE)
     authentication_type = models.CharField(max_length=15,
                                            choices=(
@@ -1096,7 +1119,7 @@ class Endpoint_Status(models.Model):
 
 
 class Endpoint(models.Model):
-    protocol = models.CharField(null=True, blank=True, max_length=10,
+    protocol = models.CharField(null=True, blank=True, max_length=20,
                                  help_text="The communication protocol/scheme such as 'http', 'ftp', 'dns', etc.")
     userinfo = models.CharField(null=True, blank=True, max_length=500,
                               help_text="User info as 'alice', 'bob', etc.")
@@ -1142,7 +1165,7 @@ class Endpoint(models.Model):
                 self.userinfo = None
 
         if self.host:
-            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.host):  # https://tools.ietf.org/html/rfc3986#section-3.2.2
+            if not re.match(r'^[A-Za-z0-9][A-Za-z0-9_\.\-\+]+$', self.host):
                 try:
                     validate_ipv46_address(self.host)
                 except ValidationError:
@@ -1399,7 +1422,7 @@ class Test(models.Model):
             models.Index(fields=['engagement', 'test_type']),
         ]
 
-    def test_type_name(self):
+    def test_type_name(self) -> str:
         return self.test_type.name
 
     def __str__(self):
@@ -3062,8 +3085,8 @@ class Tool_Product_History(models.Model):
 
 class Alerts(models.Model):
     title = models.CharField(max_length=250, default='', null=False)
-    description = models.CharField(max_length=2000, null=True)
-    url = models.URLField(max_length=2000, null=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url = models.URLField(max_length=2000, null=True, blank=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
     user_id = models.ForeignKey(User, null=True, editable=False, on_delete=models.CASCADE)
@@ -3128,7 +3151,7 @@ class Cred_Mapping(models.Model):
 
 class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False)
-    color = models.CharField(max_length=7, null=True, verbose_name='HTML color')
+    color = models.CharField(max_length=7, null=True, blank=True, verbose_name='HTML color')
 
     def __str__(self):
         return self.language
@@ -3169,7 +3192,7 @@ class App_Analysis(models.Model):
 
 
 class Objects_Review(models.Model):
-    name = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     def __str__(self):
@@ -3205,11 +3228,11 @@ class Objects_Product(models.Model):
 class Objects_Engagement(models.Model):
     engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
     object_id = models.ForeignKey(Objects_Product, on_delete=models.CASCADE)
-    build_id = models.CharField(max_length=150, null=True)
+    build_id = models.CharField(max_length=150, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
     full_url = models.URLField(max_length=400, null=True, blank=True)
-    type = models.CharField(max_length=30, null=True)
-    percentUnchanged = models.CharField(max_length=10, null=True)
+    type = models.CharField(max_length=30, null=True, blank=True)
+    percentUnchanged = models.CharField(max_length=10, null=True, blank=True)
 
     def __str__(self):
         data = ""
@@ -3285,7 +3308,7 @@ class Benchmark_Category(models.Model):
 
 class Benchmark_Requirement(models.Model):
     category = models.ForeignKey(Benchmark_Category, on_delete=models.CASCADE)
-    objective_number = models.CharField(max_length=15, null=True)
+    objective_number = models.CharField(max_length=15, null=True, blank=True)
     objective = models.TextField()
     references = models.TextField(blank=True, null=True)
     level_1 = models.BooleanField(default=False)

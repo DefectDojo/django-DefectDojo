@@ -30,12 +30,33 @@ class GenericParser(object):
         data = json.load(filename)
         findings = list()
         for item in data['findings']:
+            # remove endpoints of the dictionnary
+            unsaved_endpoints = None
+            if "endpoints" in item:
+                unsaved_endpoints = item["endpoints"]
+                del item["endpoints"]
+
             finding = Finding(**item)
             # manage active/verified overrride
             if active is not None:
                 finding.active = active
             if verified is not None:
                 finding.verified = verified
+
+            # manage endpoints
+            if unsaved_endpoints:
+                finding.unsaved_endpoints = []
+                for item in unsaved_endpoints:
+                    if type(item) is str:
+                        if '://' in item:  # is the host full uri?
+                            endpoint = Endpoint.from_uri(item)
+                            # can raise exception if the host is not valid URL
+                        else:
+                            endpoint = Endpoint.from_uri('//' + item)
+                            # can raise exception if there is no way to parse the host
+                    else:
+                        endpoint = Endpoint(**item)
+                    finding.unsaved_endpoints.append(endpoint)
             findings.append(finding)
         return findings
 
@@ -95,7 +116,9 @@ class GenericParser(object):
 
             # manage endpoints
             if 'Url' in row:
-                finding.unsaved_endpoints = [Endpoint.from_uri(row['Url'])]
+                finding.unsaved_endpoints = [Endpoint.from_uri(row['Url'])
+                                             if '://' in row['Url'] else
+                                             Endpoint.from_uri("//" + row['Url'])]
 
             # manage internal de-duplication
             key = hashlib.sha256("|".join([

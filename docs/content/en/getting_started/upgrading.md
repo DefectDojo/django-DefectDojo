@@ -62,6 +62,9 @@ Replace the first step above with this one: `docker-compose build`
 
 Follow the usual steps to upgrade as described above.
 
+BEFORE UPGRADING
+- If you are using SAML2 checkout the new [documentaion](https://defectdojo.github.io/django-DefectDojo/integrations/social-authentication/#saml-20) and update you settings following the migration section. We replaced [django-saml2-auth](https://github.com/fangli/django-saml2-auth) with [djangosaml2](https://github.com/IdentityPython/djangosaml2).
+
 AFTER UPGRADING
 - Usual migration process (`python manage.py migrate`) try to migrate all endpoints to new format and merge duplicates.
 - All broken endpoints (which weren't possible to migrate) have red flag 🚩 in standard list of endpoints.
@@ -81,18 +84,41 @@ We decided to name this version 2.0.0 because we did some big cleanups in this r
 - Refactor EndPoint handling/formatting ([#4473](https://github.com/DefectDojo/django-DefectDojo/pull/4473))
 - Upgrade to Django 3.x ([#3632](https://github.com/DefectDojo/django-DefectDojo/pull/3632))
 - PDF Reports removed ([#4418](https://github.com/DefectDojo/django-DefectDojo/pull/4418))
+- Hashcode calculation logic has changed. To update existing findings run: 
+  
+  `./manage.py dedupe --hash_code_only`.
+
+If you're using docker: 
+
+`docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`.
+
+This can take a while depending on your instance size.
 
 - See release notes: https://github.com/DefectDojo/django-DefectDojo/releases/tag/2.0.0
 
-- Hashcode calculation logic has changed. To update existing findings run:
+### Endpoints
 
-    `./manage.py dedupe --hash_code_only`
+- The usual migration process (`python manage.py migrate`) tries to migrate all endpoints to new format and merge duplicates.
+- All broken endpoints (which weren't possible to migrate) have a red flag 🚩 in the standard list of endpoints.
+- Check if all your endpoints were migrated successfully, go to: https://<defect-dojo-url>/endpoint/migrate.
+- Alternatively, this can be run as management command:  `docker-compose exec uwsgi ./manage.py endpoint_migration --dry-run`
+- When all endpoint are fixed (there is not broken endpoint), press "Run migration" in https://<defect-dojo-url>/endpoint/migrate
+- Or, you can run management command: `docker-compose exec uwsgi ./manage.py endpoint_migration`
+- Details about endpoint migration / improvements in https://github.com/DefectDojo/django-DefectDojo/pull/4473
 
-If you're using docker:
+### Authorization
 
-    `docker-compose exec uwsgi ./manage.py dedupe --hash_code_only`
+The new authorization system for Products and Product Types based on roles is the default now. The fields for authorized users are not available anymore, but you can assign roles as described in [Permissions](../../usage/permissions). Users are migrated automatically, so that their permissions are as close as possible to the previous authorization:
+- Superusers will still have all permissions on Products and Product Types, so they must not be changed.
+- Staff users have had all permissions for all product types and products, so they will be get a global role as *Owner*.
+- Product_Members and Product Type_Members will be added for authorized users according to the settings for the previous authorization:
+  - The *Reader* role is set as the default.
+  - If `AUTHORIZED_USERS_ALLOW_STAFF` is `True`, the user will get the *Owner* role for the respective Product or Product Type.
+  - If `AUTHORIZED_USERS_ALLOW_CHANGE` or `AUTHORIZED_USERS_ALLOW_DELETE` is `True`, the user will get the *Writer* role for the respective Product or Product Type.
 
-This can take a while depending on your instance size.
+The new authorization is active for both UI and API. Permissions set via authorized users or via the Django Admin interface are no longer taken into account.
+
+Please review the roles for your users after the upgrade to avoid an unintended permissions creep.
 
 
 ## Upgrading to DefectDojo Version 1.15.x

@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 {% block add_css %}
+    {{ block.super }}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
+    {{ block.super }}
     .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
     width: 70% !important;
     }
@@ -14,6 +16,7 @@
 {% endblock %}
 
 {% block content %}
+    {{ block.super }}
     <form class="form-horizontal" action="{% url 'new_product' %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         {%  if jform %}
@@ -39,6 +42,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="application/javascript">
         $(function () {
