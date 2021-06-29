@@ -385,7 +385,7 @@ XML file from IBM App Scanner.
 
 XML Scan Result File from Immuniweb Scan.
 
-###IntSights Report
+### IntSights Report
 
 IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.). 
 
