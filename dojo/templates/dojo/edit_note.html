@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load static %}
 {% block content %}
+    {{ block.super }}
     <h3> Edit Note</h3><br></br>
     <form class="form-horizontal" action="{% url 'edit_note' note.id page objid %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}

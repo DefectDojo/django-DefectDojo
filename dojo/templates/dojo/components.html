@@ -3,6 +3,7 @@
 {% load display_tags %}
 {% load static %}
 {% block content %}
+    {{ block.super }}
 <div class="row">
     <div class="col-md-12">
         <div class="panel panel-default">
@@ -37,9 +38,9 @@
                     <tr>
                         <td>
                             {% if result.component_name == none %}
-                            <a href="{% url 'findings' %}?has_component=false"><b>{{ result.component_name }}</b></a>
+                            <a href="{% url 'all_findings' %}?has_component=false"><b>{{ result.component_name }}</b></a>
                             {% else %}
-                                <a href="{% url 'findings' %}?component_name={{ result.component_name }}"><b>{{ result.component_name }}</b></a>
+                                <a href="{% url 'all_findings' %}?component_name={{ result.component_name }}"><b>{{ result.component_name }}</b></a>
                             {% endif %}
                         </td>
 
@@ -55,18 +56,18 @@
                         </td>
                         <td class="text-center">
                             {% if result.duplicate and result.component_name == none %}
-                            <a href="{% url 'findings' %}?has_component=false&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            <a href="{% url 'all_findings' %}?has_component=false&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% elif result.duplicate %}
-                            <a href="{% url 'findings' %}?component_name={{ result.component_name }}&duplicate=1"><b>{{ result.duplicate }}</b></a>
+                            <a href="{% url 'all_findings' %}?component_name={{ result.component_name }}&duplicate=1"><b>{{ result.duplicate }}</b></a>
                             {% else %}
                             0
                             {% endif %}
                         </td>
                         <td class="text-center">
                             {% if result.total and result.component_name == none %}
-                            <a href="{% url 'findings' %}?has_component=false"><b>{{ result.total }}</b></a>
+                            <a href="{% url 'all_findings' %}?has_component=false"><b>{{ result.total }}</b></a>
                             {% elif result.total %}
-                            <a href="{% url 'findings' %}?component_name={{ result.component_name }}"><b>{{ result.total }}</b></a>
+                            <a href="{% url 'all_findings' %}?component_name={{ result.component_name }}"><b>{{ result.total }}</b></a>
                             {% else %}
                             0
                             {% endif %}
@@ -83,6 +84,7 @@
 </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 <script>
         $(function () {
             //Ensures dropdown has proper zindex

@@ -49,18 +49,15 @@ For detailed documentation you can visit
 ## Getting Started
 
 We recommend checking out the
-[about](https://defectdojo.github.io/django-DefectDojo/basics/about/) document to
+[Core Data Classes](https://defectdojo.github.io/usage/models/) document to
 learn the terminology of DefectDojo and the
-[getting started guide](https://defectdojo.github.io/django-DefectDojo/running/getting-started/)
+[getting started guide](https://defectdojo.github.io/django-DefectDojo/getting_started/)
 for setting up a new installation.
 We've also created some example
-[workflows](https://defectdojo.github.io/django-DefectDojo/basics/workflows/) that
+[workflows](https://defectdojo.github.io/django-DefectDojo/usage/workflows/) that
 should give you an idea of how to use DefectDojo for your own team.
 
 ## REST APIs
-
-> ** Deprecation notice ** apiv1 is deprecated and EOS is on 12-31-2020. EOL is planned for 06-30-2021.
-> Please move on to apiv2 and raise issues for any unsupported operations.
 
 Defectdojo can be accessed through a Swagger REST API. Please see [the API documentation](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/) or the in-app Swagger documentation.
 
@@ -137,6 +134,8 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * [Cody Maffucci](https://www.linkedin.com/in/cody-maffucci)
 * Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
 * [Damien Carol](https://www.linkedin.com/in/damien-carol/)
+* [Stefan Fleckenstein](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/)
+
 
 ## Hall of Fame
 
@@ -169,6 +168,7 @@ Zohra who contributed to DefectDojo before it was open source.
 [![CloudBees](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png)](https://cloudbees.com/)
 [![WeHackPurple](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png)](https://wehackpurple.com/)
 [![MaibornWolff](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png)](https://www.maibornwolff.de/en)
+[![ARRIVAL](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/arrival.png)](https://arrival.com)
 
 
 Interested in becoming a sponsor and having your logo displayed? Please review

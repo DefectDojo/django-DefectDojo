@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block content %}
-    <h3> Edit Endpoint ({{ endpoint.host }}) Metadata</h3>
+    {{ block.super }}
+    <h3> Edit Endpoint ({{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}) Metadata</h3>
     <p>
         Use the form below to edit the values in each of the metadata fields.  To remove a field, leave the value blank.
     </p>

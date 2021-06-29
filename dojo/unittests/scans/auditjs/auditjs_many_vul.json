@@ -1,0 +1,257 @@
+[
+    {
+      "coordinates": "pkg:npm/express@3.0.0",
+      "description": "Fast, unopinionated, minimalist web framework",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/express@3.0.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/commander@0.6.1",
+      "description": "the complete solution for node.js command-line programs",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/commander@0.6.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/connect@2.6.0",
+      "description": "High performance middleware framework",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/connect@2.6.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": [
+        {
+          "id": "7df31426-09a2-4b5f-a0ab-acc699023c57",
+          "title": "[CVE-2018-3717] connect node module before 2.14.0 suffers from a Cross-Site Scripting (XSS) vuln...",
+          "description": "connect node module before 2.14.0 suffers from a Cross-Site Scripting (XSS) vulnerability due to a lack of validation of file in directory.js middleware.",
+          "cvssScore": 5.4,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:C/C:L/I:L/A:N",
+          "cve": "CVE-2018-3717",
+          "reference": "https://ossindex.sonatype.org/vulnerability/7df31426-09a2-4b5f-a0ab-acc699023c57?component-type=npm&component-name=connect&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        },
+        {
+          "id": "843bf109-df0b-4ef2-8a9d-f2fa2f5ece19",
+          "title": "Cross-Site Scripting with connect.methodOverride()",
+          "description": "This middleware overwrite req.method with the req.body['_method'] value. When you don't catch the error it responds with a default error msg: \"Cannot [METHOD] [URL]\" (https://github.com/senchalabs/connect/blob/6db901f967036ccc3c892b4bcb5bcb59e0b0dca9/lib/proto.js#L155). Because this is not enough sanitized, you can force a Cross-Site Scripting in the response:\n\n~ curl \"localhost:3000\" -d \"_method=<script src=http://martes13.net/a.js></script>\"\nCannot <SCRIPT SRC=HTTP://MARTES13.NET/A.JS></SCRIPT> /\nThis is very dangerous because in a server like ExpressJS it won't be handled with a app.all('/*', ...), so all servers using this middleware are vulnerable.",
+          "cvssScore": 6.5,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+          "reference": "https://ossindex.sonatype.org/vulnerability/843bf109-df0b-4ef2-8a9d-f2fa2f5ece19?component-type=npm&component-name=connect&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        },
+        {
+          "id": "07257200-4d10-45ca-a46a-14b3aa9b2673",
+          "title": "CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+          "description": "The software uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the software does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory.",
+          "cvssScore": 5.8,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:N/A:N",
+          "reference": "https://ossindex.sonatype.org/vulnerability/07257200-4d10-45ca-a46a-14b3aa9b2673?component-type=npm&component-name=connect&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        }
+      ]
+    },
+    {
+      "coordinates": "pkg:npm/bytes@0.1.0",
+      "description": "Utility to parse a string bytes to bytes and vice-versa",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/bytes@0.1.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/cookie@0.0.4",
+      "description": "HTTP server cookie parsing and serialization",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/cookie@0.0.4?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/crc@0.2.0",
+      "description": "Module for calculating Cyclic Redundancy Check (CRC) for Node.js and the Browser.",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/crc@0.2.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/formidable@1.0.11",
+      "description": "A node.js module for parsing form data, especially file uploads.",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/formidable@1.0.11?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/fresh@0.1.0",
+      "description": "HTTP response freshness testing",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/fresh@0.1.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": [
+        {
+          "id": "4e1a10ea-4fa1-4e1e-9571-83362672b97e",
+          "title": "CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')",
+          "description": "The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.",
+          "cvssScore": 7.5,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "reference": "https://ossindex.sonatype.org/vulnerability/4e1a10ea-4fa1-4e1e-9571-83362672b97e?component-type=npm&component-name=fresh&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        }
+      ]
+    },
+    {
+      "coordinates": "pkg:npm/pause@0.0.1",
+      "description": "Pause a stream's data events",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/pause@0.0.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/qs@0.5.1",
+      "description": "A querystring parser that supports nesting and arrays, with a depth limit",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/qs@0.5.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": [
+        {
+          "id": "e9d3e8e7-e367-42d0-b5d7-193cbd96a755",
+          "title": "CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')",
+          "description": "The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.",
+          "cvssScore": 7.5,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "reference": "https://ossindex.sonatype.org/vulnerability/e9d3e8e7-e367-42d0-b5d7-193cbd96a755?component-type=npm&component-name=qs&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        },
+        {
+          "id": "3a3bf289-21dc-4c84-a46e-39280f80bb01",
+          "title": "[CVE-2014-7191]  Resource Management Errors",
+          "description": "The qs module before 1.0.0 in Node.js does not call the compact function for array data, which allows remote attackers to cause a denial of service (memory consumption) by using a large index value to create a sparse array.",
+          "cvssScore": 5,
+          "cvssVector": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
+          "cve": "CVE-2014-7191",
+          "reference": "https://ossindex.sonatype.org/vulnerability/3a3bf289-21dc-4c84-a46e-39280f80bb01?component-type=npm&component-name=qs&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        },
+        {
+          "id": "c99eedca-ca97-4170-a935-defaf176f412",
+          "title": "CWE-20: Improper Input Validation",
+          "description": "The product does not validate or incorrectly validates input that can affect the control flow or data flow of a program.",
+          "cvssScore": 8.2,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
+          "reference": "https://ossindex.sonatype.org/vulnerability/c99eedca-ca97-4170-a935-defaf176f412?component-type=npm&component-name=qs&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        },
+        {
+          "id": "3b7c9a3f-0265-4435-b43d-7dbee2d6a461",
+          "title": "Prototype override protection bypass",
+          "description": "A prototype override protection bypass is possible, which allows attackers to overwrite properties and functions. A previous solution for the problem is incomplete.",
+          "cvssScore": 0,
+          "reference": "https://ossindex.sonatype.org/vulnerability/3b7c9a3f-0265-4435-b43d-7dbee2d6a461?component-type=npm&component-name=qs&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        }
+      ]
+    },
+    {
+      "coordinates": "pkg:npm/send@0.0.4",
+      "description": "Better streaming static file server with Range and conditional-GET support",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/send@0.0.4?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": [
+        {
+          "id": "3a5ca7f8-cd91-4681-a8b5-285ef96915f2",
+          "title": "CWE-200: Information Exposure",
+          "description": "An information exposure is the intentional or unintentional disclosure of information to an actor that is not explicitly authorized to have access to that information.",
+          "cvssScore": 5.3,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "reference": "https://ossindex.sonatype.org/vulnerability/3a5ca7f8-cd91-4681-a8b5-285ef96915f2?component-type=npm&component-name=send&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        }
+      ]
+    },
+    {
+      "coordinates": "pkg:npm/mime@1.2.6",
+      "description": "A comprehensive library for mime-type mapping",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/mime@1.2.6?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": [
+        {
+          "id": "0fa304f3-b464-4e44-b747-1bd5b1922e06",
+          "title": "CWE-400: Uncontrolled Resource Consumption ('Resource Exhaustion')",
+          "description": "The software does not properly restrict the size or amount of resources that are requested or influenced by an actor, which can be used to consume more resources than intended.",
+          "cvssScore": 7.5,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+          "reference": "https://ossindex.sonatype.org/vulnerability/0fa304f3-b464-4e44-b747-1bd5b1922e06?component-type=npm&component-name=mime&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        }
+      ]
+    },
+    {
+      "coordinates": "pkg:npm/range-parser@0.0.4",
+      "description": "Range header field string parser",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/range-parser@0.0.4?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/methods@0.0.1",
+      "description": "HTTP methods that node supports",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/methods@0.0.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/mkdirp@0.3.3",
+      "description": "Recursively mkdir, like `mkdir -p`",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/mkdirp@0.3.3?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/send@0.1.0",
+      "description": "Better streaming static file server with Range and conditional-GET support",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/send@0.1.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": [
+        {
+          "id": "3a5ca7f8-cd91-4681-a8b5-285ef96915f2",
+          "title": "CWE-200: Information Exposure",
+          "description": "An information exposure is the intentional or unintentional disclosure of information to an actor that is not explicitly authorized to have access to that information.",
+          "cvssScore": 5.3,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "reference": "https://ossindex.sonatype.org/vulnerability/3a5ca7f8-cd91-4681-a8b5-285ef96915f2?component-type=npm&component-name=send&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        }
+      ]
+    },
+    {
+      "coordinates": "pkg:npm/auditjs@4.0.25",
+      "description": "Audit dependencies to identify known vulnerabilities and maintenance problems",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/auditjs@4.0.25?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/mysql@2.0.0",
+      "description": "A node.js driver for mysql. It is written in JavaScript, does not require compiling, and is 100% MIT licensed.",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/mysql@2.0.0?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": [
+        {
+          "id": "da5a3b11-c75b-48e7-9c28-1123f0a492bf",
+          "title": "Unverified Certificate",
+          "description": "> When using SSL to connect to a MySQL server, the SSL procedure implemented does not actually check if the remote server has a trusted certificate or not.\n> \n> -- [github.com](https://github.com/mysqljs/mysql/issues/816)",
+          "cvssScore": 0,
+          "reference": "https://ossindex.sonatype.org/vulnerability/da5a3b11-c75b-48e7-9c28-1123f0a492bf?component-type=npm&component-name=mysql&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        },
+        {
+          "id": "fc92a5a0-4117-4809-89d9-ccbef6c87faf",
+          "title": "CWE-20: Improper Input Validation",
+          "description": "The product does not validate or incorrectly validates input that can affect the control flow or data flow of a program.",
+          "cvssScore": 8.2,
+          "cvssVector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:H",
+          "reference": "https://ossindex.sonatype.org/vulnerability/fc92a5a0-4117-4809-89d9-ccbef6c87faf?component-type=npm&component-name=mysql&utm_source=auditjs&utm_medium=integration&utm_content=4.0.25"
+        }
+      ]
+    },
+    {
+      "coordinates": "pkg:npm/bignumber.js@1.0.1",
+      "description": "A library for arbitrary-precision decimal and non-decimal arithmetic",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/bignumber.js@1.0.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/readable-stream@1.1.14",
+      "description": "Streams3, a user-land copy of the stream library from Node.js",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/readable-stream@1.1.14?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/core-util-is@1.0.2",
+      "description": "The `util.is*` functions introduced in Node v0.12.",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/core-util-is@1.0.2?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/isarray@0.0.1",
+      "description": "Array#isArray for older browsers",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/isarray@0.0.1?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/string_decoder@0.10.31",
+      "description": "The string_decoder module from Node core",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/string_decoder@0.10.31?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    },
+    {
+      "coordinates": "pkg:npm/require-all@0.0.3",
+      "description": "An easy way to require all files within a directory.",
+      "reference": "https://ossindex.sonatype.org/component/pkg:npm/require-all@0.0.3?utm_source=auditjs&utm_medium=integration&utm_content=4.0.25",
+      "vulnerabilities": []
+    }
+  ]

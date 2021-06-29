@@ -15,32 +15,39 @@ class CheckovParser(object):
         return "Import JSON reports of Infrastructure as Code vulnerabilities."
 
     def get_findings(self, json_output, test):
+        findings = list()
+        if json_output:
+            deserialized = self.parse_json(json_output)
+            for tree in deserialized:
+                check_type = tree['check_type']
+                findings += self.get_items(tree, test, check_type)
 
-        if json_output is None:
-            return list()
-
-        tree = self.parse_json(json_output)
-
-        check_type = ''
-        if 'check_type' in tree:
-            check_type = tree['check_type']
-
-        if tree:
-            return [data for data in self.get_items(tree, test, check_type)]
-        else:
-            return list()
+        return findings
 
     def parse_json(self, json_output):
+        """Parse JSON report.
+        Checkov may return only one `check_type` (where the report is just a JSON)
+        or more (where the report is an array of JSONs).
+        To address all scenarios we force this method to return a list of JSON objects.
+
+        :param json_output: JSON report
+        :type json_output: file
+        :return: JSON array of objects
+        :rtype: list
+        """
         try:
             data = json_output.read()
             try:
-                tree = json.loads(str(data, 'utf-8'))
+                deserialized = json.loads(str(data, 'utf-8'))
             except:
-                tree = json.loads(data)
+                deserialized = json.loads(data)
         except:
             raise Exception("Invalid format")
 
-        return tree
+        if type(deserialized) is not list:
+            return [deserialized]
+        else:
+            return deserialized
 
     def get_items(self, tree, test, check_type):
         items = []

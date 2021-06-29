@@ -1,7 +1,11 @@
+from drf_spectacular.types import OpenApiTypes
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.utils.decorators import method_decorator
+from drf_yasg.inspectors.base import NotHandled
+from drf_yasg.inspectors.query import CoreAPICompatInspector
 from rest_framework import viewsets, mixins, status
 from rest_framework.response import Response
 from django.db import IntegrityError
@@ -19,13 +23,14 @@ from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Te
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
-    BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member
+    BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
+    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
 from dojo.finding.views import set_finding_as_original_internal, reset_finding_duplicate_status_internal, \
     duplicate_cluster
-from dojo.filters import ReportFindingFilter, ReportAuthedFindingFilter, \
+from dojo.filters import ReportFindingFilter, \
     ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
     ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
 from dojo.risk_acceptance import api as ra_api
@@ -37,15 +42,121 @@ from dojo.api_v2 import serializers, permissions, prefetch, schema
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_product_type_members
-from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, get_authorized_product_members
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_product_type_members, \
+    get_authorized_product_type_groups
+from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, \
+    get_authorized_product_members, get_authorized_product_groups
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
 from dojo.endpoint.queries import get_authorized_endpoints, get_authorized_endpoint_status
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.group.queries import get_authorized_groups, get_authorized_group_members
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
+
+
+# Authorization: authenticated users
+class RoleViewSet(mixins.ListModelMixin,
+                  mixins.RetrieveModelMixin,
+                  viewsets.GenericViewSet):
+    serializer_class = serializers.RoleSerializer
+    queryset = Role.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name')
+    permission_classes = (IsAuthenticated, )
+
+
+# Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class DojoGroupViewSet(prefetch.PrefetchListMixin,
+                       prefetch.PrefetchRetrieveMixin,
+                       mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       mixins.DestroyModelMixin,
+                       mixins.UpdateModelMixin,
+                       mixins.CreateModelMixin,
+                       viewsets.GenericViewSet):
+    serializer_class = serializers.DojoGroupSerializer
+    queryset = Dojo_Group.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'name')
+    swagger_schema = prefetch.get_prefetch_schema(["dojo_groups_list", "dojo_groups_read"],
+        serializers.DojoGroupSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupPermission)
+
+    def get_queryset(self):
+        return get_authorized_groups(Permissions.Group_View).distinct()
+
+
+# Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class DojoGroupMemberViewSet(prefetch.PrefetchListMixin,
+                           prefetch.PrefetchRetrieveMixin,
+                           mixins.ListModelMixin,
+                           mixins.RetrieveModelMixin,
+                           mixins.CreateModelMixin,
+                           mixins.DestroyModelMixin,
+                           mixins.UpdateModelMixin,
+                           viewsets.GenericViewSet):
+    serializer_class = serializers.DojoGroupMemberSerializer
+    queryset = Dojo_Group_Member.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'group_id', 'user_id')
+    swagger_schema = prefetch.get_prefetch_schema(["dojo_group_members_list", "dojo_group_members_read"],
+        serializers.DojoGroupMemberSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasDojoGroupMemberPermission)
+
+    def get_queryset(self):
+        return get_authorized_group_members(Permissions.Group_View).distinct()
+
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+# Authorization: superuser
+class GlobalRoleViewSet(prefetch.PrefetchListMixin,
+                        prefetch.PrefetchRetrieveMixin,
+                        mixins.ListModelMixin,
+                        mixins.RetrieveModelMixin,
+                        mixins.DestroyModelMixin,
+                        mixins.UpdateModelMixin,
+                        mixins.CreateModelMixin,
+                        viewsets.GenericViewSet):
+    serializer_class = serializers.GlobalRoleSerializer
+    queryset = Global_Role.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'user', 'group', 'role')
+    swagger_schema = prefetch.get_prefetch_schema(["global_roles_list", "global_roles_read"],
+        serializers.GlobalRoleSerializer).to_schema()
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
 # Authorization: object-based
@@ -65,6 +176,10 @@ class EndPointViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         return get_authorized_endpoints(Permissions.Endpoint_View).distinct()
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -134,6 +249,10 @@ class EngagementViewSet(mixins.ListModelMixin,
                                                     'risk_acceptance',
                                                     'files').distinct()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_200_OK: ""}
+    )
     @swagger_auto_schema(
         request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
@@ -143,6 +262,10 @@ class EngagementViewSet(mixins.ListModelMixin,
         close_engagement(eng)
         return HttpResponse()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_200_OK: ""}
+    )
     @swagger_auto_schema(
         request_body=no_body, responses={status.HTTP_200_OK: ""}
     )
@@ -152,6 +275,10 @@ class EngagementViewSet(mixins.ListModelMixin,
         reopen_engagement(eng)
         return HttpResponse()
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -176,15 +303,33 @@ class EngagementViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @action(detail=True, methods=["get", "post", "patch"])
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.EngagementToNotesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.EngagementToNotesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post'],
+        request_body=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
+    @action(detail=True, methods=["get", "post"])
     def notes(self, request, pk=None):
         engagement = self.get_object()
         if request.method == 'POST':
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private']
-                note_type = new_note.validated_data['note_type']
+                private = new_note.validated_data.get('private', False)
+                note_type = new_note.validated_data.get('note_type', None)
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
@@ -202,23 +347,27 @@ class EngagementViewSet(mixins.ListModelMixin,
                 "engagement_id": engagement, "notes": [serialized_note.data]
             })
             return Response(serialized_note.data,
-                status=status.HTTP_200_OK)
+                status=status.HTTP_201_CREATED)
         notes = engagement.notes.all()
 
-        serialized_notes = []
-        if notes:
-            serialized_notes = serializers.EngagementToNotesSerializer({
-                    "engagement_id": engagement, "notes": notes
-            })
-            return Response(serialized_notes.data,
-                    status=status.HTTP_200_OK)
-
-        return Response(serialized_notes,
+        serialized_notes = serializers.EngagementToNotesSerializer({
+                "engagement_id": engagement, "notes": notes
+        })
+        return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.EngagementToFilesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.FileSerializer}
+    )
     @swagger_auto_schema(
         method='get',
-        responses={status.HTTP_200_OK: serializers.EngagementToFilesSerializer}
+        responses={status.HTTP_200_OK: serializers.FileSerializer}
     )
     @swagger_auto_schema(
         methods=['post', 'patch'],
@@ -287,6 +436,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
                               mixins.UpdateModelMixin,
                               mixins.CreateModelMixin,
+                              mixins.DestroyModelMixin,
                               viewsets.GenericViewSet):
     serializer_class = serializers.FindingTemplateSerializer
     queryset = Finding_Template.objects.all()
@@ -295,19 +445,25 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
     permission_classes = (IsAdminUser, DjangoModelPermissions)
 
 
-def _finding_related_fields_decorator():
-    return swagger_auto_schema(
-        responses={status.HTTP_200_OK: serializers.FindingSerializer},
-        manual_parameters=[
-            openapi.Parameter(
-                name="related_fields",
-                in_=openapi.IN_QUERY,
-                description="Expand finding external relations (engagement, environment, product, product_type, test, test_type)",
-                type=openapi.TYPE_BOOLEAN)
-        ])
-
-
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("related_fields", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False,
+                                description="Expand finding external relations (engagement, environment, product, \
+                                            product_type, test, test_type)"),
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("related_fields", OpenApiTypes.BOOL, OpenApiParameter.QUERY, required=False,
+                                description="Expand finding external relations (engagement, environment, product, \
+                                            product_type, test, test_type)"),
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class FindingViewSet(prefetch.PrefetchListMixin,
                      prefetch.PrefetchRetrieveMixin,
                      mixins.UpdateModelMixin,
@@ -344,25 +500,43 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
-        return get_authorized_findings(Permissions.Finding_View).prefetch_related('endpoints',
+        findings = get_authorized_findings(Permissions.Finding_View).prefetch_related('endpoints',
                                                     'reviewers',
                                                     'images',
                                                     'found_by',
                                                     'notes',
                                                     'risk_acceptance_set',
                                                     'test',
+                                                    'tags',
+                                                    'jira_issue',
+                                                    'finding_group_set',
+                                                    'files',
+                                                    'burprawrequestresponse_set',
+                                                    'endpoint_status',
+                                                    'finding_meta',
                                                     'test__test_type',
                                                     'test__engagement',
                                                     'test__environment',
                                                     'test__engagement__product',
-                                                    'test__engagement__product__prod_type').distinct()
+                                                    'test__engagement__product__prod_type')
+
+        return findings.distinct()
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.request and self.request.method == 'POST':
             return serializers.FindingCreateSerializer
         else:
             return serializers.FindingSerializer
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.TagSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.TagSerializer,
+        responses={status.HTTP_201_CREATED: serializers.TagSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.TagSerializer}
@@ -395,6 +569,15 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         serialized_tags = serializers.TagSerializer({"tags": tags})
         return Response(serialized_tags.data)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.BurpRawRequestResponseSerializer,
+        responses={status.HTTP_201_CREATED: serializers.BurpRawRequestResponseSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer}
@@ -432,24 +615,33 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         serialized_burps = serializers.BurpRawRequestResponseSerializer({'req_resp': burp_list})
         return Response(serialized_burps.data)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer}
     )
     @swagger_auto_schema(
-        methods=['post', 'patch'],
+        methods=['post'],
         request_body=serializers.AddNewNoteOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.NoteSerializer}
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
     )
-    @action(detail=True, methods=["get", "post", "patch"])
+    @action(detail=True, methods=["get", "post"])
     def notes(self, request, pk=None):
         finding = self.get_object()
         if request.method == 'POST':
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private'] if 'private' in new_note.validated_data else False
-                note_type = new_note.validated_data['note_type'] if 'note_type' in new_note.validated_data else None
+                private = new_note.validated_data.get('private', False)
+                note_type = new_note.validated_data.get('note_type', None)
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
@@ -472,20 +664,24 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                 "finding_id": finding, "notes": [serialized_note.data]
             })
             return Response(serialized_note.data,
-                status=status.HTTP_200_OK)
+                status=status.HTTP_201_CREATED)
         notes = finding.notes.all()
 
-        serialized_notes = []
-        if notes:
-            serialized_notes = serializers.FindingToNotesSerializer({
-                    "finding_id": finding, "notes": notes
-            })
-            return Response(serialized_notes.data,
-                    status=status.HTTP_200_OK)
-
-        return Response(serialized_notes,
+        serialized_notes = serializers.FindingToNotesSerializer({
+                "finding_id": finding, "notes": notes
+        })
+        return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.FindingToFilesSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer}
@@ -532,9 +728,13 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         return Response(serialized_files,
                 status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=serializers.FindingNoteSerializer,
+        responses={status.HTTP_204_NO_CONTENT: ""}
+    )
     @swagger_auto_schema(
         request_body=serializers.FindingNoteSerializer,
-        responses={status.HTTP_200_OK: ""}
+        responses={status.HTTP_204_NO_CONTENT: ""}
     )
     @action(detail=True, methods=["patch"])
     def remove_note(self, request, pk=None):
@@ -557,12 +757,17 @@ class FindingViewSet(prefetch.PrefetchListMixin,
                 status=status.HTTP_400_BAD_REQUEST)
 
         return Response({"Success": "Selected Note has been Removed successfully"},
-            status=status.HTTP_200_OK)
+            status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        methods=['PUT', 'PATCH'],
+        request=serializers.TagSerializer,
+        responses={status.HTTP_204_NO_CONTENT: ""},
+    )
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
         methods=['put', 'patch'],
-        request_body=serializers.TagSerializer
+        request_body=serializers.TagSerializer,
+        responses={status.HTTP_204_NO_CONTENT: ""},
     )
     @action(detail=True, methods=["put", "patch"])
     def remove_tags(self, request, pk=None):
@@ -587,44 +792,64 @@ class FindingViewSet(prefetch.PrefetchListMixin,
             finding.tags = new_tags
             finding.save()
             return Response({"success": "Tag(s) Removed"},
-                status=status.HTTP_200_OK)
+                status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(delete_tags.errors,
                 status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        responses={status.HTTP_200_OK: serializers.FindingSerializer(many=True)}
+    )
     @swagger_auto_schema(
         responses={status.HTTP_200_OK: serializers.FindingSerializer(many=True)}
     )
-    @action(detail=True, methods=['get'], url_path=r'duplicate')
-    def get_duplicate_status(self, request, pk):
+    @action(detail=True, methods=['get'], url_path=r'duplicate', filter_backends=[], pagination_class=None)
+    def get_duplicate_cluster(self, request, pk):
         finding = self.get_object()
         result = duplicate_cluster(request, finding)
         serializer = serializers.FindingSerializer(instance=result, many=True,
                                                    context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_204_NO_CONTENT: ""},
+    )
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
-        request_body=no_body
+        request_body=no_body,
+        responses={status.HTTP_204_NO_CONTENT: ""},
     )
     @action(detail=True, methods=['post'], url_path=r'duplicate/reset')
     def reset_finding_duplicate_status(self, request, pk):
+        finding = self.get_object()
         checked_duplicate_id = reset_finding_duplicate_status_internal(request.user, pk)
         if checked_duplicate_id is None:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        parameters=[
+            OpenApiParameter("new_fid", OpenApiTypes.INT, OpenApiParameter.PATH)
+        ],
+        responses={status.HTTP_204_NO_CONTENT: ""},
+    )
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: ""},
+        responses={status.HTTP_204_NO_CONTENT: ""},
         request_body=no_body
     )
     @action(detail=True, methods=['post'], url_path=r'original/(?P<new_fid>\d+)')
     def set_finding_as_original(self, request, pk, new_fid):
+        finding = self.get_object()
         success = set_finding_as_original_internal(request.user, pk, new_fid)
         if not success:
             return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -701,6 +926,51 @@ class FindingViewSet(prefetch.PrefetchListMixin,
 
         return Response("Metadata deleted", status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if finding does not exist"),
+        },
+    )
+    @extend_schema(
+        methods=['DELETE'],
+        parameters=[
+            OpenApiParameter("name", OpenApiTypes.INT, OpenApiParameter.QUERY, required=True,
+                                description="name of the metadata to retrieve. If name is empty, return all the \
+                                    metadata associated with the finding")
+        ],
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(description="Returned if the metadata was correctly deleted"),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if finding does not exist"),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Returned if there was a problem with the metadata information"),
+        },
+        # manual_parameters=[openapi.Parameter(
+        #     name="name", in_=openapi.IN_QUERY,  type=openapi.TYPE_STRING,
+        #     description="name of the metadata to retrieve. If name is empty, return all the \
+        #                     metadata associated with the finding")]
+    )
+    @extend_schema(
+        methods=['PUT'],
+        request=serializers.FindingMetaSerializer,
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if finding does not exist"),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Returned if there was a problem with the metadata information"),
+        },
+        # manual_parameters=[openapi.Parameter(
+        #     name="name", in_=openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING,
+        #     description="name of the metadata to edit")],
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.FindingMetaSerializer,
+        responses={
+            status.HTTP_200_OK: serializers.FindingMetaSerializer,
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(description="Returned if finding does not exist"),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description="Returned if there was a problem with the metadata information"),
+        },
+    )
     @swagger_auto_schema(
         responses={
             status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True),
@@ -741,7 +1011,8 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         methods=['post'],
         request_body=serializers.FindingMetaSerializer
     )
-    @action(detail=True, methods=["post", "put", "delete", "get"])
+    @action(detail=True, methods=["post", "put", "delete", "get"],
+            filter_backends=[], pagination_class=None)
     def metadata(self, request, pk=None):
         finding = self.get_object()
 
@@ -866,6 +1137,34 @@ class DojoMetaViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
+class DjangoFilterDescriptionInspector(CoreAPICompatInspector):
+    def get_filter_parameters(self, filter_backend):
+        if isinstance(filter_backend, DjangoFilterBackend):
+            result = super(DjangoFilterDescriptionInspector, self).get_filter_parameters(filter_backend)
+            for param in result:
+                if not param.get('description', ''):
+                    param.description = "Filter the returned list by {field_name}".format(field_name=param.name)
+
+            return result
+
+        return NotHandled
+
+
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+@method_decorator(name='list', decorator=swagger_auto_schema(
+    filter_inspectors=[DjangoFilterDescriptionInspector]
+))
 class ProductViewSet(prefetch.PrefetchListMixin,
                      prefetch.PrefetchRetrieveMixin,
                      mixins.CreateModelMixin,
@@ -886,6 +1185,17 @@ class ProductViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_products(Permissions.Product_View).distinct()
 
+    # def list(self, request):
+    #     print(vars(request))
+    #     # Note the use of `get_queryset()` instead of `self.queryset`
+    #     queryset = self.get_queryset()
+    #     serializer = self.serializer_class(queryset, many=True)
+    #     return Response(serializer.data)
+
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -912,6 +1222,18 @@ class ProductViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class ProductMemberViewSet(prefetch.PrefetchListMixin,
                            prefetch.PrefetchRetrieveMixin,
                            mixins.ListModelMixin,
@@ -932,14 +1254,87 @@ class ProductMemberViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         return get_authorized_product_members(Permissions.Product_View).distinct()
 
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
 
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class ProductGroupViewSet(prefetch.PrefetchListMixin,
+                          prefetch.PrefetchRetrieveMixin,
+                          mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+                          mixins.CreateModelMixin,
+                          mixins.DestroyModelMixin,
+                          mixins.UpdateModelMixin,
+                          viewsets.GenericViewSet):
+    serializer_class = serializers.ProductGroupSerializer
+    queryset = Product_Group.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product_id', 'group_id')
+    swagger_schema = prefetch.get_prefetch_schema(["product_groups_list", "product_groups_read"],
+        serializers.ProductGroupSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasProductGroupPermission)
+
+    def get_queryset(self):
+        return get_authorized_product_groups(Permissions.Product_Group_View).distinct()
+
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+# Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class ProductTypeViewSet(prefetch.PrefetchListMixin,
                          prefetch.PrefetchRetrieveMixin,
                          mixins.ListModelMixin,
                          mixins.RetrieveModelMixin,
                          mixins.CreateModelMixin,
                          mixins.UpdateModelMixin,
+                         mixins.DestroyModelMixin,
                          viewsets.GenericViewSet):
     serializer_class = serializers.ProductTypeSerializer
     queryset = Product_Type.objects.none()
@@ -958,13 +1353,18 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
         serializer.save()
         if settings.FEATURE_AUTHORIZATION_V2:
             product_type_data = serializer.data
+            product_type_data.pop('authorization_groups')
             product_type_data.pop('members')
             member = Product_Type_Member()
             member.user = self.request.user
             member.product_type = Product_Type(**product_type_data)
-            member.role = Roles.Owner
+            member.role = Role.objects.get(is_owner=True)
             member.save()
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -991,6 +1391,18 @@ class ProductTypeViewSet(prefetch.PrefetchListMixin,
 
 
 # Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
                                prefetch.PrefetchRetrieveMixin,
                                mixins.ListModelMixin,
@@ -1013,12 +1425,72 @@ class ProductTypeMemberViewSet(prefetch.PrefetchListMixin,
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.role == Roles.Owner:
-            owners = Product_Type_Member.objects.filter(product_type=instance.product_type, role=Roles.Owner).count()
+        if instance.role.is_owner:
+            owners = Product_Type_Member.objects.filter(product_type=instance.product_type, role__is_owner=True).count()
             if owners <= 1:
                 return Response('There must be at least one owner', status=status.HTTP_400_BAD_REQUEST)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+# Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class ProductTypeGroupViewSet(prefetch.PrefetchListMixin,
+                              prefetch.PrefetchRetrieveMixin,
+                              mixins.ListModelMixin,
+                              mixins.RetrieveModelMixin,
+                              mixins.CreateModelMixin,
+                              mixins.DestroyModelMixin,
+                              mixins.UpdateModelMixin,
+                              viewsets.GenericViewSet):
+    serializer_class = serializers.ProductTypeGroupSerializer
+    queryset = Product_Type_Group.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'product_type_id', 'group_id')
+    swagger_schema = prefetch.get_prefetch_schema(["product_type_groups_list", "product_type_groups_read"],
+        serializers.ProductTypeGroupSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasProductTypeGroupPermission)
+
+    def get_queryset(self):
+        return get_authorized_product_type_groups(Permissions.Product_Type_Group_View).distinct()
+
+    @extend_schema(
+        request=OpenApiTypes.NONE,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    @swagger_auto_schema(
+        request_body=no_body,
+        responses={status.HTTP_405_METHOD_NOT_ALLOWED: ""},
+    )
+    def partial_update(self, request, pk=None):
+        # Object authorization won't work if not all data is provided
+        response = {'message': 'Patch function is not offered in this path.'}
+        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 # Authorization: object-based
@@ -1026,6 +1498,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
                           mixins.CreateModelMixin,
                           mixins.UpdateModelMixin,
+                          mixins.DestroyModelMixin,
                           viewsets.GenericViewSet):
     serializer_class = serializers.StubFindingSerializer
     queryset = Stub_Finding.objects.none()
@@ -1038,7 +1511,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
         return get_authorized_stub_findings(Permissions.Finding_View).distinct()
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.request and self.request.method == 'POST':
             return serializers.StubFindingCreateSerializer
         else:
             return serializers.StubFindingSerializer
@@ -1082,13 +1555,17 @@ class TestsViewSet(mixins.ListModelMixin,
                                                 'files').distinct()
 
     def get_serializer_class(self):
-        if self.request.method == 'POST':
+        if self.request and self.request.method == 'POST':
             if self.action == 'accept_risks':
                 return ra_api.AcceptedRiskSerializer
             return serializers.TestCreateSerializer
         else:
             return serializers.TestSerializer
 
+    @extend_schema(
+        request=serializers.ReportGenerateOptionSerializer,
+        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
+    )
     @swagger_auto_schema(
         request_body=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
@@ -1113,15 +1590,33 @@ class TestsViewSet(mixins.ListModelMixin,
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
-    @action(detail=True, methods=["get", "post", "patch"])
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.TestToNotesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.TestToNotesSerializer}
+    )
+    @swagger_auto_schema(
+        methods=['post'],
+        request_body=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer}
+    )
+    @action(detail=True, methods=["get", "post"])
     def notes(self, request, pk=None):
         test = self.get_object()
         if request.method == 'POST':
             new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
             if new_note.is_valid():
                 entry = new_note.validated_data['entry']
-                private = new_note.validated_data['private']
-                note_type = new_note.validated_data['note_type']
+                private = new_note.validated_data.get('private', False)
+                note_type = new_note.validated_data.get('note_type', None)
             else:
                 return Response(new_note.errors,
                     status=status.HTTP_400_BAD_REQUEST)
@@ -1139,20 +1634,24 @@ class TestsViewSet(mixins.ListModelMixin,
                 "test_id": test, "notes": [serialized_note.data]
             })
             return Response(serialized_note.data,
-                status=status.HTTP_200_OK)
+                status=status.HTTP_201_CREATED)
         notes = test.notes.all()
 
-        serialized_notes = []
-        if notes:
-            serialized_notes = serializers.TestToNotesSerializer({
-                    "test_id": test, "notes": notes
-            })
-            return Response(serialized_notes.data,
-                    status=status.HTTP_200_OK)
-
-        return Response(serialized_notes,
+        serialized_notes = serializers.TestToNotesSerializer({
+                "test_id": test, "notes": notes
+        })
+        return Response(serialized_notes.data,
                 status=status.HTTP_200_OK)
 
+    @extend_schema(
+        methods=['GET'],
+        responses={status.HTTP_200_OK: serializers.TestToFilesSerializer}
+    )
+    @extend_schema(
+        methods=['POST'],
+        request=serializers.AddNewFileOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.FileSerializer}
+    )
     @swagger_auto_schema(
         method='get',
         responses={status.HTTP_200_OK: serializers.TestToFilesSerializer}
@@ -1204,6 +1703,7 @@ class TestsViewSet(mixins.ListModelMixin,
 class TestTypesViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
+                       mixins.DestroyModelMixin,
                        mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.TestTypeSerializer
@@ -1213,10 +1713,24 @@ class TestTypesViewSet(mixins.ListModelMixin,
     permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
 
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
 class TestImportViewSet(prefetch.PrefetchListMixin,
                       prefetch.PrefetchRetrieveMixin,
                       mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.CreateModelMixin,
                       mixins.DestroyModelMixin,
                       viewsets.GenericViewSet):
     serializer_class = serializers.TestImportSerializer
@@ -1518,10 +2032,10 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
-        host = endpoint.host_no_port
+        host = endpoint.host
         report_name = "Endpoint Report: " + host
         report_type = "Endpoint"
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
+        endpoints = Endpoint.objects.filter(host=host,
                                             product=endpoint.product).distinct()
         report_title = "Endpoint Report"
         report_subtitle = host
@@ -1529,7 +2043,7 @@ def report_generate(request, obj, options):
                                        queryset=prefetch_related_findings_for_report(Finding.objects.filter(endpoints__in=endpoints)))
 
     elif type(obj).__name__ == "CastTaggedQuerySet":
-        findings = ReportAuthedFindingFilter(request.GET,
+        findings = ReportFindingFilter(request.GET,
                                              queryset=prefetch_related_findings_for_report(obj).distinct())
 
         report_name = 'Finding'

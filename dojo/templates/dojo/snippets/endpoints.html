@@ -23,7 +23,7 @@
                                 <tbody>
                                     {% for endpoint in endpoints %}
                                         <tr>
-                                            <td>{{ endpoint }}</td>
+                                            <td>{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</td>
                                             <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
                                             <td>{{ endpoint|endpoint_date:finding|date }}</td>
                                             <td>{{ endpoint|endpoint_update_time:finding|date}}</td>
@@ -55,7 +55,7 @@
                                 <tbody>
                                     {% for endpoint in endpoints %}
                                         <tr>
-                                            <td>{{ endpoint }}</td>
+                                            <td>{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</td>
                                             <td>{{ endpoint|endpoint_display_status:finding|safe }}</td>
                                             <td>{{ endpoint|endpoint_mitigated_time:finding|date }}</td>
                                             <td>{{ endpoint|endpoint_mitigator:finding|safe }}</td>
@@ -134,7 +134,7 @@
                                             </td>
                                         {% endif %}
                                         <td>
-                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
+                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                             {% if item.tags %}
                                                 <sup>
                                                     {% for tag in item.tags.all %}
@@ -194,7 +194,7 @@
                                             </td>
                                         {% endif %}
                                         <td>
-                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}</a>
+                                            <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint }}" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                             {% if item.tags %}
                                                 <sup>
                                                     {% for tag in item.tags.all %}

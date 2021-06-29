@@ -8,12 +8,14 @@
         <td title="The finding on the top of this page is a duplicate of this so called original finding">Original{% if finding_context == similar_finding %} (this){% endif %}</td>
     {% elif similar_finding.duplicate and similar_finding.duplicate_finding == finding_context.duplicate_finding %}
         <td title="This finding is a duplicate of the same original above">Duplicate{% if finding_context == similar_finding %}(this){% endif %}</td>
+    {% elif not similar_finding.duplicate and similar_finding == finding_context %}
+        <td title="This finding is the original of the cluster">Original{% if finding_context == similar_finding %}(this){% endif %}</td>
     {% else %}
         <td title="This finding shares fields values with the finding on this page because of which it looks similar">Similar</td>
     {% endif %}
     <td class="centered" data-order="{% severity_number_value finding.severity %}">
         <span class="label severity severity-{{ finding.severity }}">
-            {{ finding.severity_display }}
+            {{ similar_finding.severity_display }}
         </span>
     </td>
     <td>

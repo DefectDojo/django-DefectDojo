@@ -1,6 +1,7 @@
-from defusedxml.ElementTree import parse
-from cpe import CPE
+import datetime
 
+from cpe import CPE
+from defusedxml.ElementTree import parse
 from dojo.models import Endpoint, Finding
 
 
@@ -21,6 +22,12 @@ class NmapParser(object):
         dupes = dict()
         if 'nmaprun' not in root.tag:
             raise ValueError("This doesn't seem to be a valid Nmap xml file.")
+
+        report_date = None
+        try:
+            report_date = datetime.datetime.fromtimestamp(int(root.attrib['start']))
+        except ValueError:
+            pass
 
         for host in root.findall("host"):
             host_info = "### Host\n\n"
@@ -45,16 +52,17 @@ class NmapParser(object):
                 host_info += "\n\n"
 
             for port_element in host.findall("ports/port"):
-                port = port_element.attrib['portid']
                 protocol = port_element.attrib['protocol']
-                endpoint = Endpoint(host=ip, fqdn=fqdn, port=port, protocol=protocol)
+                endpoint = Endpoint(host=fqdn if fqdn else ip, protocol=protocol)
+                if 'portid' in port_element.attrib and port_element.attrib['portid'].isdigit():
+                    endpoint.port = int(port_element.attrib['portid'])
 
                 # filter on open ports
                 if 'open' != port_element.find("state").attrib.get('state'):
                     continue
-                title = "Open port: %s/%s" % (port, protocol)
+                title = "Open port: %s/%s" % (endpoint.port, endpoint.protocol)
                 description = host_info
-                description += "**Port/Protocol:** %s/%s\n" % (port, protocol)
+                description += "**Port/Protocol:** %s/%s\n" % (endpoint.port, endpoint.protocol)
 
                 service_info = "\n\n"
                 if port_element.find('service') is not None:
@@ -73,10 +81,10 @@ class NmapParser(object):
 
                 # manage some script like https://github.com/vulnersCom/nmap-vulners
                 for script_element in port_element.findall('script[@id="vulners"]'):
-                    self.manage_vulner_script(test, dupes, script_element, endpoint)
+                    self.manage_vulner_script(test, dupes, script_element, endpoint, report_date)
 
                 severity = "Info"
-                dupe_key = port
+                dupe_key = "nmap:" + str(endpoint.port)
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
                     if description is not None:
@@ -91,6 +99,8 @@ class NmapParser(object):
                                    )
                     find.unsaved_endpoints = list()
                     dupes[dupe_key] = find
+                    if report_date:
+                        find.date = report_date
 
                 find.unsaved_endpoints.append(endpoint)
         return list(dupes.values())
@@ -114,36 +124,48 @@ class NmapParser(object):
         else:
             return "Critical"
 
-    def manage_vulner_script(self, test, dupes, script_element, endpoint):
+    def manage_vulner_script(self, test, dupes, script_element, endpoint, report_date=None):
         for component_element in script_element.findall('table'):
             component_cpe = CPE(component_element.attrib['key'])
             for vuln in component_element.findall('table'):
-                description = "### Vulnerability\n\n"
-                description += "**CPE**: " + str(component_cpe) + "\n"
+                # convert elements in dict
                 vuln_attributes = dict()
                 for elem in vuln.findall('elem'):
                     vuln_attributes[elem.attrib['key'].lower()] = elem.text
-                    description += "**" + elem.attrib['key'] + "**: " + elem.text + "\n"
-                cve = vuln_attributes['id']
+
+                vuln_id = vuln_attributes['id']
+                description = "### Vulnerability\n\n"
+                description += "**ID**: `" + str(vuln_id) + "`\n"
+                description += "**CPE**: " + str(component_cpe) + "\n"
+                for attribute in vuln_attributes:
+                    description += "**" + attribute + "**: `" + vuln_attributes[attribute] + "`\n"
                 severity = self.convert_cvss_score(vuln_attributes['cvss'])
 
-                dupe_key = cve
+                finding = Finding(
+                    title=vuln_id,
+                    test=test,
+                    description=description,
+                    severity=severity,
+                    component_name=component_cpe.get_product()[0] if len(component_cpe.get_product()) > 0 else '',
+                    component_version=component_cpe.get_version()[0] if len(component_cpe.get_version()) > 0 else '',
+                    vuln_id_from_tool=vuln_id,
+                    nb_occurences=1,
+                )
+                finding.unsaved_endpoints = [endpoint]
+
+                # manage if CVE is in metadata
+                if "type" in vuln_attributes and "cve" == vuln_attributes["type"]:
+                    finding.cve = vuln_attributes["id"]
+
+                if report_date:
+                    finding.date = report_date
+
+                dupe_key = finding.vuln_id_from_tool
                 if dupe_key in dupes:
                     find = dupes[dupe_key]
                     if description is not None:
-                        find.description += description
+                        find.description += "\n-----\n\n" + finding.description  # fives '-' produces an horizontal line
+                    find.unsaved_endpoints.extend(finding.unsaved_endpoints)
+                    find.nb_occurences += finding.nb_occurences
                 else:
-                    find = Finding(title=cve,
-                                    cve=cve,
-                                    test=test,
-                                    description=description,
-                                    severity=severity,
-                                    mitigation="N/A",
-                                    impact="No impact provided",
-                                    component_name=component_cpe.get_product()[0] if len(component_cpe.get_product()) > 0 else '',
-                                    component_version=component_cpe.get_version()[0] if len(component_cpe.get_version()) > 0 else '',
-                                   )
-                    find.unsaved_endpoints = list()
-                    dupes[dupe_key] = find
-
-                find.unsaved_endpoints.append(endpoint)
+                    dupes[dupe_key] = finding

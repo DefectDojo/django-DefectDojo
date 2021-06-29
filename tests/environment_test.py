@@ -49,6 +49,7 @@ class EnvironmentTest(BaseTestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(EnvironmentTest('test_create_environment'))
     suite.addTest(EnvironmentTest('test_edit_environment'))
     suite.addTest(EnvironmentTest('test_delete_environment'))

@@ -5,15 +5,18 @@
 {% load static %}
 {% load get_endpoint_status %}
 {% block add_styles %}
+    {{ block.super }}
   .tooltip-inner {
     max-width: 650px;
   }
 {% endblock %}
 {% block add_css_before %}
+    {{ block.super }}
 <!-- Source Code Highlight CSS -->
 <link rel="stylesheet" href="{% static "dojo/css/highlight.css" %}">
 {% endblock %}
 {% block content %}
+    {{ block.super }}
 <div id="test">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -896,7 +899,7 @@
         </div>
 
         <!--Cred Begin-->
-        {% if  finding.static_finding != True and cred_finding %}
+        {% if  finding.static_finding != True and cred_finding and system_settings.enable_credentials %}
             <div class="row">
                 <div class="col-md-12" id="cred">
                     <div class="panel panel-default">
@@ -1017,6 +1020,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>

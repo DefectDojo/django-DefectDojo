@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {{ block.super }}
     <h3> Add new regulation </h3>
     <form class="form-horizontal" action="{% url 'new_regulation' %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
