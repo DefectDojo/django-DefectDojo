@@ -2,10 +2,12 @@
 {% load event_tags %}
 {% load static %}
 {% block add_css %}
+    {{ block.super }}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -14,6 +16,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Apply template to a Finding</h3>
     <form id="add_finding" class="form-horizontal" name="apply_template"
           action="{% url 'apply_template_to_finding' finding.id template.id %}" method="post">
@@ -30,6 +33,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
    <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>

@@ -3,11 +3,13 @@
 {% load static %}
 
 {% block add_styles %}
+    {{ block.super }}
 .chosen-container {
     width: 70% !important;
 }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Clear Finding Review</h3>
     <h4>{{ finding.title }}</h4>
     <p>Set the appropriate status for this finding.  Please add notes to help document.</p>
@@ -22,6 +24,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript">
         $(function () {
             $('#id_reviewers').chosen({'placeholder_text_multiple': 'Select some reviewers...'});

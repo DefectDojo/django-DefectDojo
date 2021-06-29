@@ -1,6 +1,12 @@
 {% extends "base.html" %}
+{% block add_styles %}
+    .chosen-container.chosen-container-multi {
+    width: 70% !important;
+    }
+{% endblock %}
 {% block content %}
-    <h3> Register a new Product Type Member </h3>
+    {{ block.super }}
+    <h3> Register new Product Type Members </h3>
     <form class="form-horizontal" action="{%  url 'add_product_type_member_user' user.id %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
@@ -9,4 +15,11 @@
             </div>
         </div>
     </form>
+{% endblock %}
+{% block postscript %}
+    <script type="application/javascript">
+        $(function () {
+            $('#id_product_types').chosen({'placeholder_text_multiple': 'Select some product types...'});
+        });
+    </script>
 {% endblock %}

@@ -3,10 +3,12 @@
 {% load display_tags %}
 {% load static %}
 {% block add_css %}
+    {{ block.super }}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -15,6 +17,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Merge Findings</h3>
     <div id="merge">
         <p>
@@ -33,6 +36,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         var prior_select_val, prior_select_text;
 

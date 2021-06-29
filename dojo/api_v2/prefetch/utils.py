@@ -51,6 +51,10 @@ def _get_prefetchable_fields(serializer):
     for field_name in dir(model):
         field = getattr(model, field_name)
         if _is_field_prefetchable(field):
-            fields.append((field_name, field.field.related_model))
+            # ManyToMany relationship can be reverse
+            if hasattr(field, 'reverse') and field.reverse:
+                fields.append((field_name, field.field.model))
+            else:
+                fields.append((field_name, field.field.related_model))
 
     return fields
