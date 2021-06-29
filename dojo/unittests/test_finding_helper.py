@@ -21,8 +21,8 @@ class TestUpdateFindingStatusSignal(TestCase):
         self.user_2 = User.objects.get(id='2')
 
     def get_status_fields(self, finding):
-        logger.debug('%s, %s, %s, %s, %s, %s, %s, %s', finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_Mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update)
-        return finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_Mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update
+        logger.debug('%s, %s, %s, %s, %s, %s, %s, %s', finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update)
+        return finding.active, finding.verified, finding.false_p, finding.out_of_scope, finding.is_mitigated, finding.mitigated, finding.mitigated_by, finding.last_status_update
 
     @mock.patch('dojo.finding.helper.timezone.now')
     def test_new_finding(self, mock_tz):
@@ -60,7 +60,7 @@ class TestUpdateFindingStatusSignal(TestCase):
         mock_dt.return_value = frozen_datetime
         with impersonate(self.user_1):
             test = Test.objects.last()
-            finding = Finding(test=test, is_Mitigated=True, active=False)
+            finding = Finding(test=test, is_mitigated=True, active=False)
             finding.save()
             self.assertEqual(
                 self.get_status_fields(finding),
@@ -74,9 +74,9 @@ class TestUpdateFindingStatusSignal(TestCase):
 
         with impersonate(self.user_1):
             test = Test.objects.last()
-            finding = Finding(test=test, is_Mitigated=True, active=False)
+            finding = Finding(test=test, is_mitigated=True, active=False)
             finding.save()
-            finding.is_Mitigated = True
+            finding.is_mitigated = True
             finding.active = False
             finding.save()
 
@@ -96,7 +96,7 @@ class TestUpdateFindingStatusSignal(TestCase):
             test = Test.objects.last()
             finding = Finding(test=test)
             finding.save()
-            finding.is_Mitigated = True
+            finding.is_mitigated = True
             finding.active = False
             finding.mitigated = custom_mitigated
             finding.mitigated_by = self.user_2
@@ -116,9 +116,9 @@ class TestUpdateFindingStatusSignal(TestCase):
 
         with impersonate(self.user_1):
             test = Test.objects.last()
-            finding = Finding(test=test, is_Mitigated=True, active=False, mitigated=frozen_datetime, mitigated_by=self.user_1)
+            finding = Finding(test=test, is_mitigated=True, active=False, mitigated=frozen_datetime, mitigated_by=self.user_1)
             finding.save()
-            finding.is_Mitigated = True
+            finding.is_mitigated = True
             finding.active = False
             finding.mitigated = custom_mitigated
             finding.mitigated_by = self.user_2
@@ -138,9 +138,9 @@ class TestUpdateFindingStatusSignal(TestCase):
 
         with impersonate(self.user_1):
             test = Test.objects.last()
-            finding = Finding(test=test, is_Mitigated=True, active=False, mitigated=custom_mitigated, mitigated_by=self.user_2)
+            finding = Finding(test=test, is_mitigated=True, active=False, mitigated=custom_mitigated, mitigated_by=self.user_2)
             finding.save()
-            finding.is_Mitigated = True
+            finding.is_mitigated = True
             finding.active = False
             # trying to remove mitigated fields will trigger the signal to set them to now/current user
             finding.mitigated = None
@@ -159,7 +159,7 @@ class TestUpdateFindingStatusSignal(TestCase):
 
         with impersonate(self.user_1):
             test = Test.objects.last()
-            finding = Finding(test=test, is_Mitigated=True, active=False, mitigated=frozen_datetime, mitigated_by=self.user_2)
+            finding = Finding(test=test, is_mitigated=True, active=False, mitigated=frozen_datetime, mitigated_by=self.user_2)
             logger.debug('save1')
             finding.save()
             finding.active = True

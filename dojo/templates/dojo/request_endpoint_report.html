@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load humanize %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -43,7 +44,6 @@
                            class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
                         <tr>
                             <th>Endpoint</th>
-                            <th>Product</th>
                             <th nowrap="nowrap">Open Findings</th>
                         </tr>
 
@@ -58,9 +58,8 @@
                                       </sup>
                                   {% endif %}
                                 </td>
-                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a></td>
                                 <td>
-                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
+                                    <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.findings_count }}</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -79,5 +78,6 @@
 {% endblock %}
 
 {% block postscript %}
+    {{ block.super }}
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}
