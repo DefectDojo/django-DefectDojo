@@ -90,7 +90,7 @@ def build_findings_from_dict(report_findings) -> [Finding]:
         )
 
         if report_finding['Date Last Fixed']:
-            finding.mitigated = datetime.strptime(report_finding['Date Last Fixed'], "%m/%d/%Y %H:%M:%S").date()
+            finding.mitigated = datetime.strptime(report_finding['Date Last Fixed'], "%m/%d/%Y %H:%M:%S")
             finding.is_Mitigated = True
         else:
             finding.is_Mitigated = False
