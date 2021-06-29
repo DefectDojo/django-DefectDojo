@@ -17,7 +17,7 @@ class CycloneDXParser(object):
     """
 
     def get_scan_types(self):
-        return ["cyclonedx"]
+        return ["CycloneDX Scan"]
 
     def get_label_for_scan_types(self, scan_type):
         return "CycloneDX Scan"
