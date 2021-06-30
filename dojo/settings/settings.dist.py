@@ -932,6 +932,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'severity'],
     'Qualys Scan': ['title', 'severity'],
+    # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
     'PHP Symfony Security Check': ['title', 'cve'],
     'Clair Scan': ['title', 'cve', 'description', 'severity'],
     'Clair Klar Scan': ['title', 'description', 'severity'],
@@ -1025,6 +1026,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
+    # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
@@ -1173,6 +1175,10 @@ SCAN_FILE_MAX_SIZE = 100
 
 # Apply a severity level to "Security Weaknesses" in Qualys WAS
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
+
+# Create a unique finding for all findings in qualys WAS parser
+# If using this, lines for Qualys WAS deduplication functions must be un-commented
+QUALYS_WAS_UNIQUE_ID = False
 
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',
