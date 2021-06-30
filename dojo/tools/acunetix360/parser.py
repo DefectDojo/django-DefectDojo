@@ -1,5 +1,6 @@
 import json
 import re
+import datetime
 
 from dojo.models import Finding, Endpoint
 
@@ -45,6 +46,7 @@ class Acunetix360Parser(object):
             response = item["HttpResponse"]["Content"]
             if response is None or response.length <= 0:
                 response = "Response Not Found"
+            scan_date = datetime.datetime.strptime(item["Generated"], "%Y-%m-%dT%H:%M:%SZ").date()
 
             finding = Finding(title=title,
                               test=test,
@@ -52,6 +54,7 @@ class Acunetix360Parser(object):
                               severity=sev.title(),
                               mitigation=mitigation,
                               impact=impact,
+                              date=scan_date,
                               references=references,
                               cwe=cwe,
                               static_finding=True)
