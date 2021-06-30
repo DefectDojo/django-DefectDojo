@@ -17,7 +17,7 @@ class CycloneDXParser(object):
     """
 
     def get_scan_types(self):
-        return ["cyclonedx"]
+        return ["CycloneDX Scan"]
 
     def get_label_for_scan_types(self, scan_type):
         return "CycloneDX Scan"
@@ -45,18 +45,20 @@ class CycloneDXParser(object):
         for component in root.findall("b:components/b:component", namespaces=ns):
             component_name = component.findtext(f"{namespace}name")
             component_version = component.findtext(f"{namespace}version")
-            # add finding for the component
-            self.manage_component(dupes, component, report_date, namespace)
             # save a ref
             if "bom-ref" in component.attrib:
                 bom_refs[component.attrib["bom-ref"]] = {
                     "name": component_name,
                     "version": component_version,
                 }
+            # add finding for the component
+            key, finding = self.manage_component(dupes, component, report_date, namespace)
+            self.internal_deduplicate(dupes, key, finding)
+            # for each vulnerabilities add a finding
             for vulnerability in component.findall(
                 "v:vulnerabilities/v:vulnerability", namespaces=ns
             ):
-                self.manage_vulnerability(
+                key_vuln, finding_vuln = self.manage_vulnerability(
                     dupes,
                     vulnerability, ns,
                     bom_refs,
@@ -64,13 +66,23 @@ class CycloneDXParser(object):
                     component_name=component_name,
                     component_version=component_version,
                 )
+                self.internal_deduplicate(dupes, key_vuln, finding_vuln)
         # manage adhoc vulnerabilities
         for vulnerability in root.findall(
             "v:vulnerabilities/v:vulnerability", namespaces=ns
         ):
-            self.manage_vulnerability(dupes, vulnerability, ns, bom_refs, report_date)
+            key_vuln, finding_vuln = self.manage_vulnerability(dupes, vulnerability, ns, bom_refs, report_date)
+            self.internal_deduplicate(dupes, key_vuln, finding_vuln)
 
         return list(dupes.values())
+
+    def internal_deduplicate(self, dupes, dupe_key, finding):
+        if dupe_key in dupes:
+            find = dupes[dupe_key]
+            find.description += "\n\n-----\n" + finding.description
+            find.nb_occurences += 1
+        else:
+            dupes[dupe_key] = finding
 
     def get_cwes(self, node, namespaces):
         cwes = []
@@ -103,13 +115,16 @@ class CycloneDXParser(object):
         severity = vulnerability.findtext(
             "v:ratings/v:rating/v:severity", namespaces=ns
         )
-        description = "\n".join(
-            [
-                f"**Ref:** {ref}",
-                f"**Id:** {vuln_id}",
-                f"**Severity:** {severity}",
-            ]
-        )
+        description = vulnerability.findtext("v:description", namespaces=ns)
+        # by the schema, only id and ref are mandatory, even the severity is optional
+        if not description:
+            description = "\n".join(
+                [
+                    f"**Ref:** {ref}",
+                    f"**Id:** {vuln_id}",
+                    f"**Severity:** {str(severity)}",
+                ]
+            )
 
         if component_name is None:
             bom = bom_refs[ref]
@@ -130,11 +145,10 @@ class CycloneDXParser(object):
                 title=vuln_id,
                 description=description,
                 severity=severity,
-                numerical_severity=Finding.get_numerical_severity(severity),
                 references=references,
                 component_name=component_name,
                 component_version=component_version,
-                unique_id_from_tool=vuln_id,
+                vuln_id_from_tool=vuln_id,
                 nb_occurences=1,
         )
         if report_date:
@@ -147,9 +161,7 @@ class CycloneDXParser(object):
         # manage CVSS
         cvssv3 = self._get_cvssv3(vulnerability, ns)
         if cvssv3:
-            cvssv3.compute_base_score()
             finding.cvssv3 = cvssv3.clean_vector()
-            finding.cvssv3_score = float(cvssv3.base_score)
 
         # if there is some CWE
         cwes = self.get_cwes(vulnerability, ns)
@@ -168,12 +180,7 @@ class CycloneDXParser(object):
             ]
         ).encode("utf-8")).hexdigest()
 
-        if dupe_key in dupes:
-            find = dupes[dupe_key]
-            find.description += description
-            find.nb_occurences += 1
-        else:
-            dupes[dupe_key] = finding
+        return dupe_key, finding
 
     def manage_component(self, dupes, component_node, report_date, namespace):
         bom_ref = component_node.attrib.get('bom-ref')
@@ -189,7 +196,12 @@ class CycloneDXParser(object):
         )
 
         if bom_ref:
-            dupe_key = bom_ref
+            dupe_key = hashlib.sha256("|".join(
+                [
+                    "component",
+                    bom_ref,
+                ]
+            ).encode("utf-8")).hexdigest()
         else:
             dupe_key = hashlib.sha256("|".join(
                 [
@@ -199,24 +211,18 @@ class CycloneDXParser(object):
                 ]
             ).encode("utf-8")).hexdigest()
 
-        if dupe_key in dupes:
-            find = dupes[dupe_key]
-            find.description += description
-            find.nb_occurences += 1
-        else:
-            find = Finding(
-                title=f'Component detected {component_name}:{component_version}',
-                description=description,
-                severity="Info",
-                numerical_severity=Finding.get_numerical_severity("Info"),
-                component_name=component_name,
-                component_version=component_version,
-                nb_occurences=1,
-            )
-            if report_date:
-                find.date = report_date
+        finding = Finding(
+            title=f'Component detected {component_name}:{component_version}',
+            description=description,
+            severity="Info",
+            component_name=component_name,
+            component_version=component_version,
+            nb_occurences=1,
+        )
+        if report_date:
+            finding.date = report_date
 
-            dupes[dupe_key] = find
+        return dupe_key, finding
 
     def get_namespace(self, element):
         """Extract namespace present in XML file."""
