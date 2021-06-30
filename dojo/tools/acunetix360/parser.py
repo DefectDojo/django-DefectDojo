@@ -4,6 +4,7 @@ import html2text
 
 from dojo.models import Finding, Endpoint
 
+
 def cleantags(text=''):
     prepared_text = text if text else ''
     return html2text.html2text(prepared_text)
