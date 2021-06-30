@@ -1155,8 +1155,9 @@ LOGGING = {
             'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
-        "saml2": {
-            "level": "DEBUG"
+        'saml2': {
+            'handlers': [r'%s' % LOGGING_HANDLER],
+            'level': '%s' % LOG_LEVEL,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
