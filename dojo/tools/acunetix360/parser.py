@@ -38,10 +38,10 @@ class Acunetix360Parser(object):
             impact = cleantags(item["Impact"])
             dupe_key = title
             request = item["HttpRequest"]["Content"]
-            if request is None or request.lenght <= 0:
+            if request is None or request.len() <= 0:
                 request = "Request Not Found"
             response = item["HttpResponse"]["Content"]
-            if response is None or response.length <= 0:
+            if response is None or response.len() <= 0:
                 response = "Response Not Found"
             scan_date = datetime.datetime.strptime(item["Generated"], "%Y-%m-%dT%H:%M:%SZ").date()
 
