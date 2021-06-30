@@ -72,7 +72,7 @@ class SonarQubeApiImporter(object):
             if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 4 and 6
                 component = client.get_project(config.sonarqube_project_key)
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 2
-                component = client.find_project(product.name)
+                component = client.find_project(test.engagement.product.name)
 
             issues = client.find_issues(component['key'])
             logging.info('Found {} issues for component {}'.format(len(issues), component["key"]))
