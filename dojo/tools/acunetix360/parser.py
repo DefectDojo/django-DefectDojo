@@ -56,7 +56,11 @@ class Acunetix360Parser(object):
             impact = cleantags(item["Impact"])
             dupe_key = title
             request = item["HttpRequest"]["Content"]
+            if request is None or request.lenght <= 0:
+                request = "Request Not Found"
             response = item["HttpResponse"]["Content"]
+            if response is None or response.length <= 0:
+                response = "Response Not Found"
 
             finding = Finding(title=title,
                               test=test,
