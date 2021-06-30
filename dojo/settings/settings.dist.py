@@ -949,7 +949,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'JFrog Xray Unified Scan': ['cve', 'file_path', 'component_name', 'component_version'],
     'Scout Suite Scan': ['title', 'severity', 'description'],
     'AWS Security Hub Scan': ['unique_id_from_tool'],
-    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity']
+    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
+    'Github Vulnerability Scan': ['unique_id_from_tool']
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1044,7 +1045,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'JFrog Xray Unified Scan': DEDUPE_ALGO_HASH_CODE,
     'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
     'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Meterian Scan': DEDUPE_ALGO_HASH_CODE
+    'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
+    'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
