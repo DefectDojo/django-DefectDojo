@@ -1,16 +1,12 @@
 import json
-import re
 import datetime
+import html2text
 
 from dojo.models import Finding, Endpoint
 
-# Function to remove HTML tags
-TAG_RE = re.compile(r'<[^>]+>')
-
-
 def cleantags(text=''):
     prepared_text = text if text else ''
-    return TAG_RE.sub('', prepared_text)
+    return html2text.html2text(prepared_text)
 
 
 class Acunetix360Parser(object):
