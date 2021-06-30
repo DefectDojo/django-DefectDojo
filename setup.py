@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='2.0.2',
+    version='2.0.3',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
