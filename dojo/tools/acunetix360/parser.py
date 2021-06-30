@@ -3,8 +3,6 @@ import re
 
 from dojo.models import Finding, Endpoint
 
-
-
 # Function to remove HTML tags
 TAG_RE = re.compile(r'<[^>]+>')
 
