@@ -3,8 +3,6 @@ import re
 
 from dojo.models import Finding, Endpoint
 
-__author__ = "Muhammed Kılıç"
-__status__ = "Development"
 
 
 # Function to remove HTML tags
