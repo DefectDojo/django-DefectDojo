@@ -4,12 +4,12 @@ from setuptools import setup
 
 setup(
     name='DefectDojo',
-    version='2.0.0-dev',
+    version='2.1.0-dev',
     author='Greg Anderson',
     description="Tool for managing vulnerability engagements",
     install_requires=[
         'defusedxml',
-        'Django==2.2.21',
+        'Django==3.1.12',
         'django-auditlog==0.4.7',
         'django-custom-field',
         'django-filter==2.4.0',
