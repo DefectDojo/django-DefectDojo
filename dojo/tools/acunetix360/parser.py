@@ -26,11 +26,7 @@ class Acunetix360Parser(object):
         return "Acunetix360 JSON format."
 
     def get_findings(self, filename, test):
-        tree = filename.read()
-        try:
-            data = json.loads(str(tree, 'utf-8-sig'))
-        except:
-            data = json.loads(tree)
+        data = json.load(filename)
         dupes = dict()
 
         for item in data["Vulnerabilities"]:
