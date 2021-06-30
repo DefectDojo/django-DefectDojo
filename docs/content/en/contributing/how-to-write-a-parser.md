@@ -103,6 +103,69 @@ Good example:
        finding.cve = data["mykey"]
 ```
 
+### Do not parse CVSS by hand (vector, score or severity)
+
+Data can have `CVSS` vectors or scores. Don't try to write your own CVSS score algorithm.
+For parser, we rely on module `cvss`.
+
+It's easy to use and will make the parser aligned with the rest of the code.
+
+Example of use:
+
+```python
+from cvss.cvss3 import CVSS3
+import cvss.parser
+vectors = cvss.parser.parse_cvss_from_text("CVSS:3.0/S:C/C:H/I:H/A:N/AV:P/AC:H/PR:H/UI:R/E:H/RL:O/RC:R/CR:H/IR:X/AR:X/MAC:H/MPR:X/MUI:X/MC:L/MA:X")
+if len(vectors) > 0 and type(vectors[0]) == CVSS3:
+    print(vectors[0].severities())  # this is the 3 severities
+
+    cvssv3 = vectors[0].clean_vector()
+    severity = vectors[0].severities()[0]
+    vectors[0].compute_base_score()
+    cvssv3_score = vectors[0].scores()[0]
+    print(severity)
+    print(cvssv3_score)
+```
+
+Good example:
+
+```python
+vectors = cvss.parser.parse_cvss_from_text(item['cvss_vect'])
+if len(vectors) > 0 and type(vectors[0]) == CVSS3:
+    finding.cvss = vectors[0].clean_vector()
+    finding.severity = vectors[0].severities()[0]  # if your tool does generate severity
+```
+
+Bad example (DIY):
+
+```python
+    def get_severity(self, cvss, cvss_version="2.0"):
+        cvss = float(cvss)
+        cvss_version = float(cvss_version[:1])
+        # If CVSS Version 3 and above
+        if cvss_version >= 3:
+            if cvss > 0 and cvss < 4:
+                return "Low"
+            elif cvss >= 4 and cvss < 7:
+                return "Medium"
+            elif cvss >= 7 and cvss < 9:
+                return "High"
+            elif cvss >= 9:
+                return "Critical"
+            else:
+                return "Informational"
+        # If CVSS Version prior to 3
+        else:
+            if cvss > 0 and cvss < 4:
+                return "Low"
+            elif cvss >= 4 and cvss < 7:
+                return "Medium"
+            elif cvss >= 7 and cvss <= 10:
+                return "High"
+            else:
+                return "Informational"
+```
+
 ## Deduplication algorithm
 
 By default a new parser uses the 'legacy' deduplication algorithm documented at https://defectdojo.github.io/django-DefectDojo/usage/features/#deduplication-algorithms

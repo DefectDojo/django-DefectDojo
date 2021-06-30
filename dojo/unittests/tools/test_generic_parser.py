@@ -516,3 +516,66 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertEqual("urlfiltering.paloaltonetworks.com", endpoint.host)
             self.assertEqual(2345, endpoint.port)
             self.assertEqual("test-pest", endpoint.path)
+
+    def test_parse_host_json(self):
+        file = open("dojo/unittests/scans/generic/generic_report4.json")
+        parser = GenericParser()
+        findings = parser.get_findings(file, Test())
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        finding.clean()
+        self.assertEqual(4, len(finding.unsaved_endpoints))
+
+        endpoint = finding.unsaved_endpoints[0]
+        endpoint.clean()
+        self.assertEqual("www.example.com", endpoint.host)
+
+        endpoint = finding.unsaved_endpoints[1]
+        endpoint.clean()
+        self.assertEqual("localhost", endpoint.host)
+
+        endpoint = finding.unsaved_endpoints[2]
+        endpoint.clean()
+        self.assertEqual("127.0.0.1", endpoint.host)
+        self.assertEqual(80, endpoint.port)
+
+        endpoint = finding.unsaved_endpoints[3]
+        endpoint.clean()
+        self.assertEqual("foo.bar", endpoint.host)
+        self.assertEqual("path", endpoint.path)
+
+    def test_parse_host_csv(self):
+        file = open("dojo/unittests/scans/generic/generic_report4.csv")
+        parser = GenericParser()
+        findings = parser.get_findings(file, Test())
+        self.assertEqual(4, len(findings))
+
+        finding = findings[0]
+        finding.clean()
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        endpoint.clean()
+        self.assertEqual("www.example.com", endpoint.host)
+
+        finding = findings[1]
+        finding.clean()
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        endpoint.clean()
+        self.assertEqual("localhost", endpoint.host)
+
+        finding = findings[2]
+        finding.clean()
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        endpoint.clean()
+        self.assertEqual("127.0.0.1", endpoint.host)
+        self.assertEqual(80, endpoint.port)
+
+        finding = findings[3]
+        finding.clean()
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        endpoint.clean()
+        self.assertEqual("foo.bar", endpoint.host)
+        self.assertEqual("path", endpoint.path)

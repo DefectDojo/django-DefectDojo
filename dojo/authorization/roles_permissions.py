@@ -91,6 +91,13 @@ class Permissions(IntEnum):
     Product_Group_Edit = 2106
     Product_Group_Delete = 2107
 
+    Group_View = 2202
+    Group_Member_Delete = 2203
+    Group_Manage_Members = 2204
+    Group_Add_Owner = 2205
+    Group_Edit = 2206
+    Group_Delete = 2207
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -150,6 +157,15 @@ class Permissions(IntEnum):
         return {Permissions.Product_Type_Group_View, Permissions.Product_Type_Group_Edit,
             Permissions.Product_Type_Group_Delete}
 
+    @classmethod
+    def get_group_permissions(cls):
+        return {Permissions.Group_View, Permissions.Group_Member_Delete, Permissions.Group_Manage_Members,
+            Permissions.Group_Add_Owner, Permissions.Group_Edit, Permissions.Group_Delete}
+
+    @classmethod
+    def get_group_member_permissions(cls):
+        return {Permissions.Group_View, Permissions.Group_Manage_Members, Permissions.Group_Member_Delete}
+
 
 def get_roles_with_permissions():
     return {
@@ -163,7 +179,8 @@ def get_roles_with_permissions():
             Permissions.Endpoint_View,
             Permissions.Component_View,
             Permissions.Product_Group_View,
-            Permissions.Product_Type_Group_View
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View
         },
         Roles.API_Importer: {
             Permissions.Product_Type_View,
@@ -215,7 +232,8 @@ def get_roles_with_permissions():
             Permissions.Note_Add,
 
             Permissions.Product_Group_View,
-            Permissions.Product_Type_Group_View
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -275,7 +293,12 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Group_View,
             Permissions.Product_Type_Group_Add,
             Permissions.Product_Type_Group_Edit,
-            Permissions.Product_Type_Group_Delete
+            Permissions.Product_Type_Group_Delete,
+
+            Permissions.Group_View,
+            Permissions.Group_Edit,
+            Permissions.Group_Manage_Members,
+            Permissions.Group_Member_Delete
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -341,6 +364,13 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Group_Add,
             Permissions.Product_Type_Group_Add_Owner,
             Permissions.Product_Type_Group_Edit,
-            Permissions.Product_Type_Group_Delete
+            Permissions.Product_Type_Group_Delete,
+
+            Permissions.Group_View,
+            Permissions.Group_Edit,
+            Permissions.Group_Manage_Members,
+            Permissions.Group_Member_Delete,
+            Permissions.Group_Add_Owner,
+            Permissions.Group_Delete
         }
     }

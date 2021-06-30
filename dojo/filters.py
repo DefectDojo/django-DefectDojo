@@ -18,7 +18,7 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_Type, Finding, Product, Test_Import, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -922,7 +922,6 @@ class ProductFilter(DojoFilter):
 
 class ApiProductFilter(DojoFilter):
     # BooleanFilter
-    duplicate = BooleanFilter(field_name='duplicate')
     external_audience = BooleanFilter(field_name='external_audience')
     internet_accessible = BooleanFilter(field_name='internet_accessible')
     # CharFilter
@@ -943,7 +942,6 @@ class ApiProductFilter(DojoFilter):
     prod_numeric_grade = NumberInFilter(field_name='prod_numeric_grade', lookup_expr='in')
     user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
     regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
-    active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
@@ -2002,6 +2000,16 @@ class UserFilter(DojoFilter):
                   'last_name', 'username']
         exclude = ['password', 'last_login', 'groups', 'user_permissions',
                    'date_joined']
+
+
+class GroupFilter(DojoFilter):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Dojo_Group
+        fields = ['name', 'description']
+        exclude = ['users']
 
 
 class TestImportFilter(DojoFilter):

@@ -13,17 +13,19 @@ def parse_csv(csv_file) -> [Finding]:
     Returns:
     """
 
-    default_keys = ['IP', 'Network', 'DNS', 'NetBIOS', 'Tracking Method', 'OS', 'IP Status', 'QID', 'Title',
-                    'Vuln Status', 'Type', 'Severity', 'Port', 'Protocol', 'FQDN', 'SSL', 'First Detected',
-                    'Last Detected', 'Times Detected', 'Date Last Fixed', 'CVE ID', 'Vendor Reference', 'Bugtraq ID',
-                    'CVSS3', 'CVSS3 Base', 'CVSS3 Temporal', 'Threat', 'Impact', 'Solution', 'Exploitability',
-                    'Associated Malware', 'PCI Vuln', 'Ticket State', 'Instance', 'OS CPE', 'Category',
-                    'Associated Tags']
+    # default_keys = ['IP', 'Network', 'DNS', 'NetBIOS', 'Tracking Method', 'OS', 'IP Status', 'QID', 'Title',
+    #                 'Vuln Status', 'Type', 'Severity', 'Port', 'Protocol', 'FQDN', 'SSL', 'First Detected',
+    #                 'Last Detected', 'Times Detected', 'Date Last Fixed', 'CVE ID', 'Vendor Reference', 'Bugtraq ID',
+    #                 'CVSS3', 'CVSS3 Base', 'CVSS3 Temporal', 'Threat', 'Impact', 'Solution', 'Exploitability',
+    #                 'Associated Malware', 'PCI Vuln', 'Ticket State', 'Instance', 'OS CPE', 'Category',
+    #                 'Associated Tags']
 
     content = csv_file.read()
     if type(content) is bytes:
         content = content.decode('utf-8')
-    csv_reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"', fieldnames=default_keys)
+    csv_reader = csv.DictReader(io.StringIO(content), delimiter=',', quotechar='"',
+                                # fieldnames=default_keys
+                                )
 
     report_findings = get_report_findings(csv_reader)
     dojo_findings = build_findings_from_dict(report_findings)
@@ -89,7 +91,7 @@ def build_findings_from_dict(report_findings) -> [Finding]:
         )
 
         if report_finding['Date Last Fixed']:
-            finding.mitigated = datetime.strptime(report_finding['Date Last Fixed'], "%m/%d/%Y %H:%M:%S").date()
+            finding.mitigated = datetime.strptime(report_finding['Date Last Fixed'], "%m/%d/%Y %H:%M:%S")
             finding.is_Mitigated = True
         else:
             finding.is_Mitigated = False

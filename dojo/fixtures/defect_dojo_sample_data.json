@@ -24098,6 +24098,7 @@
     "model": "dojo.jira_instance",
     "pk": 2,
     "fields": {
+        "configuration_name": "Happy little JIRA 2",
         "url": "http://www.testjira.com",
         "username": "user1",
         "password": "user1",
@@ -24105,17 +24106,20 @@
         "epic_name_id": 111,
         "open_status_key": 111,
         "close_status_key": 112,
+        "info_mapping_severity": "Trivial",
         "low_mapping_severity": "test severity",
         "medium_mapping_severity": "test severity",
         "high_mapping_severity": "test severity",
         "critical_mapping_severity": "test severity",
-        "finding_text": ""
+        "finding_text": "",
+        "global_jira_sla_notification": false
     }
 },
 {
     "model": "dojo.jira_instance",
     "pk": 3,
     "fields": {
+        "configuration_name": "Happy little JIRA 3",
         "url": "http://www.testjira.com",
         "username": "user2",
         "password": "user2",
@@ -24123,17 +24127,20 @@
         "epic_name_id": 222,
         "open_status_key": 222,
         "close_status_key": 223,
+        "info_mapping_severity": "Trivial",
         "low_mapping_severity": "test severity",
         "medium_mapping_severity": "test severity",
         "high_mapping_severity": "test severity",
         "critical_mapping_severity": "test severity",
-        "finding_text": ""
+        "finding_text": "",
+        "global_jira_sla_notification": false
     }
 },
 {
     "model": "dojo.jira_instance",
     "pk": 4,
     "fields": {
+        "configuration_name": "Happy little JIRA 4",
         "url": "http://www.testjira.com",
         "username": "user3",
         "password": "user3",
@@ -24141,6 +24148,7 @@
         "epic_name_id": 333,
         "open_status_key": 333,
         "close_status_key": 334,
+        "info_mapping_severity": "Trivial",
         "low_mapping_severity": "test severity",
         "medium_mapping_severity": "test severity",
         "high_mapping_severity": "test severity",
