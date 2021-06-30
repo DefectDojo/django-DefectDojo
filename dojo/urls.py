@@ -8,7 +8,6 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.http import HttpResponse
-import django_saml2_auth.views
 from dojo import views
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
@@ -154,13 +153,6 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    # These are the SAML2 related URLs. You can change "^saml2_auth/" regex to
-    # any path you want, like "^sso_auth/", "^sso_login/", etc. (required)
-    url(r'^saml2/', include('django_saml2_auth.urls')),
-    # The following line will replace the default user login with SAML2 (optional)
-    # If you want to specific the after-login-redirect-URL, use parameter "?next=/the/path/you/want"
-    # with this view.
-    url(r'^saml2/login/$', django_saml2_auth.views.signin),
     #  Django Rest Framework API v2
     url(r'^%sapi/v2/' % get_system_setting('url_prefix'), include(v2_api.urls)),
     # action history
@@ -186,6 +178,11 @@ urlpatterns += survey_urls
 if hasattr(settings, 'DJANGO_METRICS_ENABLED'):
     if settings.DJANGO_METRICS_ENABLED:
         urlpatterns += [url(r'^%sdjango_metrics/' % get_system_setting('url_prefix'), include('django_prometheus.urls'))]
+
+if hasattr(settings, 'SAML2_ENABLED'):
+    if settings.SAML2_ENABLED:
+        # django saml2
+        urlpatterns += [url(r'^saml2/', include('djangosaml2.urls'))]
 
 if hasattr(settings, 'DJANGO_ADMIN_ENABLED'):
     if settings.DJANGO_ADMIN_ENABLED:

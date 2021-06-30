@@ -436,6 +436,7 @@ class FindingTemplatesViewSet(mixins.ListModelMixin,
                               mixins.RetrieveModelMixin,
                               mixins.UpdateModelMixin,
                               mixins.CreateModelMixin,
+                              mixins.DestroyModelMixin,
                               viewsets.GenericViewSet):
     serializer_class = serializers.FindingTemplateSerializer
     queryset = Finding_Template.objects.all()
@@ -499,18 +500,27 @@ class FindingViewSet(prefetch.PrefetchListMixin,
         serializer.save(push_to_jira=push_to_jira)
 
     def get_queryset(self):
-        return get_authorized_findings(Permissions.Finding_View).prefetch_related('endpoints',
+        findings = get_authorized_findings(Permissions.Finding_View).prefetch_related('endpoints',
                                                     'reviewers',
                                                     'images',
                                                     'found_by',
                                                     'notes',
                                                     'risk_acceptance_set',
                                                     'test',
+                                                    'tags',
+                                                    'jira_issue',
+                                                    'finding_group_set',
+                                                    'files',
+                                                    'burprawrequestresponse_set',
+                                                    'endpoint_status',
+                                                    'finding_meta',
                                                     'test__test_type',
                                                     'test__engagement',
                                                     'test__environment',
                                                     'test__engagement__product',
-                                                    'test__engagement__product__prod_type').distinct()
+                                                    'test__engagement__product__prod_type')
+
+        return findings.distinct()
 
     def get_serializer_class(self):
         if self.request and self.request.method == 'POST':
@@ -1488,6 +1498,7 @@ class StubFindingsViewSet(mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
                           mixins.CreateModelMixin,
                           mixins.UpdateModelMixin,
+                          mixins.DestroyModelMixin,
                           viewsets.GenericViewSet):
     serializer_class = serializers.StubFindingSerializer
     queryset = Stub_Finding.objects.none()
@@ -1692,6 +1703,7 @@ class TestsViewSet(mixins.ListModelMixin,
 class TestTypesViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        mixins.UpdateModelMixin,
+                       mixins.DestroyModelMixin,
                        mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = serializers.TestTypeSerializer
@@ -1717,6 +1729,8 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                       prefetch.PrefetchRetrieveMixin,
                       mixins.ListModelMixin,
                       mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.CreateModelMixin,
                       mixins.DestroyModelMixin,
                       viewsets.GenericViewSet):
     serializer_class = serializers.TestImportSerializer
