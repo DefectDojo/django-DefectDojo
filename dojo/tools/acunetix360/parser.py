@@ -34,14 +34,6 @@ class Acunetix360Parser(object):
         dupes = dict()
 
         for item in data["Vulnerabilities"]:
-            mitigation = ''
-            impact = ''
-            references = ''
-            findingdetail = ''
-            title = ''
-            request = ''
-            response = ''
-
             title = item["Name"]
             findingdetail = cleantags(item["Description"])
             cwe = int(item["Classification"]["Cwe"]) if "Cwe" in item["Classification"] else None
