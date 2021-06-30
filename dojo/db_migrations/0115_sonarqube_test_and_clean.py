@@ -23,7 +23,7 @@ def sq_clean(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0113_endpoint_protocol'),
+        ('dojo', '0114_cyclonedx_vuln_uniqu'),
     ]
 
     operations = [
