@@ -682,6 +682,8 @@ vars().update(EMAIL_CONFIG)
 # To override not configurable settings, you can use local_settings.py
 # function that helps convert env var into the djangosaml2 attribute mapping format
 # https://djangosaml2.readthedocs.io/contents/setup.html#users-attributes-and-account-linking
+
+
 def saml2_attrib_map_format(dict):
     dout = {}
     for i in dict:
