@@ -43,15 +43,15 @@ class SonarQubeApiImporter(object):
     def prepare_client(test):
         product = test.engagement.product
         if test.sonarqube_config:
-            config = test.sonarqube_config  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6
+            config = test.sonarqube_config  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
             # Double check of config
             if config.product != product:
                 raise Exception('Product SonarQube Configuration and "Product" mismatch')
         else:
-            sqqs = product.sonarqube_product_set.all()
+            sqqs = product.sonarqube_product_set.filter(product=product)
             if sqqs.count() == 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 4
                 config = sqqs.first()
-            elif sqqs.count() > 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 5
+            elif sqqs.count() > 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6
                 raise Exception(
                     'It has configured more than one Product SonarQube Configuration but non of them has been choosen.\n'
                     'Please specify at Test which one should be used.'
@@ -69,9 +69,9 @@ class SonarQubeApiImporter(object):
 
             client, config = self.prepare_client(test)
 
-            if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 4 and 6
+            if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
                 component = client.get_project(config.sonarqube_project_key)
-            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 2
+            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
                 component = client.find_project(test.engagement.product.name)
 
             issues = client.find_issues(component['key'])
