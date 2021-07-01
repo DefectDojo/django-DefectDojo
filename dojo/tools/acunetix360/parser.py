@@ -44,7 +44,6 @@ class Acunetix360Parser(object):
             response = item["HttpResponse"]["Content"]
             if response is None or len(response) <= 0:
                 response = "Response Not Found"
-            
 
             finding = Finding(title=title,
                               test=test,
