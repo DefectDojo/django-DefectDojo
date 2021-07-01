@@ -24,7 +24,7 @@ class Acunetix360Parser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = dict()
-        scan_date = datetime.datetime.strptime(data["Generated"], "%Y-%m-%dT%H:%M:%SZ").date()
+        scan_date = datetime.datetime.strptime(data["Generated"], "%d/%m/%Y %H:%M %p").date()
 
         for item in data["Vulnerabilities"]:
             title = item["Name"]
