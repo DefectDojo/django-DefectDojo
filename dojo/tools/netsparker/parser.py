@@ -1,19 +1,13 @@
 import json
-import re
+import html2text
+import datetime
 
 from dojo.models import Finding, Endpoint
-
-__author__ = "Roy Shoemake"
-__status__ = "Development"
-
-
-# Function to remove HTML tags
-TAG_RE = re.compile(r'<[^>]+>')
 
 
 def cleantags(text=''):
     prepared_text = text if text else ''
-    return TAG_RE.sub('', prepared_text)
+    return html2text.html2text(prepared_text)
 
 
 class NetsparkerParser(object):
@@ -34,23 +28,19 @@ class NetsparkerParser(object):
         except:
             data = json.loads(tree)
         dupes = dict()
+        scan_date = datetime.datetime.strptime(data["Generated"], "%d/%m/%Y %H:%M %p").date()
 
         for item in data["Vulnerabilities"]:
-            categories = ''
-            language = ''
-            mitigation = ''
-            impact = ''
-            references = ''
-            findingdetail = ''
-            title = ''
-            group = ''
-            status = ''
-            request = ''
-            response = ''
 
             title = item["Name"]
             findingdetail = cleantags(item["Description"])
-            cwe = int(item["Classification"]["Cwe"]) if "Cwe" in item["Classification"] else None
+            if "Cwe" in item["Classification"]:
+                try:
+                    cwe = int(item["Classification"]["Cwe"])
+                except:
+                    cwe = None
+            else:
+                cwe = None
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
@@ -68,6 +58,7 @@ class NetsparkerParser(object):
                               severity=sev.title(),
                               mitigation=mitigation,
                               impact=impact,
+                              date=scan_date,
                               references=references,
                               cwe=cwe,
                               static_finding=True)
