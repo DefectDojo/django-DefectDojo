@@ -1,5 +1,6 @@
 {% extends "base.html"%}
 {% block content %}
+    {{ block.super }}
  {{ block.super }}
     <h3> Add a Tool Configuration </h3>
     <form class="form-horizontal" action="{% url 'add_tool_config' %}" method="post">{% csrf_token %}

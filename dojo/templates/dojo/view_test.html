@@ -5,6 +5,7 @@
 {% load static %}
 {% load humanize %}
 {% block add_styles %}
+    {{ block.super }}
     ul#select_by_severity a:hover, ul#bulk_edit a:hover {
     cursor: pointer;
     }
@@ -19,6 +20,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix">
@@ -1129,6 +1131,7 @@
 </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">

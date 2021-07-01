@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block add_css %}
+    {{ block.super }}
     <link rel="stylesheet" href="{{ STATIC_URL }}chosen-bootstrap/chosen.bootstrap.min.css">
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3>Edit Questionnaire Questions ({{ survey.name }})</h3>
 
     <form class="form-horizontal" method="post">{% csrf_token %}
@@ -16,6 +18,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript">
         $(function () {
             $("#id_questions").bind("DOMSubtreeModified", function() {

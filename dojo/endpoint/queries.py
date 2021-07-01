@@ -3,7 +3,8 @@ from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from dojo.models import Endpoint, Endpoint_Status, Product_Member, Product_Type_Member, \
     Product_Group, Product_Type_Group
-from dojo.authorization.authorization import get_roles_for_permission
+from dojo.authorization.authorization import get_roles_for_permission, role_has_permission, \
+    get_groups
 
 
 def get_authorized_endpoints(permission, queryset=None, user=None):
@@ -25,6 +26,13 @@ def get_authorized_endpoints(permission, queryset=None, user=None):
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return endpoints
+
+        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+            return endpoints
+
+        for group in get_groups(user):
+            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
+                return endpoints
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(
@@ -78,6 +86,13 @@ def get_authorized_endpoint_status(permission, queryset=None, user=None):
     if settings.FEATURE_AUTHORIZATION_V2:
         if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
             return endpoint_status
+
+        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+            return endpoint_status
+
+        for group in get_groups(user):
+            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
+                return endpoint_status
 
         roles = get_roles_for_permission(permission)
         authorized_product_type_roles = Product_Type_Member.objects.filter(

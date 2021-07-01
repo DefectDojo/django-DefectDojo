@@ -308,7 +308,8 @@ def deduplicate_uid_or_hash_code(new_finding):
         # same without "test__engagement=new_finding.test.engagement" condition
         existing_findings = Finding.objects.filter(
             (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
-            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type))).exclude(
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            test__engagement__product=new_finding.test.engagement.product).exclude(
                 id=new_finding.id).exclude(
                         duplicate=True).order_by('id')
     deduplicationLogger.debug("Found " +

@@ -51,15 +51,17 @@ class TestEndpointModel(TestCase):
         endpoint = Endpoint(host='127.0.0.1')
         self.assertEqual(endpoint.host, '127.0.0.1')
 
+    def test_less_standard_hosts(self):
+        endpoint = Endpoint.from_uri('http://123_server/')
+        endpoint.clean()
+        endpoint = Endpoint(host='456_desktop')
+        endpoint.clean()
+
     def test_invalid(self):
-        endpoint = Endpoint.from_uri('http://127.0.1/')
-        self.assertRaises(ValidationError, endpoint.clean)
         self.assertRaises(ValidationError, Endpoint.from_uri, 'http://127.0.0.1:portNo/')
         endpoint = Endpoint.from_uri('http://127.0.0.1:-1/')
         self.assertRaises(ValidationError, endpoint.clean)
         endpoint = Endpoint.from_uri('http://127.0.0.1:66666/')
-        self.assertRaises(ValidationError, endpoint.clean)
-        endpoint = Endpoint(host='127.0.1')
         self.assertRaises(ValidationError, endpoint.clean)
         endpoint = Endpoint(host='127.0.0.1', port=-1)
         self.assertRaises(ValidationError, endpoint.clean)

@@ -3,7 +3,7 @@ from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group
+    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group, Dojo_Group_Member
 
 
 def user_has_permission(user, obj, permission):
@@ -14,14 +14,21 @@ def user_has_permission(user, obj, permission):
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return True
 
+    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
+        return True
+
+    for group in get_groups(user):
+        if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
+            return True
+
     if isinstance(obj, Product_Type):
         # Check if the user has a role for the product type with the requested permissions
         member = get_product_type_member(user, obj)
-        if member is not None and role_has_permission(member.role, permission):
+        if member is not None and role_has_permission(member.role.id, permission):
             return True
         # Check if the user is in a group with a role for the product type with the requested permissions
         for product_type_group in get_product_type_groups(user, obj):
-            if role_has_permission(product_type_group.role, permission):
+            if role_has_permission(product_type_group.role.id, permission):
                 return True
         return False
     elif (isinstance(obj, Product) and
@@ -32,11 +39,11 @@ def user_has_permission(user, obj, permission):
 
         # Check if the user has a role for the product with the requested permissions
         member = get_product_member(user, obj)
-        if member is not None and role_has_permission(member.role, permission):
+        if member is not None and role_has_permission(member.role.id, permission):
             return True
         # Check if the user is in a group with a role for the product with the requested permissions
         for product_group in get_product_groups(user, obj):
-            if role_has_permission(product_group.role, permission):
+            if role_has_permission(product_group.role.id, permission):
                 return True
         return False
     elif isinstance(obj, Engagement) and permission in Permissions.get_engagement_permissions():
@@ -65,6 +72,16 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(user, obj.product_type, permission)
     elif isinstance(obj, Product_Group) and permission in Permissions.get_product_group_permissions():
         return user_has_permission(user, obj.product, permission)
+    elif isinstance(obj, Dojo_Group) and permission in Permissions.get_group_permissions():
+        # Check if the user has a role for the group with the requested permissions
+        group_member = get_group_member(user, obj)
+        return group_member is not None and role_has_permission(group_member.role.id, permission)
+    elif isinstance(obj, Dojo_Group_Member) and permission in Permissions.get_group_member_permissions():
+        if permission == Permissions.Group_Member_Delete:
+            # Every user is allowed to remove himself
+            return obj.user == user or user_has_permission(user, obj.group, permission)
+        else:
+            return user_has_permission(user, obj.group, permission)
     else:
         raise NoAuthorizationImplementedError('No authorization implemented for class {} and permission {}'.
             format(type(obj).__name__, permission))
@@ -88,6 +105,8 @@ def get_roles_for_permission(permission):
 
 
 def role_has_permission(role, permission):
+    if role is None:
+        return False
     if not Roles.has_value(role):
         raise RoleDoesNotExistError('Role {} does not exist'.format(role))
     roles = get_roles_with_permissions()
@@ -117,7 +136,7 @@ def get_product_member(user, product):
 @cache_for_request
 def get_product_member_dict(user):
     pm_dict = {}
-    for product_member in Product_Member.objects.select_related('product').filter(user=user):
+    for product_member in Product_Member.objects.select_related('product').select_related('role').filter(user=user):
         pm_dict[product_member.product.id] = product_member
     return pm_dict
 
@@ -129,7 +148,7 @@ def get_product_type_member(user, product_type):
 @cache_for_request
 def get_product_type_member_dict(user):
     ptm_dict = {}
-    for product_type_member in Product_Type_Member.objects.select_related('product_type').filter(user=user):
+    for product_type_member in Product_Type_Member.objects.select_related('product_type').select_related('role').filter(user=user):
         ptm_dict[product_type_member.product_type.id] = product_type_member
     return ptm_dict
 
@@ -141,7 +160,7 @@ def get_product_groups(user, product):
 @cache_for_request
 def get_product_groups_dict(user):
     pg_dict = {}
-    for product_group in Product_Group.objects.select_related('product').filter(group__users=user):
+    for product_group in Product_Group.objects.select_related('product').select_related('role').filter(group__users=user):
         if pg_dict.get(product_group.product.id) is None:
             pgu_list = []
         else:
@@ -158,7 +177,7 @@ def get_product_type_groups(user, product_type):
 @cache_for_request
 def get_product_type_groups_dict(user):
     pgt_dict = {}
-    for product_type_group in Product_Type_Group.objects.select_related('product_type').filter(group__users=user):
+    for product_type_group in Product_Type_Group.objects.select_related('product_type').select_related('role').filter(group__users=user):
         if pgt_dict.get(product_type_group.product_type.id) is None:
             pgtu_list = []
         else:
@@ -166,3 +185,20 @@ def get_product_type_groups_dict(user):
         pgtu_list.append(product_type_group)
         pgt_dict[product_type_group.product_type.id] = pgtu_list
     return pgt_dict
+
+
+@cache_for_request
+def get_groups(user):
+    return Dojo_Group.objects.select_related('global_role').filter(users=user)
+
+
+def get_group_member(user, group):
+    return get_group_members_dict(user).get(group.id)
+
+
+@cache_for_request
+def get_group_members_dict(user):
+    gu_dict = {}
+    for group_member in Dojo_Group_Member.objects.select_related('group').select_related('role').filter(user=user):
+        gu_dict[group_member.group.id] = group_member
+    return gu_dict

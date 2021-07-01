@@ -238,6 +238,8 @@ class DependencyCheckParser(object):
                                      'source: {1}\n' \
                                      'url: {2}\n\n'.format(name, source, url)
 
+        mitigation = 'Update ' + component_name + ':' + component_version + ' to at least the version recommended in the description'
+
         return Finding(
             title=title,
             file_path=dependency_filename,
@@ -246,6 +248,7 @@ class DependencyCheckParser(object):
             cve=cve,
             description=description,
             severity=severity,
+            mitigation=mitigation,
             static_finding=True,
             references=reference_detail,
             component_name=component_name,

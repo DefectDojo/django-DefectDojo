@@ -43,6 +43,14 @@ arachni_reporter --reporter 'json' js.com.afr
 Use the VulnerabilitiesSummary.xml file found in the zipped report
 download.
 
+### AuditJS (OSSIndex)
+
+AuditJS scanning tool using OSSIndex database and generated with `--json` or `-j` option (<https://www.npmjs.com/package/auditjs>).
+
+{{< highlight bash >}}
+auditjs ossi --json > auditjs_report.json
+{{< /highlight >}}
+
 ### AWS Security Hub
 
 The JSON output from AWS Security Hub exported with the `aws securityhub get-findings` (<https://docs.aws.amazon.com/cli/latest/reference/securityhub/get-findings.html>)
@@ -196,12 +204,12 @@ OWASP Dependency Check output can be imported in Xml format.
 
 ### Dependency Track
 
-Dependency Track has implemented a DefectDojo integration. Information about 
-how to configure the integration is documented here: 
+Dependency Track has implemented a DefectDojo integration. Information about
+how to configure the integration is documented here:
 https://docs.dependencytrack.org/integrations/defectdojo/
 
 Alternatively, the Finding Packaging Format (FPF) from OWASP Dependency Track can be
-imported in JSON format. See here for more info on this JSON format: 
+imported in JSON format. See here for more info on this JSON format:
 <https://docs.dependencytrack.org/integrations/file-formats/>
 
 ### DrHeader
@@ -228,21 +236,78 @@ Import Findings from XML file format.
 
 ### Generic Findings Import
 
-Import Generic findings in CSV format.
+Import Generic findings in CSV or JSON format.
 
-### Hadolint
+Attributes supported for CSV:
+ - Title
+ - Description
+ - Date
+ - Severity
+ - Duplicate ('TRUE', 'FALSE')
+ - Active ('TRUE', 'FALSE')
+ - Mitigation
+ - Impact
+ - References
+ - Verified ('TRUE', 'FALSE')
+ - FalsePositive
+ - CVE
+ - CweId
+ - CVSSV3
+ - Url
 
-Hadolint Dockerfile scan in json format.
+Example of JSON format:
 
-Harbor Vulnerability
---------------------
-
-Import findings from Harbor registry container scan:
-<https://github.com/goharbor/harbor>
-
-### JFrogXRay
-
-Import the JSON format for the \"Security Export\" file.
+```JSON
+{
+    "findings": [
+        {
+            "title": "test title with endpoints as dict",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau",
+            "severity": "Medium",
+            "mitigation": "Some mitigation",
+            "date": "2021-01-06",
+            "cve": "CVE-2020-36234",
+            "cwe": 261,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/first.cpp",
+            "line": 13,
+            "endpoints": [
+                {
+                    "host": "exemple.com"
+                }
+            ]
+        },
+        {
+            "title": "test title with endpoints as strings",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
+            "severity": "Critical",
+            "mitigation": "Some mitigation",
+            "date": "2021-01-06",
+            "cve": "CVE-2020-36235",
+            "cwe": 287,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/two.cpp",
+            "line": 135,
+            "endpoints": [
+                "http://urlfiltering.paloaltonetworks.com/test-command-and-control",
+                "https://urlfiltering.paloaltonetworks.com:2345/test-pest"
+            ]
+        },
+        {
+            "title": "test title",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
+            "severity": "Critical",
+            "mitigation": "Some mitigation",
+            "date": "2021-01-06",
+            "cve": "CVE-2020-36236",
+            "cwe": 287,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/threeeeeeeeee.cpp",
+            "line": 1353
+        }
+    ]
+}
+```
 
 ### Gosec Scanner
 
@@ -301,6 +366,15 @@ Github v4 graphql query to fetch data:
   }
 {{< /highlight >}}
 
+### Hadolint
+
+Hadolint Dockerfile scan in json format.
+
+### Harbor Vulnerability
+
+Import findings from Harbor registry container scan:
+<https://github.com/goharbor/harbor>
+
 ### HuskyCI Report
 
 Import JSON reports from
@@ -317,16 +391,16 @@ XML Scan Result File from Immuniweb Scan.
 IntSights Report
 --------------
 
-IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.). 
+IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.).
 
 ### Manual Import
-Use the Export CSV feature in the IntSights Threat Command GUI to create an *IntSights Alerts.csv* file. This CSV 
+Use the Export CSV feature in the IntSights Threat Command GUI to create an *IntSights Alerts.csv* file. This CSV
 file can then be imported into Defect Dojo.
 
 ### Automated Import
 
-The IntSights `get-complete-alert` API only returns details for a single alert. To automate the process, 
-individually fetch details for each alert and append to a list. The list is then saved as the value for the key 
+The IntSights `get-complete-alert` API only returns details for a single alert. To automate the process,
+individually fetch details for each alert and append to a list. The list is then saved as the value for the key
 "Alerts". This JSON object can then be imported into Defect Dojo.
 
 Example:
@@ -376,9 +450,15 @@ Example:
       ]
     }
 
+### JFrogXRay
 
-Kiuwan Scanner
---------------
+Import the JSON format for the \"Security Export\" file. Use this importer for Xray version 2.X
+
+### JFrog XRay Unified
+
+Import the JSON format for the \"Security & Compliance | Reports\" export. Jfrog's Xray tool is an add-on to their Artifactory repository that does Software Composition Analysis, see https://www.jfrog.com/confluence/display/JFROG/JFrog+Xray for more information. \"Xray Unified\" refers to Xray Version 3.0 and later.
+
+### Kiuwan Scanner
 
 Import Kiuwan Scan in CSV format. Export as CSV Results on Kiuwan.
 
@@ -389,6 +469,10 @@ Import JSON reports of Kubernetes CIS benchmark scans.
 ### KICS Scanner
 
 Import of JSON report from <https://github.com/Checkmarx/kics>
+
+### Meterian Scanner
+
+The Meterian JSON report output file can be imported.
 
 ### Microfocus Webinspect Scanner
 
@@ -445,6 +529,10 @@ Node Security Platform (NSP) output file can be imported in JSON format.
 
 Node Package Manager (NPM) Audit plugin output file can be imported in
 JSON format. Only imports the \'advisories\' subtree.
+
+### Nuclei
+
+Import JSON output of nuclei scan report <https://github.com/projectdiscovery/nuclei>
 
 ### Openscap Vulnerability Scan
 
@@ -577,6 +665,10 @@ providers. Scan results are located at
 Multiple scans will create multiple files if they are runing agains
 different Cloud projects. See <https://github.com/nccgroup/ScoutSuite>
 
+### Semgrep JSON Report
+
+Import Semgrep output (--json)
+
 ### SKF Scan
 
 Output of SKF Sprint summary export.
@@ -682,7 +774,7 @@ JSON output of the `twistcli` tool. Example:
 
 The CSV output from the UI is now also accepted.
 
-### TFSec 
+### TFSec
 
 Import of JSON report from <https://github.com/tfsec/tfsec>
 
@@ -723,6 +815,10 @@ HTTP Return Code | Severity
 
 Import XML findings list report, preferably with parameter
 \'generateDetailsInFindingsListReport=true\'.
+
+### Yarn Audit
+
+Import Yarn Audit scan report in JSON format. Use something like `yarn audit --json > yarn_report.json`.
 
 ### Zed Attack Proxy
 

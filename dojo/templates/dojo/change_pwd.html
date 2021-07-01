@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {{ block.super }}
     <form method="post" class="form-horizontal" autocomplete="off">
         {% csrf_token %}
         <fieldset>
