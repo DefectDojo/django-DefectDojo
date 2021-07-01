@@ -24,6 +24,7 @@ class Acunetix360Parser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
         dupes = dict()
+        scan_date = datetime.datetime.strptime(data["Generated"], "%Y-%m-%dT%H:%M:%SZ").date()
 
         for item in data["Vulnerabilities"]:
             title = item["Name"]
@@ -43,7 +44,7 @@ class Acunetix360Parser(object):
             response = item["HttpResponse"]["Content"]
             if response is None or len(response) <= 0:
                 response = "Response Not Found"
-            scan_date = datetime.datetime.strptime(item["Generated"], "%Y-%m-%dT%H:%M:%SZ").date()
+            
 
             finding = Finding(title=title,
                               test=test,
