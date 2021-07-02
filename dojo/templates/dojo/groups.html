@@ -70,7 +70,7 @@
                                             {% if g|has_object_permission:"Group_Delete" %}
                                             <li role="separator" class="divider"></li>
                                             <li role="presentation">
-                                                <a class="" href="{% url 'delete_group' g.id %}">
+                                                <a class="" href="{% url 'delete_group' g.id %}" id="deleteGroup">
                                                     <i class="fa fa-trash"></i> Delete
                                                 </a>
                                             </li>

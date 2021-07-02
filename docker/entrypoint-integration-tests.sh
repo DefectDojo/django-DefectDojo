@@ -126,6 +126,14 @@ else
     fail $test
 fi
 
+test="Group integration tests"
+echo "Running: $test"
+if python3 tests/group_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
 test="Product member integration tests"
 echo "Running: $test"
 if python3 tests/product_member_test.py ; then
