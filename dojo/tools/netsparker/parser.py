@@ -5,11 +5,6 @@ import datetime
 from dojo.models import Finding, Endpoint
 
 
-def cleantags(text=''):
-    prepared_text = text if text else ''
-    return html2text.html2text(prepared_text)
-
-
 class NetsparkerParser(object):
 
     def get_scan_types(self):
@@ -33,7 +28,7 @@ class NetsparkerParser(object):
         for item in data["Vulnerabilities"]:
 
             title = item["Name"]
-            findingdetail = cleantags(item["Description"])
+            findingdetail = html2text.html2text(item.get("Description", ""))
             if "Cwe" in item["Classification"]:
                 try:
                     cwe = int(item["Classification"]["Cwe"])
@@ -44,10 +39,10 @@ class NetsparkerParser(object):
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
-            mitigation = cleantags(item["RemedialProcedure"])
-            references = cleantags(item["RemedyReferences"])
+            mitigation = html2text.html2text(item.get("RemedialProcedure", ""))
+            references =  html2text.html2text(item.get("RemedyReferences", ""))
             url = item["Url"]
-            impact = cleantags(item["Impact"])
+            impact =  html2text.html2text(item.get("Impact", ""))
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             response = item["HttpResponse"]["Content"]
