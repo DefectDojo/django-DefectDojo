@@ -52,6 +52,7 @@ class DockleParser(object):
                     severity=severity,
                     description=description,
                     static_finding=True,
+                    dynamic_finding=False,
                     nb_occurences=1,
                     vuln_id_from_tool=code,
                 )
