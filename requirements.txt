@@ -30,7 +30,7 @@ Markdown==3.3.4
 mysqlclient==2.0.3
 openpyxl==3.0.7
 xlrd==1.2.0
-Pillow==8.2.0  # required by django-imagekit
+Pillow==8.3.0  # required by django-imagekit
 psycopg2-binary==2.9.1
 cryptography==3.4.7
 python-dateutil==2.8.1
@@ -50,7 +50,7 @@ Python-jose==3.3.0
 gitpython==3.1.18
 debugpy==1.3.0
 python-gitlab==2.9.0
-google-auth==1.32.0
+google-auth==1.32.1
 google-api-python-client==1.12.8
 google-auth-oauthlib==0.4.4
 drf_yasg==1.20.0
