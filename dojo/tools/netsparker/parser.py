@@ -40,9 +40,9 @@ class NetsparkerParser(object):
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
             mitigation = html2text.html2text(item.get("RemedialProcedure", ""))
-            references =  html2text.html2text(item.get("RemedyReferences", ""))
+            references = html2text.html2text(item.get("RemedyReferences", ""))
             url = item["Url"]
-            impact =  html2text.html2text(item.get("Impact", ""))
+            impact = html2text.html2text(item.get("Impact", ""))
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             response = item["HttpResponse"]["Content"]
