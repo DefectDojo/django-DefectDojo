@@ -5,11 +5,6 @@ import html2text
 from dojo.models import Finding, Endpoint
 
 
-def cleantags(text=''):
-    prepared_text = text if text else ''
-    return html2text.html2text(prepared_text)
-
-
 class Acunetix360Parser(object):
 
     def get_scan_types(self):
@@ -28,15 +23,15 @@ class Acunetix360Parser(object):
 
         for item in data["Vulnerabilities"]:
             title = item["Name"]
-            findingdetail = cleantags(item["Description"])
+            findingdetail = html2text.html2text(item.get("Description", ""))
             cwe = int(item["Classification"]["Cwe"]) if "Cwe" in item["Classification"] else None
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
-            mitigation = cleantags(item["RemedialProcedure"])
-            references = cleantags(item["RemedyReferences"])
+            mitigation = html2text.html2text(item.get("RemedialProcedure", ""))
+            references = html2text.html2text(item.get("RemedyReferences", ""))
             url = item["Url"]
-            impact = cleantags(item["Impact"])
+            impact = html2text.html2text(item.get("Impact", ""))
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             if request is None or len(request) <= 0:
