@@ -72,8 +72,7 @@ def edit_group(request, gid):
             global_role_form = GlobalRoleForm(request.POST, instance=global_role)
 
         if form.is_valid() and global_role_form.is_valid():
-            if global_role.role != previous_global_role and not request.user.is_superuser:
-                global_role.role = previous_global_role
+            if global_role_form.cleaned_data['role'] != previous_global_role and not request.user.is_superuser:
                 messages.add_message(request,
                                     messages.WARNING,
                                     'Only superusers are allowed to change the global role.',
