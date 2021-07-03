@@ -57,8 +57,10 @@ def edit_group(request, gid):
 
     global_role = group.global_role if hasattr(group, 'global_role') else None
     if global_role is None:
+        previous_global_role = None
         global_role_form = GlobalRoleForm()
     else:
+        previous_global_role = global_role.role
         global_role_form = GlobalRoleForm(instance=global_role)
 
     if request.method == 'POST':
@@ -70,14 +72,21 @@ def edit_group(request, gid):
             global_role_form = GlobalRoleForm(request.POST, instance=global_role)
 
         if form.is_valid() and global_role_form.is_valid():
-            form.save()
-            global_role = global_role_form.save(commit=False)
-            global_role.group = group
-            global_role.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Group saved successfully.',
-                                 extra_tags='alert-success')
+            if global_role.role != previous_global_role and not request.user.is_superuser:
+                global_role.role = previous_global_role
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'Only superusers are allowed to change the global role.',
+                                    extra_tags='alert-warning')
+            else:
+                form.save()
+                global_role = global_role_form.save(commit=False)
+                global_role.group = group
+                global_role.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Group saved successfully.',
+                                    extra_tags='alert-success')
         else:
             messages.add_message(request,
                                  messages.ERROR,
@@ -128,25 +137,30 @@ def add_group(request):
         form = DojoGroupForm(request.POST)
         global_role_form = GlobalRoleForm(request.POST)
         if form.is_valid() and global_role_form.is_valid():
-            group = form.save(commit=False)
-            group.save()
-            global_role = global_role_form.save(commit=False)
-            global_role.group = group
-            global_role.save()
-            member = Dojo_Group_Member()
-            member.user = request.user
-            member.group = group
-            member.role = Role.objects.get(is_owner=True)
-            member.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Group was added successfully.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_group', args=(group.id,)))
+            if global_role_form.cleaned_data['role'] is not None and not request.user.is_superuser:
+                messages.add_message(request, messages.ERROR,
+                                    'Only superusers are allowed to set global role.',
+                                    extra_tags='alert-warning')
+            else:
+                group = form.save(commit=False)
+                group.save()
+                global_role = global_role_form.save(commit=False)
+                global_role.group = group
+                global_role.save()
+                member = Dojo_Group_Member()
+                member.user = request.user
+                member.group = group
+                member.role = Role.objects.get(is_owner=True)
+                member.save()
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Group was added successfully.',
+                                    extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_group', args=(group.id,)))
         else:
             messages.add_message(request, messages.ERROR,
-                                 'Group was not added successfully.',
-                                 extra_tags='alert-danger')
+                                'Group was not added successfully.',
+                                extra_tags='alert-danger')
 
     add_breadcrumb(title="Add Group", top_level=False, request=request)
     return render(request, "dojo/add_group.html", {
