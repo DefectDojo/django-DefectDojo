@@ -87,6 +87,8 @@ Users can be assigned a global role in the *Edit User* dialog. A global role giv
 
 A use case for a global role could be the Chief Information Security Officer of a company who needs an overview of all systems. If he gets the global role `Reader`, he can see the findings for all products and also all metrics.
 
+Since global roles give users access to all data, only superusers are allowed to edit it.
+
 ## Groups ##
 
 If you have a number of users who should all have the same permissions for some Products or Product Types, you can put them together in a group. The group defines the roles for Products and Product Types that are applied to all members of the group.
