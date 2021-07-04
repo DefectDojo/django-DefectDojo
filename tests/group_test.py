@@ -6,7 +6,6 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from base_test_class import BaseTestCase
 from user_test import UserTest
-from product_test import ProductTest
 
 
 class GroupTest(BaseTestCase):
@@ -155,7 +154,6 @@ def suite():
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
-    suite.addTest(ProductTest('test_create_product'))
     suite.addTest(UserTest('test_create_user'))
     suite.addTest(GroupTest('test_create_group'))
     suite.addTest(GroupTest('test_group_edit_name_and_global_role'))
@@ -164,7 +162,6 @@ def suite():
     suite.addTest(GroupTest('test_delete_group_member'))
     suite.addTest(GroupTest('test_group_delete'))
     suite.addTest(UserTest('test_user_delete'))
-    suite.addTest(ProductTest('test_delete_product'))
 
     return suite
 

@@ -306,7 +306,7 @@ def add_product_group(request, gid):
                         product_group.save()
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 'Product group added successfully.',
+                                 'Product groups added successfully.',
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_group', args=(gid, )))
 

@@ -323,17 +323,17 @@
                       <td>
                           <ul>
                               <li class="dropdown" style="list-style:none;position:absolute">
-                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductGroup">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                   <ul class="dropdown-menu">
                                       {% if prod|has_object_permission:"Product_Group_Edit" %}
                                       <li>
-                                          <a name="editProductMember" href="{% url 'edit_product_group' group.id %}">
+                                          <a name="editProductGroup" href="{% url 'edit_product_group' group.id %}">
                                               <i class="fa fa-pencil-square-o"></i> Edit</a>
                                       </li>
                                       {% endif %}
                                       {% if group|has_object_permission:"Product_Group_Delete" %}
                                       <li>
-                                          <a name="deleteProductMember" href="{% url 'delete_product_group' group.id %}">
+                                          <a name="deleteProductGroup" href="{% url 'delete_product_group' group.id %}">
                                               <i class="fa fa-trash"></i> Delete</a>
                                       </li>
                                       {% endif %}
