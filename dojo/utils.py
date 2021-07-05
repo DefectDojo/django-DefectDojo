@@ -361,7 +361,7 @@ def set_duplicate(new_finding, existing_finding, update_existing_finding=True):
 def is_duplicate_changed_status(new_finding, existing_finding):
     if not existing_finding.out_of_scope and not existing_finding.false_p:
         # Mitigation status. Reopen or close based on mitigation status.
-        existing_mitigated = (existing_finding.is_Mitigated or existing_finding.mitigated)
+        existing_mitigated = (existing_finding.is_mitigated or existing_finding.mitigated)
         new_mitigated = (new_finding.is_mitigated or new_finding.mitigated)
         if existing_mitigated != new_mitigated:
             return True
