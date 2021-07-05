@@ -2120,10 +2120,28 @@ class Languages_TypeTypeForm(forms.ModelForm):
         exclude = ['product']
 
 
-class App_AnalysisTypeForm(forms.ModelForm):
+class AppAnalysisForm(forms.ModelForm):
+    user = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=True)
+
     class Meta:
         model = App_Analysis
         exclude = ['product']
+
+
+class DeleteAppAnalysisForm(forms.ModelForm):
+    class Meta:
+        model = App_Analysis
+        exclude = ['product', 'tags']
+
+    def __init__(self, *args, **kwargs):
+        super(DeleteAppAnalysisForm, self).__init__(*args, **kwargs)
+        self.fields['name'].disabled = True
+        self.fields['user'].disabled = True
+        self.fields['confidence'].disabled = True
+        self.fields['version'].disabled = True
+        self.fields['icon'].disabled = True
+        self.fields['website'].disabled = True
+        self.fields['website_found'].disabled = True
 
 
 class ToolConfigForm(forms.ModelForm):
