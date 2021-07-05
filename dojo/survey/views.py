@@ -401,15 +401,14 @@ def questionnaire(request):
 
 @user_passes_test(lambda u: u.is_staff)
 def questions(request):
-    user = request.user
     questions = Question.objects.all()
     questions = QuestionFilter(request.GET, queryset=questions)
     paged_questions = get_page_items(request, questions.qs, 25)
-    add_breadcrumb(title="All Questions", top_level=False, request=request)
+    add_breadcrumb(title="Questions", top_level=False, request=request)
     return render(request, 'defectDojo-engagement-survey/list_questions.html',
                   {"questions": paged_questions,
                    "filtered": questions,
-                   "name": "All Questions",
+                   "name": "Questions",
                    })
 
 
