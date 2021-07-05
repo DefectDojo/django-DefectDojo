@@ -17,6 +17,7 @@ class TestNetsparkerParser(TestCase):
             finding = findings[0]
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(16, finding.cwe)
+            self.assertEqual("25/06/2021", finding.date.strftime("%d/%m/%Y"))
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:N/A:N/E:H/RL:O/RC:C", finding.cvssv3)
@@ -36,6 +37,7 @@ class TestNetsparkerParser(TestCase):
             finding = findings[0]
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(16, finding.cwe)
+            self.assertEqual("25/06/2021", finding.date.strftime("%d/%m/%Y"))
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:N/A:N/E:H/RL:O/RC:C", finding.cvssv3)
@@ -47,6 +49,7 @@ class TestNetsparkerParser(TestCase):
             finding = findings[1]
             self.assertEqual("Critical", finding.severity)
             self.assertEqual(89, finding.cwe)
+            self.assertEqual("25/06/2021", finding.date.strftime("%d/%m/%Y"))
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H", finding.cvssv3)
@@ -58,6 +61,7 @@ class TestNetsparkerParser(TestCase):
             finding = findings[2]
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(205, finding.cwe)
+            self.assertEqual("25/06/2021", finding.date.strftime("%d/%m/%Y"))
             self.assertIsNotNone(finding.description)
             self.assertGreater(len(finding.description), 0)
             self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:L/A:N/E:H/RL:O/RC:C", finding.cvssv3)
