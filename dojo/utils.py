@@ -384,7 +384,7 @@ def set_existing_change_status(new_finding, existing_finding):
 
     existing_finding.mitigated = new_finding.mitigated
     existing_finding.is_mitigated = new_finding.is_mitigated
-    existing_finding.active = False if new_finding.is_mitigated else new_finding.active
+    existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
                                   entry="This finding has been automatically " + event + " due to a new scan import.")
