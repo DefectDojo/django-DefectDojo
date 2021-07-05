@@ -70,7 +70,6 @@ class BundlerAuditParser(object):
                     test=test,
                     description=findingdetail,
                     severity=sev,
-                    numerical_severity=Finding.get_numerical_severity(sev),
                     mitigation=mitigation,
                     references=references,
                     url='N/A',

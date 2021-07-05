@@ -522,17 +522,6 @@
     }
 },
 {
-    "model": "tastypie.apikey",
-    "pk": 1,
-    "fields": {
-        "user": [
-            "admin"
-        ],
-        "key": "1dfdfa2042567ec751f6b3fa96038b743ea6f1cc",
-        "created": "2018-08-16T01:32:30.801Z"
-    }
-},
-{
     "model": "dojo.regulation",
     "pk": 1,
     "fields": {
@@ -708,12 +697,10 @@
         "enable_mail_notifications": false,
         "mail_notifications_from": "from@example.com",
         "mail_notifications_to": "",
-        "s_finding_severity_naming": false,
         "false_positive_history": false,
         "url_prefix": "",
         "team_name": "",
         "time_zone": "UTC",
-        "display_endpoint_uri": true,
         "enable_product_grade": true,
         "product_grade": "def grade_product(crit, high, med, low):\r\n    health=100\r\n    if crit > 0:\r\n        health = 40\r\n        health = health - ((crit - 1) * 5)\r\n    if high > 0:\r\n        if health == 100:\r\n            health = 60\r\n        health = health - ((high - 1) * 3)\r\n    if med > 0:\r\n        if health == 100:\r\n            health = 80\r\n        health = health - ((med - 1) * 2)\r\n    if low > 0:\r\n        if health == 100:\r\n            health = 95\r\n        health = health - low\r\n\r\n    if health < 5:\r\n        health = 5\r\n\r\n    return health",
         "product_grade_a": 90,
@@ -1122,9 +1109,6 @@
     "fields": {
         "name": "BodgeIt",
         "description": "[Features](https://github.com/psiinon/bodgeit) and characteristics:\r\n\r\n* Easy to install - just requires java and a servlet engine, e.g. Tomcat\r\n* Self contained (no additional dependencies other than to 2 in the above line)\r\n* Easy to change on the fly - all the functionality is implemented in JSPs, so no IDE required\r\n* Cross platform\r\n* Open source\r\n* No separate db to install and configure - it uses an 'in memory' db that is automatically (re)initialized on start up",
-        "prod_manager": "Tester Jester",
-        "tech_contact": "Bob Buster",
-        "manager": "Peter Scramble",
         "product_manager": [
             "admin"
         ],
@@ -1170,9 +1154,6 @@
     "fields": {
         "name": "Internal CRM App",
         "description": "* New product in development that attempts to follow all best practices",
-        "prod_manager": "Bob Builder",
-        "tech_contact": "Tester Jester",
-        "manager": null,
         "product_manager": [
             "product_manager"
         ],
@@ -1212,9 +1193,6 @@
     "fields": {
         "name": "Apple Accounting Software",
         "description": "Accounting software is typically composed of various modules, different sections dealing with particular areas of accounting. Among the most common are:\r\n\r\n**Core modules**\r\n\r\n* Accounts receivable\u2014where the company enters money received\r\n* Accounts payable\u2014where the company enters its bills and pays money it owes\r\n* General ledger\u2014the company's \"books\"\r\n* Billing\u2014where the company produces invoices to clients/customers",
-        "prod_manager": "0",
-        "tech_contact": "0",
-        "manager": "0",
         "product_manager": [
             "admin"
         ],
@@ -1336,34 +1314,12 @@
     }
 },
 {
-    "model": "dojo.engagement_type",
-    "pk": 1,
-    "fields": {
-        "name": "Type 1"
-    }
-},
-{
-    "model": "dojo.engagement_type",
-    "pk": 2,
-    "fields": {
-        "name": "Type 2"
-    }
-},
-{
-    "model": "dojo.engagement_type",
-    "pk": 3,
-    "fields": {
-        "name": "Type 3"
-    }
-},
-{
     "model": "dojo.engagement",
     "pk": 1,
     "fields": {
         "name": "1st Quarter Engagement",
         "description": "test Engagement",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-12",
         "target_end": "2018-04-12",
@@ -1406,7 +1362,6 @@
         "name": "April Monthly Engagement",
         "description": "Requested by the team for regular manual checkup by the security team.",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-12",
         "target_end": "2018-04-12",
@@ -1449,7 +1404,6 @@
         "name": "weekly engagement",
         "description": "test Engagement",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-04-03",
         "target_end": "2018-04-04",
@@ -1492,7 +1446,6 @@
         "name": "Static Scan",
         "description": "Initial static scan for Bodgeit.",
         "version": "v.1.2.0",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-16",
         "target_end": "2018-08-23",
@@ -1535,7 +1488,6 @@
         "name": "Quarterly PCI Scan",
         "description": "Reccuring Quarterly Scan",
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-11-01",
         "target_end": "2018-11-08",
@@ -1581,7 +1533,6 @@
         "name": "Ad Hoc Engagement",
         "description": null,
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-16",
         "target_end": "2018-08-16",
@@ -1622,7 +1573,6 @@
         "name": "Initial Assessment",
         "description": "This application needs to be assesed to determine the security posture.",
         "version": "10.2.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-10-02",
         "target_end": "2018-10-09",
@@ -1665,7 +1615,6 @@
         "name": "Multiple scanners",
         "description": "Example engagement with multiple scan types.",
         "version": "1.2.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-17",
@@ -1711,7 +1660,6 @@
         "name": "Manual PenTest",
         "description": "Please do a manual pentest before our next release to prod.",
         "version": "1.9.1",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-10-12",
         "target_end": "2018-10-15",
@@ -1754,7 +1702,6 @@
         "name": "CI/CD Baseline Security Test",
         "description": "",
         "version": "1.1.2",
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-24",
@@ -1797,7 +1744,6 @@
         "name": "AdHoc Import - Fri, 17 Aug 2018 18:20:55",
         "description": null,
         "version": null,
-        "eng_type": null,
         "first_contacted": null,
         "target_start": "2018-08-17",
         "target_end": "2018-08-17",
@@ -1837,7 +1783,6 @@
     "fields": {
         "protocol": "http",
         "host": "127.0.0.1",
-        "fqdn": "example.com",
         "port": 80,
         "path": "/endpoint/420/edit/",
         "query": null,
@@ -1852,7 +1797,6 @@
     "fields": {
         "protocol": "ftp",
         "host": "localhost",
-        "fqdn": "www.example.com",
         "port": 21,
         "path": "/",
         "query": null,
@@ -1866,8 +1810,7 @@
     "pk": 3,
     "fields": {
         "protocol": "ssh",
-        "host": "127.0.1",
-        "fqdn": "www.example.com",
+        "host": "127.0.0.1",
         "port": 22,
         "path": null,
         "query": null,
@@ -1881,9 +1824,8 @@
     "pk": 4,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/login.jsp",
         "query": null,
         "fragment": null,
@@ -1897,7 +1839,6 @@
     "fields": {
         "protocol": null,
         "host": "127.0.0.1",
-        "fqdn": null,
         "port": null,
         "path": null,
         "query": null,
@@ -1911,9 +1852,8 @@
     "pk": 6,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/register.jsp",
         "query": null,
         "fragment": null,
@@ -1926,9 +1866,8 @@
     "pk": 7,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/password.jsp",
         "query": null,
         "fragment": null,
@@ -1941,9 +1880,8 @@
     "pk": 8,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/",
         "query": null,
         "fragment": null,
@@ -1956,9 +1894,8 @@
     "pk": 9,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/basket.jsp",
         "query": null,
         "fragment": null,
@@ -1971,9 +1908,8 @@
     "pk": 10,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/advanced.jsp",
         "query": null,
         "fragment": null,
@@ -1986,9 +1922,8 @@
     "pk": 11,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/admin.jsp",
         "query": null,
         "fragment": null,
@@ -2001,9 +1936,8 @@
     "pk": 12,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/about.jsp",
         "query": null,
         "fragment": null,
@@ -2016,9 +1950,8 @@
     "pk": 13,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/contact.jsp",
         "query": null,
         "fragment": null,
@@ -2031,9 +1964,8 @@
     "pk": 14,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/home.jsp",
         "query": null,
         "fragment": null,
@@ -2046,9 +1978,8 @@
     "pk": 15,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/product.jsp",
         "query": null,
         "fragment": null,
@@ -2061,9 +1992,8 @@
     "pk": 16,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/score.jsp",
         "query": null,
         "fragment": null,
@@ -2076,9 +2006,8 @@
     "pk": 17,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/search.jsp",
         "query": null,
         "fragment": null,
@@ -2091,9 +2020,8 @@
     "pk": 18,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/",
         "query": null,
         "fragment": null,
@@ -2106,9 +2034,8 @@
     "pk": 19,
     "fields": {
         "protocol": "http",
-        "host": "localhost:8888",
-        "fqdn": null,
-        "port": null,
+        "host": "localhost",
+        "port": 8888,
         "path": "/bodgeit/logout.jsp",
         "query": null,
         "fragment": null,
@@ -24171,6 +24098,7 @@
     "model": "dojo.jira_instance",
     "pk": 2,
     "fields": {
+        "configuration_name": "Happy little JIRA 2",
         "url": "http://www.testjira.com",
         "username": "user1",
         "password": "user1",
@@ -24178,17 +24106,20 @@
         "epic_name_id": 111,
         "open_status_key": 111,
         "close_status_key": 112,
+        "info_mapping_severity": "Trivial",
         "low_mapping_severity": "test severity",
         "medium_mapping_severity": "test severity",
         "high_mapping_severity": "test severity",
         "critical_mapping_severity": "test severity",
-        "finding_text": ""
+        "finding_text": "",
+        "global_jira_sla_notification": false
     }
 },
 {
     "model": "dojo.jira_instance",
     "pk": 3,
     "fields": {
+        "configuration_name": "Happy little JIRA 3",
         "url": "http://www.testjira.com",
         "username": "user2",
         "password": "user2",
@@ -24196,17 +24127,20 @@
         "epic_name_id": 222,
         "open_status_key": 222,
         "close_status_key": 223,
+        "info_mapping_severity": "Trivial",
         "low_mapping_severity": "test severity",
         "medium_mapping_severity": "test severity",
         "high_mapping_severity": "test severity",
         "critical_mapping_severity": "test severity",
-        "finding_text": ""
+        "finding_text": "",
+        "global_jira_sla_notification": false
     }
 },
 {
     "model": "dojo.jira_instance",
     "pk": 4,
     "fields": {
+        "configuration_name": "Happy little JIRA 4",
         "url": "http://www.testjira.com",
         "username": "user3",
         "password": "user3",
@@ -24214,6 +24148,7 @@
         "epic_name_id": 333,
         "open_status_key": 333,
         "close_status_key": 334,
+        "info_mapping_severity": "Trivial",
         "low_mapping_severity": "test severity",
         "medium_mapping_severity": "test severity",
         "high_mapping_severity": "test severity",
@@ -40269,9 +40204,9 @@
         ],
         "object_id": "3",
         "object_id_int": 3,
-        "title": "ssh:127.0.1",
+        "title": "ssh:127.0.0.1",
         "description": "",
-        "content": "ssh 127.0.1 www.example.com None None None",
+        "content": "ssh 127.0.0.1 www.example.com None None None",
         "url": "",
         "meta_encoded": "{}"
     }

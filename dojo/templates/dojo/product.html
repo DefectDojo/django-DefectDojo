@@ -3,6 +3,7 @@
 {% load display_tags %}
 {% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -61,7 +62,7 @@
                             <th class="text-center">GitHub</th>
                             {% endif %}
                             <th class="text-center"> Active (Verified) Findings</th>
-                            <th class="text-center"> Endpoints</th>
+                            <th class="text-center"> Vulnerable Hosts / Endpoints</th>
                             <th> Contact</th>
                             <th>{% dojo_sort request 'Product Type' 'prod_type__name' %}</th>
                         </tr>
@@ -99,8 +100,10 @@
                                           <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
-                                          <li><a href="{% url 'endpoints' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                                          <li><a href="{% url 'endpoint' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                                          <li><a href="{% url 'endpoint_host' %}?product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Hosts</a></li>
                                           <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
+                                          <li><a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Hosts</a></li>
                                           <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
                                         {% if prod|has_object_permission:"Endpoint_Add" or user|is_authorized_for_staff:prod %}
                                           <li><a href="{% url 'add_endpoint' prod.id %}"><i class="fa fa-plus"></i> Add New Endpoint</a></li>
@@ -230,9 +233,10 @@
                                     {% endif %}
                                 </td>
                                 <td class="text-center">
-                                  {% if prod.endpoints_count %}
+                                  {% if prod.endpoint_count %}
+                                    <a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><b>{{ prod.endpoint_host_count }}</b></a> /
                                     <a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><b>{{ prod.endpoint_count }}</b></a>
-                                  {% else %}
+                                    {% else %}
                                       0
                                   {% endif %}
                                 </td>
@@ -271,6 +275,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         $(function () {
             //Ensures dropdown has proper zindex

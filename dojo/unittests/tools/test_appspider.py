@@ -12,6 +12,9 @@ class TestAppSpiderParser(TestCase):
         testfile = open("dojo/unittests/scans/appspider/one_vuln.xml")
         parser = AppSpiderParser()
         findings = parser.get_findings(testfile, test)
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         testfile.close()
         self.assertEqual(1, len(findings))
         item = findings[0]

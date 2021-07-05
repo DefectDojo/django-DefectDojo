@@ -337,7 +337,7 @@
         {
           "version": "1.3.4",
           "paths": [
-            "express>send>mime",
+            "c748e76b6a1b63450590f72e14f9b53ad357bc64632ff0bda73d00799c4a0a91>send>mime",
             "express>serve-static>send>mime"
           ],
           "dev": false,

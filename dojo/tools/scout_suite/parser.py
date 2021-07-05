@@ -103,7 +103,6 @@ class ScoutSuiteParser(object):
                                 test=test,
                                 description="**Account:** " + account_id + "\n" + description,
                                 severity=sev,
-                                numerical_severity=Finding.get_numerical_severity(sev),
                                 references=references,
                                 date=find_date,
                                 dynamic_finding=True)

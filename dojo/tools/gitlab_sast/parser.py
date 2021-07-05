@@ -90,13 +90,12 @@ def get_item(vuln, test):
     elif 'method' in location:
         sast_object = location['method']
 
-    severity = vuln['severity']
-    if severity == 'Undefined' or severity == 'Unknown':
+    severity = vuln.get('severity')
+    if severity is None or severity == 'Undefined' or severity == 'Unknown':
         # Severity can be "Undefined" or "Unknown" in SAST report
         # In that case we set it as Info and specify the initial severity in the title
         title = '[{} severity] {}'.format(severity, title)
         severity = 'Info'
-    numerical_severity = Finding.get_numerical_severity(severity)
     scanner_confidence = get_confidence_numeric(vuln.get('confidence', 'Unkown'))
 
     mitigation = ''
@@ -127,7 +126,6 @@ def get_item(vuln, test):
                       test=test,
                       description=description,
                       severity=severity,
-                      numerical_severity=numerical_severity,
                       scanner_confidence=scanner_confidence,
                       mitigation=mitigation,
                       unique_id_from_tool=unique_id_from_tool,

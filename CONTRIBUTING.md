@@ -4,7 +4,7 @@
 
 Before submitting, please ensure that you are using the latests code by performing a `git pull`.
 
-Please include your operating system name, your operating system version number (16.04, 18.6, etc), and the dojo install type you are using (setup.bash, docker, etc).
+Please include your operating system name, your operating system version number (16.04, 18.6, etc), and the dojo install type you are using (setup.bash, docker, k8s, etc).
 
 Bugs that do not have this information will be closed.
 
@@ -23,16 +23,14 @@ Please use [these test scripts](./tests) to test your changes. These are the scr
 For changes that require additional settings, you can now use local_settings.py file. See the logging section below for more information.
 
 ## Python3 version
-For compatibility reasons, the code in dev branch should be python3.6 compliant.
+For compatibility reasons, the code in dev branch should be python3.8 compliant.
 
 ## Submitting Pull Requests
 
 The following are things to consider before submitting a pull request to
 DefectDojo.
 
-0. Ensure all changes made to the code, packages, etc. are reflected in the
-[__setup.bash__][setup_bash] script and the [__setup.py__][setup_py] script.
-
+0. Base your PR against the `dev` branch, unless discussed otherwise with the maintainers
 
 0. Make sure that the install is working properly.
 
@@ -44,10 +42,8 @@ DefectDojo.
 
 0. Pull requests should be submitted to the 'dev' branch.
 
-0. In dev branch, the code should be python 3.6 compliant.
+0. In dev branch, the code should be python 3.8 compliant.
 
 [dojo_settings]: /dojo/settings/settings.dist.py "DefectDojo settings file"
-[setup_py]: /setup.py "Python setup script"
-[setup_bash]: /setup.bash "Bash setup script"
 [pep8]: https://www.python.org/dev/peps/pep-0008/ "PEP8"
 [flake8 built-in commit hooks]: https://flake8.pycqa.org/en/latest/user/using-hooks.html#built-in-hook-integration

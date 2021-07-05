@@ -126,7 +126,6 @@ class CheckmarxParser(object):
                            # Concatenates the query information with this specific finding information
                            description=findingdetail + '-----\n' + description,
                            severity=sev,
-                           numerical_severity=Finding.get_numerical_severity(sev),
                            mitigation=self.mitigation,
                            impact=self.impact,
                            references=self.references,
@@ -207,7 +206,6 @@ class CheckmarxParser(object):
                        false_p=result.get('FalsePositive') == "True",
                        description=findingdetail,
                        severity=sev,
-                       numerical_severity=Finding.get_numerical_severity(sev),
                        mitigation=self.mitigation,
                        impact=self.impact,
                        references=self.references,

@@ -1,3 +1,5 @@
+from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.queries import get_authorized_findings
 import re
 import binascii
 import os
@@ -187,8 +189,8 @@ def deduplicate_legacy(new_finding):
         # ---------------------------------------------------------
 
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            list1 = [e.host_with_port for e in new_finding.endpoints.all()]
-            list2 = [e.host_with_port for e in find.endpoints.all()]
+            list1 = [str(e) for e in new_finding.endpoints.all()]
+            list2 = [str(e) for e in find.endpoints.all()]
 
             if all(x in list1 for x in list2):
                 deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
@@ -306,7 +308,8 @@ def deduplicate_uid_or_hash_code(new_finding):
         # same without "test__engagement=new_finding.test.engagement" condition
         existing_findings = Finding.objects.filter(
             (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
-            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type))).exclude(
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            test__engagement__product=new_finding.test.engagement.product).exclude(
                 id=new_finding.id).exclude(
                         duplicate=True).order_by('id')
     deduplicationLogger.debug("Found " +
@@ -349,9 +352,9 @@ def set_duplicate(new_finding, existing_finding, update_existing_finding=True):
         set_duplicate(find, existing_finding, False)
 
     existing_finding.found_by.add(new_finding.test.test_type)
-    logger.debug('saving new finding')
+    logger.debug('saving new finding: %d', new_finding.id)
     super(Finding, new_finding).save()
-    logger.debug('saving existing finding')
+    logger.debug('saving existing finding: %d', existing_finding.id)
     super(Finding, existing_finding).save()
 
 
@@ -359,7 +362,7 @@ def is_duplicate_changed_status(new_finding, existing_finding):
     if not existing_finding.out_of_scope and not existing_finding.false_p:
         # Mitigation status. Reopen or close based on mitigation status.
         existing_mitigated = (existing_finding.is_Mitigated or existing_finding.mitigated)
-        new_mitigated = (new_finding.is_Mitigated or new_finding.mitigated)
+        new_mitigated = (new_finding.is_mitigated or new_finding.mitigated)
         if existing_mitigated != new_mitigated:
             return True
     return False
@@ -380,8 +383,8 @@ def set_existing_change_status(new_finding, existing_finding):
         event = "changed"
 
     existing_finding.mitigated = new_finding.mitigated
-    existing_finding.is_Mitigated = new_finding.is_Mitigated
-    existing_finding.active = False if new_finding.is_Mitigated else new_finding.active
+    existing_finding.is_mitigated = new_finding.is_mitigated
+    existing_finding.active = False if new_finding.is_mitigated else new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
                                   entry="This finding has been automatically " + event + " due to a new scan import.")
@@ -641,6 +644,22 @@ def add_breadcrumb(parent=None,
         crumbs += obj_crumbs
 
     request.session['dojo_breadcrumbs'] = crumbs
+
+
+def is_title_in_breadcrumbs(title):
+    request = crum.get_current_request()
+    if request is None:
+        return False
+
+    breadcrumbs = request.session.get('dojo_breadcrumbs')
+    if breadcrumbs is None:
+        return False
+
+    for breadcrumb in breadcrumbs:
+        if breadcrumb.get('title') == title:
+            return True
+
+    return False
 
 
 def get_punchcard_data(objs, start_date, weeks, view='Finding'):
@@ -1446,7 +1465,7 @@ def get_system_setting(setting, default=None):
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Product)
-def calculate_grade(product):
+def calculate_grade(product, *args, **kwargs):
     system_settings = System_Settings.objects.get()
     if not product:
         logger.warning('ignoring calculate product for product None!')
@@ -1510,6 +1529,8 @@ class Product_Tab():
                                                           mitigated__isnull=True).count()
         self.endpoints_count = Endpoint.objects.filter(
             product=self.product).count()
+        self.endpoint_hosts_count = Endpoint.objects.filter(
+            product=self.product).values('host').distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
             enabled=True).order_by('name')
         self.engagement = None
@@ -1543,6 +1564,9 @@ class Product_Tab():
 
     def endpoints(self):
         return self.endpoints_count
+
+    def endpoint_hosts(self):
+        return self.endpoint_hosts_count
 
     def benchmark_type(self):
         return self.benchmark_type
@@ -1764,9 +1788,9 @@ def sla_compute_and_notify(*args, **kwargs):
 
             query = None
             if settings.SLA_NOTIFY_ACTIVE:
-                query = Q(active=True, is_Mitigated=False, duplicate=False)
+                query = Q(active=True, is_mitigated=False, duplicate=False)
             if settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
-                query = Q(active=True, verified=True, is_Mitigated=False, duplicate=False)
+                query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: {}".format(query))
 
             no_jira_findings = {}
@@ -1862,11 +1886,21 @@ def sla_compute_and_notify(*args, **kwargs):
         logger.info("Findings SLA is not enabled.")
 
 
-def get_words_for_field(queryset, fieldname):
+def get_words_for_field(model, fieldname):
     max_results = getattr(settings, 'MAX_AUTOCOMPLETE_WORDS', 20000)
-    words = [
-        word for component_name in queryset.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (component_name.split() if component_name else []) if len(word) > 2
-    ]
+    models = None
+    if model == Finding:
+        models = get_authorized_findings(Permissions.Finding_View, user=get_current_user())
+    elif model == Finding_Template:
+        models = Finding_Template.objects.all()
+
+    if models is not None:
+        words = [
+            word for field_value in models.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
+        ]
+    else:
+        words = []
+
     return sorted(set(words))
 
 
@@ -1937,7 +1971,7 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def mass_model_updater(model_type, models, function, fields=None, page_size=1000, order='asc', log_prefix=''):
+def mass_model_updater(model_type, models, function, fields, page_size=1000, order='asc', log_prefix=''):
     """ Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
     this process very well if we can process the models ordered by id.

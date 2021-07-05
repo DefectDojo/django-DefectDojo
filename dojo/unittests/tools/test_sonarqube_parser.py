@@ -150,8 +150,6 @@ class TestSonarQubeParser(TestCase):
         self.assertEqual(False, item.verified)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("Critical", item.severity)
-        self.assertEqual(str, type(item.numerical_severity))
-        self.assertEqual("S0", item.numerical_severity)
         self.assertEqual(str, type(item.mitigation))
         self.assertEqual(
             "'PASSWORD' detected in this expression, review this potentially hardcoded credential.",
@@ -259,8 +257,6 @@ class TestSonarQubeParser(TestCase):
         )
         self.assertEqual(str, type(item.severity))
         self.assertEqual("Critical", item.severity)
-        self.assertEqual(str, type(item.numerical_severity))
-        self.assertEqual("S0", item.numerical_severity)
         self.assertEqual(str, type(item.mitigation))
         self.assertEqual(
             'Remove this "clone" implementation; use a copy constructor or copy factory instead.',
@@ -309,8 +305,6 @@ class TestSonarQubeParser(TestCase):
         self.assertEqual("No description provided", item.description)
         self.assertEqual(str, type(item.severity))
         self.assertEqual("Critical", item.severity)
-        self.assertEqual(str, type(item.numerical_severity))
-        self.assertEqual("S0", item.numerical_severity)
         self.assertEqual(str, type(item.mitigation))
         self.assertEqual(
             'Remove this "clone" implementation; use a copy constructor or copy factory instead.',

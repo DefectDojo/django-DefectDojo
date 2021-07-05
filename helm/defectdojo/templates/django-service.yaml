@@ -24,6 +24,9 @@ spec:
     port: 80
     targetPort: 8080
     {{- end }}
+{{- if .Values.django.serviceType }}
+  type: {{ .Values.django.serviceType }}
+{{- end }}
 {{- if .Values.gke.useGKEIngress }}
   type: NodePort
 {{- end }}

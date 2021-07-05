@@ -1,6 +1,7 @@
 from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
+from django.conf import settings
 
 
 class MetadataTest(APITestCase):
@@ -57,7 +58,10 @@ class MetadataTest(APITestCase):
 
     def test_invalid_product(self):
         r = self.create(product=99999, name='quux', value='bar')
-        self.assertEqual(r.status_code, 400)
+        if settings.FEATURE_AUTHORIZATION_V2:
+            self.assertEqual(r.status_code, 404)
+        else:
+            self.assertEqual(r.status_code, 400)
 
         r = self.client.get(reverse('metadata-list'))
         for x in r.json()['results']:

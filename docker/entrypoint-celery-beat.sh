@@ -37,7 +37,7 @@ if test -f "$FILE"; then
     cp "$FILE" /app/dojo/settings/local_settings.py
 fi
 
-exec celery beat \
-  --app=dojo \
+exec celery --app=dojo \
+    beat \
   --pidfile=/var/run/defectdojo/celery-beat.pid \
   --schedule=/var/run/defectdojo/celerybeat-schedule

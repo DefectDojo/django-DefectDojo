@@ -100,7 +100,6 @@ class AWSScout2Parser(object):
                                test=test,
                                description="**AWS Account:** " + aws_account_id + "\n" + description,
                                severity=sev,
-                               numerical_severity=Finding.get_numerical_severity(sev),
                                references=None,
                                date=find_date,
                                dynamic_finding=True)

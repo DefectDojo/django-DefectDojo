@@ -116,7 +116,6 @@ class FortifyParser(object):
                 items.append(Finding(
                     title=title,
                     severity=issue["Friority"],
-                    numerical_severity=Finding.get_numerical_severity(issue["Friority"]),
                     file_path=issue['FilePath'],
                     line_number=int(issue['LineStart']),
                     line=int(issue['LineStart']),

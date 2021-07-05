@@ -1,0 +1,20 @@
+{
+	"results": [
+		{
+			"rule_id": "GEN003",
+			"rule_description": "Potentially sensitive data stored in block attribute.",
+			"rule_provider": "general",
+			"link": "See https://tfsec.dev/docs/general/GEN003/ for more information.",
+			"location": {
+				"filename": "tfsec-test/identity.tf",
+				"start_line": 226,
+				"end_line": 226
+			},
+			"description": "Block 'keycloak_oidc_identity_provider.google' includes a potentially sensitive attribute which is defined within the project.",
+			"impact": "Block attribute could be leaking secrets",
+			"resolution": "Don't include sensitive data in blocks",
+			"severity": "WARNING",
+			"passed": false
+		}
+	]
+}

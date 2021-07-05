@@ -126,6 +126,22 @@ else
     fail $test
 fi
 
+test="Product member integration tests"
+echo "Running: $test"
+if python3 tests/product_member_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Product type member integration tests"
+echo "Running: $test"
+if python3 tests/product_type_member_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
 test="Ibm Appscan integration test"
 echo "Running: $test"
 if python3 tests/ibm_appscan_test.py ; then

@@ -1,0 +1,28 @@
+{
+    "findings": [
+        {
+            "title": "test title3",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau",
+            "severity": "Medium",
+            "mitigation": "Some mitigation",
+            "date": "2021-01-06",
+            "cve": "CVE-2020-36234",
+            "cwe": 261,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/first.cpp",
+            "line": 13
+        },
+        {
+            "title": "test title4",
+            "description": "Some very long description with\n\n some UTF-8 chars à qu'il est beau2",
+            "severity": "Critical",
+            "mitigation": "Some mitigation",
+            "date": "2021-01-06",
+            "cve": "CVE-2020-36235",
+            "cwe": 287,
+            "cvssv3": "CVSS:3.1/AV:N/AC:L/PR:H/UI:R/S:C/C:L/I:L/A:N",
+            "file_path": "src/two.cpp",
+            "line": 135
+        }
+    ]
+}

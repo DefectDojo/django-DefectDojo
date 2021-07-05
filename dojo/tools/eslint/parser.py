@@ -55,7 +55,6 @@ class ESLintParser(object):
                             test=test,
                             description=findingdetail,
                             severity=sev.title(),
-                            numerical_severity=Finding.get_numerical_severity(sev),
                             file_path=item["filePath"],
                             line=message["line"],
                             url='N/A',

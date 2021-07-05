@@ -118,8 +118,6 @@ class WhitesourceParser(object):
                                 cve=vuln.get('cve'),
                                 cwe=vuln.get('cwe'),
                                 mitigation=vuln.get('mitigation'),
-                                numerical_severity=Finding.get_numerical_severity(
-                                    vuln.get('severity')),
                                 references=vuln.get('references'),
                                 file_path=vuln.get('file_path'),
                                 component_name=vuln.get('component_name'),

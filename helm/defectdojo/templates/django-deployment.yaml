@@ -32,6 +32,11 @@ spec:
         prometheus.io/scheme: http
         prometheus.io/scrape: "true"
       {{- end }}
+      {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/esecret: {{ include (print $.Template.BasePath "/extra-secret.yaml") . | sha256sum }}
+      {{- end }}
     spec:
       serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
@@ -93,8 +98,8 @@ spec:
         - name: http
           protocol: TCP
           containerPort: 8081
-        {{- if .Values.django.uwsgi.enable_ptvsd }}
-        - name: ptvsd
+        {{- if .Values.django.uwsgi.enable_debug }}
+        - name: debug
           protocol: TCP
           containerPort: 3000
         {{- end }}
@@ -110,6 +115,10 @@ spec:
             secretKeyRef:
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
+        {{- if .Values.django.uwsgi.enable_debug }}
+        - name: DD_DEBUG
+          value: 'True'
+        {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:

@@ -173,10 +173,10 @@ def webhook(request, secret=None):
                 findings = None
                 if jissue.finding:
                     findings = [jissue.finding]
-                    create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
+                    create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), finding=jissue.finding, url=reverse("view_finding", args=(jissue.finding.id, )), icon='check')
                 elif jissue.finding_group:
                     findings = [jissue.finding_group.findings.all()]
-                    create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), url=reverse("view_finding_group", args=(jissue.finding_group.id, )), icon='check')
+                    create_notification(event='other', title='JIRA incoming comment - %s' % (jissue.finding), finding=jissue.finding, url=reverse("view_finding_group", args=(jissue.finding_group.id, )), icon='check')
                 elif jissue.engagement:
                     return HttpResponse('Comment for engagement ignored')
                 else:

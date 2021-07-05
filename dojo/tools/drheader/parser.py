@@ -26,7 +26,6 @@ class DrHeaderParser(object):
                            test=test,
                            description=message,
                            severity=severity,
-                           numerical_severity=Finding.get_numerical_severity(severity),
                            static_finding=False)
 
             items.append(find)

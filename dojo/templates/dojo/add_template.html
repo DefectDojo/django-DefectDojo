@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% load static %}
 {% block add_css %}
+    {{ block.super }}
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -13,6 +15,7 @@
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> {{ name }} {{ template }}</h3>
 
     <form id="add_template" class="form-horizontal" method="post">{% csrf_token %}
@@ -42,6 +45,7 @@
     {% endif %}
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
     <script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
     <script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>

@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<!DOCTYPE niktoscan SYSTEM "docs/nikto.dtd">
+<niktoscan>
+<niktoscan hoststest="0" options="-h https://www.tdh.com -o /tmp/tdh.xml" version="2.1.6" scanstart="Mon Apr 26 08:33:14 2021" scanend="Thu Jan  1 00:00:00 1970" scanelapsed=" seconds" nxmlversion="1.2">
+
+<scandetails targetip="64.220.43.153" targethostname="www.tdh.com" targetport="443" targetbanner="nginx" starttime="2021-04-26 08:33:16" sitename="https://www.tdh.com:443/" siteip="https://64.220.43.153:443/" hostheader="www.tdh.com" errors="0" checks="6955">
+<ssl ciphers="TLS_AES_128_GCM_SHA256" issuers="/C=GB/ST=Greater Manchester/L=Salford/O=Sectigo Limited/CN=Sectigo RSA Domain Validation Secure Server CA" info="/CN=tdh.com" altnames="tdh.com, www.tdh.com" />
+
+<item id="999100" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Uncommon header 'x-cache' found, with contents: HIT]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://www.tdh.com:443/]]></namelink>
+<iplink><![CDATA[https://64.220.43.153:443/]]></iplink>
+</item>
+
+<item id="999100" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Uncommon header 'x-cacheable' found, with contents: YES]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://www.tdh.com:443/]]></namelink>
+<iplink><![CDATA[https://64.220.43.153:443/]]></iplink>
+</item>
+
+<item id="999100" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Uncommon header 'x-redirect-by' found, with contents: WordPress]]></description>
+<uri><![CDATA[/iqeVqbOU.]]></uri>
+<namelink><![CDATA[https://www.tdh.com:443/iqeVqbOU.]]></namelink>
+<iplink><![CDATA[https://64.220.43.153:443/iqeVqbOU.]]></iplink>
+</item>
+
+<item id="999997" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[Entry '/wp-admin/' in robots.txt returned a non-forbidden or redirect HTTP code (302)]]></description>
+<uri><![CDATA[/wp-admin/]]></uri>
+<namelink><![CDATA[https://www.tdh.com:443/wp-admin/]]></namelink>
+<iplink><![CDATA[https://64.220.43.153:443/wp-admin/]]></iplink>
+</item>
+
+<item id="999996" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA["robots.txt" contains 2 entries which should be manually viewed.]]></description>
+<uri><![CDATA[/robots.txt]]></uri>
+<namelink><![CDATA[https://www.tdh.com:443/robots.txt]]></namelink>
+<iplink><![CDATA[https://64.220.43.153:443/robots.txt]]></iplink>
+</item>
+
+<item id="999966" osvdbid="0" osvdblink="" method="GET">
+<description><![CDATA[The Content-Encoding header is set to "deflate" this may mean that the server is vulnerable to the BREACH attack.]]></description>
+<uri><![CDATA[/]]></uri>
+<namelink><![CDATA[https://www.tdh.com:443/]]></namelink>
+<iplink><![CDATA[https://64.220.43.153:443/]]></iplink>
+</item>
+
+<statistics elapsed="1619427130" itemsfound="" itemstested="6955" endtime="2021-04-26 08:52:10" />
+</scandetails>
+
+</niktoscan>
+
+
+</niktoscan>

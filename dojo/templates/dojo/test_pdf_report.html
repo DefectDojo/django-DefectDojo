@@ -7,6 +7,7 @@
 {% load get_notetype_availability %}
 {% load event_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="container">
         <div class="row">
           <div class="col-lg-12">
@@ -402,6 +403,7 @@
     </div> <!-- /container -->
 {% endblock %}
 {% block js %}
+    {{ block.super }}
 
     <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
     <!-- Flot Charts JavaScript -->

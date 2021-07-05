@@ -9,6 +9,9 @@ class TestIbmAppParser(TestCase):
         testfile = open("dojo/unittests/scans/ibm_app/testfire.xml")
         parser = IbmAppParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         testfile.close()
         self.assertEqual(27, len(findings))
         finding = findings[0]

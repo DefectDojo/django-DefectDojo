@@ -1,22 +1,26 @@
 from django.shortcuts import render
-from dojo.models import Finding
 from django.db.models import Count, Q
 from dojo.utils import add_breadcrumb, get_page_items
 from dojo.filters import ComponentFilter
 from dojo.components.sql_group_concat import Sql_GroupConcat
 from django.db import connection
 from django.contrib.postgres.aggregates import StringAgg
+from dojo.finding.queries import get_authorized_findings
+from dojo.authorization.roles_permissions import Permissions
 
 
 def components(request):
     add_breadcrumb(title='Components', top_level=True, request=request)
     separator = ', '
     # Get components ordered by component_name and concat component versions to the same row
+
+    component_query = get_authorized_findings(Permissions.Finding_View)
+
     if connection.vendor == 'postgresql':
-        component_query = Finding.objects.values("component_name").order_by('component_name').annotate(
+        component_query = component_query.values("component_name").order_by('component_name').annotate(
             component_version=StringAgg('component_version', delimiter=separator, distinct=True))
     else:
-        component_query = Finding.objects.values("component_name").order_by('component_name')
+        component_query = component_query.values("component_name").order_by('component_name')
         component_query = component_query.annotate(component_version=Sql_GroupConcat(
             'component_version', separator=separator, distinct=True))
 

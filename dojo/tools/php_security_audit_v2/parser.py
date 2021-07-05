@@ -50,7 +50,6 @@ class PhpSecurityAuditV2Parser(object):
                             test=test,
                             description=findingdetail,
                             severity=sev.title(),
-                            numerical_severity=Finding.get_numerical_severity(sev),
                             file_path=filepath,
                             line=issue["line"],
                             static_finding=True,

@@ -58,7 +58,7 @@ from pathlib import Path
 from importlib import import_module
 
 # iterate through the modules in the current package
-package_dir = Path(__file__).resolve().parent
+package_dir = str(Path(__file__).resolve().parent)
 for (path, module_name, _) in iter_modules([package_dir]):
     # check if it's submodule
     if os.path.isdir(os.path.join(package_dir, module_name)):

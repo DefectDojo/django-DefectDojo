@@ -90,7 +90,7 @@ def get_item(vuln, test):
         # In that case we set it as Info and specify the initial severity in the title
         title = '[{} severity] {}'.format(severity, title)
         severity = 'Info'
-    numerical_severity = Finding.get_numerical_severity(severity)
+
     # Dependency Scanning analyzers doesn't provide confidence property
     # See https://docs.gitlab.com/ee/user/application_security/dependency_scanning/analyzers.html#analyzers-data
     scanner_confidence = False
@@ -120,7 +120,6 @@ def get_item(vuln, test):
                       test=test,
                       description=description,
                       severity=severity,
-                      numerical_severity=numerical_severity,
                       scanner_confidence=scanner_confidence,
                       mitigation=mitigation,
                       unique_id_from_tool=unique_id_from_tool,

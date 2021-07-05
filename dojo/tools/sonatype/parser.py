@@ -111,7 +111,6 @@ def get_item(vulnerability, test):
             cve=cve,
             test=test,
             severity=severity,
-            numerical_severity=Finding.get_numerical_severity(severity),
             description=finding_description,
             mitigation=status,
             references="{}\n{}\n".format(main_finding['url'], "\n".join(references)),

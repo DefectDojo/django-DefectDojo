@@ -1,6 +1,5 @@
 import hashlib
 import re
-from urllib.parse import urlparse
 
 import html2text
 from defusedxml.ElementTree import parse
@@ -30,14 +29,7 @@ class MicrofocusWebinspectParser(object):
         dupes = dict()
         for session in root:
             url = session.find('URL').text
-            parts = urlparse(url)
-            endpoint = Endpoint(
-                protocol=parts.scheme,
-                host=parts.netloc,
-                path=parts.path,
-                query=parts.query,
-                fragment=parts.fragment,
-            )
+            endpoint = Endpoint.from_uri(url)
             issues = session.find('Issues')
             for issue in issues.findall('Issue'):
                 mitigation = None
@@ -71,7 +63,6 @@ class MicrofocusWebinspectParser(object):
                     description=description,
                     mitigation=mitigation,
                     severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
                     references=reference,
                     static_finding=False,
                     dynamic_finding=True,
