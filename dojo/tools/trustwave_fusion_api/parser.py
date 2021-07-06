@@ -63,15 +63,16 @@ def get_item(vuln, test):
     # Defining variables
     location = vuln["location"]
 
-    ### Endpoint ###
+    # Endpoint
     #  using url
-    if location["url"] and location["url"] != "None":
+    if "url" in location and location["url"] and location["url"] != "None":
         endpoint = Endpoint.from_uri(location["url"])
     # fallback to using old way of creating endpoints
-    elif location["domain"] and location["domain"] != "None":
+    elif "domain" in location and location["domain"] and location["domain"] != "None":
         endpoint = Endpoint(host=str(location["domain"]))
     else:  # no domain, use ip instead
-        endpoint = Endpoint(host=str(location["ip"]))
+        if "ip" in location and location["ip"] and location["ip"] != "None":
+            endpoint = Endpoint(host=str(location["ip"]))
     # check for protocol
     if (
         "applicationProtocol" in location and
@@ -88,10 +89,10 @@ def get_item(vuln, test):
         endpoint.port = location["port"]
     finding.unsaved_endpoints = [endpoint]  # assigning endpoint
 
-    ### Title ###
+    # Title
     finding.title = vuln["name"]
 
-    ### Description + CVEs ###
+    # Description + CVEs
     description = vuln["classification"]
     cves = "no match"
     if "CVE-NO-MATCH" not in vuln["kb"]["cves"]:
@@ -104,13 +105,17 @@ def get_item(vuln, test):
     finding.description = description + "; CVEs: " + cves
     finding.severity = vuln["severity"].title()
 
-    ### Date ###
+    # Date
     date_str = vuln["createdOn"]
     date_str = date_str[: len(date_str) - 3] + date_str[-2:]
     finding.date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
 
-    ### Component Name and Version ###
-    if location["applicationCpe"] and location["applicationCpe"] != "None":
+    # Component Name and Version
+    if (
+        "applicationCpe" in location and
+        location["applicationCpe"] and
+        location["applicationCpe"] != "None"
+    ):
         cpe = CPE(location["applicationCpe"])
 
         component_name = cpe.get_vendor()[0] + ":" if len(
