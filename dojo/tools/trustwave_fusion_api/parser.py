@@ -62,22 +62,22 @@ def get_item(vuln, test):
     location = vuln["location"]
 
     # Endpoint
-    if "url" in location and location["url"] != "None":
+    if location["url"] and location["url"] != "None":
         endpoint = Endpoint.from_uri(location["url"])
     elif (
-        "domain" in location and location["domain"] != "None"
+        location["domain"] and location["domain"] != "None"
     ):  # fallback to using old way of creating endpoints
         endpoint = Endpoint(
-            protocol=location["applicationProtocol"],
             host=str(location["domain"]),
-            port=location["port"],
         )
     else:  # no domain, use ip instead
         endpoint = Endpoint(
-            protocol=location["applicationProtocol"],
             host=str(location["ip"]),
-            port=location["port"],
         )
+    if location["applicationProtocol"] and location["applicationProtocol"] != "None":
+        endpoint.protocol = location["applicationProtocol"]
+    if location["port"] in location and location["port"] != "None":
+        endpoint.port = location["port"]
     finding.unsaved_endpoints = [endpoint]
 
     finding.title = vuln["name"]
@@ -103,7 +103,7 @@ def get_item(vuln, test):
     finding.date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f%z")
 
     # Component name and version
-    if "applicationCpe" in location and location["applicationCpe"] != "None":
+    if location["applicationCpe"] and location["applicationCpe"] != "None":
         cpe = CPE(location["applicationCpe"])
         component_name = cpe.get_vendor()[0] + ":" if len(cpe.get_vendor()) > 0 else ""
         component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
