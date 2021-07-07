@@ -1,7 +1,7 @@
 import logging
 from crum import get_current_user
 from django.contrib import messages
-from django.contrib.auth import authenticate, logout
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
