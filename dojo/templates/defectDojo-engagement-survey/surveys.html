@@ -1,3 +1,5 @@
+{% load display_tags %}
+{% load authorization_tags %}
 {% if surveys %}
     <table id="surveys" class="tablesorter-bootstrap table table-condensed table-striped">
         <thead>
@@ -32,21 +34,25 @@
                                     <i class="fa fa-edit"></i> Edit Responses</a>
                                 </li>
                                 {% endif %}
+                                {% if survey.engagement|has_object_permission:"Engagement_Edit" or user|is_authorized_for_change:survey.engagement %}
                                 <li role="presentation"
                                     ><a class="" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/assign">
                                         <i class="fa fa-plus"></i> Assign User</a>
                                 </li>
+                                {% endif %}
                                 <li>
                                     <a class="" data-toggle="modal"
                                     data-target="#shareQuestionnaireModal"
                                     data-whatever="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/answer">
                                     <i class="fa fa-share-alt"></i> Share Questionnaire</a>
                                 </li>
+                                {% if survey.engagement|has_object_permission:"Engagement_Edit" or user|is_authorized_for_change:survey.engagement %}
                                 <li class="divider"></li>
                                 <li role="presentation">
                                     <a class="text-danger" href="/engagement/{{ survey.engagement.id }}/questionnaire/{{ survey.id }}/delete">
                                     <i class="fa fa-trash-o"></i> Delete Questionnaire</a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
                     </ul>
