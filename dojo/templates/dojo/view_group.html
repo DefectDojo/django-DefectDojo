@@ -291,6 +291,10 @@
                                 {{ products|length }}
                             </td>
                         </tr>
+                        <tr>
+                            <td style="width: 200px;"><strong>Global role</strong></td>
+                            <td>{% if group.global_role.role %} {{ group.global_role.role }} {% endif %}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
