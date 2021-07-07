@@ -238,7 +238,7 @@
                             <td>
                                 <ul>
                                     <li class="dropdown" style="list-style:none;position:absolute">
-                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" name="dropdownManageProductTypeGroup">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                         <ul class="dropdown-menu">
                                             {% if pt|has_object_permission:"Product_Type_Group_Edit" %}
                                             <li>
@@ -256,8 +256,8 @@
                                     </li>
                                 </ul>
                             </td>
-                            <td name="member_user">{{ group.group.name }}</td>
-                            <td name="member_role">{{ group.role }}</td>
+                            <td name="product_type_group_group">{{ group.group.name }}</td>
+                            <td name="product_type_group_role">{{ group.role }}</td>
                         </tr>
                         {% endfor %}
                         </tbody>
