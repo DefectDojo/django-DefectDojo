@@ -1825,6 +1825,11 @@ class UserContactInfoForm(forms.ModelForm):
         model = UserContactInfo
         exclude = ['user', 'slack_user_id']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            del self.fields['force_password_reset']
 
 class GlobalRoleForm(forms.ModelForm):
 

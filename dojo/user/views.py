@@ -20,7 +20,7 @@ from rest_framework.authtoken.models import Token
 from dojo.filters import UserFilter
 from dojo.forms import DojoUserForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
     Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm
-from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
+from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member, Dojo_User
 from dojo.utils import get_page_items, add_breadcrumb
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.group.queries import get_authorized_group_members_for_user
@@ -234,6 +234,7 @@ def change_password(request):
                     messages.add_message(request, messages.ERROR, 'New password must be different from current password.', extra_tags='alert-danger')
                     return render(request, 'dojo/change_pwd.html', {'error': ''})
                 user.set_password(new_pwd)
+                Dojo_User.disable_force_password_reset(user)
                 user.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
