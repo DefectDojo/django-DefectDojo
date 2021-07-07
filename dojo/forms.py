@@ -1831,8 +1831,8 @@ class UserContactInfoForm(forms.ModelForm):
         if not current_user.is_superuser:
             del self.fields['force_password_reset']
 
-class GlobalRoleForm(forms.ModelForm):
 
+class GlobalRoleForm(forms.ModelForm):
     class Meta:
         model = Global_Role
         exclude = ['user', 'group']
