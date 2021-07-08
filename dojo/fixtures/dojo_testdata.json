@@ -2298,7 +2298,7 @@
     "model": "dojo.language_type",
     "pk": 1,
     "fields": {
-        "language": "ActionScript",
+        "language": "JSON",
         "color": "#882B0F"
     }
   },

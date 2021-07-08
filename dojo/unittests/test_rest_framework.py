@@ -1580,3 +1580,42 @@ class LanguageTest(BaseClass.RESTEndpointTest):
         self.permission_update = Permissions.Language_Edit
         self.permission_delete = Permissions.Language_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ImportLanguagesTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Languages
+        self.endpoint_path = 'import-languages'
+        self.viewname = 'importlanguages'
+        self.viewset = ImportLanguagesView
+        self.payload = {
+            'product': 1,
+            'file': open("/app/dojo/unittests/files/defectdojo_cloc.json")
+        }
+        self.object_permission = True
+        self.permission_check_class = Languages
+        self.permission_create = Permissions.Language_Add
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create(self):
+        BaseClass.RESTEndpointTest.test_create(self)
+
+        languages = Languages.objects.filter(product=1).order_by('language')
+
+        self.assertEqual(2, len(languages))
+
+        self.assertEqual(languages[0].product, Product.objects.get(id=1))
+        self.assertEqual(languages[0].language, Language_Type.objects.get(id=1))
+        self.assertEqual(languages[0].files, 21)
+        self.assertEqual(languages[0].blank, 7)
+        self.assertEqual(languages[0].comment, 0)
+        self.assertEqual(languages[0].code, 63996)
+
+        self.assertEqual(languages[1].product, Product.objects.get(id=1))
+        self.assertEqual(languages[1].language, Language_Type.objects.get(id=2))
+        self.assertEqual(languages[1].files, 432)
+        self.assertEqual(languages[1].blank, 10813)
+        self.assertEqual(languages[1].comment, 5054)
+        self.assertEqual(languages[1].code, 51056)
