@@ -13,7 +13,8 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
-    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member
+    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
+    Language_Type, Languages
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
@@ -1346,6 +1347,65 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             raise serializers.ValidationError(
                 'The date cannot be in the future!')
         return value
+
+
+class LanguageTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Language_Type
+        fields = '__all__'
+
+
+class LanguageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Languages
+        fields = '__all__'
+
+
+class ImportLanguagesSerializer(serializers.Serializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
+    file = serializers.FileField(required=True)
+
+    def save(self):
+        data = self.validated_data
+        product = data['product']
+        languages = data['file']
+
+        try:
+            data = languages.read()
+            try:
+                deserialized = json.loads(str(data, 'utf-8'))
+            except:
+                deserialized = json.loads(data)
+        except:
+            raise Exception("Invalid format")
+
+        Languages.objects.filter(product=product).delete()
+
+        for name in deserialized:
+            if name not in ['header', 'SUM']:
+                element = deserialized[name]
+
+                try:
+                    language_type, created = Language_Type.objects.get_or_create(language=name)
+                except Language_Type.MultipleObjectsReturned:
+                    language_type = Language_Type.objects.filter(language=name).first()
+
+                language = Languages()
+                language.product = product
+                language.language = language_type
+                language.files = element.get('nFiles', 0)
+                language.blank = element.get('blank', 0)
+                language.comment = element.get('comment', 0)
+                language.code = element.get('code', 0)
+                language.save()
+
+    def validate(self, data):
+        if is_scan_file_too_large(data['file']):
+            raise serializers.ValidationError(
+                'File is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
+        return data
 
 
 class AddNewNoteOptionSerializer(serializers.ModelSerializer):
