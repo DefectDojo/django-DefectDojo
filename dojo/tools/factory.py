@@ -53,7 +53,7 @@ def requires_file(scan_type):
 
 import os
 from inspect import isclass
-from pkgutil import iter_modules, find_loader
+from pkgutil import find_loader
 from pathlib import Path
 from importlib import import_module
 
