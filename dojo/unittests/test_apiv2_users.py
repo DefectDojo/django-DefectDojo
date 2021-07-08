@@ -15,7 +15,6 @@ class UserTest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
 
     def test_user_multiple_usernames(self):
-        from django.urls import get_resolver
         r = self.client.get("{}?username=user1&username=user2".format(reverse('dojo_user-list')), format='json')
         self.assertEqual(r.status_code, 200, r.content[:1000])
         self.assertEqual(r.json()['count'], 2, r.content[:1000])
