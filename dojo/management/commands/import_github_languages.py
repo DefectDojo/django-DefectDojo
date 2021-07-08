@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     """
-    GitHub maintains a wide range of languages with colors. The project https://github.com/ozh/github-colors 
+    GitHub maintains a wide range of languages with colors. The project https://github.com/ozh/github-colors
     converts them regularly in a json file, which we can use to update Language_Types
     """
     help = 'Usage: manage.py migraimport_github_languages'

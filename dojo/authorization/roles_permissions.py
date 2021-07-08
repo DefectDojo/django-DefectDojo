@@ -318,7 +318,8 @@ def get_roles_with_permissions():
             Permissions.Language_View,
             Permissions.Language_Add,
             Permissions.Language_Edit,
-            Permissions.Language_Delete        },
+            Permissions.Language_Delete
+        },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
             Permissions.Product_Type_View,
@@ -395,5 +396,6 @@ def get_roles_with_permissions():
             Permissions.Language_View,
             Permissions.Language_Add,
             Permissions.Language_Edit,
-            Permissions.Language_Delete        }
+            Permissions.Language_Delete
+        }
     }
