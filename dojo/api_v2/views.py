@@ -32,7 +32,7 @@ from dojo.finding.views import set_finding_as_original_internal, reset_finding_d
     duplicate_cluster
 from dojo.filters import ReportFindingFilter, \
     ApiFindingFilter, ApiProductFilter, ApiEngagementFilter, ApiEndpointFilter, \
-    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter
+    ApiAppAnalysisFilter, ApiTestFilter, ApiTemplateFindingFilter, ApiUserFilter
 from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
@@ -1840,9 +1840,9 @@ class UsersViewSet(mixins.CreateModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.UserSerializer
-    queryset = User.objects.all()
+    queryset = Dojo_User.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'username', 'first_name', 'last_name')
+    filter_class = ApiUserFilter
     permission_classes = (IsAdminUser, DjangoModelPermissions)
 
 
