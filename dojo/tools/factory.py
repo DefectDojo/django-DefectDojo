@@ -53,18 +53,18 @@ def requires_file(scan_type):
 
 import os
 from inspect import isclass
-from pkgutil import find_loader
 from pathlib import Path
 from importlib import import_module
+from importlib.util import find_spec
 
 # iterate through the modules in the current package
-package_dir = Path(__file__).resolve().parent
+package_dir = str(Path(__file__).resolve().parent)
 for module_name in os.listdir(package_dir):
     # check if it's dir
     if os.path.isdir(os.path.join(package_dir, module_name)):
         try:
             # check if it's a Python module
-            if find_loader(os.path.join(package_dir, module_name)):
+            if find_spec(f"dojo.tools.{module_name}.parser"):
                 # import the module and iterate through its attributes
                 module = import_module(f"dojo.tools.{module_name}.parser")
                 for attribute_name in dir(module):
