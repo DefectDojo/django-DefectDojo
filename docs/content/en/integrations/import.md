@@ -113,7 +113,7 @@ to filter duplicates, the parser will automatically combine issues with the same
 
 Example:
 
-```JSON
+{{< highlight json >}}
 {
     "Issues": [
         {
@@ -127,8 +127,8 @@ Example:
             "description_html": "Details",
             "remediation_html": "Remediation Details",
             "severity": "high",
-            "path": "/path",
-            "origin": "https://www.example.com",
+            "path": "/burp",
+            "origin": "https://portswigger.net",
             "evidence": [
                 {
                     "request_index": 0,
@@ -162,7 +162,53 @@ Example:
         }
     ]
 }
-```
+{{< /highlight >}}
+
+Example GraphQL query to get issue details:
+
+{{< highlight graphql >}}
+    query Issue ($id: ID!, $serial_num: ID!) {
+        issue(scan_id: $id, serial_number: $serial_num) {
+            issue_type {
+                name
+                description_html
+                remediation_html
+                vulnerability_classifications_html
+                references_html
+            }
+            description_html
+            remediation_html
+            severity
+            path
+            origin
+            evidence {
+                ... on Request {
+                    request_index
+                    request_segments {
+                        ... on DataSegment {
+                            data_html
+                        }
+                        ... on HighlightSegment {
+                                highlight_html
+                        }
+                    }
+                }
+                ... on Response {
+                    response_index
+                    response_segments {
+                        ... on DataSegment {
+                            data_html
+                        }
+                        ... on HighlightSegment {
+                            highlight_html
+                        }
+                    }
+                }
+            }
+        }
+    }
+{{< /highlight >}}
+
 
 ### CargoAudit Scan
 
