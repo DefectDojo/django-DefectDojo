@@ -25,7 +25,7 @@ class DetectSecretsParser(object):
             find_date = dateutil.parser.parse(data.get('generated_at'))
         for detect_file in data.get('results'):
             for item in data.get('results').get(detect_file):
-                if 'is_secret' in item and item['is_secret'] == False:
+                if 'is_secret' in item and item['is_secret'] is False:
                     continue
                 type = item.get('type')
                 file = item.get('filename')
