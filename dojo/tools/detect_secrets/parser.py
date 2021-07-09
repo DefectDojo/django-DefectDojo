@@ -25,8 +25,6 @@ class DetectSecretsParser(object):
             find_date = dateutil.parser.parse(data.get('generated_at'))
         for detect_file in data.get('results'):
             for item in data.get('results').get(detect_file):
-                if 'is_secret' in item and item['is_secret'] is False:
-                    continue
                 type = item.get('type')
                 file = item.get('filename')
                 hashed_secret = item.get('hashed_secret')
@@ -50,6 +48,7 @@ class DetectSecretsParser(object):
                         file_path=file,
                         line=line,
                         nb_occurences=1,
+                        false_p='is_secret' in item and item['is_secret'] is False,
                     )
                     dupes[dupe_key] = finding
         return list(dupes.values())
