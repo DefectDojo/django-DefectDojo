@@ -171,7 +171,8 @@ env = environ.Env(
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
-    DD_FEATURE_FINDING_GROUPS=(bool, False),
+    # Allow grouping of findings in the same test, for example to group findings per dependency
+    DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
 
