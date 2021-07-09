@@ -41,11 +41,7 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
 def get_choices():
     res = list()
     for key in PARSERS:
-        test_type, created = Test_Type.objects.get_or_create(name=key)
-        if created:
-            test_type.save()
-        if test_type.active:
-            res.append((key, PARSERS[key].get_label_for_scan_types(key)))
+        res.append((key, PARSERS[key].get_label_for_scan_types(key)))
     return tuple(res)
 
 
