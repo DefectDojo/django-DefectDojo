@@ -28,12 +28,11 @@ class BurpGraphQLParser(object):
                 data = json.loads(tree)
 
             scan_data = data.get('Issues')
-                
-
+     
             return self.create_findings(scan_data, test)
 
     def create_findings(self, scan_data, test):
-        
+
         finding_data = self.parse_findings(scan_data)
 
         items = list()
@@ -81,7 +80,6 @@ class BurpGraphQLParser(object):
 
         return list(issue_dict.values())
 
-
     def combine_findings(self, finding, issue):
 
         description = issue.get('description_html')
@@ -95,7 +93,6 @@ class BurpGraphQLParser(object):
 
         finding['Endpoints'].append(Endpoint.from_uri(issue['origin'] + issue['path']))
 
-
     def create_finding(self, issue):
         finding = dict()
         finding['Impact'] = ''
@@ -107,7 +104,7 @@ class BurpGraphQLParser(object):
         if issue.get('description_html'):
             finding['Description'] += "**Issue Detail**\n"
             finding['Description'] += issue.get('description_html') + "\n\n"
-            
+
             if issue['issue_type'].get('description_html'):
                 finding['Impact'] += "**Issue Background**\n"
                 finding['Impact'] += issue['issue_type'].get('description_html') + "\n\n"
@@ -130,7 +127,7 @@ class BurpGraphQLParser(object):
             finding['Severity'] = issue['severity'].capitalize()
         else:
             finding['Severity'] - 'Info'
-        
+
         finding['Endpoints'] = [Endpoint.from_uri(issue['origin'] + issue['path'])]
 
         if issue.get('evidence'):
@@ -141,7 +138,7 @@ class BurpGraphQLParser(object):
         if issue['issue_type'].get('references_html'):
             finding['References'] += "**References**\n"
             finding['References'] += issue['issue_type'].get('references_html') + "\n\n"
-        
+
         if issue['issue_type'].get('vulnerability_classifications_html'):
             finding['References'] += "**CWE Information**\n"
             finding['References'] += issue['issue_type'].get('vulnerability_classifications_html') + "\n\n"
@@ -150,7 +147,6 @@ class BurpGraphQLParser(object):
             finding['CWE'] = 0
 
         return finding
-
 
     def parse_evidence(self, evidence):
 
@@ -181,16 +177,15 @@ class BurpGraphQLParser(object):
                         response += data.get('data_html')
                     elif data.get('highlight_html'):
                         response += data.get('highlight_html')
-                                    
+             
                 i += 2
                 req_resp_list.append({"req": request, "resp": response})
-                            
+           
             else:
                 req_resp_list.append({"req": request, "resp": ""})
                 i += 1
-                    
-        return req_resp_list
 
+        return req_resp_list
 
     def get_cwe(self, cwe_html):
         # Match only the first CWE!
