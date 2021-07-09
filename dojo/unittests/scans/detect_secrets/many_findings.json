@@ -109,7 +109,8 @@
         "filename": "modules_images",
         "hashed_secret": "535850f35566365fddf9eb01a0d36962c0ffed8c",
         "is_verified": false,
-        "line_number": 156
+        "line_number": 156,
+        "is_secret": true
       }
     ],
     "example/pkg/docker_registry_watcher/docker_config.go": [
@@ -127,7 +128,8 @@
         "filename": "example/pkg/docker_registry_watcher/docker_registry_watcher.go",
         "hashed_secret": "b732fb611fd46a38e8667f9972e0cde777fbe37f",
         "is_verified": false,
-        "line_number": 112
+        "line_number": 112,
+        "is_secret": false
       }
     ]
   },
