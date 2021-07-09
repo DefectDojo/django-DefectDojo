@@ -28,7 +28,7 @@ class BurpGraphQLParser(object):
                 data = json.loads(tree)
 
             scan_data = data.get('Issues')
-     
+
             return self.create_findings(scan_data, test)
 
     def create_findings(self, scan_data, test):
@@ -177,10 +177,10 @@ class BurpGraphQLParser(object):
                         response += data.get('data_html')
                     elif data.get('highlight_html'):
                         response += data.get('highlight_html')
-             
+
                 i += 2
                 req_resp_list.append({"req": request, "resp": response})
-           
+
             else:
                 req_resp_list.append({"req": request, "resp": ""})
                 i += 1
