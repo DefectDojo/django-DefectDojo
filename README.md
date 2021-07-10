@@ -6,12 +6,19 @@
 
 ![Screenshot of DefectDojo](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/screenshot1.png)
 
-[DefectDojo](https://www.defectdojo.org/) is a security program and
-vulnerability management tool.
+[DefectDojo](https://www.defectdojo.org/) is a security orchestration and
+vulnerability management platform.
 DefectDojo allows you to manage your application security program, maintain
 product and application information, triage vulnerabilities and
-push findings into defect trackers.
-Consolidate your findings into one source of truth with DefectDojo.
+push findings to systems like JIRA and Slack. DefectDojo enriches and
+refines vulnerability data using a number of heuristic algrothims that
+improve with the more you use the platform.
+
+## Demo
+
+Try out the demo sever at [demo.defectdojo.org](https://demo.defectdojo.org)
+
+Log in with `admin / defectdojo@demo#appsec` and please note that the demo server is refreshed regularly.
 
 ## Quick Start
 
@@ -29,9 +36,6 @@ docker-compose logs initializer | grep "Admin password:"
 
 Navigate to <http://localhost:8080>.
 
-Alternatively, try out the demo sever at [demo.defectdojo.org](https://demo.defectdojo.org)
-
-Log in with `admin / defectdojo@demo#appsec` and please note that the demo server is refreshed regularly.
 
 ## Documentation
 
@@ -87,7 +91,7 @@ To manage expectations, we call this the wishlist. These are items we want to do
 - More flexible model
 
 
-## Support, Bug Reports and Getting Involved
+## Community and Getting Involved
 Please come to our Slack channel first, where we can try to help you or point you in the right direction:
 
 ![Slack](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/slack_rgb.png)
