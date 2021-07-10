@@ -47,6 +47,8 @@ Navigate to <http://localhost:8080>.
 
 ### [Release and Branch Model](readme-docs/RELEASE-AND-BRANCH-MODEL.md)
 
+### [Contributing](readme-docs.md)
+
 ### [Roadmap](readme-docs/ROADMAP.md)
 
 ### [Wishlist](readme-docs/WISHLIST.md)
@@ -104,7 +106,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
   maintainer for years. He performed Dojo's first UI overhaul, optimized code structure/features, and added numerous enhancements.
 
 
-## [Contributing](readme-docs.md)
+
 
 
 ## Sponsors
