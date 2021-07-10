@@ -37,13 +37,7 @@ docker-compose logs initializer | grep "Admin password:"
 Navigate to <http://localhost:8080>.
 
 
-### [Documentation](https://defectdojo.github.io/django-DefectDojo/)
-
-## Supported Installation Options
-
-* [Docker / Docker Compose](readme-docs/DOCKER.md)
-* [godojo](https://github.com/DefectDojo/godojo)
-
+## [Documentation](https://defectdojo.github.io/django-DefectDojo/)
 
 ### [Getting Started](readme-docs/GETTING-STARTED.md)
 
@@ -56,6 +50,11 @@ Navigate to <http://localhost:8080>.
 ### [Roadmap](readme-docs/ROADMAP.md)
 
 ### [Wishlist](readme-docs/WISHLIST.md)
+
+## Supported Installation Options
+
+* [Docker / Docker Compose](readme-docs/DOCKER.md)
+* [godojo](https://github.com/DefectDojo/godojo)
 
 
 ## Community and Getting Involved
