@@ -129,7 +129,7 @@
       <div class="panel-heading">
         <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies {%if app_analysis%}({{ app_analysis.count }}){%endif%}
             {% if prod|has_object_permission:"Technology_Add" %}
-            <a title="Add New Technology" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology"><span class="fa fa-plus"></span> </a>
+            <a title="Add new Technology" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology" id="addTechnology"><span class="fa fa-plus"></span> </a>
             {% endif %}
         </h3>      
       </div>
@@ -159,8 +159,8 @@
                     </li>
                     </ul>
                 </td>
-                <td>{{ app.name }}</td>
-                <td><span class="badge">{{ app.version|version_num }}</span></td>
+                <td name="technology_name">{{ app.name }}</td>
+                <td name="technology_version"><span class="badge">{{ app.version|version_num }}</span></td>
             </tr>
             {% endfor %}
         </tbody>

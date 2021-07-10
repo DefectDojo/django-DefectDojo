@@ -273,10 +273,6 @@ class ProductForm(forms.ModelForm):
             queryset=None,
             required=False, label="Authorized Users")
 
-    app_analysis = forms.ModelMultipleChoiceField(label='Technologies',
-                                           queryset=App_Analysis.objects.all().order_by('name'),
-                                           required=False)
-
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
@@ -292,11 +288,11 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         if settings.FEATURE_AUTHORIZATION_V2:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
+            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
                     'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                     'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
         else:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
+            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
                     'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                     'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
