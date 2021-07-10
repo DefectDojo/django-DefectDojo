@@ -39,12 +39,9 @@ Navigate to <http://localhost:8080>.
 
 ## [Documentation](https://defectdojo.github.io/django-DefectDojo/)
 
-For detailed documentation you can visit
-[Github Pages](https://defectdojo.github.io/django-DefectDojo/).
-
 ## Supported Installation Options
 
-* [Docker / Docker Compose](DOCKER.md)
+* [Docker / Docker Compose](readmedocs/DOCKER.md)
 * [godojo](https://github.com/DefectDojo/godojo)
 
 
