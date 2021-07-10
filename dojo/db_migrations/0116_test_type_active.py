@@ -5,7 +5,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0114_cyclonedx_vuln_uniqu'),
+        ('dojo', '0115_language_types'),
     ]
 
     operations = [
