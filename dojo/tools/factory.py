@@ -31,6 +31,8 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
         test_type, created = Test_Type.objects.get_or_create(name=scan_type)
         if created:
             test_type.save()
+        if not test_type.active:
+            raise ValueError(f"Parser {scan_type} is not active")
         return PARSERS[scan_type]
     else:
         raise ValueError(f'Unknown Test Type {scan_type}')
