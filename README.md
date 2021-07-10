@@ -47,23 +47,15 @@ Navigate to <http://localhost:8080>.
 
 ### [Getting Started](readme-docs/GETTING-STARTED.md)
 
-## [REST APIs](readme-docs/REST-APIs.md)
+### [REST APIs](readme-docs/REST-APIs.md)
 
-## [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND-WRAPPERS)
+### [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND-WRAPPERS)
 
-## [Release and Branch Model](readme-docs/RELEASE-AND-BRANCH-MODEL.md)
+### [Release and Branch Model](readme-docs/RELEASE-AND-BRANCH-MODEL.md)
 
-## [Roadmap](readme-docs/ROADMAP.md)
+### [Roadmap](readme-docs/ROADMAP.md)
 
-
-
-## Wishlist
-To manage expectations, we call this the wishlist. These are items we want to do, are discussing or pondering our minds:
-- New modern UI / SPA
-- New dashboarding / statistics
-- New search engine
-- Adopt a plugin framework to allow plugins for issue trackers, parsers, reports, etc
-- More flexible model
+### [Wishlist](readme-docs/WISHLIST.md)
 
 
 ## Community and Getting Involved
