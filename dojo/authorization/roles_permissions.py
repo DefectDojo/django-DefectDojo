@@ -180,6 +180,7 @@ class Permissions(IntEnum):
     def get_language_permissions(cls):
         return {Permissions.Language_View, Permissions.Language_Edit, Permissions.Language_Delete}
 
+    @classmethod
     def get_technology_permissions(cls):
         return {Permissions.Technology_View, Permissions.Technology_Edit, Permissions.Technology_Delete}
 
