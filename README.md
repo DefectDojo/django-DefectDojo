@@ -41,7 +41,7 @@ Navigate to <http://localhost:8080>.
 
 ## Supported Installation Options
 
-* [Docker / Docker Compose](readmedocs/DOCKER.md)
+* [Docker / Docker Compose](readme-docs/DOCKER.md)
 * [godojo](https://github.com/DefectDojo/godojo)
 
 
