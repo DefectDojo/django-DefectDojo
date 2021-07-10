@@ -162,8 +162,8 @@ env = environ.Env(
     DD_LEGACY_API_V1_ENABLE=(bool, False),
     # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
-    # new experimental feature that tracks history across multiple reimports for the same test
-    DD_TRACK_IMPORT_HISTORY=(bool, False),
+    # new feature that tracks history across multiple reimports for the same test
+    DD_TRACK_IMPORT_HISTORY=(bool, True),
 
     # Feature toggle for new authorization, which is incomplete at the moment.
     # Don't set it to True for productive environments!
