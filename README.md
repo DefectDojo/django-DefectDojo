@@ -45,36 +45,16 @@ Navigate to <http://localhost:8080>.
 * [godojo](https://github.com/DefectDojo/godojo)
 
 
-## Getting Started
+## [Getting Started](readme-docs/GETTING-STARTED.md)
 
-We recommend checking out the
-[Core Data Classes](https://defectdojo.github.io/usage/models/) document to
-learn the terminology of DefectDojo and the
-[getting started guide](https://defectdojo.github.io/django-DefectDojo/getting_started/)
-for setting up a new installation.
-We've also created some example
-[workflows](https://defectdojo.github.io/django-DefectDojo/usage/workflows/) that
-should give you an idea of how to use DefectDojo for your own team.
+## [REST APIs](readme-docs/REST-APIs.md)
 
-## REST APIs
+## [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND-WRAPPERS)
 
-Defectdojo can be accessed through a Swagger REST API. Please see [the API documentation](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/) or the in-app Swagger documentation.
+## [Release and Branch Model](readme-docs/RELEASE-AND-BRANCH-MODEL.md)
 
-## Client APIs and wrappers
-This section presents different ways to programmatically interact with DefectDojo APIs.
+## [Roadmap](readme-docs/ROADMAP.md)
 
-See [Wrappers](WRAPPERS.md)
-
-
-## Release and branch model
-See [Release and branch model](BRANCHING-MODEL.md)
-
-
-## Roadmap
-A magical, illusionary, non-existent, YMMV, wannabe, no guarantees list of thing we may or may not be working on:
-- New permission model (underway)
-- Push groups of findings to a single JIRA ticket (experimental now in!)
-- Reimport matching improvements
 
 
 ## Wishlist
