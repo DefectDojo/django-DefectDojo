@@ -255,6 +255,14 @@ class UserHasTestImportPermission(permissions.BasePermission):
         return check_object_permission(request, obj.test, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete)
 
 
+class UserHasLanguagePermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Product, 'product', Permissions.Language_Add)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Language_View, Permissions.Language_Edit, Permissions.Language_Delete)
+
+
 class IsSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_superuser

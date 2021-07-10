@@ -441,7 +441,7 @@
     </div>
     <div class="panel-body">
         <div class="chart" id="donut-lang"></div>
-        <div style="text-align: center;padding-top: 10px;">
+        <div style="padding-top: 10px;">
             {%  if langSummary.files__sum > 0 %}
             <strong>{{ langSummary.files__sum|intcomma }}</strong> files {%  if langSummary.code__sum %} and {%endif%}
             {% endif %}
@@ -599,11 +599,11 @@
       function severity_pie() {
           var data = [
           {% for lang in languages %}
-            {% if lang.files %}
+            {% if lang.code %}
             {
-                label: "&nbsp;{{lang}}",
+                label: "&nbsp;{{lang}} - {{lang.code|intcomma}} LoC",
                 color: "{{lang.language.color }}",
-                data: {{lang.files}}
+                data: {{lang.code}}
             },
             {% endif %}
           {% endfor %}

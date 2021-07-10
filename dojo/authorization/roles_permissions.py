@@ -98,6 +98,11 @@ class Permissions(IntEnum):
     Group_Edit = 2206
     Group_Delete = 2207
 
+    Language_View = 2302
+    Language_Add = 2303
+    Language_Edit = 2306
+    Language_Delete = 2307
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -166,6 +171,10 @@ class Permissions(IntEnum):
     def get_group_member_permissions(cls):
         return {Permissions.Group_View, Permissions.Group_Manage_Members, Permissions.Group_Member_Delete}
 
+    @classmethod
+    def get_language_permissions(cls):
+        return {Permissions.Language_View, Permissions.Language_Edit, Permissions.Language_Delete}
+
 
 def get_roles_with_permissions():
     return {
@@ -180,7 +189,8 @@ def get_roles_with_permissions():
             Permissions.Component_View,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
-            Permissions.Group_View
+            Permissions.Group_View,
+            Permissions.Language_View
         },
         Roles.API_Importer: {
             Permissions.Product_Type_View,
@@ -233,7 +243,12 @@ def get_roles_with_permissions():
 
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
-            Permissions.Group_View
+            Permissions.Group_View,
+
+            Permissions.Language_View,
+            Permissions.Language_Add,
+            Permissions.Language_Edit,
+            Permissions.Language_Delete
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -298,7 +313,12 @@ def get_roles_with_permissions():
             Permissions.Group_View,
             Permissions.Group_Edit,
             Permissions.Group_Manage_Members,
-            Permissions.Group_Member_Delete
+            Permissions.Group_Member_Delete,
+
+            Permissions.Language_View,
+            Permissions.Language_Add,
+            Permissions.Language_Edit,
+            Permissions.Language_Delete
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -371,6 +391,11 @@ def get_roles_with_permissions():
             Permissions.Group_Manage_Members,
             Permissions.Group_Member_Delete,
             Permissions.Group_Add_Owner,
-            Permissions.Group_Delete
+            Permissions.Group_Delete,
+
+            Permissions.Language_View,
+            Permissions.Language_Add,
+            Permissions.Language_Edit,
+            Permissions.Language_Delete
         }
     }
