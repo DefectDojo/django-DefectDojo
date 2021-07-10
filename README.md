@@ -72,17 +72,6 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 [DefectDojo Twitter Account](https://twitter.com/defectdojo) tweets project
 updates and changes.
 
-## Available Plugins
-
-[Engagement Surveys](https://github.com/grendel513/defectDojo-engagement-survey)
-– A plugin that adds answerable surveys to engagements.
-
-[LDAP Integration](https://django-auth-ldap.readthedocs.io/en/latest/)
-
-[SAML Integration](https://pypi.python.org/pypi/djangosaml2/)
-
-[Multi-Factor Auth](https://django-mfa.readthedocs.io/en/latest/)
-
 ## About Us
 
 DefectDojo is maintained by:
@@ -115,15 +104,8 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
   maintainer for years. He performed Dojo's first UI overhaul, optimized code structure/features, and added numerous enhancements.
 
 
-## Contributing
+## [Contributing](readme-docs.md)
 
-We greatly appreciate all of our
-[contributors](https://github.com/DefectDojo/django-DefectDojo/graphs/contributors).
-
-More info: [Contributing guideline](CONTRIBUTING.md)
-
-We would also like to highlight the contributions from Michael Dong and Fatimah
-Zohra who contributed to DefectDojo before it was open source.
 
 ## Sponsors
 
@@ -142,9 +124,8 @@ Zohra who contributed to DefectDojo before it was open source.
 
 
 Interested in becoming a sponsor and having your logo displayed? Please review
-our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
+our [sponsorship information](SPONSORING.md) or email greg.anderson@10security.com
 
 ## License
 
 DefectDojo is licensed under the [BSD Simplified license](LICENSE.md)
-https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/DD-Hierarchy.png
