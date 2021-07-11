@@ -108,15 +108,13 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 
 ## Sponsors
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png" alt="10Security" width="300"/>](https://10security.com)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png" github-user="devgrega" alt="10Security" width="300"/>](https://10security.com)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/isaac.png" alt="ISAAC" width="300"/>](https://isaac.nl)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/timo-pagel-logo.png" alt="Tim Pagel" width=300 />](https://pagel.pro/)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/timo-pagel-logo.png" github-user="wurstbot" alt="Tim Pagel" width=300 />](https://pagel.pro/)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/sda-se-logo.png" alt="SDA-SE" width=300 />](https://sda-se.com/)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/signal-iduna.png" alt="Signal-Iduna" width=300 />](https://signal-iduna.de/)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/signal-iduna.png" alt="Signal-Iduna" width=300 />](https://signal-iduna.de/)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/arrival.png" alt="Signal-Iduna" width=300 />](https://signal-iduna.de/)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png" github-user="madchap" alt="Cloudbees" width=300 />](https://cloudbees.com/)
 
-[![WSO2](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/wso2-logo-for-screen.png)](https://wso2.com/)
-[![CloudBees](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png)](https://cloudbees.com/)
 [![WeHackPurple](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png)](https://wehackpurple.com/)
 [![MaibornWolff](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png)](https://www.maibornwolff.de/en)
 [![ARRIVAL](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/arrival.png)](https://arrival.com)
