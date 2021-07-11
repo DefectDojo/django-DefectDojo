@@ -90,7 +90,6 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * Valentijn Scholten (@valentijnscholten) ([github](https://github.com/valentijnscholten) | [sponsor](https://github.com/sponsors/valentijnscholten) | [linkedin](https://www.linkedin.com/in/valentijn-scholten/))
 * Jannik Jürgens
 * [Fred Blaise](https://www.linkedin.com/in/fredblaise/)
-* Saurabh kumar
 * [Cody Maffucci](https://www.linkedin.com/in/cody-maffucci)
 * Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
 * [Damien Carol](https://www.linkedin.com/in/damien-carol/)
@@ -109,8 +108,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 
 ## Sponsors
-![<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png" alt="drawing" style="width:200px;"/>](https://10security.com)
-
+<img href="https://10security.com" src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png" alt="drawing" style="width:200px;"/>
 [![10Security](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png)](https://10security.com/services-by-technology/defectdojo-commercial-support/)
 [![ISAAC](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/isaac.png)](https://isaac.nl "ISAAC")
 [![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/timo-pagel-logo.png )](https://pagel.pro/)
