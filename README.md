@@ -67,8 +67,14 @@ Please come to our Slack channel first, where we can try to help you or point yo
 Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 [Get Access.](https://owasp-slack.herokuapp.com/)
 
+
+## Commercial Support and Training
+Commercial support and training is availaible through ![10Security](https://10security.com)
+10Security was founded by the creators of DefectDojo. For information please email info@10security.com or visit our ![site](https://10security.com).
+
 ## Social Media
- [![Twitter](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png)](https://twitter.com/defectdojo)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png" alt="Twitter" height="65"/>](https://twitter.com/defectdojo)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png" alt="Twitter" height="65"/>](https://twitter.com/defectdojo)
  [![LinkedIn](https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon-png.png)](https://www.linkedin.com/company/defectdojo)
 
 Follow DefectDojo on [Twitter](https://twitter.com/defectdojo) and [Linkedin](https://www.linkedin.com/company/defectdojo) for project updates!
@@ -102,9 +108,6 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
     DefectDojo Maintainer for years and wrote some of Dojo's core functionality.
 * Jay Paz ([@jjpaz](https://twitter.com/jjpaz)) – Jay was a DefectDojo
   maintainer for years. He performed Dojo's first UI overhaul, optimized code structure/features, and added numerous enhancements.
-
-
-
 
 
 ## Sponsors
