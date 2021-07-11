@@ -594,9 +594,9 @@ class AppAnalysisTest(BaseClass.RESTEndpointTest):
         self.object_permission = True
         self.permission_check_class = Product
         self.permission_check_id = 1
-        self.permission_create = Permissions.Product_Edit
-        self.permission_update = Permissions.Product_Edit
-        self.permission_delete = Permissions.Product_Edit
+        self.permission_create = Permissions.Technology_Add
+        self.permission_update = Permissions.Technology_Edit
+        self.permission_delete = Permissions.Technology_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
