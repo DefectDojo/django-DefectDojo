@@ -70,11 +70,12 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 ## Commercial Support and Training
 Commercial support and training is availaible through [10Security](https://10security.com)
+
 10Security was founded by the creators of DefectDojo. For information please email info@10security.com or visit our [site](https://10security.com).
 
 ## Social Media
-[<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="65"/>](https://www.linkedin.com/company/defectdojo)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png" alt="Twitter" height="65"/>](https://twitter.com/defectdojo)
+[<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png" alt="Twitter" height="50"/>](https://twitter.com/defectdojo)
 
 Follow DefectDojo on [Twitter](https://twitter.com/defectdojo) and [Linkedin](https://www.linkedin.com/company/defectdojo) for project updates!
 
