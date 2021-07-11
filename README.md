@@ -69,8 +69,10 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 ## Social Media
  [![Twitter](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png)](https://twitter.com/defectdojo)
-[DefectDojo Twitter Account](https://twitter.com/defectdojo) tweets project
-updates and changes.
+ 
+  [![LinkedIn](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon.png)](https://www.linkedin.com/company/defectdojo)
+
+Follow DefectDojo on ![Twitter](https://twitter.com/defectdojo) and ![Linkedin](https://www.linkedin.com/company/defectdojo) for project updates!
 
 ## About Us
 
