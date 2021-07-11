@@ -108,12 +108,13 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 
 ## Sponsors
-[<img href="https://10security.com" src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png" width="500"/>](https://10security.com)
-[![10Security](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png)](https://10security.com/services-by-technology/defectdojo-commercial-support/)
-[![ISAAC](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/isaac.png)](https://isaac.nl "ISAAC")
-[![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/timo-pagel-logo.png )](https://pagel.pro/)
-[![SDA-SE](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/sda-se-logo.png)](https://sda-se.com/)
-[![Signal-Iduna](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/signal-iduna.png)](https://signal-iduna.de/)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png" alt="10Security" width="300"/>](https://10security.com)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/isaac.png" alt="ISAAC" width="300"/>](https://isaac.nl)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/timo-pagel-logo.png" alt="Tim Pagel" width=300 />](https://pagel.pro/)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/sda-se-logo.png" alt="SDA-SE" width=300 />](https://sda-se.com/)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/signal-iduna.png" alt="Signal-Iduna" width=300 />](https://signal-iduna.de/)
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/signal-iduna.png" alt="Signal-Iduna" width=300 />](https://signal-iduna.de/)
+
 [![WSO2](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/wso2-logo-for-screen.png)](https://wso2.com/)
 [![CloudBees](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png)](https://cloudbees.com/)
 [![WeHackPurple](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png)](https://wehackpurple.com/)
