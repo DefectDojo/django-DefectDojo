@@ -61,7 +61,7 @@ Navigate to <http://localhost:8080>.
 
 ## Community, Getting Involved, and Updates
 
-[<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/static/images/slack_logo_icon.png" alt="Slack" height="50"/>](https://owasp-slack.herokuapp.com/)
+[<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/static/images/slack-logo-icon.png" alt="Slack" height="50"/>](https://owasp-slack.herokuapp.com/)
 [<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png" alt="Twitter" height="50"/>](https://twitter.com/defectdojo)
 [<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/static/images/YouTube-Emblem.png" alt="Youtube" height="50"/>](https://www.youtube.com/channel/UCWw9qzqptiIvTqSqhOFuCuQ)
