@@ -109,10 +109,8 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 
 ## Sponsors
-
-[![Xing](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/XING_logo.png)](https://corporate.xing.com/en/about-xing/security/)
+<img src=https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png" max-width=300 />
 [![10Security](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/10Security-logo.png)](https://10security.com/services-by-technology/defectdojo-commercial-support/)
-[![GCSecurity](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/gc_logo_2018.png)](https://gcsec.com.br/)
 [![ISAAC](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/isaac.png)](https://isaac.nl "ISAAC")
 [![Timo-Pagel](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/timo-pagel-logo.png )](https://pagel.pro/)
 [![SDA-SE](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/sda-se-logo.png)](https://sda-se.com/)
