@@ -68,8 +68,7 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 [Get Access.](https://owasp-slack.herokuapp.com/)
 
 ## Social Media
-
-![<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png">](https://twitter.com/defectdojo)
+ [![Twitter](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png)](https://twitter.com/defectdojo)
 [DefectDojo Twitter Account](https://twitter.com/defectdojo) tweets project
 updates and changes.
 
