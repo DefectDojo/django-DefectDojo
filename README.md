@@ -62,6 +62,7 @@ Navigate to <http://localhost:8080>.
 ## Community and Getting Involved
 
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/slack_rgb.png" alt="Slack" height="50"/>](https://owasp-slack.herokuapp.com/)
+
 Join the community and discussion! Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 ## Commercial Support and Training
