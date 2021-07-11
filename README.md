@@ -69,7 +69,7 @@ Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 ## Social Media
  [![Twitter](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Twitter_Logo.png)](https://twitter.com/defectdojo)
- [![LinkedIn](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon-png.png)](https://www.linkedin.com/company/defectdojo)
+ [![LinkedIn](https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon-png.png)](https://www.linkedin.com/company/defectdojo)
 
 Follow DefectDojo on [Twitter](https://twitter.com/defectdojo) and [Linkedin](https://www.linkedin.com/company/defectdojo) for project updates!
 
@@ -113,7 +113,6 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/timo-pagel-logo.png" github-user="wurstbot" alt="Tim Pagel" width="250" />](https://pagel.pro/)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/arrival.png" github-user="ansidorov" alt="ARRIVAL" width=300 />](https://arrival.com)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png" github-user="madchap" alt="Cloudbees" width=300 />](https://cloudbees.com/)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png" github-user="mtesauro" alt="WeHackPurle" width=300 />](https://wehackpurple.com/)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png" github-user="mtesauro" alt="WeHackPurle" width=300 />](https://wehackpurple.com/)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png)" github-user="StefanFl" alt="MiabornWolff" width=300 />]((https://www.maibornwolff.de/en))
 
