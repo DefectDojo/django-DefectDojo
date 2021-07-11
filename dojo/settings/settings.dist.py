@@ -128,10 +128,12 @@ env = environ.Env(
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
     # Set to True if you want to allow authorized users to make changes to findings or delete them
+    # These parameters are only used for the legacy authorization, which is not active per default anymore.
     DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
     DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
     # Set to True if you want to allow authorized users staff access only on specific products
     # This will only apply to users with 'active' status
+    # This parameter is only used for the legacy authorization, which is not active per default anymore.
     DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, False),
     # SLA Notifications via alerts and JIRA comments
     # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature
@@ -165,8 +167,7 @@ env = environ.Env(
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
 
-    # Feature toggle for new authorization, which is incomplete at the moment.
-    # Don't set it to True for productive environments!
+    # Feature toggle for new authorization, which is the default configuration now.
     DD_FEATURE_AUTHORIZATION_V2=(bool, True),
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
@@ -1202,8 +1203,7 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
 
-# Feature toggle for new authorization, which is incomplete at the moment.
-# Don't set it to True for productive environments!
+# Feature toggle for new authorization, which is the default configuration now.
 FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
 # When enabled, staff users have full access to all product types and products
 AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
