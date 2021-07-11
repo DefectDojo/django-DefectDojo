@@ -60,18 +60,15 @@ Navigate to <http://localhost:8080>.
 
 
 ## Community and Getting Involved
-Please come to our Slack channel first, where we can try to help you or point you in the right direction:
 
-![Slack](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/slack_rgb.png)
-
-Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
-[Get Access.](https://owasp-slack.herokuapp.com/)
-
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/slack_rgb.png" alt="Slack" height="50"/>](https://owasp-slack.herokuapp.com/)
+Join the community and discussion! Realtime discussion is done in the OWASP Slack Channel, #defectdojo.
 
 ## Commercial Support and Training
-Commercial support and training is availaible through [10Security](https://10security.com)
+Commercial support and training is availaible through [10Security](https://10security.com).
 
-10Security was founded by the creators of DefectDojo. For information please email info@10security.com or visit our [site](https://10security.com).
+10Security was founded by the creators of DefectDojo.
+For information please email info@10security.com or visit our [site](https://10security.com).
 
 ## Social Media
 [<img src="https://raw.githubusercontent.com/devGregA/django-DefectDojo/dev/docs/static/images/Linkedin-logo-icon-png.png" alt="LinkedIn" height="50"/>](https://www.linkedin.com/company/defectdojo)
