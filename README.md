@@ -114,7 +114,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/arrival.png" github-user="ansidorov" alt="ARRIVAL" width=300 />](https://arrival.com)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png" github-user="madchap" alt="Cloudbees" width=300 />](https://cloudbees.com/)
 [<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png" github-user="mtesauro" alt="WeHackPurle" width=300 />](https://wehackpurple.com/)
-[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png)" github-user="StefanFl" alt="MiabornWolff" width=300 />]((https://www.maibornwolff.de/en))
+[<img src="https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png" github-user="StefanFl" alt="MiabornWolff" width=300 />]((https://www.maibornwolff.de/en))
 
 
 
