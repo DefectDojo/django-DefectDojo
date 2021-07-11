@@ -126,7 +126,7 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 
 
 Interested in becoming a sponsor and having your logo displayed? Please review
-our [sponsorship information](SPONSORING.md) or email greg.anderson@10security.com
+our [sponsorship information](SPONSORING.md) or email greg.anderson@owasp.org
 
 ## License
 
