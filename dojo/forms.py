@@ -1773,9 +1773,12 @@ class ChangePasswordForm(forms.Form):
     current_password = forms.CharField(widget=forms.PasswordInput,
         required=True)
     new_password = forms.CharField(widget=forms.PasswordInput,
-        required=True, validators=[validate_password])
+        required=True, validators=[validate_password],
+        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) \
+                   letter, one number (0-9), and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?).')
     confirm_password = forms.CharField(widget=forms.PasswordInput,
-        required=True, validators=[validate_password])
+        required=True, validators=[validate_password],
+        help_text='Password must match the new password entered above, following the same password rules.')
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -1803,7 +1806,9 @@ class ChangePasswordForm(forms.Form):
 class AddDojoUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput,
         required=False, validators=[validate_password],
-        help_text='Leave blank to set an unusable password for this user.')
+        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) \
+                   letter, one number (0-9), and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave \
+                   blank to set an unusable password for this user.')
     if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_products = forms.ModelMultipleChoiceField(
             queryset=Product.objects.all(), required=False,
