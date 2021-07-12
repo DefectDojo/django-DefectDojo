@@ -190,7 +190,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{% url 'product' %}" aria-expanded="false" aria-label="Products">
+                                <a id="product-side-menu" href="{% url 'product' %}" aria-expanded="false" aria-label="Products">
                                     <i class="fa fa-list fa-fw"></i>
                                     <span>Products</span>
                                     <span class="glyphicon arrow"></span>
@@ -202,7 +202,7 @@
                                     {% endif %}
                                     <li><a href="{% url 'product_type' %}">All Product Types</a></li>
                                     {% if request.user.is_staff %}
-                                        <li><a href="{% url 'add_product_type' %}"> Add Product Type</a></li>
+                                        <li><a id="pop-out-add-product-type" href="{% url 'add_product_type' %}"> Add Product Type</a></li>
                                     {% endif %}
                                 </ul>
                                 <!-- /.nav-second-level -->

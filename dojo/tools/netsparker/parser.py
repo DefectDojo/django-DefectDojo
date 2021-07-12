@@ -1,19 +1,8 @@
 import json
-import re
+import html2text
+import datetime
 
 from dojo.models import Finding, Endpoint
-
-__author__ = "Roy Shoemake"
-__status__ = "Development"
-
-
-# Function to remove HTML tags
-TAG_RE = re.compile(r'<[^>]+>')
-
-
-def cleantags(text=''):
-    prepared_text = text if text else ''
-    return TAG_RE.sub('', prepared_text)
 
 
 class NetsparkerParser(object):
@@ -34,30 +23,26 @@ class NetsparkerParser(object):
         except:
             data = json.loads(tree)
         dupes = dict()
+        scan_date = datetime.datetime.strptime(data["Generated"], "%d/%m/%Y %H:%M %p").date()
 
         for item in data["Vulnerabilities"]:
-            categories = ''
-            language = ''
-            mitigation = ''
-            impact = ''
-            references = ''
-            findingdetail = ''
-            title = ''
-            group = ''
-            status = ''
-            request = ''
-            response = ''
 
             title = item["Name"]
-            findingdetail = cleantags(item["Description"])
-            cwe = int(item["Classification"]["Cwe"]) if "Cwe" in item["Classification"] else None
+            findingdetail = html2text.html2text(item.get("Description", ""))
+            if "Cwe" in item["Classification"]:
+                try:
+                    cwe = int(item["Classification"]["Cwe"])
+                except:
+                    cwe = None
+            else:
+                cwe = None
             sev = item["Severity"]
             if sev not in ['Info', 'Low', 'Medium', 'High', 'Critical']:
                 sev = 'Info'
-            mitigation = cleantags(item["RemedialProcedure"])
-            references = cleantags(item["RemedyReferences"])
+            mitigation = html2text.html2text(item.get("RemedialProcedure", ""))
+            references = html2text.html2text(item.get("RemedyReferences", ""))
             url = item["Url"]
-            impact = cleantags(item["Impact"])
+            impact = html2text.html2text(item.get("Impact", ""))
             dupe_key = title
             request = item["HttpRequest"]["Content"]
             response = item["HttpResponse"]["Content"]
@@ -68,6 +53,7 @@ class NetsparkerParser(object):
                               severity=sev.title(),
                               mitigation=mitigation,
                               impact=impact,
+                              date=scan_date,
                               references=references,
                               cwe=cwe,
                               static_finding=True)
