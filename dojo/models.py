@@ -392,7 +392,7 @@ class UserContactInfo(models.Model):
     slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
-    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset password upon first sign in.')
+    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset their password on next login.')
 
 
 class Role(models.Model):
