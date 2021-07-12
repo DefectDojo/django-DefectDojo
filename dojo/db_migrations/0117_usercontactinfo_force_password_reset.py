@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0117_cyclonedx_vuln_uniqu'),
+        ('dojo', '0116_test_type_active'),
     ]
 
     operations = [
