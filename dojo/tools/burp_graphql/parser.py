@@ -45,7 +45,7 @@ class BurpGraphQLParser(object):
                            mitigation=issue.get('Mitigation'),
                            references=issue.get('References'),
                            impact=issue.get('Impact'),
-                           cwe=issue.get('CWE'),
+                           cwe=int(issue.get('CWE')),
                            false_p=False,
                            duplicate=False,
                            out_of_scope=False,
@@ -126,7 +126,7 @@ class BurpGraphQLParser(object):
         if issue.get('severity'):
             finding['Severity'] = issue['severity'].capitalize()
         else:
-            finding['Severity'] - 'Info'
+            finding['Severity'] = 'Info'
 
         finding['Endpoints'] = [Endpoint.from_uri(issue['origin'] + issue['path'])]
 
