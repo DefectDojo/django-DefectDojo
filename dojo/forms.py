@@ -1774,8 +1774,8 @@ class ChangePasswordForm(forms.Form):
         required=True)
     new_password = forms.CharField(widget=forms.PasswordInput,
         required=True, validators=[validate_password],
-        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) \
-                   letter, one number (0-9), and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?).')
+        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
+                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?).')  # noqa W605
     confirm_password = forms.CharField(widget=forms.PasswordInput,
         required=True, validators=[validate_password],
         help_text='Password must match the new password entered above, following the same password rules.')
@@ -1806,9 +1806,8 @@ class ChangePasswordForm(forms.Form):
 class AddDojoUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput,
         required=False, validators=[validate_password],
-        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) \
-                   letter, one number (0-9), and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave \
-                   blank to set an unusable password for this user.')
+        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
+                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave blank to set an unusable password for this user.')  # noqa W605
     if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_products = forms.ModelMultipleChoiceField(
             queryset=Product.objects.all(), required=False,
