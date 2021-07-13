@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dojo', '0116_test_type_active'),
+        ('dojo', '0117_usercontactinfo_force_password_reset'),
     ]
 
     operations = [
