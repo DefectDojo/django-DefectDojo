@@ -349,6 +349,20 @@ class Dojo_User(User):
         return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
 
     @staticmethod
+    def force_password_reset(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.force_password_reset
+
+    def disable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = False
+            user.usercontactinfo.save()
+
+    def enable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = True
+            user.usercontactinfo.save()
+
+    @staticmethod
     def generate_full_name(user):
         """
         Returns the first_name plus the last_name, with a space in between.
@@ -378,6 +392,7 @@ class UserContactInfo(models.Model):
     slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
+    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset their password on next login.')
 
 
 class Role(models.Model):

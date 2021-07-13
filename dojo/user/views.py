@@ -1,7 +1,7 @@
 import logging
 from crum import get_current_user
 from django.contrib import messages
-from django.contrib.auth import authenticate, logout
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
@@ -18,7 +18,7 @@ from django.db import DEFAULT_DB_ALIAS
 from rest_framework.authtoken.models import Token
 
 from dojo.filters import UserFilter
-from dojo.forms import DojoUserForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
+from dojo.forms import DojoUserForm, ChangePasswordForm, AddDojoUserForm, EditDojoUserForm, DeleteUserForm, APIKeyForm, UserContactInfoForm, \
     Add_Product_Type_Member_UserForm, Add_Product_Member_UserForm, GlobalRoleForm, Add_Group_Member_UserForm
 from dojo.models import Product, Product_Type, Dojo_User, Alerts, Product_Member, Product_Type_Member, Dojo_Group_Member
 from dojo.utils import get_page_items, add_breadcrumb
@@ -213,41 +213,30 @@ def view_profile(request):
 
 
 def change_password(request):
-    if request.method == 'POST':
-        current_pwd = request.POST['current_password']
-        new_pwd = request.POST['new_password']
-        confirm_pwd = request.POST['confirm_password']
-        user = authenticate(username=request.user.username,
-                            password=current_pwd)
-        if user is not None:
-            if user.is_active:
-                if not new_pwd:
-                    messages.add_message(request, messages.ERROR, 'New password field may not be left blank.', extra_tags='alert-danger')
-                    return render(request, 'dojo/change_pwd.html', {'error': ''})
-                if not confirm_pwd:
-                    messages.add_message(request, messages.ERROR, 'Confirm password field may not be left blank.', extra_tags='alert-danger')
-                    return render(request, 'dojo/change_pwd.html', {'error': ''})
-                if new_pwd != confirm_pwd:
-                    messages.add_message(request, messages.ERROR, 'Passwords do not match.', extra_tags='alert-danger')
-                    return render(request, 'dojo/change_pwd.html', {'error': ''})
-                if new_pwd == current_pwd:
-                    messages.add_message(request, messages.ERROR, 'New password must be different from current password.', extra_tags='alert-danger')
-                    return render(request, 'dojo/change_pwd.html', {'error': ''})
-                user.set_password(new_pwd)
-                user.save()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Your password has been changed.',
-                                     extra_tags='alert-success')
-                return HttpResponseRedirect(reverse('view_profile'))
+    user = get_object_or_404(Dojo_User, pk=request.user.id)
+    form = ChangePasswordForm(user=user)
 
-        messages.add_message(request,
-                             messages.ERROR,
-                             'Your password has not been changed.',
-                             extra_tags='alert-danger')
+    if request.method == 'POST':
+        form = ChangePasswordForm(request.POST, user=user)
+        if form.is_valid():
+            current_password = form.cleaned_data['current_password']
+            new_password = form.cleaned_data['new_password']
+            confirm_password = form.cleaned_data['confirm_password']
+
+            user.set_password(new_password)
+            Dojo_User.disable_force_password_reset(user)
+            user.save()
+
+            messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Your password has been changed.',
+                                    extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_profile'))
+
     add_breadcrumb(title="Change Password", top_level=False, request=request)
-    return render(request, 'dojo/change_pwd.html',
-                  {'error': ''})
+    return render(request, 'dojo/change_pwd.html', {
+        'name': 'ChangePassword',
+        'form': form})
 
 
 @user_passes_test(lambda u: u.is_staff)
