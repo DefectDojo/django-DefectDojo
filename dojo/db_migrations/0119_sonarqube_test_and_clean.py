@@ -23,7 +23,7 @@ def sq_clean(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0116_test_type_active'),
+        ('dojo', '0118_remove_finding_images'),
     ]
 
     operations = [
