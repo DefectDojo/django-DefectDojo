@@ -14,10 +14,10 @@ class GitlabContainerScanParser(object):
         return ["GitLab Container Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "GitLab Container Scan"
+        return "GitLab Container Scan Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "GitLab Container Scanning report file can be imported in JSON format (option --json)."
+        return "GitLab Container Scan report file can be imported in JSON format (option --json)."
 
     def get_findings(self, file, test):
 
