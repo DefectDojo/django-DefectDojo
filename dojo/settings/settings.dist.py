@@ -465,6 +465,30 @@ LOGIN_EXEMPT_URLS = (
 
 LEGACY_API_V1_ENABLE = env('DD_LEGACY_API_V1_ENABLE')
 
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 9,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'dojo.user.validators.NumberValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.UppercaseValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.LowercaseValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.SymbolValidator'
+    }
+]
+
 # ------------------------------------------------------------------------------
 # SECURITY DIRECTIVES
 # ------------------------------------------------------------------------------
