@@ -9,6 +9,7 @@ from django.db.models import Count, Q
 
 from dateutil.relativedelta import relativedelta
 from django import forms
+from django.contrib.auth.password_validation import validate_password
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
@@ -22,7 +23,7 @@ import tagulous
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, FindingImage, \
+    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
@@ -903,7 +904,7 @@ class AddFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -955,7 +956,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -982,7 +983,7 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template', 'endpoint_status'
-                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
+                   'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
 
 
 class SplitDateTimeWidget(forms.MultiWidget):
@@ -1144,7 +1145,7 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
@@ -1768,10 +1769,45 @@ class DojoUserForm(forms.ModelForm):
                    'user_permissions']
 
 
+class ChangePasswordForm(forms.Form):
+    current_password = forms.CharField(widget=forms.PasswordInput,
+        required=True)
+    new_password = forms.CharField(widget=forms.PasswordInput,
+        required=True, validators=[validate_password],
+        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
+                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?).')  # noqa W605
+    confirm_password = forms.CharField(widget=forms.PasswordInput,
+        required=True, validators=[validate_password],
+        help_text='Password must match the new password entered above, following the same password rules.')
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        super(ChangePasswordForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        current_password = self.cleaned_data.get('current_password')
+        new_password = self.cleaned_data.get('new_password')
+        confirm_password = self.cleaned_data.get('confirm_password')
+
+        if not self.user.check_password(current_password):
+            raise forms.ValidationError('Current password is incorrect.')
+        if new_password == current_password:
+            raise forms.ValidationError('New password must be different from current password.')
+        if new_password != confirm_password:
+            raise forms.ValidationError('Passwords do not match.')
+
+        return cleaned_data
+
+
 class AddDojoUserForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput, required=False,
-        help_text='Leave blank to set an unusable password for this user.')
+    password = forms.CharField(widget=forms.PasswordInput,
+        required=False, validators=[validate_password],
+        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
+                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave blank to set an unusable password for this user.')  # noqa W605
     if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_products = forms.ModelMultipleChoiceField(
             queryset=Product.objects.all(), required=False,
@@ -1825,9 +1861,14 @@ class UserContactInfoForm(forms.ModelForm):
         model = UserContactInfo
         exclude = ['user', 'slack_user_id']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            del self.fields['force_password_reset']
+
 
 class GlobalRoleForm(forms.ModelForm):
-
     class Meta:
         model = Global_Role
         exclude = ['user', 'group']
@@ -1913,15 +1954,6 @@ class DeleteStubFindingForm(forms.ModelForm):
     class Meta:
         model = Stub_Finding
         fields = ['id']
-
-
-class AddFindingImageForm(forms.ModelForm):
-    class Meta:
-        model = FindingImage
-        exclude = ['']
-
-
-FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
 
 
 class GITHUB_IssueForm(forms.ModelForm):
@@ -2665,7 +2697,7 @@ class GoogleSheetFieldsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.credentials_required = kwargs.pop('credentials_required')
         options = ((0, 'Hide'), (100, 'Small'), (200, 'Medium'), (400, 'Large'))
-        protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+        protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'is_template']
         self.all_fields = kwargs.pop('all_fields')
         super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
