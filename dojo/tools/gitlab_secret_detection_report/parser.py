@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from dojo.models import Finding
 
 
@@ -24,7 +25,7 @@ class GitlabSecretDetectionReportParser(object):
         findings = []
 
         # This is required by schema - it won't be null / undefined
-        date = data["scan"]["end_time"]
+        date = datetime.strptime(data["scan"]["end_time"], "%Y-%m-%dT%H:%M:%S")
 
         # Vulnerabilities is stored on vulnerabilities key
         vulnerabilities = data["vulnerabilities"]
