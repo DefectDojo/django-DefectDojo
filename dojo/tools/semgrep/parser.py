@@ -68,6 +68,6 @@ class SemgrepParser(object):
         elif "ERROR" == val.upper():
             return "High"
         elif "INFO" == val.upper():
-            return "Info"
+            return "Informational"
         else:
             raise ValueError(f"Unknown value for severity: {val}")
