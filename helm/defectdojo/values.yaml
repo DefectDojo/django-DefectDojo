@@ -164,6 +164,35 @@ django:
       certMountPath: /certs/
       certFileName: ca.crt
 
+  # A list of extra volumes to mount. This
+  # is useful for bringing in extra data that can be referenced by other configurations
+  # at a well known path, such as local_settings. The
+  # value of this should be a list of objects.
+  #
+  # Example:
+  #
+  # ```yaml
+  # extraVolumes:
+  #   - type: secret
+  #     name: local_settings
+  #     load: true
+  # ```
+  #
+  # Each object supports the following keys:
+  #
+  # - `type` - Type of the volume, must be one of "configMap" or "secret". Case sensitive.
+  #
+  # - `name` - Name of the configMap or secret to be mounted. This also controls
+  #   the path that it is mounted to. The volume will be mounted to `/consul/userconfig/<name>`.
+  #
+  # - `load` - If true, then the agent will be
+  #   configured to automatically load HCL/JSON configuration files from this volume
+  #   with `-config-dir`. This defaults to false.
+  #
+  # @type: array<map>
+  extraVolumes: []
+
+
 initializer:
   run: true
   keepSeconds: 60

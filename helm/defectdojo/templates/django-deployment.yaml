@@ -51,6 +51,22 @@ spec:
         configMap:
           name: {{ .Values.django.uwsgi.certificates.configName }}
       {{- end }}
+      {{- range .Values.django.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: { { .name } }
+          {{- end }}
+          {{- with .items }}
+          items:
+          {{- range . }}
+          - key: {{.key}}
+            path: {{.path}}
+          {{- end }}
+          {{- end }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
