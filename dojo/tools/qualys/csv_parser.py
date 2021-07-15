@@ -80,7 +80,7 @@ def build_findings_from_dict(report_findings) -> [Finding]:
             title=f"QID-{report_finding['QID']} | {report_finding['Title']}",
             mitigation=report_finding['Solution'],
             description=report_finding['Threat'],
-            severity=severity_lookup.get(report_finding['Severity'], 'Informational'),
+            severity=severity_lookup.get(report_finding['Severity'], 'Info'),
             references=get_references(report_finding['CVE ID']),
             impact=report_finding['Impact'],
             date=datetime.strptime(report_finding['Last Detected'], "%m/%d/%Y %H:%M:%S"),
