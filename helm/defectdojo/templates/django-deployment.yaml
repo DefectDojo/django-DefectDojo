@@ -46,6 +46,8 @@ spec:
       volumes:
       - name: run
         emptyDir: {}
+      - name: media
+        emptyDir: {}
       {{- if  .Values.django.uwsgi.certificates.enabled }}
       - name: cert-mount
         configMap:
@@ -90,6 +92,8 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        - name: media
+          mountPath: /app/media/
         {{- if  .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
@@ -169,6 +173,8 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        - name: media
+          mountPath: /usr/share/nginx/html/media
         ports:
         - name: http
           protocol: TCP
