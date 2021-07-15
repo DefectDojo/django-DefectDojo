@@ -83,7 +83,7 @@ def build_findings_from_dict(report_findings) -> [Finding]:
             severity=severity_lookup.get(report_finding['Severity'], 'Informational'),
             references=get_references(report_finding['CVE ID']),
             impact=report_finding['Impact'],
-            date=datetime.strptime(report_finding['Last Detected'], "%m/%d/%Y %H:%M:%S").date(),
+            date=datetime.strptime(report_finding['Last Detected'], "%m/%d/%Y %H:%M:%S"),
             vuln_id_from_tool=report_finding['QID'],
             cvssv3_score=report_finding['CVSS3']
         )
