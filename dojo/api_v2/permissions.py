@@ -33,10 +33,10 @@ def check_object_permission(request, object, get_permission, put_permission, del
 
 class UserHasAppAnalysisPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(request, Product, 'product', Permissions.Product_Edit)
+        return check_post_permission(request, Product, 'product', Permissions.Technology_Add)
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(request, obj.product, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit)
+        return check_object_permission(request, obj.product, Permissions.Technology_View, Permissions.Technology_Edit, Permissions.Technology_Delete)
 
 
 class UserHasDojoGroupPermission(permissions.BasePermission):
@@ -253,6 +253,14 @@ class UserHasTestImportPermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return check_object_permission(request, obj.test, Permissions.Test_View, Permissions.Test_Edit, Permissions.Test_Delete)
+
+
+class UserHasLanguagePermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(request, Product, 'product', Permissions.Language_Add)
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(request, obj, Permissions.Language_View, Permissions.Language_Edit, Permissions.Language_Delete)
 
 
 class IsSuperUser(permissions.BasePermission):

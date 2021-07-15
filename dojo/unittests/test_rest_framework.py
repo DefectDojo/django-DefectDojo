@@ -9,7 +9,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
-    Product_Group, Global_Role, Dojo_Group_Member
+    Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -19,7 +19,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet, ProductTypeViewSet, \
     DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
-    DojoGroupMemberViewSet
+    DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView
 from json import dumps
 from django.urls import reverse
 from rest_framework import status
@@ -594,9 +594,9 @@ class AppAnalysisTest(BaseClass.RESTEndpointTest):
         self.object_permission = True
         self.permission_check_class = Product
         self.permission_check_id = 1
-        self.permission_create = Permissions.Product_Edit
-        self.permission_update = Permissions.Product_Edit
-        self.permission_delete = Permissions.Product_Edit
+        self.permission_create = Permissions.Technology_Add
+        self.permission_update = Permissions.Technology_Edit
+        self.permission_delete = Permissions.Technology_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -787,7 +787,7 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "static_finding": False,
             "dynamic_finding": False,
             "endpoints": [1, 2],
-            "images": [],
+            "files": [],
             "tags": ['tag1', 'tag_2'],
         }
         self.update_fields = {'duplicate': False, 'active': True, "push_to_jira": "True", 'tags': ['finding_tag_new']}
@@ -1534,3 +1534,88 @@ class ProductGroupTest(BaseClass.MemberEndpointTest):
         self.permission_update = Permissions.Product_Group_Edit
         self.permission_delete = Permissions.Product_Group_Delete
         BaseClass.MemberEndpointTest.__init__(self, *args, **kwargs)
+
+
+class LanguageTypeTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Language_Type
+        self.endpoint_path = 'language_types'
+        self.viewname = 'language_type'
+        self.viewset = LanguageTypeViewSet
+        self.payload = {
+            'language': 'Test',
+            'color': 'red',
+            'created': '2018-08-16T16:58:23.908Z'
+        }
+        self.update_fields = {'color': 'blue'}
+        self.object_permission = False
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class LanguageTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Languages
+        self.endpoint_path = 'languages'
+        self.viewname = 'languages'
+        self.viewset = LanguageViewSet
+        self.payload = {
+            'product': 1,
+            'language': 2,
+            'user': 1,
+            'files': 2,
+            'blank': 3,
+            'comment': 4,
+            'code': 5,
+            'created': '2018-08-16T16:58:23.908Z'
+        }
+        self.update_fields = {'code': 10}
+        self.object_permission = True
+        self.permission_check_class = Languages
+        self.permission_check_id = 1
+        self.permission_create = Permissions.Language_Add
+        self.permission_update = Permissions.Language_Edit
+        self.permission_delete = Permissions.Language_Delete
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class ImportLanguagesTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Languages
+        self.endpoint_path = 'import-languages'
+        self.viewname = 'importlanguages'
+        self.viewset = ImportLanguagesView
+        self.payload = {
+            'product': 1,
+            'file': open("/app/dojo/unittests/files/defectdojo_cloc.json")
+        }
+        self.object_permission = True
+        self.permission_check_class = Languages
+        self.permission_create = Permissions.Language_Add
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_create(self):
+        BaseClass.RESTEndpointTest.test_create(self)
+
+        languages = Languages.objects.filter(product=1).order_by('language')
+
+        self.assertEqual(2, len(languages))
+
+        self.assertEqual(languages[0].product, Product.objects.get(id=1))
+        self.assertEqual(languages[0].language, Language_Type.objects.get(id=1))
+        self.assertEqual(languages[0].files, 21)
+        self.assertEqual(languages[0].blank, 7)
+        self.assertEqual(languages[0].comment, 0)
+        self.assertEqual(languages[0].code, 63996)
+
+        self.assertEqual(languages[1].product, Product.objects.get(id=1))
+        self.assertEqual(languages[1].language, Language_Type.objects.get(id=2))
+        self.assertEqual(languages[1].files, 432)
+        self.assertEqual(languages[1].blank, 10813)
+        self.assertEqual(languages[1].comment, 5054)
+        self.assertEqual(languages[1].code, 51056)

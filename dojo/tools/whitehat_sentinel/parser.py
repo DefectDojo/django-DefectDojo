@@ -26,13 +26,6 @@ class WhiteHatSentinelParser(object):
 
     def get_findings(self, file, test):
 
-<<<<<<< HEAD
-        # Exit if file is not provided
-        if file is None:
-            return []
-
-=======
->>>>>>> fd52a578aa6ed204156d9ef62ca74052b0b366da
         findings_collection = json.load(file)
 
         if not findings_collection.keys():
