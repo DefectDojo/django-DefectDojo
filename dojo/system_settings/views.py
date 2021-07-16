@@ -57,7 +57,18 @@ def system_settings(request):
                                  messages.SUCCESS,
                                  'Settings saved.',
                                  extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('system_settings', ))
+        else:
+
+            errorstring = ''
+            for error in form.errors.as_data().values():
+                errorstring += str(error)
+
+            messages.add_message(request,
+                        messages.WARNING,
+                        'Settings cannot be saved:' + errorstring,
+                        extra_tags='alert-warning')
+        return HttpResponseRedirect(reverse('system_settings', ))
+
     else:
         # Celery needs to be set with the setting: CELERY_RESULT_BACKEND = 'db+sqlite:///dojo.celeryresults.sqlite'
         if hasattr(settings, 'CELERY_RESULT_BACKEND'):

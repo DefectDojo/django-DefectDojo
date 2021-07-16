@@ -108,6 +108,93 @@ class Regulation(models.Model):
         return self.acronym + ' (' + self.jurisdiction + ')'
 
 
+User = get_user_model()
+
+
+# proxy class for convenience and UI
+class Dojo_User(User):
+    class Meta:
+        proxy = True
+        ordering = ['first_name']
+
+    def get_full_name(self):
+        return Dojo_User.generate_full_name(self)
+
+    def __str__(self):
+        return self.get_full_name()
+
+    @staticmethod
+    def wants_block_execution(user):
+        # this return False if there is no user, i.e. in celery processes, unittests, etc.
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
+    @staticmethod
+    def force_password_reset(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.force_password_reset
+
+    def disable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = False
+            user.usercontactinfo.save()
+
+    def enable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = True
+            user.usercontactinfo.save()
+
+    @staticmethod
+    def generate_full_name(user):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        full_name = '%s %s (%s)' % (user.first_name,
+                                    user.last_name,
+                                    user.username)
+        return full_name.strip()
+
+
+class UserContactInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    title = models.CharField(blank=True, null=True, max_length=150)
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
+                                 message="Phone number must be entered in the format: '+999999999'. "
+                                         "Up to 15 digits allowed.")
+    phone_number = models.CharField(validators=[phone_regex], blank=True,
+                                    max_length=15,
+                                    help_text="Phone number must be entered in the format: '+999999999'. "
+                                              "Up to 15 digits allowed.")
+    cell_number = models.CharField(validators=[phone_regex], blank=True,
+                                   max_length=15,
+                                   help_text="Phone number must be entered in the format: '+999999999'. "
+                                             "Up to 15 digits allowed.")
+    twitter_username = models.CharField(blank=True, null=True, max_length=150)
+    github_username = models.CharField(blank=True, null=True, max_length=150)
+    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
+    slack_user_id = models.CharField(blank=True, null=True, max_length=25)
+    block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
+    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset their password on next login.')
+
+
+class Dojo_Group(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True, blank=True)
+    users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    is_owner = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
+
+
 class System_Settings(models.Model):
     enable_auditlog = models.BooleanField(
         default=True,
@@ -300,6 +387,31 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable checklists',
         help_text="With this setting turned off, checklists will be disabled in the user interface.")
+    default_group = models.ForeignKey(
+        Dojo_Group,
+        null=True,
+        blank=True,
+        help_text="New users created by OAuth2 will be assigned to this group.",
+        on_delete=models.RESTRICT)
+    default_group_role = models.ForeignKey(
+        Role,
+        null=True,
+        blank=True,
+        help_text="New users created by OAuth2 will be assigned to their default group with this role.",
+        on_delete=models.RESTRICT)
+    staff_user_email_pattern = models.CharField(
+        max_length=200,
+        default='',
+        blank=True,
+        verbose_name='Email pattern for staff users',
+        help_text="When the email address of a new user created by OAuth2 matches this regex pattern, their is_staff flag will be set to True.")
+
+    def clean(self):
+        if (self.default_group is None and self.default_group_role is not None) or \
+           (self.default_group is not None and self.default_group_role is None):
+            raise ValidationError('Default group and Default group role must either both be set or both be empty.')
+
+        return super().clean()
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -324,93 +436,6 @@ def get_current_date():
 
 def get_current_datetime():
     return timezone.now()
-
-
-User = get_user_model()
-
-
-# proxy class for convenience and UI
-class Dojo_User(User):
-    class Meta:
-        proxy = True
-        ordering = ['first_name']
-
-    def get_full_name(self):
-        return Dojo_User.generate_full_name(self)
-
-    def __str__(self):
-        return self.get_full_name()
-
-    @staticmethod
-    def wants_block_execution(user):
-        # this return False if there is no user, i.e. in celery processes, unittests, etc.
-        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
-
-    @staticmethod
-    def force_password_reset(user):
-        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.force_password_reset
-
-    def disable_force_password_reset(user):
-        if hasattr(user, 'usercontactinfo'):
-            user.usercontactinfo.force_password_reset = False
-            user.usercontactinfo.save()
-
-    def enable_force_password_reset(user):
-        if hasattr(user, 'usercontactinfo'):
-            user.usercontactinfo.force_password_reset = True
-            user.usercontactinfo.save()
-
-    @staticmethod
-    def generate_full_name(user):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
-        full_name = '%s %s (%s)' % (user.first_name,
-                                    user.last_name,
-                                    user.username)
-        return full_name.strip()
-
-
-class UserContactInfo(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    title = models.CharField(blank=True, null=True, max_length=150)
-    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
-                                 message="Phone number must be entered in the format: '+999999999'. "
-                                         "Up to 15 digits allowed.")
-    phone_number = models.CharField(validators=[phone_regex], blank=True,
-                                    max_length=15,
-                                    help_text="Phone number must be entered in the format: '+999999999'. "
-                                              "Up to 15 digits allowed.")
-    cell_number = models.CharField(validators=[phone_regex], blank=True,
-                                   max_length=15,
-                                   help_text="Phone number must be entered in the format: '+999999999'. "
-                                             "Up to 15 digits allowed.")
-    twitter_username = models.CharField(blank=True, null=True, max_length=150)
-    github_username = models.CharField(blank=True, null=True, max_length=150)
-    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
-    slack_user_id = models.CharField(blank=True, null=True, max_length=25)
-    block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
-    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset their password on next login.')
-
-
-class Role(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    is_owner = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ('name',)
-
-
-class Dojo_Group(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True, blank=True)
-    users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
-
-    def __str__(self):
-        return self.name
 
 
 class Dojo_Group_Member(models.Model):
