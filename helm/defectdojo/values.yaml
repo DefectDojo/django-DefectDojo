@@ -145,6 +145,10 @@ django:
       periodSeconds: 10
       successThreshold: 1
       timeoutSeconds: 5
+    persistentVolume:
+      enabled: false
+      size: 20Gi
+      storageClass: ''
     resources:
       requests:
         cpu: 100m
