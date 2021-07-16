@@ -58,6 +58,16 @@ class NetsparkerParser(object):
                               cwe=cwe,
                               static_finding=True)
 
+            if item["State"].find("FalsePositive") != -1:
+                finding.active = False
+                finding.verified = False
+                finding.false_p = True
+                finding.mitigated = None
+                finding.is_mitigated = False
+
+            if item["State"].find("AcceptedRisk") != -1:
+                finding.risk_accepted = True
+
             if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
                 finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]
 
