@@ -120,8 +120,8 @@ class CheckmarxParser(object):
                            cwe=int(cwe),
                            test=self.test,
                            # Make it as comment so the default active/verified will not be set as False (Relate to issue #4598)
-                           #active=False,
-                           #verified=False,
+                           # active=False,
+                           # verified=False,
                            # this may be overwritten later by another member of the aggregate, see "else" below
                            false_p=(false_p == "True"),
                            # Concatenates the query information with this specific finding information
@@ -203,8 +203,8 @@ class CheckmarxParser(object):
                        cwe=int(cwe),
                        test=self.test,
                        # Make it as comment so the default active/verified will not be set as False (Relate to issue #4598)
-                       #active=False,
-                       #verified=False,
+                       # active=False,
+                       # verified=False,
                        false_p=result.get('FalsePositive') == "True",
                        description=findingdetail,
                        severity=sev,
