@@ -1,0 +1,19 @@
+{{- if .Values.django.uwsgi.persistentVolume.enabled -}}
+{{- if not .Values.django.uwsgi.persistentVolume.existingClaim -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
+  name: {{ include "defectdojo.fullname" . }}-media
+spec:
+  accessModes:
+  - ReadWriteOnce
+{{- with .Values.django.uwsgi.persistentVolume.storageClass }}
+  storageClassName: "{{ . }}"
+{{- end }}
+  resources:
+    requests:
+      storage: "{{ .Values.django.uwsgi.persistentVolume.size }}"
+{{- end -}}
+{{- end -}}
