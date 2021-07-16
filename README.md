@@ -68,6 +68,9 @@ See [Wrappers](WRAPPERS.md)
 
 
 ## Release and branch model
+
+We release every month on the last Tuesday. These release are minor releases, i.e. 2.0.0 to 2.1.0. In between there might be bugfix/hotfix/patch releases when needed, i.e. 2.0.1.
+
 See [Release and branch model](BRANCHING-MODEL.md)
 
 
