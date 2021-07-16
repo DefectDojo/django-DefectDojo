@@ -51,22 +51,19 @@ def system_settings(request):
     if request.method == 'POST':
         form = SystemSettingsForm(request.POST, instance=system_settings_obj)
         if form.is_valid():
-            new_settings = form.save()
-            enable_disable_auditlog(enable=new_settings.enable_auditlog)
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Settings saved.',
-                                 extra_tags='alert-success')
-        else:
-
-            errorstring = ''
-            for error in form.errors.as_data().values():
-                errorstring += str(error)
-
-            messages.add_message(request,
-                        messages.WARNING,
-                        'Settings cannot be saved:' + errorstring,
-                        extra_tags='alert-warning')
+            if (form.cleaned_data['default_group'] is None and form.cleaned_data['default_group_role'] is not None) or \
+               (form.cleaned_data['default_group'] is not None and form.cleaned_data['default_group_role'] is None):
+                messages.add_message(request,
+                    messages.WARNING,
+                    'Settings cannot be saved: Default group and Default group role must either both be set or both be empty.',
+                    extra_tags='alert-warning')
+            else:
+                new_settings = form.save()
+                enable_disable_auditlog(enable=new_settings.enable_auditlog)
+                messages.add_message(request,
+                                    messages.SUCCESS,
+                                    'Settings saved.',
+                                    extra_tags='alert-success')
         return HttpResponseRedirect(reverse('system_settings', ))
 
     else:

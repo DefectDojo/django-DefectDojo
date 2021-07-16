@@ -406,13 +406,6 @@ class System_Settings(models.Model):
         verbose_name='Email pattern for staff users',
         help_text="When the email address of a new user created by OAuth2 matches this regex pattern, their is_staff flag will be set to True.")
 
-    def clean(self):
-        if (self.default_group is None and self.default_group_role is not None) or \
-           (self.default_group is not None and self.default_group_role is None):
-            raise ValidationError('Default group and Default group role must either both be set or both be empty.')
-
-        return super().clean()
-
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
 
