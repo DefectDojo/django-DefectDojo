@@ -31,7 +31,7 @@ class NetsparkerParser(object):
             findingdetail = html2text.html2text(item.get("Description", ""))
             if "Cwe" in item["Classification"]:
                 try:
-                    cwe = int(item["Classification"]["Cwe"])
+                    cwe = int(item["Classification"]["Cwe"].split(',')[0])
                 except:
                     cwe = None
             else:
