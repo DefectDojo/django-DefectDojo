@@ -9,9 +9,7 @@ metadata:
 spec:
   accessModes:
   - ReadWriteMany
-{{- with .Values.django.uwsgi.persistentVolume.storageClass }}
-  storageClassName: "{{ . }}"
-{{- end }}
+  storageClassName: "{{ .Values.django.uwsgi.persistentVolume.storageClass }}"
   resources:
     requests:
       storage: "{{ .Values.django.uwsgi.persistentVolume.size }}"
