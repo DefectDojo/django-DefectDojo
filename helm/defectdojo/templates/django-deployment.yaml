@@ -47,7 +47,12 @@ spec:
       - name: run
         emptyDir: {}
       - name: media
+        {{- if .Values.django.uwsgi.persistentVolume.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ if .Values.django.uwsgi.persistentVolume.existingClaim }}{{ .Values.django.uwsgi.persistentVolume.existingClaim }}{{- else }}{{ include "defectdojo.fullname" . }}-media{{- end }}
+        {{- else }}
         emptyDir: {}
+        {{- end }}
       {{- if  .Values.django.uwsgi.certificates.enabled }}
       - name: cert-mount
         configMap:
