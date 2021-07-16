@@ -8,7 +8,7 @@ metadata:
   name: {{ include "defectdojo.fullname" . }}-media
 spec:
   accessModes:
-  - ReadWriteOnce
+  - ReadWriteMany
 {{- with .Values.django.uwsgi.persistentVolume.storageClass }}
   storageClassName: "{{ . }}"
 {{- end }}
