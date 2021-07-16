@@ -285,10 +285,7 @@ def finding_querys(request, prod):
         # 'risk_acceptance_set',
         'reporter')
     findings = MetricsFindingFilter(request.GET, queryset=findings_query, pid=prod)
-    print("288")
-    print(findings)
     findings_qs = queryset_check(findings)
-    
     filters['form'] = findings.form
 
     # dead code:
@@ -342,12 +339,11 @@ def finding_querys(request, prod):
                                          active=True,
                                          is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
-                                             #false_p=False,
+                                             false_p=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
-                                             is_mitigated=False
-                                             )
+                                             is_mitigated=False)
     filters['closed'] = findings_qs.filter(date__range=[start_date, end_date],
                                            false_p=False,
                                            duplicate=False,
@@ -362,9 +358,6 @@ def finding_querys(request, prod):
                                                  false_p=False,
                                                  duplicate=False,
                                                  out_of_scope=True)
-    print("362")
-    print(findings_qs)
-
     filters['all'] = findings_qs
     filters['open_vulns'] = findings_qs.filter(
         false_p=False,
@@ -521,7 +514,6 @@ def view_product_metrics(request, pid):
     critical_weekly = OrderedDict()
     high_weekly = OrderedDict()
     medium_weekly = OrderedDict()
-    
 
     for v in filters.get('open', None):
         iso_cal = v.date.isocalendar()
