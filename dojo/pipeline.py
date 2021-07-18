@@ -64,10 +64,10 @@ def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
         system_settings = System_Settings.objects.get()
 
         if system_settings.default_group is not None and system_settings.default_group_role is not None:
-            dojo_group_member = Dojo_Group_Member()
-            dojo_group_member.group = system_settings.default_group
-            dojo_group_member.user = user
-            dojo_group_member.role = system_settings.default_group_role
+            dojo_group_member = Dojo_Group_Member(
+                group=system_settings.default_group,
+                user=user,
+                role=system_settings.default_group_role)
             dojo_group_member.save()
 
         if system_settings.staff_user_email_pattern is not None and \

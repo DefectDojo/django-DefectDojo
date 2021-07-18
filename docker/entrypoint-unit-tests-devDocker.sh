@@ -7,7 +7,7 @@ set -e
 set -v
 
 cd /app
-# Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
+# Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
 unset DD_DATABASE_URL
 
 python3 manage.py makemigrations dojo
@@ -16,16 +16,16 @@ python3 manage.py migrate
 # will print any warnings to stderr
 python3 manage.py spectacular > /dev/null
 
-# echo "Swagger Schema Tests - Broken"
-# echo "------------------------------------------------------------"
-# python3 manage.py test dojo.unittests -v 3 --keepdb --no-input --tag broken && true
+echo "Swagger Schema Tests - Broken"
+echo "------------------------------------------------------------"
+python3 manage.py test dojo.unittests -v 3 --keepdb --no-input --tag broken && true
 
-# echo "Unit Tests"
-# echo "------------------------------------------------------------"
-# python3 manage.py test dojo.unittests -v 3 --keepdb --no-input --exclude-tag broken
+echo "Unit Tests"
+echo "------------------------------------------------------------"
+python3 manage.py test dojo.unittests -v 3 --keepdb --no-input --exclude-tag broken
 
 # you can select a single file to "test" unit tests
-python3 manage.py test dojo.unittests.test_pipeline.TestPipeline --keepdb -v 3
+# python3 manage.py test dojo.unittests.tools.test_npm_audit_scan_parser.TestNpmAuditParser --keepdb -v 3
 
 # or even a single method
 # python3 manage.py test dojo.unittests.tools.test_npm_audit_scan_parser.TestNpmAuditParser.test_npm_audit_parser_many_vuln_npm7 --keepdb -v 3
