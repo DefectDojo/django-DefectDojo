@@ -2185,8 +2185,9 @@ class ToolConfigForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
-            url_validator(form_data["url"])
+            if form_data["url"] is not None:
+                url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
+                url_validator(form_data["url"])
         except forms.ValidationError:
             raise forms.ValidationError(
                 'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
@@ -2227,8 +2228,9 @@ class ToolProductSettingsForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
-            url_validator(form_data["url"])
+            if form_data["url"] is not None:
+                url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
+                url_validator(form_data["url"])
         except forms.ValidationError:
             raise forms.ValidationError(
                 'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
