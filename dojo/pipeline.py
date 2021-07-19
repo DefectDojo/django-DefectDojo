@@ -93,7 +93,7 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                         # Make product member an Owner of the product
                         product_member.role = 4
                         product_member.save()
-                # Import tags and/or URL if necessary       
+                # Import tags and/or URL if necessary
                 for project in projects:
                     if project.path_with_namespace == project_name:
                         if settings.GITLAB_PROJECT_IMPORT_TAGS:
