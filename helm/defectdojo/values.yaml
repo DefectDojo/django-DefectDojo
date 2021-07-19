@@ -145,6 +145,8 @@ django:
       periodSeconds: 10
       successThreshold: 1
       timeoutSeconds: 5
+    # Persistent Volume on UWSGI is used in order to store files uploaded to defectdojo
+    # In case the persistentVolume is not enabled an emptyDir will be created and uploaded files will be deleted in case the pod is removed   
     persistentVolume:
       enabled: false
       size: 20Gi
