@@ -98,7 +98,13 @@ spec:
         - name: run
           mountPath: /run/defectdojo
         - name: media
-          mountPath: /app/media/
+        {{- if (kindIs "invalid" .Values.extraConfigs) }}
+          mountPath: /app/media
+        {{else if not (kindIs "invalid" .Values.extraConfigs.DD_MEDIA_ROOT)}}
+          mountPath: {{.Values.extraConfigs.DD_MEDIA_ROOT}}
+        {{else}}
+          mountPath: /app/media
+        {{end}}
         {{- if  .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
