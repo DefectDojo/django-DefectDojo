@@ -199,9 +199,6 @@ class CheckmarxParser(object):
             find = Finding(title=title,
                        cwe=int(cwe),
                        test=self.test,
-                       # These lines are commented so the default active/verified will not be set as False (Relate to issue #4598)
-                       #active=False,
-                       #verified=False,
                        false_p=result.get('FalsePositive') == "True",
                        description=findingdetail,
                        severity=sev,
