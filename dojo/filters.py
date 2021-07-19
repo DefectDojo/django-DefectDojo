@@ -188,8 +188,6 @@ def get_finding_filter_fields(metrics=False, similar=False):
     if similar:
         fields.extend([
             'id',
-            'unique_id_from_tool',
-            'vuln_id_from_tool',
             'hash_code'
         ])
 
@@ -228,6 +226,8 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'has_component',
                 'has_notes',
                 'file_path',
+                'unique_id_from_tool',
+                'vuln_id_from_tool',
     ])
 
     if similar:
