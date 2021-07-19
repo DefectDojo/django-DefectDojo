@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import render
 from django.utils import timezone
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from dojo.utils import add_breadcrumb, get_punchcard_data
 from dojo.models import Answered_Survey
 from dojo.authorization.roles_permissions import Permissions
@@ -46,7 +46,11 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     severity_count_by_month = get_severities_by_month(findings, today)
     punchcard, ticks = get_punchcard_data(findings, today - relativedelta(weeks=26), 26)
 
-    unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0)
+    if request.user.is_staff:
+        unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0, ) \
+            .filter(Q(engagement__isnull=True) | Q(engagement__in=engagements))
+    else:
+        unassigned_surveys = None
 
     add_breadcrumb(request=request, clear=True)
     return render(request, 'dojo/dashboard.html', {

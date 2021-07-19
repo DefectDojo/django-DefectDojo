@@ -20,7 +20,11 @@ width: 70% !important;
     <legend>Default Information</legend>
     {% include "dojo/form_fields.html" with form=form %}
   </fieldset>
-  <div class="form-group">
+  <fieldset>
+    <legend>Global Role</legend>
+    {% include "dojo/form_fields.html" with form=global_role_form %}
+  </fieldset>
+<div class="form-group">
     <div class="col-sm-offset-2 col-sm-10">
       <input class="btn btn-primary" type="submit" name="add_group" value="Submit"/>
     </div>

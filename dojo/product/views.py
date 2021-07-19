@@ -21,8 +21,9 @@ from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
-                       GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
-                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm
+                       GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
+                       Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm, \
+                       DeleteAppAnalysisForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
@@ -1044,11 +1045,10 @@ def new_eng_for_app(request, pid, cicd=False):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+@user_is_authorized(Product, Permissions.Technology_Add, 'pid', 'staff')
 def new_tech_for_prod(request, pid):
-    prod = Product.objects.get(id=pid)
     if request.method == 'POST':
-        form = App_AnalysisTypeForm(request.POST)
+        form = AppAnalysisForm(request.POST)
         if form.is_valid():
             tech = form.save(commit=False)
             tech.product_id = pid
@@ -1059,9 +1059,58 @@ def new_tech_for_prod(request, pid):
                                  extra_tags='alert-success')
             return HttpResponseRedirect(reverse('view_product', args=(pid,)))
 
-    form = App_AnalysisTypeForm()
+    form = AppAnalysisForm(initial={'user': request.user})
+    product_tab = Product_Tab(pid, title="Add Technology", tab="settings")
     return render(request, 'dojo/new_tech.html',
-                  {'form': form, 'pid': pid})
+                  {'form': form,
+                   'product_tab': product_tab,
+                   'pid': pid})
+
+
+@user_is_authorized(App_Analysis, Permissions.Technology_Edit, 'tid', 'staff')
+def edit_technology(request, tid):
+    technology = get_object_or_404(App_Analysis, id=tid)
+    form = AppAnalysisForm(instance=technology)
+    if request.method == 'POST':
+        form = AppAnalysisForm(request.POST)
+        if form.is_valid():
+            tech = form.save(commit=False)
+            tech.id = technology.id
+            tech.product_id = technology.product.id
+            tech.save()
+            messages.add_message(request,
+                                 messages.SUCCESS,
+                                 'Technology changed successfully.',
+                                 extra_tags='alert-success')
+            return HttpResponseRedirect(reverse('view_product', args=(technology.product.id,)))
+
+    product_tab = Product_Tab(technology.product.id, title="Edit Technology", tab="settings")
+    return render(request, 'dojo/edit_technology.html',
+                  {'form': form,
+                   'product_tab': product_tab,
+                   'technology': technology})
+
+
+@user_is_authorized(App_Analysis, Permissions.Technology_Delete, 'tid', 'staff')
+def delete_technology(request, tid):
+    technology = get_object_or_404(App_Analysis, id=tid)
+    form = DeleteAppAnalysisForm(instance=technology)
+    if request.method == 'POST':
+        form = Delete_Product_MemberForm(request.POST, instance=technology)
+        technology = form.instance
+        technology.delete()
+        messages.add_message(request,
+                            messages.SUCCESS,
+                            'Technology deleted successfully.',
+                            extra_tags='alert-success')
+        return HttpResponseRedirect(reverse('view_product', args=(technology.product.id,)))
+
+    product_tab = Product_Tab(technology.product.id, title="Delete Technology", tab="settings")
+    return render(request, 'dojo/delete_technology.html', {
+        'technology': technology,
+        'form': form,
+        'product_tab': product_tab,
+    })
 
 
 @user_is_authorized(Product, Permissions.Engagement_Add, 'pid', 'staff')

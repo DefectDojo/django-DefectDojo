@@ -1,10 +1,10 @@
 # requirements.txt for DefectDojo using Python 3.x
 asteval==0.9.25
-bleach==3.3.0
+bleach==3.3.1
 celery==5.1.0
 coverage==5.5
 defusedxml==0.7.1
-django_celery_results==2.0.1
+django_celery_results==2.2.0
 django-auditlog==1.0a1
 django-dbbackup==3.3.0
 django-environ==0.4.5
@@ -18,11 +18,11 @@ django-slack==5.16.2
 django-tagging==0.5.0
 django-watson==1.5.5
 django-prometheus==2.1.0
-Django==3.1.12
+Django==3.1.13
 djangorestframework==3.12.4
 gunicorn==20.1.0
 html2text==2020.1.16
-humanize==3.9.0
+humanize==3.10.0
 jira==3.0.1
 PyGithub==1.55
 lxml==4.6.3
@@ -30,34 +30,34 @@ Markdown==3.3.4
 mysqlclient==2.0.3
 openpyxl==3.0.7
 xlrd==1.2.0
-Pillow==8.2.0  # required by django-imagekit
+Pillow==8.3.1  # required by django-imagekit
 psycopg2-binary==2.9.1
 cryptography==3.4.7
-python-dateutil==2.8.1
+python-dateutil==2.8.2
 pytz==2021.1
 redis==3.5.3
-requests==2.25.1
-sqlalchemy==1.4.19  # Required by Celery broker transport
+requests==2.26.0
+sqlalchemy==1.4.21  # Required by Celery broker transport
 supervisor==4.2.2
 urllib3==1.26.6
 uWSGI==2.0.19.1
 vobject==0.9.6.1
 whitenoise==5.2.0
-titlecase==2.2.0
+titlecase==2.3
 social-auth-app-django==4.0.0
 social-auth-core==4.1.0
 Python-jose==3.3.0
 gitpython==3.1.18
 debugpy==1.3.0
 python-gitlab==2.9.0
-google-auth==1.32.0
+google-auth==1.33.0
 google-api-python-client==1.12.8
 google-auth-oauthlib==0.4.4
 drf_yasg==1.20.0
 cpe==1.2.1
 packageurl-python==0.9.4
 django-crum==0.7.9
-JSON-log-formatter==0.3.1
+JSON-log-formatter==0.4.0
 django-split-settings==1.0.1
 django-debug-toolbar==3.2.1
 django-debug-toolbar-request-history==0.1.3
@@ -69,5 +69,6 @@ cvss==2.3
 django-fieldsignals==0.6.0
 hyperlink==21.0.0
 django-test-migrations==1.1.0
-djangosaml2==1.3.2
+djangosaml2==1.3.3
 drf-spectacular==0.17.2
+django-ratelimit==3.0.1
