@@ -58,7 +58,7 @@ class TrivyParser:
             if schema_version == 2:
                 results = data.get('Results', None)
             else:
-                raise RuntimeError('Schema of Trivy json report is not supported')
+                raise ValueError('Schema of Trivy json report is not supported')
 
         items = list()
         for target_data in results:
