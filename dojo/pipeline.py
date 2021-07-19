@@ -86,15 +86,6 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                 product, created = Product.objects.get_or_create(name=project_name, prod_type=product_type)
                 if not settings.FEATURE_AUTHORIZATION_V2:
                     product.authorized_users.add(user)
-                    for project in projects:
-                        if project.path_with_namespace == project_name:
-                            if hasattr(project, 'topics'):
-                                if len(project.topics) > 0:
-                                    product.tags = ",".join(project.topics)
-                            elif hasattr(project, 'tag_list') and len(project.tag_list) > 0:
-                                product.tags = ",".join(project.tag_list)
-                            if hasattr(project, 'web_url') and len(project.web_url) > 0:
-                                product.description = "[" + project.web_url + "](" + project.web_url + ")"
                     product.save()
                 else:
                     product_member, created = Product_Member.objects.get_or_create(product=product, user=user)
@@ -102,7 +93,20 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                         # Make product member an Owner of the product
                         product_member.role = 4
                         product_member.save()
-
+                # Import tags and/or URL if necessary       
+                for project in projects:
+                    if project.path_with_namespace == project_name:
+                        if settings.GITLAB_PROJECT_IMPORT_TAGS:
+                            if hasattr(project, 'topics'):
+                                if len(project.topics) > 0:
+                                    product.tags = ",".join(project.topics)
+                            elif hasattr(project, 'tag_list') and len(project.tag_list) > 0:
+                                product.tags = ",".join(project.tag_list)
+                        if settings.GITLAB_PROJECT_IMPORT_URL:
+                            if hasattr(project, 'web_url') and len(project.web_url) > 0:
+                                product.description = "[" + project.web_url + "](" + project.web_url + ")"
+                        if settings.GITLAB_PROJECT_IMPORT_TAGS or settings.GITLAB_PROJECT_IMPORT_URL:
+                            product.save()
         # For each product: if user is not project member any more, remove him from product's authorized users
         for product_name in user_product_names:
             if product_name not in project_names:
