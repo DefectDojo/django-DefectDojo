@@ -83,4 +83,3 @@ class TestMobsfscanParser(TestCase):
             self.assertIsNotNone(finding.description)
             self.assertEqual('200', finding.cwe)
             self.assertIsNotNone(finding.references)
-    
