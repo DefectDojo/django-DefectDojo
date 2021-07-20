@@ -267,9 +267,9 @@ documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configurat
 5.  Restart DefectDojo, and you should now see a **Login with SAML**
     button on the login page.
 
-NOTE: In the case when IDP is configured to use self signed certificate,
+NOTE: In the case when IDP is configured to use self signed (private) certificate,
 than CA needs to be specified by define environments variable
-REQUESTS_CA_BUNDLE that points to the path of public CA certificate.
+REQUESTS_CA_BUNDLE that points to the path of private CA certificate.
 
 ### Advanced Configuration
 The [https://github.com/IdentityPython/djangosaml2](djangosaml2) plugin has a lot of options. For details take a look at the [plugin
