@@ -153,6 +153,7 @@ section of `dojo/settings/settings.dist.py`.
 ## Azure Active Directory
 
 You can now use your corporate Azure Active Directory to authenticate
+You can now use your corporate Azure Active Directory to authenticate
 users to Defect Dojo. Users will be using your corporate Azure AD
 account (A.K.A. Office 365 identity) to authenticate via OAuth, and all
 the conditional access rules and benefits from Azure Active Directory
@@ -251,9 +252,11 @@ homepage](https://github.com/IdentityPython/djangosaml2).
     DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, '/path/to/your/metadata.xml'),
     # Fill in DD_SAML2_ATTRIBUTES_MAP to corresponding SAML2 userprofile attributes provided by your IdP
     DD_SAML2_ATTRIBUTES_MAP=(dict, {
-        'Email': ('email', ),
-        'Firstname': ('first_name', ),
-        'Lastname': ('last_name', )
+        # format: SAML attrib:django_user_model
+        'Email': 'email',
+        'UserName': 'username',
+        'Firstname': 'first_name',
+        'Lastname': 'last_name'
     }),
     # May configure the optional fields
     {{< /highlight >}}
