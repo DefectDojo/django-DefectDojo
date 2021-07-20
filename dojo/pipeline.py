@@ -88,11 +88,7 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                     product.authorized_users.add(user)
                     product.save()
                 else:
-                    product_member, created = Product_Member.objects.get_or_create(product=product, user=user, role=Role.objects.get(id=Roles.Owner))
-                    if created:
-                        # Make product member an Owner of the product
-                        product_member.role = Role.objects.get(id=Roles.Owner)
-                        product_member.save()
+                    product_member, created = Product_Member.objects.get_or_create(product=product, user=user, defaults={'role': Role.objects.get(id=Roles.Owner)})
 
         # For each product: if user is not project member any more, remove him from product's authorized users
         for product_name in user_product_names:
