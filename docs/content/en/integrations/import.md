@@ -577,6 +577,10 @@ Import XML report
 
 Export a JSON file using the API, api/v1/report\_json.
 
+### Mobsfscan
+
+Import JSON report from <https://github.com/MobSF/mobsfscan>
+
 ### Mozilla Observatory Scanner
 
 Import JSON report.
