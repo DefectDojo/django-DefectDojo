@@ -3,7 +3,8 @@ from django.conf import settings
 from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group, Dojo_Group_Member
+    Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group, Dojo_Group_Member, \
+    Languages, App_Analysis
 
 
 def user_has_permission(user, obj, permission):
@@ -55,6 +56,10 @@ def user_has_permission(user, obj, permission):
     elif isinstance(obj, Finding_Group) and permission in Permissions.get_finding_group_permissions():
         return user_has_permission(user, obj.test.engagement.product, permission)
     elif isinstance(obj, Endpoint) and permission in Permissions.get_endpoint_permissions():
+        return user_has_permission(user, obj.product, permission)
+    elif isinstance(obj, Languages) and permission in Permissions.get_language_permissions():
+        return user_has_permission(user, obj.product, permission)
+    elif isinstance(obj, App_Analysis) and permission in Permissions.get_technology_permissions():
         return user_has_permission(user, obj.product, permission)
     elif isinstance(obj, Product_Type_Member) and permission in Permissions.get_product_type_member_permissions():
         if permission == Permissions.Product_Type_Member_Delete:

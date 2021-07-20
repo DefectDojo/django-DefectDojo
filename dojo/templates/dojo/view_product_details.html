@@ -128,17 +128,49 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title"><span class="fa fa-bolt" aria-hidden="true"></span> Technologies {%if app_analysis%}({{ app_analysis.count }}){%endif%}
-          <a title="Add New Technology" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology"><span class="fa fa-plus"></span> </a>
+            {% if prod|has_object_permission:"Technology_Add" %}
+            <a title="Add new Technology" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology" id="addTechnology"><span class="fa fa-plus"></span> </a>
+            {% endif %}
         </h3>      
       </div>
-      <ul class="list-group">
-      {% for app in app_analysis %}
-        <li class="list-group-item"><span class="badge">{{ app.version|version_num }}</span><span data-toggle="tooltip" data-placement="bottom" title="{{ app.website }}, Confidence: {{ app.confidence }}">{{ app.name }}</span></li>
-      {% empty %}
-        <li class="list-group-item"><small class="text-muted"><em>There are no technologies.</em></small></li>
-      {% endfor %}
-      </ul>
-    </div>
+      {% if app_analysis %}
+      <table class="tablesorter-bootstrap table table-condensed table-striped">
+         <tbody>
+            {% for app in app_analysis %}
+            <tr>
+                <td>
+                    <ul>
+                    <li class="dropdown" style="list-style:none;position:absolute">
+                        <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageTechnologies"><b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                        <ul class="dropdown-menu">
+                            {% if prod|has_object_permission:"Technology_Edit" %}
+                            <li>
+                                <a name="editTechnology" href="{% url 'edit_technology' app.id %}">
+                                <i class="fa fa-pencil-square-o"></i> Edit</a>
+                            </li>
+                            {% endif %}
+                            {% if prod|has_object_permission:"Technology_Delete" %}
+                            <li>
+                                <a name="deleteTechnology" href="{% url 'delete_technology' app.id %}">
+                                <i class="fa fa-trash"></i> Delete</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    </ul>
+                </td>
+                <td name="technology_name">{{ app.name }}</td>
+                <td name="technology_version"><span class="badge">{{ app.version|version_num }}</span></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <ul class="list-group">
+            <li class="list-group-item"><small class="text-muted"><em>There are no technologies.</em></small></li>
+        </ul>
+      {% endif %}
+</div>
   </div>
   <div class="col-md-6">
     <div class="panel panel-default">
@@ -323,17 +355,17 @@
                       <td>
                           <ul>
                               <li class="dropdown" style="list-style:none;position:absolute">
-                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductGroup">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                   <ul class="dropdown-menu">
                                       {% if prod|has_object_permission:"Product_Group_Edit" %}
                                       <li>
-                                          <a name="editProductMember" href="{% url 'edit_product_group' group.id %}">
+                                          <a name="editProductGroup" href="{% url 'edit_product_group' group.id %}">
                                               <i class="fa fa-pencil-square-o"></i> Edit</a>
                                       </li>
                                       {% endif %}
                                       {% if group|has_object_permission:"Product_Group_Delete" %}
                                       <li>
-                                          <a name="deleteProductMember" href="{% url 'delete_product_group' group.id %}">
+                                          <a name="deleteProductGroup" href="{% url 'delete_product_group' group.id %}">
                                               <i class="fa fa-trash"></i> Delete</a>
                                       </li>
                                       {% endif %}
@@ -441,7 +473,7 @@
     </div>
     <div class="panel-body">
         <div class="chart" id="donut-lang"></div>
-        <div style="text-align: center;padding-top: 10px;">
+        <div style="padding-top: 10px;">
             {%  if langSummary.files__sum > 0 %}
             <strong>{{ langSummary.files__sum|intcomma }}</strong> files {%  if langSummary.code__sum %} and {%endif%}
             {% endif %}
@@ -599,11 +631,11 @@
       function severity_pie() {
           var data = [
           {% for lang in languages %}
-            {% if lang.files %}
+            {% if lang.code %}
             {
-                label: "&nbsp;{{lang}}",
+                label: "&nbsp;{{lang}} - {{lang.code|intcomma}} LoC",
                 color: "{{lang.language.color }}",
-                data: {{lang.files}}
+                data: {{lang.code}}
             },
             {% endif %}
           {% endfor %}

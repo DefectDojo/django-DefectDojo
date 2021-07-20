@@ -17,7 +17,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
+from dojo.models import Language_Type, Languages, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
@@ -45,7 +45,7 @@ import tagulous
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_product_type_members, \
     get_authorized_product_type_groups
 from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, \
-    get_authorized_product_members, get_authorized_product_groups
+    get_authorized_product_members, get_authorized_product_groups, get_authorized_languages
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
@@ -502,7 +502,6 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         findings = get_authorized_findings(Permissions.Finding_View).prefetch_related('endpoints',
                                                     'reviewers',
-                                                    'images',
                                                     'found_by',
                                                     'notes',
                                                     'risk_acceptance_set',
@@ -1760,7 +1759,6 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                                         'findings_affected__notes__author',
                                         'findings_affected__notes__history',
                                         'findings_affected__files',
-                                        'findings_affected__images',
                                         'findings_affected__found_by',
                                         'findings_affected__tags',
                                         'findings_affected__risk_acceptance_set',
@@ -1870,6 +1868,67 @@ class ImportScanView(mixins.CreateModelMixin,
 
     def get_queryset(self):
         return get_authorized_tests(Permissions.Import_Scan_Result)
+
+
+# Authorization: staff users
+class LanguageTypeViewSet(mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+                          mixins.CreateModelMixin,
+                          mixins.DestroyModelMixin,
+                          mixins.UpdateModelMixin,
+                          viewsets.GenericViewSet):
+    serializer_class = serializers.LanguageTypeSerializer
+    queryset = Language_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'language', 'color')
+    permission_classes = (IsAdminUser, DjangoModelPermissions)
+
+
+# Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class LanguageViewSet(prefetch.PrefetchListMixin,
+                      prefetch.PrefetchRetrieveMixin,
+                      mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.CreateModelMixin,
+                      viewsets.GenericViewSet):
+    serializer_class = serializers.LanguageSerializer
+    queryset = Languages.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'language', 'product')
+    swagger_schema = prefetch.get_prefetch_schema(["languages_list", "languages_read"],
+        serializers.LanguageSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
+
+    def get_queryset(self):
+        return get_authorized_languages(Permissions.Language_View).distinct()
+
+
+# Authorization: object-based
+class ImportLanguagesView(mixins.CreateModelMixin,
+                          viewsets.GenericViewSet):
+    serializer_class = serializers.ImportLanguagesSerializer
+    parser_classes = [MultiPartParser]
+    queryset = Product.objects.none()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
+
+    def get_queryset(self):
+        return get_authorized_products(Permissions.Language_Add)
 
 
 # Authorization: authenticated users, DjangoModelPermissions
@@ -2073,19 +2132,19 @@ def report_generate(request, obj, options):
     }
 
     finding_notes = []
-    finding_images = []
+    finding_files = []
 
     if include_finding_images:
         for finding in findings.qs.order_by('numerical_severity'):
-            images = finding.images.all()
-            if images:
-                finding_images.append(
+            files = finding.files.all()
+            if files:
+                finding_files.append(
                     {
                         "finding_id": finding,
-                        "images": images
+                        "files": files
                     }
                 )
-        result['finding_images'] = finding_images
+        result['finding_files'] = finding_files
 
     if include_finding_notes:
         for finding in findings.qs.order_by('numerical_severity'):
