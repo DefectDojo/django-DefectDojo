@@ -153,7 +153,6 @@ section of `dojo/settings/settings.dist.py`.
 ## Azure Active Directory
 
 You can now use your corporate Azure Active Directory to authenticate
-You can now use your corporate Azure Active Directory to authenticate
 users to Defect Dojo. Users will be using your corporate Azure AD
 account (A.K.A. Office 365 identity) to authenticate via OAuth, and all
 the conditional access rules and benefits from Azure Active Directory
