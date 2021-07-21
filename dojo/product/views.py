@@ -339,7 +339,7 @@ def finding_querys(request, prod):
                                          active=True,
                                          is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
-                                             false_p=False,
+                                             # false_p=True,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
