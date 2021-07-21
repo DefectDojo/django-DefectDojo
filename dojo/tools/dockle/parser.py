@@ -47,11 +47,12 @@ class DockleParser(object):
                 finding.nb_occurences += 1
             else:
                 finding = Finding(
-                    title=f"Found {code}: {title}",
+                    title=f"{code}: {title}",
                     test=test,
                     severity=severity,
                     description=description,
                     static_finding=True,
+                    dynamic_finding=False,
                     nb_occurences=1,
                     vuln_id_from_tool=code,
                 )
