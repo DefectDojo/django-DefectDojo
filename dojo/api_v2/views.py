@@ -17,7 +17,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.models import Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
+from dojo.models import Language_Type, Languages, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
     Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
@@ -45,7 +45,7 @@ import tagulous
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_product_type_members, \
     get_authorized_product_type_groups
 from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, \
-    get_authorized_product_members, get_authorized_product_groups
+    get_authorized_product_members, get_authorized_product_groups, get_authorized_languages
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
@@ -502,7 +502,6 @@ class FindingViewSet(prefetch.PrefetchListMixin,
     def get_queryset(self):
         findings = get_authorized_findings(Permissions.Finding_View).prefetch_related('endpoints',
                                                     'reviewers',
-                                                    'images',
                                                     'found_by',
                                                     'notes',
                                                     'risk_acceptance_set',
@@ -1760,7 +1759,6 @@ class TestImportViewSet(prefetch.PrefetchListMixin,
                                         'findings_affected__notes__author',
                                         'findings_affected__notes__history',
                                         'findings_affected__files',
-                                        'findings_affected__images',
                                         'findings_affected__found_by',
                                         'findings_affected__tags',
                                         'findings_affected__risk_acceptance_set',
