@@ -190,10 +190,6 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual("Stored XSS (Users.java)", item.title)
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(79, item.cwe)
-        self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
-        self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
@@ -222,58 +218,6 @@ class TestCheckmarxParser(TestCase):
         self,
     ):
         my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
-        )
-        parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test)
-        self.teardown(my_file_handle)
-        # Verifications common to both parsers
-        self.check_parse_file_with_false_positive_is_false_positive(findings)
-
-    def test_detailed_parse_file_with_false_positive_is_false_positive(self):
-        my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
-        )
-        parser = CheckmarxParser()
-        parser.set_mode('detailed')
-        findings = parser.get_findings(my_file_handle, test)
-        self.teardown(my_file_handle)
-        # Verifications common to both parsers
-        self.check_parse_file_with_false_positive_is_false_positive(findings)
-
-    def check_parse_file_with_false_positive_is_false_positive(self, findings):
-        self.assertEqual(1, len(findings))
-        # check content
-        item = findings[0]
-        self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
-        self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
-        self.assertEqual(bool, type(item.false_p))
-        self.assertEqual(True, item.false_p)
-
-    # ----------------------------------------------------------------------------
-    # two findings with the same aggregate keys, but one is false positive
-    # the result should be one exploitable finding, even though the first one found was false positive
-    # ----------------------------------------------------------------------------
-
-    def test_file_name_aggregated_parse_file_with_two_aggregated_findings_one_is_false_p(
-        self,
-    ):
-        my_file_handle, product, engagement, test = self.init(
-            "dojo/unittests/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml"
-        )
-        parser = CheckmarxParser()
-        findings = parser.get_findings(my_file_handle, test)
-        self.teardown(my_file_handle)
-        self.assertEqual(1, len(findings))
-        # check content for aggregated finding
-        item = findings[0]
-        # finding is never active/verified yet at this time
-        self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
-        self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
 
@@ -492,10 +436,6 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual("Stored XSS (Users.java�)", item.title)
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(79, item.cwe)
-        self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
-        self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
@@ -648,10 +588,6 @@ class TestCheckmarxParser(TestCase):
         )
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(79, item.cwe)
-        self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
-        self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
