@@ -188,8 +188,6 @@ def get_finding_filter_fields(metrics=False, similar=False):
     if similar:
         fields.extend([
             'id',
-            'unique_id_from_tool',
-            'vuln_id_from_tool',
             'hash_code'
         ])
 
@@ -228,6 +226,8 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'has_component',
                 'has_notes',
                 'file_path',
+                'unique_id_from_tool',
+                'vuln_id_from_tool',
     ])
 
     if similar:
@@ -1108,7 +1108,7 @@ class ApiFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['url', 'is_template', 'thread_id', 'notes', 'images', 'files',
+        exclude = ['url', 'is_template', 'thread_id', 'notes', 'files',
                    'sourcefile', 'line', 'endpoint_status']
 
 
@@ -1264,7 +1264,7 @@ class FindingFilter(FindingFilterWithTags):
                    'endpoint', 'references', 'is_template',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
-                   'hash_code', 'images', 'endpoint_status',
+                   'hash_code', 'endpoint_status',
                    'line_number', 'reviewers', 'sourcefile',
                    'created', 'files', 'sla_start_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
@@ -1907,7 +1907,7 @@ class ReportFindingFilter(FindingFilterWithTags):
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template', 'sonarqube_issue'
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
-                   'numerical_severity', 'reporter', 'last_reviewed', 'images',
+                   'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
     def __init__(self, *args, **kwargs):

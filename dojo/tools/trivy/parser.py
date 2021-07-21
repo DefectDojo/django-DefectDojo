@@ -47,11 +47,21 @@ class TrivyParser:
         except:
             data = json.loads(scan_data)
 
-        if not isinstance(data, list):
+        # Legacy format is empty
+        if data is None:
             return list()
+        # Legacy format with results
+        elif isinstance(data, list):
+            results = data
+        else:
+            schema_version = data.get('SchemaVersion', None)
+            if schema_version == 2:
+                results = data.get('Results', None)
+            else:
+                raise ValueError('Schema of Trivy json report is not supported')
 
         items = list()
-        for target_data in data:
+        for target_data in results:
             if not isinstance(target_data, dict) or 'Target' not in target_data:
                 continue
             target = target_data['Target']
@@ -86,6 +96,11 @@ class TrivyParser:
                     fixed_version=mitigation,
                     description_text=vuln.get('Description', ''),
                 )
+                cvss = vuln.get('CVSS', None)
+                if cvss is not None:
+                    nvd = cvss.get('nvd', None)
+                    if nvd is not None:
+                        cvssv3 = nvd.get('V3Vector', None)
                 items.append(
                     Finding(
                         test=test,
@@ -98,6 +113,7 @@ class TrivyParser:
                         mitigation=mitigation,
                         component_name=package_name,
                         component_version=package_version,
+                        cvssv3=cvssv3,
                         static_finding=True,
                         dynamic_finding=False,
                     )

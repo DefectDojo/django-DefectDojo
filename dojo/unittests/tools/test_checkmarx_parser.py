@@ -1,4 +1,5 @@
 from django.test import TestCase
+from unittest.mock import patch
 
 from dojo.models import Test, Engagement, Product
 from dojo.tools.checkmarx.parser import CheckmarxParser
@@ -25,9 +26,8 @@ class TestCheckmarxParser(TestCase):
     # no_finding
     # ----------------------------------------------------------------------------
     # Default checkmarx scanner, aggregated by sink file_path
-    def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(
-        self,
-    ):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_name_aggregated_parse_file_with_no_vulnerabilities_has_no_findings(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/no_finding.xml"
         )
@@ -35,9 +35,11 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(0, len(findings))
+        mock.assert_called_with(product, 'Java')
 
     # Checkmarx detailed scanner, with all vulnerabilities from checkmarx
-    def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_detailed_parse_file_with_no_vulnerabilities_has_no_findings(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/no_finding.xml"
         )
@@ -46,10 +48,10 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(0, len(findings))
+        mock.assert_called_with(product, 'Java')
 
-    def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(
-        self,
-    ):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_name_aggregated_parse_file_with_single_vulnerability_has_single_finding(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/single_finding.xml"
         )
@@ -79,8 +81,10 @@ class TestCheckmarxParser(TestCase):
             item.description,
         )
         self.assertEqual(1, item.nb_occurences)
+        mock.assert_called_with(product, 'Java')
 
-    def test_detailed_parse_file_with_single_vulnerability_has_single_finding(self):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_detailed_parse_file_with_single_vulnerability_has_single_finding(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/single_finding.xml"
         )
@@ -181,6 +185,7 @@ class TestCheckmarxParser(TestCase):
             item.sast_source_file_path,
         )
         self.assertIsNone(item.nb_occurences)
+        mock.assert_called_with(product, 'Java')
 
     def check_parse_file_with_single_vulnerability_has_single_finding(self, findings):
         self.assertEqual(1, len(findings))
@@ -214,20 +219,69 @@ class TestCheckmarxParser(TestCase):
     # ----------------------------------------------------------------------------
     # single finding false positive
     # ----------------------------------------------------------------------------
-    def test_file_name_aggregated_parse_file_with_false_positive_is_false_positive(
-        self,
-    ):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_name_aggregated_parse_file_with_false_positive_is_false_positive(self, mock):
         my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
+        )
+        parser = CheckmarxParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.teardown(my_file_handle)
+        # Verifications common to both parsers
+        self.check_parse_file_with_false_positive_is_false_positive(findings)
+        mock.assert_called_with(product, 'Java')
+
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_detailed_parse_file_with_false_positive_is_false_positive(self, mock):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/single_finding_false_positive.xml"
+        )
+        parser = CheckmarxParser()
+        parser.set_mode('detailed')
+        findings = parser.get_findings(my_file_handle, test)
+        self.teardown(my_file_handle)
+        # Verifications common to both parsers
+        self.check_parse_file_with_false_positive_is_false_positive(findings)
+        mock.assert_called_with(product, 'Java')
+
+    def check_parse_file_with_false_positive_is_false_positive(self, findings):
+        self.assertEqual(1, len(findings))
+        # check content
+        item = findings[0]
+        self.assertEqual(bool, type(item.active))
+        self.assertEqual(False, item.active)
+        self.assertEqual(bool, type(item.verified))
+        self.assertEqual(False, item.verified)
+        self.assertEqual(bool, type(item.false_p))
+        self.assertEqual(True, item.false_p)
+
+    # ----------------------------------------------------------------------------
+    # two findings with the same aggregate keys, but one is false positive
+    # the result should be one exploitable finding, even though the first one found was false positive
+    # ----------------------------------------------------------------------------
+
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_name_aggregated_parse_file_with_two_aggregated_findings_one_is_false_p(self, mock):
+        my_file_handle, product, engagement, test = self.init(
+            "dojo/unittests/scans/checkmarx/two_aggregated_findings_one_is_false_positive.xml"
+        )
+        parser = CheckmarxParser()
+        findings = parser.get_findings(my_file_handle, test)
+        self.teardown(my_file_handle)
+        self.assertEqual(1, len(findings))
+        # check content for aggregated finding
+        item = findings[0]
+        # finding is never active/verified yet at this time
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
+        mock.assert_called_with(product, 'Java')
 
     # ----------------------------------------------------------------------------
     # multiple_findings : source filename = sink filename.
     # ----------------------------------------------------------------------------
 
-    def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
-        self,
-    ):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_name_aggregated_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings.xml"
         )
@@ -236,10 +290,10 @@ class TestCheckmarxParser(TestCase):
         self.teardown(my_file_handle)
         # checkmarx says 3 but we're down to 2 due to the aggregation on sink filename rather than source filename + source line number + sink filename + sink line number
         self.assertEqual(2, len(findings))
+        mock.assert_called_with(product, 'Java')
 
-    def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(
-        self,
-    ):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_detailed_parse_file_with_multiple_vulnerabilities_has_multiple_findings(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings.xml"
         )
@@ -248,13 +302,13 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(3, len(findings))
+        mock.assert_called_with(product, 'Java')
 
     # ----------------------------------------------------------------------------
     # multiple_findings : different sourceFilename but same sinkFilename
     # ----------------------------------------------------------------------------
-    def test_file_name_aggregated_parse_file_with_different_sourceFilename_same_sinkFilename_is_aggregated(
-        self,
-    ):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_name_aggregated_parse_file_with_different_sourceFilename_same_sinkFilename_is_aggregated(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
         )
@@ -266,10 +320,10 @@ class TestCheckmarxParser(TestCase):
         item = findings[0]
         # nb_occurences counts the number of aggregated vulnerabilities from tool
         self.assertEqual(2, findings[0].nb_occurences)
+        mock.assert_called_with(product, 'Java')
 
-    def test_detailed_parse_file_with_different_sourceFilename_same_sinkFilename_is_not_aggregated(
-        self,
-    ):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_detailed_parse_file_with_different_sourceFilename_same_sinkFilename_is_not_aggregated(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_different_sourceFilename_same_sinkFilename.xml"
         )
@@ -280,13 +334,13 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual(2, len(findings))
         self.assertIsNone(findings[0].nb_occurences)
         self.assertIsNone(findings[1].nb_occurences)
+        mock.assert_called_with(product, 'Java')
 
     # ----------------------------------------------------------------------------
     # multiple_findings : same sourceFilename but different sinkFilename
     # ----------------------------------------------------------------------------
-    def test_file_name_aggregated_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(
-        self,
-    ):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_name_aggregated_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
         )
@@ -295,10 +349,10 @@ class TestCheckmarxParser(TestCase):
         self.teardown(my_file_handle)
         # aggregation is on sink filename but sink filename differ -> not aggregated
         self.assertEqual(2, len(findings))
+        mock.assert_called_with(product, 'Java')
 
-    def test_detailed_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(
-        self,
-    ):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_detailed_parse_file_with_same_sourceFilename_different_sinkFilename_is_not_aggregated(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/multiple_findings_same_sourceFilename_different_sinkFilename.xml"
         )
@@ -307,11 +361,13 @@ class TestCheckmarxParser(TestCase):
         findings = parser.get_findings(my_file_handle, test)
         self.teardown(my_file_handle)
         self.assertEqual(2, len(findings))
+        mock.assert_called_with(product, 'Java')
 
     # ----------------------------------------------------------------------------
     # utf-8 replacement char in various fields of the report. check all finding elements
     # ----------------------------------------------------------------------------
-    def test_file_name_aggregated_parse_file_with_utf8_replacement_char(self):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_name_aggregated_parse_file_with_utf8_replacement_char(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/utf8_replacement_char.xml"
         )
@@ -341,8 +397,10 @@ class TestCheckmarxParser(TestCase):
             item.description,
         )
         self.assertIsNone(item.line)
+        mock.assert_called_with(product, 'Java')
 
-    def test_detailed_parse_file_with_utf8_replacement_char(self):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_detailed_parse_file_with_utf8_replacement_char(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/utf8_replacement_char.xml"
         )
@@ -427,6 +485,7 @@ class TestCheckmarxParser(TestCase):
         )
         self.assertEqual(str, type(item.line))
         self.assertEqual("58", item.line)
+        mock.assert_called_with(product, 'Java')
 
     def check_parse_file_with_utf8_replacement_char(self, findings):
         self.assertEqual(1, len(findings))
@@ -460,7 +519,8 @@ class TestCheckmarxParser(TestCase):
     # ----------------------------------------------------------------------------
     # more utf-8 non-ascii chars.
     # ----------------------------------------------------------------------------
-    def test_file_name_aggregated_parse_file_with_utf8_various_non_ascii_char(self):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_file_name_aggregated_parse_file_with_utf8_various_non_ascii_char(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml"
         )
@@ -490,8 +550,10 @@ class TestCheckmarxParser(TestCase):
             item.description,
         )
         self.assertIsNone(item.line)
+        mock.assert_called_with(product, 'Java')
 
-    def test_detailed_parse_file_with_utf8_various_non_ascii_char(self):
+    @patch('dojo.tools.checkmarx.parser.add_language')
+    def test_detailed_parse_file_with_utf8_various_non_ascii_char(self, mock):
         my_file_handle, product, engagement, test = self.init(
             "dojo/unittests/scans/checkmarx/utf8_various_non_ascii_char.xml"
         )
@@ -576,6 +638,7 @@ class TestCheckmarxParser(TestCase):
         )
         self.assertEqual(str, type(item.line))
         self.assertEqual("58", item.line)
+        mock.assert_called_with(product, 'Java')
 
     def check_parse_file_with_utf8_various_non_ascii_char(self, findings):
         self.assertEqual(1, len(findings))
