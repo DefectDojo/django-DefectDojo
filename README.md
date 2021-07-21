@@ -49,7 +49,7 @@ For detailed documentation you can visit
 ## Getting Started
 
 We recommend checking out the
-[Core Data Classes](https://defectdojo.github.io/usage/models/) document to
+[Core Data Classes](https://defectdojo.github.io/django-DefectDojo/usage/models/) document to
 learn the terminology of DefectDojo and the
 [getting started guide](https://defectdojo.github.io/django-DefectDojo/getting_started/)
 for setting up a new installation.
