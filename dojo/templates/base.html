@@ -762,7 +762,7 @@
             <!-- 'no_results_text': "Tag not found, press TAB key to add.", -->
         <!-- }); -->
 
-        $('select').addClass('selectpicker');
+        $('select').not('#notification-scope').addClass('selectpicker');
         $('.selectpicker').attr('data-live-search', 'true');
         $('.selectpicker').css('width', '70%');
         $('.selectpicker').selectpicker();
