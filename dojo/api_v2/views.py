@@ -1888,12 +1888,12 @@ class LanguageTypeViewSet(mixins.ListModelMixin,
 @extend_schema_view(
     list=extend_schema(parameters=[
             OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
-                             description="List of fields for which to prefetch model instances and add those to the response"),
+                                description="List of fields for which to prefetch model instances and add those to the response"),
     ],
     ),
     retrieve=extend_schema(parameters=[
             OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
-                             description="List of fields for which to prefetch model instances and add those to the response"),
+                                description="List of fields for which to prefetch model instances and add those to the response"),
     ],
     )
 )
