@@ -1249,6 +1249,7 @@ class UsersTest(BaseClass.RESTEndpointTest):
         self.assertEqual(r.json()['results'][0]['username'], 'user1', r.json()['results'][0])
         self.assertEqual(r.json()['results'][1]['username'], 'user2', r.json()['results'][1])
 
+
 class ProductPermissionTest(DojoAPITestCase):
     fixtures = ['dojo_testdata.json']
 

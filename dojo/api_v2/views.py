@@ -1870,7 +1870,6 @@ class ImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
 
-
 # Authorization: staff users
 class LanguageTypeViewSet(mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
@@ -1888,13 +1887,13 @@ class LanguageTypeViewSet(mixins.ListModelMixin,
 # Authorization: object-based
 @extend_schema_view(
     list=extend_schema(parameters=[
-        OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
-                         description="List of fields for which to prefetch model instances and add those to the response"),
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                             description="List of fields for which to prefetch model instances and add those to the response"),
     ],
     ),
     retrieve=extend_schema(parameters=[
-        OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
-                         description="List of fields for which to prefetch model instances and add those to the response"),
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                             description="List of fields for which to prefetch model instances and add those to the response"),
     ],
     )
 )
@@ -1911,7 +1910,7 @@ class LanguageViewSet(prefetch.PrefetchListMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'language', 'product')
     swagger_schema = prefetch.get_prefetch_schema(["languages_list", "languages_read"],
-                                                  serializers.LanguageSerializer).to_schema()
+        serializers.LanguageSerializer).to_schema()
     if settings.FEATURE_AUTHORIZATION_V2:
         permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
 
