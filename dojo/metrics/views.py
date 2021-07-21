@@ -137,7 +137,7 @@ def finding_querys(prod_type, request):
     findings_query = get_authorized_findings(Permissions.Finding_View, findings_query, request.user)
 
     active_findings_query = Finding.objects.filter(
-        #verified=True,
+        verified=True,
         active=True,
         severity__in=('Critical', 'High', 'Medium', 'Low', 'Info')
     ).select_related(
@@ -182,57 +182,25 @@ def finding_querys(prod_type, request):
         start_date = timezone.now()
         end_date = timezone.now()
 
-    #Get the first date of the month
-    start_date = start_date.replace(day=1)
-
-    #print("Created Date, Range")
-    #print(Finding.objects.filter(created__date__range = [start_date, end_date]))
-    #print("Mitigated Range")
-    #print(Finding.objects.filter(mitigated__date__range=[start_date, end_date]))
-
-
-    print("Accepted Range with time")
-    print(Finding.objects.filter(created__date__range = [start_date, end_date], risk_accepted = True))
-
-    #print("Accepted Range Time only")
-    #print(Finding.objects.filter([start_date, end_date]))
-    
-
-    print("Accepted Range withoutt time")
-    print(Finding.objects.filter(risk_accepted = True))
-
-    #print("Start : End")
-    #print(start_date, end_date)
-
     if len(prod_type) > 0:
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date],
                                                  test__engagement__product__prod_type__in=prod_type).prefetch_related(
             'test__engagement__product')
         # capture the accepted findings in period
-        # Replace risk_acceptance__created__date__range=[start_date, end_date] with risk_accepted = True
-        # Original
-        # accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]
-        #                                            test__engagement__product__prod_type__in=prod_type). \
-        #     prefetch_related('test__engagement__product')        
-        #My solution
-        accepted_findings = Finding.objects.filter(risk_accepted = True,
+        # set the start date of the month manually for acceepted_findings and accepted_findings_counts
+        accepted_findings = Finding.objects.filter(date__range = [start_date.replace(day=1), end_date], risk_accepted = True,
                                                    test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_accepted = True,
+        accepted_findings_counts = Finding.objects.filter(date__range = [start_date.replace(day=1), end_date], risk_accepted = True,
                                                           test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
     else:
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
             'test__engagement__product')
-        accepted_findings = Finding.objects.filter(risk_accepted = True). \
+        accepted_findings = Finding.objects.filter(date__range = [start_date.replace(day=1), end_date], risk_accepted = True,). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_accepted = True). \
+        accepted_findings_counts = Finding.objects.filter(date__range = [start_date.replace(day=1), end_date], risk_accepted = True,). \
             prefetch_related('test__engagement__product')
-
-    #print("Accepted Finding")
-    #print(accepted_findings)
-    #print("Closed Finding")
-    #print(findings_closed)
 
     findings_closed = get_authorized_findings(Permissions.Finding_View, findings_closed, request.user)
     accepted_findings = get_authorized_findings(Permissions.Finding_View, accepted_findings, request.user)
