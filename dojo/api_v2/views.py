@@ -1870,6 +1870,68 @@ class ImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
 
+
+# Authorization: staff users
+class LanguageTypeViewSet(mixins.ListModelMixin,
+                          mixins.RetrieveModelMixin,
+                          mixins.CreateModelMixin,
+                          mixins.DestroyModelMixin,
+                          mixins.UpdateModelMixin,
+                          viewsets.GenericViewSet):
+    serializer_class = serializers.LanguageTypeSerializer
+    queryset = Language_Type.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'language', 'color')
+    permission_classes = (IsAdminUser, DjangoModelPermissions)
+
+
+# Authorization: object-based
+@extend_schema_view(
+    list=extend_schema(parameters=[
+        OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                         description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+        OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                         description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class LanguageViewSet(prefetch.PrefetchListMixin,
+                      prefetch.PrefetchRetrieveMixin,
+                      mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.CreateModelMixin,
+                      viewsets.GenericViewSet):
+    serializer_class = serializers.LanguageSerializer
+    queryset = Languages.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'language', 'product')
+    swagger_schema = prefetch.get_prefetch_schema(["languages_list", "languages_read"],
+                                                  serializers.LanguageSerializer).to_schema()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
+
+    def get_queryset(self):
+        return get_authorized_languages(Permissions.Language_View).distinct()
+
+
+# Authorization: object-based
+class ImportLanguagesView(mixins.CreateModelMixin,
+                          viewsets.GenericViewSet):
+    serializer_class = serializers.ImportLanguagesSerializer
+    parser_classes = [MultiPartParser]
+    queryset = Product.objects.none()
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasLanguagePermission)
+
+    def get_queryset(self):
+        return get_authorized_products(Permissions.Language_Add)
+
+
 # Authorization: authenticated users, DjangoModelPermissions
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
@@ -2071,19 +2133,19 @@ def report_generate(request, obj, options):
     }
 
     finding_notes = []
-    finding_images = []
+    finding_files = []
 
     if include_finding_images:
         for finding in findings.qs.order_by('numerical_severity'):
-            images = finding.images.all()
-            if images:
-                finding_images.append(
+            files = finding.files.all()
+            if files:
+                finding_files.append(
                     {
                         "finding_id": finding,
-                        "images": images
+                        "files": files
                     }
                 )
-        result['finding_images'] = finding_images
+        result['finding_files'] = finding_files
 
     if include_finding_notes:
         for finding in findings.qs.order_by('numerical_severity'):
