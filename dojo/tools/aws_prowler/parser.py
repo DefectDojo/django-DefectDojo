@@ -5,6 +5,7 @@ import sys
 import io
 import csv
 import textwrap
+import hashlib
 
 from dojo.models import Finding
 
@@ -37,23 +38,55 @@ class AWSProwlerParser(object):
             region = row.get('REGION')
             title_id = row.get('TITLE_ID')
             result = row.get('RESULT', row.get('CHECK_RESULT'))
+            result_extended = row.get('CHECK_RESULT_EXTENDED')
             scored = row.get('SCORED')
             level = row.get('LEVEL')
             severity = row.get('SEVERITY')
             title_text = row.get('TITLE_TEXT')
+            impact = row.get('CHECK_RISK')
+            mitigation = row.get('CHECK_REMEDIATION')
+            documentation = row.get('CHECK_DOC')
+            # get prowler check number, usefull for exceptions
+            prowler_check_number = re.search(r'\[(.*?)\]', title_text).group(1)
             # remove '[check000] ' at the start of each title
             title_text = re.sub(r'\[.*\]\s', '', title_text)
+            control = re.sub(r'\[.*\]\s', '', title_text)
             notes = row.get('NOTES')
+            asff_compliance_type=row.get('CHECK_ASFF_COMPLIANCE_TYPE')
+            asff_resource_type=row.get('CHECK_ASFF_RESOURCE_TYPE')
+            asff_type=row.get('CHECK_ASFF_TYPE')
+            aws_service_name=row.get('CHECK_SERVICENAME')
+            security_domain= row.get('CHECK_CAF_EPIC')
 
             sev = self.getCriticalityRating(result, level, severity)
-            description = "**Region:** " + region + "\n\n" + str(notes) + "\n"
+            
 
             if result == "INFO" or result == "PASS":
                 active = False
             else:
                 active = True
 
-            dupe_key = sev + title_text
+            # creating description early will help with duplication control
+            if not notes:
+                notes = ""
+            if not level:
+                level = ""
+            else:
+                level = ", " + level
+            description = "**Issue:** " + str(result_extended) + \
+                    "\n**Control:** " + str(control) + \
+                    "\n**AWS Account:** " + str(account) + " | **Region:** " + str(region) + \
+                    "\n**CIS Control:** " + str(title_id) + str(level) + \
+                    "\n**Prowler check:** " + str(prowler_check_number) + \
+                    "\n**AWS Service:** " + str(aws_service_name) + \
+                    "\n**ASFF Resource Type:** " + str(asff_resource_type) + \
+                    "\n**ASFF Type:** " + str(asff_type) + \
+                    "\n**ASFF Compliance Type:** " + str(asff_compliance_type) + \
+                    "\n" + str(notes)
+
+            # improving key to get duplicates 
+            dupe_key = hashlib.sha256((sev + '|' + region + '|' + result_extended).encode('utf-8')).hexdigest()
+            # dupe_key = sev + region + result_extended 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if description is not None:
@@ -62,15 +95,18 @@ class AWSProwlerParser(object):
             else:
                 find = Finding(
                     active=active,
-                    title=textwrap.shorten(title_text, 150),
+                    title=textwrap.shorten(result_extended, 150),
                     cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                     test=test,
-                    description="**AWS Account:** " + str(account) + "\n**Control:** " + str(title_text) + "\n**CIS Control:** " + str(title_id) + ", " + str(level) + "\n\n" + description,
+                    description=description,
                     severity=sev,
-                    references=None,
+                    references=documentation,
                     date=find_date,
                     dynamic_finding=True,
                     nb_occurences=1,
+                    mitigation=mitigation,
+                    impact=impact,
+                    
                 )
                 dupes[dupe_key] = find
 
