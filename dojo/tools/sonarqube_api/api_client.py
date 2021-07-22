@@ -274,3 +274,25 @@ class SonarQubeAPI:
                     issue_key, response.status_code, response.content
                 )
             )
+
+    def test_connection(self):
+        """
+        Returns number of components (projects) or raise error.
+        """
+        response = self.session.get(
+            url='{}/components/search'.format(self.sonar_api_url),
+            params={
+                'qualifiers': 'TRK'
+            },
+            headers={
+                'User-Agent': 'DefectDojo'
+            },
+        )
+
+        if response.ok:
+            return response.json()['paging']['total']
+
+        else:
+            raise Exception("Unable to connect and search in SonarQube due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8")
+            ))
