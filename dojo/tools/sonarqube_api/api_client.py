@@ -67,7 +67,7 @@ class SonarQubeAPI:
 
         else:
             raise Exception("Unable to find the project {} due to {} - {}".format(
-                project_name, response.status_code, response.content
+                project_name, response.status_code, response.content.decode("utf-8")
             ))
 
     def get_project(self, project_key):
@@ -91,7 +91,7 @@ class SonarQubeAPI:
             return response.json().get('component')
         else:
             raise Exception("Unable to find the project {} due to {} - {}".format(
-                project_key, response.status_code, response.content
+                project_key, response.status_code, response.content.decode("utf-8")
             ))
 
     def find_issues(self, component_key, types='VULNERABILITY'):
@@ -136,7 +136,7 @@ class SonarQubeAPI:
             else:
                 raise Exception(
                     "Unable to find the issues for component {} due to {} - {}".format(
-                        component_key, response.status_code, response.content
+                        component_key, response.status_code, response.content.decode("utf-8")
                     )
                 )
 
@@ -178,7 +178,7 @@ class SonarQubeAPI:
         else:
             raise Exception(
                 "Unable to get issue {} due to {} - {}".format(
-                    issue_key, response.status_code, response.content
+                    issue_key, response.status_code, response.content.decode("utf-8")
                 )
             )
 
@@ -202,7 +202,7 @@ class SonarQubeAPI:
                 self.rules_cache.update({rule_id: rule})
             else:
                 raise Exception("Unable to get the rule {} due to {} - {}".format(
-                    rule_id, response.status_code, response.content
+                    rule_id, response.status_code, response.content.decode("utf-8")
                 ))
         return rule
 
@@ -246,7 +246,7 @@ class SonarQubeAPI:
         if not response.ok:
             raise Exception(
                 "Unable to transition {} the issue {} due to {} - {}".format(
-                    transition, issue_key, response.status_code, response.content
+                    transition, issue_key, response.status_code, response.content.decode("utf-8")
                 )
             )
 
@@ -271,7 +271,7 @@ class SonarQubeAPI:
         if not response.ok:
             raise Exception(
                 "Unable to add a comment into issue {} due to {} - {}".format(
-                    issue_key, response.status_code, response.content
+                    issue_key, response.status_code, response.content.decode("utf-8")
                 )
             )
 

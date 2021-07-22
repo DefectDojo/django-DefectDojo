@@ -28,7 +28,7 @@ def new_tool_config(request):
                     project_count = sq.test_connection()  # if connection is not successful, this call raise exception
                     messages.add_message(request,
                                          messages.SUCCESS,
-                                         'SonarQube connection succesful. You have access to {} projects'.format(project_count),
+                                         'SonarQube connection successful. You have access to {} projects'.format(project_count),
                                          extra_tags='alert-success')
                 form_copy.save()
                 messages.add_message(request,
@@ -64,7 +64,7 @@ def edit_tool_config(request, ttid):
                     project_count = sq.test_connection()  # if connection is not successful, this call raise exception
                     messages.add_message(request,
                                          messages.SUCCESS,
-                                         'SonarQube connection succesful. You have access to {} projects'.format(project_count),
+                                         'SonarQube connection successful. You have access to {} projects'.format(project_count),
                                          extra_tags='alert-success')
                 form_copy.save()
                 messages.add_message(request,

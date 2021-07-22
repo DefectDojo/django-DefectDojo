@@ -44,6 +44,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
+from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 
 logger = logging.getLogger(__name__)
 
@@ -1596,15 +1597,28 @@ def add_sonarqube(request, pid):
         if form.is_valid():
             sonarqube_product = form.save(commit=False)
             sonarqube_product.product = prod
-            sonarqube_product.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'SonarQube Configuration added successfully.',
-                                 extra_tags='alert-success')
-            if 'add_another' in request.POST:
-                return HttpResponseRedirect(reverse('add_sonarqube', args=(pid,)))
-            else:
-                return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+            try:
+                sq = SonarQubeAPI(sonarqube_product.sonarqube_tool_config)
+                project = sq.get_project(sonarqube_product.sonarqube_project_key)  # if connection is not successful, this call raise exception
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'SonarQube connection successful. You have access to project "{}"'.format(
+                                         project['name']),
+                                     extra_tags='alert-success')
+                sonarqube_product.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'SonarQube Configuration added successfully.',
+                                     extra_tags='alert-success')
+                if 'add_another' in request.POST:
+                    return HttpResponseRedirect(reverse('add_sonarqube', args=(pid,)))
+                else:
+                    return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     str(e),
+                                     extra_tags='alert-danger')
     else:
         form = Sonarqube_ProductForm()
 
@@ -1644,13 +1658,28 @@ def edit_sonarqube(request, pid, sqcid):
     if request.method == 'POST':
         sqcform = Sonarqube_ProductForm(request.POST, instance=sqc)
         if sqcform.is_valid():
-            sqcform.save()
+            try:
+                sqcform_copy = sqcform.save(commit=False)
+                sq = SonarQubeAPI(sqcform_copy.sonarqube_tool_config)
+                project = sq.get_project(
+                    sqcform_copy.sonarqube_project_key)  # if connection is not successful, this call raise exception
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'SonarQube connection successful. You have access to project "{}"'.format(
+                                         project['name']),
+                                     extra_tags='alert-success')
+                sqcform.save()
 
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'SonarQube Configuration Successfully Updated.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'SonarQube Configuration Successfully Updated.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     str(e),
+                                     extra_tags='alert-danger')
     else:
         sqcform = Sonarqube_ProductForm(instance=sqc)
 
