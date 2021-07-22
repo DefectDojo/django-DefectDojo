@@ -1,7 +1,10 @@
 import unittest
 import sys
 from base_test_class import BaseTestCase
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 from user_test import UserTest
 
 
@@ -21,11 +24,20 @@ class ProductTypeMemberTest(BaseTestCase):
             driver.find_element_by_id("dropdownMenuAddProductTypeMember").click()
             driver.find_element_by_id("addProductTypeMember").click()
             # Select the product type 'Research and Development'
-            Select(driver.find_element_by_id("id_product_type")).select_by_visible_text("Research and Development")
+            try:
+                WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_product_types_chosen')))
+            except TimeoutException:
+                self.fail('Timed out waiting for product types dropdown to initialize ')
+            driver.execute_script("document.getElementsByName('product_types')[0].style.display = 'inline'")
+            element = driver.find_element_by_xpath("//select[@name='product_types']")
+            product_type_option = element.find_elements_by_tag_name('option')[0]
+            Select(element).select_by_value(product_type_option.get_attribute("value"))
+            # Select the role 'Reader'
+            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
             # "Click" the submit button to complete the transaction
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
             # Assert the message to determine success status
-            self.assertTrue(self.is_success_message_present(text='Product type member added successfully.'))
+            self.assertTrue(self.is_success_message_present(text='Product type members added successfully.'))
             # Query the site to determine if the member has been added
             self.assertEqual(driver.find_elements_by_name("member_product_type")[0].text, "Research and Development")
             self.assertEqual(driver.find_elements_by_name("member_product_type_role")[0].text, "Reader")
@@ -99,11 +111,20 @@ class ProductTypeMemberTest(BaseTestCase):
             driver.find_element_by_id("dropdownMenuAddProductTypeMember").click()
             driver.find_element_by_id("addProductTypeMember").click()
             # Select the user 'propersahm'
-            Select(driver.find_element_by_id("id_user")).select_by_visible_text("Proper Samuel (propersahm)")
+            try:
+                WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_users_chosen')))
+            except TimeoutException:
+                self.fail('Timed out waiting for users dropdown to initialize ')
+            driver.execute_script("document.getElementsByName('users')[0].style.display = 'inline'")
+            element = driver.find_element_by_xpath("//select[@name='users']")
+            user_option = element.find_elements_by_tag_name('option')[0]
+            Select(element).select_by_value(user_option.get_attribute("value"))
+            # Select the role 'Reader'
+            Select(driver.find_element_by_id("id_role")).select_by_visible_text("Reader")
             # "Click" the submit button to complete the transaction
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
             # Assert the message to determine success status
-            self.assertTrue(self.is_success_message_present(text='Product type member added successfully.'))
+            self.assertTrue(self.is_success_message_present(text='Product type members added successfully.'))
             # Query the site to determine if the member has been added
             self.assertEqual(driver.find_elements_by_name("member_user")[1].text, "Proper Samuel (propersahm)")
             self.assertEqual(driver.find_elements_by_name("member_role")[1].text, "Reader")
@@ -173,6 +194,7 @@ def suite():
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(UserTest('test_create_user'))
     suite.addTest(ProductTypeMemberTest('test_user_add_product_type_member'))
     suite.addTest(ProductTypeMemberTest('test_user_edit_product_type_member'))

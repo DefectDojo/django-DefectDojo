@@ -4,9 +4,11 @@
 {% load display_tags %}
 {% load authorization_tags %}
 {% block add_styles %}
+    {{ block.super }}
   .chart {height: 160px}
 {% endblock %}
 {% block content %}
+    {{ block.super }}
 <div class="row">
   <div class="col-md-8">
     <div class="panel panel-default">
@@ -205,12 +207,12 @@
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a id="addProductMember" href="{% url 'add_product_member' prod.id %}">
-                                <i class="fa fa-plus"></i> Add User
+                                <i class="fa fa-plus"></i> Add Users
                             </a>
                         </li>
                     </ul>
                     &nbsp;
-                    <a href="https://defectdojo.github.io/django-DefectDojo/basics/permissions/" target="_blank">
+                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                         <i class="fa fa-question-circle text-low"></i></a>
                 </div>
                 {% endif %}
@@ -251,22 +253,22 @@
                                 </li>
                                 </ul>
                             </td>
-                            <td name="member_user">{{ member.user|full_name }}</td>
+                            <td name="member_user">{{ member.user.get_full_name }}</td>
                             <td>Product member</td>
-                            <td name="member_role">{% role_as_string member.role %}</td>
+                            <td name="member_role">{{ member.role }}</td>
                         </tr>
                     {% endfor %}
                     {% for member in product_type_members %}
                         <tr>
                             <td>
                             </td>
-                            <td>{{ member.user|full_name }}</td>
+                            <td>{{ member.user.get_full_name }}</td>
                             <td>
                                 <a class="" href="{% url 'view_product_type' member.product_type.id %}">
-                                    {{ member.product_type|product_type_name }}
+                                    {{ member.product_type }}
                                 </a>
                             </td>
-                            <td>{% role_as_string member.role %}</td>
+                            <td>{{ member.role }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -278,6 +280,94 @@
             </div>
         {% endif %}
     </div>
+
+      <div class="panel panel-default">
+          <div class="panel-heading">
+              <div class="clearfix">
+                  <h4 class="pull-left">Groups</h4>
+                  {% if prod|has_object_permission:"Product_Group_Add" %}
+                  <div class="dropdown pull-right">
+                      <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductGroup"
+                              data-toggle="dropdown" aria-expanded="true" aria-label="Add Product Group">
+                          <span class="fa fa-bars"></span>
+                          <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                          <li role="presentation">
+                              <a id="addProductGroup" href="{% url 'add_product_group' prod.id %}">
+                                  <i class="fa fa-plus"></i> Add Groups
+                              </a>
+                          </li>
+                      </ul>
+                      &nbsp;
+                      <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                          <i class="fa fa-question-circle text-low"></i></a>
+                  </div>
+                  {% endif %}
+              </div>
+          </div>
+          {% if product_groups or product_type_groups %}
+          <div class="table-responsive">
+              <table class="tablesorter-bootstrap table table-condensed table-striped">
+                  <thead>
+                  <tr>
+                      <th label="Actions"></th>
+                      <th>Group</th>
+                      <th>Source</th>
+                      <th>Role</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for group in product_groups %}
+                  <tr>
+                      <td>
+                          <ul>
+                              <li class="dropdown" style="list-style:none;position:absolute">
+                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" label="Actions" name="dropdownManageProductMember">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                  <ul class="dropdown-menu">
+                                      {% if prod|has_object_permission:"Product_Group_Edit" %}
+                                      <li>
+                                          <a name="editProductMember" href="{% url 'edit_product_group' group.id %}">
+                                              <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                      </li>
+                                      {% endif %}
+                                      {% if group|has_object_permission:"Product_Group_Delete" %}
+                                      <li>
+                                          <a name="deleteProductMember" href="{% url 'delete_product_group' group.id %}">
+                                              <i class="fa fa-trash"></i> Delete</a>
+                                      </li>
+                                      {% endif %}
+                                  </ul>
+                              </li>
+                          </ul>
+                      </td>
+                      <td name="group_name">{{ group.group.name }}</td>
+                      <td name="group_source"> Product Group </td>
+                      <td name="group_role">{{ group.role }}</td>
+                  </tr>
+                  {% endfor %}
+                  {% for type_group in product_type_groups %}
+                  <tr>
+                      <td></td>
+                      <td>{{ type_group.group.name }}</td>
+                      <td>
+                          <a class="" href="{% url 'view_product_type' type_group.product_type.id %}">
+                              {{ type_group.product_type }}
+                          </a>
+                      </td>
+                      <td>{{ type_group.role }}</td>
+                  </tr>
+                  {% endfor %}
+                  </tbody>
+              </table>
+          </div>
+          {% else %}
+          <div class="panel-body">
+              <small class="text-muted"><em>No groups found.</em></small>
+          </div>
+          {% endif %}
+      </div>
+
 {% endif %}
 </div>
 <!-- Meta Data -->
@@ -479,6 +569,7 @@
 </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
   <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
   <!-- Flot Charts JavaScript -->
   <script src="{% static "flot/excanvas.min.js" %}"></script>

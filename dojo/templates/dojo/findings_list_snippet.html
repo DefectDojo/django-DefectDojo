@@ -91,7 +91,7 @@
                                 <span>Out of scope</span>
                             </label>
                             <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_is_Mitigated" name="is_Mitigated" type="checkbox" disabled/>
+                                <input id="id_bulk_is_mitigated" name="is_mitigated" type="checkbox" disabled/>
                                 <span>Mitigated</span>
                             </label>
                             <br/>
@@ -605,18 +605,18 @@
                 $('#bulk_edit_menu #id_bulk_verified').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', !checked);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('disabled', !checked);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', !checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', !checked);
             })
 
             $('#bulk_edit_menu #id_bulk_active').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_false_p').prop('disabled', checked);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('disabled', checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_false_p').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', false);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', false);
             })
 
-            $('#bulk_edit_menu #id_bulk_is_Mitigated').on("click", function (e){
+            $('#bulk_edit_menu #id_bulk_is_mitigated').on("click", function (e){
                 var checked = this.checked;
                 $('#bulk_edit_menu #id_bulk_active').prop('disabled', checked);
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
@@ -630,7 +630,7 @@
                 $('#bulk_edit_menu #id_bulk_active').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_risk_accepted').prop('checked', false);
                 $('#bulk_edit_menu #id_bulk_out_of_scope').prop('checked', false);
-                $('#bulk_edit_menu #id_bulk_is_Mitigated').prop('checked', checked);
+                $('#bulk_edit_menu #id_bulk_is_mitigated').prop('checked', checked);
             })
 
             $('#bulk_edit_menu #id_bulk_risk_accepted').on("click", function (e){

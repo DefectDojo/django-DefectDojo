@@ -5,13 +5,16 @@ from dojo.models import Test, Engagement, Product
 
 class TestOpenVASUploadCsvParser(TestCase):
 
-    def test_openvas_csv_parser_without_file_has_no_findings(self):
-        with open("dojo/unittests/scans/openvas/report-e2759495-f26d-4089-9c56-12a10dc36c9c.csv") as f:
+    def test_openvas_csv_one_vuln(self):
+        with open("dojo/unittests/scans/openvas/one_vuln.csv") as f:
             test = Test()
             test.engagement = Engagement()
             test.engagement.product = Product()
             parser = OpenVASCsvParser()
             findings = parser.get_findings(f, test)
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
             self.assertEqual(1, len(findings))
             # finding
             self.assertEqual("SSH Weak Encryption Algorithms Supported", findings[0].title)
@@ -22,3 +25,26 @@ class TestOpenVASUploadCsvParser(TestCase):
             self.assertEqual("10.0.0.8", findings[0].unsaved_endpoints[0].host)
             self.assertEqual("tcp", findings[0].unsaved_endpoints[0].protocol)
             self.assertEqual(22, findings[0].unsaved_endpoints[0].port)
+
+    def test_openvas_csv_many_vuln(self):
+        with open("dojo/unittests/scans/openvas/many_vuln.csv") as f:
+            test = Test()
+            test.engagement = Engagement()
+            test.engagement.product = Product()
+            parser = OpenVASCsvParser()
+            findings = parser.get_findings(f, test)
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
+            self.assertEqual(4, len(findings))
+            # finding
+            finding = findings[3]
+            self.assertEqual("HTTP Brute Force Logins With Default Credentials Reporting", finding.title)
+            self.assertEqual("High", finding.severity)
+            # endpoints
+            self.assertEqual(1, len(finding.unsaved_endpoints))
+            # endpoint
+            endpoint = finding.unsaved_endpoints[0]
+            self.assertEqual("LOGSRV", endpoint.host)
+            self.assertEqual("tcp", endpoint.protocol)
+            self.assertEqual(9200, endpoint.port)

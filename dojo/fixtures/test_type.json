@@ -641,14 +641,14 @@
             "name": "AWS Security Hub Scan"
         },
         "model": "dojo.test_type",
-		"pk": 183
+        "pk": 183
     },
     {
         "fields": {
             "name": "Risk Recon API Importer"
         },
         "model": "dojo.test_type",
-		     "pk": 184
+        "pk": 184
     },
     {
         "fields": {
@@ -664,7 +664,7 @@
         "model": "dojo.test_type",
         "pk": 186
     },
-	  {
+    {
         "fields": {
             "name": "Semgrep JSON Report"
         },
@@ -701,8 +701,8 @@
     },
     {
         "fields": {
-		"name": "OssIndex Devaudit SCA Scan Importer"
-	},
+            "name": "OssIndex Devaudit SCA Scan Importer"
+        },
         "model": "dojo.test_type",
         "pk": 192
     },
@@ -719,5 +719,12 @@
         },
         "model": "dojo.test_type",
         "pk": 194
+    },
+    {
+        "fields": {
+            "name": "IntSights Report"
+        },
+        "model": "dojo.test_type",
+        "pk": 195
     }
 ]

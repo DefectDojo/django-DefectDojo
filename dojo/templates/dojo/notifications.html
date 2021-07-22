@@ -4,6 +4,7 @@
 
 
 {% block content %}
+    {{ block.super }}
     <h3> {% if scope == 'system' %}System{% else %}Personal{% endif %} Notification Settings </h3>
     <form class="form-inline col-sm-10" method="post" id="notform">{% csrf_token %}
         <div class="container" style="width:50%">
@@ -75,6 +76,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         $(function () {
             $(".chosen-select").chosen({disable_search_threshold: 10});

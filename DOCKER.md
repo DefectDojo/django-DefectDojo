@@ -100,29 +100,31 @@ To update changes in static resources, served by nginx, just refresh the browser
 id -u
 ```
 
-## Run with Docker compose in development mode with ptvsd (remote debug)
+## Run with Docker compose in development mode with debugpy (remote debug)
 
-If you want to be able to step in your code, you can activate ptvsd.Server.
-
-If your environment support linux symlinks, you can launch your local dev instance of DefectDojo with
+The debug mode, offers out of the box a debugging server listening on port 3000
 
 ```zsh
-# switch to ptvsd configuration
-docker/setEnv.sh ptvsd
+# switch to debug configuration
+docker/setEnv.sh debug
 # then use docker-compose as usual
 docker-compose up
 ```
 
-This will run the application based on merged configurations from docker-compose.yml and docker-compose.override.ptvsd.yml.
+This will run the application based on merged configurations from `docker-compose.yml` and `docker-compose.override.debug.yml`.
 
 Alternatively (if using docker for windows for example), you can copy the override file over (and re-create the containers):
 ```
-cp docker-compose.override.ptvsd.yml docker-compose.override.yml 
+cp docker-compose.override.debug.yml docker-compose.override.yml
 docker-compose down
 docker-compose up
 ```
 
-The default configuration assumes port 3000 by default for ptvsd.
+The default configuration assumes port 3000 by default for debug.
+
+But you can pass additional environment variables:
+- `DD_DEBUG_PORT` to define a different port
+- `DD_DEBUG_WAIT_FOR_CLIENT` - That's if you want to debugger to wait, right before calling `django.core.wsgi.get_wsgi_application()`
 
 
 ### VS code

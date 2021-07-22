@@ -1,6 +1,7 @@
 from django.test import TestCase
 from dojo.tools.aqua.parser import AquaParser
 from dojo.models import Test
+from collections import Counter
 
 
 class TestAquaParser(TestCase):
@@ -57,3 +58,19 @@ class TestAquaParser(TestCase):
                     nb_cvssv3 = nb_cvssv3 + 1
 
             self.assertEqual(16, nb_cvssv3)
+
+    def test_aqua_parser_for_aqua_severity(self):
+        with open("dojo/unittests/scans/aqua/vulns_with_aqua_severity.json") as testfile:
+            parser = AquaParser()
+            findings = parser.get_findings(testfile, Test())
+            sevs = list()
+
+            for finding in findings:
+                sevs.append(finding.severity)
+
+            d = Counter(sevs)
+            self.assertEqual(1, d['Critical'])
+            self.assertEqual(1, d['High'])
+            self.assertEqual(2, d['Medium'])
+            self.assertEqual(2, d['Low'])
+            self.assertEqual(7, d['Info'])

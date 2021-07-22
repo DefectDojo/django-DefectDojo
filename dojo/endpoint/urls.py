@@ -5,11 +5,17 @@ from dojo.endpoint import views
 urlpatterns = [
     # endpoints
     url(r'^endpoint$', views.all_endpoints,
-        name='endpoints'),
+        name='endpoint'),
+    url(r'^endpoint/host$', views.all_endpoint_hosts,
+        name='endpoint_host'),
     url(r'^endpoint/vulnerable$', views.vulnerable_endpoints,
         name='vulnerable_endpoints'),
+    url(r'^endpoint/host/vulnerable$', views.vulnerable_endpoint_hosts,
+        name='vulnerable_endpoint_hosts'),
     url(r'^endpoint/(?P<eid>\d+)$', views.view_endpoint,
         name='view_endpoint'),
+    url(r'^endpoint/host/(?P<eid>\d+)$', views.view_endpoint_host,
+        name='view_endpoint_host'),
     url(r'^endpoint/(?P<eid>\d+)/edit$', views.edit_endpoint,
         name='edit_endpoint'),
     url(r'^endpoints/(?P<pid>\d+)/add$', views.add_endpoint,
@@ -28,4 +34,6 @@ urlpatterns = [
         name='endpoints_bulk_update_all_product'),
     url(r'^endpoint/(?P<fid>\d+)/bulk_status$', views.endpoint_status_bulk_update,
         name='endpoints_status_bulk'),
+    url(r'^endpoint/migrate$', views.migrate_endpoints_view,
+        name='endpoint_migrate'),
 ]

@@ -633,9 +633,9 @@ class TestDuplicationLogic(TestCase):
         # first setup some finding with same unique_id in same engagement, but different test (same test_type)
         finding_new.test = Test.objects.get(id=66)
         finding_new.save()
-        print(finding_new.pk)
-        print(finding_new.hash_code)
-        print(finding_new.duplicate)
+        # print(finding_new.pk)
+        # print(finding_new.hash_code)
+        # print(finding_new.duplicate)
 
         # expect duplicate as dedupe_inside_engagement is True and the other test is in the same engagement
         self.assert_finding(finding_new, not_pk=124, duplicate=True, duplicate_finding_id=124, hash_code=finding_124.hash_code)
@@ -1275,7 +1275,7 @@ class TestDuplicationLogic(TestCase):
             logger.debug('\t\t' + 'findings:')
             for finding in findings:
                 logger.debug('\t\t\t{:4.4}'.format(str(finding.id)) + ': "' + '{:20.20}'.format(finding.title) + '": ' + '{:5.5}'.format(finding.severity) + ': act: ' + '{:5.5}'.format(str(finding.active)) +
-                        ': ver: ' + '{:5.5}'.format(str(finding.verified)) + ': mit: ' + '{:5.5}'.format(str(finding.is_Mitigated)) +
+                        ': ver: ' + '{:5.5}'.format(str(finding.verified)) + ': mit: ' + '{:5.5}'.format(str(finding.is_mitigated)) +
                         ': dup: ' + '{:5.5}'.format(str(finding.duplicate)) + ': dup_id: ' +
                         ('{:4.4}'.format(str(finding.duplicate_finding.id)) if finding.duplicate_finding else 'None') + ': hash_code: ' + str(finding.hash_code) +
                         ': eps: ' + str(finding.endpoints.count()) + ": notes: " + str([n.id for n in finding.notes.all()]) +

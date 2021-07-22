@@ -75,7 +75,7 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
         # Get user's projects list on Gitlab
         gl = gitlab.Gitlab(settings.SOCIAL_AUTH_GITLAB_API_URL, oauth_token=token)
         # Get each project path_with_namespace as future product name
-        projects = gl.projects.list(membership=True, all=True)
+        projects = gl.projects.list(membership=True, min_access_level=settings.GITLAB_PROJECT_MIN_ACCESS_LEVEL, all=True)
         project_names = [project.path_with_namespace for project in projects]
         # Create product_type if necessary
         product_type, created = Product_Type.objects.get_or_create(name='Gitlab Import')

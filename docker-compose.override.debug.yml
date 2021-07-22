@@ -1,0 +1,38 @@
+---
+    version: '3.7'
+    services:
+      uwsgi:
+        entrypoint: ['/wait-for-it.sh', 'mysql:3306', '-t', '30', '--', '/entrypoint-uwsgi-dev.sh']
+        volumes:
+          - '.:/app:z'
+        environment:
+          DD_DEBUG: 'True'
+          DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
+          DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
+        ports:
+          - target: ${DD_DEBUG_PORT:-3000}
+            published: ${DD_DEBUG_PORT:-3000}
+            protocol: tcp
+            mode: host
+      celeryworker:
+        volumes:
+          - '.:/app:z'
+      celerybeat:
+        volumes:
+          - '.:/app:z'
+      initializer:
+        volumes:
+          - '.:/app:z'
+        environment:
+          DD_ADMIN_USER: ${DD_ADMIN_USER:-admin}
+          DD_ADMIN_PASSWORD: ${DD_ADMIN_PASSWORD:-admin}
+      nginx:
+        volumes:
+          - './dojo/static/dojo:/usr/share/nginx/html/static/dojo'
+      mysql:
+        ports:
+          - target: 3306
+            published: 3306
+            protocol: tcp
+            mode: host
+

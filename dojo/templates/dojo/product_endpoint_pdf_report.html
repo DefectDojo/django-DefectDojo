@@ -7,6 +7,7 @@
 {% load get_notetype_availability %}
 {% load event_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="container">
         {% if include_table_of_contents%}
             <div class="row">
@@ -134,7 +135,7 @@
                     <div class="panel panel-warning">
                         <div class="panel-heading">
                             <h4>
-                                Endpoint: {{ endpoint.host_no_port }}
+                                Endpoint: {{ endpoint }}
                             </h4>
                         </div>
                     </div>
@@ -303,6 +304,7 @@
     </div> <!-- /container -->
 {% endblock %}
 {% block js %}
+    {{ block.super }}
     <!-- jQuery -->
     <script src="{{ host }}{% static "jquery/dist/jquery.js" %}"></script>
     <!-- Flot Charts JavaScript -->

@@ -6612,9 +6612,79 @@ D63FFE5FA76C15D2D63FFE5FA77AE579  &#65533;?&#65533;_&#65533;l.&#65533;&#65533;?&
 					</services>
 				</endpoint>
 
+				<endpoint protocol="udp" port="1812" status="open">
+					<services>
+						<service name="radius (RADIUS authentication protocol (RFC 2138))">
+							<tests>
+							</tests>
+						</service>
+					</services>
+				</endpoint>
+
+				<endpoint protocol="tcp" port="2049" status="open">
+					<services>
+						<service name="nfs_acl">
+							<configuration>
+								<config name="port.discovered.from">tcp/111</config>
+								<config name="program-number">100227</config>
+								<config name="program-version">3</config>
+							</configuration>
+							<tests>
+							</tests>
+						</service>
+					</services>
+				</endpoint>
+
+				<endpoint protocol="udp" port="2049" status="open">
+					<services>
+						<service name="nfs_acl">
+							<configuration>
+								<config name="port.discovered.from">tcp/111</config>
+								<config name="program-number">100227</config>
+								<config name="program-version">3</config>
+							</configuration>
+							<tests>
+							</tests>
+						</service>
+					</services>
+				</endpoint>
+
+				<endpoint protocol="tcp" port="6101" status="open">
+					<services>
+						<service name="Backup Exec Agent Browser">
+							<configuration>
+								<config name="sslv3">false</config>
+								<config name="tlsv1_0">false</config>
+								<config name="tlsv1_1">false</config>
+								<config name="tlsv1_2">false</config>
+							</configuration>
+							<tests>
+							</tests>
+						</service>
+					</services>
+				</endpoint>
+
 				<endpoint protocol="tcp" port="7777" status="open">
 					<services>
 						<service name="&lt;unknown&gt;">
+							<tests>
+							</tests>
+						</service>
+					</services>
+				</endpoint>
+
+				<endpoint protocol="tcp" port="8888" status="open">
+					<services>
+						<service name="sun-answerbook (Sun Answerbook HTTP server)">
+							<tests>
+							</tests>
+						</service>
+					</services>
+				</endpoint>
+
+				<endpoint protocol="tcp" port="9100" status="open">
+					<services>
+						<service name="HP JetDirect Data">
 							<tests>
 							</tests>
 						</service>

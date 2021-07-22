@@ -59,6 +59,16 @@ class NpmAuditParser(object):
         return list(items.values())
 
 
+def censor_path_hashes(path):
+    """ https://github.com/npm/npm/issues/20739 for dependencies installed from git, npm audit replaces the name with a (random?) hash """
+    """ this hash changes on every run of npm audit, so defect dojo might think it's a new finding every run """
+    """ we strip the hash and replace it with 'censored_by_npm_audit` """
+    if not path:
+        return None
+
+    return re.sub('[a-f0-9]{64}', 'censored_by_npm_audit', path)
+
+
 def get_item(item_node, test):
 
     if item_node['severity'] == 'low':
@@ -91,7 +101,7 @@ def get_item(item_node, test):
     dojo_finding = Finding(title=item_node['title'] + " - " + "(" + item_node['module_name'] + ", " + item_node['vulnerable_versions'] + ")",
                       test=test,
                       severity=severity,
-                      file_path=item_node['findings'][0]['paths'][0],
+                      file_path=censor_path_hashes(item_node['findings'][0]['paths'][0]),
                       description=item_node['url'] + "\n" +
                       item_node['overview'] + "\n Vulnerable Module: " +
                       item_node['module_name'] + "\n Vulnerable Versions: " +

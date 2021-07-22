@@ -1,5 +1,4 @@
 import hashlib
-from urllib.parse import urlparse
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree as ET
@@ -70,17 +69,9 @@ class SSLyzeXMLParser(object):
         results = root.find('results')
         dupes = dict()
         for target in results:
-            url = target.attrib['host']
+            host = target.attrib['host']
             port = target.attrib['port']
-            parsedUrl = urlparse(url)
-            protocol = parsedUrl.scheme
-            query = parsedUrl.query
-            fragment = parsedUrl.fragment
-            path = parsedUrl.path
-            try:
-                (host, port) = parsedUrl.netloc.split(':')
-            except:
-                host = parsedUrl.netloc
+            protocol = target.attrib['tlsWrappedProtocol']
             for element in target:
                 title = ""
                 severity = ""
@@ -91,21 +82,21 @@ class SSLyzeXMLParser(object):
                     heartbleed_element = element.find('openSslHeartbleed')
                     if 'isVulnerable' in heartbleed_element.attrib:
                         if heartbleed_element.attrib['isVulnerable'] == 'True':
-                            title = element.attrib['title'] + " | " + url
+                            title = element.attrib['title'] + " | " + host
                             description = "**heartbleed** : Vulnerable" + "\n\n" + \
                                         "**title** : " + element.attrib['title']
                 if element.tag == 'openssl_ccs':
                     openssl_ccs_element = element.find('openSslCcsInjection')
                     if 'isVulnerable' in openssl_ccs_element.attrib:
                         if openssl_ccs_element.attrib['isVulnerable'] == 'True':
-                            title = element.attrib['title'] + " | " + url
+                            title = element.attrib['title'] + " | " + host
                             description = "**openssl_ccs** : Vulnerable" + "\n\n" + \
                                         "**title** : " + element.attrib['title']
                 if element.tag == 'reneg':
                     reneg_element = element.find('sessionRenegotiation')
                     if 'isSecure' in reneg_element.attrib:
                         if reneg_element.attrib['isSecure'] == 'False':
-                            title = element.attrib['title'] + " | " + url
+                            title = element.attrib['title'] + " | " + host
                             description = "**Session Renegotiation** : Vulnerable" + "\n\n" + \
                                         "**title** : " + element.attrib['title']
                 if element.tag in PROTOCOLS and element.attrib['isProtocolSupported'] == "True":
@@ -117,7 +108,7 @@ class SSLyzeXMLParser(object):
                                     if not cipher.attrib['name'] in weak_cipher[element.tag]:
                                         weak_cipher[element.tag].append(cipher.attrib['name'])
                     if len(weak_cipher[element.tag]) > 0:
-                        title = element.tag + " | " + "Weak Ciphers" + " | " + url
+                        title = element.tag + " | " + "Weak Ciphers" + " | " + host
                         description = "**Protocol** : " + element.tag + "\n\n" + \
                                     "**Weak Ciphers** : " + ",\n\n".join(weak_cipher[element.tag])
                 if title and description is not None:
@@ -139,12 +130,9 @@ class SSLyzeXMLParser(object):
                         finding.unsaved_endpoints = list()
                         dupes[dupe_key] = finding
 
-                        if url is not None:
+                        if host is not None:
                             finding.unsaved_endpoints.append(Endpoint(
                                 host=host,
                                 port=port,
-                                path=path,
-                                protocol=protocol,
-                                query=query,
-                                fragment=fragment,))
+                                protocol=protocol))
         return dupes.values()

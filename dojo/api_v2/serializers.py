@@ -1,4 +1,9 @@
+from typing import List
+from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
+from rest_framework.fields import DictField
+
+from dojo.endpoint.utils import endpoint_filter
 from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -7,12 +12,12 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
-    Test_Import_Finding_Action, Product_Type_Member, Product_Member
+    Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
+    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
 from dojo.utils import is_scan_file_too_large
-from django.core.validators import URLValidator, validate_ipv46_address
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
@@ -28,37 +33,14 @@ import tagulous
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
 from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Roles, Permissions
+from dojo.authorization.roles_permissions import Permissions
 
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
-class TagList(list):
-    def __init__(self, *args, **kwargs):
-        pretty_print = kwargs.pop("pretty_print", True)
-        list.__init__(self, *args, **kwargs)
-        self.pretty_print = pretty_print
-
-    def __add__(self, rhs):
-        return TagList(list.__add__(self, rhs))
-
-    def __getitem__(self, item):
-        result = list.__getitem__(self, item)
-        try:
-            return TagList(result)
-        except TypeError:
-            return result
-
-    def __str__(self):
-        if self.pretty_print:
-            return json.dumps(
-                self, sort_keys=True, indent=4, separators=(',', ': '))
-        else:
-            return json.dumps(self)
-
-
+@extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
 class TagListSerializerField(serializers.ListField):
     child = serializers.CharField()
     default_error_messages = {
@@ -115,35 +97,15 @@ class TagListSerializerField(serializers.ListField):
         # return data
 
     def to_representation(self, value):
-        if not isinstance(value, TagList):
-
+        if not isinstance(value, list):
             # we can't use isinstance because TagRelatedManager is non-existing class
             # it cannot be imported or referenced, so we fallback to string comparison
             if type(value).__name__ == 'TagRelatedManager':
-                # if self.order_by:
-                #     tags = value.all().order_by(*self.order_by)
-                # else:
-                #     tags = value.all()
-                # value = [tag.name for tag in tags]
-
                 value = value.get_tag_list()
-
             elif isinstance(value, str):
                 value = tagulous.utils.parse_tags(value)
-
-            # elif len(value) > 0 and isinstance(value[0], Tag):
-            #     raise ValueError('unreachable code?!')
-            #     print('to_representation4: ' + str(value))
-            #     # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
-            #     tags = value
-            #     value = [tag.name for tag in tags]
-            #     if self.order_by:
-            #         # the only possible ordering is by name, so we order after creating the list
-            #         value = sorted(value)
             else:
-                raise ValueError('unable to convert %s into TagList' % type(value).__name__)
-
-            value = TagList(value, pretty_print=self.pretty_print)
+                raise ValueError('unable to convert %s into list of tags' % type(value).__name__)
         return value
 
 
@@ -209,7 +171,7 @@ class RequestResponseDict(list):
 
 
 class RequestResponseSerializerField(serializers.ListSerializer):
-    child = serializers.CharField()
+    child = DictField(child=serializers.CharField())
     default_error_messages = {
         'not_a_list': _(
             'Expected a list of items but got type "{input_type}".'),
@@ -260,8 +222,7 @@ class RequestResponseSerializerField(serializers.ListSerializer):
             if not isinstance(response, str):
                 self.fail('not_a_str', input_type=type(request).__name__)
 
-            self.child.run_validation(request)
-            self.child.run_validation(response)
+            self.child.run_validation(s)
         return data
 
     def to_representation(self, value):
@@ -273,7 +234,12 @@ class RequestResponseSerializerField(serializers.ListSerializer):
                 else:
                     burps = value.all()
                 value = [{'request': burp.get_request(), 'response': burp.get_response()} for burp in burps]
+
         return value
+
+
+class BurpRawRequestResponseSerializer(serializers.Serializer):
+    req_resp = RequestResponseSerializerField(required=True)
 
 
 class MetaSerializer(serializers.ModelSerializer):
@@ -312,11 +278,95 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
 
+    def create(self, validated_data):
+        user = User.objects.create(**validated_data)
+        user.set_unusable_password()
+        user.save()
+        return user
+
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'first_name', 'last_name')
+
+
+class RoleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Role
+        fields = '__all__'
+
+
+class DojoGroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Dojo_Group
+        fields = '__all__'
+
+
+class DojoGroupMemberSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Dojo_Group_Member
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('group') != self.instance.group and \
+                not user_has_permission(self.context['request'].user, data.get('group'), Permissions.Group_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a user to this group')
+
+        if self.instance is None or \
+                data.get('group') != self.instance.group or \
+                data.get('user') != self.instance.user:
+            members = Dojo_Group_Member.objects.filter(group=data.get('group'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Dojo_Group_Member already exists')
+
+        if self.instance is not None and not data.get('role').is_owner:
+            owners = Dojo_Group_Member.objects.filter(group=data.get('group'), role__is_owner=True).exclude(id=self.instance.id).count()
+            if owners < 1:
+                raise ValidationError('There must be at least one owner')
+
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('group'), Permissions.Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a user as Owner to this group')
+
+        return data
+
+
+class GlobalRoleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Global_Role
+        fields = '__all__'
+
+    def validate(self, data):
+        user = None
+        group = None
+
+        if self.instance is not None:
+            user = self.instance.user
+            group = self.instance.group
+
+        if 'user' in data:
+            user = data.get('user')
+        if 'group' in data:
+            group = data.get('group')
+
+        if user is None and group is None:
+            raise ValidationError("Global_Role must have either user or group")
+        if user is not None and group is not None:
+            raise ValidationError("Global_Role cannot have both user and group")
+
+        return data
+
+
+class AddUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('id', 'username')
 
 
 class NoteHistorySerializer(serializers.ModelSerializer):
@@ -376,39 +426,47 @@ class ProductMemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        if self.context['request'].method == 'POST':
+        if self.instance is not None and \
+                data.get('product') != self.instance.product and \
+                not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a member to this product')
+
+        if self.instance is None or \
+                data.get('product') != self.instance.product or \
+                data.get('user') != self.instance.user:
             members = Product_Member.objects.filter(product=data.get('product'), user=data.get('user'))
             if members.count() > 0:
-                raise ValidationError('Product member already exists')
+                raise ValidationError('Product_Member already exists')
 
-        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Member_Add_Owner):
-            raise PermissionDenied('You are not permitted to add users as owners')
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Member_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a member as Owner to this product')
 
         return data
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
-    findings_count = serializers.SerializerMethodField()
-    findings_list = serializers.SerializerMethodField()
-
-    tags = TagListSerializerField(required=False)
-    product_meta = ProductMetaSerializer(read_only=True, many=True)
+class ProductGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Product
-        if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['tid', 'manager', 'prod_manager', 'tech_contact', 'updated', 'members']
-            extra_kwargs = {
-                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-            }
-        else:
-            exclude = ['tid', 'manager', 'prod_manager', 'tech_contact', 'updated', 'authorized_users']
+        model = Product_Group
+        fields = '__all__'
 
-    def get_findings_count(self, obj):
-        return obj.findings_count
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product') != self.instance.product and \
+                not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Group_Add):
+            raise PermissionDenied('You are not permitted to add a group to this product')
 
-    def get_findings_list(self, obj):
-        return obj.open_findings_list
+        if self.instance is None or \
+                data.get('product') != self.instance.product or \
+                data.get('group') != self.instance.group:
+            members = Product_Group.objects.filter(product=data.get('product'), group=data.get('group'))
+            if members.count() > 0:
+                raise ValidationError('Product_Group already exists')
+
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a group as Owner to this product')
+
+        return data
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
@@ -418,18 +476,50 @@ class ProductTypeMemberSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate(self, data):
-        if self.context['request'].method == 'POST':
+        if self.instance is not None and \
+                data.get('product_type') != self.instance.product_type and \
+                not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a member to this product type')
+
+        if self.instance is None or \
+                data.get('product_type') != self.instance.product_type or \
+                data.get('user') != self.instance.user:
             members = Product_Type_Member.objects.filter(product_type=data.get('product_type'), user=data.get('user'))
             if members.count() > 0:
-                raise ValidationError('Product type member already exists')
-        else:
-            if data.get('role') != Roles.Owner:
-                owners = Product_Type_Member.objects.filter(product_type=data.get('product_type'), role=Roles.Owner).exclude(id=self.instance.id).count()
-                if owners < 1:
-                    raise ValidationError('There must be at least one owner')
+                raise ValidationError('Product_Type_Member already exists')
 
-        if data.get('role') == Roles.Owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Member_Add_Owner):
-            raise PermissionDenied('You are not permitted to add users as owners')
+        if self.instance is not None and not data.get('role').is_owner:
+            owners = Product_Type_Member.objects.filter(product_type=data.get('product_type'), role__is_owner=True).exclude(id=self.instance.id).count()
+            if owners < 1:
+                raise ValidationError('There must be at least one owner')
+
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Member_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a member as Owner to this product type')
+
+        return data
+
+
+class ProductTypeGroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product_Type_Group
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product_type') != self.instance.product_type and \
+                not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Group_Add):
+            raise PermissionDenied('You are not permitted to add a group to this product type')
+
+        if self.instance is None or \
+                data.get('product_type') != self.instance.product_type or \
+                data.get('group') != self.instance.group:
+            members = Product_Type_Group.objects.filter(product_type=data.get('product_type'), group=data.get('group'))
+            if members.count() > 0:
+                raise ValidationError('Product_Type_Group already exists')
+
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a group as Owner to this product type')
 
         return data
 
@@ -480,7 +570,7 @@ class EngagementToFilesSerializer(serializers.Serializer):
     files = FileSerializer(many=True)
 
 
-class AppAnalysisSerializer(serializers.ModelSerializer):
+class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -553,80 +643,71 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def validate(self, data):
         # print('EndpointSerialize.validate')
-        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}" \
-                  "|655[0-2][0-9]|6553[0-5])"
 
         if not self.context['request'].method == 'PATCH':
-            if ('host' not in data or
-                    'protocol' not in data or
-                    'path' not in data or
-                    'query' not in data or
-                    'fragment' not in data):
-                raise serializers.ValidationError(
-                    'Please provide valid host, protocol, path, query and '
-                    'fragment')
-            protocol = data['protocol']
-            path = data['path']
-            query = data['query']
-            fragment = data['fragment']
-            host = data['host']
+            if 'product' not in data:
+                raise serializers.ValidationError('Product is required')
+            protocol = data.get('protocol')
+            userinfo = data.get('userinfo')
+            host = data.get('host')
+            port = data.get('port')
+            path = data.get('path')
+            query = data.get('query')
+            fragment = data.get('fragment')
+            product = data.get('product')
         else:
             protocol = data.get('protocol', self.instance.protocol)
+            userinfo = data.get('userinfo', self.instance.userinfo)
+            host = data.get('host', self.instance.host)
+            port = data.get('port', self.instance.port)
             path = data.get('path', self.instance.path)
             query = data.get('query', self.instance.query)
             fragment = data.get('fragment', self.instance.fragment)
-            host = data.get('host', self.instance.host)
-        product = data.get('product', None)
+            if 'product' in data and data['product'] != self.instance.product:
+                raise serializers.ValidationError('Change of product is not possible')
+            product = self.instance.product
 
-        from urllib.parse import urlunsplit
-        if protocol:
-            endpoint = urlunsplit((protocol, host, path, query, fragment))
-        else:
-            endpoint = host
+        endpoint_ins = Endpoint(
+            protocol=protocol,
+            userinfo=userinfo,
+            host=host,
+            port=port,
+            path=path,
+            query=query,
+            fragment=fragment,
+            product=product
+        )
+        endpoint_ins.clean()  # Run standard validation and clean process; can raise errors
 
-        from django.core import exceptions
-        from django.core.validators import RegexValidator
-        import re
-        try:
-            url_validator = URLValidator()
-            url_validator(endpoint)
-        except exceptions.ValidationError:
-            try:
-                # do we have a port number?
-                regex = re.compile(port_re)
-                host = endpoint
-                if regex.findall(endpoint):
-                    for g in regex.findall(endpoint):
-                        host = re.sub(port_re, '', host)
-                validate_ipv46_address(host)
-            except exceptions.ValidationError:
-                try:
-                    validate_hostname = RegexValidator(
-                        regex=r'[a-zA-Z0-9-_]*\.[a-zA-Z]{2,6}')
-                    # do we have a port number?
-                    regex = re.compile(port_re)
-                    host = endpoint
-                    if regex.findall(endpoint):
-                        for g in regex.findall(endpoint):
-                            host = re.sub(port_re, '', host)
-                    validate_hostname(host)
-                except:  # noqa
-                    raise serializers.ValidationError(
-                        'It does not appear as though this endpoint is a '
-                        'valid URL or IP address.',
-                        code='invalid')
-
-        endpoint = Endpoint.objects.filter(protocol=protocol,
-                                           host=host,
-                                           path=path,
-                                           query=query,
-                                           fragment=fragment,
-                                           product=product)
-        if endpoint.count() > 0 and not self.instance:
+        endpoint = endpoint_filter(
+            protocol=endpoint_ins.protocol,
+            userinfo=endpoint_ins.userinfo,
+            host=endpoint_ins.host,
+            port=endpoint_ins.port,
+            path=endpoint_ins.path,
+            query=endpoint_ins.query,
+            fragment=endpoint_ins.fragment,
+            product=endpoint_ins.product
+        )
+        if ((self.context['request'].method in ["PUT", "PATCH"] and
+             ((endpoint.count() > 1) or
+              (endpoint.count() == 1 and
+               endpoint.first().pk != self.instance.pk))) or
+                (self.context['request'].method in ["POST"] and endpoint.count() > 0)):
             raise serializers.ValidationError(
                 'It appears as though an endpoint with this data already '
                 'exists for this product.',
                 code='invalid')
+
+        # use clean data
+        data['protocol'] = endpoint_ins.protocol
+        data['userinfo'] = endpoint_ins.userinfo
+        data['host'] = endpoint_ins.host
+        data['port'] = endpoint_ins.port
+        data['path'] = endpoint_ins.path
+        data['query'] = endpoint_ins.query
+        data['fragment'] = endpoint_ins.fragment
+        data['product'] = endpoint_ins.product
 
         return data
 
@@ -638,7 +719,7 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
         model = JIRA_Issue
         fields = '__all__'
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         return jira_helper.get_jira_issue_url(obj)
 
 
@@ -687,7 +768,7 @@ class FindingGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Finding_Group
-        fields = ('name', 'test', 'jira_issue')
+        fields = ('id', 'name', 'test', 'jira_issue')
 
 
 class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -712,9 +793,9 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         queryset=Engagement.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
         allow_null=True,
-        default=[],
         queryset=Notes.objects.all(),
-        many=True)
+        many=True,
+        required=False)
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -768,7 +849,7 @@ class FindingImageSerializer(serializers.ModelSerializer):
         model = FindingImage
         fields = ["base64", "caption", "id"]
 
-    def get_base64(self, obj):
+    def get_base64(self, obj) -> bytes:
         return base64.b64encode(obj.image.read())
 
 
@@ -826,10 +907,12 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
     test = serializers.SerializerMethodField()
     jira = serializers.SerializerMethodField()
 
+    @extend_schema_field(FindingTestSerializer)
     @swagger_serializer_method(FindingTestSerializer)
     def get_test(self, obj):
         return FindingTestSerializer(read_only=True).to_representation(obj.test)
 
+    @extend_schema_field(JIRAIssueSerializer)
     @swagger_serializer_method(JIRAIssueSerializer)
     def get_jira(self, obj):
         issue = jira_helper.get_jira_issue(obj)
@@ -858,14 +941,17 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Finding
         fields = '__all__'
 
+    @extend_schema_field(serializers.DateTimeField())
     @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_creation(self, obj):
         return jira_helper.get_jira_creation(obj)
 
+    @extend_schema_field(serializers.DateTimeField())
     @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_change(self, obj):
         return jira_helper.get_jira_change(obj)
 
+    @extend_schema_field(FindingRelatedFieldsSerializer)
     @swagger_serializer_method(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
         request = self.context.get('request', None)
@@ -878,8 +964,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             return None
 
-    @swagger_serializer_method(serializers.ListField(serializers.CharField()))
-    def get_display_status(self, obj):
+    def get_display_status(self, obj) -> str:
         return obj.status()
 
     # Overriding this to push add Push to JIRA functionality
@@ -939,6 +1024,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             return NoteSerializer, {'many': True, 'read_only': True}
         return super().build_relational_field(field_name, relation_info)
 
+    @extend_schema_field(BurpRawRequestResponseSerializer)
+    @swagger_serializer_method(serializer_or_field=BurpRawRequestResponseSerializer)
     def get_request_response(self, obj):
         # burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
         burp_req_resp = obj.burprawrequestresponse_set.all()
@@ -955,7 +1042,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True,
         allow_null=True,
-        default=[],
+        required=False,
         many=True)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
@@ -1020,7 +1107,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         return data
 
 
-class FindingTemplateSerializer(serializers.ModelSerializer):
+class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1044,6 +1131,32 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
+
+
+class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+    findings_count = serializers.SerializerMethodField()
+    findings_list = serializers.SerializerMethodField()
+
+    tags = TagListSerializerField(required=False)
+    product_meta = ProductMetaSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Product
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['tid', 'updated', 'members']
+            extra_kwargs = {
+                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+            }
+        else:
+            exclude = ['tid', 'updated', 'authorized_users']
+
+    def get_findings_count(self, obj) -> int:
+        return obj.findings_count
+
+    #  -> List[int] as return type doesn't seem enough for drf-yasg
+    @swagger_serializer_method(serializer_or_field=serializers.ListField(child=serializers.IntegerField()))
+    def get_findings_list(self, obj) -> List[int]:
+        return obj.open_findings_list
 
 
 class ImportScanSerializer(serializers.Serializer):
@@ -1078,6 +1191,8 @@ class ImportScanSerializer(serializers.Serializer):
 
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
     def save(self, push_to_jira=False):
         data = self.validated_data
         close_old_findings = data['close_old_findings']
@@ -1106,6 +1221,8 @@ class ImportScanSerializer(serializers.Serializer):
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
+        group_by = data.get('group_by', None)
+
         importer = Importer()
         try:
             test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
@@ -1116,7 +1233,8 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              branch_tag=branch_tag, build_id=build_id,
                                                                              commit_hash=commit_hash,
                                                                              push_to_jira=push_to_jira,
-                                                                             close_old_findings=close_old_findings)
+                                                                             close_old_findings=close_old_findings,
+                                                                             group_by=group_by)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -1171,7 +1289,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
 
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
     def save(self, push_to_jira=False):
+        logger.debug('push_to_jira: %s', push_to_jira)
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
@@ -1189,6 +1310,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
+        group_by = data.get('group_by', None)
+
         reimporter = ReImporter()
         try:
             test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
@@ -1197,7 +1320,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             endpoints_to_add=endpoints_to_add, scan_date=scan_date,
                                             version=version, branch_tag=branch_tag, build_id=build_id,
                                             commit_hash=commit_hash, push_to_jira=push_to_jira,
-                                            close_old_findings=close_old_findings)
+                                            close_old_findings=close_old_findings,
+                                            group_by=group_by)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -1305,7 +1429,3 @@ class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
-
-
-class BurpRawRequestResponseSerializer(serializers.Serializer):
-    req_resp = RequestResponseSerializerField(required=True)
