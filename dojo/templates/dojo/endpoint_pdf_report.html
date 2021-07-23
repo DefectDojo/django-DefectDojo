@@ -7,6 +7,7 @@
 {% load get_notetype_availability %}
 {% load event_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="container">
         {% if include_table_of_contents%}
 			<div class="row">
@@ -193,14 +194,7 @@
                     <h6>References</h6>
                     <pre>{{ finding.references }}</pre>
                     {% if include_finding_images %}
-                        <h6>Images</h6>
-                        {% if finding.images.all.count > 0 %}
-                            {% for pic in finding.images.all %}
-                                <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%"></p>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-center">No images found.</p>
-                        {% endif %}
+                        {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
                     {% endif %}
                     {% if include_finding_notes %}
                         {% with notes=finding.notes.all|get_public_notes %}
@@ -254,6 +248,7 @@
     </div> <!-- /container -->
 {% endblock %}
 {% block js %}
+    {{ block.super }}
     <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
     <!-- Flot Charts JavaScript -->
     <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>

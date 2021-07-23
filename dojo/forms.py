@@ -9,6 +9,7 @@ from django.db.models import Count, Q
 
 from dateutil.relativedelta import relativedelta
 from django import forms
+from django.contrib.auth.password_validation import validate_password
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms import modelformset_factory
@@ -22,14 +23,14 @@ import tagulous
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
-    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, FindingImage, \
+    Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member
+    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -39,11 +40,12 @@ import logging
 from crum import get_current_user
 from dojo.utils import get_system_setting, get_product
 from django.conf import settings
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type
+from dojo.group.queries import get_authorized_groups
 
 logger = logging.getLogger(__name__)
 
@@ -191,8 +193,6 @@ class Delete_Product_TypeForm(forms.ModelForm):
 
 
 class Edit_Product_Type_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_Type_MemberForm, self).__init__(*args, **kwargs)
@@ -205,23 +205,35 @@ class Edit_Product_Type_MemberForm(forms.ModelForm):
         fields = ['product_type', 'user', 'role']
 
 
-class Add_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
+class Add_Product_Type_MemberForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label='Users')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_MemberForm, self).__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list('user', flat=True)
-        self.fields['user'].queryset = Dojo_User.objects.exclude(
+        self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
-        self.fields['user'].disabled = False
+        self.fields['product_type'].disabled = True
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_type', 'users', 'role']
 
 
-class Add_Product_Type_Member_UserForm(Edit_Product_Type_MemberForm):
+class Add_Product_Type_Member_UserForm(forms.ModelForm):
+    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label='Product Types')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_Type_Member_UserForm, self).__init__(*args, **kwargs)
         current_members = Product_Type_Member.objects.filter(user=self.initial['user']).values_list('product_type', flat=True)
-        self.fields['product_type'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
+        self.fields['product_types'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
             .exclude(id__in=current_members)
-        self.fields['product_type'].disabled = False
+        self.fields['user'].disabled = True
+
+    class Meta:
+        model = Product_Type_Member
+        fields = ['product_types', 'user', 'role']
 
 
 class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
@@ -262,10 +274,6 @@ class ProductForm(forms.ModelForm):
             queryset=None,
             required=False, label="Authorized Users")
 
-    app_analysis = forms.ModelMultipleChoiceField(label='Technologies',
-                                           queryset=App_Analysis.objects.all().order_by('name'),
-                                           required=False)
-
     product_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     technical_contact = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
     team_manager = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=False)
@@ -281,11 +289,11 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         if settings.FEATURE_AUTHORIZATION_V2:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
+            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
                     'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                     'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
         else:
-            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations', 'app_analysis',
+            fields = ['name', 'description', 'tags', 'product_manager', 'technical_contact', 'team_manager', 'prod_type', 'regulations',
                     'authorized_users', 'business_criticality', 'platform', 'lifecycle', 'origin', 'user_records', 'revenue', 'external_audience',
                     'internet_accessible', 'enable_simple_risk_acceptance', 'enable_full_risk_acceptance']
 
@@ -309,8 +317,6 @@ class DeleteFindingGroupForm(forms.ModelForm):
 
 
 class Edit_Product_MemberForm(forms.ModelForm):
-    user = forms.ModelChoiceField(queryset=None, required=True)
-    role = forms.ChoiceField(choices=Roles.choices())
 
     def __init__(self, *args, **kwargs):
         super(Edit_Product_MemberForm, self).__init__(*args, **kwargs)
@@ -323,23 +329,35 @@ class Edit_Product_MemberForm(forms.ModelForm):
         fields = ['product', 'user', 'role']
 
 
-class Add_Product_MemberForm(Edit_Product_MemberForm):
+class Add_Product_MemberForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label='Users')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
         current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list('user', flat=True)
-        self.fields['user'].queryset = Dojo_User.objects.exclude(
+        self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
-        self.fields['user'].disabled = False
+
+    class Meta:
+        model = Product_Member
+        fields = ['product', 'users', 'role']
 
 
-class Add_Product_Member_UserForm(Edit_Product_MemberForm):
+class Add_Product_Member_UserForm(forms.ModelForm):
+    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label='Products')
+
     def __init__(self, *args, **kwargs):
         super(Add_Product_Member_UserForm, self).__init__(*args, **kwargs)
         current_members = Product_Member.objects.filter(user=self.initial["user"]).values_list('product', flat=True)
-        self.fields['product'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
+        self.fields['products'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
             .exclude(id__in=current_members)
-        self.fields['product'].disabled = False
+        self.fields['user'].disabled = True
+
+    class Meta:
+        model = Product_Member
+        fields = ['products', 'user', 'role']
 
 
 class Delete_Product_MemberForm(Edit_Product_MemberForm):
@@ -398,7 +416,7 @@ class DojoMetaDataForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
-    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1])
+    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1].lower())
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -694,8 +712,7 @@ class EngForm(forms.ModelForm):
     name = forms.CharField(
         max_length=300, required=False,
         help_text="Add a descriptive name to identify this engagement. " +
-                  "Without a name the target start date will be used in " +
-                  "listings.")
+                  "Without a name the target start date will be set.")
     description = forms.CharField(widget=forms.Textarea(attrs={}),
                                   required=False, help_text="Description of the engagement and details regarding the engagement.")
     product = forms.ModelChoiceField(label='Product',
@@ -883,7 +900,7 @@ class AddFindingForm(forms.ModelForm):
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -935,7 +952,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -962,7 +979,7 @@ class PromoteFindingForm(forms.ModelForm):
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'is_template', 'endpoint_status'
-                   'duplicate', 'out_of_scope', 'images', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
+                   'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
 
 
 class SplitDateTimeWidget(forms.MultiWidget):
@@ -1124,7 +1141,7 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
@@ -1572,6 +1589,174 @@ class MetricsFilterForm(forms.Form):
             del self.fields['exclude_product_types']
 
 
+class DojoGroupForm(forms.ModelForm):
+
+    name = forms.CharField(max_length=255, required=True)
+    description = forms.CharField(widget=forms.Textarea(attrs={}), required=False)
+
+    class Meta:
+        model = Dojo_Group
+        fields = ['name', 'description']
+        exclude = ['users']
+
+
+class DeleteGroupForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Dojo_Group
+        fields = ['id']
+
+
+class Add_Group_MemberForm(forms.ModelForm):
+    users = forms.ModelMultipleChoiceField(queryset=Dojo_Group_Member.objects.none(), required=True, label='Users')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Group_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['group'].disabled = True
+        current_members = Dojo_Group_Member.objects.filter(group=self.initial['group']).values_list('user', flat=True)
+        self.fields['users'].queryset = Dojo_User.objects.exclude(
+            Q(is_superuser=True) |
+            Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
+        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+
+    class Meta:
+        model = Dojo_Group_Member
+        fields = ['group', 'users', 'role']
+
+
+class Add_Group_Member_UserForm(forms.ModelForm):
+    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Group_Member_UserForm, self).__init__(*args, **kwargs)
+        self.fields['user'].disabled = True
+        current_groups = Dojo_Group_Member.objects.filter(user=self.initial['user']).values_list('group', flat=True)
+        self.fields['groups'].queryset = Dojo_Group.objects.exclude(id__in=current_groups)
+        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+
+    class Meta:
+        model = Dojo_Group_Member
+        fields = ['groups', 'user', 'role']
+
+
+class Edit_Group_MemberForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(Edit_Group_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['group'].disabled = True
+        self.fields['user'].disabled = True
+        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+
+    class Meta:
+        model = Dojo_Group_Member
+        fields = ['group', 'user', 'role']
+
+
+class Delete_Group_MemberForm(Edit_Group_MemberForm):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Group_MemberForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
+
+
+class Add_Product_GroupForm(forms.ModelForm):
+    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_GroupForm, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
+        current_groups = Product_Group.objects.filter(product=self.initial["product"]).values_list('group', flat=True)
+        authorized_groups = get_authorized_groups(Permissions.Group_View)
+        authorized_groups = authorized_groups.exclude(id__in=current_groups)
+        self.fields['groups'].queryset = authorized_groups
+
+    class Meta:
+        model = Product_Group
+        fields = ['product', 'groups', 'role']
+
+
+class Add_Product_Group_GroupForm(forms.ModelForm):
+    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True, label='Products')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Group_GroupForm, self).__init__(*args, **kwargs)
+        current_members = Product_Group.objects.filter(group=self.initial["group"]).values_list('product', flat=True)
+        self.fields['products'].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
+            .exclude(id__in=current_members)
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Group
+        fields = ['products', 'group', 'role']
+
+
+class Edit_Product_Group_Form(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Edit_Product_Group_Form, self).__init__(*args, **kwargs)
+        self.fields['product'].disabled = True
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Group
+        fields = ['product', 'group', 'role']
+
+
+class Delete_Product_GroupForm(Edit_Product_Group_Form):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Product_GroupForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
+
+
+class Add_Product_Type_GroupForm(forms.ModelForm):
+    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label='Groups')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Type_GroupForm, self).__init__(*args, **kwargs)
+        current_groups = Product_Type_Group.objects.filter(product_type=self.initial["product_type"]).values_list('group', flat=True)
+        authorized_groups = get_authorized_groups(Permissions.Group_View)
+        authorized_groups = authorized_groups.exclude(id__in=current_groups)
+        self.fields['groups'].queryset = authorized_groups
+        self.fields['product_type'].disabled = True
+
+    class Meta:
+        model = Product_Type_Group
+        fields = ['product_type', 'groups', 'role']
+
+
+class Add_Product_Type_Group_GroupForm(forms.ModelForm):
+    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True, label='Product Types')
+
+    def __init__(self, *args, **kwargs):
+        super(Add_Product_Type_Group_GroupForm, self).__init__(*args, **kwargs)
+        current_members = Product_Type_Group.objects.filter(group=self.initial['group']).values_list('product_type', flat=True)
+        self.fields['product_types'].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
+            .exclude(id__in=current_members)
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Type_Group
+        fields = ['product_types', 'group', 'role']
+
+
+class Edit_Product_Type_Group_Form(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Edit_Product_Type_Group_Form, self).__init__(*args, **kwargs)
+        self.fields['product_type'].disabled = True
+        self.fields['group'].disabled = True
+
+    class Meta:
+        model = Product_Type_Group
+        fields = ['product_type', 'group', 'role']
+
+
+class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
+    def __init__(self, *args, **kwargs):
+        super(Delete_Product_Type_GroupForm, self).__init__(*args, **kwargs)
+        self.fields['role'].disabled = True
+
+
 class DojoUserForm(forms.ModelForm):
     class Meta:
         model = Dojo_User
@@ -1580,7 +1765,65 @@ class DojoUserForm(forms.ModelForm):
                    'user_permissions']
 
 
+class ChangePasswordForm(forms.Form):
+    current_password = forms.CharField(widget=forms.PasswordInput,
+        required=True)
+    new_password = forms.CharField(widget=forms.PasswordInput,
+        required=True, validators=[validate_password],
+        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
+                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?).')  # noqa W605
+    confirm_password = forms.CharField(widget=forms.PasswordInput,
+        required=True, validators=[validate_password],
+        help_text='Password must match the new password entered above, following the same password rules.')
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        super(ChangePasswordForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        current_password = self.cleaned_data.get('current_password')
+        new_password = self.cleaned_data.get('new_password')
+        confirm_password = self.cleaned_data.get('confirm_password')
+
+        if not self.user.check_password(current_password):
+            raise forms.ValidationError('Current password is incorrect.')
+        if new_password == current_password:
+            raise forms.ValidationError('New password must be different from current password.')
+        if new_password != confirm_password:
+            raise forms.ValidationError('Passwords do not match.')
+
+        return cleaned_data
+
+
 class AddDojoUserForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput,
+        required=False, validators=[validate_password],
+        help_text='Password must contain at least 9 characters, one lowercase (a-z) and one uppercase (A-Z) letter, one number (0-9), \
+                   and one symbol (()[]{}|\`~!@#$%^&*_-+=;:\'\",<>./?). Leave blank to set an unusable password for this user.')  # noqa W605
+    if not settings.FEATURE_AUTHORIZATION_V2:
+        authorized_products = forms.ModelMultipleChoiceField(
+            queryset=Product.objects.all(), required=False,
+            help_text='Select the products this user should have access to.')
+        authorized_product_types = forms.ModelMultipleChoiceField(
+            queryset=Product_Type.objects.all(), required=False,
+            help_text='Select the product types this user should have access to.')
+
+    class Meta:
+        model = Dojo_User
+        fields = ['username', 'password', 'first_name', 'last_name', 'email', 'is_active',
+                  'is_staff', 'is_superuser']
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions']
+        else:
+            exclude = ['last_login', 'groups', 'date_joined', 'user_permissions',
+                       'authorized_products', 'authorized_product_types']
+
+
+class EditDojoUserForm(forms.ModelForm):
     if not settings.FEATURE_AUTHORIZATION_V2:
         authorized_products = forms.ModelMultipleChoiceField(
             queryset=Product.objects.all(), required=False,
@@ -1594,12 +1837,10 @@ class AddDojoUserForm(forms.ModelForm):
         fields = ['username', 'first_name', 'last_name', 'email', 'is_active',
                   'is_staff', 'is_superuser']
         if not settings.FEATURE_AUTHORIZATION_V2:
-            exclude = ['password', 'last_login', 'groups',
-                    'date_joined', 'user_permissions']
+            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions']
         else:
-            exclude = ['password', 'last_login', 'groups',
-                    'date_joined', 'user_permissions',
-                    'authorized_products', 'authorized_product_types']
+            exclude = ['password', 'last_login', 'groups', 'date_joined', 'user_permissions',
+                       'authorized_products', 'authorized_product_types']
 
 
 class DeleteUserForm(forms.ModelForm):
@@ -1615,6 +1856,24 @@ class UserContactInfoForm(forms.ModelForm):
     class Meta:
         model = UserContactInfo
         exclude = ['user', 'slack_user_id']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            del self.fields['force_password_reset']
+
+
+class GlobalRoleForm(forms.ModelForm):
+    class Meta:
+        model = Global_Role
+        exclude = ['user', 'group']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_user = get_current_user()
+        if not current_user.is_superuser:
+            self.fields['role'].disabled = True
 
 
 def get_years():
@@ -1691,15 +1950,6 @@ class DeleteStubFindingForm(forms.ModelForm):
     class Meta:
         model = Stub_Finding
         fields = ['id']
-
-
-class AddFindingImageForm(forms.ModelForm):
-    class Meta:
-        model = FindingImage
-        exclude = ['']
-
-
-FindingImageFormSet = modelformset_factory(FindingImage, extra=3, max_num=10, exclude=[''], can_delete=True)
 
 
 class GITHUB_IssueForm(forms.ModelForm):
@@ -1898,10 +2148,28 @@ class Languages_TypeTypeForm(forms.ModelForm):
         exclude = ['product']
 
 
-class App_AnalysisTypeForm(forms.ModelForm):
+class AppAnalysisForm(forms.ModelForm):
+    user = forms.ModelChoiceField(queryset=Dojo_User.objects.exclude(is_active=False).order_by('first_name', 'last_name'), required=True)
+
     class Meta:
         model = App_Analysis
         exclude = ['product']
+
+
+class DeleteAppAnalysisForm(forms.ModelForm):
+    class Meta:
+        model = App_Analysis
+        exclude = ['product', 'tags']
+
+    def __init__(self, *args, **kwargs):
+        super(DeleteAppAnalysisForm, self).__init__(*args, **kwargs)
+        self.fields['name'].disabled = True
+        self.fields['user'].disabled = True
+        self.fields['confidence'].disabled = True
+        self.fields['version'].disabled = True
+        self.fields['icon'].disabled = True
+        self.fields['website'].disabled = True
+        self.fields['website_found'].disabled = True
 
 
 class ToolConfigForm(forms.ModelForm):
@@ -1917,8 +2185,9 @@ class ToolConfigForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
-            url_validator(form_data["url"])
+            if form_data["url"] is not None:
+                url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
+                url_validator(form_data["url"])
         except forms.ValidationError:
             raise forms.ValidationError(
                 'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
@@ -1959,8 +2228,9 @@ class ToolProductSettingsForm(forms.ModelForm):
         form_data = self.cleaned_data
 
         try:
-            url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
-            url_validator(form_data["url"])
+            if form_data["url"] is not None:
+                url_validator = URLValidator(schemes=['ssh', 'http', 'https'])
+                url_validator(form_data["url"])
         except forms.ValidationError:
             raise forms.ValidationError(
                 'It does not appear as though this endpoint is a valid URL/SSH or IP address.',
@@ -2315,7 +2585,7 @@ class JIRAFindingForm(forms.Form):
                 # for field in error_fields:
                 #     self.finding_form.add_error(field, error)
 
-        if jira_issue_key_new and not finding.has_jira_group_issue:
+        if jira_issue_key_new and (not finding or not finding.has_jira_group_issue):
             # when there is a group jira issue, we skip all the linking/unlinking as this is not supported (yet)
             if finding:
                 # in theory there can multiple jira instances that have similar projects
@@ -2416,7 +2686,7 @@ class GoogleSheetFieldsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.credentials_required = kwargs.pop('credentials_required')
         options = ((0, 'Hide'), (100, 'Small'), (200, 'Medium'), (400, 'Large'))
-        protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'images', 'under_review', 'reviewers',
+        protect = ['reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'is_template']
         self.all_fields = kwargs.pop('all_fields')
         super(GoogleSheetFieldsForm, self).__init__(*args, **kwargs)
@@ -2808,7 +3078,7 @@ class AssignUserForm(forms.ModelForm):
             assignee = kwargs.pop('asignees')
         super(AssignUserForm, self).__init__(*args, **kwargs)
         if assignee is None:
-            self.fields['assignee'] = forms.ModelChoiceField(queryset=User.objects.all(), empty_label='Not Assigned', required=False)
+            self.fields['assignee'] = forms.ModelChoiceField(queryset=Dojo_User.objects.all(), empty_label='Not Assigned', required=False)
         else:
             self.fields['assignee'].initial = assignee
 

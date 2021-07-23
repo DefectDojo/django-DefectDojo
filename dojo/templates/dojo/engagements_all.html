@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% load display_tags %}
+{% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row" xmlns="http://www.w3.org/1999/html">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -24,7 +26,7 @@
                 </div>
 
                 <div class="table-responsive panel panel-default">
-                    <table id="engagements" class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                    <table id="engagements" class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <thead>
                         <tr>
                             <th>Product</th>
@@ -37,9 +39,7 @@
                             <th>Period</th>
                             <th>Lead</th>
                             <th>Tests</th>
-                            {% if user.is_staff %}
-                                <th>Engagement</th>
-                            {% endif %}
+                            <th>Engagement</th>
                         </tr>
                         </thead>
 
@@ -78,24 +78,24 @@
                                     </td>
                                     {% endif %}
                                     <td> {{ e.status }} </td>
-                                    <td> {{ e.target_start|date:"SHORT_DATE_FORMAT" }} - {{ e.target_end|date:"SHORT_DATE_FORMAT" }}
+                                    <td> {{ e.target_start }} - {{ e.target_end }}
                                         {% if e.is_overdue %}<sup><div class="tag-label warning-color">{{ e.target_end|overdue }} overdue</div></sup>
                                         {% endif %}
                                     </td>
-                                    <td> {{ e.lead.first_name }}</td>
+                                    <td> {{ e.lead.first_name }} {{ e.lead.last_name }}</td>
                                     <td>
                                         <a class="eng_link"
                                            href="{% url 'view_engagement' e.id %}#tests">
                                             {{ e.test_count }}
                                         </a>
                                     </td>
-                                    {% if user.is_staff %}
-                                        <td>
-                                            <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
+                                    <td>
+                                        {% if p|has_object_permission:"Engagement_Add" or user|is_authorized_for_staff:p %}
+                                        <a class="btn btn-sm btn-success" href="{% url 'new_eng_for_prod' p.id %}">
                                                 <i class="fa fa-plus"></i> Add
-                                            </a>
-                                        </td>
-                                    {% endif %}
+                                        </a>
+                                        {% endif %}
+                                    </td>
                                 </tr>
 
                             {% endfor %}
@@ -113,6 +113,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 
     <script>
         $(function () {

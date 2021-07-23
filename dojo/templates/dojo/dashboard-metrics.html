@@ -2,6 +2,7 @@
 {% load event_tags %}
 {% load static %}
 {% block add_styles %}
+    {{ block.super }}
     body{
         padding-top: 0px !important;
     }
@@ -22,6 +23,7 @@
     rotate(-45deg);-ms-transform:rotate(-45deg);display: inline-block;}
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <div class="row navbar-fixed-top">
         <div class="col-md-12">
             <h2>{{ name }} For {{ start_date.date }} - {{ end_date.date }}
@@ -179,6 +181,7 @@
     <br/>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <!-- Flot Charts JavaScript -->
     <script src="{% static "flot/excanvas.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.js" %}"></script>

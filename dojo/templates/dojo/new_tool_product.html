@@ -1,5 +1,6 @@
 {% extends "base.html"%}
 {% block content %}
+    {{ block.super }}
  {{ block.super }}
     <h3> Add Product Tool Type Configuration </h3>
     <form class="form-horizontal" action="{% url 'new_tool_product' pid %}" method="post">{% csrf_token %}

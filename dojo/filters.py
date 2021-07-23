@@ -18,7 +18,7 @@ from django.db.models import Q
 from dojo.models import Dojo_User, Finding_Group, Product_Type, Finding, Product, Test_Import, Test_Type, \
     Endpoint, Development_Environment, Finding_Template, Note_Type, \
     Engagement_Survey, Question, TextQuestion, ChoiceQuestion, Endpoint_Status, Engagement, \
-    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES
+    ENGAGEMENT_STATUS_CHOICES, Test, App_Analysis, SEVERITY_CHOICES, Dojo_Group
 from dojo.utils import get_system_setting
 from django.contrib.contenttypes.models import ContentType
 import tagulous
@@ -188,8 +188,6 @@ def get_finding_filter_fields(metrics=False, similar=False):
     if similar:
         fields.extend([
             'id',
-            'unique_id_from_tool',
-            'vuln_id_from_tool',
             'hash_code'
         ])
 
@@ -228,6 +226,8 @@ def get_finding_filter_fields(metrics=False, similar=False):
                 'has_component',
                 'has_notes',
                 'file_path',
+                'unique_id_from_tool',
+                'vuln_id_from_tool',
     ])
 
     if similar:
@@ -740,6 +740,7 @@ class ProductEngagementFilter(DojoFilter):
 
 
 class ApiEngagementFilter(DojoFilter):
+    product__prod_type = NumberInFilter(field_name='product__prod_type', lookup_expr='in')
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
                              help_text='Comma seperated list of exact tags')
@@ -921,7 +922,6 @@ class ProductFilter(DojoFilter):
 
 class ApiProductFilter(DojoFilter):
     # BooleanFilter
-    duplicate = BooleanFilter(field_name='duplicate')
     external_audience = BooleanFilter(field_name='external_audience')
     internet_accessible = BooleanFilter(field_name='internet_accessible')
     # CharFilter
@@ -942,7 +942,6 @@ class ApiProductFilter(DojoFilter):
     prod_numeric_grade = NumberInFilter(field_name='prod_numeric_grade', lookup_expr='in')
     user_records = NumberInFilter(field_name='user_records', lookup_expr='in')
     regulations = NumberInFilter(field_name='regulations', lookup_expr='in')
-    active_finding_count = NumberInFilter(field_name='active_finding_count', lookup_expr='in')
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', label='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
@@ -1109,7 +1108,7 @@ class ApiFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['url', 'is_template', 'thread_id', 'notes', 'images', 'files',
+        exclude = ['url', 'is_template', 'thread_id', 'notes', 'files',
                    'sourcefile', 'line', 'endpoint_status']
 
 
@@ -1265,7 +1264,7 @@ class FindingFilter(FindingFilterWithTags):
                    'endpoint', 'references', 'is_template',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
-                   'hash_code', 'images', 'endpoint_status',
+                   'hash_code', 'endpoint_status',
                    'line_number', 'reviewers', 'sourcefile',
                    'created', 'files', 'sla_start_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
@@ -1908,7 +1907,7 @@ class ReportFindingFilter(FindingFilterWithTags):
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
                    'endpoint', 'references', 'test', 'is_template', 'sonarqube_issue'
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
-                   'numerical_severity', 'reporter', 'last_reviewed', 'images',
+                   'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
 
     def __init__(self, *args, **kwargs):
@@ -2001,6 +2000,16 @@ class UserFilter(DojoFilter):
                   'last_name', 'username']
         exclude = ['password', 'last_login', 'groups', 'user_permissions',
                    'date_joined']
+
+
+class GroupFilter(DojoFilter):
+    name = CharFilter(lookup_expr='icontains')
+    description = CharFilter(lookup_expr='icontains')
+
+    class Meta:
+        model = Dojo_Group
+        fields = ['name', 'description']
+        exclude = ['users']
 
 
 class TestImportFilter(DojoFilter):

@@ -2,15 +2,11 @@ from enum import IntEnum
 
 
 class Roles(IntEnum):
-    Reader = 0
+    Reader = 5
     API_Importer = 1
     Writer = 2
     Maintainer = 3
     Owner = 4
-
-    @classmethod
-    def choices(cls):
-        return [(key.value, key.name) for key in cls]
 
     @classmethod
     def has_value(cls, value):
@@ -95,6 +91,23 @@ class Permissions(IntEnum):
     Product_Group_Edit = 2106
     Product_Group_Delete = 2107
 
+    Group_View = 2202
+    Group_Member_Delete = 2203
+    Group_Manage_Members = 2204
+    Group_Add_Owner = 2205
+    Group_Edit = 2206
+    Group_Delete = 2207
+
+    Language_View = 2302
+    Language_Add = 2303
+    Language_Edit = 2306
+    Language_Delete = 2307
+
+    Technology_View = 2402
+    Technology_Add = 2403
+    Technology_Edit = 2406
+    Technology_Delete = 2407
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -154,6 +167,23 @@ class Permissions(IntEnum):
         return {Permissions.Product_Type_Group_View, Permissions.Product_Type_Group_Edit,
             Permissions.Product_Type_Group_Delete}
 
+    @classmethod
+    def get_group_permissions(cls):
+        return {Permissions.Group_View, Permissions.Group_Member_Delete, Permissions.Group_Manage_Members,
+            Permissions.Group_Add_Owner, Permissions.Group_Edit, Permissions.Group_Delete}
+
+    @classmethod
+    def get_group_member_permissions(cls):
+        return {Permissions.Group_View, Permissions.Group_Manage_Members, Permissions.Group_Member_Delete}
+
+    @classmethod
+    def get_language_permissions(cls):
+        return {Permissions.Language_View, Permissions.Language_Edit, Permissions.Language_Delete}
+
+    @classmethod
+    def get_technology_permissions(cls):
+        return {Permissions.Technology_View, Permissions.Technology_Edit, Permissions.Technology_Delete}
+
 
 def get_roles_with_permissions():
     return {
@@ -167,7 +197,10 @@ def get_roles_with_permissions():
             Permissions.Endpoint_View,
             Permissions.Component_View,
             Permissions.Product_Group_View,
-            Permissions.Product_Type_Group_View
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+            Permissions.Language_View,
+            Permissions.Technology_View
         },
         Roles.API_Importer: {
             Permissions.Product_Type_View,
@@ -180,6 +213,7 @@ def get_roles_with_permissions():
             Permissions.Component_View,
             Permissions.Product_Group_View,
             Permissions.Product_Type_Group_View,
+            Permissions.Technology_View,
             Permissions.Import_Scan_Result
         },
         Roles.Writer: {
@@ -219,7 +253,17 @@ def get_roles_with_permissions():
             Permissions.Note_Add,
 
             Permissions.Product_Group_View,
-            Permissions.Product_Type_Group_View
+            Permissions.Product_Type_Group_View,
+            Permissions.Group_View,
+
+            Permissions.Language_View,
+            Permissions.Language_Add,
+            Permissions.Language_Edit,
+            Permissions.Language_Delete,
+
+            Permissions.Technology_View,
+            Permissions.Technology_Add,
+            Permissions.Technology_Edit
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
@@ -279,7 +323,22 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Group_View,
             Permissions.Product_Type_Group_Add,
             Permissions.Product_Type_Group_Edit,
-            Permissions.Product_Type_Group_Delete
+            Permissions.Product_Type_Group_Delete,
+
+            Permissions.Group_View,
+            Permissions.Group_Edit,
+            Permissions.Group_Manage_Members,
+            Permissions.Group_Member_Delete,
+
+            Permissions.Language_View,
+            Permissions.Language_Add,
+            Permissions.Language_Edit,
+            Permissions.Language_Delete,
+
+            Permissions.Technology_View,
+            Permissions.Technology_Add,
+            Permissions.Technology_Edit,
+            Permissions.Technology_Delete
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -345,6 +404,23 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Group_Add,
             Permissions.Product_Type_Group_Add_Owner,
             Permissions.Product_Type_Group_Edit,
-            Permissions.Product_Type_Group_Delete
+            Permissions.Product_Type_Group_Delete,
+
+            Permissions.Group_View,
+            Permissions.Group_Edit,
+            Permissions.Group_Manage_Members,
+            Permissions.Group_Member_Delete,
+            Permissions.Group_Add_Owner,
+            Permissions.Group_Delete,
+
+            Permissions.Language_View,
+            Permissions.Language_Add,
+            Permissions.Language_Edit,
+            Permissions.Language_Delete,
+
+            Permissions.Technology_View,
+            Permissions.Technology_Add,
+            Permissions.Technology_Edit,
+            Permissions.Technology_Delete
         }
     }

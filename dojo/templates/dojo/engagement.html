@@ -4,6 +4,7 @@
 {% load dict_key %}
 
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -27,9 +28,10 @@
 
                 <div class="table-responsive panel panel-default">
                     <table id="engagements"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                           class="tablesorter-bootstrap table table-condensed table-striped table-hover">
                         <tr>
                             <th>{% dojo_sort request 'Engagement' 'name' 'asc' %}</th>
+                            <th>Period</th>
                             <th class="prod_name">{% dojo_sort request 'Product' 'product__name' 'asc' %}</th>
                             <th class="prod_name">{% dojo_sort request 'Product Type' 'product__prod_type__name' %}</th>
                             <th>{% dojo_sort request 'Lead' 'lead__first_name' %}</th>
@@ -42,14 +44,8 @@
                         {% for e in engagements %}
                             <tr>
                                 <td style="white-space: normal">
-                                    {% if e.is_overdue %}
-                                        <span style="float: right" class="tag-label warning-color">
-                                             {{ e.target_end|overdue }} overdue
-                                         </span>
-                                     {% endif %}
                                      <a class="eng_link" href="{%url 'view_engagement' e.id %}">
                                         {% if e.name %}{{ e.name }}{% endif %}
-                                        {{ e.target_start|date }} - {{ e.target_end|date }}
                                     </a>
                                     <div>
                                         {% for tag in e.tags.all %}
@@ -58,6 +54,13 @@
                                             </a>
                                         {% endfor %}
                                     </div>
+                                </td>
+                                <td> {{ e.target_start }} - {{ e.target_end }}
+                                     {% if e.is_overdue %}
+                                        <span class="tag-label warning-color">
+                                             {{ e.target_end|overdue }} overdue
+                                         </span>
+                                      {% endif %}
                                 </td>
                                 <td class="prod_name">
                                     <a href="{% url 'view_product' e.product.id %}">
@@ -77,11 +80,11 @@
                                         {{ e.product.prod_type.name }}
                                     </a>
                                 </td>
-                                <td>{{ e.lead.first_name }}</td>
+                                <td>{{ e.lead.first_name }} {{ e.lead.last_name }}</td>
                                 <td>
                                     <a class="eng_link" href="{%url 'view_engagement' e.id %}#tests">
                                         {% with test_count=engagement_test_counts|dict_key:e.pk|default_if_none:0 %}
-                                            {{ test_count }} Test{{ test_count|pluralize }}
+                                            {{ test_count }}
                                         {% endwith %}
                                     </a>
                                 </td>
@@ -95,7 +98,7 @@
                     </table>
                 </div>
                 <div class="clearfix">
-                    {% include "dojo/paging_snippet.html" with page=products page_size=True %}
+                    {% include "dojo/paging_snippet.html" with page=engagements page_size=True %}
                 </div>
             {% else %}
                 <div id="no_engagements"><h5 class="text-center"> No active engagements </h5></div>
@@ -105,6 +108,7 @@
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script>
         $(function () {
             var prodWords = [

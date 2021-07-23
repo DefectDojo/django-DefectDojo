@@ -166,6 +166,7 @@
         }
     </style>
 {% block content %}
+    {{ block.super }}
     <div class="container" id="html_report">
         {% for widget in widgets %}
             {{ widget.get_html }}

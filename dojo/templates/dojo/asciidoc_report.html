@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {{ block.super }}
     {% load event_tags %}
     {% load display_tags %}
     {% load humanize %}
@@ -324,13 +325,7 @@
         {% if include_finding_images %}
             <p><b>==== Finding Images: ====</b>
                 <br>
-                {% if find.images.all %}
-                    {% for pic in find.images.all %}
-                        image::{{ request.scheme }}://{{ request.get_host }}{% pic_token pic 'small' %}[] +<br>
-                    {% endfor %}
-                {% else %}
-                    No images found.
-                {% endif %}
+                {% include "dojo/snippets/file_images.html" with size='small' obj=find format="AsciiDoc" %}
             </p><br>
         {% else %}
             <br>
@@ -381,13 +376,7 @@
             {% if include_finding_images %}
                 <p><b>==== Finding Images: ====</b>
                     <br>
-                    {% if find.images.all %}
-                        {% for pic in find.images.all %}
-                            image::{{ request.scheme }}://{{ request.get_host }}{% pic_token pic 'small' %}[] +<br>
-                        {% endfor %}
-                    {% else %}
-                        No images found.
-                    {% endif %}
+                    {% include "dojo/snippets/file_images.html" with size='small' obj=find format="AsciiDoc" %}
                 </p><br>
             {% else %}
                 <br>
@@ -488,13 +477,7 @@
                 {% if include_finding_images %}
                     <p><b>==== Finding Images: ====</b>
                         <br>
-                        {% if find.images.all %}
-                            {% for pic in find.images.all %}
-                                image::{{ request.scheme }}://{{ request.get_host }}{% pic_token pic 'small' %}[] +<br>
-                            {% endfor %}
-                        {% else %}
-                            No images found.
-                        {% endif %}
+                        {% include "dojo/snippets/file_images.html" with size='small' obj=find format="AsciiDoc" %}
                     </p><br>
                 {% else %}
                     <br>
@@ -528,6 +511,7 @@
 	{% endif %}
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="text/javascript">
 
         window.onload = function () {

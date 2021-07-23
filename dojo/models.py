@@ -19,8 +19,6 @@ from django_extensions.db.models import TimeStampedModel
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.functional import cached_property
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToCover
 from django.utils import timezone
 from pytz import all_timezones
 from polymorphic.models import PolymorphicModel
@@ -349,6 +347,20 @@ class Dojo_User(User):
         return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
 
     @staticmethod
+    def force_password_reset(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.force_password_reset
+
+    def disable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = False
+            user.usercontactinfo.save()
+
+    def enable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = True
+            user.usercontactinfo.save()
+
+    @staticmethod
     def generate_full_name(user):
         """
         Returns the first_name plus the last_name, with a space in between.
@@ -378,15 +390,39 @@ class UserContactInfo(models.Model):
     slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
+    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset their password on next login.')
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    is_owner = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
 
 
 class Dojo_Group(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True)
-    users = models.ManyToManyField(Dojo_User, blank=True)
+    description = models.CharField(max_length=4000, null=True, blank=True)
+    users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
 
     def __str__(self):
         return self.name
+
+
+class Dojo_Group_Member(models.Model):
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, help_text="This role determines the permissions of the user to manage the group.", verbose_name="Group role")
+
+
+class Global_Role(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+    group = models.OneToOneField(Dojo_Group, null=True, blank=True, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, help_text="The global role will be applied to all product types and products.", verbose_name="Global role")
 
 
 class Contact(models.Model):
@@ -453,7 +489,7 @@ class Product_Type(models.Model):
          * San Francisco / New York offices
     """
     name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True)
+    description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -532,6 +568,7 @@ class Test_Type(models.Model):
     name = models.CharField(max_length=200, unique=True)
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -808,30 +845,30 @@ class Product(models.Model):
 class Product_Member(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Group(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Member(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Group(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)
-    description = models.CharField(max_length=2000, null=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
 
     class Meta:
         ordering = ['name']
@@ -843,7 +880,7 @@ class Tool_Type(models.Model):
 class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.CharField(max_length=2000, null=True)
+    url = models.CharField(max_length=2000, null=True, blank=True)
     tool_type = models.ForeignKey(Tool_Type, related_name='tool_type', on_delete=models.CASCADE)
     authentication_type = models.CharField(max_length=15,
                                            choices=(
@@ -1096,7 +1133,7 @@ class Endpoint_Status(models.Model):
 
 
 class Endpoint(models.Model):
-    protocol = models.CharField(null=True, blank=True, max_length=10,
+    protocol = models.CharField(null=True, blank=True, max_length=20,
                                  help_text="The communication protocol/scheme such as 'http', 'ftp', 'dns', etc.")
     userinfo = models.CharField(null=True, blank=True, max_length=500,
                               help_text="User info as 'alice', 'bob', etc.")
@@ -1142,7 +1179,7 @@ class Endpoint(models.Model):
                 self.userinfo = None
 
         if self.host:
-            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.host):  # https://tools.ietf.org/html/rfc3986#section-3.2.2
+            if not re.match(r'^[A-Za-z0-9][A-Za-z0-9_\.\-\+]+$', self.host):
                 try:
                     validate_ipv46_address(self.host)
                 except ValidationError:
@@ -1399,7 +1436,7 @@ class Test(models.Model):
             models.Index(fields=['engagement', 'test_type']),
         ]
 
-    def test_type_name(self):
+    def test_type_name(self) -> str:
         return self.test_type.name
 
     def __str__(self):
@@ -1718,10 +1755,6 @@ class Finding(models.Model):
                                          on_delete=models.CASCADE,
                                          verbose_name="Last Reviewed By",
                                          help_text="Provides the person who last reviewed the flaw.")
-    images = models.ManyToManyField('FindingImage',
-                                    blank=True,
-                                    verbose_name="Images",
-                                    help_text="Image(s) / Screenshot(s) related to the flaw.")
     files = models.ManyToManyField(FileUpload,
                                    blank=True,
                                    editable=False,
@@ -2694,36 +2727,12 @@ class Risk_Acceptance(models.Model):
         return None
 
 
-class FindingImage(models.Model):
-    image = models.ImageField(upload_to=UniqueUploadNameProvider('finding_images'))
-    caption = models.CharField(max_length=500, blank=True)
-    image_thumbnail = ImageSpecField(source='image',
-                                     processors=[ResizeToCover(100, 100)],
-                                     format='JPEG',
-                                     options={'quality': 70})
-    image_small = ImageSpecField(source='image',
-                                 processors=[ResizeToCover(640, 480)],
-                                 format='JPEG',
-                                 options={'quality': 100})
-    image_medium = ImageSpecField(source='image',
-                                  processors=[ResizeToCover(800, 600)],
-                                  format='JPEG',
-                                  options={'quality': 100})
-    image_large = ImageSpecField(source='image',
-                                 processors=[ResizeToCover(1024, 768)],
-                                 format='JPEG',
-                                 options={'quality': 100})
-
-    def __str__(self):
-        return self.image.name or 'No Image'
-
-
-class FindingImageAccessToken(models.Model):
+class FileAccessToken(models.Model):
     """This will allow reports to request the images without exposing the
     media root to the world without
     authentication"""
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
-    image = models.ForeignKey(FindingImage, null=False, blank=False, on_delete=models.CASCADE)
+    file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
     size = models.CharField(max_length=9,
                             choices=(
@@ -2737,7 +2746,7 @@ class FindingImageAccessToken(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = uuid4()
-        return super(FindingImageAccessToken, self).save(*args, **kwargs)
+        return super(FileAccessToken, self).save(*args, **kwargs)
 
 
 class BannerConf(models.Model):
@@ -3062,8 +3071,8 @@ class Tool_Product_History(models.Model):
 
 class Alerts(models.Model):
     title = models.CharField(max_length=250, default='', null=False)
-    description = models.CharField(max_length=2000, null=True)
-    url = models.URLField(max_length=2000, null=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url = models.URLField(max_length=2000, null=True, blank=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
     user_id = models.ForeignKey(User, null=True, editable=False, on_delete=models.CASCADE)
@@ -3128,7 +3137,7 @@ class Cred_Mapping(models.Model):
 
 class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False)
-    color = models.CharField(max_length=7, null=True, verbose_name='HTML color')
+    color = models.CharField(max_length=7, null=True, blank=True, verbose_name='HTML color')
 
     def __str__(self):
         return self.language
@@ -3169,7 +3178,7 @@ class App_Analysis(models.Model):
 
 
 class Objects_Review(models.Model):
-    name = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     def __str__(self):
@@ -3205,11 +3214,11 @@ class Objects_Product(models.Model):
 class Objects_Engagement(models.Model):
     engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
     object_id = models.ForeignKey(Objects_Product, on_delete=models.CASCADE)
-    build_id = models.CharField(max_length=150, null=True)
+    build_id = models.CharField(max_length=150, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
     full_url = models.URLField(max_length=400, null=True, blank=True)
-    type = models.CharField(max_length=30, null=True)
-    percentUnchanged = models.CharField(max_length=10, null=True)
+    type = models.CharField(max_length=30, null=True, blank=True)
+    percentUnchanged = models.CharField(max_length=10, null=True, blank=True)
 
     def __str__(self):
         data = ""
@@ -3285,7 +3294,7 @@ class Benchmark_Category(models.Model):
 
 class Benchmark_Requirement(models.Model):
     category = models.ForeignKey(Benchmark_Category, on_delete=models.CASCADE)
-    objective_number = models.CharField(max_length=15, null=True)
+    objective_number = models.CharField(max_length=15, null=True, blank=True)
     objective = models.TextField()
     references = models.TextField(blank=True, null=True)
     level_1 = models.BooleanField(default=False)
@@ -3643,8 +3652,8 @@ admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
 admin.site.register(Test)
 admin.site.register(Finding, FindingAdmin)
-admin.site.register(FindingImage)
-admin.site.register(FindingImageAccessToken)
+admin.site.register(FileUpload)
+admin.site.register(FileAccessToken)
 admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)

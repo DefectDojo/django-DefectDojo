@@ -1,0 +1,5 @@
+Title,Description,Severity,Date,Url
+Title1,,,28/02/2021,www.example.com
+Title2,,,28/02/2021,localhost
+Title3,,,28/02/2021,127.0.0.1:80
+Title4,,,28/02/2021,foo.bar/path
