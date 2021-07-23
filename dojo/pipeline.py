@@ -101,7 +101,7 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
                         product.description = "[" + project.web_url + "](" + project.web_url + ")"
                 if settings.GITLAB_PROJECT_IMPORT_TAGS or settings.GITLAB_PROJECT_IMPORT_URL:
                     product.save()
-        
+
         # For each product: if user is not project member any more, remove him from product's authorized users
         for product_name in user_product_names:
             if product_name not in project_names:
