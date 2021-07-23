@@ -58,6 +58,8 @@ spec:
           name: {{ .name }}
           {{- else if (eq .type "secret") }}
           secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
           {{- end }}
           {{- with .items }}
           items:
