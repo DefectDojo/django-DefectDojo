@@ -1,3 +1,7 @@
+# For Prowler CSV Export
+# Based on:
+# PROWLER_VERSION=2.4.0-07042021
+
 import re
 from datetime import datetime
 import sys
@@ -32,30 +36,31 @@ class AWSProwlerParser(object):
         account = None
 
         for row in reader:
+            # Getting all available fields from the Prowler CSV
+            # Fields in order of appearence
             profile = row.get('PROFILE')
             account = row.get('ACCOUNT_NUM')
             region = row.get('REGION')
             title_id = row.get('TITLE_ID')
-            result = row.get('RESULT', row.get('CHECK_RESULT'))
-            result_extended = row.get('CHECK_RESULT_EXTENDED')
-            scored = row.get('SCORED')
-            level = row.get('LEVEL')
-            severity = row.get('SEVERITY')
+            result = row.get('CHECK_RESULT')
+            scored = row.get('ITEM_SCORED')
+            level = row.get('ITEM_LEVEL')
             title_text = row.get('TITLE_TEXT')
+            result_extended = row.get('CHECK_RESULT_EXTENDED')
+            asff_compliance_type = row.get('CHECK_ASFF_COMPLIANCE_TYPE')
+            severity = row.get('SEVERITY')
+            aws_service_name = row.get('CHECK_SERVICENAME')
+            asff_resource_type = row.get('CHECK_ASFF_RESOURCE_TYPE')
+            asff_type = row.get('CHECK_ASFF_TYPE')
             impact = row.get('CHECK_RISK')
             mitigation = row.get('CHECK_REMEDIATION')
             documentation = row.get('CHECK_DOC')
+            security_domain = row.get('CHECK_CAF_EPIC')
             # get prowler check number, usefull for exceptions
             prowler_check_number = re.search(r'\[(.*?)\]', title_text).group(1)
             # remove '[check000] ' at the start of each title
-            title_text = re.sub(r'\[.*\]\s', '', title_text)
+            title = re.sub(r'\[.*\]\s', '', result_extended)
             control = re.sub(r'\[.*\]\s', '', title_text)
-            notes = row.get('NOTES')
-            asff_compliance_type = row.get('CHECK_ASFF_COMPLIANCE_TYPE')
-            asff_resource_type = row.get('CHECK_ASFF_RESOURCE_TYPE')
-            asff_type = row.get('CHECK_ASFF_TYPE')
-            aws_service_name = row.get('CHECK_SERVICENAME')
-            security_domain = row.get('CHECK_CAF_EPIC')
             sev = self.getCriticalityRating(result, level, severity)
             if result == "INFO" or result == "PASS":
                 active = False
@@ -63,8 +68,6 @@ class AWSProwlerParser(object):
                 active = True
 
             # creating description early will help with duplication control
-            if not notes:
-                notes = ""
             if not level:
                 level = ""
             else:
@@ -78,7 +81,7 @@ class AWSProwlerParser(object):
                 "\n**ASFF Resource Type:** " + str(asff_resource_type) + \
                 "\n**ASFF Type:** " + str(asff_type) + \
                 "\n**ASFF Compliance Type:** " + str(asff_compliance_type) + \
-                "\n" + str(notes)
+                "\n**Security Domain:** " + str(security_domain)
 
             # improving key to get duplicates
             dupe_key = hashlib.sha256(
@@ -120,6 +123,10 @@ class AWSProwlerParser(object):
             criticality = "Info"
         elif result == "FAIL":
             if severity:
+                # control is failing but marked as Info so we want to mark as
+                # Low to appear in the Dojo
+                if severity == "Informational":
+                    return "Low"
                 return severity
             else:
                 if level == "Level 1":
