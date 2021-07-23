@@ -13,10 +13,10 @@ def custom_exception_handler(exc, context):
         response = Response()
         response.status_code = HTTP_500_INTERNAL_SERVER_ERROR
         response.data = {}
-        response.data['exception'] = exc.__class__.__name__
-        response.data['message'] = str(exc)
+        response.data['message'] = 'Internal server error, check logs for details'
 
     if isinstance(exc, RestrictedError):
         response.status_code = HTTP_409_CONFLICT
+        response.data['message'] = str(exc)
 
     return response
