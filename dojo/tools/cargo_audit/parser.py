@@ -30,7 +30,10 @@ class CargoAuditParser(object):
                     f"\n**Read more:** `{advisory.get('url')}`",
                 ])
                 date = advisory.get('date')
-                cve = advisory.get('aliases')[0]
+                if len(advisory.get('aliases')) != 0:
+                    cve = advisory.get('aliases')[0]
+                else:
+                    cve = None
                 package_name = item.get('package').get('name')
                 package_version = item.get('package').get('version')
                 severity = "High"
