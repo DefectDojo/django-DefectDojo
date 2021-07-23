@@ -187,18 +187,19 @@ def finding_querys(prod_type, request):
                                                  test__engagement__product__prod_type__in=prod_type).prefetch_related(
             'test__engagement__product')
         # capture the accepted findings in period
-        accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date],
+        # set the start date of the month manually for acceepted_findings and accepted_findings_counts
+        accepted_findings = Finding.objects.filter(date__range = [start_date.replace(day=1), end_date], risk_accepted = True,
                                                    test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date],
+        accepted_findings_counts = Finding.objects.filter(date__range = [start_date.replace(day=1), end_date], risk_accepted = True,
                                                           test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
     else:
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
             'test__engagement__product')
-        accepted_findings = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]). \
+        accepted_findings = Finding.objects.filter(date__range = [start_date.replace(day=1), end_date], risk_accepted = True,). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_acceptance__created__date__range=[start_date, end_date]). \
+        accepted_findings_counts = Finding.objects.filter(date__range = [start_date.replace(day=1), end_date], risk_accepted = True,). \
             prefetch_related('test__engagement__product')
 
     findings_closed = get_authorized_findings(Permissions.Finding_View, findings_closed, request.user)
