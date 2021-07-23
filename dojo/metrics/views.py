@@ -197,7 +197,7 @@ def finding_querys(prod_type, request):
     else:
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
             'test__engagement__product')
-        accepted_findings = Finding.objects.filter(date__range=[start_date.replace(day=1), end_date], risk_accepted = True,). \
+        accepted_findings = Finding.objects.filter(date__range=[start_date.replace(day=1), end_date], risk_accepted=True,). \
             prefetch_related('test__engagement__product')
         accepted_findings_counts = Finding.objects.filter(date__range=[start_date.replace(day=1), end_date], risk_accepted=True,). \
             prefetch_related('test__engagement__product')
