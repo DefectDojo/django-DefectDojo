@@ -20,7 +20,7 @@ Set up your environment to use the debug environment, such as:
 
 `$ docker/setEnv.sh debug`
 
-Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md) for more details.
+Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) for more details.
 
 ### Docker images
 You'd want to build your docker images locally, and eventually pass in your local user's `uid` to be able to write to the image (handy for database migration files). Assuming your user's `uid` is `1000`, then:

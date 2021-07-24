@@ -47,7 +47,7 @@ Navigate to <http://localhost:8080>.
 
 ### [Release and Branch Model](readme-docs/RELEASE-AND-BRANCH-MODEL.md)
 
-### [Contributing](readme-docs.md)
+### [Contributing](readme-docs/CONTRIBUTING.md)
 
 ### [Roadmap](readme-docs/ROADMAP.md)
 
