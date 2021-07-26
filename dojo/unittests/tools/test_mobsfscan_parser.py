@@ -25,7 +25,7 @@ class TestMobsfscanParser(TestCase):
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
-            self.assertEqual('295', finding.cwe)
+            self.assertEqual(295, finding.cwe)
             self.assertIsNotNone(finding.references)
 
         with self.subTest(i=1):
@@ -34,7 +34,7 @@ class TestMobsfscanParser(TestCase):
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
-            self.assertEqual('798', finding.cwe)
+            self.assertEqual(798, finding.cwe)
             self.assertIsNotNone(finding.references)
             self.assertEqual("app/src/main/java/com/routes/domain/analytics/event/Signatures.kt", finding.file_path)
             self.assertEqual(10, finding.line)
@@ -45,7 +45,7 @@ class TestMobsfscanParser(TestCase):
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
-            self.assertEqual('200', finding.cwe)
+            self.assertEqual(200, finding.cwe)
             self.assertIsNotNone(finding.references)
 
         with self.subTest(i=3):
@@ -54,7 +54,7 @@ class TestMobsfscanParser(TestCase):
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
-            self.assertEqual('919', finding.cwe)
+            self.assertEqual(919, finding.cwe)
             self.assertIsNotNone(finding.references)
 
         with self.subTest(i=4):
@@ -63,7 +63,7 @@ class TestMobsfscanParser(TestCase):
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
-            self.assertEqual('353', finding.cwe)
+            self.assertEqual(353, finding.cwe)
             self.assertIsNotNone(finding.references)
 
         with self.subTest(i=5):
@@ -72,7 +72,7 @@ class TestMobsfscanParser(TestCase):
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
-            self.assertEqual('295', finding.cwe)
+            self.assertEqual(295, finding.cwe)
             self.assertIsNotNone(finding.references)
 
         with self.subTest(i=6):
@@ -81,5 +81,5 @@ class TestMobsfscanParser(TestCase):
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, finding.nb_occurences)
             self.assertIsNotNone(finding.description)
-            self.assertEqual('200', finding.cwe)
+            self.assertEqual(200, finding.cwe)
             self.assertIsNotNone(finding.references)
