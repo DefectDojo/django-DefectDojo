@@ -20,16 +20,15 @@ class BurpGraphQLParser(object):
         return "Import Burp Enterprise Edition findings from the GraphQL API"
 
     def get_findings(self, filename, test):
-        if filename:
-            tree = filename.read()
-            try:
-                data = json.loads(str(tree, 'utf-8'))
-            except:
-                data = json.loads(tree)
 
-            scan_data = data.get('Issues')
+        data = json.load(filename)
 
-            return self.create_findings(scan_data, test)
+        scan_data = data.get("Issues")
+
+        if not scan_data:
+            raise ValueError('No Issues found')
+
+        return self.create_findings(data.get('Issues'), test)
 
     def create_findings(self, scan_data, test):
 
@@ -49,7 +48,6 @@ class BurpGraphQLParser(object):
                            false_p=False,
                            duplicate=False,
                            out_of_scope=False,
-                           mitigated=None,
                            static_finding=False,
                            dynamic_finding=True,
                            nb_occurences=1)
