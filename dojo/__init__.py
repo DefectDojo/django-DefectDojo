@@ -6,6 +6,6 @@ from .celery import app as celery_app  # noqa
 
 default_app_config = 'dojo.apps.DojoAppConfig'
 
-__version__ = '2.0.0-dev'
+__version__ = '2.1.0-dev'
 __url__ = 'https://github.com/DefectDojo/django-DefectDojo'
 __docs__ = 'https://defectdojo.github.io/django-DefectDojo'

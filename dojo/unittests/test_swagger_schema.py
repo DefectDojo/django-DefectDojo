@@ -19,14 +19,15 @@ from dojo.api_v2.views import \
     SonarqubeIssueViewSet, SonarqubeProductViewSet, \
     SonarqubeIssueTransitionViewSet, StubFindingsViewSet, SystemSettingsViewSet, \
     TestTypesViewSet, TestsViewSet, ToolConfigurationsViewSet, ToolProductSettingsViewSet, \
-    ToolTypesViewSet, UsersViewSet, JiraIssuesViewSet, JiraProjectViewSet, AppAnalysisViewSet
+    ToolTypesViewSet, UsersViewSet, JiraIssuesViewSet, JiraProjectViewSet, AppAnalysisViewSet, \
+    LanguageTypeViewSet, LanguageViewSet
 
 from dojo.models import \
     Development_Environment, Endpoint_Status, Endpoint, Engagement, Finding_Template, \
     Finding, JIRA_Instance, JIRA_Issue, DojoMeta, Note_Type, Notes, Product_Type, Product, Regulation, \
     Sonarqube_Issue, Sonarqube_Product, Sonarqube_Issue_Transition, \
     Stub_Finding, System_Settings, Test_Type, Test, Tool_Configuration, Tool_Product_Settings, \
-    Tool_Type, Dojo_User, JIRA_Project, App_Analysis
+    Tool_Type, Dojo_User, JIRA_Project, App_Analysis, Language_Type, Languages
 
 from dojo.api_v2.serializers import \
     DevelopmentEnvironmentSerializer, EndpointStatusSerializer, EndpointSerializer, \
@@ -36,7 +37,7 @@ from dojo.api_v2.serializers import \
     SonarqubeIssueSerializer, SonarqubeProductSerializer, SonarqubeIssueTransitionSerializer, \
     StubFindingSerializer, SystemSettingsSerializer, TestTypeSerializer, TestSerializer, ToolConfigurationSerializer, \
     ToolProductSettingsSerializer, ToolTypeSerializer, UserSerializer, NoteSerializer, ProductTypeSerializer, \
-    AppAnalysisSerializer
+    AppAnalysisSerializer, LanguageTypeSerializer, LanguageSerializer
 
 SWAGGER_SCHEMA_GENERATOR = OpenAPISchemaGenerator(Info("defectdojo", "v2"))
 BASE_API_URL = "/api/v2"
@@ -793,3 +794,24 @@ class UserTest(BaseClass.SchemaTest):
         self.field_transformers = {
             "username": lambda v: v + "_transformed"
         }
+
+
+class LanguageTypeTest(BaseClass.SchemaTest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.viewname = "language_types"
+        self.viewset = LanguageTypeViewSet
+        self.model = Language_Type
+        self.serializer = LanguageTypeSerializer
+
+
+class LanguageTest(BaseClass.SchemaTest):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.viewname = "languages"
+        self.viewset = LanguageViewSet
+        self.model = Languages
+        self.serializer = LanguageSerializer
+
+    def test_post_endpoint(self):
+        super().test_post_endpoint(extra_data={"language": 2})

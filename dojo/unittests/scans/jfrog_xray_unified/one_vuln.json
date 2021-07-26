@@ -1,0 +1,38 @@
+{ "total_rows" : 1,
+  "rows" : [
+{
+	"cves": [
+	{
+	"cve": "CVE-2020-28493",
+	"cvss_v2_score": 5,
+	"cvss_v2_vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:N/I:N/A:P",
+	"cvss_v3_score": 5.3,
+	"cvss_v3_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+	}
+	],
+	"cvss2_max_score": 5,
+	"cvss3_max_score": 5.3,
+	"summary": "This affects the package jinja2 from 0.0.0 and before 2.11.3. The ReDOS vulnerability of the regex is mainly due to the sub-pattern [a-zA-Z0-9._-]+.[a-zA-Z0-9._-]+ This issue can be mitigated by Markdown to format user content instead of the urlize filter, or by implementing request timeouts and limiting process memory.",
+	"severity": "Medium",
+	"vulnerable_component": "pypi://Jinja2:2.11.2",
+	"impacted_artifact": "pypi://Jinja2:2.11.2",
+	"impact_path": [
+	"pypi://Jinja2:2.11.2"
+	],
+	"path": "pypi-remote/30/9e/f663a2aa66a09d838042ae1a2c5659828bb9b41ea3a6efa20a20fd92b121/Jinja2-2.11.2-py2.py3-none-any.whl",
+	"fixed_versions": [
+	"2.11.3"
+	],
+	"published": "2021-02-02T22:43:02+11:00",
+	"artifact_scan_time": "2021-01-15T15:39:25+11:00",
+	"issue_id": "XRAY-139239",
+	"package_type": "pypi",
+	"provider": "JFrog",
+	"description": "This affects the package jinja2 from 0.0.0 and before 2.11.3. The ReDOS vulnerability of the regex is mainly due to the sub-pattern [a-zA-Z0-9._-]+.[a-zA-Z0-9._-]+ This issue can be mitigated by Markdown to format user content instead of the urlize filter, or by implementing request timeouts and limiting process memory.",
+	"references": [
+	"https://snyk.io/vuln/SNYK-PYTHON-JINJA2-1012994",
+	"https://github.com/pallets/jinja/pull/1343",
+	"https://github.com/pallets/jinja/blob/ab81fd9c277900c85da0c322a2ff9d68a235b2e6/src/jinja2/utils.py%23L20"
+	]
+	}
+]}

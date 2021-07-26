@@ -30,9 +30,11 @@ For compatibility reasons, the code in dev branch should be python3.8 compliant.
 The following are things to consider before submitting a pull request to
 DefectDojo.
 
-0. Ensure all changes made to the code, packages, etc. are reflected requirements.txt, package.json, etc
+0. Base your PR against the `dev` branch, unless discussed otherwise with the maintainers
 
-0. All [unit tests](./dojo/unittests) and [integration tests](./tests) should be passing.
+0. Make sure that the install is working properly.
+
+0. All tests found in [these test scripts](./tests) should be passing.
 
 0. All submitted code should conform to [__PEP8 standards__][pep8].
 
