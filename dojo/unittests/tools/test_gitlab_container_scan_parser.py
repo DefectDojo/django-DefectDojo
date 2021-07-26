@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.test import TestCase
 from dojo.tools.gitlab_container_scan.parser import GitlabContainerScanParser
 from dojo.models import Test
@@ -22,6 +23,7 @@ class TestGitlabContainerScanParser(TestCase):
                 endpoint.clean()
         first_finding = findings[0]
         self.assertEqual(1, len(findings))
+        self.assertEqual(datetime(2021, 4, 14, 19, 46, 18), finding.date)
         self.assertEqual("CVE-2019-3462 in apt-1.4.8", first_finding.title)
         self.assertEqual("apt", first_finding.component_name)
         self.assertEqual("1.4.8", first_finding.component_version)
