@@ -102,6 +102,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
+    DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS=(bool, False),
+    DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_URL=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_MIN_ACCESS_LEVEL=(int, 20),
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
@@ -119,19 +121,23 @@ env = environ.Env(
     DD_SAML2_CREATE_USER=(bool, False),
     DD_SAML2_ATTRIBUTES_MAP=(dict, {
         # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
-        'Email': ('email', ),
-        'UserName': ('username', ),
-        'Firstname': ('first_name', ),
-        'Lastname': ('last_name', )
+        # format: SAML attrib:django_user_model
+        'Email': 'email',
+        'UserName': 'username',
+        'Firstname': 'first_name',
+        'Lastname': 'last_name'
     }),
+    DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
     # Set to True if you want to allow authorized users to make changes to findings or delete them
+    # These parameters are only used for the legacy authorization, which is not active per default anymore.
     DD_AUTHORIZED_USERS_ALLOW_CHANGE=(bool, False),
     DD_AUTHORIZED_USERS_ALLOW_DELETE=(bool, False),
     # Set to True if you want to allow authorized users staff access only on specific products
     # This will only apply to users with 'active' status
+    # This parameter is only used for the legacy authorization, which is not active per default anymore.
     DD_AUTHORIZED_USERS_ALLOW_STAFF=(bool, False),
     # SLA Notifications via alerts and JIRA comments
     # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature
@@ -162,23 +168,31 @@ env = environ.Env(
     DD_LEGACY_API_V1_ENABLE=(bool, False),
     # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
-    # new experimental feature that tracks history across multiple reimports for the same test
-    DD_TRACK_IMPORT_HISTORY=(bool, False),
+    # new feature that tracks history across multiple reimports for the same test
+    DD_TRACK_IMPORT_HISTORY=(bool, True),
 
-    # Feature toggle for new authorization, which is incomplete at the moment.
-    # Don't set it to True for productive environments!
+    # Feature toggle for new authorization, which is the default configuration now.
     DD_FEATURE_AUTHORIZATION_V2=(bool, True),
     # When enabled, staff users have full access to all product types and products
     DD_AUTHORIZATION_STAFF_OVERRIDE=(bool, False),
 
-    DD_FEATURE_FINDING_GROUPS=(bool, False),
+    # Allow grouping of findings in the same test, for example to group findings per dependency
+    DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, 'dojo/templates/issue-trackers'),
     DD_TEMPLATE_DIR_PREFIX=(str, 'dojo/templates/'),
 
     # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
     # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
     # Set to True to revert to the old behaviour where all duplicates are deleted
-    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False)
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False),
+    # Enable Rate Limiting for the login page
+    DD_RATE_LIMITER_ENABLED=(bool, False),
+    # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
+    DD_RATE_LIMITER_RATE=(str, '5/m'),
+    # Block the requests after rate limit is exceeded
+    DD_RATE_LIMITER_BLOCK=(bool, False),
+    # Forces the user to change password on next login.
+    DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
 )
 
 
@@ -417,6 +431,8 @@ SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_
 
 GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
 GITLAB_PROJECT_AUTO_IMPORT = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT')
+GITLAB_PROJECT_IMPORT_TAGS = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS')
+GITLAB_PROJECT_IMPORT_URL = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_URL')
 GITLAB_PROJECT_MIN_ACCESS_LEVEL = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_MIN_ACCESS_LEVEL')
 SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
 SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
@@ -462,6 +478,36 @@ LOGIN_EXEMPT_URLS = (
 )
 
 LEGACY_API_V1_ENABLE = env('DD_LEGACY_API_V1_ENABLE')
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 9,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'dojo.user.validators.NumberValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.UppercaseValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.LowercaseValidator'
+    },
+    {
+        'NAME': 'dojo.user.validators.SymbolValidator'
+    }
+]
+
+# https://django-ratelimit.readthedocs.io/en/stable/index.html
+RATE_LIMITER_ENABLED = env('DD_RATE_LIMITER_ENABLED')
+RATE_LIMITER_RATE = env('DD_RATE_LIMITER_RATE')  # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
+RATE_LIMITER_BLOCK = env('DD_RATE_LIMITER_BLOCK')  # Block the requests after rate limit is exceeded
+RATE_LIMITER_ACCOUNT_LOCKOUT = env('DD_RATE_LIMITER_ACCOUNT_LOCKOUT')  # Forces the user to change password on next login.
 
 # ------------------------------------------------------------------------------
 # SECURITY DIRECTIVES
@@ -678,6 +724,17 @@ vars().update(EMAIL_CONFIG)
 # For more configuration and customization options, see djangosaml2 documentation
 # https://djangosaml2.readthedocs.io/contents/setup.html#configuration
 # To override not configurable settings, you can use local_settings.py
+# function that helps convert env var into the djangosaml2 attribute mapping format
+# https://djangosaml2.readthedocs.io/contents/setup.html#users-attributes-and-account-linking
+
+
+def saml2_attrib_map_format(dict):
+    dout = {}
+    for i in dict:
+        dout[i] = (dict[i],)
+    return dout
+
+
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
 SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
 if SAML2_ENABLED:
@@ -697,10 +754,10 @@ if SAML2_ENABLED:
     SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
     SAML_IGNORE_LOGOUT_ERRORS = True
     SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'username'
-    # SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
+#    SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
     SAML_USE_NAME_ID_AS_USERNAME = True
     SAML_CREATE_UNKNOWN_USER = env('DD_SAML2_CREATE_USER')
-    SAML_ATTRIBUTE_MAPPING = env('DD_SAML2_ATTRIBUTES_MAP')
+    SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env('DD_SAML2_ATTRIBUTES_MAP'))
     BASEDIR = path.dirname(path.abspath(__file__))
     if len(env('DD_SAML2_ENTITY_ID')) == 0:
         SAML2_ENTITY_ID = '%s/saml2/metadata/' % SITE_URL
@@ -716,7 +773,8 @@ if SAML2_ENABLED:
 
         # directory with attribute mapping
         'attribute_map_dir': path.join(BASEDIR, 'attribute-maps'),
-
+        # do now discard attributes not specified in attribute-maps
+        'allow_unknown_attributes': env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE'),
         # this block states what services we provide
         'service': {
             # we are just a lonely SP
@@ -932,6 +990,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Whitesource Scan': ['title', 'severity', 'description'],
     'ZAP Scan': ['title', 'cwe', 'severity'],
     'Qualys Scan': ['title', 'severity'],
+    # 'Qualys Webapp Scan': ['title', 'unique_id_from_tool'],
     'PHP Symfony Security Check': ['title', 'cve'],
     'Clair Scan': ['title', 'cve', 'description', 'severity'],
     'Clair Klar Scan': ['title', 'description', 'severity'],
@@ -948,7 +1007,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'JFrog Xray Unified Scan': ['cve', 'file_path', 'component_name', 'component_version'],
     'Scout Suite Scan': ['title', 'severity', 'description'],
     'AWS Security Hub Scan': ['unique_id_from_tool'],
-    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity']
+    'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
+    'Github Vulnerability Scan': ['unique_id_from_tool']
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1025,6 +1085,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Acunetix Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Scan': DEDUPE_ALGO_HASH_CODE,
     'Clair Klar Scan': DEDUPE_ALGO_HASH_CODE,
+    # 'Qualys Webapp Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,  # Must also uncomment qualys webapp line in hashcode fields per scanner
     'Veracode Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     # for backwards compatibility because someone decided to rename this scanner:
     'Symfony Security Check': DEDUPE_ALGO_HASH_CODE,
@@ -1042,7 +1103,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'JFrog Xray Unified Scan': DEDUPE_ALGO_HASH_CODE,
     'Scout Suite Scan': DEDUPE_ALGO_HASH_CODE,
     'AWS Security Hub Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'Meterian Scan': DEDUPE_ALGO_HASH_CODE
+    'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
+    'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1143,6 +1205,10 @@ LOGGING = {
             'level': '%s' % LOG_LEVEL,
             'propagate': False,
         },
+        'saml2': {
+            'handlers': [r'%s' % LOGGING_HANDLER],
+            'level': '%s' % LOG_LEVEL,
+        },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
             'handlers': [r'%s' % LOGGING_HANDLER],
@@ -1174,6 +1240,10 @@ SCAN_FILE_MAX_SIZE = 100
 # Apply a severity level to "Security Weaknesses" in Qualys WAS
 QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 
+# Create a unique finding for all findings in qualys WAS parser
+# If using this, lines for Qualys WAS deduplication functions must be un-commented
+QUALYS_WAS_UNIQUE_ID = False
+
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',
     'json': 'tagulous.serializers.json',
@@ -1193,8 +1263,7 @@ TAGULOUS_AUTOCOMPLETE_JS = (
 # using 'element' for width should take width from css defined in template, but it doesn't. So set to 70% here.
 TAGULOUS_AUTOCOMPLETE_SETTINGS = {'placeholder': "Enter some tags (comma separated, use enter to select / create a new tag)", 'width': '70%'}
 
-# Feature toggle for new authorization, which is incomplete at the moment.
-# Don't set it to True for productive environments!
+# Feature toggle for new authorization, which is the default configuration now.
 FEATURE_AUTHORIZATION_V2 = env('DD_FEATURE_AUTHORIZATION_V2')
 # When enabled, staff users have full access to all product types and products
 AUTHORIZATION_STAFF_OVERRIDE = env('DD_AUTHORIZATION_STAFF_OVERRIDE')
