@@ -183,8 +183,6 @@ django:
   #     path: /app/dojo/settings/
   #     hostPath: /var/run
   #     container: uwsgi
-  #
-  #
   # ```
   #
   # Each object supports the following keys:

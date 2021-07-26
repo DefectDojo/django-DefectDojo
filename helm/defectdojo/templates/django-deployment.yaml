@@ -60,13 +60,7 @@ spec:
           secretName: {{ .name }}
           {{- else if (eq .type "hostPath") }}
           type: {{ .pathType | default "Directory" }}
-          {{- end }}
-          {{- with .items }}
-          items:
-          {{- range . }}
-          - key: {{.key}}
-            path: {{.path}}
-          {{- end }}
+          path: {{ .hostPath }}
           {{- end }}
       {{- end }}
       containers:
