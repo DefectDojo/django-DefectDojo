@@ -43,7 +43,7 @@ class CargoAuditParser(object):
                     tags = []
 
                 dupe_key = hashlib.sha256(
-                    (vuln_id + cve + date + package_name + package_version).encode('utf-8')
+                    (vuln_id + str(cve) + date + package_name + package_version).encode('utf-8')
                 ).hexdigest()
 
                 if dupe_key in dupes:
@@ -65,5 +65,3 @@ class CargoAuditParser(object):
                     )
                     dupes[dupe_key] = finding
         return list(dupes.values())
-
-
