@@ -23,4 +23,10 @@ urlpatterns = [
         name='edit_product_type_member'),
     url(r'^product/type/member/(?P<memberid>\d+)/delete$', views.delete_product_type_member,
         name='delete_product_type_member'),
+    url(r'^product/type/(?P<ptid>\d+)/add_group$', views.add_product_type_group,
+        name='add_product_type_group'),
+    url(r'^product/type/group/(?P<groupid>\d+)/edit$', views.edit_product_type_group,
+        name='edit_product_type_group'),
+    url(r'^product/type/group/(?P<groupid>\d+)/delete$', views.delete_product_type_group,
+        name='delete_product_type_group')
 ]

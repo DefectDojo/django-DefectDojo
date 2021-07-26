@@ -39,7 +39,7 @@ from django.db.models.query import Prefetch, QuerySet
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.risk_acceptance.helper import prefetch_for_expiration
-from dojo.finding.views import NOT_ACCEPTED_FINDINGS_QUERY
+from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
 from django.views.decorators.vary import vary_on_cookie
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
@@ -416,7 +416,7 @@ def prefetch_for_view_tests(tests):
         prefetched = prefetched.annotate(count_findings_test_all=Count('finding__id', distinct=True))
         prefetched = prefetched.annotate(count_findings_test_active=Count('finding__id', filter=Q(finding__active=True), distinct=True))
         prefetched = prefetched.annotate(count_findings_test_active_verified=Count('finding__id', filter=Q(finding__active=True) & Q(finding__verified=True), distinct=True))
-        prefetched = prefetched.annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_Mitigated=True), distinct=True))
+        prefetched = prefetched.annotate(count_findings_test_mitigated=Count('finding__id', filter=Q(finding__is_mitigated=True), distinct=True))
         prefetched = prefetched.annotate(count_findings_test_dups=Count('finding__id', filter=Q(finding__duplicate=True), distinct=True))
         prefetched = prefetched.annotate(total_reimport_count=Count('test_import__id', filter=Q(test_import__type=Test_Import.REIMPORT_TYPE), distinct=True))
 
@@ -557,6 +557,8 @@ def import_scan_results(request, eid=None, pid=None):
             environment_id = request.POST.get('environment', 'Development')
             environment = Development_Environment.objects.get(id=environment_id)
 
+            group_by = form.cleaned_data.get('group_by', None)
+
             # TODO move to form validation?
             if not any(scan_type in code
                        for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
@@ -599,7 +601,7 @@ def import_scan_results(request, eid=None, pid=None):
                 test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings)
+                            close_old_findings=close_old_findings, group_by=group_by)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 

@@ -181,6 +181,7 @@ def add_report_tests_to_suite(suite):
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(ProductTest('test_add_product_endpoints'))

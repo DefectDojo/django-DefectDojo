@@ -22,3 +22,9 @@ class TestGitleaksParser(TestCase):
         parser = GitleaksParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(2, len(findings))
+
+    def test_parse_file_with_multiple_redacted_finding(self):
+        testfile = open("dojo/unittests/scans/gitleaks/redacted_data_many.json")
+        parser = GitleaksParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(6, len(findings))

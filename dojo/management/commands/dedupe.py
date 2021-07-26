@@ -67,10 +67,10 @@ class Command(BaseCommand):
             if get_system_setting('enable_deduplication'):
                 logger.info("######## Start deduplicating (%s) ########", ('foreground' if dedupe_sync else 'background'))
                 if dedupe_sync:
-                    mass_model_updater(Finding, findings, lambda f: do_dedupe_finding(f), order='desc', page_size=100, log_prefix='deduplicating ')
+                    mass_model_updater(Finding, findings, lambda f: do_dedupe_finding(f), fields=None, order='desc', page_size=100, log_prefix='deduplicating ')
                 else:
                     # async tasks only need the id
-                    mass_model_updater(Finding, findings.only('id'), lambda f: do_dedupe_finding_task(f.id), order='desc', log_prefix='deduplicating ')
+                    mass_model_updater(Finding, findings.only('id'), lambda f: do_dedupe_finding_task(f.id), fields=None, order='desc', log_prefix='deduplicating ')
 
                 # update the grading (if enabled)
                 logger.debug('Updating grades for products...')

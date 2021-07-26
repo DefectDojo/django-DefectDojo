@@ -3,9 +3,11 @@
 {% load display_tags %}
 {% load static %}
 {% block add_styles %}
+    {{ block.super }}
     .graph {min-height: 158px;}
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <div class="panel panel-default">
         <div class="panel-heading tight">
             <div class="clearfix">
@@ -460,6 +462,7 @@
 </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <!-- Flot Charts JavaScript -->
     <script src="{% static "flot/excanvas.min.js" %}"></script>

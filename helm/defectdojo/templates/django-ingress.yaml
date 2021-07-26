@@ -42,14 +42,22 @@ spec:
       paths:
         {{- if semverCompare ">=1.19.0" .Capabilities.KubeVersion.GitVersion }}
         - pathType: Prefix
+          {{- if .Values.django.ingress.path }}
+          path: {{ .Values.django.ingress.path }}
+          {{- else }}
           path: "/"
+          {{- end }}
           backend:
             service:
               name: {{ $fullName }}-django
               port:
                 name: http
         {{- else }}
+        {{- if .Values.django.ingress.path }}
+        - path: {{ .Values.django.ingress.path }}
+        {{- else }}
         - path: /
+        {{- end }}
           backend:
             serviceName: {{ $fullName }}-django
             servicePort: http

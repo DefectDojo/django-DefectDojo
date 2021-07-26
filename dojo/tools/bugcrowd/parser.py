@@ -1,7 +1,6 @@
 import csv
 import hashlib
 import io
-from urllib.parse import urlparse
 
 from dojo.models import Endpoint, Finding
 
@@ -154,20 +153,4 @@ class BugCrowdParser(object):
         return severity
 
     def get_endpoint(self, url):
-        parsedUrl = urlparse(url)
-        protocol = parsedUrl.scheme
-        query = parsedUrl.query[:1000]
-        fragment = parsedUrl.fragment
-        path = parsedUrl.path[:500]
-        port = ""  # Set port to empty string by default
-        # Split the returned network address into host and
-        try:  # If there is port number attached to host address
-            host, port = parsedUrl.netloc.split(':')
-        except:  # there's no port attached to address
-            host = parsedUrl.netloc
-
-        return Endpoint(
-                host=host, port=port,
-                path=path,
-                protocol=protocol,
-                query=query, fragment=fragment)
+        return Endpoint.from_uri(url)

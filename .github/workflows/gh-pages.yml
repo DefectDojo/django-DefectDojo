@@ -5,23 +5,36 @@ on:
     branches:
       - dev
 
+# Taken from https://github.com/marketplace/actions/hugo-setup#%EF%B8%8F-workflow-for-autoprefixer-and-postcss-cli
 jobs:
   deploy:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: true  # Fetch Hugo themes (true OR recursive)
-          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+          submodules: recursive  # Fetch the Docsy theme
+          fetch-depth: 0         # Fetch all history for .GitInfo and .Lastmod
 
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
-          hugo-version: '0.79.1'
-          # extended: true
+          hugo-version: '0.81.0'
+          extended: true
 
-      - name: Build
-        run: cd docs && hugo --minify
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12.x'
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - run: cd docs && npm ci && hugo --minify
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

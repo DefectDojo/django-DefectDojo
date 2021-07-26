@@ -3,11 +3,13 @@
 {% load display_tags %}
 {% load static %}
 {% block add_styles %}
+    {{ block.super }}
     .tooltip-inner {
       max-width: 350px;
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
           {% include "dojo/snippets/engagement_list.html" with engs=engs filter=engs_filter count=engs_count prefix="engs" status="open" type=engagement_type recent_test_day_count=recent_test_day_count %}
           {% include "dojo/snippets/engagement_list.html" with engs=queued_engs filter=queued_engs_filter count=queued_engs_count prefix="queued_engs_count" status="paused" type=engagement_type recent_test_day_count=recent_test_day_count %}
@@ -18,6 +20,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         $(function () {

@@ -15,7 +15,6 @@ from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 import dateutil.relativedelta
 import datetime
-from urllib.parse import urlparse
 import bleach
 import git
 from django.conf import settings
@@ -84,10 +83,6 @@ def markdown_render(value):
 @register.filter(name='url_shortner')
 def url_shortner(value):
     return_value = str(value)
-    url = urlparse(return_value)
-
-    if url.path and len(url.path) != 1:
-        return_value = url.path
     if len(return_value) > 50:
         return_value = "..." + return_value[-47:]
 
@@ -232,6 +227,18 @@ def version_num(value):
         version = "v." + value
 
     return version
+
+
+@register.filter(name='group_sla')
+def group_sla(group):
+    if not get_system_setting('enable_finding_sla'):
+        return ""
+
+    if not group.findings.all():
+        return ""
+
+    # if there is at least 1 finding, there will be date, severity etc to calculate sla
+    return finding_sla(group)
 
 
 @register.filter(name='finding_sla')
@@ -404,17 +411,6 @@ def pic_token(context, image, size):
     token = FindingImageAccessToken(user=user, image=image, size=size)
     token.save()
     return reverse('download_finding_pic', args=[token.token])
-
-
-@register.simple_tag
-def severity_value(value):
-    try:
-        if get_system_setting('s_finding_severity_naming'):
-            value = Finding.get_numerical_severity(value)
-    except:
-        pass
-
-    return value
 
 
 @register.simple_tag

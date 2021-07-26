@@ -78,7 +78,9 @@
     <link rel="shortcut icon" href="{% static "dojo/img/favicon.ico" %}"/>
     <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
     <link rel="stylesheet" href="{% static "fullcalendar/dist/fullcalendar.min.css" %}">
-    <link rel="stylesheet" href="{% static "dojo/css/dojo.css" %}">
+    {% block dojo_css %}
+        <link rel="stylesheet" href="{% static "dojo/css/dojo.css" %}">
+    {% endblock %}
     <link rel="stylesheet" href="{% static "datatables.net-dt/css/jquery.dataTables.min.css" %}">
     {% comment %} <link rel="stylesheet" href="{% static "datatables.net-buttons-dt/css/buttons.dataTables.min.css" %}"> {% endcomment %}
     <link rel="stylesheet" href="{% static "datatables.net-bs/css/dataTables.bootstrap.min.css" %}">
@@ -148,15 +150,18 @@
                                 <li><a href="{% url 'view_profile' %}"><i
                                         class="fa fa-user fa-fw"></i> {{ request.user.username }}</a>
                                 </li>
-                                <li><a href="{% url 'api_key' %}"><i class="fa fa-fw fa-key"></i> API v1 Key</a></li>
                                 <li><a href="{% url 'api_v2_key' %}"><i class="fa fa-fw fa-key"></i> API v2 Key</a></li>
                             {% endif %}
-                            <li><a href="{% url 'tastypie_swagger:index' %}"><i class="fa fa-book fa-fw"></i> API
-                                v1 Docs</a></li>
-                            <li><a href="{% url 'api_v2_schema' %}"><i class="fa fa-book fa-fw"></i> API
-                                v2 Docs</a></li>
-                            {{ block.super }}
-                            {% if user.is_staff %}
+                            <li>
+                                <a href="{% url 'api_v2_schema' %}" target="_blank"><i class="fa fa-book fa-fw" title="OpenAPI v2 Docs"></i> API v2 OpenAPI2 Docs</a>
+                            </li>
+                            <li>
+                                <a href="{% url 'swagger-ui_oa3' %}?docExpansion=none" target="_blank"><i class="fa fa-book fa-fw" title="OpenAPI v3 Docs"></i> API v2 OpenAPI3 Docs </a>
+                            </li>
+                            <li><a href="https://defectdojo.github.io/django-DefectDojo" target="_blank">
+                                <i class="fa fa-question-circle fa-fw"></i> Documentation</a>
+                            </li>
+                            {% if user.is_staff and system_settings.enable_questionnaires %}
                                 <li><a href="{% url 'questionnaire' %}"> <i class="fa fa-hospital-o fa-fw"> </i> Questionnaires </a></li>
                             {% endif %}
                         {% endblock %}
@@ -260,41 +265,38 @@
                                     </ul>
                                 </li>
                                 <li>
-                                    <a href="{% url 'endpoints' %}" aria-expanded="false" aria-label="Endpoints">
+                                    <a href="{% url 'endpoint' %}" aria-expanded="false" aria-label="Endpoints">
 					                    <i class="fa fa-sitemap fa-fw"></i>
                                         <span>Endpoints</span>
                                         <span class="glyphicon arrow"></span>
                                     </a>
                                     <ul class="nav nav-second-level">
                                         <li>
-                                            <a href="{% url 'endpoints' %}">All Endpoints</a>
+                                            <a href="{% url 'endpoint' %}">All Endpoints</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'vulnerable_endpoints' %}">
-                                                Vulnerable Endpoints
-                                            </a>
+                                            <a href="{% url 'endpoint_host' %}">All Endpoint Hosts</a>
                                         </li>
+                                        <li>
+                                            <a href="{% url 'vulnerable_endpoints' %}">Vulnerable Endpoints</a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'vulnerable_endpoint_hosts' %}">Vulnerable Endpoint Hosts</a>
+                                        </li>
+                                        {% if request.user.is_staff %}
+                                            <li>
+                                                <a href="{% url 'endpoint_migrate' %}">Migrate Endpoints</a>
+                                            </li>
+                                        {% endif %}
                                     </ul>
                                 </li>
                             {% endif %}
                             <li>
-                                {% if 'FEATURE_REPORTS_PDF_LIST'|setting_enabled %}
-                                <a href="{% url 'reports' %}" aria-expanded="false" aria-label="Reports">
-				                    <i class="fa fa-file-text-o fa-fw"></i>
-                                    <span>Reports</span>
-                                    <span class="glyphicon arrow"></span>
-                                </a>
-                                <ul class="nav nav-second-level">
-                                    <li><a href="{% url 'reports' %}"> All Reports </a></li>
-                                    <li><a href="{% url 'report_builder' %}"> Report Builder </a></li>
-                                </ul>
-                                {% else %}
                                 <a href="{% url 'report_builder' %}" aria-expanded="false" aria-label="Reports">
 				                    <i class="fa fa-file-text-o fa-fw"></i>
                                     <span>Reports</span>
                                     <span class="glyphicon arrow"></span>
                                 </a>
-                                {% endif %}
                                 <!-- /.nav-second-level -->
                             </li>
                             <li>
@@ -321,7 +323,12 @@
                                     <a href="{% url 'users' %}" aria-disabled="true" aria-expanded="false" aria-label="Users">
                                         <i class="fa fa-user fa-fw"></i>
                                         <span>Users</span>
+                                        <span class="glyphicon arrow"></span>
                                     </a>
+                                    <ul class="nav nav-second-level">
+                                        <li><a href="{% url 'users' %}"> Users </a></li>
+                                        <li><a href="{% url 'groups' %}"> Groups </a></li>
+                                    </ul>
                                 </li>
                             {% endif %}
                             {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
@@ -332,7 +339,7 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if request.user.is_staff %}
+                            {% if request.user.is_staff and system_settings.enable_questionnaires %}
                                 <li>
                                     <a href="#"><i class="fa fa-hospital-o fa-fw"> </i> <span>Questionnaires</span><span
                                             class="glyphicon arrow"></span></a>
@@ -351,7 +358,9 @@
                                     </a>
                                     <ul class="nav nav-second-level">
                                         {% if request.user.is_superuser %}
+                                        {% if system_settings.enable_credentials %}
                                         <li><a href="{% url 'cred' %}">Credential Manager </a></li>
+                                        {% endif %}
                                         {% if system_settings.enable_jira %}
                                         <li><a href="{% url 'jira' %}">JIRA </a></li>
                                         {% endif %}
@@ -458,11 +467,13 @@
                   <!-- Endpoints Tab -->
                   <li role="presentation" class="dropdown{% if product_tab.tab == 'endpoints' %} active active-color{% endif %}">
                     <a class="dropdown-toggle" data-toggle="dropdown" href=""><span class="fa fa-sitemap" aria-hidden="true"></span>
-                    <span class="hidden-xs"> Endpoints{% if product_tab.endpoints > 0 %} <span class="badge">{{ product_tab.endpoints }}</span>{% endif %}</span>
+                    <span class="hidden-xs"> Endpoints{% if product_tab.endpoints > 0 %} <span class="badge">{{ product_tab.endpoint_hosts }} / {{ product_tab.endpoints }}</span>{% endif %}</span>
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                      <li><a href="{% url 'endpoints' %}?product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                      <li><a href="{% url 'endpoint' %}?product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Endpoints</a></li>
+                      <li><a href="{% url 'endpoint_host' %}?product={{ product_tab.product.id }}"><i class="fa fa-list-alt"></i> View Hosts</a></li>
                       <li><a href="{% url 'vulnerable_endpoints' %}?product={{ product_tab.product.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Endpoints</a></li>
+                      <li><a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ product_tab.product.id }}"><i class="fa fa-sitemap"></i> View Vulnerable Hosts</a></li>
                       <li role="separator" class="divider"></li>
                       <li><a href="{% url 'product_endpoint_report' product_tab.product.id %}"><i class="fa fa-file-text-o"></i> Endpoint Report</a></li>
                       {% if product_tab.product|has_object_permission:"Endpoint_Add" or user|is_authorized_for_staff:product_tab.product %}
@@ -522,6 +533,7 @@
                                 <i class="fa fa-history"></i> View Product Tracking Files
                             </a>
                         </li>
+                        {% if system_settings.enable_credentials %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
                             <a href="{% url 'new_cred_product' product_tab.product.id %}">
@@ -533,6 +545,7 @@
                                 <i class="fa fa-list-alt"></i> View Credentials
                             </a>
                         </li>
+                        {% endif %}
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
                             <a href="{% url 'new_tool_product' product_tab.product.id %}">

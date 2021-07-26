@@ -9,6 +9,7 @@ import os
 import re
 # import time
 
+
 dd_driver = None
 dd_driver_options = None
 
@@ -27,6 +28,21 @@ def on_exception_html_source_logger(func):
             raise(e)
 
     return wrapper
+
+
+def set_suite_settings(suite, jira=False, github=False, block_execution=False):
+    if jira:
+        suite.addTest(BaseTestCase('enable_jira'))
+    else:
+        suite.addTest(BaseTestCase('disable_jira'))
+    if github:
+        suite.addTest(BaseTestCase('enable_github'))
+    else:
+        suite.addTest(BaseTestCase('disable_github'))
+    if block_execution:
+        suite.addTest(BaseTestCase('enable_block_execution'))
+    else:
+        suite.addTest(BaseTestCase('disable_block_execution'))
 
 
 class BaseTestCase(unittest.TestCase):
@@ -246,18 +262,25 @@ class BaseTestCase(unittest.TestCase):
     def enable_github(self):
         return self.enable_system_setting('id_enable_github')
 
-    def enable_block_execution(self):
+    def set_block_execution(self, block_execution=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
+        print('setting lbock execution to: ', str(block_execution))
         driver = self.driver
         driver.get(self.base_url + 'profile')
-        if not driver.find_element_by_id('id_block_execution').is_selected():
+        if driver.find_element_by_id('id_block_execution').is_selected() != block_execution:
             driver.find_element_by_xpath('//*[@id="id_block_execution"]').click()
             # save settings
             driver.find_element_by_css_selector("input.btn.btn-primary").click()
             # check if it's enabled after reload
-            self.assertTrue(driver.find_element_by_id('id_block_execution').is_selected())
+            self.assertTrue(driver.find_element_by_id('id_block_execution').is_selected() == block_execution)
         return driver
+
+    def enable_block_execution(self):
+        self.set_block_execution()
+
+    def disable_block_execution(self):
+        self.set_block_execution(block_execution=False)
 
     def is_alert_present(self):
         try:

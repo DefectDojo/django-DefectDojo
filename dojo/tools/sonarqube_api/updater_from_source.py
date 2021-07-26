@@ -52,7 +52,7 @@ class SonarQubeApiUpdaterFromSource(object):
         target_status = None
         if finding.false_p:
             target_status = 'FALSE-POSITIVE'
-        elif finding.mitigated or finding.is_Mitigated:
+        elif finding.mitigated or finding.is_mitigated:
             target_status = 'FIXED'
         elif finding.risk_accepted:
             target_status = 'WONTFIX'
@@ -70,7 +70,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = False
             finding.false_p = False
             finding.mitigated = None
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         elif sonarqube_status == 'CONFIRMED':
@@ -78,7 +78,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = True
             finding.false_p = False
             finding.mitigated = None
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         elif sonarqube_status == 'FIXED':
@@ -86,7 +86,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = True
             finding.false_p = False
             finding.mitigated = timezone.now()
-            finding.is_Mitigated = True
+            finding.is_mitigated = True
             ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         elif sonarqube_status == 'WONTFIX':
@@ -94,7 +94,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = True
             finding.false_p = False
             finding.mitigated = None
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             Risk_Acceptance.objects.create(
                 owner=finding.reporter,
             ).accepted_findings.set([finding])
@@ -104,7 +104,7 @@ class SonarQubeApiUpdaterFromSource(object):
             finding.verified = False
             finding.false_p = True
             finding.mitigated = None
-            finding.is_Mitigated = False
+            finding.is_mitigated = False
             ra_helper.remove_finding.from_any_risk_acceptance(finding)
 
         finding.save(issue_updater_option=False, dedupe_option=False)

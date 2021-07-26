@@ -105,8 +105,10 @@ class SchemaChecker():
 
     def _check_has_required_fields(self, required_fields, obj):
         for required_field in required_fields:
-            field = f"{self._get_prefix()}#{required_field}"
-            self._check_or_fail(obj is not None and required_field in obj, f"{field} is required but was not returned")
+            # passwords are writeOnly, but this is not supported by Swagger / OpenAPIv2
+            if required_field != 'password':
+                field = f"{self._get_prefix()}#{required_field}"
+                self._check_or_fail(obj is not None and required_field in obj, f"{field} is required but was not returned")
 
     def _check_type(self, schema, obj):
         schema_type = schema["type"]
@@ -152,9 +154,18 @@ class SchemaChecker():
             properties = schema.get("properties", None)
             if properties is not None:
                 for name, prop in properties.items():
+                    # print('property: ', name)
+                    # print('obj ', obj)
                     obj_child = obj.get(name, None)
                     if obj_child is not None:
                         self._with_prefix(name, _check, prop, obj_child)
+
+                for child_name in obj.keys():
+                    # TODO prefetch mixins not picked up by spectcular?
+                    if child_name not in ['prefetch']:
+                        if not properties or child_name not in properties.keys():
+                            self._has_failed = True
+                            self._register_error(f'unexpected property "{child_name}" found')
 
             additional_properties = schema.get("additionalProperties", None)
             if additional_properties is not None:
@@ -200,6 +211,7 @@ class BaseClass():
 
         def check_schema(self, schema, obj):
             schema_checker = SchemaChecker(self.schema["definitions"])
+            # print(vars(schema_checker))
             schema_checker.check(schema, obj)
 
         def get_valid_object_id(self):
@@ -250,7 +262,10 @@ class BaseClass():
 
             schema = endpoints['get']['responses']['200']['schema']
             for id in ids:
+                print('id:', id)
                 response = self.client.get(format_url(f"/{self.viewname}/{id}/"), extra_args)
+                print('response type:', type(response))
+                print('response data:', response.data)
                 check_response_valid(status.HTTP_200_OK, response)
                 obj = response.data
                 self.check_schema(schema, obj)
@@ -273,7 +288,7 @@ class BaseClass():
             self.check_schema(schema, obj)
 
         @skipIfNotSubclass(UpdateModelMixin)
-        def test_put_endpoint(self, extra_args=None):
+        def test_put_endpoint(self, extra_data={}, extra_args=None):
             operation = self.schema["paths"][f"/{self.viewname}/{{id}}/"]['put']
 
             id = self.get_valid_object_id()
@@ -281,6 +296,7 @@ class BaseClass():
                 self.skipTest("No data exists to test endpoint")
 
             data = self.construct_response_data(id)
+            data.update(extra_data)
 
             schema = operation['responses']['200']['schema']
             response = self.client.put(format_url(f"/{self.viewname}/{id}/"), data, format='json')
@@ -290,7 +306,7 @@ class BaseClass():
             self.check_schema(schema, obj)
 
         @skipIfNotSubclass(CreateModelMixin)
-        def test_post_endpoint(self, extra_args=None):
+        def test_post_endpoint(self, extra_data=[], extra_args=None):
             operation = self.schema["paths"][f"/{self.viewname}/"]["post"]
 
             id = self.get_valid_object_id()
@@ -298,10 +314,15 @@ class BaseClass():
                 self.skipTest("No data exists to test endpoint")
 
             data = self.construct_response_data(id)
+            data.update(extra_data)
+
+            print('data:', data)
 
             schema = operation['responses']['201']['schema']
             response = self.client.post(format_url(f"/{self.viewname}/"), data, format='json')
             check_response_valid(status.HTTP_201_CREATED, response)
+
+            print('response.data:', response.data)
 
             obj = response.data
             self.check_schema(schema, obj)
@@ -314,6 +335,16 @@ class DevelopmentEnvironmentTest(BaseClass.SchemaTest):
         self.viewset = DevelopmentEnvironmentViewSet
         self.model = Development_Environment
         self.serializer = DevelopmentEnvironmentSerializer
+
+
+# Test will only work when FEATURE_AUTHENTICATION_V2 is the default
+# class DojoGroupTest(BaseClass.SchemaTest):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.viewname = "group"
+#         self.viewset = DojoGroupViewSet
+#         self.model = Dojo_Group
+#         self.serializer = DojoGroupSerializer
 
 
 class EndpointStatusTest(BaseClass.SchemaTest):
@@ -333,7 +364,7 @@ class EndpointTest(BaseClass.SchemaTest):
         self.model = Endpoint
         self.serializer = EndpointSerializer
         self.field_transformers = {
-            "path": lambda v: v + "transformed/"
+            "path": lambda v: (v if v else '') + "transformed/"
         }
 
 
@@ -345,10 +376,12 @@ class EngagementTest(BaseClass.SchemaTest):
         self.model = Engagement
         self.serializer = EngagementSerializer
 
-    @testIsBroken
+    # @testIsBroken
+    # fixed
     def test_accept_risks(self):
         operation = self.get_endpoint_schema("/engagements/{id}/accept_risks/", "post")
         schema = operation['responses']['201']['schema']
+        print(schema)
         id = self.get_valid_object_id()
         if id is None:
             self.skipTest("No data exists to test endpoint")
@@ -363,10 +396,13 @@ class EngagementTest(BaseClass.SchemaTest):
 
         response = self.client.post(format_url(f"/engagements/{id}/accept_risks/"), data, format='json')
         check_response_valid(201, response)
+        print('response.data')
+        # print(vars(response))
+        print(response.content)
         obj = response.data
         self.check_schema(schema, obj)
 
-    @testIsBroken
+    # fixed
     def test_notes_read(self):
         operation = self.get_endpoint_schema("/engagements/{id}/notes/", "get")
         schema = operation['responses']['200']['schema']
@@ -379,7 +415,7 @@ class EngagementTest(BaseClass.SchemaTest):
         obj = response.data
         self.check_schema(schema, obj)
 
-    @testIsBroken
+    # fixed
     def test_notes_create(self):
         operation = self.get_endpoint_schema("/engagements/{id}/notes/", "post")
         schema = operation['responses']['201']['schema']
@@ -406,15 +442,15 @@ class FindingTemplateTest(BaseClass.SchemaTest):
         self.model = Finding_Template
         self.serializer = FindingTemplateSerializer
 
-    @testIsBroken
+    # fixed
     def test_post_endpoint(self):
         super().test_post_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
         super().test_put_endpoint()
 
@@ -427,21 +463,21 @@ class FindingTest(BaseClass.SchemaTest):
         self.model = Finding
         self.serializer = FindingSerializer
 
-    @testIsBroken
+    # fixed
     def test_list_endpoint(self):
         super().test_list_endpoint({
             "related_fields": True
         })
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
         super().test_put_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_retrieve_endpoint(self):
         super().test_retrieve_endpoint({
             "related_fields": True
@@ -456,25 +492,25 @@ class JiraInstanceTest(BaseClass.SchemaTest):
         self.model = JIRA_Instance
         self.serializer = JIRAInstanceSerializer
 
-    @testIsBroken
+    # fixed
     def test_list_endpoint(self):
         super().test_list_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
-        super().test_put_endpoint()
+        super().test_put_endpoint(extra_data={"password": "12345"})
 
-    @testIsBroken
+    # fixed
     def test_retrieve_endpoint(self):
         super().test_retrieve_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_post_endpoint(self):
-        super().test_post_endpoint()
+        super().test_post_endpoint(extra_data={"password": "12345"})
 
 
 class JiraFindingMappingsTest(BaseClass.SchemaTest):
@@ -541,6 +577,26 @@ class ProductTypeTest(BaseClass.SchemaTest):
         }
 
 
+# Test will only work when FEATURE_AUTHENTICATION_V2 is the default
+# class ProductTypeMemberTest(BaseClass.SchemaTest):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.viewname = "product_type_members"
+#         self.viewset = ProductTypeMemberViewSet
+#         self.model = Product_Type_Member
+#         self.serializer = ProductTypeMemberSerializer
+
+
+# Test will only work when FEATURE_AUTHENTICATION_V2 is the default
+# class ProductTypeGroupTest(BaseClass.SchemaTest):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.viewname = "product_type_groups"
+#         self.viewset = ProductTypeGroupViewSet
+#         self.model = Product_Type_Group
+#         self.serializer = ProductTypeGroupSerializer
+
+
 class ProductTest(BaseClass.SchemaTest):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -552,25 +608,53 @@ class ProductTest(BaseClass.SchemaTest):
             "name": lambda v: v + "_new"
         }
 
-    @testIsBroken
+    # fixed
     def test_list_endpoint(self):
         super().test_list_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
         super().test_put_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_retrieve_endpoint(self):
         super().test_retrieve_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_post_endpoint(self):
         super().test_post_endpoint()
+
+
+# Test will only work when FEATURE_AUTHENTICATION_V2 is the default
+# class ProductMemberTest(BaseClass.SchemaTest):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.viewname = "product_members"
+#         self.viewset = ProductMemberViewSet
+#         self.model = Product_Member
+#         self.serializer = ProductMemberSerializer
+
+#     @testIsBroken
+#     def test_post_endpoint(self):
+#         super().test_post_endpoint()
+
+#     @testIsBroken
+#     def test_patch_endpoint(self):
+#         super().test_post_endpoint()
+
+
+# Test will only work when FEATURE_AUTHENTICATION_V2 is the default
+# class ProductGroupTest(BaseClass.SchemaTest):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.viewname = "product_groups"
+#         self.viewset = ProductGroupViewSet
+#         self.model = Product_Group
+#         self.serializer = ProductGroupSerializer
 
 
 class RegulationTest(BaseClass.SchemaTest):
@@ -638,15 +722,15 @@ class AppAnalysisTest(BaseClass.SchemaTest):
         self.model = App_Analysis
         self.serializer = AppAnalysisSerializer
 
-    @testIsBroken
+    # fixed
     def test_patch_endpoint(self):
         super().test_patch_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_put_endpoint(self):
         super().test_put_endpoint()
 
-    @testIsBroken
+    # fixed
     def test_post_endpoint(self):
         super().test_post_endpoint()
 

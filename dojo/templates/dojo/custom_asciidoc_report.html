@@ -5,6 +5,7 @@
 {% load humanize %}
 
 {% block content %}
+    {{ block.super }}
     <button onclick="asciidocDownload()" class="btn btn-primary" type="button">
         Download Report
     </button>

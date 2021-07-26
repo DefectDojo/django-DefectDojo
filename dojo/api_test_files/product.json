@@ -1,5 +1,0 @@
- {
-    "description": "<script>alert(1) <script>", 
-    "name": "Test Service 2",
-    "prod_type": 7
-}

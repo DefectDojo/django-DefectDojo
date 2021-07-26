@@ -7,7 +7,6 @@ import re
 import xml.etree.ElementTree
 from datetime import datetime
 from dojo.models import Endpoint, Finding
-from urllib.parse import urlparse
 
 try:
     from dojo.settings.settings import QUALYS_WAS_WEAKNESS_IS_VULN
@@ -58,23 +57,7 @@ def attach_extras(endpoints, requests, responses, finding, date, qid):
             finding.date = date
 
     for endpoint in endpoints:
-        parsedUrl = urlparse(endpoint)
-        protocol = parsedUrl.scheme
-        query = parsedUrl.query
-        fragment = parsedUrl.fragment
-        path = parsedUrl.path
-        port = ""  # Set port to empty string by default
-        # Split the returned network address into host and
-        try:  # If there is port number attached to host address
-            host, port = parsedUrl.netloc.split(':')
-        except:  # there's no port attached to address
-            host = parsedUrl.netloc
-
-        finding.unsaved_endpoints.append(Endpoint(
-                    host=truncate_str(host, 500), port=port,
-                    path=truncate_str(path, 500),
-                    protocol=protocol,
-                    query=truncate_str(query, 1000), fragment=truncate_str(fragment, 500)))
+        finding.unsaved_endpoints.append(Endpoint.from_uri(endpoint))
 
     for i in range(0, len(requests)):
         if requests[i] != '' or responses[i] != '':
