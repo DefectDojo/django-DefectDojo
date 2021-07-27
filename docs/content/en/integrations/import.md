@@ -625,6 +625,10 @@ JSON format. Only imports the \'advisories\' subtree.
 
 Import JSON output of nuclei scan report <https://github.com/projectdiscovery/nuclei>
 
+### njsscan
+
+Import JSON report from <https://github.com/ajinabraham/njsscan>
+
 ### Openscap Vulnerability Scan
 
 Import Openscap Vulnerability Scan in XML formats.

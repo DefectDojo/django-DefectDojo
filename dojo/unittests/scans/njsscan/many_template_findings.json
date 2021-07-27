@@ -1,0 +1,289 @@
+{
+  "errors": [],
+  "njsscan_version": "0.2.8",
+  "nodejs": {},
+  "templates": {
+    "dust_template": {
+      "files": [
+        {
+          "file_path": "/app/dust.tl",
+          "match_lines": [
+            1,
+            2
+          ],
+          "match_position": [
+            12,
+            22
+          ],
+          "match_string": "{title|s}{"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-79 Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The Dust.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS)",
+        "owasp": "A1: Injection",
+        "severity": "ERROR"
+      }
+    },
+    "ejs_ect_template": {
+      "files": [
+        {
+          "file_path": "/app/ejs_template.ejs",
+          "match_lines": [
+            1,
+            1
+          ],
+          "match_position": [
+            1,
+            9
+          ],
+          "match_string": "<%-xdd-%>"
+        },
+        {
+          "file_path": "/app/ect.tmpl",
+          "match_lines": [
+            5,
+            5
+          ],
+          "match_position": [
+            40,
+            51
+          ],
+          "match_string": "<%- ffff %>"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-79 Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The EJS/ECT template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).",
+        "owasp": "A1: Injection",
+        "severity": "ERROR"
+      }
+    },
+    "electronjs_disable_websecurity": {
+      "files": [
+        {
+          "file_path": "/app/electron.html",
+          "match_lines": [
+            6,
+            7
+          ],
+          "match_position": [
+            172,
+            215
+          ],
+          "match_string": "<webview src=\"page.html\" disablewebsecurity"
+        },
+        {
+          "file_path": "/app/electron.html",
+          "match_lines": [
+            2,
+            3
+          ],
+          "match_position": [
+            53,
+            96
+          ],
+          "match_string": "<webview src=\"page.html\" disablewebsecurity"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-79 Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "Disabling webSecurity will disable the same-origin policy and allows the execution of insecure code from any domain.",
+        "owasp": "A6: Security Misconfiguration",
+        "severity": "ERROR"
+      }
+    },
+    "electronjs_node_integration": {
+      "files": [
+        {
+          "file_path": "/app/electron.html",
+          "match_lines": [
+            4,
+            5
+          ],
+          "match_position": [
+            110,
+            134
+          ],
+          "match_string": "<webview nodeIntegration"
+        },
+        {
+          "file_path": "/app/electron.html",
+          "match_lines": [
+            1,
+            1
+          ],
+          "match_position": [
+            1,
+            24
+          ],
+          "match_string": "<webview nodeIntegration"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-272 Least Privilege Violation",
+        "description": "Node integration exposes node.js APIs to the electron app and this can introduce remote code execution vulnerabilities to the application if the app is vulnerable to Cross Site Scripting (XSS).",
+        "owasp": "A6: Security Misconfiguration",
+        "severity": "WARNING"
+      }
+    },
+    "handlebar_mustache_template": {
+      "files": [
+        {
+          "file_path": "/app/mustache.mustache",
+          "match_lines": [
+            7,
+            7
+          ],
+          "match_position": [
+            128,
+            138
+          ],
+          "match_string": "{{{name}}}"
+        },
+        {
+          "file_path": "/app/mustache.mustache",
+          "match_lines": [
+            9,
+            10
+          ],
+          "match_position": [
+            185,
+            198
+          ],
+          "match_string": "{{ &escap2 }}"
+        },
+        {
+          "file_path": "/app/handlebars.hbs",
+          "match_lines": [
+            1,
+            1
+          ],
+          "match_position": [
+            52,
+            62
+          ],
+          "match_string": "{{{html}}}"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-79 Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The Handlebar.js/Mustache.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).",
+        "owasp": "A1: Injection",
+        "severity": "ERROR"
+      }
+    },
+    "pug_jade_template": {
+      "files": [
+        {
+          "file_path": "/app/jade_template.jade",
+          "match_lines": [
+            3,
+            3
+          ],
+          "match_position": [
+            114,
+            130
+          ],
+          "match_string": "!{riskyBusiness}"
+        },
+        {
+          "file_path": "/app/pug.pug",
+          "match_lines": [
+            1,
+            1
+          ],
+          "match_position": [
+            18,
+            24
+          ],
+          "match_string": "!{'}'}"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-79 Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The Pug.js/Jade.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).",
+        "owasp": "A1: Injection",
+        "severity": "ERROR"
+      }
+    },
+    "squirrelly_template": {
+      "files": [
+        {
+          "file_path": "/app/squirrelly.js.html",
+          "match_lines": [
+            1,
+            1
+          ],
+          "match_position": [
+            1,
+            23
+          ],
+          "match_string": "{{myreference | safe }}"
+        },
+        {
+          "file_path": "/app/squirrelly.js.html",
+          "match_lines": [
+            2,
+            3
+          ],
+          "match_position": [
+            25,
+            66
+          ],
+          "match_string": "{{mystring | reverse | safe |capitalize}}"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-79 Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The Squirrelly.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS)",
+        "owasp": "A1: Injection",
+        "severity": "ERROR"
+      }
+    },
+    "underscore_template": {
+      "files": [
+        {
+          "file_path": "/app/underscore.html",
+          "match_lines": [
+            8,
+            8
+          ],
+          "match_position": [
+            285,
+            307
+          ],
+          "match_string": "_.unescape(escapedStr)"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-79 Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The Underscore unescape function with untrusted user input results in Cross Site Scripting (XSS).",
+        "owasp": "A1: Injection",
+        "severity": "ERROR"
+      }
+    },
+    "vue_template": {
+      "files": [
+        {
+          "file_path": "/app/vue.vue",
+          "match_lines": [
+            8,
+            8
+          ],
+          "match_position": [
+            153,
+            164
+          ],
+          "match_string": "v-html=\"sd\""
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-79 Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The Vue.js template has an unescaped variable. Untrusted user input passed to this variable results in Cross Site Scripting (XSS).",
+        "owasp": "A1: Injection",
+        "severity": "ERROR"
+      }
+    }
+  }
+}
