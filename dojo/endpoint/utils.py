@@ -159,8 +159,7 @@ def clean_hosts_run(apps, change):
 
                         if parts.query:
                             if endpoint.query and (endpoint.query != parts.query):
-
- message = 'has defined query ({}) and it is not the same as query in host ' \
+                                message = 'has defined query ({}) and it is not the same as query in host ' \
                                           '({})'.format(endpoint.query, parts.query)
                                 err_log(message, html_log, endpoint_html_log, endpoint)
                             else:
