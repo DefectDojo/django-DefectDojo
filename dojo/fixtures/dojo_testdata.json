@@ -846,7 +846,7 @@
       "static_finding": false,
       "date": "2020-05-21",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -897,7 +897,7 @@
       "static_finding": false,
       "date": "2021-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -948,7 +948,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -999,7 +999,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -1050,7 +1050,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -1101,7 +1101,7 @@
       "static_finding": false,
       "date": "2017-12-31",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -1155,7 +1155,7 @@
       "static_finding": false,
       "date": "2020-05-21",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1206,7 +1206,7 @@
       "static_finding": false,
       "date": "2021-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1257,7 +1257,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1309,7 +1309,7 @@
       "static_finding": false,
       "date": "2020-05-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1361,7 +1361,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1413,7 +1413,7 @@
       "static_finding": false,
       "date": "2020-05-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1465,7 +1465,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -2292,6 +2292,36 @@
     "fields": {
       "user": 1,
       "role": 4
+    }
+  },
+  {
+    "model": "dojo.language_type",
+    "pk": 1,
+    "fields": {
+        "language": "JSON",
+        "color": "#882B0F"
+    }
+  },
+  {
+    "model": "dojo.language_type",
+    "pk": 2,
+    "fields": {
+        "language": "Python",
+        "color": "#3572A5"
+    }
+  },
+  {
+    "model": "dojo.languages",
+    "pk": 1,
+    "fields": {
+        "language": 1,
+        "product": 1,
+        "user": 1,
+        "files": 2,
+        "blank": 3,
+        "comment": 4,
+        "code": 5,
+        "created": "2018-04-16T06:54:35.940Z"
     }
   }
 ]

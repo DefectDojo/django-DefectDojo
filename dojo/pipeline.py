@@ -3,10 +3,10 @@ import gitlab
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from dojo.models import Engagement, Product, Product_Member, Product_Type, Test
+from dojo.models import Engagement, Product, Product_Member, Product_Type, Test, Role
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.product.queries import get_authorized_products
 
 
@@ -80,19 +80,27 @@ def update_product_access(backend, uid, user=None, social=None, *args, **kwargs)
         # Create product_type if necessary
         product_type, created = Product_Type.objects.get_or_create(name='Gitlab Import')
         # For each project: create a new product or update product's authorized_users
-        for project_name in project_names:
-            if project_name not in user_product_names:
+        for project in projects:
+            if project.path_with_namespace not in user_product_names:
                 # Create new product
-                product, created = Product.objects.get_or_create(name=project_name, prod_type=product_type)
+                product, created = Product.objects.get_or_create(name=project.path_with_namespace, prod_type=product_type)
                 if not settings.FEATURE_AUTHORIZATION_V2:
                     product.authorized_users.add(user)
                     product.save()
                 else:
-                    product_member, created = Product_Member.objects.get_or_create(product=product, user=user)
-                    if created:
-                        # Make product member an Owner of the product
-                        product_member.role = 4
-                        product_member.save()
+                    product_member, created = Product_Member.objects.get_or_create(product=product, user=user, defaults={'role': Role.objects.get(id=Roles.Owner)})
+                # Import tags and/orl URL if necessary
+                if settings.GITLAB_PROJECT_IMPORT_TAGS:
+                    if hasattr(project, 'topics'):
+                        if len(project.topics) > 0:
+                            product.tags = ",".join(project.topics)
+                    elif hasattr(project, 'tag_list') and len(project.tag_list) > 0:
+                        product.tags = ",".join(project.tag_list)
+                if settings.GITLAB_PROJECT_IMPORT_URL:
+                    if hasattr(project, 'web_url') and len(project.web_url) > 0:
+                        product.description = "[" + project.web_url + "](" + project.web_url + ")"
+                if settings.GITLAB_PROJECT_IMPORT_TAGS or settings.GITLAB_PROJECT_IMPORT_URL:
+                    product.save()
 
         # For each product: if user is not project member any more, remove him from product's authorized users
         for product_name in user_product_names:

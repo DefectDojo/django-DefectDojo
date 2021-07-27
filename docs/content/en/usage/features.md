@@ -459,6 +459,16 @@ Superuser status
 :   Designates that this user can configure the system and has all permissions
     for objects without explicitly assigning them.
 
+A superuser may force a password reset for any user at any given time. This
+can be set when creating a new user, or when editing an existing one, requiring
+the user to change their password upon their next login.
+
+DefectDojo enforces the following password rules for all users:
+*   Must meet a length requirement of 9 characters
+*   Must be unique (not commonly used)
+*   Must contain one of each of the following: a number (0-9), uppercase letter
+    (A-Z), lowercase letter (a-z), and symbol ()[]{}|\~!@#$%^&*_-+=;:`'",<>./?
+
 ## Calendar
 
 The calendar view provides a look at all the engagements and tests occurring
