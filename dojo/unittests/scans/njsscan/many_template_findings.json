@@ -72,18 +72,6 @@
             215
           ],
           "match_string": "<webview src=\"page.html\" disablewebsecurity"
-        },
-        {
-          "file_path": "/app/electron.html",
-          "match_lines": [
-            2,
-            3
-          ],
-          "match_position": [
-            53,
-            96
-          ],
-          "match_string": "<webview src=\"page.html\" disablewebsecurity"
         }
       ],
       "metadata": {
@@ -140,18 +128,6 @@
             138
           ],
           "match_string": "{{{name}}}"
-        },
-        {
-          "file_path": "/app/mustache.mustache",
-          "match_lines": [
-            9,
-            10
-          ],
-          "match_position": [
-            185,
-            198
-          ],
-          "match_string": "{{ &escap2 }}"
         },
         {
           "file_path": "/app/handlebars.hbs",

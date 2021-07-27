@@ -27,18 +27,6 @@
     "hardcoded_jwt_secret": {
       "files": [
         {
-          "file_path": "/app/jwt_none_algorithm.js",
-          "match_lines": [
-            8,
-            12
-          ],
-          "match_position": [
-            5,
-            8
-          ],
-          "match_string": "    let jwt = require(\"jsonwebtoken\");\n    let secret = 'some-secret';\n    jwt.verify('token-here', secret, { algorithms: ['RS256', 'none'] }, function (err, payload) {\n        console.log(payload);\n    });"
-        },
-        {
           "file_path": "/app/jwt_hardcoded.js",
           "match_lines": [
             2,
@@ -49,66 +37,6 @@
             44
           ],
           "match_string": "const jsonwt = require('jsonwebtoken')\nconst jose = require('jose')\nconst { JWK, JWT } = jose\nconst config = require('./config')\n\nconst payload = { foo: 'bar' }\nconst secret = 'shhhhh'\n\nconst secret2 = config.secret\nconst secret3 = process.env.SECRET || 'fallback-secret'\n\n//jsonwebtoken\n//true\nconst token1 = jsonwt.sign(payload, secret)"
-        },
-        {
-          "file_path": "/app/jwt_hardcoded.js",
-          "match_lines": [
-            2,
-            17
-          ],
-          "match_position": [
-            1,
-            51
-          ],
-          "match_string": "const jsonwt = require('jsonwebtoken')\nconst jose = require('jose')\nconst { JWK, JWT } = jose\nconst config = require('./config')\n\nconst payload = { foo: 'bar' }\nconst secret = 'shhhhh'\n\nconst secret2 = config.secret\nconst secret3 = process.env.SECRET || 'fallback-secret'\n\n//jsonwebtoken\n//true\nconst token1 = jsonwt.sign(payload, secret)\n//true\nconst token2 = jsonwt.sign(payload, 'some-secret')"
-        },
-        {
-          "file_path": "/app/jwt_hardcoded.js",
-          "match_lines": [
-            35,
-            49
-          ],
-          "match_position": [
-            1,
-            3
-          ],
-          "match_string": "const $jwt = require('jsonwebtoken');\n\nconst cert = 'hardcoded-secret';\n\nmodule.exports = (app) => {\n    app.post('/api/login', (req, res) => {\n        app.login(req.body.username, req.body.password).then((out) => {\n            out.token = $jwt.sign(out, cert, { expiresIn: '1d' });\n            res.send(out);\n        }, (err) => {\n            console.error(err);\n            res.status(400).send(err);\n        });\n    });\n};"
-        },
-        {
-          "file_path": "/app/jwt_hardcoded.js",
-          "match_lines": [
-            52,
-            68
-          ],
-          "match_position": [
-            1,
-            3
-          ],
-          "match_string": "const jwt = require('jsonwebtoken')\n\nconst jwtSign = (payload = { id: 1 }) =>\n    jwt.sign(payload, 'hardcoded-secret')\n\nconst jwtVerify = req => () => new Promise((resolve, reject) => {\n    const token = req.headers['x-access-token']\n    if (!token) {\n        resolve(false)\n    }\n    jwt.verify(token, 'hardcoded-secret', (err, decoded) => {\n        if (err) {\n            resolve(false)\n        }\n        resolve(decoded)\n    })\n})"
-        },
-        {
-          "file_path": "/app/jwt_hardcoded.js",
-          "match_lines": [
-            52,
-            55
-          ],
-          "match_position": [
-            1,
-            42
-          ],
-          "match_string": "const jwt = require('jsonwebtoken')\n\nconst jwtSign = (payload = { id: 1 }) =>\n    jwt.sign(payload, 'hardcoded-secret')"
-        },
-        {
-          "file_path": "/app/jwt_hardcoded.js",
-          "match_lines": [
-            76,
-            89
-          ],
-          "match_position": [
-            9,
-            12
-          ],
-          "match_string": "        let User = require('./user'),\n            jwt = require('jsonwebtoken');\n\n        const express = require('express');\n        let router = express.Router();\n\n        router.post('/signup', (req, res) => {\n            let user = new User({\n                name: req.body.name,\n                password: req.body.password\n            });\n            var token = jwt.sign(user, \"hardcoded-secret\", { expiresIn: 60 * 60 * 10 });\n            res.send({ success: true, token: token });\n        });"
         },
         {
           "file_path": "/app/jwt_hardcoded.js",
@@ -143,150 +71,6 @@
             77
           ],
           "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    const token1 = JWT.sign({ password: 123 }, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            11,
-            14
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    const payload = { one: 1, two: 2, password: 123 }\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            19,
-            23
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    let payload;\n    payload = { one: 1, two: 2, password: 123 }\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            28,
-            32
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    const payload = {}\n    payload.password = 123\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            37,
-            40
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    const payload = Object.assign({ password: 'bar' }, { bar: 123 }, { one: 1, two: 2 })\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            45,
-            49
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    let payload;\n    payload = Object.assign({ password: 'bar' }, { bar: 123 }, { one: 1, two: 2 })\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            54,
-            56
-          ],
-          "match_position": [
-            5,
-            128
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    const token1 = JWT.sign(Object.assign({ password: 'bar' }, { bar: 123 }, { one: 1, two: 2 }), 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            61,
-            63
-          ],
-          "match_position": [
-            5,
-            87
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    const token1 = JWT.sign({ user: { password: 123 } }, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            68,
-            71
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    const payload = { one: 1, two: 2, user: { password: 123 } }\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            76,
-            80
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    let payload;\n    payload = { one: 1, two: 2, user: { password: 123 } }\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            85,
-            89
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    const payload = { user: {} }\n    payload.user.password = 123\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            94,
-            97
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    const payload = Object.assign({ user: { password: 123 } }, { bar: 123 }, { one: 1, two: 2 })\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
-        },
-        {
-          "file_path": "/app/jwt_exposed_credentials.js",
-          "match_lines": [
-            102,
-            106
-          ],
-          "match_position": [
-            5,
-            67
-          ],
-          "match_string": "    const jose = require('jose')\n    const { JWK, JWT } = jose\n    let payload;\n    payload = Object.assign({ user: { password: 123 } }, { bar: 123 }, { one: 1, two: 2 })\n    const token1 = JWT.sign(payload, 'secret', { some: 'params' })"
         },
         {
           "file_path": "/app/jwt_exposed_credentials.js",
@@ -359,42 +143,6 @@
         {
           "file_path": "/app/jwt_express_hardcoded.js",
           "match_lines": [
-            10,
-            16
-          ],
-          "match_position": [
-            1,
-            4
-          ],
-          "match_string": "let hardcodedSecret = 'shhhhhhared-secret'\n\n// ruleid:jwt_express_hardcoded\napp.get('/protected2', jwt({ secret: hardcodedSecret }), function (req, res) {\n    if (!req.user.admin) return res.sendStatus(401);\n    res.sendStatus(200);\n});"
-        },
-        {
-          "file_path": "/app/jwt_express_hardcoded.js",
-          "match_lines": [
-            13,
-            13
-          ],
-          "match_position": [
-            24,
-            56
-          ],
-          "match_string": "app.get('/protected2', jwt({ secret: hardcodedSecret }), function (req, res) {"
-        },
-        {
-          "file_path": "/app/jwt_express_hardcoded.js",
-          "match_lines": [
-            19,
-            26
-          ],
-          "match_position": [
-            1,
-            4
-          ],
-          "match_string": "let secret = \"hardcode\"\n// ruleid:jwt_express_hardcoded\nconst opts = Object.assign({ issuer: 'http://issuer' }, { secret })\n\napp.get('/protected3', jwt(opts), function (req, res) {\n    if (!req.user.admin) return res.sendStatus(401);\n    res.sendStatus(200);\n});"
-        },
-        {
-          "file_path": "/app/jwt_express_hardcoded.js",
-          "match_lines": [
             21,
             26
           ],
@@ -417,18 +165,6 @@
         {
           "file_path": "/app/jwt_express_hardcoded.js",
           "match_lines": [
-            4,
-            4
-          ],
-          "match_position": [
-            23,
-            60
-          ],
-          "match_string": "app.get('/protected', jwt({ secret: 'shhhhhhared-secret' }), function (req, res) {"
-        },
-        {
-          "file_path": "/app/jwt_express_hardcoded.js",
-          "match_lines": [
             13,
             13
           ],
@@ -437,42 +173,6 @@
             56
           ],
           "match_string": "app.get('/protected2', jwt({ secret: hardcodedSecret }), function (req, res) {"
-        },
-        {
-          "file_path": "/app/jwt_express_hardcoded.js",
-          "match_lines": [
-            23,
-            23
-          ],
-          "match_position": [
-            24,
-            33
-          ],
-          "match_string": "app.get('/protected3', jwt(opts), function (req, res) {"
-        },
-        {
-          "file_path": "/app/jwt_not_revoked.js",
-          "match_lines": [
-            5,
-            5
-          ],
-          "match_position": [
-            26,
-            61
-          ],
-          "match_string": "app.get('/ok-protected', jwt({ secret: process.env.SECRET }), function (req, res) {"
-        },
-        {
-          "file_path": "/app/jwt_not_revoked.js",
-          "match_lines": [
-            13,
-            13
-          ],
-          "match_position": [
-            26,
-            35
-          ],
-          "match_string": "app.get('/ok-protected', jwt(opts), function (req, res) {"
         }
       ],
       "metadata": {
@@ -529,30 +229,6 @@
             31
           ],
           "match_string": "    let secret = 'some-secret';"
-        },
-        {
-          "file_path": "/app/jwt_express_hardcoded.js",
-          "match_lines": [
-            10,
-            10
-          ],
-          "match_position": [
-            5,
-            43
-          ],
-          "match_string": "let hardcodedSecret = 'shhhhhhared-secret'"
-        },
-        {
-          "file_path": "/app/jwt_express_hardcoded.js",
-          "match_lines": [
-            19,
-            19
-          ],
-          "match_position": [
-            5,
-            24
-          ],
-          "match_string": "let secret = \"hardcode\""
         },
         {
           "file_path": "/app/jwt_hardcoded.js",
