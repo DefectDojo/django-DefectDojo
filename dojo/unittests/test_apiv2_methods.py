@@ -16,7 +16,7 @@ class ApiEndpointMethods(TestCase):
     def test_is_defined(self):
 
         for reg, _, _ in sorted(self.registry):
-            if reg in ['import-scan', 'reimport-scan', 'notes', 'system_settings', 'users', 'roles']:
+            if reg in ['import-scan', 'reimport-scan', 'notes', 'system_settings', 'users', 'roles', 'import-languages']:
                 continue
 
             for method in ['get', 'post']:

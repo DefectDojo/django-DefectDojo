@@ -15,7 +15,7 @@ def generate_hash_code(f):
     old_hash_code = f.hash_code
     f.hash_code = f.compute_hash_code()
     if f.hash_code != old_hash_code:
-        logger.debug('%d: hash_code changed from %d to %s', f.id, old_hash_code, f.hash_code)
+        logger.debug('%d: hash_code changed from %s to %s', f.id, old_hash_code, f.hash_code)
     return f
 
 
