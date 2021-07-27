@@ -957,7 +957,6 @@ HASHCODE_FIELDS_PER_SCANNER = {
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
     'Anchore Grype': True,
-    'AWS Prowler Scan': True,
     'Checkmarx Scan': False,
     'Checkmarx OSA': True,
     'SonarQube Scan': False,
@@ -1005,7 +1004,6 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
     'Aqua Scan': DEDUPE_ALGO_HASH_CODE,
     'AuditJS Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    'AWS Prowler Scan': DEDUPE_ALGO_HASH_CODE,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'CargoAudit Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
