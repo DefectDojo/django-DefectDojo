@@ -984,6 +984,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'NPM Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
+    'Njsscan Scan': ['title', 'severity', 'cwe', 'file_path', 'line'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     'Yarn Audit Scan': ['title', 'severity', 'file_path', 'cve', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cve + file_path + severity
@@ -1024,6 +1025,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Nessus Scan': True,
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
+    'Njsscan Scan': False,
     'Yarn Audit Scan': True,
     'Whitesource Scan': True,
     'ZAP Scan': False,
@@ -1077,6 +1079,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
     'Nexpose Scan': DEDUPE_ALGO_HASH_CODE,
     'NPM Audit Scan': DEDUPE_ALGO_HASH_CODE,
+    'Njsscan Scan': DEDUPE_ALGO_HASH_CODE,
     'Yarn Audit Scan': DEDUPE_ALGO_HASH_CODE,
     'Whitesource Scan': DEDUPE_ALGO_HASH_CODE,
     'ZAP Scan': DEDUPE_ALGO_HASH_CODE,

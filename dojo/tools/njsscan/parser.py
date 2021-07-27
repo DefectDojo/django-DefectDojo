@@ -53,7 +53,7 @@ class NjsscanParser(object):
                     finding.file_path = file_path
                     finding.line = line
                     dupe_key = hashlib.sha256(
-                        (key + str(cwe) + owasp).encode('utf-8')
+                        (key + str(cwe) + owasp + file_path + str(line)).encode('utf-8')
                     ).hexdigest()
 
                     if dupe_key in dupes:
