@@ -19,8 +19,6 @@ from django_extensions.db.models import TimeStampedModel
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.functional import cached_property
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToCover
 from django.utils import timezone
 from pytz import all_timezones
 from polymorphic.models import PolymorphicModel
@@ -349,6 +347,20 @@ class Dojo_User(User):
         return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
 
     @staticmethod
+    def force_password_reset(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.force_password_reset
+
+    def disable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = False
+            user.usercontactinfo.save()
+
+    def enable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = True
+            user.usercontactinfo.save()
+
+    @staticmethod
     def generate_full_name(user):
         """
         Returns the first_name plus the last_name, with a space in between.
@@ -378,6 +390,7 @@ class UserContactInfo(models.Model):
     slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
+    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset their password on next login.')
 
 
 class Role(models.Model):
@@ -555,6 +568,7 @@ class Test_Type(models.Model):
     name = models.CharField(max_length=200, unique=True)
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -1741,10 +1755,6 @@ class Finding(models.Model):
                                          on_delete=models.CASCADE,
                                          verbose_name="Last Reviewed By",
                                          help_text="Provides the person who last reviewed the flaw.")
-    images = models.ManyToManyField('FindingImage',
-                                    blank=True,
-                                    verbose_name="Images",
-                                    help_text="Image(s) / Screenshot(s) related to the flaw.")
     files = models.ManyToManyField(FileUpload,
                                    blank=True,
                                    editable=False,
@@ -2717,36 +2727,12 @@ class Risk_Acceptance(models.Model):
         return None
 
 
-class FindingImage(models.Model):
-    image = models.ImageField(upload_to=UniqueUploadNameProvider('finding_images'))
-    caption = models.CharField(max_length=500, blank=True)
-    image_thumbnail = ImageSpecField(source='image',
-                                     processors=[ResizeToCover(100, 100)],
-                                     format='JPEG',
-                                     options={'quality': 70})
-    image_small = ImageSpecField(source='image',
-                                 processors=[ResizeToCover(640, 480)],
-                                 format='JPEG',
-                                 options={'quality': 100})
-    image_medium = ImageSpecField(source='image',
-                                  processors=[ResizeToCover(800, 600)],
-                                  format='JPEG',
-                                  options={'quality': 100})
-    image_large = ImageSpecField(source='image',
-                                 processors=[ResizeToCover(1024, 768)],
-                                 format='JPEG',
-                                 options={'quality': 100})
-
-    def __str__(self):
-        return self.image.name or 'No Image'
-
-
-class FindingImageAccessToken(models.Model):
+class FileAccessToken(models.Model):
     """This will allow reports to request the images without exposing the
     media root to the world without
     authentication"""
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
-    image = models.ForeignKey(FindingImage, null=False, blank=False, on_delete=models.CASCADE)
+    file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
     size = models.CharField(max_length=9,
                             choices=(
@@ -2760,7 +2746,7 @@ class FindingImageAccessToken(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = uuid4()
-        return super(FindingImageAccessToken, self).save(*args, **kwargs)
+        return super(FileAccessToken, self).save(*args, **kwargs)
 
 
 class BannerConf(models.Model):
@@ -3666,8 +3652,8 @@ admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
 admin.site.register(Test)
 admin.site.register(Finding, FindingAdmin)
-admin.site.register(FindingImage)
-admin.site.register(FindingImageAccessToken)
+admin.site.register(FileUpload)
+admin.site.register(FileAccessToken)
 admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)

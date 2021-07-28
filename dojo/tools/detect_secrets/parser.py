@@ -48,6 +48,7 @@ class DetectSecretsParser(object):
                         file_path=file,
                         line=line,
                         nb_occurences=1,
+                        false_p='is_secret' in item and item['is_secret'] is False,
                     )
                     dupes[dupe_key] = finding
         return list(dupes.values())
