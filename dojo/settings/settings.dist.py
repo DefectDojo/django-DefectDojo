@@ -980,7 +980,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx OSA': ['cve', 'component_name'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
-    'Dockle Scan': ['title', 'vuln_id_from_tool'],
+    'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
     'Mobsfscan Scan': ['title', 'severity', 'cwe'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
