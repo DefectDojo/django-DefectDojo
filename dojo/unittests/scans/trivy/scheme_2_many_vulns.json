@@ -86,12 +86,6 @@
             "CWE-674"
           ],
           "CVSS": {
-            "nvd": {
-              "V2Vector": "AV:N/AC:L/Au:N/C:N/I:N/A:P",
-              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
-              "V2Score": 5,
-              "V3Score": 7.5
-            },
             "redhat": {
               "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
               "V3Score": 7.5
