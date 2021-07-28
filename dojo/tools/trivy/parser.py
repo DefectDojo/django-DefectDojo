@@ -97,6 +97,7 @@ class TrivyParser:
                     description_text=vuln.get('Description', ''),
                 )
                 cvss = vuln.get('CVSS', None)
+                cvssv3 = None
                 if cvss is not None:
                     nvd = cvss.get('nvd', None)
                     if nvd is not None:

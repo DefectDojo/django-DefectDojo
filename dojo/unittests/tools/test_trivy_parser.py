@@ -55,3 +55,17 @@ class TestTrivyParser(TestCase):
         self.assertEqual('CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H', finding.cvssv3)
         self.assertTrue(finding.static_finding)
         self.assertFalse(finding.dynamic_finding)
+
+        finding = findings[1]
+        self.assertEqual("High", finding.severity)
+        self.assertEqual('CVE-2020-28196 krb5-libs 1.15.5-r0', finding.title)
+        self.assertEqual("CVE-2020-28196", finding.cve)
+        self.assertEqual(674, finding.cwe)
+        self.assertEqual("krb5-libs", finding.component_name)
+        self.assertEqual("1.15.5-r0", finding.component_version)
+        self.assertIsNotNone(finding.description)
+        self.assertIsNotNone(finding.references)
+        self.assertEqual('1.15.5-r1', finding.mitigation)
+        self.assertIsNone(finding.cvssv3)
+        self.assertTrue(finding.static_finding)
+        self.assertFalse(finding.dynamic_finding)
