@@ -31,7 +31,7 @@ class NetsparkerParser(object):
             findingdetail = html2text.html2text(item.get("Description", ""))
             if "Cwe" in item["Classification"]:
                 try:
-                    cwe = int(item["Classification"]["Cwe"])
+                    cwe = int(item["Classification"]["Cwe"].split(',')[0])
                 except:
                     cwe = None
             else:
@@ -57,6 +57,16 @@ class NetsparkerParser(object):
                               references=references,
                               cwe=cwe,
                               static_finding=True)
+
+            if item["State"].find("FalsePositive") != -1:
+                finding.active = False
+                finding.verified = False
+                finding.false_p = True
+                finding.mitigated = None
+                finding.is_mitigated = False
+
+            if item["State"].find("AcceptedRisk") != -1:
+                finding.risk_accepted = True
 
             if (item["Classification"] is not None) and (item["Classification"]["Cvss"] is not None) and (item["Classification"]["Cvss"]["Vector"] is not None):
                 finding.cvssv3 = item["Classification"]["Cvss"]["Vector"]

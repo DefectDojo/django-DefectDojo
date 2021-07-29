@@ -1,5 +1,6 @@
 import json
 import textwrap
+from datetime import datetime
 from dojo.models import Finding
 
 
@@ -26,7 +27,7 @@ class GitlabContainerScanParser(object):
         data = json.load(file)
 
         # This is required by schema - it won't be null / undefined
-        date = data["scan"]["end_time"]
+        date = datetime.strptime(data["scan"]["end_time"], "%Y-%m-%dT%H:%M:%S")
 
         # Vulnerabilities is stored on vulnerabilities key
         vulnerabilities = data["vulnerabilities"]
