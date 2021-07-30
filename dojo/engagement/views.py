@@ -84,7 +84,7 @@ def engagement_calendar(request):
 def engagement(request):
     products = get_authorized_products(Permissions.Engagement_View).distinct()
     engagements = Engagement.objects.filter(
-        product__in=products
+        product__in=products, active=True
     ).select_related(
         'product',
         'product__prod_type',
