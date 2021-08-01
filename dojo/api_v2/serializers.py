@@ -1467,6 +1467,23 @@ class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = System_Settings
         fields = '__all__'
 
+    def validate(self, data):
+
+        if self.instance is not None:
+            default_group = self.instance.default_group
+            default_group_role = self.instance.default_group_role
+
+        if 'default_group' in data:
+            default_group = data['default_group']
+        if 'default_group_role' in data:
+            default_group_role = data['default_group_role']
+
+        if (default_group is None and default_group_role is not None) or \
+           (default_group is not None and default_group_role is None):
+            raise ValidationError('default_group and default_group_role must either both be set or both be empty.')
+
+        return data
+
 
 class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
