@@ -1510,6 +1510,16 @@ class ReviewFindingForm(forms.Form):
                                      'required, please use the text area '
                                      'below to provide documentation.')})
 
+    def __init__(self, *args, **kwargs):
+        finding = None
+        if 'finding' in kwargs:
+            finding = kwargs.pop('finding')
+
+        super(ReviewFindingForm, self).__init__(*args, **kwargs)
+
+        if finding is not None and settings.FEATURE_AUTHORIZATION_V2:
+            self.fields['reviewers'].queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
+
     class Meta:
         fields = ['reviewers', 'entry']
 
