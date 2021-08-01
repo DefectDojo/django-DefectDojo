@@ -122,7 +122,7 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.4.2
         with:
-          minikube version: 'v1.14.2'
+          minikube version: 'v1.22.0'
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress'
