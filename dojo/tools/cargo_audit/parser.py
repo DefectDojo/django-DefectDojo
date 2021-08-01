@@ -30,13 +30,13 @@ class CargoAuditParser(object):
                     categories = ''
                 description = categories + f"\n**Description:** `{advisory.get('description')}`"
 
-                if item["affected"] is not None:
-                    if "functions" in item["affected"]:
-                        affected_func = [f'{func}: {", ".join(versions)}'
-                                         for func, versions in item["affected"]["functions"].items()]
-                        description += f"\n**Affected functions**: {', '.join(affected_func)}"
-                    references = f"{advisory.get('url')}\n" + '\n'.join(advisory['references'])
-                    date = advisory.get('date')
+                if item["affected"] is not None and "functions" in item["affected"]:
+                    affected_func = [f'{func}: {", ".join(versions)}'
+                                     for func, versions in item["affected"]["functions"].items()]
+                    description += f"\n**Affected functions**: {', '.join(affected_func)}"
+
+                references = f"{advisory.get('url')}\n" + '\n'.join(advisory['references'])
+                date = advisory.get('date')
 
                 if len(advisory.get('aliases')) != 0:
                     cve = advisory.get('aliases')[0]
