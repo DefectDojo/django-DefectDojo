@@ -30,7 +30,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
+    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -45,7 +45,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type
-from dojo.group.queries import get_authorized_groups
+from dojo.group.queries import get_authorized_groups, get_group_member_roles
 
 logger = logging.getLogger(__name__)
 
@@ -1619,7 +1619,7 @@ class Add_Group_MemberForm(forms.ModelForm):
         self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
-        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+        self.fields['role'].queryset = get_group_member_roles()
 
     class Meta:
         model = Dojo_Group_Member
@@ -1634,7 +1634,7 @@ class Add_Group_Member_UserForm(forms.ModelForm):
         self.fields['user'].disabled = True
         current_groups = Dojo_Group_Member.objects.filter(user=self.initial['user']).values_list('group', flat=True)
         self.fields['groups'].queryset = Dojo_Group.objects.exclude(id__in=current_groups)
-        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+        self.fields['role'].queryset = get_group_member_roles()
 
     class Meta:
         model = Dojo_Group_Member
@@ -1646,7 +1646,7 @@ class Edit_Group_MemberForm(forms.ModelForm):
         super(Edit_Group_MemberForm, self).__init__(*args, **kwargs)
         self.fields['group'].disabled = True
         self.fields['user'].disabled = True
-        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+        self.fields['role'].queryset = get_group_member_roles()
 
     class Meta:
         model = Dojo_Group_Member
@@ -2300,6 +2300,10 @@ class DeleteEngagementPresetsForm(forms.ModelForm):
 
 
 class SystemSettingsForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(SystemSettingsForm, self).__init__(*args, **kwargs)
+        self.fields['default_group_role'].queryset = get_group_member_roles()
 
     class Meta:
         model = System_Settings

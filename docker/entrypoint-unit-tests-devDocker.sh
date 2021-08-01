@@ -7,7 +7,7 @@ set -e
 set -v
 
 cd /app
-# Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
+# Unset the database URL so that we can force the DD_TEST_DATABASE_NAME (see django "DATABASES" configuration in settings.dist.py)
 unset DD_DATABASE_URL
 
 python3 manage.py makemigrations dojo
