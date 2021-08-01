@@ -14,7 +14,7 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
-    Language_Type, Languages
+    Language_Type, Languages, Notifications
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
@@ -1470,3 +1470,11 @@ class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
+
+
+class NotificationsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Notifications
+        fields = '__all__'
+

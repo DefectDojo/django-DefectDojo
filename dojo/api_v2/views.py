@@ -17,7 +17,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.models import Language_Type, Languages, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
+from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
@@ -2290,3 +2290,17 @@ class SystemSettingsViewSet(mixins.ListModelMixin,
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
     serializer_class = serializers.SystemSettingsSerializer
     queryset = System_Settings.objects.all()
+
+
+# Authorization: superuser
+class NottificationsViewSet(mixins.ListModelMixin,
+                            mixins.RetrieveModelMixin,
+                            mixins.DestroyModelMixin,
+                            mixins.CreateModelMixin,
+                            mixins.UpdateModelMixin,
+                            viewsets.GenericViewSet):
+    serializer_class = serializers.NotificationsSerializer
+    queryset = Notifications.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'user', 'product')
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
