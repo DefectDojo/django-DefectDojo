@@ -1844,6 +1844,13 @@ class UsersViewSet(mixins.CreateModelMixin,
     filter_fields = ('id', 'username', 'first_name', 'last_name', 'email')
     permission_classes = (IsAdminUser, DjangoModelPermissions)
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if request.user == instance:
+            return Response('Users may not delete themselves', status=status.HTTP_400_BAD_REQUEST)
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 # Authorization: authenticated users, DjangoModelPermissions
 class ImportScanView(mixins.CreateModelMixin,

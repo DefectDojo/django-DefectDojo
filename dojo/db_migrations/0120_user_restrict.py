@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('dojo', '0118_remove_finding_images'),
+        ('dojo', '0119_default_group_is_staff'),
     ]
 
     operations = [
