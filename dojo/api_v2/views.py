@@ -1836,11 +1836,12 @@ class UsersViewSet(mixins.CreateModelMixin,
                    mixins.UpdateModelMixin,
                    mixins.ListModelMixin,
                    mixins.RetrieveModelMixin,
+                   mixins.DestroyModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.UserSerializer
     queryset = User.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'username', 'first_name', 'last_name')
+    filter_fields = ('id', 'username', 'first_name', 'last_name', 'email')
     permission_classes = (IsAdminUser, DjangoModelPermissions)
 
 
