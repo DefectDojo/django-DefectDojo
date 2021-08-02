@@ -131,6 +131,11 @@ client.
 
 CSV Report
 
+### Cobalt.io API
+
+Export Cobalt.io API findings data in JSON format (`/findings` endpoint).
+Be sure to scope the result to the pentest or asset you want to import findings from.
+
 ### Coverity API
 
 Export Coverity API view data in JSON format (`/api/viewContents/issues` endpoint).
@@ -399,7 +404,7 @@ Github v4 graphql query to fetch data:
   }
 {{< /highlight >}}
 
-Another example of Python script that query one repository: 
+Another example of Python script that query one repository:
 
 ```python
 

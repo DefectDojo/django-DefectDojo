@@ -726,5 +726,12 @@
         },
         "model": "dojo.test_type",
         "pk": 195
+    },
+    {
+        "fields": {
+            "name": "Cobalt.io API"
+        },
+        "model": "dojo.test_type",
+        "pk": 196
     }
 ]
