@@ -1118,18 +1118,34 @@ class SonarqubeProductViewSet(mixins.ListModelMixin,
 
 
 # Authorization: object-based
-class DojoMetaViewSet(mixins.ListModelMixin,
-                     mixins.RetrieveModelMixin,
-                     mixins.DestroyModelMixin,
-                     mixins.CreateModelMixin,
-                     mixins.UpdateModelMixin,
-                     viewsets.GenericViewSet):
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class DojoMetaViewSet(prefetch.PrefetchListMixin,
+                      prefetch.PrefetchRetrieveMixin,
+                      mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.DestroyModelMixin,
+                      mixins.CreateModelMixin,
+                      mixins.UpdateModelMixin,
+                      viewsets.GenericViewSet):
     serializer_class = serializers.MetaSerializer
     queryset = DojoMeta.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'product', 'endpoint', 'name', 'finding')
+    filter_fields = ('id', 'product', 'endpoint', 'finding', 'name', 'value')
     if settings.FEATURE_AUTHORIZATION_V2:
         permission_classes = (IsAuthenticated, permissions.UserHasDojoMetaPermission)
+    swagger_schema = prefetch.get_prefetch_schema(["metadata_list", "metadata_read"],
+        serializers.MetaSerializer).to_schema()
 
     def get_queryset(self):
         return get_authorized_dojo_meta(Permissions.Product_View)
@@ -2293,14 +2309,30 @@ class SystemSettingsViewSet(mixins.ListModelMixin,
 
 
 # Authorization: superuser
-class NottificationsViewSet(mixins.ListModelMixin,
-                            mixins.RetrieveModelMixin,
-                            mixins.DestroyModelMixin,
-                            mixins.CreateModelMixin,
-                            mixins.UpdateModelMixin,
-                            viewsets.GenericViewSet):
+@extend_schema_view(
+    list=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+            OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                                description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class NotificationsViewSet(prefetch.PrefetchListMixin,
+                           prefetch.PrefetchRetrieveMixin,
+                           mixins.ListModelMixin,
+                           mixins.RetrieveModelMixin,
+                           mixins.DestroyModelMixin,
+                           mixins.CreateModelMixin,
+                           mixins.UpdateModelMixin,
+                           viewsets.GenericViewSet):
     serializer_class = serializers.NotificationsSerializer
     queryset = Notifications.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'user', 'product')
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    swagger_schema = prefetch.get_prefetch_schema(["notifications_list", "notifications_read"],
+        serializers.NotificationsSerializer).to_schema()
