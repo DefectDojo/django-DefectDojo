@@ -210,7 +210,7 @@ class NessusXMLParser(object):
                         find.unsaved_endpoints = list()
                         dupes[dupe_key] = find
 
-                    if '://' in fqdn:
+                    if fqdn and '://' in fqdn:
                         endpoint = Endpoint.from_uri(fqdn)
                     else:
                         if protocol == 'general':
