@@ -323,10 +323,14 @@ cloudsql:
   image:
     # set repo and image tag of gce-proxy
     repository: gcr.io/cloudsql-docker/gce-proxy
-    tag: 1.17
+    tag: 1.23.1
     pullPolicy: IfNotPresent
   # set CloudSQL instance: 'project:zone:instancename'
   instance: ""
+  # use IAM database authentication
+  enable_iam_login: false
+  # whether to use a private IP to connect to the database
+  use_private_ip: false
 
 # Settings to make running the chart on GKE simpler
 gke:
