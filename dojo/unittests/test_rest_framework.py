@@ -9,7 +9,8 @@ from dojo.models import Product, Engagement, Test, Finding, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
-    Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages
+    Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
+    Notifications
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -19,7 +20,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     EndpointStatusViewSet, SonarqubeIssueViewSet, NotesViewSet, ProductTypeViewSet, \
     DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
-    DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView
+    DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
+    NotificationsViewSet
 from json import dumps
 from django.urls import reverse
 from rest_framework import status
@@ -198,6 +200,10 @@ class SchemaChecker():
 
     def check(self, schema, obj):
         def _check(schema, obj):
+            # Convert sets to lists to streamline checks
+            if 'type' in schema and schema["type"] is TYPE_ARRAY and isinstance(obj, set):
+                obj = list(obj)
+
             schema = self._resolve_if_ref(schema)
             self._check_type(schema, obj)
 
@@ -379,7 +385,14 @@ class BaseClass():
             for key, value in self.update_fields.items():
                 # some exception as push_to_jira has been implemented strangely in the update methods in the api
                 if key not in ['push_to_jira', 'ssh', 'password', 'api_key']:
-                    self.assertEqual(value, response.data[key])
+                    # Convert data to sets to avoid problems with lists
+                    if isinstance(value, list):
+                        value = set(value)
+                    if isinstance(response.data[key], list):
+                        response_data = set(response.data[key])
+                    else:
+                        response_data = response.data[key]
+                    self.assertEqual(value, response_data)
 
             self.assertFalse('push_to_jira' in response.data)
             self.assertFalse('ssh' in response.data)
@@ -1619,3 +1632,21 @@ class ImportLanguagesTest(BaseClass.RESTEndpointTest):
         self.assertEqual(languages[1].blank, 10813)
         self.assertEqual(languages[1].comment, 5054)
         self.assertEqual(languages[1].code, 51056)
+
+
+class NotificationsTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = Notifications
+        self.endpoint_path = 'notifications'
+        self.viewname = 'notifications'
+        self.viewset = NotificationsViewSet
+        self.payload = {
+            'product': 1,
+            'user': 3,
+            'product_type_added': ["alert", "msteams"]
+        }
+        self.update_fields = {'product_added': ["alert", "msteams"]}
+        self.object_permission = False
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
