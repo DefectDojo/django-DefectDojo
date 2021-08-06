@@ -483,16 +483,15 @@ XML file from IBM App Scanner.
 
 XML Scan Result File from Immuniweb Scan.
 
-IntSights Report
---------------
+### IntSights Report
 
 IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.).
 
-### Manual Import
+#### Manual Import
 Use the Export CSV feature in the IntSights Threat Command GUI to create an *IntSights Alerts.csv* file. This CSV
 file can then be imported into Defect Dojo.
 
-### Automated Import
+#### Automated Import
 
 The IntSights `get-complete-alert` API only returns details for a single alert. To automate the process,
 individually fetch details for each alert and append to a list. The list is then saved as the value for the key
