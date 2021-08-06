@@ -2323,5 +2323,14 @@
         "code": 5,
         "created": "2018-04-16T06:54:35.940Z"
     }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.notifications",
+    "fields": {
+      "product": 1,
+      "user": 2,
+      "product_type_added": ["slack"]
+    }
   }
 ]

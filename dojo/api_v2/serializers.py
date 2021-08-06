@@ -1,10 +1,10 @@
 from typing import List
 from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
-from rest_framework.fields import DictField
+from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
-from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
+from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -14,7 +14,7 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
-    Language_Type, Languages
+    Language_Type, Languages, Notifications, NOTIFICATION_CHOICES
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
@@ -1494,3 +1494,54 @@ class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
+
+
+class NotificationsSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(),
+                                                 required=False,
+                                                 default=None,
+                                                 allow_null=True)
+    user = serializers.PrimaryKeyRelatedField(queryset=Dojo_User.objects.all(),
+                                                 required=False,
+                                                 default=None,
+                                                 allow_null=True)
+    product_type_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    product_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    engagement_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    test_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    scan_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    jira_update = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    upcoming_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    stale_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    auto_close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    user_mentioned = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    code_review = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    review_requested = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    other = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+
+    class Meta:
+        model = Notifications
+        fields = '__all__'
+
+    def validate(self, data):
+        user = None
+        product = None
+
+        if self.instance is not None:
+            user = self.instance.user
+            product = self.instance.product
+
+        if 'user' in data:
+            user = data.get('user')
+        if 'product' in data:
+            product = data.get('product')
+
+        if self.instance is None or user != self.instance.user or product != self.instance.product:
+            notifications = Notifications.objects.filter(user=user, product=product).count()
+            if notifications > 0:
+                raise ValidationError("Notification for user and product already exists")
+
+        return data
