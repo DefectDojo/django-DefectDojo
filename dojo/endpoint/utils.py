@@ -183,7 +183,9 @@ def clean_hosts_run(apps, change):
                         err_log(message, html_log, endpoint_html_log, endpoint)
 
         try:
-            endpoint.clean()
+            Endpoint.clean(endpoint)  # still don't understand why 'endpoint.clean()' doesn't work
+            if change:
+                endpoint.save()
         except ValidationError as ves:
             for ve in ves:
                 err_log(ve, html_log, endpoint_html_log, endpoint)
