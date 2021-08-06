@@ -1,11 +1,20 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-10">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    {{ name }}
+                </div>
+            </div>
             {% if questions %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=questions page_size=True %}
+                </div>
                 <div class="panel panel-default table-responsive">
-                    <table class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                    <table id="groups" class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
                             <th>Text</th>
@@ -26,7 +35,9 @@
                         </tbody>
                     </table>
                 </div>
-                {% include "dojo/paging_snippet.html" with page=questions %}
+                <div class="clearfix">
+                    {% include "dojo/paging_snippet.html" with page=questions page_size=True %}
+                </div>
             {% else %}
                 No Questionnaires found.
             {% endif %}

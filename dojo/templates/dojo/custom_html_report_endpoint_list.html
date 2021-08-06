@@ -20,7 +20,7 @@
         <div class="panel panel-warning">
             <div class="panel-heading">
                 <h4>
-                    Endpoint: {{ endpoint.host_no_port }} with {{ endpoint.active_findings|length|apnumber }}
+                    Endpoint: {{ endpoint }} with {{ endpoint.active_findings|length|apnumber }}
                     active findings
                 </h4>
             </div>
@@ -145,12 +145,7 @@
             <pre>{{ finding.references|markdown_render }}</pre>
             {% endif %}
             {% if include_finding_images %}
-                {% if finding.images.all.count > 0 %}
-                <h6>Images</h6>
-                    {% for pic in finding.images.all %}
-                        <p><img src="{{ host }}{% pic_token pic 'original' %}" style="max-width: 85%" alt="Finding Image"></p>
-                    {% endfor %}
-                {% endif %}
+                {% include "dojo/snippets/file_images.html" with size='original' obj=finding format="HTML" %}
             {% endif %}
             {% if include_finding_notes %}
                 {% with notes=finding.notes.all|get_public_notes %}

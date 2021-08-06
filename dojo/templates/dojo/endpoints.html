@@ -3,6 +3,7 @@
 {% load display_tags %}
 {% load authorization_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -75,8 +76,14 @@
                                 </form>
                             </th>
                             {% endif %}
-                            <th>{% dojo_sort request 'Endpoint' 'host' %}</th>
-                            <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
+                            {% if host_view %}
+                                <th>{% dojo_sort request 'Host' 'host' %}</th>
+                            {% else %}
+                                <th>{% dojo_sort request 'Endpoint' 'endpoint' %}</th>
+                            {% endif %}
+                            {% if not product_tab %}
+                                <th>{% dojo_sort request 'Product' 'product' 'asc' %}</th>
+                            {% endif %}
 							<th nowrap="nowrap">Open Findings</th>
 							<th>Status</th>
                         </tr>
@@ -86,15 +93,15 @@
                                 {% if user.is_staff or 'AUTHORIZED_USERS_ALLOW_CHANGE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_DELETE'|setting_enabled or 'AUTHORIZED_USERS_ALLOW_STAFF'|setting_enabled or product_tab and product_tab.product|has_object_permission:"Endpoint_Edit" %}
                                 <td class="hidden-sm centered">
                                     <form action="#">
-                                        <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}" id="{{ e.id }}"
-                                                class="select_one {{ e.id }}"></input>
+                                        <input type="checkbox" title= "Select_{{ e.id }}" name="select_{{ e.id }}"
+                                               id="{{ e.id }}"  class="select_one {{ e.id }}"></input>
                                     </form>
                                 </td>
                                 {% endif %}
-                                {% if show_uri %}
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}</a>
+                                {% if host_view %}
+                                  <td><a href="{% url 'view_endpoint_host' e.id %}">{{ e.host }}</a>
                                 {% else %}
-                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e.host_no_port }}</a>
+                                <td><a href="{% url 'view_endpoint' e.id %}">{{ e }}{% if e.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                 {% endif %}
                                   {% if e.tags %}
                                       <sup>
@@ -104,30 +111,44 @@
                                       </sup>
                                   {% endif %}
                                 </td>
-                                <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
-                                  <sup>
-                                      {% for tag in e.product.tags.all %}
-                                          <a title="Search {{ tag }}" class="tag-label tag-color"
-                                             href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
-                                      {% endfor %}
-                                  </sup>
+                                {% if not product_tab %}
+                                  <td><a href="{% url 'view_product' e.product.id %}">{{ e.product }}</a>
+                                    <sup>
+                                        {% for tag in e.product.tags.all %}
+                                            <a title="Search {{ tag }}" class="tag-label tag-color"
+                                               href="{% url 'simple_search' %}?query=tag:{{ tag }}">{{ tag }}</a>
+                                        {% endfor %}
+                                    </sup>
+                                  </td>
+                                {% endif %}
+                                <td>
+                                  {% if host_view %}
+                                    {% if e.host_active_findings_count > 0 %}
+                                      {{ e.host_active_findings_count }}
+                                    {% else %}
+                                      No Open, Active Findings
+                                    {% endif %}
+                                  {% else %}
+                                    {% if e.active_findings_count > 0 %}
+                                      <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.active_findings_count }}</a>
+                                    {% else %}
+                                      No Open, Active Findings
+                                    {% endif %}
+                                  {% endif %}
                                 </td>
                                 <td>
-                                  {% if e.finding_count > 0 %}
-                                  {% if tab_product %}
-                                  <a href="{% url 'product_open_findings' tab_product.id %}?test__engagement__product={{ tab_product.id }}&endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
+                                  {% if host_view %}
+                                    {{ e.host_mitigated_endpoints_count }} / {{ e.host_endpoints_count }} Mitigated Endpoints
                                   {% else %}
-                                  <a href="{% url 'open_findings' %}?endpoints={{ e.id }}">{{ e.finding_count_endpoint }}</a>
-                                  {% endif %}
-                                  {% else %}
-                                  No Open, Active Findings
-                                  {% endif %}
-                                </td>
-                                <td>
-                                  {% if e.mitigated%}
-                                    Mitigated
-                                  {% else %}
-                                    Vulnerable
+                                    {% if e.mitigated %}
+                                      Mitigated
+                                    {% else %}
+                                      {% if e.active_findings_count > 0 %}
+                                        Vulnerable
+                                      {% else %}
+                                        No Open, Active Findings
+                                      {% endif %}
+                                    {% endif %}
                                   {% endif %}
                                 </td>
                             </tr>
@@ -145,6 +166,7 @@
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 <script>
         var checkbox_count = 0;
         function check_checked_endpoint()

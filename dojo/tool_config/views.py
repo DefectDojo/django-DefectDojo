@@ -6,10 +6,11 @@ from django.contrib.auth.decorators import user_passes_test
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from dojo.models import Tool_Configuration
+from dojo.models import Tool_Configuration, Tool_Type
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view
 from dojo.utils import add_breadcrumb
 from dojo.forms import ToolConfigForm
+from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +20,27 @@ def new_tool_config(request):
     if request.method == 'POST':
         tform = ToolConfigForm(request.POST)
         if tform.is_valid():
-            tform.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Tool Configuration Successfully Created.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('tool_config', ))
+            form_copy = tform.save(commit=False)
+            try:
+                tool_type_qs = Tool_Type.objects.filter(name='SonarQube')
+                if form_copy.tool_type in tool_type_qs:
+                    sq = SonarQubeAPI(form_copy)
+                    project_count = sq.test_connection()  # if connection is not successful, this call raise exception
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'SonarQube connection successful. You have access to {} projects'.format(project_count),
+                                         extra_tags='alert-success')
+                form_copy.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Tool Configuration Successfully Updated.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('tool_config', ))
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     str(e),
+                                     extra_tags='alert-danger')
     else:
         tform = ToolConfigForm()
         add_breadcrumb(title="New Tool Configuration", top_level=False, request=request)
@@ -41,12 +57,26 @@ def edit_tool_config(request, ttid):
             form_copy = tform.save(commit=False)
             form_copy.password = dojo_crypto_encrypt(tform.cleaned_data['password'])
             form_copy.ssh = dojo_crypto_encrypt(tform.cleaned_data['ssh'])
-            form_copy.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 'Tool Configuration Successfully Updated.',
-                                 extra_tags='alert-success')
-            return HttpResponseRedirect(reverse('tool_config', ))
+            try:
+                tool_type_qs = Tool_Type.objects.filter(name='SonarQube')
+                if form_copy.tool_type in tool_type_qs:
+                    sq = SonarQubeAPI(form_copy)
+                    project_count = sq.test_connection()  # if connection is not successful, this call raise exception
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         'SonarQube connection successful. You have access to {} projects'.format(project_count),
+                                         extra_tags='alert-success')
+                form_copy.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Tool Configuration Successfully Updated.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('tool_config', ))
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     str(e),
+                                     extra_tags='alert-danger')
     else:
         tool_config.password = prepare_for_view(tool_config.password)
         tool_config.ssh = prepare_for_view(tool_config.ssh)

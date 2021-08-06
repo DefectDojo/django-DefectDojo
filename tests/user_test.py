@@ -24,6 +24,9 @@ class UserTest(BaseTestCase):
         # username
         driver.find_element_by_id("id_username").clear()
         driver.find_element_by_id("id_username").send_keys("propersahm")
+        # password
+        driver.find_element_by_id("id_password").clear()
+        driver.find_element_by_id("id_password").send_keys("Def3ctD0jo&")
         # First Name
         driver.find_element_by_id("id_first_name").clear()
         driver.find_element_by_id("id_first_name").send_keys("Proper")

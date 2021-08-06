@@ -11,6 +11,9 @@ class TestBurpParser(TestCase):
         with open(path.join(path.dirname(__file__), "../scans/burp/one_finding.xml")) as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
 
             self.assertEqual(1, len(findings))
             self.assertEqual("1049088", findings[0].vuln_id_from_tool)
@@ -20,6 +23,9 @@ class TestBurpParser(TestCase):
         with open(path.join(path.dirname(__file__), "../scans/burp/seven_findings.xml")) as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
             self.assertEqual(7, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]
@@ -31,6 +37,9 @@ class TestBurpParser(TestCase):
         with open(path.join(path.dirname(__file__), "../scans/burp/one_finding_with_blank_response.xml")) as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
 
             self.assertEqual(1, len(findings))
 
@@ -44,6 +53,9 @@ class TestBurpParser(TestCase):
         with open(path.join(path.dirname(__file__), "../scans/burp/one_finding_with_cwe.xml")) as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
 
             self.assertEqual(1, len(findings))
 
@@ -57,6 +69,9 @@ class TestBurpParser(TestCase):
         with open(path.join(path.dirname(__file__), "../scans/burp/issue4399.xml")) as test_file:
             parser = BurpParser()
             findings = parser.get_findings(test_file, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
             self.assertEqual(20, len(findings))
             with self.subTest(i=0):
                 finding = findings[0]

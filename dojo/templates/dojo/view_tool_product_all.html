@@ -2,6 +2,7 @@
 {% load navigation_tags %}
 {% load get_config_setting %}
 {% block content %}
+    {{ block.super }}
     <div class="row">
           <div class="col-md-12">
               <div class="panel panel-default table-responsive">
@@ -25,11 +26,21 @@
                           <tbody>
                           {% for tool in tools %}
                               <tr>
-                                <td><a href="{{ tool.url }}" target="_blank">
-                                  {{ tool.name }}</a></td>
+                                <td>
+                                    {% if tool.url %}
+                                        <a href="{{ tool.url }}" target="_blank">{{ tool.name }}</a>
+                                    {% else %}
+                                        {{ tool.name }}
+                                    {% endif %}
+                                  </td>
                                   <td>{{ tool.tool_project_id }}</td>
-                                  <td><a href="{{ tool.tool_configuration.url }}" target="_blank">
-                                    {{ tool.tool_configuration.name }}</a></td>
+                                  <td>
+                                    {% if tool.tool_configuration.url %}
+                                        <a href="{{ tool.tool_configuration.url }}" target="_blank">{{ tool.tool_configuration.name }}</a>
+                                    {% else %}
+                                        {{ tool.tool_configuration.name }}
+                                    {% endif %}
+                                  </td>
                                   <td>{{ tool.tool_configuration.tool_type.name }}</td>
                                   <td>
                                       <div class="btn-group"><!--
@@ -55,5 +66,6 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     {% include "dojo/filter_js_snippet.html" %}
 {% endblock %}

@@ -120,7 +120,7 @@ class TestSarifParser(TestCase):
         # finding 6
         item = findings[6]
         self.assertEqual("CVE-2019-11358", item.title)
-        self.assertEqual("Medium", item.severity)
+        self.assertEqual("Critical", item.severity)
         self.assertEqual("CVE-2019-11358", item.cve)
         for finding in findings:
             self.common_checks(finding)
@@ -194,6 +194,7 @@ class TestSarifParser(TestCase):
         )
         self.assertIsNone(finding.cve)
         self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.timezone.utc), finding.date)
+        self.assertEqual(327, finding.cwe)
         # finding 1
         finding = findings[1]
         self.assertEqual(
@@ -202,5 +203,35 @@ class TestSarifParser(TestCase):
         )
         self.assertEqual(235, finding.line)
         self.assertEqual(datetime.datetime(2021, 3, 23, 0, 10, 48, tzinfo=datetime.timezone.utc), finding.date)
+        self.assertEqual(798, finding.cwe)
         for finding in findings:
             self.common_checks(finding)
+
+    def test_dockle(self):
+        """Generated with goodwithtech/dockle (https://github.com/goodwithtech/dockle)"""
+        testfile = open("dojo/unittests/scans/sarif/dockle_0_3_15.sarif")
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(4, len(findings))
+        for finding in findings:
+            self.common_checks(finding)
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("CIS-DI-0010", finding.vuln_id_from_tool)
+            self.assertEqual("Critical", finding.severity)
+            self.assertIn("Do not store credential in ENVIRONMENT vars/files", finding.description)
+        with self.subTest(i=1):
+            finding = findings[1]
+            self.assertEqual("CIS-DI-0005", finding.vuln_id_from_tool)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual("Enable Content trust for Docker", finding.description)
+        with self.subTest(i=2):
+            finding = findings[2]
+            self.assertEqual("CIS-DI-0006", finding.vuln_id_from_tool)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual("Add HEALTHCHECK instruction to the container image", finding.description)
+        with self.subTest(i=3):
+            finding = findings[3]
+            self.assertEqual("CIS-DI-0008", finding.vuln_id_from_tool)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual("Confirm safety of setuid/setgid files", finding.description)

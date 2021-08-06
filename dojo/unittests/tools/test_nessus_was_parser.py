@@ -15,10 +15,13 @@ class TestNessusWASParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus_was/nessus_was_many_vuln.xml")
         parser = NessusWASXMLParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(5, len(findings))
         for i in [0, 1, 2, 3, 4]:
             finding = findings[i]
-            self.assertEqual('TCP', finding.unsaved_endpoints[0].protocol)
+            self.assertEqual('http', finding.unsaved_endpoints[0].protocol)
             self.assertIsNone(finding.cwe)
         finding = findings[0]
         self.assertEqual('High', finding.severity)
@@ -28,9 +31,12 @@ class TestNessusWASParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus_was/nessus_was_one_vuln.xml")
         parser = NessusWASXMLParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
         finding = findings[0]
-        self.assertEqual('TCP', finding.unsaved_endpoints[0].protocol)
+        self.assertEqual('http', finding.unsaved_endpoints[0].protocol)
         self.assertIsNone(finding.cwe)
         self.assertEqual('High', finding.severity)
         self.assertEqual('Cross-Site Scripting (XSS)', finding.title)
@@ -39,12 +45,18 @@ class TestNessusWASParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus_was/nessus_was_no_vuln.xml")
         parser = NessusWASXMLParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(0, len(findings))
 
     def test_parse_many_findings_csv(self):
         testfile = open("dojo/unittests/scans/nessus_was/nessus_was_many_vuln.csv")
         parser = NessusWASCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(5, len(findings))
         for i in [0, 1, 2, 3, 4]:
             finding = findings[i]
@@ -60,6 +72,9 @@ class TestNessusWASParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus_was/nessus_was_one_vuln.csv")
         parser = NessusWASCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)

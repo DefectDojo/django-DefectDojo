@@ -19,6 +19,9 @@ class TestQualysParser(TestCase):
         )
         parser = QualysParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(301, len(findings))
 
         finding = findings[0]

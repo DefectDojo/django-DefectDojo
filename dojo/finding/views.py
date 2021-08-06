@@ -3,9 +3,6 @@ import base64
 import json
 import logging
 import mimetypes
-import os
-import shutil
-
 from collections import OrderedDict, defaultdict
 from django.db import models
 from django.db.models.functions import Length
@@ -24,18 +21,19 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 from itertools import chain
+from imagekit import ImageSpec
+from imagekit.processors import ResizeToFill
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 
-from dojo.filters import OpenFindingFilter, OpenFindingSuperFilter, AcceptedFindingFilter, AcceptedFindingSuperFilter, \
-    ClosedFindingFilter, ClosedFindingSuperFilter, TemplateFindingFilter, SimilarFindingFilter
+from dojo.filters import OpenFindingFilter, AcceptedFindingFilter, ClosedFindingFilter, TemplateFindingFilter, SimilarFindingFilter
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
-    DeleteFindingTemplateForm, FindingImageFormSet, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
+    DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
     FindingFormID, FindingBulkUpdateForm, MergeFindings
 from dojo.models import Finding, Finding_Group, Notes, NoteHistory, Note_Type, \
-    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, FindingImage, Endpoint_Status, \
-    FindingImageAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
+    BurpRawRequestResponse, Stub_Finding, Endpoint, Finding_Template, Endpoint_Status, \
+    FileAccessToken, GITHUB_PKey, GITHUB_Issue, Dojo_User, Cred_Mapping, Test, Product, User, Engagement
 from dojo.utils import get_page_items, add_breadcrumb, FileIterWrapper, process_notifications, \
     get_system_setting, apply_cwe_to_template, Product_Tab, calculate_grade, \
     redirect_to_return_url_or_else, get_return_url, add_external_issue, update_external_issue, \
@@ -54,61 +52,46 @@ from dojo.finding.queries import get_authorized_findings
 
 logger = logging.getLogger(__name__)
 
-OPEN_FINDINGS_QUERY = Q(active=True)
-VERIFIED_FINDINGS_QUERY = Q(active=True, verified=True)
-OUT_OF_SCOPE_FINDINGS_QUERY = Q(active=False, out_of_scope=True)
-FALSE_POSITIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, false_p=True)
-INACTIVE_FINDINGS_QUERY = Q(active=False, duplicate=False, is_mitigated=False, false_p=False, out_of_scope=False)
-ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=True)
-NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
-WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
-CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
-
 
 def open_findings_filter(request, queryset, user, pid):
-    if user.is_staff:
-        return OpenFindingSuperFilter(request.GET, queryset=queryset, user=user, pid=pid)
-    else:
-        return OpenFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
+    return OpenFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
 def accepted_findings_filter(request, queryset, user, pid):
-    filter_class = AcceptedFindingSuperFilter if user.is_staff else AcceptedFindingFilter
-    return filter_class(request.GET, queryset=queryset, pid=pid)
+    return AcceptedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
 def closed_findings_filter(request, queryset, user, pid):
-    filter_class = ClosedFindingSuperFilter if user.is_staff else ClosedFindingFilter
-    return filter_class(request.GET, queryset=queryset, pid=pid)
+    return ClosedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
 
 
 def open_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=OPEN_FINDINGS_QUERY, prefetch_type='open')
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=finding_helper.OPEN_FINDINGS_QUERY, prefetch_type='open')
 
 
 def verified_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Verified", query_filter=VERIFIED_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Verified", query_filter=finding_helper.VERIFIED_FINDINGS_QUERY)
 
 
 def out_of_scope_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Out of Scope", query_filter=OUT_OF_SCOPE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Out of Scope", query_filter=finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY)
 
 
 def false_positive_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="False Positive", query_filter=FALSE_POSITIVE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="False Positive", query_filter=finding_helper.FALSE_POSITIVE_FINDINGS_QUERY)
 
 
 def inactive_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=INACTIVE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=finding_helper.INACTIVE_FINDINGS_QUERY)
 
 
 def accepted_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=ACCEPTED_FINDINGS_QUERY,
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=finding_helper.ACCEPTED_FINDINGS_QUERY,
                     django_filter=accepted_findings_filter)
 
 
 def closed_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=finding_helper.CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
                     django_filter=closed_findings_filter)
 
 
@@ -121,15 +104,16 @@ django_filter=open_findings_filter, prefetch_type='all'):
     jira_project = None
     github_config = None
 
-    tags = Finding.tags.tag_model.objects.all()
-
     findings = get_authorized_findings(Permissions.Finding_View)
+    # print('View: ', view)
     if view == "All":
         filter_name = "All"
     else:
+        print('Filtering!', view)
         findings = findings.filter(query_filter)
 
     findings = findings.order_by(order_by)
+    # print('findings.query1', findings.query)
 
     if pid:
         product = get_object_or_404(Product, id=pid)
@@ -151,12 +135,21 @@ django_filter=open_findings_filter, prefetch_type='all'):
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
+    print('findings.query2', findings.query)
+    # print(django_filter)
     findings_filter = django_filter(request, findings, request.user, pid)
 
-    title_words = get_words_for_field(findings_filter.qs, 'title')
-    component_words = get_words_for_field(findings_filter.qs, 'component_name')
+    print('findings.query3', findings_filter.qs.query)
 
-    paged_findings = get_page_items(request, prefetch_for_findings(findings_filter.qs, prefetch_type), 25)
+    print('done')
+
+    title_words = get_words_for_field(Finding, 'title')
+    component_words = get_words_for_field(Finding, 'component_name')
+
+    # trick to prefetch after paging to avoid huge join generated by select count(*) from Paginator
+    paged_findings = get_page_items(request, findings_filter.qs, 25)
+
+    paged_findings.object_list = prefetch_for_findings(paged_findings.object_list, prefetch_type)
 
     bulk_edit_form = FindingBulkUpdateForm(request.GET)
 
@@ -494,7 +487,7 @@ def defect_finding_review(request, fid):
             new_note.date = now
             new_note.save()
             finding.notes.add(new_note)
-            finding.under_defect_review = False
+            finding.under_review = False
             defect_choice = form.cleaned_data['defect_choice']
 
             if defect_choice == "Close Finding":
@@ -970,7 +963,7 @@ def request_finding_review(request, fid):
                 reverse('view_finding', args=(finding.id, )))
 
     else:
-        form = ReviewFindingForm()
+        form = ReviewFindingForm(finding=finding)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Review Finding", tab="findings")
 
@@ -1097,7 +1090,7 @@ def find_template_to_apply(request, fid):
     paged_templates = get_page_items(request, templates.qs, 25)
 
     # just query all templates as this weird ordering above otherwise breaks Django ORM
-    title_words = get_words_for_field(Finding_Template.objects.all(), 'title')
+    title_words = get_words_for_field(Finding_Template, 'title')
     product_tab = Product_Tab(test.engagement.product.id, title="Apply Template to Finding", tab="findings")
     return render(
         request, 'dojo/templates.html', {
@@ -1542,114 +1535,46 @@ def delete_template(request, tid):
         return HttpResponseForbidden()
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
-def manage_images(request, fid):
-    finding = get_object_or_404(Finding, id=fid)
-    images_formset = FindingImageFormSet(queryset=finding.images.all())
-    error = False
-
-    messages.add_message(
-                request,
-                messages.INFO,
-                'Finding Images will be removed as of 06/31/2021. Please use the File Uploads instead.',
-                extra_tags='alert-danger')
-
-    if request.method == 'POST':
-        images_formset = FindingImageFormSet(
-            request.POST, request.FILES, queryset=finding.images.all())
-        if images_formset.is_valid():
-            # remove all from database and disk
-
-            images_formset.save()
-
-            for obj in images_formset.deleted_objects:
-                os.remove(os.path.join(settings.MEDIA_ROOT, obj.image.name))
-                if obj.image_thumbnail is not None and os.path.isfile(
-                        os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name)):
-                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name))
-                if obj.image_medium is not None and os.path.isfile(
-                        os.path.join(settings.MEDIA_ROOT, obj.image_medium.name)):
-                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_medium.name))
-                if obj.image_large is not None and os.path.isfile(
-                        os.path.join(settings.MEDIA_ROOT, obj.image_large.name)):
-                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_large.name))
-
-            for obj in images_formset.new_objects:
-                finding.images.add(obj)
-
-            orphan_images = FindingImage.objects.filter(finding__isnull=True)
-            for obj in orphan_images:
-                os.remove(os.path.join(settings.MEDIA_ROOT, obj.image.name))
-                if obj.image_thumbnail is not None and os.path.isfile(
-                        os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name)):
-                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_thumbnail.name))
-                if obj.image_medium is not None and os.path.isfile(
-                        os.path.join(settings.MEDIA_ROOT, obj.image_medium.name)):
-                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_medium.name))
-                if obj.image_large is not None and os.path.isfile(
-                        os.path.join(settings.MEDIA_ROOT, obj.image_large.name)):
-                    os.remove(os.path.join(settings.MEDIA_ROOT, obj.image_large.name))
-                obj.delete()
-
-            files = os.listdir(os.path.join(settings.MEDIA_ROOT, 'finding_images'))
-
-            for file in files:
-                with_media_root = os.path.join(settings.MEDIA_ROOT, 'finding_images', file)
-                with_part_root_only = os.path.join('finding_images', file)
-                if os.path.isfile(with_media_root):
-                    pic = FindingImage.objects.filter(
-                        image=with_part_root_only)
-
-                    if len(pic) == 0:
-                        os.remove(with_media_root)
-                        cache_to_remove = os.path.join(settings.MEDIA_ROOT, 'CACHE', 'images', 'finding_images',
-                            os.path.splitext(file)[0])
-                        if os.path.isdir(cache_to_remove):
-                            shutil.rmtree(cache_to_remove)
-                    else:
-                        for p in pic:
-                            if p.finding_set is None:
-                                p.delete()
-
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                'Images updated successfully.',
-                extra_tags='alert-success')
-        else:
-            error = True
-            messages.add_message(
-                request,
-                messages.ERROR,
-                'Please check form data and try again.',
-                extra_tags='alert-danger')
-
-        if not error:
-            return HttpResponseRedirect(reverse('view_finding', args=(fid, )))
-    product_tab = Product_Tab(finding.test.engagement.product.id, title="Manage Finding Images", tab="findings")
-    return render(
-        request, 'dojo/manage_images.html', {
-            'product_tab': product_tab,
-            'images_formset': images_formset,
-            'active_tab': 'findings',
-            'name': 'Manage Finding Images',
-            'finding': finding,
-        })
-
-
 def download_finding_pic(request, token):
+    class Thumbnail(ImageSpec):
+        processors = [ResizeToFill(100, 100)]
+        format = 'JPEG'
+        options = {'quality': 70}
+
+    class Small(ImageSpec):
+        processors = [ResizeToFill(640, 480)]
+        format = 'JPEG'
+        options = {'quality': 100}
+
+    class Medium(ImageSpec):
+        processors = [ResizeToFill(800, 600)]
+        format = 'JPEG'
+        options = {'quality': 100}
+
+    class Large(ImageSpec):
+        processors = [ResizeToFill(1024, 768)]
+        format = 'JPEG'
+        options = {'quality': 100}
+
+    class Original(ImageSpec):
+        format = 'JPEG'
+        options = {'quality': 100}
+
     mimetypes.init()
 
+    size_map = {
+        'thumbnail': Thumbnail,
+        'small': Small,
+        'medium': Medium,
+        'large': Large,
+        'original': Original,
+    }
+
     try:
-        access_token = FindingImageAccessToken.objects.get(token=token)
-        sizes = {
-            'thumbnail': access_token.image.image_thumbnail,
-            'small': access_token.image.image_small,
-            'medium': access_token.image.image_medium,
-            'large': access_token.image.image_large,
-            'original': access_token.image.image,
-        }
-        if access_token.size not in list(sizes.keys()):
+        access_token = FileAccessToken.objects.get(token=token)
+        size = access_token.size
+
+        if access_token.size not in list(size_map.keys()):
             raise Http404
         size = access_token.size
         # we know there is a token - is it for this image
@@ -1661,11 +1586,14 @@ def download_finding_pic(request, token):
     except:
         raise PermissionDenied
 
-    response = StreamingHttpResponse(FileIterWrapper(open(sizes[size].path, 'rb')))
-    response['Content-Disposition'] = 'inline'
-    mimetype, encoding = mimetypes.guess_type(sizes[size].name)
-    response['Content-Type'] = mimetype
-    return response
+    with open(access_token.file.file.file.name, 'rb') as file:
+        file_name = file.name
+        image = size_map[size](source=file).generate()
+        response = StreamingHttpResponse(FileIterWrapper(image))
+        response['Content-Disposition'] = 'inline'
+        mimetype, encoding = mimetypes.guess_type(file_name)
+        response['Content-Type'] = mimetype
+        return response
 
 
 @user_is_authorized(Product, Permissions.Finding_Edit, 'pid', 'staff')

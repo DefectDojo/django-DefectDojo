@@ -23,10 +23,11 @@ urlpatterns = [
         name='edit_user'),
     url(r'^user/(?P<uid>\d+)/delete', views.delete_user,
         name='delete_user'),
-    url(r'^api/key$', views.api_key, name='api_key'),
     url(r'^api/key-v2$', views.api_v2_key, name='api_v2_key'),
     url(r'^user/(?P<uid>\d+)/add_product_type_member$', views.add_product_type_member,
         name='add_product_type_member_user'),
     url(r'^user/(?P<uid>\d+)/add_product_member$', views.add_product_member,
         name='add_product_member_user'),
+    url(r'^user/(?P<uid>\d+)/add_group_member$', views.add_group_member,
+        name='add_group_member_user')
 ]

@@ -11,7 +11,7 @@ from auditlog.registry import auditlog
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, validate_ipv46_address
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q, Count
@@ -19,8 +19,6 @@ from django_extensions.db.models import TimeStampedModel
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.functional import cached_property
-from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToCover
 from django.utils import timezone
 from pytz import all_timezones
 from polymorphic.models import PolymorphicModel
@@ -108,6 +106,93 @@ class Regulation(models.Model):
 
     def __str__(self):
         return self.acronym + ' (' + self.jurisdiction + ')'
+
+
+User = get_user_model()
+
+
+# proxy class for convenience and UI
+class Dojo_User(User):
+    class Meta:
+        proxy = True
+        ordering = ['first_name']
+
+    def get_full_name(self):
+        return Dojo_User.generate_full_name(self)
+
+    def __str__(self):
+        return self.get_full_name()
+
+    @staticmethod
+    def wants_block_execution(user):
+        # this return False if there is no user, i.e. in celery processes, unittests, etc.
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
+    @staticmethod
+    def force_password_reset(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.force_password_reset
+
+    def disable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = False
+            user.usercontactinfo.save()
+
+    def enable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = True
+            user.usercontactinfo.save()
+
+    @staticmethod
+    def generate_full_name(user):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        full_name = '%s %s (%s)' % (user.first_name,
+                                    user.last_name,
+                                    user.username)
+        return full_name.strip()
+
+
+class UserContactInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    title = models.CharField(blank=True, null=True, max_length=150)
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
+                                 message="Phone number must be entered in the format: '+999999999'. "
+                                         "Up to 15 digits allowed.")
+    phone_number = models.CharField(validators=[phone_regex], blank=True,
+                                    max_length=15,
+                                    help_text="Phone number must be entered in the format: '+999999999'. "
+                                              "Up to 15 digits allowed.")
+    cell_number = models.CharField(validators=[phone_regex], blank=True,
+                                   max_length=15,
+                                   help_text="Phone number must be entered in the format: '+999999999'. "
+                                             "Up to 15 digits allowed.")
+    twitter_username = models.CharField(blank=True, null=True, max_length=150)
+    github_username = models.CharField(blank=True, null=True, max_length=150)
+    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
+    slack_user_id = models.CharField(blank=True, null=True, max_length=25)
+    block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
+    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset their password on next login.')
+
+
+class Dojo_Group(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True, blank=True)
+    users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    is_owner = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
 
 
 class System_Settings(models.Model):
@@ -203,7 +288,6 @@ class System_Settings(models.Model):
     time_zone = models.CharField(max_length=50,
                                  choices=[(tz, tz) for tz in all_timezones],
                                  default='UTC', blank=False)
-    display_endpoint_uri = models.BooleanField(default=False, verbose_name="Display Endpoint Full URI", help_text="Displays the full endpoint URI in the endpoint view.")
     enable_product_grade = models.BooleanField(default=False, verbose_name="Enable Product Grading", help_text="Displays a grade letter next to a product to show the overall health.")
     product_grade = models.CharField(max_length=800, blank=True)
     product_grade_a = models.IntegerField(default=90,
@@ -303,6 +387,24 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable checklists',
         help_text="With this setting turned off, checklists will be disabled in the user interface.")
+    default_group = models.ForeignKey(
+        Dojo_Group,
+        null=True,
+        blank=True,
+        help_text="New users created by OAuth2 will be assigned to this group.",
+        on_delete=models.RESTRICT)
+    default_group_role = models.ForeignKey(
+        Role,
+        null=True,
+        blank=True,
+        help_text="New users created by OAuth2 will be assigned to their default group with this role.",
+        on_delete=models.RESTRICT)
+    staff_user_email_pattern = models.CharField(
+        max_length=200,
+        default='',
+        blank=True,
+        verbose_name='Email pattern for staff users',
+        help_text="When the email address of a new user created by OAuth2 matches this regex pattern, their is_staff flag will be set to True.")
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -329,62 +431,16 @@ def get_current_datetime():
     return timezone.now()
 
 
-User = get_user_model()
+class Dojo_Group_Member(models.Model):
+    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
+    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, help_text="This role determines the permissions of the user to manage the group.", verbose_name="Group role")
 
 
-# proxy class for convenience and UI
-class Dojo_User(User):
-    class Meta:
-        proxy = True
-        ordering = ['first_name']
-
-    def get_full_name(self):
-        return Dojo_User.generate_full_name(self)
-
-    def __str__(self):
-        return self.get_full_name()
-
-    @staticmethod
-    def wants_block_execution(user):
-        # this return False if there is no user, i.e. in celery processes, unittests, etc.
-        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
-
-    @staticmethod
-    def generate_full_name(user):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
-        full_name = '%s %s (%s)' % (user.first_name,
-                                    user.last_name,
-                                    user.username)
-        return full_name.strip()
-
-
-class UserContactInfo(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    title = models.CharField(blank=True, null=True, max_length=150)
-    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
-                                 message="Phone number must be entered in the format: '+999999999'. "
-                                         "Up to 15 digits allowed.")
-    phone_number = models.CharField(validators=[phone_regex], blank=True,
-                                    max_length=15,
-                                    help_text="Phone number must be entered in the format: '+999999999'. "
-                                              "Up to 15 digits allowed.")
-    cell_number = models.CharField(validators=[phone_regex], blank=True,
-                                   max_length=15,
-                                   help_text="Phone number must be entered in the format: '+999999999'. "
-                                             "Up to 15 digits allowed.")
-    twitter_username = models.CharField(blank=True, null=True, max_length=150)
-    github_username = models.CharField(blank=True, null=True, max_length=150)
-    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
-    slack_user_id = models.CharField(blank=True, null=True, max_length=25)
-    block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
-
-
-class Dojo_Group(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True)
-    users = models.ManyToManyField(Dojo_User, blank=True)
+class Global_Role(models.Model):
+    user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+    group = models.OneToOneField(Dojo_Group, null=True, blank=True, on_delete=models.CASCADE)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, help_text="The global role will be applied to all product types and products.", verbose_name="Global role")
 
 
 class Contact(models.Model):
@@ -451,7 +507,7 @@ class Product_Type(models.Model):
          * San Francisco / New York offices
     """
     name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True)
+    description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
     updated = models.DateTimeField(auto_now=True, null=True)
@@ -530,6 +586,7 @@ class Test_Type(models.Model):
     name = models.CharField(max_length=200, unique=True)
     static_tool = models.BooleanField(default=False)
     dynamic_tool = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -709,25 +766,23 @@ class Product(models.Model):
             return self.active_verified_finding_count
 
     @cached_property
-    def endpoint_count(self):
+    def endpoint_host_count(self):
         # active_endpoints is (should be) prefetched
         endpoints = self.active_endpoints
 
         hosts = []
-        ids = []
         for e in endpoints:
-            if ":" in e.host:
-                host_no_port = e.host[:e.host.index(':')]
-            else:
-                host_no_port = e.host
-
-            if host_no_port in hosts:
+            if e.host in hosts:
                 continue
             else:
-                hosts.append(host_no_port)
-                ids.append(e.id)
+                hosts.append(e.host)
 
         return len(hosts)
+
+    @cached_property
+    def endpoint_count(self):
+        # active_endpoints is (should be) prefetched
+        return len(self.active_endpoints)
 
     def open_findings(self, start_date=None, end_date=None):
         if start_date is None or end_date is None:
@@ -808,30 +863,30 @@ class Product(models.Model):
 class Product_Member(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Group(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Member(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Product_Type_Group(models.Model):
     product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
     group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.IntegerField(default=0)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)
-    description = models.CharField(max_length=2000, null=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
 
     class Meta:
         ordering = ['name']
@@ -843,7 +898,7 @@ class Tool_Type(models.Model):
 class Tool_Configuration(models.Model):
     name = models.CharField(max_length=200, null=False)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.CharField(max_length=2000, null=True)
+    url = models.CharField(max_length=2000, null=True, blank=True)
     tool_type = models.ForeignKey(Tool_Type, related_name='tool_type', on_delete=models.CASCADE)
     authentication_type = models.CharField(max_length=15,
                                            choices=(
@@ -1096,17 +1151,18 @@ class Endpoint_Status(models.Model):
 
 
 class Endpoint(models.Model):
-    protocol = models.CharField(null=True, blank=True, max_length=10,
-                                help_text="The communication protocol such as 'http', 'ftp', etc.")
+    protocol = models.CharField(null=True, blank=True, max_length=20,
+                                 help_text="The communication protocol/scheme such as 'http', 'ftp', 'dns', etc.")
+    userinfo = models.CharField(null=True, blank=True, max_length=500,
+                              help_text="User info as 'alice', 'bob', etc.")
     host = models.CharField(null=True, blank=True, max_length=500,
-                            help_text="The host name or IP address, you can also include the port number. For example"
-                                      "'127.0.0.1', '127.0.0.1:8080', 'localhost', 'yourdomain.com'.")
-    fqdn = models.CharField(null=True, blank=True, max_length=500)
+                            help_text="The host name or IP address. It must not include the port number. "
+                                      "For example '127.0.0.1', 'localhost', 'yourdomain.com'.")
     port = models.IntegerField(null=True, blank=True,
                                help_text="The network port associated with the endpoint.")
     path = models.CharField(null=True, blank=True, max_length=500,
-                            help_text="The location of the resource, it should start with a '/'. For example"
-                                      "/endpoint/420/edit")
+                            help_text="The location of the resource, it must not start with a '/'. For example "
+                                      "endpoint/420/edit")
     query = models.CharField(null=True, blank=True, max_length=1000,
                              help_text="The query string, the question mark should be omitted."
                                        "For example 'group=4&team=8'")
@@ -1121,46 +1177,113 @@ class Endpoint(models.Model):
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add.")
 
     class Meta:
-        ordering = ['product', 'protocol', 'host', 'path', 'query', 'fragment']
+        ordering = ['product', 'host', 'protocol', 'port', 'userinfo', 'path', 'query', 'fragment']
         indexes = [
             models.Index(fields=['product', 'mitigated']),
         ]
 
+    def clean(self):
+        errors = []
+        if self.protocol or self.protocol == '':
+            if not re.match(r'^[A-Za-z][A-Za-z0-9\.\-\+]+$', self.protocol):  # https://tools.ietf.org/html/rfc3986#section-3.1
+                errors.append(ValidationError('Protocol "{}" has invalid format'.format(self.protocol)))
+            if self.protocol == '':
+                self.protocol = None
+
+        if self.userinfo or self.userinfo == '':
+            if not re.match(r'^[A-Za-z0-9\.\-_~%\!\$&\'\(\)\*\+,;=:]+$', self.userinfo):  # https://tools.ietf.org/html/rfc3986#section-3.2.1
+                errors.append(ValidationError('Userinfo "{}" has invalid format'.format(self.userinfo)))
+            if self.userinfo == '':
+                self.userinfo = None
+
+        if self.host:
+            if not re.match(r'^[A-Za-z0-9][A-Za-z0-9_\.\-\+]+$', self.host):
+                try:
+                    validate_ipv46_address(self.host)
+                except ValidationError:
+                    errors.append(ValidationError('Host "{}" has invalid format'.format(self.host)))
+        else:
+            errors.append(ValidationError('Host must not be empty'))
+
+        if self.port or self.port == 0:
+            try:
+                int_port = int(self.port)
+                if not (0 <= int_port < 65536):
+                    errors.append(ValidationError('Port "{}" has invalid format - out of range'.format(self.port)))
+                self.port = int_port
+            except ValueError:
+                errors.append(ValidationError('Port "{}" has invalid format - it is not a number'.format(self.port)))
+
+        if self.path or self.path == '':
+            while len(self.path) > 0 and self.path[0] == "/":  # Endpoint store "root-less" path
+                self.path = self.path[1:]
+            if self.path == '':
+                self.path = None
+
+        if self.query or self.query == '':
+            if len(self.query) > 0 and self.query[0] == "?":
+                self.query = self.query[1:]
+            if self.query == '':
+                self.query = None
+
+        if self.fragment or self.fragment == '':
+            if len(self.fragment) > 0 and self.fragment[0] == "#":
+                self.fragment = self.fragment[1:]
+            if self.fragment == '':
+                self.fragment = None
+
+        if errors:
+            raise ValidationError(errors)
+
     def __str__(self):
-        from urllib.parse import uses_netloc
-
-        netloc = self.host
-        port = self.port
-        scheme = self.protocol
-        url = self.path if self.path else ''
-        query = self.query
-        fragment = self.fragment
-
-        if port:
-            # If http or https on standard ports then don't tack on the port number
-            if (port != 443 and scheme == "https") or (port != 80 and scheme == "http"):
-                netloc += ':%s' % port
-
-        if netloc or (scheme and scheme in uses_netloc and url[:2] != '//'):
-            if url and url[:1] != '/':
-                url = '/' + url
-            if scheme and scheme in uses_netloc and url[:2] != '//':
-                url = '//' + (netloc or '') + url
+        try:
+            if self.host:
+                dummy_scheme = 'dummy-scheme'  # workaround for https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L988
+                url = hyperlink.EncodedURL(
+                    scheme=self.protocol if self.protocol else dummy_scheme,
+                    userinfo=self.userinfo or '',
+                    host=self.host,
+                    port=self.port,
+                    path=tuple(self.path.split('/')) if self.path else (),
+                    query=tuple(
+                        (
+                            qe.split(u"=", 1)
+                            if u"=" in qe
+                            else (qe, None)
+                        )
+                        for qe in self.query.split(u"&")
+                    ) if self.query else (),  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1427
+                    fragment=self.fragment or ''
+                )
+                # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
+                # Example: https://google.com and https://google.com:443
+                normalize_path = self.path  # it used to add '/' at the end of host
+                clean_url = url.normalize(scheme=True, host=True, path=normalize_path, query=True, fragment=True, userinfo=True, percents=True).to_uri().to_text()
+                if not self.protocol:
+                    if clean_url[:len(dummy_scheme) + 3] == (dummy_scheme + '://'):
+                        clean_url = clean_url[len(dummy_scheme) + 3:]
+                    else:
+                        raise ValueError('hyperlink lib did not create URL as was expected')
+                return clean_url
             else:
-                url = (netloc or '') + url
-        if scheme:
-            url = scheme + ':' + url
-        if query:
-            url = url + '?' + query
-        if fragment:
-            url = url + '#' + fragment
-        return url
-
-    # Return a normalized version of the URL to avoid differences where there shouldn't be any difference.
-    # Example: https://google.com and https://google.com:443
-    def get_normalized_url(self):
-        url = hyperlink.parse(str(self))
-        return url.normalize(scheme=True, host=True, path=True, query=True, fragment=True, userinfo=True, percents=True).to_text()
+                raise ValueError('Missing host')
+        except:
+            url = ''
+            if self.protocol:
+                url += '{}://'.format(self.protocol)
+            if self.userinfo:
+                url += '{}@'.format(self.userinfo)
+            if self.host:
+                url += self.host
+            if self.port:
+                url += ':{}'.format(self.port)
+            if self.path:
+                url += '{}{}'.format('/' if self.path[0] != '/' else '', self.path)
+            if self.query:
+                url += '?{}'.format(self.query)
+            if self.fragment:
+                url += '#{}'.format(self.fragment)
+            return url
 
     def __hash__(self):
         return self.__str__().__hash__()
@@ -1171,73 +1294,112 @@ class Endpoint(models.Model):
         else:
             return NotImplemented
 
-    @cached_property
-    def finding_count(self):
-        host = self.host_no_port
+    @property
+    def is_broken(self):
+        try:
+            self.clean()
+        except:
+            return True
+        else:
+            if self.product:
+                return False
+            else:
+                return True
 
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
-                                            product=self.product).distinct()
+    def vulnerable(self):
+        return self.active_findings_count() > 0
 
-        findings = Finding.objects.filter(endpoints__in=endpoints,
-                                          active=True,
-                                          verified=True,
-                                          out_of_scope=False).distinct()
+    def findings(self):
+        return Finding.objects.filter(endpoints=self).distinct()
 
-        return findings.count()
+    def findings_count(self):
+        return self.findings().count()
 
     def active_findings(self):
-        host = self.host_no_port
-
-        endpoints = Endpoint.objects.filter(host__regex="^" + host + ":?",
-                                            product=self.product).distinct()
-        return Finding.objects.filter(endpoints__in=endpoints,
-                                      active=True,
+        return self.findings().filter(active=True,
                                       verified=True,
+                                      out_of_scope=False,
                                       mitigated__isnull=True,
                                       false_p=False,
-                                      duplicate=False).distinct().order_by(
-            'numerical_severity')
+                                      duplicate=False).order_by('numerical_severity')
 
-    @cached_property
-    def finding_count_endpoint(self):
-        findings = Finding.objects.filter(endpoints=self,
-                                          active=True,
-                                          verified=True,
-                                          duplicate=False,
-                                          out_of_scope=False).distinct()
+    def active_findings_count(self):
+        return self.active_findings().count()
 
-        return findings.count()
+    def closed_findings(self):
+        return self.findings().filter(mitigated__isnull=False)
+
+    def closed_findings_count(self):
+        return self.closed_findings().count()
+
+    def host_endpoints(self):
+        return Endpoint.objects.filter(host=self.host,
+                                       product=self.product).distinct()
+
+    def host_endpoints_count(self):
+        return self.host_endpoints().count()
+
+    def host_mitigated_endpoints(self):
+        return Endpoint.objects.filter(host=self.host,
+                                       product=self.product,
+                                       mitigated=True).distinct()
+
+    def host_mitigated_endpoints_count(self):
+        return self.host_mitigated_endpoints().count()
+
+    def host_findings(self):
+        return Finding.objects.filter(endpoints__in=self.host_endpoints()).distinct()
+
+    def host_findings_count(self):
+        return self.host_finding().count()
+
+    def host_active_findings(self):
+        return self.host_findings().filter(active=True,
+                                           verified=True,
+                                           out_of_scope=False,
+                                           mitigated__isnull=True,
+                                           false_p=False,
+                                           duplicate=False).order_by('numerical_severity')
+
+    def host_active_findings_count(self):
+        return self.host_active_findings().count()
+
+    def host_closed_findings(self):
+        return self.host_findings().filter(mitigated__isnull=False)
+
+    def host_closed_findings_count(self):
+        return self.host_closed_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()
-        bc += [{'title': self.host_no_port,
+        bc += [{'title': self.host,
                 'url': reverse('view_endpoint', args=(self.id,))}]
         return bc
 
     @staticmethod
     def from_uri(uri):
-        return Endpoint()
+        try:
+            url = hyperlink.parse(url=uri)
+        except hyperlink.URLParseError as e:
+            raise ValidationError('Invalid URL format: {}'.format(e))
 
-    @property
-    def host_no_port(self):
-        if ":" in self.host:
-            return self.host[:self.host.index(":")]
-        else:
-            return self.host
+        query_parts = []  # inspired by https://github.com/python-hyper/hyperlink/blob/b8c9152cd826bbe8e6cc125648f3738235019705/src/hyperlink/_url.py#L1768
+        for k, v in url.query:
+            if v is None:
+                query_parts.append(k)
+            else:
+                query_parts.append(u"=".join([k, v]))
+        query_string = u"&".join(query_parts)
 
-    @property
-    def host_with_port(self):
-        host = self.host
-        port = self.port
-        scheme = self.protocol
-        if ":" in host:
-            return host
-        elif (port is None) and (scheme == "https"):
-            return host + ':443'
-        elif (port is None) and (scheme == "http"):
-            return host + ':80'
-        else:
-            return str(self)
+        return Endpoint(
+            protocol=url.scheme if url.scheme != '' else None,
+            userinfo=':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None,
+            host=url.host if url.host != '' else None,
+            port=url.port,
+            path='/'.join(url.path) if url.path not in [(), ('',)] else None,
+            query=query_string if query_string != '' else None,
+            fragment=url.fragment if url.fragment != '' else None
+        )
 
     def get_absolute_url(self):
         from django.urls import reverse
@@ -1253,6 +1415,40 @@ class Development_Environment(models.Model):
     def get_breadcrumbs(self):
         return [{"title": str(self),
                  "url": reverse("edit_dev_env", args=(self.id,))}]
+
+
+class Sonarqube_Issue(models.Model):
+    key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
+    status = models.CharField(max_length=20, help_text="SonarQube issue status")
+    type = models.CharField(max_length=15, help_text="SonarQube issue type")
+
+    def __str__(self):
+        return self.key
+
+
+class Sonarqube_Issue_Transition(models.Model):
+    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, on_delete=models.CASCADE, db_index=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    finding_status = models.CharField(max_length=100)
+    sonarqube_status = models.CharField(max_length=50)
+    transitions = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ('-created', )
+
+
+class Sonarqube_Product(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    sonarqube_project_key = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="SonarQube Project Key"
+    )
+    sonarqube_tool_config = models.ForeignKey(
+        Tool_Configuration, verbose_name="SonarQube Configuration",
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return '{} | {}'.format(self.sonarqube_tool_config.name, self.sonarqube_project_key)
 
 
 class Test(models.Model):
@@ -1286,13 +1482,14 @@ class Test(models.Model):
                                    null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
+    sonarqube_config = models.ForeignKey(Sonarqube_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="SonarQube Config")
 
     class Meta:
         indexes = [
             models.Index(fields=['engagement', 'test_type']),
         ]
 
-    def test_type_name(self):
+    def test_type_name(self) -> str:
         return self.test_type.name
 
     def __str__(self):
@@ -1386,40 +1583,6 @@ class Test_Import_Finding_Action(TimeStampedModel):
         return '%i: %s' % (self.finding.id, self.action)
 
 
-class Sonarqube_Issue(models.Model):
-    key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
-    status = models.CharField(max_length=20, help_text="SonarQube issue status")
-    type = models.CharField(max_length=15, help_text="SonarQube issue type")
-
-    def __str__(self):
-        return self.key
-
-
-class Sonarqube_Issue_Transition(models.Model):
-    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, on_delete=models.CASCADE, db_index=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    finding_status = models.CharField(max_length=100)
-    sonarqube_status = models.CharField(max_length=50)
-    transitions = models.CharField(max_length=100)
-
-    class Meta:
-        ordering = ('-created', )
-
-
-class Sonarqube_Product(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    sonarqube_project_key = models.CharField(
-        max_length=200, null=True, blank=True, verbose_name="SonarQube Project Key"
-    )
-    sonarqube_tool_config = models.ForeignKey(
-        Tool_Configuration, verbose_name="SonarQube Configuration",
-        null=True, blank=True, on_delete=models.CASCADE
-    )
-
-    def __str__(self):
-        return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
-
-
 class Finding(models.Model):
 
     title = models.CharField(max_length=511,
@@ -1492,10 +1655,6 @@ class Finding(models.Model):
                                              related_name="finding_endpoint_status",
                                              verbose_name="Endpoint Status",
                                              help_text="The status of the endpoint associated with this flaw (Vulnerable, Mitigated, ...).")
-    unsaved_endpoints = []
-    unsaved_request = None
-    unsaved_response = None
-    unsaved_tags = None
     references = models.TextField(null=True,
                                   blank=True,
                                   db_column="refs",
@@ -1615,10 +1774,6 @@ class Finding(models.Model):
                                          on_delete=models.CASCADE,
                                          verbose_name="Last Reviewed By",
                                          help_text="Provides the person who last reviewed the flaw.")
-    images = models.ManyToManyField('FindingImage',
-                                    blank=True,
-                                    verbose_name="Images",
-                                    help_text="Image(s) / Screenshot(s) related to the flaw.")
     files = models.ManyToManyField(FileUpload,
                                    blank=True,
                                    editable=False,
@@ -1781,6 +1936,14 @@ class Finding(models.Model):
             models.Index(fields=['duplicate_finding', 'id']),
         ]
 
+    def __init__(self, *args, **kwargs):
+        super(Finding, self).__init__(*args, **kwargs)
+
+        self.unsaved_endpoints = []
+        self.unsaved_request = None
+        self.unsaved_response = None
+        self.unsaved_tags = None
+
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('view_finding', args=[str(self.id)])
@@ -1871,7 +2034,7 @@ class Finding(models.Model):
                 # convert list of unsaved endpoints to the list of their canonical representation
                 endpoint_str_list = list(
                     map(
-                        lambda endpoint: endpoint.get_normalized_url(),
+                        lambda endpoint: str(endpoint),
                         self.unsaved_endpoints
                     ))
                 # deduplicate (usually done upon saving finding) and sort endpoints
@@ -1890,7 +2053,7 @@ class Finding(models.Model):
             # convert list of endpoints to the list of their canonical representation
             endpoint_str_list = list(
                 map(
-                    lambda endpoint: endpoint.get_normalized_url(),
+                    lambda endpoint: str(endpoint),
                     self.endpoints.all()
                 ))
             # sort endpoints strings
@@ -2071,7 +2234,7 @@ class Finding(models.Model):
     @cached_property
     def finding_group(self):
         group = self.finding_group_set.all().first()
-        logger.debug('finding.finding_group: %s', group)
+        # logger.debug('finding.finding_group: %s', group)
         return group
 
     @cached_property
@@ -2288,7 +2451,7 @@ class FindingAdmin(admin.ModelAdmin):
 
 
 Finding.endpoints.through.__str__ = lambda \
-    x: "Endpoint: " + x.endpoint.host
+    x: "Endpoint: " + str(x.endpoint)
 
 
 class Stub_Finding(models.Model):
@@ -2583,36 +2746,12 @@ class Risk_Acceptance(models.Model):
         return None
 
 
-class FindingImage(models.Model):
-    image = models.ImageField(upload_to=UniqueUploadNameProvider('finding_images'))
-    caption = models.CharField(max_length=500, blank=True)
-    image_thumbnail = ImageSpecField(source='image',
-                                     processors=[ResizeToCover(100, 100)],
-                                     format='JPEG',
-                                     options={'quality': 70})
-    image_small = ImageSpecField(source='image',
-                                 processors=[ResizeToCover(640, 480)],
-                                 format='JPEG',
-                                 options={'quality': 100})
-    image_medium = ImageSpecField(source='image',
-                                  processors=[ResizeToCover(800, 600)],
-                                  format='JPEG',
-                                  options={'quality': 100})
-    image_large = ImageSpecField(source='image',
-                                 processors=[ResizeToCover(1024, 768)],
-                                 format='JPEG',
-                                 options={'quality': 100})
-
-    def __str__(self):
-        return self.image.name or 'No Image'
-
-
-class FindingImageAccessToken(models.Model):
+class FileAccessToken(models.Model):
     """This will allow reports to request the images without exposing the
     media root to the world without
     authentication"""
     user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
-    image = models.ForeignKey(FindingImage, null=False, blank=False, on_delete=models.CASCADE)
+    file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
     token = models.CharField(max_length=255)
     size = models.CharField(max_length=9,
                             choices=(
@@ -2626,7 +2765,7 @@ class FindingImageAccessToken(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = uuid4()
-        return super(FindingImageAccessToken, self).save(*args, **kwargs)
+        return super(FileAccessToken, self).save(*args, **kwargs)
 
 
 class BannerConf(models.Model):
@@ -2951,8 +3090,8 @@ class Tool_Product_History(models.Model):
 
 class Alerts(models.Model):
     title = models.CharField(max_length=250, default='', null=False)
-    description = models.CharField(max_length=2000, null=True)
-    url = models.URLField(max_length=2000, null=True)
+    description = models.CharField(max_length=2000, null=True, blank=True)
+    url = models.URLField(max_length=2000, null=True, blank=True)
     source = models.CharField(max_length=100, default='Generic')
     icon = models.CharField(max_length=25, default='icon-user-check')
     user_id = models.ForeignKey(User, null=True, editable=False, on_delete=models.CASCADE)
@@ -3017,7 +3156,7 @@ class Cred_Mapping(models.Model):
 
 class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False)
-    color = models.CharField(max_length=7, null=True, verbose_name='HTML color')
+    color = models.CharField(max_length=7, null=True, blank=True, verbose_name='HTML color')
 
     def __str__(self):
         return self.language
@@ -3058,7 +3197,7 @@ class App_Analysis(models.Model):
 
 
 class Objects_Review(models.Model):
-    name = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
 
     def __str__(self):
@@ -3094,11 +3233,11 @@ class Objects_Product(models.Model):
 class Objects_Engagement(models.Model):
     engagement = models.ForeignKey(Engagement, on_delete=models.CASCADE)
     object_id = models.ForeignKey(Objects_Product, on_delete=models.CASCADE)
-    build_id = models.CharField(max_length=150, null=True)
+    build_id = models.CharField(max_length=150, null=True, blank=True)
     created = models.DateTimeField(null=False, editable=False, default=now)
     full_url = models.URLField(max_length=400, null=True, blank=True)
-    type = models.CharField(max_length=30, null=True)
-    percentUnchanged = models.CharField(max_length=10, null=True)
+    type = models.CharField(max_length=30, null=True, blank=True)
+    percentUnchanged = models.CharField(max_length=10, null=True, blank=True)
 
     def __str__(self):
         data = ""
@@ -3174,7 +3313,7 @@ class Benchmark_Category(models.Model):
 
 class Benchmark_Requirement(models.Model):
     category = models.ForeignKey(Benchmark_Category, on_delete=models.CASCADE)
-    objective_number = models.CharField(max_length=15, null=True)
+    objective_number = models.CharField(max_length=15, null=True, blank=True)
     objective = models.TextField()
     references = models.TextField(blank=True, null=True)
     level_1 = models.BooleanField(default=False)
@@ -3532,8 +3671,8 @@ admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
 admin.site.register(Test)
 admin.site.register(Finding, FindingAdmin)
-admin.site.register(FindingImage)
-admin.site.register(FindingImageAccessToken)
+admin.site.register(FileUpload)
+admin.site.register(FileAccessToken)
 admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)

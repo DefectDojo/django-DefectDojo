@@ -1,5 +1,4 @@
 import hashlib
-from urllib.parse import urlparse
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
@@ -56,17 +55,6 @@ class ImmuniwebParser(object):
 
             description = (vulnerability.find('Description').text)
             url = vulnerability.find("URL").text
-            parsedUrl = urlparse(url)
-            protocol = parsedUrl.scheme
-            query = parsedUrl.query
-            fragment = parsedUrl.fragment
-            path = parsedUrl.path
-            port = ""  # Set port to empty string by default
-            # Split the returned network address into host and
-            try:  # If there is port number attached to host address
-                host, port = parsedUrl.netloc.split(':')
-            except:  # there's no port attached to address
-                host = parsedUrl.netloc
 
             dupe_key = hashlib.md5(str(description + title + severity).encode('utf-8')).hexdigest()
 
@@ -92,10 +80,6 @@ class ImmuniwebParser(object):
                 finding.unsaved_endpoints = list()
                 dupes[dupe_key] = finding
 
-                finding.unsaved_endpoints.append(Endpoint(
-                        host=host, port=port,
-                        path=path,
-                        protocol=protocol,
-                        query=query, fragment=fragment))
+                finding.unsaved_endpoints.append(Endpoint.from_uri(url))
 
         return list(dupes.values())

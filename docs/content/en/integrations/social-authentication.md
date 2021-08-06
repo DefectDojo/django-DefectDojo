@@ -1,6 +1,6 @@
 ---
-title: "Authentication via OAuth2"
-description: "OAuth2 let users authenticate against enterprise directories."
+title: "Authentication via OAuth2/SAML2"
+description: "OAuth2/SAML2 let users authenticate against enterprise directories."
 draft: false
 weight: 3
 ---
@@ -234,60 +234,88 @@ Follow along below.
     button on the login page.
 
 ## SAML 2.0
-
-{{% alert title="Warning" color="warning" %}}
-The SAML integration below is based on [https://github.com/fangli/django-saml2-auth](django-saml2-auth) which is no longer maintained, see #3890
-{{% /alert %}}
-
 In a similar direction to OAuth, this SAML addition provides a more secure
 perogative to SSO. For definitions of terms used and more information,
 see the plugin [plugin
-homepage](https://github.com/fangli/django-saml2-auth)
+homepage](https://github.com/IdentityPython/djangosaml2). 
 
 1.  Navigate to your SAML IdP and find your metadata
-2.  Edit the dojo/`dojo/settings/settings.dist.py` file:
+2.  Edit the dojo/`dojo/settings/settings.dist.py` file or set the corresponding environment variables:
 
     {{< highlight python >}}
     DD_SAML2_ENABLED=(bool, **True**),
     # If the metadata can be accessed from a url, try the
-    DD_SAML2_METADATA_AUTO_CONF_URL
     DD_SAML2_METADATA_AUTO_CONF_URL=(str, '<https://your_IdP.com/metadata.xml>'),
     # Otherwise, downlaod a copy of the metadata into an xml file, and
     # list the path in DD_SAML2_METADATA_LOCAL_FILE_PATH
     DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, '/path/to/your/metadata.xml'),
-    # Fill in DD_SAML2_ASSERTION_URL and DD_SAML2_ENTITY_ID to
-    # match the specs of you IdP.
-    # Configure the remaining optional fields to your desire.
+    # Fill in DD_SAML2_ATTRIBUTES_MAP to corresponding SAML2 userprofile attributes provided by your IdP
+    DD_SAML2_ATTRIBUTES_MAP=(dict, {
+        # format: SAML attrib:django_user_model
+        'Email': 'email',
+        'UserName': 'username',
+        'Firstname': 'first_name',
+        'Lastname': 'last_name'
+    }),
+    # May configure the optional fields
     {{< /highlight >}}
 
-4.  In the "Authentication" section of the `dojo/settings/settings.dist.py`, do the
-    following
+NOTE: *DD_SAML2_ATTRIBUTES_MAP* in k8s can be referenced as extraConfig (e.g. `DD_SAML2_ATTRIBUTES_MAP: 'Email'='email', 'Username'='username'...`)
 
-    - Find the "SAML_2_AUTH" dictionary
-    - Comment out the metadata collection method that was not used.
-    - For example, if METADATA_AUTO_CONF_URL was used, comment the
-      METADATA_LOCAL_FILE_PATH line.
+4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin
+documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
 
 5.  Restart DefectDojo, and you should now see a **Login with SAML**
     button on the login page.
 
-NOTE: In the case when IDP is configured to use self signed certificate,
+NOTE: In the case when IDP is configured to use self signed (private) certificate,
 than CA needs to be specified by define environments variable
-REQUESTS_CA_BUNDLE that points to the path of public CA certificate.
+REQUESTS_CA_BUNDLE that points to the path of private CA certificate.
+
+### Advanced Configuration
+The [https://github.com/IdentityPython/djangosaml2](djangosaml2) plugin has a lot of options. For details take a look at the [plugin
+documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration). All default options in DefectDojo can overwritten in the local_settings.py. If you want to change the organization name, you can add the following lines:
+
+{{< highlight python >}}
+if SAML2_ENABLED:
+    SAML_CONFIG['contact_person'] = [{
+        'given_name': 'Extra',
+        'sur_name': 'Example',
+        'company': 'DefectDojo',
+        'email_address': 'dummy@defectdojo.com',
+        'contact_type': 'technical'
+    }]
+    SAML_CONFIG['organization'] = {
+        'name': [('DefectDojo', 'en')],
+        'display_name': [('DefectDojo', 'en')],
+    },
+{{< /highlight >}}
+
+### Migration from django-saml2-auth
+Up to relase 1.15.0 the SAML integration was based on [https://github.com/fangli/django-saml2-auth](django-saml2-auth). Which the switch to djangosaml2 some parameters has changed:
+
+* DD_SAML2_ASSERTION_URL: not necessary any more - automatically generated
+* DD_SAML2_DEFAULT_NEXT_URL: not necessary any more - default forwarding from defectdojo is used
+* DD_SAML2_NEW_USER_PROFILE: not possible any more - default profile is used, see User Permissions
+* DD_SAML2_ATTRIBUTES_MAP: Syntax has changed
+* DD_SAML2_CREATE_USER: Default value changed to False, to avoid security breaches
 
 ## User Permissions
 
-When a new user is created via the social-auth, only the default permissions are active. This means that the newly created user does not have access to add, edit, nor delete anything within DefectDojo. To circumvent that, a custom pipeline was added (dojo/pipline.py/modify_permissions) to elevate new users to staff. This can be disabled by setting 'is_staff' equal to False. Similarly, for an admin account, simply add the following to the modify_permissions pipeline:
+When a new user is created via the social-auth, only the default permissions are active. This means that the newly created user does not have access to add, edit, nor delete anything within DefectDojo. There are two parameters in the System Settings to influence the permissions for newly created users:
 
-{{< highlight python >}}
-is_superuser = True
-{{< /highlight >}}
+### Default group
 
-Exception for Gitlab OAuth2: with
-DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT set to True in
-`dojo/settings/settings.dist.py`, where a new user is created via the Gitlab
-social-auth, he has one permission: add_engagement. It allows him to
-create further engagements on his products via the API.
+When both the parameters `Default group` and `Default group role` are set, the new user will be a member of the given group with the given role, which will give him the respective permissions.
+
+### Staff user ###
+
+Newly created users are neither staff nor superuser by default. The `is_staff` flag of a new user will be set to `True`, if the user's email address matches the regular expression in the parameter `Email pattern for staff users`. 
+
+**Example:**
+
+`.*@example.com` will make `alice@example.com` a staff user, while `bob@partner.example.com` or `chris@example.org` will be non-staff users.
+
 
 ## Other Providers
 

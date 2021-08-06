@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+    {{ block.super }}
     <h3> Edit Rule {{ pt.name }}</h3>
     <form class="form-horizontal" action="{% url 'Edit Rule' pt.id %}" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
@@ -12,6 +13,7 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 <script type="application/javascript">
     $(document).ready(function() {
         $('#id_applied_field).empty();

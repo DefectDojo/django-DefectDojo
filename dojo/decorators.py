@@ -1,9 +1,14 @@
 from functools import wraps
-from dojo.models import Finding
+from dojo.models import Finding, Dojo_User
 from django.db import models
 from django.conf import settings
 from django.forms.models import model_to_dict
 from django.db.models.query import QuerySet
+
+from ratelimit.exceptions import Ratelimited
+from ratelimit.core import is_ratelimited
+from ratelimit import ALL
+
 import logging
 
 
@@ -191,9 +196,34 @@ def on_exception_log_kwarg(func):
         except Exception as e:
             print("exception occured at url:", self.driver.current_url)
             print("page source:", self.driver.page_source)
-            f = open("selenium_page_source.html", "w", encoding='utf-8')
+            f = open("/tmp/selenium_page_source.html", "w", encoding='utf-8')
             f.writelines(self.driver.page_source)
             # time.sleep(30)
             raise(e)
 
     return wrapper
+
+
+def dojo_ratelimit(key='ip', rate=None, method=ALL, block=False):
+    def decorator(fn):
+        @wraps(fn)
+        def _wrapped(request, *args, **kw):
+            _block = getattr(settings, 'RATE_LIMITER_BLOCK', block)
+            _rate = getattr(settings, 'RATE_LIMITER_RATE', rate)
+            _lockout = getattr(settings, 'RATE_LIMITER_ACCOUNT_LOCKOUT', False)
+            old_limited = getattr(request, 'limited', False)
+            ratelimited = is_ratelimited(request=request, fn=fn,
+                                         key=key, rate=_rate, method=method,
+                                         increment=True)
+            request.limited = ratelimited or old_limited
+            if ratelimited and _block:
+                if _lockout:
+                    username = request.POST.get('username', None)
+                    if username:
+                        dojo_user = Dojo_User.objects.filter(username=username).first()
+                        if dojo_user:
+                            Dojo_User.enable_force_password_rest(dojo_user)
+                raise Ratelimited()
+            return fn(request, *args, **kw)
+        return _wrapped
+    return decorator

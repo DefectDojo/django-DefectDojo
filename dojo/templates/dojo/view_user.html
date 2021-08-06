@@ -3,6 +3,7 @@
 {% load authorization_tags %}
 
 {% block content %}
+    {{ block.super }}
 <h3 id="id_heading"> User {{ user.first_name }} {{ user.last_name }}</h3>
 <div class="row">
     <div id="tests" class="col-md-8">
@@ -114,12 +115,12 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu2">
                             <li role="presentation">
                                 <a id="addProductTypeMember" href="{% url 'add_product_type_member_user' user.id %}">
-                                    <i class="fa fa-plus"></i> Add Product Type
+                                    <i class="fa fa-plus"></i> Add Product Types
                                 </a>
                             </li>
                         </ul>
                         &nbsp;
-                        <a href="https://defectdojo.github.io/django-DefectDojo/basics/permissions/" target="_blank">
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                             <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
@@ -161,7 +162,7 @@
                                 </ul>
                             </td>
                             <td name="member_product_type"><a href="{% url 'view_product_type' member.product_type.id %}">{{ member.product_type }}</a></td>
-                            <td name="member_product_type_role">{% role_as_string member.role %}</td>
+                            <td name="member_product_type_role">{{ member.role }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -187,12 +188,12 @@
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu3">
                             <li role="presentation">
                                 <a id="addProductMember" href="{% url 'add_product_member_user' user.id %}">
-                                    <i class="fa fa-plus"></i> Add Product
+                                    <i class="fa fa-plus"></i> Add Products
                                 </a>
                             </li>
                         </ul>
                         &nbsp;
-                        <a href="https://defectdojo.github.io/django-DefectDojo/basics/permissions/" target="_blank">
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
                             <i class="fa fa-question-circle text-low"></i></a>
                     </div>
                     {% endif %}
@@ -234,7 +235,7 @@
                                 </ul>
                             </td>
                             <td name="member_product"><a href="{% url 'view_product' member.product.id %}">{{ member.product }}</a></td>
-                            <td name="member_product_role">{% role_as_string member.role %}</td>
+                            <td name="member_product_role">{{ member.role }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -246,6 +247,81 @@
             </div>
             {% endif %}
         </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="clearfix">
+                    <h4 class="pull-left">Group Members</h4>
+                    {% if request.user.is_superuser %}
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
+                                data-toggle="dropdown" aria-expanded="true">
+                            <span class="fa fa-bars"></span>
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu4">
+                            <li role="presentation">
+                                <a id="addGroupMember" href="{% url 'add_group_member_user' user.id %}">
+                                    <i class="fa fa-plus"></i> Add Groups
+                                </a>
+                            </li>
+                        </ul>
+                        &nbsp;
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/#groups" target="_blank">
+                            <i class="fa fa-question-circle text-low"></i></a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if group_members %}
+            <div class="table-responsive">
+                <table class="tablesorter-bootstrap table table-condensed table-striped">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Group</th>
+                        <th>Group role</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for member in group_members %}
+                    <tr>
+                        <td>
+                            <ul>
+                                <li class="dropdown" style="list-style:none;position:absolute">
+                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" name="dropdownManageProductTypeMember"
+                                       aria-expanded="true">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
+                                    <ul class="dropdown-menu">
+                                        {% if member.group|has_object_permission:"Group_Manage_Members" %}
+                                        <li>
+                                            <a name="editProductTypeMember" href="{% url 'edit_group_member' member.id %}">
+                                                <i class="fa fa-pencil-square-o"></i> Edit</a>
+                                        </li>
+                                        {% endif %}
+                                        {% if member|has_object_permission:"Group_Member_Delete" %}
+                                        <li>
+                                            <a name="deleteProductTypeMember" href="{% url 'delete_group_member' member.id %}">
+                                                <i class="fa fa-trash"></i> Delete</a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </li>
+                            </ul>
+                        </td>
+                        <td name="group_name"><a href="{% url 'view_group' member.group.id %}">{{ member.group }}</a></td>
+                        <td name="group_role">{{ member.role }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="panel-body">
+                <small class="text-muted"><em>No group members found.</em></small>
+            </div>
+            {% endif %}
+        </div>
+
         {% endif %}
     </div>
     <div class="col-md-4">
@@ -322,6 +398,12 @@
                                 {{ authorized_product_types.all.0 }}
                                 {% endif %}
                             </td>
+                        </tr>
+                        {% endif %}
+                        {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
+                        <tr>
+                            <td style="width: 200px;"><strong>Global role</strong></td>
+                            <td>{% if user.global_role.role %} {{ user.global_role.role }} {% endif %}</td>
                         </tr>
                         {% endif %}
                     </tbody>

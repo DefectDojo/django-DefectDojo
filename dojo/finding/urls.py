@@ -6,8 +6,6 @@ urlpatterns = [
     #  findings
     url(r'^finding$', views.open_findings, {'view': 'All'},
         name='all_findings'),
-    url(r'^finding$', views.open_findings,
-        name='findings'),
     url(r'^finding/bulk$', views.finding_bulk_update_all,
         name='finding_bulk_update_all'),
     url(r'^product/(?P<pid>\d+)/finding/bulk_product$', views.finding_bulk_update_all,
@@ -79,8 +77,6 @@ urlpatterns = [
         views.defect_finding_review, name='defect_finding_review'),
     url(r'^finding/(?P<fid>\d+)/open', views.reopen_finding,
         name='reopen_finding'),
-    url(r'^finding/(?P<fid>\d+)/manage_images', views.manage_images,
-        name='manage_images'),
     url(r'^finding/image/(?P<token>[^/]+)$', views.download_finding_pic,
         name='download_finding_pic'),
     url(r'^finding/(?P<fid>\d+)/merge$',

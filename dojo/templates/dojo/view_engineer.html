@@ -3,6 +3,7 @@
 {% load display_tags %}
 {% load static %}
 {% block add_styles %}
+    {{ block.super }}
     #chart_div3 .flot-x-axis .tickLabel, #chart_div4 .flot-x-axis .tickLabel
     {   top: 290px !important;
     font-size: 10px;
@@ -15,6 +16,7 @@
     #chart_div, #chart_div2, #chart_div3, #chart_div4 {height: 300px}
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h2> {{ name }}</h2>
     <div class="row metric-data">
         <div class="col-md-12">
@@ -570,6 +572,7 @@
     <br/>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <!-- Flot Charts JavaScript -->
     <script src="{% static "flot/excanvas.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.js" %}"></script>

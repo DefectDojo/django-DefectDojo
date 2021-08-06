@@ -232,6 +232,24 @@
   },
   {
     "pk": 1,
+    "model": "dojo.product_type_member",
+    "fields": {
+      "product_type": 1,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 2,
+    "model": "dojo.product_type_member",
+    "fields": {
+      "product_type": 1,
+      "user": 2,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
     "model": "dojo.report_type",
     "fields": {
       "name": "Type 1",
@@ -315,7 +333,6 @@
       "team_manager": 2,
       "tid": 0,
       "authorized_users": [
-        1,
         2,
         3
       ],
@@ -354,7 +371,6 @@
       "team_manager": 3,
       "tid": 0,
       "authorized_users": [
-        1,
         3
       ],
       "description": "test product"
@@ -379,15 +395,6 @@
     }
   },
   {
-    "pk": 3,
-    "model": "dojo.product_member",
-    "fields": {
-      "product": 1,
-      "user": 3,
-      "role": 4
-    }
-  },
-  {
     "pk": 4,
     "model": "dojo.product_member",
     "fields": {
@@ -397,29 +404,11 @@
     }
   },
   {
-    "pk": 5,
-    "model": "dojo.product_member",
-    "fields": {
-      "product": 2,
-      "user": 3,
-      "role": 4
-    }
-  },
-  {
     "pk": 6,
     "model": "dojo.product_member",
     "fields": {
       "product": 3,
       "user": 1,
-      "role": 4
-    }
-  },
-  {
-    "pk": 7,
-    "model": "dojo.product_member",
-    "fields": {
-      "product": 3,
-      "user": 3,
       "role": 4
     }
   },
@@ -646,10 +635,9 @@
       "product": 2,
       "protocol": "http",
       "fragment": null,
-      "fqdn": "example.com",
       "host": "127.0.0.1",
       "query": null,
-      "path": "/endpoint/420/edit/",
+      "path": "endpoint/420/edit/",
       "port": 80
     }
   },
@@ -660,10 +648,9 @@
       "product": 1,
       "protocol": "ftp",
       "fragment": null,
-      "fqdn": "www.example.com",
       "host": "localhost",
       "query": null,
-      "path": "/",
+      "path": null,
       "port": 21
     }
   },
@@ -674,8 +661,7 @@
       "product": 3,
       "protocol": "ssh",
       "fragment": null,
-      "fqdn": "www.example.com",
-      "host": "127.0.1",
+      "host": "127.0.0.1",
       "query": null,
       "path": null,
       "port": 22
@@ -860,7 +846,7 @@
       "static_finding": false,
       "date": "2020-05-21",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -911,7 +897,7 @@
       "static_finding": false,
       "date": "2021-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -962,7 +948,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -1013,7 +999,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -1064,7 +1050,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -1115,7 +1101,7 @@
       "static_finding": false,
       "date": "2017-12-31",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "High",
@@ -1169,7 +1155,7 @@
       "static_finding": false,
       "date": "2020-05-21",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1220,7 +1206,7 @@
       "static_finding": false,
       "date": "2021-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1271,7 +1257,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1323,7 +1309,7 @@
       "static_finding": false,
       "date": "2020-05-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1375,7 +1361,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1427,7 +1413,7 @@
       "static_finding": false,
       "date": "2020-05-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1479,7 +1465,7 @@
       "static_finding": false,
       "date": "2018-01-01",
       "references": "",
-      "images": [],
+      "files": [],
       "payload": null,
       "under_defect_review": false,
       "impact": "Low",
@@ -1611,6 +1597,7 @@
     "pk": 2,
     "model": "dojo.jira_instance",
     "fields": {
+        "configuration_name": "Happy little JIRA 2",
         "url": "https://defectdojo.atlassian.net/",
         "username": "YOUR USERNAME",
         "password": "YOU API TOKEN",
@@ -1618,6 +1605,7 @@
         "epic_name_id": 10011,
         "open_status_key": 11,
         "close_status_key": 41,
+        "info_mapping_severity": "Trivial",
         "low_mapping_severity": "Low",
         "medium_mapping_severity": "Medium",
         "high_mapping_severity": "High",
@@ -1630,9 +1618,11 @@
     "pk": 3,
     "model": "dojo.jira_instance",
     "fields": {
+      "configuration_name": "Happy little JIRA 3",
       "username": "defect.dojo",
       "default_issue_type": "Task",
       "finding_text": "",
+      "info_mapping_severity": "Trivial",
       "low_mapping_severity": "test severity",
       "url": "http://www.testjira.com",
       "medium_mapping_severity": "test severity",
@@ -1648,9 +1638,11 @@
     "pk": 4,
     "model": "dojo.jira_instance",
     "fields": {
+      "configuration_name": "Happy little JIRA 4",
       "username": "defect.dojo",
       "default_issue_type": "Spike",
       "finding_text": "",
+      "info_mapping_severity": "Trivial",
       "low_mapping_severity": "test severity",
       "url": "http://www.testjira.com",
       "medium_mapping_severity": "test severity",
@@ -2249,6 +2241,87 @@
     "fields": {
       "user": 3,
       "created": "2018-04-16T06:54:35.940Z"
+    }
+  },
+  {
+    "pk": "1",
+    "model": "dojo.dojo_group",
+    "fields": {
+      "name": "Group 1 Testdata",
+      "description": "Testdata description"
+    }
+  },
+  {
+    "pk": "2",
+    "model": "dojo.dojo_group",
+    "fields": {
+      "name": "Group 2 Testdata",
+      "description": "Testdata description"
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.product_type_group",
+    "fields": {
+      "product_type": 1,
+      "group": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.dojo_group_member",
+    "fields": {
+      "group": 1,
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.product_group",
+    "fields": {
+      "product": 1,
+      "group": 1,
+      "role": 4
+    }
+  },
+  {
+    "pk": 1,
+    "model": "dojo.global_role",
+    "fields": {
+      "user": 1,
+      "role": 4
+    }
+  },
+  {
+    "model": "dojo.language_type",
+    "pk": 1,
+    "fields": {
+        "language": "JSON",
+        "color": "#882B0F"
+    }
+  },
+  {
+    "model": "dojo.language_type",
+    "pk": 2,
+    "fields": {
+        "language": "Python",
+        "color": "#3572A5"
+    }
+  },
+  {
+    "model": "dojo.languages",
+    "pk": 1,
+    "fields": {
+        "language": 1,
+        "product": 1,
+        "user": 1,
+        "files": 2,
+        "blank": 3,
+        "comment": 4,
+        "code": 5,
+        "created": "2018-04-16T06:54:35.940Z"
     }
   }
 ]

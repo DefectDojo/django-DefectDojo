@@ -2,11 +2,13 @@
 {% load static %}
 
 {% block add_styles %}
+    {{ block.super }}
 .chosen-container {
     width: 70% !important;
 }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Edit Endpoint </h3>
     <form class="form-horizontal" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
@@ -18,4 +20,5 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 {% endblock %}

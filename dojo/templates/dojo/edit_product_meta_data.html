@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+    {{ block.super }}
     <h3> Edit {{ product.name }} Metadata</h3>
     <p>
         Use the form below to edit the values in each of the metadata fields.  To remove a field, leave the value blank.
