@@ -251,16 +251,12 @@ homepage](https://github.com/IdentityPython/djangosaml2).
     DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, '/path/to/your/metadata.xml'),
     # Fill in DD_SAML2_ATTRIBUTES_MAP to corresponding SAML2 userprofile attributes provided by your IdP
     DD_SAML2_ATTRIBUTES_MAP=(dict, {
-        # format: SAML attrib:django_user_model
-        'Email': 'email',
-        'UserName': 'username',
-        'Firstname': 'first_name',
-        'Lastname': 'last_name'
+        'Email': ('email', ),
+        'Firstname': ('first_name', ),
+        'Lastname': ('last_name', )
     }),
     # May configure the optional fields
     {{< /highlight >}}
-
-NOTE: *DD_SAML2_ATTRIBUTES_MAP* in k8s can be referenced as extraConfig (e.g. `DD_SAML2_ATTRIBUTES_MAP: 'Email'='email', 'Username'='username'...`)
 
 4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin
 documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
@@ -268,9 +264,9 @@ documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configurat
 5.  Restart DefectDojo, and you should now see a **Login with SAML**
     button on the login page.
 
-NOTE: In the case when IDP is configured to use self signed (private) certificate,
+NOTE: In the case when IDP is configured to use self signed certificate,
 than CA needs to be specified by define environments variable
-REQUESTS_CA_BUNDLE that points to the path of private CA certificate.
+REQUESTS_CA_BUNDLE that points to the path of public CA certificate.
 
 ### Advanced Configuration
 The [https://github.com/IdentityPython/djangosaml2](djangosaml2) plugin has a lot of options. For details take a look at the [plugin

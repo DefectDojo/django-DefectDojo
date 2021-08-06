@@ -695,7 +695,7 @@ def prefetch_related_findings_for_report(findings):
                                      'endpoints',
                                      'tags',
                                      'notes',
-                                     'files',
+                                     'images',
                                      'reporter',
                                      'mitigated_by'
                                      )

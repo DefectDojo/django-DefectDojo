@@ -87,6 +87,9 @@ User.objects.create_superuser(
 )
 EOD
 
+  echo "Preparing survey fixture"
+  # surveys fixture needs to be modified as it contains an instance dependant polymorphic content id
+  python3 manage.py import_surveys
   # load surveys all at once as that's much faster
    echo "Importing fixtures all at once"
    python3 manage.py loaddata system_settings initial_banner_conf product_type test_type \
@@ -104,8 +107,4 @@ EOD
 
   echo "Installing watson search index"
   python3 manage.py installwatson
-
-  # surveys fixture needs to be modified as it contains an instance dependant polymorphic content id
-  echo "Migration of textquestions for surveys"
-  python3 manage.py migrate_textquestions
 fi

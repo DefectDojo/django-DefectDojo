@@ -16,10 +16,7 @@ class KubeBenchParser(object):
 
     def get_findings(self, json_output, test):
         tree = json.load(json_output)
-        if 'Controls' in tree:
-            return self.get_chapters(tree['Controls'], test)
-        else:
-            return self.get_chapters(tree, test)
+        return self.get_chapters(tree, test)
 
     def get_chapters(self, tree, test):
         items = []
@@ -67,51 +64,42 @@ def get_results(tree, test, description):
 
 def get_item(vuln, test, description):
 
-    status = vuln.get('status', None)
-    reason = vuln.get('reason', None)
-
-    if status is None:
+    if ('status' in vuln) and (vuln['status'].upper() != 'FAIL'):
         return None
 
-    # kube-bench doesn't define severities. So we use the status to define the severity
-    if status.upper() == 'FAIL':
-        severity = 'Medium'
-    elif status.upper() == 'WARN' and reason != 'Test marked as a manual test':
-        severity = 'Info'
+    if 'test_number' not in vuln:
+        return None
+
+    unique_id_from_tool = vuln['test_number']
+
+    title = ''
+    if 'test_desc' in vuln:
+        title = vuln['test_desc']
     else:
-        return None
-
-    test_number = vuln.get('test_number', 'Test number not found')
-    test_description = vuln.get('test_desc', 'Description not found')
-
-    title = test_number + ' - ' + test_description
+        title = 'test_desc not found'
 
     if 'test_number' in vuln:
         description += vuln['test_number'] + ' '
     if 'test_desc' in vuln:
         description += vuln['test_desc']
+    description += '\n'
     if 'audit' in vuln:
-        description += '\n'
         description += 'Audit: {}\n'.format(vuln['audit'])
-    if 'reason' in vuln and vuln['reason'] != '':
-        description += '\n'
-        description += 'Reason: {}\n'.format(vuln['reason'])
-    if 'expected_result' in vuln and vuln['expected_result'] != '':
-        description += '\n'
-        description += 'Expected result: {}\n'.format(vuln['expected_result'])
-    if 'actual_value' in vuln and vuln['actual_value'] != '':
-        description += '\n'
-        description += 'Actual value: {}\n'.format(vuln['actual_value'])
 
-    mitigation = vuln.get('remediation', None)
-    vuln_id_from_tool = test_number
+    # kube-bench doesn't define severities. Sine the findings are
+    # vulnerabilities, we set them to Medium
+    severity = 'Medium'
+
+    mitigation = ''
+    if 'remediation' in vuln:
+        mitigation = vuln['remediation']
 
     finding = Finding(title=title,
                       test=test,
                       description=description,
                       severity=severity,
                       mitigation=mitigation,
-                      vuln_id_from_tool=vuln_id_from_tool,
+                      unique_id_from_tool=unique_id_from_tool,
                       static_finding=True,
                       dynamic_finding=False)
 

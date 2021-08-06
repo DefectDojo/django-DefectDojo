@@ -5,7 +5,6 @@ from re import compile
 import logging
 from threading import local
 from django.db import models
-from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +43,6 @@ class LoginRequiredMiddleware:
                 else:
                     fullURL = "%s?next=%s" % (settings.LOGIN_URL, urlquote(request.get_full_path()))
                 return HttpResponseRedirect(fullURL)
-
-        if request.user.is_authenticated:
-            path = request.path_info.lstrip('/')
-            from dojo.models import Dojo_User
-            if Dojo_User.force_password_reset(request.user) and path != 'change_password':
-                return HttpResponseRedirect(reverse('change_password'))
 
         response = self.get_response(request)
         return response

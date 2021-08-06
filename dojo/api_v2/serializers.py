@@ -9,12 +9,11 @@ from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Instance, Endpoint, JIRA_Project, \
-    Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, \
+    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
-    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
-    Language_Type, Languages
+    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
@@ -23,6 +22,7 @@ from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils import timezone
+import base64
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
@@ -842,6 +842,17 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FindingImageSerializer(serializers.ModelSerializer):
+    base64 = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FindingImage
+        fields = ["base64", "caption", "id"]
+
+    def get_base64(self, obj) -> bytes:
+        return base64.b64encode(obj.image.read())
+
+
 class FindingMetaSerializer(serializers.ModelSerializer):
     class Meta:
         model = DojoMeta
@@ -911,6 +922,7 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
 
 
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
+    images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
@@ -1046,7 +1058,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Finding
-        fields = '__all__'
+        exclude = ['images']
         extra_kwargs = {
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
@@ -1336,65 +1348,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         return value
 
 
-class LanguageTypeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Language_Type
-        fields = '__all__'
-
-
-class LanguageSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Languages
-        fields = '__all__'
-
-
-class ImportLanguagesSerializer(serializers.Serializer):
-    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
-    file = serializers.FileField(required=True)
-
-    def save(self):
-        data = self.validated_data
-        product = data['product']
-        languages = data['file']
-
-        try:
-            data = languages.read()
-            try:
-                deserialized = json.loads(str(data, 'utf-8'))
-            except:
-                deserialized = json.loads(data)
-        except:
-            raise Exception("Invalid format")
-
-        Languages.objects.filter(product=product).delete()
-
-        for name in deserialized:
-            if name not in ['header', 'SUM']:
-                element = deserialized[name]
-
-                try:
-                    language_type, created = Language_Type.objects.get_or_create(language=name)
-                except Language_Type.MultipleObjectsReturned:
-                    language_type = Language_Type.objects.filter(language=name).first()
-
-                language = Languages()
-                language.product = product
-                language.language = language_type
-                language.files = element.get('nFiles', 0)
-                language.blank = element.get('blank', 0)
-                language.comment = element.get('comment', 0)
-                language.code = element.get('code', 0)
-                language.save()
-
-    def validate(self, data):
-        if is_scan_file_too_large(data['file']):
-            raise serializers.ValidationError(
-                'File is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
-        return data
-
-
 class AddNewNoteOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -1407,6 +1360,11 @@ class AddNewFileOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileUpload
         fields = '__all__'
+
+
+class FindingToFindingImagesSerializer(serializers.Serializer):
+    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
+    images = FindingImageSerializer(many=True)
 
 
 class FindingToNotesSerializer(serializers.Serializer):
@@ -1454,6 +1412,7 @@ class ReportGenerateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     user_id = serializers.IntegerField()
     host = serializers.CharField(max_length=200)
+    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True, required=False)
     finding_notes = FindingToNotesSerializer(many=True, allow_null=True, required=False)
 
 

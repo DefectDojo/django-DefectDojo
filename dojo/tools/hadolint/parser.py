@@ -41,7 +41,7 @@ def get_item(vulnerability, test):
     else:
         severity = "Info"
 
-    # create the finding object, with 'static' type
+    # create the finding object
     finding = Finding(
         title=vulnerability['code'] + ": " + vulnerability['file'],
         test=test,
@@ -50,8 +50,6 @@ def get_item(vulnerability, test):
         mitigation="No mitigation provided",
         false_p=False,
         duplicate=False,
-        static_finding=True,
-        dynamic_finding=False,
         out_of_scope=False,
         mitigated=None,
         impact="No impact provided")
