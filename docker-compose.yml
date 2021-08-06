@@ -82,6 +82,7 @@ services:
         - type: bind
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
+        - defectdojo_media:${DD_MEDIA_ROOT:-/app/media}
   initializer:
     image: defectdojo/defectdojo-django:${DJANGO_VERSION:-latest}
     depends_on:
@@ -101,7 +102,7 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   mysql:
-    image: mysql:5.7.34@sha256:a682e3c78fc5bd941e9db080b4796c75f69a28a8cad65677c23f7a9f18ba21fa
+    image: mysql:5.7.35@sha256:be70d18aedc37927293e7947c8de41ae6490ecd4c79df1db40d1b5b5af7d9596
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       DD_DATABASE_URL: ${DD_DATABASE_URL:-mysql://defectdojo:defectdojo@mysql:3306/defectdojo}
@@ -112,7 +113,7 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.8.18@sha256:56a5436bf69740952f2e8b13641de81e66d4fc4901910cd11f8897cbc3cb97a8
+    image: rabbitmq:3.9.1@sha256:d5056e576d8767c0faffcb17b5604a4351edacb8f83045e084882cabd384d216
     volumes:
        - defectdojo_rabbitmq:/var/lib/rabbitmq
 volumes:

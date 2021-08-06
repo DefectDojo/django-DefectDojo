@@ -553,7 +553,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 25
+    'PAGE_SIZE': 25,
+    'EXCEPTION_HANDLER': 'dojo.api_v2.exception_handler.custom_exception_handler'
 }
 
 SWAGGER_SETTINGS = {
@@ -922,6 +923,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
+    'Mobsfscan Scan': ['title', 'severity', 'cwe'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
@@ -962,6 +964,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Checkmarx OSA': True,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
+    'Mobsfscan Scan': False,
     'Nessus Scan': True,
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
@@ -1013,6 +1016,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
+    'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
