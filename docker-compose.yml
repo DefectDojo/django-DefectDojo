@@ -113,7 +113,7 @@ services:
     volumes:
        - defectdojo_data:/var/lib/mysql
   rabbitmq:
-    image: rabbitmq:3.8.19@sha256:8ab8da1c463bafd02d14a081f8f7634f2de27744fd45c5be31769fdc7e60d236
+    image: rabbitmq:3.8.19@sha256:20064e7c237879e71311bbfedfc0101df9826fd756edb37806ab9c9b72d39d1e
     volumes:
        - defectdojo_rabbitmq:/var/lib/rabbitmq
 volumes:
