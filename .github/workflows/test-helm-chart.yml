@@ -18,7 +18,7 @@ jobs:
           # ensure we're dealing with a pull request
           if [ ! -z ${GITHUB_BASE_REF} ] && [ ! -z ${GITHUB_HEAD_REF} ]; then
             # check source and target branches.
-            if [ ${GITHUB_BASE_REF} == "master" ] && [ ${GITHUB_HEAD_REF} == "dev" ]; then
+            if [ "${GITHUB_BASE_REF}" == "master" ] && [ "${GITHUB_HEAD_REF}" == "dev" ]; then
               # fail this job, needed by the others
               exit 1
             fi
