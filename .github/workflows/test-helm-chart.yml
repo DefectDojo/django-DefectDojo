@@ -9,6 +9,21 @@ on:
       - hotfix/**
 
 jobs:
+  check-master-to-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merging from master to dev?
+        id: is-master-to-dev
+        run: |
+          # ensure we're dealing with a pull request
+          if [ ! -z ${GITHUB_BASE_REF} ] && [ ! -z ${GITHUB_HEAD_REF} ]; then
+            # check source and target branches.
+            if [ ${GITHUB_BASE_REF} -eq "master" ] && [ ${GITHUB_HEAD_REF} -eq "dev" ]; then
+              # fail this job, needed by the others
+              exit 1
+            fi
+          fi
+
   lint:
     name: Lint chart
     runs-on: ubuntu-latest
@@ -25,7 +40,7 @@ jobs:
 
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: Configure Helm repos
         run: |-
@@ -40,13 +55,16 @@ jobs:
       - name: Determine target branch
         id: ct-branch-target
         run: |
+          # This is a pull request
           if [ ! -z ${GITHUB_BASE_REF} ]; then
             echo ::set-output name=ct-branch::${GITHUB_BASE_REF}
+          # Not a PR
           else
             echo ::set-output name=ct-branch::${GITHUB_REF#refs/heads/}
           fi
 
       - name: Run chart-testing (list-changed)
+        needs: check-master-to-dev
         id: list-changed
         run: |
           changed=$(ct list-changed --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch}})
@@ -55,6 +73,7 @@ jobs:
           fi
 
       - name: Run chart-testing (lint)
+        needs: check-master-to-dev
         run: ct lint --config ct.yaml --target-branch ${{ steps.ct-branch-target.outputs.ct-branch }}
         if: steps.list-changed.outputs.changed == 'true'
 
