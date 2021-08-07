@@ -316,7 +316,6 @@ def finding_querys(request, prod):
 
     from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY
     filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY, date__range=[start_date, end_date]).distinct()
-
     filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              active=True,
@@ -477,7 +476,6 @@ def view_product_metrics(request, pid):
         queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
 
     inactive_engs_page = get_page_items(request, result.qs, 10)
-    
     # View is finding
     filters = dict()
     if view == 'Finding':
