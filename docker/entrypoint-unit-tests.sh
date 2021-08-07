@@ -16,12 +16,12 @@ unset DD_DATABASE_URL
 #   cp dojo/settings/settings.dist.py dojo/settings/settings.py
 # fi
 
-python3 manage.py spectacular --fail-on-warn || {
+python3 manage.py spectacular --fail-on-warn > /dev/null || {
     cat <<-EOF
 
 ********************************************************************************
 
-You made changes to the REAST API without applying the correct schema annotations
+You made changes to the REST API without applying the correct schema annotations
 
 These schema annotations are needed to allow for the correct generation of
 the OpenAPI (v3) schema's and documentation.
@@ -40,6 +40,7 @@ More info at: https://drf-spectacular.readthedocs.io/en/latest/customization.htm
 ********************************************************************************
 
 EOF
+    python3 manage.py spectacular > /dev/null
     exit 1
 }
 
