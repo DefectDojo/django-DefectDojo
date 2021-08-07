@@ -477,8 +477,8 @@ def view_product_metrics(request, pid):
         queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
 
     inactive_engs_page = get_page_items(request, result.qs, 10)
-    print(view)
-    #View is finding
+    
+    # View is finding
     filters = dict()
     if view == 'Finding':
         filters = finding_querys(request, prod)

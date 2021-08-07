@@ -1,5 +1,4 @@
 import collections
-from os import stat_result
 from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY
 import logging
 from datetime import timedelta, datetime

@@ -153,7 +153,7 @@ def finding_querys(prod_type, request):
     active_findings = MetricsFindingFilter(request.GET, queryset=active_findings_query)
     findings_qs = queryset_check(findings)
     active_findings_qs = queryset_check(active_findings)
-    
+
     if not findings_qs and not findings_query:
         findings = findings_query
         active_findings = active_findings_query
@@ -183,18 +183,18 @@ def finding_querys(prod_type, request):
                                                  test__engagement__product__prod_type__in=prod_type).prefetch_related(
             'test__engagement__product')
         # capture the accepted findings in period
-        accepted_findings = Finding.objects.filter(risk_accepted = True, date__range=[start_date, end_date],
+        accepted_findings = Finding.objects.filter(risk_accepted=True, date__range=[start_date, end_date],
                                                    test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_accepted = True, date__range=[start_date, end_date],
+        accepted_findings_counts = Finding.objects.filter(risk_accepted=True, date__range=[start_date, end_date],
                                                           test__engagement__product__prod_type__in=prod_type). \
             prefetch_related('test__engagement__product')
     else:
         findings_closed = Finding.objects.filter(mitigated__date__range=[start_date, end_date]).prefetch_related(
             'test__engagement__product')
-        accepted_findings = Finding.objects.filter(risk_accepted = True, date__range=[start_date, end_date]). \
+        accepted_findings = Finding.objects.filter(risk_accepted=True, date__range=[start_date, end_date]). \
             prefetch_related('test__engagement__product')
-        accepted_findings_counts = Finding.objects.filter(risk_accepted = True, date__range=[start_date, end_date]). \
+        accepted_findings_counts = Finding.objects.filter(risk_accepted=True, date__range=[start_date, end_date]). \
             prefetch_related('test__engagement__product')
 
     findings_closed = get_authorized_findings(Permissions.Finding_View, findings_closed, request.user)
