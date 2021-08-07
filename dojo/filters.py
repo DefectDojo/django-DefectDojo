@@ -1,4 +1,7 @@
 import collections
+from drf_spectacular.types import OpenApiTypes
+
+from drf_spectacular.utils import extend_schema_field
 from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, FALSE_POSITIVE_FINDINGS_QUERY, INACTIVE_FINDINGS_QUERY, OPEN_FINDINGS_QUERY, OUT_OF_SCOPE_FINDINGS_QUERY, VERIFIED_FINDINGS_QUERY
 import logging
 from datetime import timedelta, datetime
@@ -1049,7 +1052,7 @@ class ApiFindingFilter(DojoFilter):
     finding_group = NumberInFilter(field_name='finding_group', lookup_expr='in')
 
     # ReportRiskAcceptanceFilter
-    risk_acceptance = ReportRiskAcceptanceFilter()
+    risk_acceptance = extend_schema_field(OpenApiTypes.NUMBER)(ReportRiskAcceptanceFilter())
 
     tag = CharFilter(field_name='tags__name', lookup_expr='icontains', help_text='Tag name contains')
     tags = CharFieldInFilter(field_name='tags__name', lookup_expr='in',
