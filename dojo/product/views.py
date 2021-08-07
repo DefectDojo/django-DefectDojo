@@ -271,7 +271,6 @@ def identify_view(request):
 
 def finding_querys(request, prod):
     filters = dict()
-
     findings_query = Finding.objects.filter(test__engagement__product=prod,
                                       severity__in=('Critical', 'High', 'Medium', 'Low', 'Info'))
 
@@ -314,11 +313,9 @@ def finding_querys(request, prod):
         end_date = timezone.now()
     week = end_date - timedelta(days=7)  # seven days and /newnewer are considered "new"
 
-    # risk_acceptances = Risk_Acceptance.objects.filter(engagement__in=Engagement.objects.filter(product=prod)).prefetch_related('accepted_findings')
-    # filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
 
     from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY
-    filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY).distinct()
+    filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY, date__range=[start_date, end_date]).distinct()
 
     filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
@@ -339,7 +336,6 @@ def finding_querys(request, prod):
                                          active=True,
                                          is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
-                                             # No need for verify if it is False positive, comment out
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
@@ -481,7 +477,8 @@ def view_product_metrics(request, pid):
         queryset=Engagement.objects.filter(product=prod, active=False).order_by('-target_end'))
 
     inactive_engs_page = get_page_items(request, result.qs, 10)
-
+    print(view)
+    #View is finding
     filters = dict()
     if view == 'Finding':
         filters = finding_querys(request, prod)
@@ -491,7 +488,6 @@ def view_product_metrics(request, pid):
     start_date = filters['start_date']
     end_date = filters['end_date']
     week_date = filters['week']
-
     tests = Test.objects.filter(engagement__product=prod).prefetch_related('finding_set', 'test_type')
     tests = tests.annotate(verified_finding_count=Count('finding__id', filter=Q(finding__verified=True)))
 
