@@ -102,6 +102,8 @@ env = environ.Env(
     DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, 'https://graph.microsoft.com/'),
     DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
+    DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS=(bool, False),
+    DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_URL=(bool, False),
     DD_SOCIAL_AUTH_GITLAB_PROJECT_MIN_ACCESS_LEVEL=(int, 20),
     DD_SOCIAL_AUTH_GITLAB_KEY=(str, ''),
     DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ''),
@@ -119,11 +121,13 @@ env = environ.Env(
     DD_SAML2_CREATE_USER=(bool, False),
     DD_SAML2_ATTRIBUTES_MAP=(dict, {
         # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
-        'Email': ('email', ),
-        'UserName': ('username', ),
-        'Firstname': ('first_name', ),
-        'Lastname': ('last_name', )
+        # format: SAML attrib:django_user_model
+        'Email': 'email',
+        'UserName': 'username',
+        'Firstname': 'first_name',
+        'Lastname': 'last_name'
     }),
+    DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
     # merging findings doesn't always work well with dedupe and reimport etc.
     # disable it if you see any issues (and report them on github)
     DD_DISABLE_FINDING_MERGE=(bool, False),
@@ -427,6 +431,8 @@ SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env('DD_SOCIAL_AUTH_AZUREAD_TENANT_
 
 GITLAB_OAUTH2_ENABLED = env('DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED')
 GITLAB_PROJECT_AUTO_IMPORT = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT')
+GITLAB_PROJECT_IMPORT_TAGS = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS')
+GITLAB_PROJECT_IMPORT_URL = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_URL')
 GITLAB_PROJECT_MIN_ACCESS_LEVEL = env('DD_SOCIAL_AUTH_GITLAB_PROJECT_MIN_ACCESS_LEVEL')
 SOCIAL_AUTH_GITLAB_KEY = env('DD_SOCIAL_AUTH_GITLAB_KEY')
 SOCIAL_AUTH_GITLAB_SECRET = env('DD_SOCIAL_AUTH_GITLAB_SECRET')
@@ -593,7 +599,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 25
+    'PAGE_SIZE': 25,
+    'EXCEPTION_HANDLER': 'dojo.api_v2.exception_handler.custom_exception_handler'
 }
 
 SWAGGER_SETTINGS = {
@@ -718,6 +725,17 @@ vars().update(EMAIL_CONFIG)
 # For more configuration and customization options, see djangosaml2 documentation
 # https://djangosaml2.readthedocs.io/contents/setup.html#configuration
 # To override not configurable settings, you can use local_settings.py
+# function that helps convert env var into the djangosaml2 attribute mapping format
+# https://djangosaml2.readthedocs.io/contents/setup.html#users-attributes-and-account-linking
+
+
+def saml2_attrib_map_format(dict):
+    dout = {}
+    for i in dict:
+        dout[i] = (dict[i],)
+    return dout
+
+
 SAML2_ENABLED = env('DD_SAML2_ENABLED')
 SAML2_LOGOUT_URL = env('DD_SAML2_LOGOUT_URL')
 if SAML2_ENABLED:
@@ -737,10 +755,10 @@ if SAML2_ENABLED:
     SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
     SAML_IGNORE_LOGOUT_ERRORS = True
     SAML_DJANGO_USER_MAIN_ATTRIBUTE = 'username'
-    # SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
+#    SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
     SAML_USE_NAME_ID_AS_USERNAME = True
     SAML_CREATE_UNKNOWN_USER = env('DD_SAML2_CREATE_USER')
-    SAML_ATTRIBUTE_MAPPING = env('DD_SAML2_ATTRIBUTES_MAP')
+    SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env('DD_SAML2_ATTRIBUTES_MAP'))
     BASEDIR = path.dirname(path.abspath(__file__))
     if len(env('DD_SAML2_ENTITY_ID')) == 0:
         SAML2_ENTITY_ID = '%s/saml2/metadata/' % SITE_URL
@@ -756,7 +774,8 @@ if SAML2_ENABLED:
 
         # directory with attribute mapping
         'attribute_map_dir': path.join(BASEDIR, 'attribute-maps'),
-
+        # do now discard attributes not specified in attribute-maps
+        'allow_unknown_attributes': env('DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE'),
         # this block states what services we provide
         'service': {
             # we are just a lonely SP
@@ -962,6 +981,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
     'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
+    'Mobsfscan Scan': ['title', 'severity', 'cwe'],
     'Nessus Scan': ['title', 'severity', 'cve', 'cwe'],
     'Nexpose Scan': ['title', 'severity', 'cve', 'cwe'],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
@@ -999,10 +1019,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
 HASHCODE_ALLOWS_NULL_CWE = {
     'Anchore Engine Scan': True,
     'Anchore Grype': True,
+    'AWS Prowler Scan': True,
     'Checkmarx Scan': False,
     'Checkmarx OSA': True,
     'SonarQube Scan': False,
     'Dependency Check Scan': True,
+    'Mobsfscan Scan': False,
     'Nessus Scan': True,
     'Nexpose Scan': True,
     'NPM Audit Scan': True,
@@ -1046,6 +1068,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Anchore Grype': DEDUPE_ALGO_HASH_CODE,
     'Aqua Scan': DEDUPE_ALGO_HASH_CODE,
     'AuditJS Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'AWS Prowler Scan': DEDUPE_ALGO_HASH_CODE,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'CargoAudit Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
@@ -1053,6 +1076,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
+    'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1186,6 +1210,10 @@ LOGGING = {
             'handlers': [r'%s' % LOGGING_HANDLER],
             'level': '%s' % LOG_LEVEL,
             'propagate': False,
+        },
+        'saml2': {
+            'handlers': [r'%s' % LOGGING_HANDLER],
+            'level': '%s' % LOG_LEVEL,
         },
         'MARKDOWN': {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.

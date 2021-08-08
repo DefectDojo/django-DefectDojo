@@ -1,7 +1,7 @@
 from crum import get_current_user
 from django.db.models import Exists, OuterRef
 from django.conf import settings
-from dojo.models import Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group
+from dojo.models import Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group, Role
 from dojo.authorization.authorization import get_roles_for_permission, role_has_permission, get_groups
 from dojo.authorization.roles_permissions import Permissions
 
@@ -68,3 +68,7 @@ def get_product_groups_for_group(group):
 
 def get_product_type_groups_for_group(group):
     return Product_Type_Group.objects.filter(group=group).select_related('role')
+
+
+def get_group_member_roles():
+    return Role.objects.exclude(name='API_Importer').exclude(name='Writer')
