@@ -1,5 +1,6 @@
 # #  product
 import calendar as tcalendar
+from dojo.finding.helper import FALSE_POSITIVE_FINDINGS_QUERY
 import logging
 import base64
 from collections import OrderedDict
@@ -23,7 +24,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, App_AnalysisTypeForm, JIRAEngagementForm, Add_Product_MemberForm, \
                        Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm
-from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
+from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Risk_Acceptance, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
                         Product_Group
@@ -318,8 +319,8 @@ def finding_querys(request, prod):
     # filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
 
     from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY
-    filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY).distinct()
-
+    filters['accepted'] = findings_qs.filter(date__range=[start_date, end_date],
+                                            risk_accepted = True)
     filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              active=True,
@@ -339,7 +340,6 @@ def finding_querys(request, prod):
                                          active=True,
                                          is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
-                                             false_p=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
