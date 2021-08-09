@@ -58,6 +58,14 @@ update the source code first)
 Replace the first step above with this one: `docker-compose build`
 
 
+## Upgrading to DefectDojo Version 2.2.x.
+
+Upgrade to 2.0.0 contained migration of endpoints. Some parts of migration haven't been done properly. This deficiency
+may manifest as a doubled slash in endpoint URLs (like `http://foo.bar:8080//test`) or as a problem with deduplication
+of the same endpoints. The mentioned bug was fixed in 2.2.0 and if you have seen these kinds of problems, just rerun
+"Endpoint migration" as it is written in [Upgrading to DefectDojo Version 2.0.x.](#upgrading-to-defectdojo-version-20x).
+
+
 ## Upgrading to DefectDojo Version 2.0.x.
 
 Follow the usual steps to upgrade as described above.

@@ -49,7 +49,7 @@ For detailed documentation you can visit
 ## Getting Started
 
 We recommend checking out the
-[Core Data Classes](https://defectdojo.github.io/usage/models/) document to
+[Core Data Classes](https://defectdojo.github.io/django-DefectDojo/usage/models/) document to
 learn the terminology of DefectDojo and the
 [getting started guide](https://defectdojo.github.io/django-DefectDojo/getting_started/)
 for setting up a new installation.
@@ -68,6 +68,9 @@ See [Wrappers](WRAPPERS.md)
 
 
 ## Release and branch model
+
+We release every month on the last Tuesday. These release are minor releases, i.e. 2.0.0 to 2.1.0. In between there might be bugfix/hotfix/patch releases when needed, i.e. 2.0.1.
+
 See [Release and branch model](BRANCHING-MODEL.md)
 
 

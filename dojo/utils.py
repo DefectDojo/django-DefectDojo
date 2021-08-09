@@ -1216,6 +1216,10 @@ def get_page_items_and_count(request, items, page_size, prefix='', do_count=True
 
 def handle_uploaded_threat(f, eng):
     name, extension = os.path.splitext(f.name)
+    # Check if threat folder exist.
+    if not os.path.isdir(settings.MEDIA_ROOT + '/threat/'):
+        # Create the folder
+        os.mkdir(settings.MEDIA_ROOT + '/threat/')
     with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
               'wb+') as destination:
         for chunk in f.chunks():
@@ -1742,6 +1746,7 @@ def sla_compute_and_notify(*args, **kwargs):
             event='sla_breach',
             title=title,
             finding=finding,
+            url=reverse('view_finding', args=(finding.id,)),
             sla_age=sla_age
         )
 
@@ -1813,7 +1818,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 jira_issue = None
                 if finding.has_jira_issue:
                     jira_issue = finding.jira_issue
-                elif finding.grouped:
+                elif finding.has_finding_group:
                     jira_issue = finding.finding_group.jira_issue
 
                 if jira_issue:
