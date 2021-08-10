@@ -1156,6 +1156,8 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
     #  -> List[int] as return type doesn't seem enough for drf-yasg
     @swagger_serializer_method(serializer_or_field=serializers.ListField(child=serializers.IntegerField()))
     def get_findings_list(self, obj) -> List[int]:
+        print("HERE")
+        print(obj.open_findings_list)
         return obj.open_findings_list
 
 
