@@ -1598,10 +1598,12 @@ class Finding(models.Model):
     description = models.TextField(verbose_name="Description",
                                 help_text="Longer more descriptive information about the flaw.")
     mitigation = models.TextField(verbose_name="Mitigation",
-                                null=False,
+                                null=True,
+                                blank=True,
                                 help_text="Text describing how to best fix the flaw.")
     impact = models.TextField(verbose_name="Impact",
-                                null=False,
+                                null=True,
+                                blank=True,
                                 help_text="Text describing the impact this flaw has on systems, products, enterprise, etc.")
     steps_to_reproduce = models.TextField(null=True,
                                           blank=True,
@@ -1639,13 +1641,13 @@ class Finding(models.Model):
                                  help_text="Denotes if this flaw is active or not.")
     # note that false positive findings cannot be verified
     # in defectdojo verified means: "we have verified the finding and it turns out that it's not a false positive"
-    verified = models.BooleanField(null=False,
+    verified = models.BooleanField(default=True,
                                    verbose_name="Verified",
                                    help_text="Denotes if this flaw has been manually verified by the tester.")
-    false_p = models.BooleanField(null=False,
+    false_p = models.BooleanField(default=False,
                                   verbose_name="False Positive",
                                   help_text="Denotes if this flaw has been deemed a false positive by the tester.")
-    duplicate = models.BooleanField(null=False,
+    duplicate = models.BooleanField(default=False,
                                     verbose_name="Duplicate",
                                     help_text="Denotes if this flaw is a duplicate of other flaws reported.")
     duplicate_finding = models.ForeignKey('self',

@@ -1058,8 +1058,13 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Finding
-        exclude = ['images']
+        exclude = ['images'] 
         extra_kwargs = {
+            'mitigation': {'required': True},
+            'impact': {'required': True},
+            'duplicate': {'required': True},
+            'verified': {'required': True},
+            'false_p': {'required': True},
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
 
