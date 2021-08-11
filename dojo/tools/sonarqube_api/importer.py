@@ -75,8 +75,6 @@ class SonarQubeApiImporter(object):
                 line = issue.get('line')
                 rule_id = issue['rule']
                 rule = client.get_rule(rule_id)
-                #severity = self.convert_sonar_severity(rule['severity'])
-                #Changed the code to show updated severity of the vulnerability rather than the vulnerability severity of the rule for better behavior
                 severity = self.convert_sonar_severity(issue['severity'])
                 description = self.clean_rule_description_html(rule['htmlDesc'])
                 cwe = self.clean_cwe(rule['htmlDesc'])
