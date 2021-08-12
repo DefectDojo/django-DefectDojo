@@ -69,6 +69,7 @@ class TestEndpointMigration(MigratorTestCase):
             'url_existing_port': Endpoint.objects.create(host='https://foo.bar:4433/', port=4433).pk,
             'full_url': Endpoint.objects.create(host='https://alice@foo.bar:4433/path1/path2/?key1=value1&no_value_key'
                                                      '#fragmentX').pk,
+            'path_with_slash': Endpoint.objects.create(host='bar.foo', path='/test').pk,
         }
 
         self.prod_type = Product_Type.objects.create()
@@ -141,6 +142,9 @@ class TestEndpointMigration(MigratorTestCase):
         self.assertEqual(endpoint.path, 'path1/path2/')
         self.assertEqual(endpoint.query, 'key1=value1&no_value_key')
         self.assertEqual(endpoint.fragment, 'fragmentX')
+
+        endpoint = Endpoint.objects.get(pk=self.endpoints['path_with_slash'])
+        self.assertEqual(endpoint.path, 'test')
 
         low_id = Endpoint.objects.filter(id=min(self.endpoints_eps.values()))
         logger.debug("Low id: {}".format(list(low_id)))

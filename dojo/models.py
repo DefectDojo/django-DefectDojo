@@ -1,9 +1,9 @@
 import base64
 import hashlib
 import logging
-from operator import itemgetter
 import os
 import re
+from typing import Dict, Set, Optional
 from uuid import uuid4
 from django.conf import settings
 
@@ -29,7 +29,6 @@ from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
 from django.db.models import JSONField
-from itertools import groupby
 import hyperlink
 from cvss import CVSS3
 
@@ -106,6 +105,93 @@ class Regulation(models.Model):
 
     def __str__(self):
         return self.acronym + ' (' + self.jurisdiction + ')'
+
+
+User = get_user_model()
+
+
+# proxy class for convenience and UI
+class Dojo_User(User):
+    class Meta:
+        proxy = True
+        ordering = ['first_name']
+
+    def get_full_name(self):
+        return Dojo_User.generate_full_name(self)
+
+    def __str__(self):
+        return self.get_full_name()
+
+    @staticmethod
+    def wants_block_execution(user):
+        # this return False if there is no user, i.e. in celery processes, unittests, etc.
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
+
+    @staticmethod
+    def force_password_reset(user):
+        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.force_password_reset
+
+    def disable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = False
+            user.usercontactinfo.save()
+
+    def enable_force_password_reset(user):
+        if hasattr(user, 'usercontactinfo'):
+            user.usercontactinfo.force_password_reset = True
+            user.usercontactinfo.save()
+
+    @staticmethod
+    def generate_full_name(user):
+        """
+        Returns the first_name plus the last_name, with a space in between.
+        """
+        full_name = '%s %s (%s)' % (user.first_name,
+                                    user.last_name,
+                                    user.username)
+        return full_name.strip()
+
+
+class UserContactInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    title = models.CharField(blank=True, null=True, max_length=150)
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
+                                 message="Phone number must be entered in the format: '+999999999'. "
+                                         "Up to 15 digits allowed.")
+    phone_number = models.CharField(validators=[phone_regex], blank=True,
+                                    max_length=15,
+                                    help_text="Phone number must be entered in the format: '+999999999'. "
+                                              "Up to 15 digits allowed.")
+    cell_number = models.CharField(validators=[phone_regex], blank=True,
+                                   max_length=15,
+                                   help_text="Phone number must be entered in the format: '+999999999'. "
+                                             "Up to 15 digits allowed.")
+    twitter_username = models.CharField(blank=True, null=True, max_length=150)
+    github_username = models.CharField(blank=True, null=True, max_length=150)
+    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
+    slack_user_id = models.CharField(blank=True, null=True, max_length=25)
+    block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
+    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset their password on next login.')
+
+
+class Dojo_Group(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    description = models.CharField(max_length=4000, null=True, blank=True)
+    users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Role(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    is_owner = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
 
 
 class System_Settings(models.Model):
@@ -300,6 +386,24 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name='Enable checklists',
         help_text="With this setting turned off, checklists will be disabled in the user interface.")
+    default_group = models.ForeignKey(
+        Dojo_Group,
+        null=True,
+        blank=True,
+        help_text="New users created by OAuth2 will be assigned to this group.",
+        on_delete=models.RESTRICT)
+    default_group_role = models.ForeignKey(
+        Role,
+        null=True,
+        blank=True,
+        help_text="New users created by OAuth2 will be assigned to their default group with this role.",
+        on_delete=models.RESTRICT)
+    staff_user_email_pattern = models.CharField(
+        max_length=200,
+        default='',
+        blank=True,
+        verbose_name='Email pattern for staff users',
+        help_text="When the email address of a new user created by OAuth2 matches this regex pattern, their is_staff flag will be set to True.")
 
     from dojo.middleware import System_Settings_Manager
     objects = System_Settings_Manager()
@@ -324,93 +428,6 @@ def get_current_date():
 
 def get_current_datetime():
     return timezone.now()
-
-
-User = get_user_model()
-
-
-# proxy class for convenience and UI
-class Dojo_User(User):
-    class Meta:
-        proxy = True
-        ordering = ['first_name']
-
-    def get_full_name(self):
-        return Dojo_User.generate_full_name(self)
-
-    def __str__(self):
-        return self.get_full_name()
-
-    @staticmethod
-    def wants_block_execution(user):
-        # this return False if there is no user, i.e. in celery processes, unittests, etc.
-        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.block_execution
-
-    @staticmethod
-    def force_password_reset(user):
-        return hasattr(user, 'usercontactinfo') and user.usercontactinfo.force_password_reset
-
-    def disable_force_password_reset(user):
-        if hasattr(user, 'usercontactinfo'):
-            user.usercontactinfo.force_password_reset = False
-            user.usercontactinfo.save()
-
-    def enable_force_password_reset(user):
-        if hasattr(user, 'usercontactinfo'):
-            user.usercontactinfo.force_password_reset = True
-            user.usercontactinfo.save()
-
-    @staticmethod
-    def generate_full_name(user):
-        """
-        Returns the first_name plus the last_name, with a space in between.
-        """
-        full_name = '%s %s (%s)' % (user.first_name,
-                                    user.last_name,
-                                    user.username)
-        return full_name.strip()
-
-
-class UserContactInfo(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    title = models.CharField(blank=True, null=True, max_length=150)
-    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
-                                 message="Phone number must be entered in the format: '+999999999'. "
-                                         "Up to 15 digits allowed.")
-    phone_number = models.CharField(validators=[phone_regex], blank=True,
-                                    max_length=15,
-                                    help_text="Phone number must be entered in the format: '+999999999'. "
-                                              "Up to 15 digits allowed.")
-    cell_number = models.CharField(validators=[phone_regex], blank=True,
-                                   max_length=15,
-                                   help_text="Phone number must be entered in the format: '+999999999'. "
-                                             "Up to 15 digits allowed.")
-    twitter_username = models.CharField(blank=True, null=True, max_length=150)
-    github_username = models.CharField(blank=True, null=True, max_length=150)
-    slack_username = models.CharField(blank=True, null=True, max_length=150, help_text="Email address associated with your slack account", verbose_name="Slack Email Address")
-    slack_user_id = models.CharField(blank=True, null=True, max_length=25)
-    block_execution = models.BooleanField(default=False, help_text="Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion.")
-    force_password_reset = models.BooleanField(default=False, help_text='Forces this user to reset their password on next login.')
-
-
-class Role(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    is_owner = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        ordering = ('name',)
-
-
-class Dojo_Group(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True, blank=True)
-    users = models.ManyToManyField(Dojo_User, through='Dojo_Group_Member', related_name='users', blank=True)
-
-    def __str__(self):
-        return self.name
 
 
 class Dojo_Group_Member(models.Model):
@@ -1399,6 +1416,40 @@ class Development_Environment(models.Model):
                  "url": reverse("edit_dev_env", args=(self.id,))}]
 
 
+class Sonarqube_Issue(models.Model):
+    key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
+    status = models.CharField(max_length=20, help_text="SonarQube issue status")
+    type = models.CharField(max_length=15, help_text="SonarQube issue type")
+
+    def __str__(self):
+        return self.key
+
+
+class Sonarqube_Issue_Transition(models.Model):
+    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, on_delete=models.CASCADE, db_index=True)
+    created = models.DateTimeField(null=False, editable=False, default=now)
+    finding_status = models.CharField(max_length=100)
+    sonarqube_status = models.CharField(max_length=50)
+    transitions = models.CharField(max_length=100)
+
+    class Meta:
+        ordering = ('-created', )
+
+
+class Sonarqube_Product(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    sonarqube_project_key = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="SonarQube Project Key"
+    )
+    sonarqube_tool_config = models.ForeignKey(
+        Tool_Configuration, verbose_name="SonarQube Configuration",
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return '{} | {}'.format(self.sonarqube_tool_config.name, self.sonarqube_project_key)
+
+
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
     lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
@@ -1430,6 +1481,7 @@ class Test(models.Model):
                                    null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
+    sonarqube_config = models.ForeignKey(Sonarqube_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="SonarQube Config")
 
     class Meta:
         indexes = [
@@ -1528,40 +1580,6 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
     def __str__(self):
         return '%i: %s' % (self.finding.id, self.action)
-
-
-class Sonarqube_Issue(models.Model):
-    key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
-    status = models.CharField(max_length=20, help_text="SonarQube issue status")
-    type = models.CharField(max_length=15, help_text="SonarQube issue type")
-
-    def __str__(self):
-        return self.key
-
-
-class Sonarqube_Issue_Transition(models.Model):
-    sonarqube_issue = models.ForeignKey(Sonarqube_Issue, on_delete=models.CASCADE, db_index=True)
-    created = models.DateTimeField(null=False, editable=False, default=now)
-    finding_status = models.CharField(max_length=100)
-    sonarqube_status = models.CharField(max_length=50)
-    transitions = models.CharField(max_length=100)
-
-    class Meta:
-        ordering = ('-created', )
-
-
-class Sonarqube_Product(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    sonarqube_project_key = models.CharField(
-        max_length=200, null=True, blank=True, verbose_name="SonarQube Project Key"
-    )
-    sonarqube_tool_config = models.ForeignKey(
-        Tool_Configuration, verbose_name="SonarQube Configuration",
-        null=True, blank=True, on_delete=models.CASCADE
-    )
-
-    def __str__(self):
-        return '{} | {}'.format(self.product.name, self.sonarqube_project_key)
 
 
 class Finding(models.Model):
@@ -2482,12 +2500,11 @@ class Finding_Group(TimeStampedModel):
 
     @cached_property
     def components(self):
-        # Using defaultdict() + groupby()
-        # Convert list of tuples to dictionary value lists
-        component_tuples = set([(find.component_name, find.component_version) for find in self.findings.all()])
-        components = dict((k, [v[1] for v in itr]) for k, itr in groupby(
-                                component_tuples, itemgetter(0)))
-        return ','.join([key + ':' + ', '.join(value) for key, value in components.items() if key and value])
+        components: Dict[str, Set[Optional[str]]] = {}
+        for finding in self.findings.all():
+            if finding.component_name is not None:
+                components.setdefault(finding.component_name, set()).add(finding.component_version)
+        return "; ".join(f"""{name}: {", ".join(map(str, versions))}""" for name, versions in components.items())
 
     @property
     def age(self):

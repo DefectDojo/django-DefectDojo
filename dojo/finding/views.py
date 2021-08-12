@@ -487,7 +487,7 @@ def defect_finding_review(request, fid):
             new_note.date = now
             new_note.save()
             finding.notes.add(new_note)
-            finding.under_defect_review = False
+            finding.under_review = False
             defect_choice = form.cleaned_data['defect_choice']
 
             if defect_choice == "Close Finding":
@@ -963,7 +963,7 @@ def request_finding_review(request, fid):
                 reverse('view_finding', args=(finding.id, )))
 
     else:
-        form = ReviewFindingForm()
+        form = ReviewFindingForm(finding=finding)
 
     product_tab = Product_Tab(finding.test.engagement.product.id, title="Review Finding", tab="findings")
 
