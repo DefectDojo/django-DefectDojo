@@ -2011,8 +2011,7 @@ class UserFilter(DojoFilter):
 
 
 class ApiUserFilter(DojoFilter):
-    username = ModelMultipleChoiceFilter(field_name='username', to_field_name='username',
-                                         queryset=Dojo_User.objects.all())
+    username = CharFieldInFilter(field_name='username', lookup_expr='in')
 
     o = OrderingFilter(
         # tuple-mapping retains order
