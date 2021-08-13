@@ -1060,11 +1060,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Finding
         fields = '__all__'
         extra_kwargs = {
-            'mitigation': {'required': True},
-            'impact': {'required': True},
-            'duplicate': {'required': True},
+            'active': {'required': True},
             'verified': {'required': True},
-            'false_p': {'required': True},
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
 
