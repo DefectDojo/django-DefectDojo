@@ -1048,6 +1048,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Finding
         fields = '__all__'
         extra_kwargs = {
+            'active': {'required': True},
+            'verified': {'required': True},
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
 
