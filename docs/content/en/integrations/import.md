@@ -171,6 +171,10 @@ That will generate three files, two of which are needed for defectdojo. Build th
 
 From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
 
+### Cloudsploit (AquaSecurity)
+
+From: https://github.com/aquasecurity/cloudsploit . Import the JSON output.
+
 ### CycloneDX
 
 CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security contexts and supply chain component analysis.
@@ -399,7 +403,7 @@ Github v4 graphql query to fetch data:
   }
 {{< /highlight >}}
 
-Another example of Python script that query one repository: 
+Another example of Python script that query one repository:
 
 ```python
 
@@ -801,21 +805,21 @@ Follow the below steps to setup API Import:
     Configuration-\>Tool Configuration. Note the url should be in the
     formation of `<http(s)://>\<sonarqube\_hostname\>/api`. Select the tool
     type to SonarQube. By default the tool will import vulnerabilities only,
-    but additional filters can be setup using the Extras field separated by 
+    but additional filters can be setup using the Extras field separated by
     commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
 2.  In the Product settings fill the details for the SonarQube Project
     Key (Key name can be found by navigating to a specific project and
     selecting the value from the url
     `<http(s)://>\<sonarqube\_host\>/dashboard?id=\<key\_name\>`.
-    In case you will not provide SonarQube Project Key, DefectDojo will 
-    try to use Product as Project name in SonarQube. If you would like to 
-    collect findings from multiple projects you can specify multiple Keys as 
+    In case you will not provide SonarQube Project Key, DefectDojo will
+    try to use Product as Project name in SonarQube. If you would like to
+    collect findings from multiple projects you can specify multiple Keys as
     separated SonarQube Configuration in the Product settings.
 3.  Once all of the above settings are made, the API Import should be
-    able to auto-import all vulnerability information from the SonarQube 
-    instance. During setting import, you can select which SonarQube 
-    Configuration (which Project key) should be used. If you will not choose 
-    any, DefectDojo will try to do the best guess :) (if you defined only one 
+    able to auto-import all vulnerability information from the SonarQube
+    instance. During setting import, you can select which SonarQube
+    Configuration (which Project key) should be used. If you will not choose
+    any, DefectDojo will try to do the best guess :) (if you defined only one
     Product SonarQube Configuration or only one SonarQube Tool Configuration).
 
 
