@@ -5,6 +5,7 @@ import binascii
 import os
 import hashlib
 import bleach
+import mimetypes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -1215,6 +1216,10 @@ def get_page_items_and_count(request, items, page_size, prefix='', do_count=True
 
 def handle_uploaded_threat(f, eng):
     name, extension = os.path.splitext(f.name)
+    # Check if threat folder exist.
+    if not os.path.isdir(settings.MEDIA_ROOT + '/threat/'):
+        # Create the folder
+        os.mkdir(settings.MEDIA_ROOT + '/threat/')
     with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
               'wb+') as destination:
         for chunk in f.chunks():
@@ -1741,6 +1746,7 @@ def sla_compute_and_notify(*args, **kwargs):
             event='sla_breach',
             title=title,
             finding=finding,
+            url=reverse('view_finding', args=(finding.id,)),
             sla_age=sla_age
         )
 
@@ -1812,7 +1818,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 jira_issue = None
                 if finding.has_jira_issue:
                     jira_issue = finding.jira_issue
-                elif finding.grouped:
+                elif finding.has_finding_group:
                     jira_issue = finding.finding_group.jira_issue
 
                 if jira_issue:
@@ -2043,3 +2049,24 @@ def prod_name(obj):
         return 'Unknown'
 
     return get_product(obj).name
+
+
+# Returns image locations by default (i.e. uploaded_files/09577eb1-6ccb-430b-bc82-0742d4c97a09.png)
+# if return_objects=True, return the FileUPload object instead of just the file location
+def get_file_images(obj, return_objects=False):
+    logger.debug('getting images for %s:%s', type(obj), obj)
+    files = None
+    if not obj:
+        return files
+    files = obj.files.all()
+
+    images = []
+    for file in files:
+        file_name = file.file.name
+        file_type = mimetypes.guess_type(file_name)[0]
+        if file_type and 'image' in file_type:
+            if return_objects:
+                images.append(file)
+            else:
+                images.append(file_name)
+    return images

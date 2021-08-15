@@ -28,6 +28,7 @@ class TestDetectSecretsParser(TestCase):
             self.assertEqual("modules_images", finding.file_path)
             self.assertEqual(151, finding.line)
             self.assertEqual(1, finding.nb_occurences)
+            self.assertFalse(finding.false_p)
 
         with self.subTest(i=1):
             finding = findings[1]
@@ -38,6 +39,7 @@ class TestDetectSecretsParser(TestCase):
             self.assertEqual("modules_images", finding.file_path)
             self.assertEqual(156, finding.line)
             self.assertEqual(1, finding.nb_occurences)
+            self.assertFalse(finding.false_p)
 
         with self.subTest(i=2):
             finding = findings[2]
@@ -48,6 +50,7 @@ class TestDetectSecretsParser(TestCase):
             self.assertEqual("example/pkg/docker_registry_watcher/docker_config.go", finding.file_path)
             self.assertEqual(109, finding.line)
             self.assertEqual(1, finding.nb_occurences)
+            self.assertFalse(finding.false_p)
 
         with self.subTest(i=3):
             finding = findings[3]
@@ -58,3 +61,4 @@ class TestDetectSecretsParser(TestCase):
             self.assertEqual("example/pkg/docker_registry_watcher/docker_registry_watcher.go", finding.file_path)
             self.assertEqual(112, finding.line)
             self.assertEqual(1, finding.nb_occurences)
+            self.assertTrue(finding.false_p)

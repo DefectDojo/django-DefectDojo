@@ -251,12 +251,16 @@ homepage](https://github.com/IdentityPython/djangosaml2).
     DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, '/path/to/your/metadata.xml'),
     # Fill in DD_SAML2_ATTRIBUTES_MAP to corresponding SAML2 userprofile attributes provided by your IdP
     DD_SAML2_ATTRIBUTES_MAP=(dict, {
-        'Email': ('email', ),
-        'Firstname': ('first_name', ),
-        'Lastname': ('last_name', )
+        # format: SAML attrib:django_user_model
+        'Email': 'email',
+        'UserName': 'username',
+        'Firstname': 'first_name',
+        'Lastname': 'last_name'
     }),
     # May configure the optional fields
     {{< /highlight >}}
+
+NOTE: *DD_SAML2_ATTRIBUTES_MAP* in k8s can be referenced as extraConfig (e.g. `DD_SAML2_ATTRIBUTES_MAP: 'Email'='email', 'Username'='username'...`)
 
 4.  Checkout the SAML section in dojo/`dojo/settings/settings.dist.py` and verfiy if it fits your requirement. If you need help, take a look at the [plugin
 documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configuration).
@@ -264,9 +268,9 @@ documentation](https://djangosaml2.readthedocs.io/contents/setup.html#configurat
 5.  Restart DefectDojo, and you should now see a **Login with SAML**
     button on the login page.
 
-NOTE: In the case when IDP is configured to use self signed certificate,
+NOTE: In the case when IDP is configured to use self signed (private) certificate,
 than CA needs to be specified by define environments variable
-REQUESTS_CA_BUNDLE that points to the path of public CA certificate.
+REQUESTS_CA_BUNDLE that points to the path of private CA certificate.
 
 ### Advanced Configuration
 The [https://github.com/IdentityPython/djangosaml2](djangosaml2) plugin has a lot of options. For details take a look at the [plugin
@@ -298,17 +302,20 @@ Up to relase 1.15.0 the SAML integration was based on [https://github.com/fangli
 
 ## User Permissions
 
-When a new user is created via the social-auth, only the default permissions are active. This means that the newly created user does not have access to add, edit, nor delete anything within DefectDojo. To circumvent that, a custom pipeline was added (dojo/pipline.py/modify_permissions) to elevate new users to staff. This can be disabled by setting 'is_staff' equal to False. Similarly, for an admin account, simply add the following to the modify_permissions pipeline:
+When a new user is created via the social-auth, only the default permissions are active. This means that the newly created user does not have access to add, edit, nor delete anything within DefectDojo. There are two parameters in the System Settings to influence the permissions for newly created users:
 
-{{< highlight python >}}
-is_superuser = True
-{{< /highlight >}}
+### Default group
 
-Exception for Gitlab OAuth2: with
-DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT set to True in
-`dojo/settings/settings.dist.py`, where a new user is created via the Gitlab
-social-auth, he has one permission: add_engagement. It allows him to
-create further engagements on his products via the API.
+When both the parameters `Default group` and `Default group role` are set, the new user will be a member of the given group with the given role, which will give him the respective permissions.
+
+### Staff user ###
+
+Newly created users are neither staff nor superuser by default. The `is_staff` flag of a new user will be set to `True`, if the user's email address matches the regular expression in the parameter `Email pattern for staff users`. 
+
+**Example:**
+
+`.*@example.com` will make `alice@example.com` a staff user, while `bob@partner.example.com` or `chris@example.org` will be non-staff users.
+
 
 ## Other Providers
 

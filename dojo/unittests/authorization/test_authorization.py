@@ -3,7 +3,8 @@ from django.core.exceptions import PermissionDenied
 from django.test import TestCase, override_settings
 from unittest.mock import patch
 from dojo.models import Dojo_User, Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
-    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member
+    Test, Finding, Endpoint, Dojo_Group, Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, \
+    Languages, App_Analysis
 import dojo.authorization.authorization
 from dojo.authorization.authorization import role_has_permission, get_roles_for_permission, \
     user_has_permission_or_403, user_has_permission, \
@@ -47,6 +48,12 @@ class TestAuthorization(TestCase):
 
         cls.endpoint = Endpoint()
         cls.endpoint.product = cls.product
+
+        cls.technology = App_Analysis()
+        cls.technology.product = cls.product
+
+        cls.language = Languages()
+        cls.language.product = cls.product
 
         cls.product_type_member_reader = Product_Type_Member()
         cls.product_type_member_reader.user = cls.user
@@ -524,3 +531,47 @@ class TestAuthorization(TestCase):
         result = user_has_permission(self.user4, self.group_member, Permissions.Group_View)
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(user=self.user4)
+
+    @patch('dojo.models.Product_Member.objects')
+    def test_user_has_permission_language_no_permissions(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.product_member_reader]
+
+        result = user_has_permission(self.user, self.language, Permissions.Language_Edit)
+
+        self.assertFalse(result)
+        mock_foo.filter.assert_called_with(user=self.user)
+
+    @patch('dojo.models.Product_Member.objects')
+    def test_user_has_permission_language_success(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.product_member_owner]
+
+        result = user_has_permission(self.user, self.language, Permissions.Language_Delete)
+
+        self.assertTrue(result)
+        mock_foo.filter.assert_called_with(user=self.user)
+
+    @patch('dojo.models.Product_Member.objects')
+    def test_user_has_permission_technology_no_permissions(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.product_member_reader]
+
+        result = user_has_permission(self.user, self.technology, Permissions.Technology_Edit)
+
+        self.assertFalse(result)
+        mock_foo.filter.assert_called_with(user=self.user)
+
+    @patch('dojo.models.Product_Member.objects')
+    def test_user_has_permission_technology_success(self, mock_foo):
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.select_related.return_value = mock_foo
+        mock_foo.filter.return_value = [self.product_member_owner]
+
+        result = user_has_permission(self.user, self.technology, Permissions.Technology_Delete)
+
+        self.assertTrue(result)
+        mock_foo.filter.assert_called_with(user=self.user)

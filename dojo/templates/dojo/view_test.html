@@ -130,6 +130,9 @@
                             </i>
                         </th>
                     {% endif %}
+                    {% if test.sonarqube_config %}
+                        <th>SonarQube Config</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a></td>
@@ -159,6 +162,17 @@
                     <td>{{ test.version }}</td>
                     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and test.total_reimport_count %}
                         <td>{{ test.total_reimport_count }}</td>
+                    {% endif %}
+                    {% if test.sonarqube_config %}
+                        <td>
+                            {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
+                                <a href="{% url 'edit_sonarqube' prod.id test.sonarqube_config.id %}">
+                            {% endif %}
+                            {{ test.sonarqube_config }}
+                            {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
+                                </a>
+                            {% endif %}
+                        </td>
                     {% endif %}
                 </tr>
             </table>
@@ -672,13 +686,6 @@
                                             </a>
                                         </li>
                                         <li class="divider"></li>
-                                        {% endif %}
-                                    {% if finding|has_object_permission:"Finding_Edit" or user|is_authorized_for_staff:finding %}
-                                        <li role="presentation">
-                                            <a href="{% url 'manage_images' finding.id %}">
-                                                <i class="fa fa-file-image-o"></i> Manage Images
-                                            </a>
-                                        </li>
                                     {% endif %}
                                     {% if finding|has_object_permission:"Finding_Edit" or user|is_authorized_for_change:finding %}
                                         {% if finding.under_review and dojo_user in finding.reviewers.all or dojo_user == finding.review_requested_by and finding.under_review %}
