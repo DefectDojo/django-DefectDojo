@@ -7,7 +7,7 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-CWE_REGEX = "cwe-\d"
+CWE_REGEX = r'cwe-\d+'
 
 
 class SarifParser(object):
@@ -71,11 +71,10 @@ def get_rule_tags(rule):
         return rule['properties']['tags']
 
 
-def search_cwe(value,cwes):
+def search_cwe(value, cwes):
     matches = re.search(CWE_REGEX, value, re.IGNORECASE)
     if matches:
-         cwes.append(int(matches[0].split("-")[1]))
-    
+        cwes.append(int(matches[0].split("-")[1]))
 
 
 def get_rule_cwes(rule):
@@ -83,12 +82,10 @@ def get_rule_cwes(rule):
     # condition for njsscan
     if 'properties' in rule and 'cwe' in rule['properties']:
         value = rule['properties']['cwe']
-        search_cwe(value,cwes)
-        
+        search_cwe(value, cwes)
     else:
         for tag in get_rule_tags(rule):
-            search_cwe(tag,cwes)
-            
+            search_cwe(tag, cwes)
     return cwes
 
 
