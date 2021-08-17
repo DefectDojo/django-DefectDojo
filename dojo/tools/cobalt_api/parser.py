@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from dojo.models import Endpoint, Finding
+from dojo.tools.cobalt_api.importer import CobaltApiImporter
 
 __author__ = 'ericcornelissen'
 
@@ -11,16 +12,19 @@ class CobaltApiParser(object):
     """
 
     def get_scan_types(self):
-        return ["Cobalt.io API"]
+        return ["Cobalt.io API Import"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Cobalt.io API"
+        return "Cobalt.io API Import"
 
     def get_description_for_scan_types(self, scan_type):
         return "Cobalt.io API findings can be imported in JSON format (option --json)."
 
     def get_findings(self, file, test):
-        data = json.load(file)
+        if file is None:
+            data = CobaltApiImporter().get_findings(test)
+        else:
+            data = json.load(file)
 
         findings = []
         for entry in data["data"]:
@@ -96,16 +100,16 @@ class CobaltApiParser(object):
     def include_finding(self, resource):
         """Determine whether this finding should be imported to DefectDojo"""
         allowed_states = [
-            "carried_over", #X Finding from a previous pentest
-            "check_fix",    #X Fix for finding is being verified
+            "carried_over", # Finding from a previous pentest
+            "check_fix",    # Fix for finding is being verified
             "duplicate",    # Finding is a duplicate within the pentest
-            "invalid",      #X Finding is found to be a false positive
-            "need_fix",     #X Finding is verified and valid
-            "new",          #X The finding is not yet verified by the pentest team
-            "out_of_scope", #X Finding is out of the scope of the pentest
-            "triaging",     #X The finding is not yet verified by the pentest team
+            "invalid",      # Finding is found to be a false positive
+            "need_fix",     # Finding is verified and valid
+            "new",          # The finding is not yet verified by the pentest team
+            "out_of_scope", # Finding is out of the scope of the pentest
+            "triaging",     # The finding is not yet verified by the pentest team
             "valid_fix",    # Fix for finding has been varified
-            "wont_fix",     #X Risk of finding has been accepted
+            "wont_fix",     # Risk of finding has been accepted
         ]
 
         if resource["state"] in allowed_states:

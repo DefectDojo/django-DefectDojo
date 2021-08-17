@@ -133,6 +133,9 @@
                     {% if test.sonarqube_config %}
                         <th>SonarQube Config</th>
                     {% endif %}
+                    {% if test.cobaltio_config %}
+                        <th>Cobalt.io Config</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a></td>
@@ -169,6 +172,17 @@
                                 <a href="{% url 'edit_sonarqube' prod.id test.sonarqube_config.id %}">
                             {% endif %}
                             {{ test.sonarqube_config }}
+                            {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
+                                </a>
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                    {% if test.cobaltio_config %}
+                        <td>
+                            {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
+                                <a href="{% url 'edit_cobaltio' prod.id test.cobaltio_config.id %}">
+                            {% endif %}
+                            {{ test.cobaltio_config }}
                             {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
                                 </a>
                             {% endif %}

@@ -131,10 +131,23 @@ client.
 
 CSV Report
 
-### Cobalt.io API
+### Cobalt.io API Import
 
-Export Cobalt.io API findings data in JSON format (`/findings` endpoint).
-Be sure to scope the result to the pentest or asset you want to import findings from.
+Import findings from the Cobalt.io API - no file required.
+
+Follow these steps to setup API importing:
+
+1.  Configure the Cobalt.io Authentication details by navigating to
+    Configuration-\>Tool Configuration, selecting the Tool Type to "Cobalt.io",
+    and Authentication Type "API Key". Paste your Cobalt.io API key in the
+    "API Key" input and the desired org token in the "Extras" input.
+2.  In the Product settings select "Add Cobalt.io Configuration". Provide the ID
+    of the asset from which to import findings. The ID can be found at the end
+    of the URL when viewing the asset in your browser. Also select the
+    appropriate "Cobalt.io" configuration.
+3.  After this is you can import the findings as a scan by selecting "Cobalt.io
+    API Import" as the scan type. If you have more than one asset configured you
+    must also select which "Cobalt.io Config" to use.
 
 ### Coverity API
 
@@ -806,21 +819,21 @@ Follow the below steps to setup API Import:
     Configuration-\>Tool Configuration. Note the url should be in the
     formation of `<http(s)://>\<sonarqube\_hostname\>/api`. Select the tool
     type to SonarQube. By default the tool will import vulnerabilities only,
-    but additional filters can be setup using the Extras field separated by 
+    but additional filters can be setup using the Extras field separated by
     commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
 2.  In the Product settings fill the details for the SonarQube Project
     Key (Key name can be found by navigating to a specific project and
     selecting the value from the url
     `<http(s)://>\<sonarqube\_host\>/dashboard?id=\<key\_name\>`.
-    In case you will not provide SonarQube Project Key, DefectDojo will 
-    try to use Product as Project name in SonarQube. If you would like to 
-    collect findings from multiple projects you can specify multiple Keys as 
+    In case you will not provide SonarQube Project Key, DefectDojo will
+    try to use Product as Project name in SonarQube. If you would like to
+    collect findings from multiple projects you can specify multiple Keys as
     separated SonarQube Configuration in the Product settings.
 3.  Once all of the above settings are made, the API Import should be
-    able to auto-import all vulnerability information from the SonarQube 
-    instance. During setting import, you can select which SonarQube 
-    Configuration (which Project key) should be used. If you will not choose 
-    any, DefectDojo will try to do the best guess :) (if you defined only one 
+    able to auto-import all vulnerability information from the SonarQube
+    instance. During setting import, you can select which SonarQube
+    Configuration (which Project key) should be used. If you will not choose
+    any, DefectDojo will try to do the best guess :) (if you defined only one
     Product SonarQube Configuration or only one SonarQube Tool Configuration).
 
 
