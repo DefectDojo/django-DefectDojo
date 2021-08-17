@@ -7,7 +7,7 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-CWE_REGEX = r'cwe-\d+$'
+CWE_REGEX = r'cwe-\d+'
 
 
 class SarifParser(object):
@@ -71,16 +71,21 @@ def get_rule_tags(rule):
         return rule['properties']['tags']
 
 
+def search_cwe(value, cwes):
+    matches = re.search(CWE_REGEX, value, re.IGNORECASE)
+    if matches:
+        cwes.append(int(matches[0].split("-")[1]))
+
+
 def get_rule_cwes(rule):
     cwes = []
-    if 'properties' in rule and 'cwe' in rule['properties']:  # condition for njsscan
+    # condition for njsscan
+    if 'properties' in rule and 'cwe' in rule['properties']:
         value = rule['properties']['cwe']
-        cwes.append(int(re.split('-|:', value)[1]))
+        search_cwe(value, cwes)
     else:
         for tag in get_rule_tags(rule):
-            matches = re.search(CWE_REGEX, tag, re.IGNORECASE)
-            if matches:
-                cwes.append(int(matches[0].split("-")[1]))
+            search_cwe(tag, cwes)
     return cwes
 
 
@@ -134,8 +139,10 @@ def cve_try(val):
 
 
 def get_item(result, rules, artifacts, run_date):
-    mitigation = result.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
-    references = result.get('Remediation', {}).get('Recommendation', {}).get('Url')
+    mitigation = result.get('Remediation', {}).get(
+        'Recommendation', {}).get('Text', "")
+    references = result.get('Remediation', {}).get(
+        'Recommendation', {}).get('Url')
 
     # if there is a location get it
     file_path = None
@@ -152,7 +159,8 @@ def get_item(result, rules, artifacts, run_date):
     rule = rules.get(result['ruleId'])
     title = result['ruleId']
     if 'message' in result:
-        description = get_message_from_multiformatMessageString(result['message'], rule)
+        description = get_message_from_multiformatMessageString(
+            result['message'], rule)
         if len(description) < 150:
             title = description
     description = ''
@@ -160,12 +168,15 @@ def get_item(result, rules, artifacts, run_date):
     if rule is not None:
         # get the severity from the rule
         if 'defaultConfiguration' in rule:
-            severity = get_severity(rule['defaultConfiguration'].get('level', 'warning'))
+            severity = get_severity(
+                rule['defaultConfiguration'].get('level', 'warning'))
 
         if 'shortDescription' in rule:
-            description = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
+            description = get_message_from_multiformatMessageString(
+                rule['shortDescription'], rule)
         elif 'fullDescription' in rule:
-            description = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
+            description = get_message_from_multiformatMessageString(
+                rule['fullDescription'], rule)
         elif 'name' in rule:
             description = rule['name']
         else:
@@ -184,7 +195,8 @@ def get_item(result, rules, artifacts, run_date):
         description=description,
         mitigation=mitigation,
         references=references,
-        cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
+        # for now we only support when the id of the rule is a CVE
+        cve=cve_try(result['ruleId']),
         cwe=cwes[-1],
         static_finding=True,  # by definition
         dynamic_finding=False,  # by definition
