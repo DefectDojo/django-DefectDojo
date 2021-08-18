@@ -617,7 +617,7 @@ def add_jira_issue(obj, *args, **kwargs):
                 'project': {
                     'key': jira_project.project_key
                 },
-                'summary': jira_summary(obj),
+                'summary': jira_summary(obj).replace('\r', '').replace('\n', ''),
                 'description': jira_description(obj),
                 'issuetype': {
                     'name': jira_instance.default_issue_type
