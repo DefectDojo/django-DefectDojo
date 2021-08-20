@@ -2,8 +2,7 @@ from django.core.management.base import BaseCommand
 
 
 """
-Author: Josh Hewing and Michael Chen 
-This script will solve issue #3666 by checking for deduplication configuration at startup
+Author: Josh Hewing and Michael Chen- This script will solve issue #3666 by checking for deduplication configuration at startup
 """
 
 
