@@ -121,6 +121,6 @@ EOD
   initialize_test_types
   
   # checks the deduplication config at startup
-  echo "Validation of Deduplication Configuration"
+  echo "Startup Deduplication Configuration"
   python3 manage.py validatededupeconfig.py
 fi
