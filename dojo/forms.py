@@ -2149,7 +2149,6 @@ class Cobaltio_ProductForm(forms.ModelForm):
         exclude = ['product', 'cobaltio_asset_name']
 
 
-
 class DeleteJIRAInstanceForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -2238,7 +2237,6 @@ class DeleteSonarqubeConfigurationForm(forms.ModelForm):
     class Meta:
         model = Sonarqube_Product
         fields = ['id']
-
 
 
 class DeleteCobaltioConfigurationForm(forms.ModelForm):

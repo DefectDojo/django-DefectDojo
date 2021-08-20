@@ -25,8 +25,8 @@ class CobaltAPI:
         assets = self.get_assets()
 
         for asset in assets:
-          if asset["resource"]["id"] == asset_id:
-            return asset
+            if asset["resource"]["id"] == asset_id:
+                return asset
 
         raise Exception("Asset {} not found in organisation".format(asset_id))
 

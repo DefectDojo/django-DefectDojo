@@ -1824,6 +1824,7 @@ def edit_cobaltio(request, pid, cobaltio_cid):
                       'product_tab': product_tab
                   })
 
+
 @user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
 def delete_cobaltio(request, pid, cobaltio_cid):
 

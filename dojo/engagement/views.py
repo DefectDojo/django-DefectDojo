@@ -604,7 +604,7 @@ def import_scan_results(request, eid=None, pid=None):
                 test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings, group_by=group_by, sonarqube_config=sonarqube_config,cobaltio_config=cobaltio_config)
+                            close_old_findings=close_old_findings, group_by=group_by, sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 

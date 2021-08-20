@@ -43,7 +43,7 @@ class CobaltApiParser(object):
                 [
                     resource["description"],
                     "",
-                    f"Cobalt.io details:",
+                    "Cobalt.io details:",
                     f"- Impact: {resource['impact']}",
                     f"- Likelihood: {resource['likelihood']}",
                     "",
@@ -100,16 +100,16 @@ class CobaltApiParser(object):
     def include_finding(self, resource):
         """Determine whether this finding should be imported to DefectDojo"""
         allowed_states = [
-            "carried_over", # Finding from a previous pentest
-            "check_fix",    # Fix for finding is being verified
-            "duplicate",    # Finding is a duplicate within the pentest
-            "invalid",      # Finding is found to be a false positive
-            "need_fix",     # Finding is verified and valid
-            "new",          # The finding is not yet verified by the pentest team
-            "out_of_scope", # Finding is out of the scope of the pentest
-            "triaging",     # The finding is not yet verified by the pentest team
-            "valid_fix",    # Fix for finding has been varified
-            "wont_fix",     # Risk of finding has been accepted
+            "carried_over",  # Finding from a previous pentest
+            "check_fix",     # Fix for finding is being verified
+            "duplicate",     # Finding is a duplicate within the pentest
+            "invalid",       # Finding is found to be a false positive
+            "need_fix",      # Finding is verified and valid
+            "new",           # The finding is not yet verified by the pentest team
+            "out_of_scope",  # Finding is out of the scope of the pentest
+            "triaging",      # The finding is not yet verified by the pentest team
+            "valid_fix",     # Fix for finding has been varified
+            "wont_fix",      # Risk of finding has been accepted
         ]
 
         if resource["state"] in allowed_states:
