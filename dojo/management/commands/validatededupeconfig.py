@@ -8,7 +8,7 @@ This script will solve issue #3666 by checking for deduplication configuration a
 
 
 class Command(BaseCommand):
-    For each_var in HASHCODE_FIELDS_PER_SCANNER:
+    for each_var in HASHCODE_FIELDS_PER_SCANNER:
 	    for each_ind in each_var:
 		    if each_ind not in HASHCODE_ALLOWED_FIELDS:
 			    deduplicationLogger.info(
