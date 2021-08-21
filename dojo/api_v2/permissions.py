@@ -1,7 +1,8 @@
 import re
 
 from rest_framework.exceptions import ParseError
-from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
+from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group, Engagement_Presets, \
+    Network_Locations
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from dojo.authorization.authorization import user_has_permission
@@ -266,3 +267,35 @@ class UserHasLanguagePermission(permissions.BasePermission):
 class IsSuperUser(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_superuser
+
+
+class UserHasEngagementPresetPermission(permissions.BasePermission):
+    path_preset_post = re.compile(r'^/api/v2/engagement_presets/$')
+    path_preset = re.compile(r'^/api/v2/engagement_presets/\d+/$')
+
+    def has_permission(self, request, view):
+        if UserHasEngagementPresetPermission.path_preset_post.match(request.path) or \
+                UserHasEngagementPresetPermission.path_preset.match(request.path):
+            return check_post_permission(request, Product, 'product', Permissions.Product_Edit)
+
+    def has_object_permission(self, request, view, obj):
+        if UserHasEngagementPresetPermission.path_preset_post.match(request.path) or \
+                UserHasEngagementPresetPermission.path_preset.match(request.path):
+            return check_object_permission(request, obj, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Delete)
+        else:
+            return check_object_permission(request, obj, Permissions.Product_View, Permissions.Product_Edit, Permissions.Product_Edit, Permissions.Product_Edit)
+
+
+class UserHasNetworkLocationsPermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.method == 'GET':
+            return True
+        else:
+            return request.user and request.user.is_superuser
+
+    def has_object_permission(self, request, view, obj):
+        if request.method == 'GET':
+            return True
+        else:
+            return request.user and request.user.is_superuser
