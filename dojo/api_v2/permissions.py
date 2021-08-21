@@ -1,8 +1,7 @@
 import re
 
 from rest_framework.exceptions import ParseError
-from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group, Engagement_Presets, \
-    Network_Locations
+from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from dojo.authorization.authorization import user_has_permission
