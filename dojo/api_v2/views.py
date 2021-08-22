@@ -2368,4 +2368,4 @@ class NetworkLocationsViewset(mixins.ListModelMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'location')
     if settings.FEATURE_AUTHORIZATION_V2:
-        permission_classes = (IsAuthenticated, permissions.UserHasNetworkLocationsPermission)
+        permission_classes = (IsAuthenticated, DjangoModelPermissions)

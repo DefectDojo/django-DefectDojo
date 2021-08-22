@@ -1555,11 +1555,6 @@ class EngagementPresetsSerializer(serializers.ModelSerializer):
         model = Engagement_Presets
         fields = '__all__'
 
-    def validate(self, data):
-        if 'scope' not in data or data['scope'] is None:
-            data['scope'] = ''
-        return data
-
 
 class NetworkLocationsSerializer(serializers.ModelSerializer):
     class Meta:
