@@ -235,3 +235,11 @@ class TestSarifParser(TestCase):
             self.assertEqual("CIS-DI-0008", finding.vuln_id_from_tool)
             self.assertEqual("Info", finding.severity)
             self.assertEqual("Confirm safety of setuid/setgid files", finding.description)
+
+    def test_mobsfscan(self):
+        testfile = open("dojo/unittests/scans/sarif/mobsfscan.json")
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(9, len(findings))
+        for finding in findings:
+            self.common_checks(finding)

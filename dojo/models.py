@@ -1395,9 +1395,9 @@ class Endpoint(models.Model):
             userinfo=':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None,
             host=url.host if url.host != '' else None,
             port=url.port,
-            path='/'.join(url.path) if url.path not in [(), ('',)] else None,
-            query=query_string if query_string != '' else None,
-            fragment=url.fragment if url.fragment != '' else None
+            path='/'.join(url.path)[:500] if url.path not in [None, (), ('',)] else None,
+            query=query_string[:1000] if query_string is not None and query_string != '' else None,
+            fragment=url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
         )
 
     def get_absolute_url(self):
