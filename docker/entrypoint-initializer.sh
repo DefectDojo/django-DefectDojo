@@ -122,5 +122,5 @@ EOD
   
   # checks the deduplication config at startup
   echo "Startup Deduplication Configuration"
-  python3 manage.py validatededupeconfig.py
+  python3 manage.py validatededupeconfig
 fi
