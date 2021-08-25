@@ -1,38 +1,13 @@
 from django.test import TestCase
 from dojo.tools.aws_prowler.parser import AWSProwlerParser
-from django.utils import timezone
-from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
+from dojo.models import Test
 
 
 class TestAwsProwlerParser(TestCase):
     def setup(self, testfile):
-        product_type = Product_Type(critical_product=True, key_product=False)
-        product_type.save()
-
-        test_type = Test_Type(static_tool=True, dynamic_tool=False)
-        test_type.save()
-
-        product = Product(prod_type=product_type)
-        product.save()
-
-        engagement = Engagement(
-            product=product, target_start=timezone.now(), target_end=timezone.now()
-        )
-        engagement.save()
-
         parser = AWSProwlerParser()
-        findings = parser.get_findings(
-            testfile,
-            Test(
-                engagement=engagement,
-                test_type=test_type,
-                target_start=timezone.now(),
-                target_end=timezone.now(),
-            ),
-        )
-
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
-
         return findings
 
     def test_aws_prowler_parser_with_no_vuln_has_no_findings(self):
@@ -92,3 +67,30 @@ class TestAwsProwlerParser(TestCase):
             self.assertEqual("High", finding.severity)
             self.assertEqual(1032, finding.cwe)
             self.assertEqual(1, finding.nb_occurences)
+
+    def test_aws_prowler_parser_with_no_vuln_has_no_findings_json(self):
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/no_vuln.json"))
+        self.assertEqual(0, len(findings))
+
+    def test_aws_prowler_parser_with_critical_vuln_has_one_findings_json(self):
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/one_vuln.json"))
+        self.assertEqual(1, len(findings))
+        self.assertEqual("eu-central-1: Only Virtual MFA is enabled for root", findings[0].title)
+
+    def test_aws_prowler_parser_with_many_vuln_has_many_findings_json(self):
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/many_vuln.json"))
+        self.assertEqual(4, len(findings))
+        # self.assertEqual(
+        #     "Root user in the account wasn't accessed in the last 1 days", findings[0].title)
+        # self.assertEqual("Critical", findings[0].severity)
+        # self.assertEqual(
+        #     "User example_user has never used access key 1 since creation and not rotated it in the past 90 days", findings[1].title)
+        # self.assertEqual("Critical", findings[1].severity)
+        # self.assertEqual("Password Policy has weak reuse requirement (lower than 24)", findings[2].title)
+        # self.assertEqual("Critical", findings[2].severity)
+        # self.assertEqual("eu-west-2: sg-01234567890qwerty is not being used!", findings[3].title)
+        # self.assertEqual("High", findings[3].severity)
+
