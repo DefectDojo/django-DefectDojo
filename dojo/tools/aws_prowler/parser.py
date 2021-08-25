@@ -10,7 +10,6 @@ import csv
 import textwrap
 import hashlib
 import json
-from django.core.files.uploadedfile import TemporaryUploadedFile
 
 from dojo.models import Finding
 
