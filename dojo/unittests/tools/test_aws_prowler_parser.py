@@ -54,24 +54,24 @@ class TestAwsProwlerParser(TestCase):
         self.assertEqual(4, len(findings))
         self.assertEqual(
             "Root user in the account wasn't accessed in the last 1 days", findings[0].title)
-        self.assertEqual("Critical", findings[0].severity)
+        self.assertEqual("High", findings[0].severity)
         self.assertEqual(
             "User example_user has never used access key 1 since creation and not rotated it in the past 90 days", findings[1].title)
-        self.assertEqual("Critical", findings[1].severity)
+        self.assertEqual("Medium", findings[1].severity)
         self.assertEqual("Password Policy has weak reuse requirement (lower than 24)", findings[2].title)
-        self.assertEqual("Critical", findings[2].severity)
+        self.assertEqual("Medium", findings[2].severity)
         self.assertEqual("eu-west-2: sg-01234567890qwerty is not being used!", findings[3].title)
-        self.assertEqual("High", findings[3].severity)
+        self.assertEqual("Low", findings[3].severity)
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings2(self):
         findings = self.setup(
             open("dojo/unittests/scans/aws_prowler/many_vuln2.csv"))
-        self.assertEqual(175, len(findings))
+        self.assertEqual(174, len(findings))
         self.assertEqual("Root user in the account wasn't accessed in the last 1 days", findings[0].title)
         self.assertEqual("Info", findings[0].severity)
         self.assertEqual(
             "User example has never used access key 1 since creation and not rotated it in the past 90 days", findings[4].title)
-        self.assertEqual("Critical", findings[6].severity)
+        self.assertEqual("Medium", findings[6].severity)
 
     def test_aws_prowler_parser_issue4450(self):
         findings = self.setup(
@@ -89,6 +89,6 @@ class TestAwsProwlerParser(TestCase):
             self.assertTrue(finding.active)
             self.assertEqual(
                 "User ansible-test-user has Password enabled but MFA disabled", finding.title)
-            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("High", finding.severity)
             self.assertEqual(1032, finding.cwe)
             self.assertEqual(1, finding.nb_occurences)
