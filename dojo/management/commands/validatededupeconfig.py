@@ -10,4 +10,4 @@ class Command(BaseCommand):
     for each_var in HASHCODE_FIELDS_PER_SCANNER:
         for each_ind in each_var:
             if each_ind not in HASHCODE_ALLOWED_FIELDS:
-                deduplicationLogger.info("compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. " "Using default fields")
+                deduplicationLogger.error("compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. " "Using default fields")
