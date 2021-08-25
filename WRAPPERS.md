@@ -1,12 +1,14 @@
-| Wrapper                      | APIV1  | APIV2  | Notes                   |
-| -----------------------------| -------|   ---- | ------------------------|
-| Specific python wrapper      | Yes    | Yes    | working (2021-01-21)    |
-| Openapi python wrapper       | No     | Yes    | proof of concept only   |
-| Bash wrapper                 | No     | Yes    | might be outdated       |
-| Java library                 | No     | Yes    | working (2021-04-13)    |
-| Image using the Java library | No     | Yes    | out of date             |
-| .Net/C# library              | No     | Yes    | working (2021-06-08)    |
+| Wrapper                      | Notes                   |
+| -----------------------------| ------------------------|
+| Specific python wrapper      | working (2021-01-21)    |
+| Openapi python wrapper       | proof of concept only   |
+| Bash wrapper                 | might be outdated       |
+| Java library                 | working (2021-04-13)    |
+| Image using the Java library | out of date             |
+| .Net/C# library              | working (2021-06-08)    |
+| dd-import                    | working (2021-08-24)    |
 
+**All wrappers support API v2.**
 
 ### Specific python wrapper
 * Install the DefectDojo Python API via `pip install defectdojo_api`(outdated) or clone
@@ -29,3 +31,8 @@ https://github.com/DefectDojo/defectdojo-java-client (out of date, update expect
 
 ### .Net/C# library
 https://www.nuget.org/packages/DefectDojo.Api/
+
+### dd-import
+https://github.com/MaibornWolff/dd-import
+
+dd-import is not directly an API wrapper. It offers some convenience functions to make it easier to import findings and language data from CI/CD pipelines.
