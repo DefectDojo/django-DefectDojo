@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# Test types shall be initialized every time by the initializer, to make sure test types are complete
+# when new parsers have been implemented
+initialize_test_types()
+{
+    echo "Initialization of test_types"
+    python3 manage.py initialize_test_types
+}
+
 # Allow for bind-mount setting.py overrides
 FILE=/app/docker/extra_settings/settings.dist.py
 if test -f "$FILE"; then
@@ -57,6 +65,7 @@ then
     echo "Admin password: Initialization detected that the admin user ${DD_ADMIN_USER} already exists in your database."
     echo "If you don't remember the ${DD_ADMIN_USER} password, you can create a new superuser with:"
     echo "$ docker-compose exec uwsgi /bin/bash -c 'python manage.py createsuperuser'"
+    initialize_test_types
     exit
 fi
 
@@ -108,4 +117,6 @@ EOD
   # surveys fixture needs to be modified as it contains an instance dependant polymorphic content id
   echo "Migration of textquestions for surveys"
   python3 manage.py migrate_textquestions
+
+  initialize_test_types
 fi
