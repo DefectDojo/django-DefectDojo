@@ -155,16 +155,16 @@ class Item(object):
         for instance in item_node.findall('instances/instance'):
             for node in instance.iter():
                 if node.tag == "uri":
-                    if node.text != "":
+                    if node.text and node.text != "":
                         description_detail += "URL: " + node.text
                 if node.tag == "method":
-                    if node.text != "":
+                    if node.text and node.text != "":
                         description_detail += "Method: " + node.text
                 if node.tag == "param":
-                    if node.text != "":
+                    if node.text and node.text != "":
                         description_detail += "Parameter: " + node.text
                 if node.tag == "evidence":
-                    if node.text != "":
+                    if node.text and node.text != "":
                         description_detail += "Evidence: " + escape(node.text)
                 description_detail += "\n"
 
