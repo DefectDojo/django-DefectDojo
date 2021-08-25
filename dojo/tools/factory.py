@@ -28,7 +28,9 @@ def import_parser_factory(file, test, active, verified, scan_type=None):
     """
     if scan_type in PARSERS:
         # create dynamicaly in DB
-        test_type = Test_Type.objects.get_or_create(name=scan_type)
+        test_type, created = Test_Type.objects.get_or_create(name=scan_type)
+        if created:
+            test_type.save()
         if not test_type.active:
             raise ValueError(f"Parser {scan_type} is not active")
         return PARSERS[scan_type]
@@ -54,7 +56,9 @@ def requires_file(scan_type):
 def initialize_test_types():
     # called by the initializer to fill the table with test_types
     for scan_type in PARSERS:
-        Test_Type.objects.get_or_create(name=scan_type)
+        test_type, created = Test_Type.objects.get_or_create(name=scan_type)
+        if created:
+            test_type.save()
 
 
 import os
