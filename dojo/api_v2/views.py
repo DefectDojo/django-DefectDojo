@@ -24,7 +24,7 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
-    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member
+    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -45,7 +45,8 @@ import tagulous
 from dojo.product_type.queries import get_authorized_product_types, get_authorized_product_type_members, \
     get_authorized_product_type_groups
 from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, \
-    get_authorized_product_members, get_authorized_product_groups, get_authorized_languages
+    get_authorized_product_members, get_authorized_product_groups, get_authorized_languages, \
+    get_authorized_engagement_presets
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
@@ -2336,3 +2337,35 @@ class NotificationsViewSet(prefetch.PrefetchListMixin,
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
     swagger_schema = prefetch.get_prefetch_schema(["notifications_list", "notifications_read"],
         serializers.NotificationsSerializer).to_schema()
+
+
+class EngagementPresetsViewset(mixins.ListModelMixin,
+                         mixins.RetrieveModelMixin,
+                         mixins.UpdateModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.CreateModelMixin,
+                         viewsets.GenericViewSet):
+    serializer_class = serializers.EngagementPresetsSerializer
+    queryset = Engagement_Presets.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'title', 'product')
+
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, permissions.UserHasEngagementPresetPermission)
+
+    def get_queryset(self):
+        return get_authorized_engagement_presets(Permissions.Product_View)
+
+
+class NetworkLocationsViewset(mixins.ListModelMixin,
+                              mixins.RetrieveModelMixin,
+                              mixins.UpdateModelMixin,
+                              mixins.DestroyModelMixin,
+                              mixins.CreateModelMixin,
+                              viewsets.GenericViewSet):
+    serializer_class = serializers.NetworkLocationsSerializer
+    queryset = Network_Locations.objects.all()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('id', 'location')
+    if settings.FEATURE_AUTHORIZATION_V2:
+        permission_classes = (IsAuthenticated, DjangoModelPermissions)
