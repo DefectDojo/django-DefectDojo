@@ -48,6 +48,8 @@ class GitleaksParser(object):
                     line = issue["lineNumber"]
                 if "operation" in issue:
                     description += "**Operation:** " + issue["operation"] + "\n"
+                if "leakURL" in issue:
+                    description += "**Leak URL:** [" + issue["leakURL"] + "](" + issue["leakURL"] + ")\n"
                 description += "\n**String Found:**\n" + issue["line"].replace(issue["offender"], "REDACTED") + "\n"
 
                 severity = "High"
