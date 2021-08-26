@@ -1,6 +1,4 @@
 import json
-import re
-from datetime import datetime
 from dojo.models import Finding
 
 
@@ -62,7 +60,7 @@ class VeracodePipelineParser(object):
         finding = Finding()
         finding.test = test
         finding.mitigation = ''
-        finding.impact= ''
+        finding.impact = ''
         finding.static_finding = True
         finding.dynamic_finding = False
         finding.unique_id_from_tool = cls.__json_flaw_to_unique_id(scan_id, flaw)
@@ -78,11 +76,10 @@ class VeracodePipelineParser(object):
         _source_line_number = None
         _source_file_function = None
 
-        if 'files' in flaw:
-            if 'source_file' in flaw['files']:
-                _source_file_path = flaw['files']['source_file']['file']
-                _source_line_number = flaw['files']['source_file']['line']
-                _source_file_function = flaw['files']['source_file']['function_prototype']
+        if 'files' in flaw and 'source_file' in flaw['files']:
+            _source_file_path = flaw['files']['source_file']['file']
+            _source_line_number = flaw['files']['source_file']['line']
+            _source_file_function = flaw['files']['source_file']['function_prototype']
         finding.file_path = _source_file_path
         finding.sourcefile = _source_file_path
         finding.sast_source_file_path = _source_file_path
