@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load display_tags %}
 {% block add_styles %}
+    {{ block.super }}
     form.biweekly-metrics p { display: inline-block;}
     form.biweekly-metrics input {border: 1px solid #ccc;border-radius: 4px;padding: 3px 6px;}
     form.biweekly-metrics select {border-radius: 4px;background-color: #fff;background-image: none;border: 1px solid
@@ -8,6 +9,7 @@
     .errorlist {color: #a94442; display: inline-block;}
 {% endblock %}
 {% block content %}
+    {{ block.super }}
 
     <form class="biweekly-metrics" action="{% url 'product_type_counts' %}" method="get">
         {{ form.as_p }}

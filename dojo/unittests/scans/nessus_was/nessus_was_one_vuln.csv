@@ -1,0 +1,24 @@
+Plugin ID,CVE,CVSS,CVSSv3,Risk,Host,Protocol,Port,Name,Synopsis,Description,Solution,See Also,Plugin Output
+98104,,7.5,7.1,high,google.com,http,,Cross-Site Scripting (XSS),Cross-Site Scripting (XSS),"Client-side scripts are used extensively by modern web applications. They perform from simple functions (such as the formatting of text) up to full manipulation of client-side data and Operating System interaction.
+
+Cross Site Scripting (XSS) allows clients to inject scripts into a request and have the server return the script to the client in the response. This occurs because the application is taking untrusted data (in this example, from the client) and reusing it without performing any validation or sanitisation.
+
+If the injected script is returned immediately this is known as reflected XSS. If the injected script is stored by the server and returned to any client visiting the affected page, then this is known as persistent XSS (also stored XSS).
+
+Scanner has discovered that it is possible to insert script content directly into HTML element content.","To remedy XSS vulnerabilities, it is important to never use untrusted or unfiltered data within the code of a HTML page.
+Untrusted data can originate not only form the client but potentially a third party or previously uploaded file etc.
+Filtering of untrusted data typically involves converting special characters to their HTML entity encoded counterparts (however, other methods do exist, see references). These special characters include:
+* `&` * `<` * `>` * `'` * `'` * `/`
+An example of HTML entity encoding is converting `<` to `&lt;`.
+Although it is possible to filter untrusted input, there are five locations within an HTML page where untrusted input (even if it has been filtered) should never be placed:
+1. Directly in a script. 2. Inside an HTML comment. 3. In an attribute name. 4. In a tag name. 5. Directly in CSS.
+Each of these locations have their own form of escaping and filtering.
+_Because many browsers attempt to implement XSS protection, any manual verification of this finding should be conducted using multiple different browsers and browser versions._","http://projects.webappsec.org/w/page/13246920/Cross%20Site%20Scripting
+
+https://www.owasp.org/index.php/XSS_%28Cross_Site_Scripting%29_Prevention_Cheat_Sheet","Vulnerability has been detected on URL 'http:google.com/search.jsp' by exploiting 'form' element named 'query' and injecting following payload:
+
+ | ()""&%1'-;<xss_9676200>'
+
+To confirm the presence of the vulnerability, this proof has been identified in the target response:
+
+ | <xss_9676200>"

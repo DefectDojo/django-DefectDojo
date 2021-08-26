@@ -15,8 +15,8 @@ Docs link on the user drop down menu in the header.
 ![image](../../images/api_v2_1.png)
 
 The documentation is generated using [Django Rest Framework
-Swagger](https://marcgibbons.com/django-rest-swagger/), and is
-interactive.
+Yet Another Swagger Generator](https://github.com/axnsan12/drf-yasg/), and is
+interactive. On the top of API v2 docs is a link that generates an OpenAPI v2 spec.
 
 To interact with the documentation, a valid Authorization header value
 is needed. Visit the `/api/v2/key/` view to generate your

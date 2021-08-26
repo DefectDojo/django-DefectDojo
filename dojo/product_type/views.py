@@ -9,17 +9,19 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from dojo.filters import ProductTypeFilter
 from dojo.forms import Product_TypeForm, Delete_Product_TypeForm, Add_Product_Type_MemberForm, \
-    Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm
-from dojo.models import Product_Type, Product_Type_Member
+    Edit_Product_Type_MemberForm, Delete_Product_Type_MemberForm, Add_Product_Type_GroupForm, \
+    Edit_Product_Type_Group_Form, Delete_Product_Type_GroupForm
+from dojo.models import Product_Type, Product_Type_Member, Role, Product_Type_Group
 from dojo.utils import get_page_items, add_breadcrumb, is_title_in_breadcrumbs
 from dojo.notifications.helper import create_notification
 from django.db.models import Count, Q
 from django.db.models.query import QuerySet
 from django.conf import settings
 from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions, Roles
+from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type
+from dojo.product_type.queries import get_authorized_product_types, get_authorized_members_for_product_type, \
+    get_authorized_groups_for_product_type
 from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)
@@ -79,7 +81,7 @@ def add_product_type(request):
                 member = Product_Type_Member()
                 member.user = request.user
                 member.product_type = product_type
-                member.role = Roles.Owner
+                member.role = Role.objects.get(is_owner=True)
                 member.save()
             messages.add_message(request,
                                  messages.SUCCESS,
@@ -100,12 +102,14 @@ def add_product_type(request):
 def view_product_type(request, ptid):
     pt = get_object_or_404(Product_Type, pk=ptid)
     members = get_authorized_members_for_product_type(pt, Permissions.Product_Type_View)
+    groups = get_authorized_groups_for_product_type(pt, Permissions.Product_Type_View)
     products = get_authorized_products(Permissions.Product_View).filter(prod_type=pt)
     add_breadcrumb(title="View Product Type", top_level=False, request=request)
     return render(request, 'dojo/view_product_type.html', {
         'name': 'View Product Type',
         'pt': pt,
         'products': products,
+        'groups': groups,
         'members': members})
 
 
@@ -177,22 +181,24 @@ def add_product_type_member(request, ptid):
     if request.method == 'POST':
         memberform = Add_Product_Type_MemberForm(request.POST, initial={'product_type': pt.id})
         if memberform.is_valid():
-            members = Product_Type_Member.objects.filter(product_type=pt, user=memberform.instance.user)
-            if members.count() > 0:
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    'Product type member already exists.',
-                                    extra_tags='alert-warning')
-            elif memberform.instance.role == Roles.Owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
+            if memberform.cleaned_data['role'].is_owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to add users as owners.',
                                     extra_tags='alert-warning')
             else:
-                memberform.save()
+                if 'users' in memberform.cleaned_data and len(memberform.cleaned_data['users']) > 0:
+                    for user in memberform.cleaned_data['users']:
+                        members = Product_Type_Member.objects.filter(product_type=pt, user=user)
+                        if members.count() == 0:
+                            product_type_member = Product_Type_Member()
+                            product_type_member.product_type = pt
+                            product_type_member.user = user
+                            product_type_member.role = memberform.cleaned_data['role']
+                            product_type_member.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
-                                    'Product type member added successfully.',
+                                    'Product type members added successfully.',
                                     extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_product_type', args=(ptid, )))
     add_breadcrumb(title="Add Product Type Member", top_level=False, request=request)
@@ -209,8 +215,8 @@ def edit_product_type_member(request, memberid):
     if request.method == 'POST':
         memberform = Edit_Product_Type_MemberForm(request.POST, instance=member)
         if memberform.is_valid():
-            if member.role != Roles.Owner:
-                owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).exclude(id=member.id).count()
+            if not member.role.is_owner:
+                owners = Product_Type_Member.objects.filter(product_type=member.product_type, role__is_owner=True).exclude(id=member.id).count()
                 if owners < 1:
                     messages.add_message(request,
                                         messages.SUCCESS,
@@ -220,7 +226,7 @@ def edit_product_type_member(request, memberid):
                         return HttpResponseRedirect(reverse('view_user', args=(member.user.id, )))
                     else:
                         return HttpResponseRedirect(reverse('view_product_type', args=(member.product_type.id, )))
-            if member.role == Roles.Owner and not user_has_permission(request.user, member.product_type, Permissions.Product_Type_Member_Add_Owner):
+            if member.role.is_owner and not user_has_permission(request.user, member.product_type, Permissions.Product_Type_Member_Add_Owner):
                 messages.add_message(request,
                                     messages.WARNING,
                                     'You are not permitted to make users to owners.',
@@ -249,8 +255,8 @@ def delete_product_type_member(request, memberid):
     if request.method == 'POST':
         memberform = Delete_Product_Type_MemberForm(request.POST, instance=member)
         member = memberform.instance
-        if member.role == Roles.Owner:
-            owners = Product_Type_Member.objects.filter(product_type=member.product_type, role=Roles.Owner).count()
+        if member.role.is_owner:
+            owners = Product_Type_Member.objects.filter(product_type=member.product_type, role__is_owner=True).count()
             if owners <= 1:
                 messages.add_message(request,
                                     messages.SUCCESS,
@@ -275,4 +281,98 @@ def delete_product_type_member(request, memberid):
     return render(request, 'dojo/delete_product_type_member.html', {
         'memberid': memberid,
         'form': memberform,
+    })
+
+
+@user_is_authorized(Product_Type, Permissions.Product_Type_Group_Add, 'ptid')
+def add_product_type_group(request, ptid):
+    pt = get_object_or_404(Product_Type, pk=ptid)
+    group_form = Add_Product_Type_GroupForm(initial={'product_type': pt.id})
+
+    if request.method == 'POST':
+        group_form = Add_Product_Type_GroupForm(request.POST, initial={'product_type': pt.id})
+        if group_form.is_valid():
+            if group_form.cleaned_data['role'].is_owner and not user_has_permission(request.user, pt, Permissions.Product_Type_Group_Add_Owner):
+                messages.add_message(request,
+                                    messages.WARNING,
+                                    'You are not permitted to add groups as owners.',
+                                    extra_tags='alert-warning')
+            else:
+                if 'groups' in group_form.cleaned_data and len(group_form.cleaned_data['groups']) > 0:
+                    for group in group_form.cleaned_data['groups']:
+                        groups = Product_Type_Group.objects.filter(product_type=pt, group=group)
+                        if groups.count() == 0:
+                            product_type_group = Product_Type_Group()
+                            product_type_group.product_type = pt
+                            product_type_group.group = group
+                            product_type_group.role = group_form.cleaned_data['role']
+                            product_type_group.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Product type groups added successfully.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_product_type', args=(ptid,)))
+
+    add_breadcrumb(title="Add Product Type Group", top_level=False, request=request)
+    return render(request, 'dojo/new_product_type_group.html', {
+        'pt': pt,
+        'form': group_form,
+    })
+
+
+@user_is_authorized(Product_Type_Group, Permissions.Product_Type_Group_Edit, 'groupid')
+def edit_product_type_group(request, groupid):
+    group = get_object_or_404(Product_Type_Group, pk=groupid)
+    groupform = Edit_Product_Type_Group_Form(instance=group)
+
+    if request.method == 'POST':
+        groupform = Edit_Product_Type_Group_Form(request.POST, instance=group)
+        if groupform.is_valid():
+            if group.role.is_owner and not user_has_permission(request.user, group.product_type, Permissions.Product_Type_Group_Add_Owner):
+                messages.add_message(request,
+                                     messages.WARNING,
+                                     'You are not permitted to make groups owners.',
+                                     extra_tags='alert-warning')
+            else:
+                groupform.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Product type group updated successfully.',
+                                     extra_tags='alert-success')
+                if is_title_in_breadcrumbs('View Group'):
+                    return HttpResponseRedirect(reverse('view_group', args=(group.group.id,)))
+                else:
+                    return HttpResponseRedirect(reverse('view_product_type', args=(group.product_type.id,)))
+
+    add_breadcrumb(title="Edit Product Type Group", top_level=False, request=request)
+    return render(request, 'dojo/edit_product_type_group.html', {
+        'groupid': groupid,
+        'form': groupform
+    })
+
+
+@user_is_authorized(Product_Type_Group, Permissions.Product_Type_Group_Delete, 'groupid')
+def delete_product_type_group(request, groupid):
+    group = get_object_or_404(Product_Type_Group, pk=groupid)
+    groupform = Delete_Product_Type_GroupForm(instance=group)
+
+    if request.method == 'POST':
+        groupform = Delete_Product_Type_GroupForm(request.POST, instance=group)
+        group = groupform.instance
+        group.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Product type group deleted successfully.',
+                             extra_tags='alert-success')
+        if is_title_in_breadcrumbs('View Group'):
+            return HttpResponseRedirect(reverse('view_group', args=(group.group.id, )))
+        else:
+            # TODO: If user was in the group that was deleted and no longer has access, redirect them to the product
+            #  types page
+            return HttpResponseRedirect(reverse('view_product_type', args=(group.product_type.id, )))
+
+    add_breadcrumb("Delete Product Type Group", top_level=False, request=request)
+    return render(request, 'dojo/delete_product_type_group.html', {
+        'groupid': groupid,
+        'form': groupform
     })

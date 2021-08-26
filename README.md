@@ -49,7 +49,7 @@ For detailed documentation you can visit
 ## Getting Started
 
 We recommend checking out the
-[Core Data Classes](https://defectdojo.github.io/usage/models/) document to
+[Core Data Classes](https://defectdojo.github.io/django-DefectDojo/usage/models/) document to
 learn the terminology of DefectDojo and the
 [getting started guide](https://defectdojo.github.io/django-DefectDojo/getting_started/)
 for setting up a new installation.
@@ -68,6 +68,9 @@ See [Wrappers](WRAPPERS.md)
 
 
 ## Release and branch model
+
+We release every month on the last Tuesday. These release are minor releases, i.e. 2.0.0 to 2.1.0. In between there might be bugfix/hotfix/patch releases when needed, i.e. 2.0.1.
+
 See [Release and branch model](BRANCHING-MODEL.md)
 
 
@@ -134,6 +137,8 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * [Cody Maffucci](https://www.linkedin.com/in/cody-maffucci)
 * Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
 * [Damien Carol](https://www.linkedin.com/in/damien-carol/)
+* [Stefan Fleckenstein](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/)
+
 
 ## Hall of Fame
 
@@ -166,6 +171,7 @@ Zohra who contributed to DefectDojo before it was open source.
 [![CloudBees](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png)](https://cloudbees.com/)
 [![WeHackPurple](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png)](https://wehackpurple.com/)
 [![MaibornWolff](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png)](https://www.maibornwolff.de/en)
+[![ARRIVAL](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/arrival.png)](https://arrival.com)
 
 
 Interested in becoming a sponsor and having your logo displayed? Please review

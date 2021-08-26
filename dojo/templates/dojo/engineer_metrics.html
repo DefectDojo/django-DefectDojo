@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load navigation_tags %}
 {% block content %}
+    {{ block.super }}
     <div class="clearfix">
         <h3 class="pull-left">Engineers</h3>{% include "dojo/paging_snippet.html" with page=users page_size=True%}
     </div>

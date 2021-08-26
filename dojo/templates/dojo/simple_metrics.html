@@ -2,6 +2,7 @@
 {% load event_tags %}
 {% load display_tags %}
 {% block content %}
+    {{ block.super }}
 
     <h2> {{ name }}</h2>
     <form class="simple_metrics" action="{% url 'simple_metrics' %}" method="post">{% csrf_token %}

@@ -1,7 +1,6 @@
 
 import re
 import socket
-from urllib.parse import urlparse
 
 import hyperlink
 from defusedxml import ElementTree as ET
@@ -33,7 +32,7 @@ class ZapParser(object):
         items = list()
         for node in tree.findall('site'):
             site = Site(node)
-            main_host = Endpoint(host=site.name + (":" + site.port) if site.port is not None else "")
+            main_host = Endpoint(host=site.host, port=site.port)
             for item in site.items:
                 severity = item.riskdesc.split(' ', 1)[0]
                 references = ''
@@ -56,13 +55,8 @@ class ZapParser(object):
 
                 find.unsaved_endpoints = [main_host]
                 for i in item.items:
-                    parts = urlparse(i['uri'])
-                    find.unsaved_endpoints.append(Endpoint(protocol=parts.scheme,
-                                                           host=parts.netloc[:500],
-                                                           path=parts.path[:500],
-                                                           query=parts.query[:1000],
-                                                           fragment=parts.fragment[:500],
-                                                           ))
+                    endpoint = Endpoint.from_uri(i['uri'])
+                    find.unsaved_endpoints.append(endpoint)
                 items.append(find)
         return items
 
@@ -161,16 +155,16 @@ class Item(object):
         for instance in item_node.findall('instances/instance'):
             for node in instance.iter():
                 if node.tag == "uri":
-                    if node.text != "":
+                    if node.text and node.text != "":
                         description_detail += "URL: " + node.text
                 if node.tag == "method":
-                    if node.text != "":
+                    if node.text and node.text != "":
                         description_detail += "Method: " + node.text
                 if node.tag == "param":
-                    if node.text != "":
+                    if node.text and node.text != "":
                         description_detail += "Parameter: " + node.text
                 if node.tag == "evidence":
-                    if node.text != "":
+                    if node.text and node.text != "":
                         description_detail += "Evidence: " + escape(node.text)
                 description_detail += "\n"
 

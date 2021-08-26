@@ -45,7 +45,7 @@ class EndpointTest(BaseTestCase):
         # Clear the old endpoint host name
         driver.find_element_by_id("id_host").clear()
         # Fill in the endpoint host name
-        driver.find_element_by_id("id_host").send_keys("/rnd.moving.com")
+        driver.find_element_by_id("id_host").send_keys("rnd.moving.com")
         # Fill in port for endpoint
         driver.find_element_by_id("id_port").clear()
         driver.find_element_by_id("id_port").send_keys("8080")
@@ -63,7 +63,7 @@ class EndpointTest(BaseTestCase):
         # Navigate to the endpoint page
         driver.get(self.base_url + "endpoint")
         # Select one of the previously created endpoint to delete
-        driver.find_element_by_link_text("/rnd.moving.com").click()
+        driver.find_element_by_link_text("rnd.moving.com:8080").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
         # "Click" the Delete Endpoint
@@ -81,6 +81,7 @@ def suite():
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(EndpointTest('test_create_endpoint'))
     suite.addTest(EndpointTest('test_edit_endpoint'))

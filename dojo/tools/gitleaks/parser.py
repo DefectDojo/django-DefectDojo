@@ -48,13 +48,15 @@ class GitleaksParser(object):
                     line = issue["lineNumber"]
                 if "operation" in issue:
                     description += "**Operation:** " + issue["operation"] + "\n"
+                if "leakURL" in issue:
+                    description += "**Leak URL:** [" + issue["leakURL"] + "](" + issue["leakURL"] + ")\n"
                 description += "\n**String Found:**\n" + issue["line"].replace(issue["offender"], "REDACTED") + "\n"
 
                 severity = "High"
                 if "Github" in reason or "AWS" in reason or "Heroku" in reason:
                     severity = "Critical"
 
-                dupe_key = hashlib.md5((issue["offender"]).encode("utf-8")).hexdigest()
+                dupe_key = hashlib.sha256((issue["offender"] + file_path + str(line)).encode("utf-8")).hexdigest()
 
                 if dupe_key not in dupes:
                     dupes[dupe_key] = Finding(title=titleText,

@@ -34,6 +34,7 @@ class TestZapParser(TestCase):
         with self.subTest(i=0):
             finding = findings[0]
             self.assertTrue(finding.active)
+            self.assertFalse(finding.verified)  # this one is marked as new ("status": "New")
             self.assertEqual("Risky cryptographic hashing function", finding.title)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(328, finding.cwe)
@@ -50,6 +51,7 @@ class TestZapParser(TestCase):
         with self.subTest(i=0):
             finding = findings[0]
             self.assertTrue(finding.active)
+            self.assertTrue(finding.verified)
             self.assertEqual("HTTP header injection", finding.title)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(610, finding.cwe)
@@ -64,8 +66,10 @@ class TestZapParser(TestCase):
         self.assertIsInstance(findings, list)
         self.assertEqual(20, len(findings))
         with self.subTest(i=0):
-            finding = findings[0]
+            finding = findings[0]  # this one is dismissed as a false positive
             self.assertFalse(finding.active)
+            self.assertTrue(finding.verified)
+            self.assertTrue(finding.false_p)
             self.assertEqual("Cross-site scripting", finding.title)
             self.assertEqual("High", finding.severity)
             self.assertEqual(79, finding.cwe)
@@ -75,6 +79,7 @@ class TestZapParser(TestCase):
         with self.subTest(i=10):
             finding = findings[10]
             self.assertFalse(finding.active)
+            self.assertTrue(finding.verified)
             self.assertEqual("Use of hard-coded password", finding.title)
             self.assertEqual("Medium", finding.severity)
             self.assertEqual(259, finding.cwe)
@@ -84,6 +89,7 @@ class TestZapParser(TestCase):
         with self.subTest(i=19):
             finding = findings[19]
             self.assertFalse(finding.active)
+            self.assertTrue(finding.verified)
             self.assertEqual("Cross-site scripting", finding.title)
             self.assertEqual("High", finding.severity)
             self.assertEqual(79, finding.cwe)

@@ -37,7 +37,9 @@ class DockleParser(object):
                 severity = self.SEVERITY[dockle_severity]
             else:
                 severity = "Medium"
-            description = "\n".join(item.get('alerts', []))
+            description = item.get('alerts', [])
+            description.sort()
+            description = "\n".join(description)
             dupe_key = hashlib.sha256(
                 (code + title).encode("utf-8")
             ).hexdigest()
@@ -47,11 +49,12 @@ class DockleParser(object):
                 finding.nb_occurences += 1
             else:
                 finding = Finding(
-                    title=f"Found {code}: {title}",
+                    title=f"{code}: {title}",
                     test=test,
                     severity=severity,
                     description=description,
                     static_finding=True,
+                    dynamic_finding=False,
                     nb_occurences=1,
                     vuln_id_from_tool=code,
                 )

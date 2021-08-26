@@ -15,10 +15,16 @@ class TestImmuniwebParser(TestCase):
         testfile = open("dojo/unittests/scans/immuniweb/ImmuniWeb-1-vuln.xml")
         parser = ImmuniwebParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
 
     def test_parse_file_with_multiple_vuln_has_multiple_findings(self):
         testfile = open("dojo/unittests/scans/immuniweb/ImmuniWeb-multiple-vuln.xml")
         parser = ImmuniwebParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertTrue(len(findings) > 2)

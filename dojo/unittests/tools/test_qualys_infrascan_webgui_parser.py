@@ -26,6 +26,9 @@ class TestQualysInfrascanWebguiParser(TestCase):
         )
         parser = QualysInfrascanWebguiParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
 
         finding = findings[0]
@@ -40,6 +43,9 @@ class TestQualysInfrascanWebguiParser(TestCase):
         )
         parser = QualysInfrascanWebguiParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(6, len(findings))
         # finding 0
         finding = findings[0]
@@ -60,6 +66,9 @@ class TestQualysInfrascanWebguiParser(TestCase):
         )
         parser = QualysInfrascanWebguiParser()
         findings = parser.get_findings(testfile, Test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(1, len(findings))
         # finding 0
         finding = findings[0]

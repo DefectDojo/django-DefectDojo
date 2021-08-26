@@ -1,8 +1,6 @@
 import base64
 import logging
 import re
-from urllib.parse import urlparse
-
 import html2text
 from defusedxml import ElementTree as etree
 from dojo.models import Endpoint, Finding
@@ -100,7 +98,7 @@ def get_clean_base64(value):
     if value is None:
         return ""
     try:
-        return base64.b64decode(value).decode()
+        return base64.b64decode(value).decode("utf-8", "replace")  # wouldn't this be cleaner than below?
     except UnicodeDecodeError as ue:
         # decoding of UTF-8 fail when you have a binary payload in the HTTP response
         # so we just cut it to have only the header and add fake body
@@ -136,7 +134,12 @@ def get_item(item_node, test):
     unsaved_req_resp = list()
     for request_response in item_node.findall('./requestresponse'):
         request = get_clean_base64(request_response.findall('request')[0].text)
-        response = get_clean_base64(request_response.findall('response')[0].text)
+        if request_response.findall('response'):
+            response = get_clean_base64(request_response.findall('response')[0].text)
+        else:
+            response = ""
+            # This case happens when a request_response pair doesn't have
+            # a response at all
         unsaved_req_resp.append({"req": request, "resp": response})
 
     collab_text = ""
@@ -226,22 +229,7 @@ def get_item(item_node, test):
         vuln_id_from_tool=vuln_id_from_tool)
     finding.unsaved_req_resp = unsaved_req_resp
     # manage endpoint
-    protocol = urlparse(url_host).scheme
-    host = urlparse(url_host).netloc
-
-    port = 80
-    if protocol == 'https':
-        port = 443
-    if urlparse(url_host).port is not None:
-        port = urlparse(url_host).port
-    finding.unsaved_endpoints = [Endpoint(
-            protocol=protocol,
-            host=host,
-            port=port,
-            path=path,
-            query=None,
-            fragment=None)
-    ]
+    finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
     # manage cwes
     cwes = do_clean_cwe(item_node.findall('vulnerabilityClassifications'))
     if len(cwes) > 1:

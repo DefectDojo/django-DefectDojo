@@ -10,6 +10,9 @@ class TestAquaParser(TestCase):
         with open("dojo/unittests/scans/arachni/arachni.afr.json") as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
             self.assertEqual(1, len(findings))
             # finding 0
             finding = findings[0]
@@ -22,6 +25,9 @@ class TestAquaParser(TestCase):
         with open("dojo/unittests/scans/arachni/dd.com.afr.json") as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
             self.assertEqual(3, len(findings))
             # finding 0
             finding = findings[0]
@@ -50,6 +56,9 @@ class TestAquaParser(TestCase):
         with open("dojo/unittests/scans/arachni/js.com.afr.json") as testfile:
             parser = ArachniParser()
             findings = parser.get_findings(testfile, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
             self.assertEqual(10, len(findings))
             # finding 0
             finding = findings[0]

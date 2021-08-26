@@ -15,6 +15,9 @@ class TestNessusParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln.xml")
         parser = NessusXMLParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(6, len(findings))
         finding = findings[0]
         self.assertEqual('Info', finding.severity)
@@ -25,6 +28,9 @@ class TestNessusParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln.csv")
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(4, len(findings))
         for i in [0, 1, 2, 3]:
             finding = findings[i]
@@ -50,6 +56,9 @@ class TestNessusParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-default.csv")
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(29, len(findings))
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
@@ -68,6 +77,9 @@ class TestNessusParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv")
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(29, len(findings))
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
@@ -86,18 +98,30 @@ class TestNessusParser(TestCase):
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv")
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rt")
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         testfile = open("dojo/unittests/scans/nessus/nessus_many_vuln2-all.csv", "rb")
         parser = NessusCSVParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
 
     def test_parse_some_findings_samples(self):
         """Test that come from samples repo"""
         testfile = open("dojo/unittests/scans/nessus/nessus_v_unknown.xml")
         parser = NessusParser()
         findings = parser.get_findings(testfile, self.create_test())
+        for finding in findings:
+            for endpoint in finding.unsaved_endpoints:
+                endpoint.clean()
         self.assertEqual(32, len(findings))
         finding = findings[0]
         self.assertIn(finding.severity, Finding.SEVERITIES)
