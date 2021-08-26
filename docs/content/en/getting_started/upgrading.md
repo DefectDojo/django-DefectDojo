@@ -5,6 +5,12 @@ draft: false
 weight: 5
 ---
 
+{{% alert title="Deprecation notice" color="warning" %}}
+Legacy authorization will be removed with version 2.5.0. If you have set 
+`FEATURE_AUTHORIZATION_V2` to `False` in your local configuration, remove this
+local setting before and start using the new authorization as described in 
+[Permissions]({{< ref "/usage/permissions" >}}).
+{{% /alert %}}
 
 Docker-compose
 --------------
