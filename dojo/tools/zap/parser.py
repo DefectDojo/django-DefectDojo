@@ -178,7 +178,7 @@ class Item(object):
         for instance in item_node.findall('instances/instance'):
             n = instance.findtext("uri")
             n2 = instance.findtext("param")
-            url = hyperlink.parse(n)
+            url = hyperlink.parse(n, decoded=False)
             item = {'uri': n, 'param': n2 if n2 else "", 'host': url.host, 'protocol': url.scheme, 'port': url.port}
             self.items.append(item)
 

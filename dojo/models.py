@@ -1378,7 +1378,7 @@ class Endpoint(models.Model):
     @staticmethod
     def from_uri(uri):
         try:
-            url = hyperlink.parse(url=uri)
+            url = hyperlink.parse(url=uri, decoded=False)
         except hyperlink.URLParseError as e:
             raise ValidationError('Invalid URL format: {}'.format(e))
 
