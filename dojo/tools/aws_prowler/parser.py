@@ -3,7 +3,7 @@
 # PROWLER_VERSION=2.4.0-07042021
 
 import re
-from datetime import datetime
+from datetime import date
 import sys
 import io
 import csv
@@ -41,7 +41,6 @@ class AWSProwlerParser(object):
         reader = csv.DictReader(io.StringIO(content))
         dupes = dict()
 
-        find_date = datetime.now()
         account = None
 
         for row in reader:
@@ -109,7 +108,6 @@ class AWSProwlerParser(object):
                     description=description,
                     severity=sev,
                     references=documentation,
-                    date=find_date,
                     static_finding=True,
                     dynamic_finding=False,
                     nb_occurences=1,
@@ -122,7 +120,6 @@ class AWSProwlerParser(object):
 
     def process_json(self, file, test):
         dupes = dict()
-        find_date = datetime.now()
 
         data = file.readlines()
         for issue in data:
@@ -145,6 +142,7 @@ class AWSProwlerParser(object):
             mitigation = deserialized.get('Remediation')
             documentation = deserialized.get('Doc link')
             security_domain = deserialized.get('CAF Epic')
+            timestamp = deserialized.get('Timestamp')
             # get prowler check number, usefull for exceptions
             prowler_check_number = re.search(r'\[(.*?)\]', title_text).group(1)
             control = re.sub(r'\[.*\]\s', '', title_text)
@@ -180,7 +178,7 @@ class AWSProwlerParser(object):
                     description=description,
                     severity=sev,
                     references=documentation,
-                    date=find_date,
+                    date=date.fromisoformat(timestamp[:10]),
                     static_finding=True,
                     dynamic_finding=False,
                     nb_occurences=1,

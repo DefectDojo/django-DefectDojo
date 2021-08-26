@@ -1,3 +1,4 @@
+import datetime
 from django.test import TestCase
 from dojo.tools.aws_prowler.parser import AWSProwlerParser
 from dojo.models import Test
@@ -91,6 +92,7 @@ class TestAwsProwlerParser(TestCase):
         self.assertIn('The root account is the most privileged user in an AWS account. MFA adds an extra layer', findings[0].impact)
         self.assertEqual('Using IAM console navigate to Dashboard and expand Activate MFA on your root account.', findings[0].mitigation)
         self.assertEqual('https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa', findings[0].references)
+        self.assertEqual(datetime.date(2021, 8, 23), findings[0].date)
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings_json(self):
         findings = self.setup(
