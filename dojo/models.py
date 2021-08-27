@@ -703,11 +703,11 @@ class Product(models.Model):
     description = models.CharField(max_length=4000)
 
     product_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                        related_name='product_manager', on_delete=models.CASCADE)
+                                        related_name='product_manager', on_delete=models.RESTRICT)
     technical_contact = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                          related_name='technical_contact', on_delete=models.CASCADE)
+                                          related_name='technical_contact', on_delete=models.RESTRICT)
     team_manager = models.ForeignKey(Dojo_User, null=True, blank=True,
-                                     related_name='team_manager', on_delete=models.CASCADE)
+                                     related_name='team_manager', on_delete=models.RESTRICT)
 
     created = models.DateTimeField(editable=False, null=True, blank=True)
     prod_type = models.ForeignKey(Product_Type, related_name='prod_type',
@@ -995,7 +995,7 @@ class Engagement(models.Model):
     first_contacted = models.DateField(null=True, blank=True)
     target_start = models.DateField(null=False, blank=False)
     target_end = models.DateField(null=False, blank=False)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
+    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
     requester = models.ForeignKey(Contact, null=True, blank=True, on_delete=models.CASCADE)
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text="Settings and notes for performing this engagement.", on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
@@ -1120,7 +1120,7 @@ class Endpoint_Status(models.Model):
     last_modified = models.DateTimeField(null=True, editable=False, default=get_current_datetime)
     mitigated = models.BooleanField(default=False, blank=True)
     mitigated_time = models.DateTimeField(editable=False, null=True, blank=True)
-    mitigated_by = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
+    mitigated_by = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
     false_positive = models.BooleanField(default=False, blank=True)
     out_of_scope = models.BooleanField(default=False, blank=True)
     risk_accepted = models.BooleanField(default=False, blank=True)
@@ -1452,7 +1452,7 @@ class Sonarqube_Product(models.Model):
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
-    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.CASCADE)
+    lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -1710,7 +1710,7 @@ class Finding(models.Model):
                                             null=True,
                                             blank=True,
                                             related_name='review_requested_by',
-                                            on_delete=models.CASCADE,
+                                            on_delete=models.RESTRICT,
                                             verbose_name="Review Requested By",
                                             help_text="Documents who requested a review for this finding.")
     reviewers = models.ManyToManyField(User,
@@ -1726,7 +1726,7 @@ class Finding(models.Model):
                                                    null=True,
                                                    blank=True,
                                                    related_name='defect_review_requested_by',
-                                                   on_delete=models.CASCADE,
+                                                   on_delete=models.RESTRICT,
                                                    verbose_name="Defect Review Requested By",
                                                    help_text="Documents who requested a defect review for this flaw.")
     is_mitigated = models.BooleanField(default=False,
@@ -1744,14 +1744,14 @@ class Finding(models.Model):
                                      null=True,
                                      editable=False,
                                      related_name="mitigated_by",
-                                     on_delete=models.CASCADE,
+                                     on_delete=models.RESTRICT,
                                      verbose_name="Mitigated By",
                                      help_text="Documents who has marked this flaw as fixed.")
     reporter = models.ForeignKey(User,
                                  editable=False,
                                  default=1,
                                  related_name='reporter',
-                                 on_delete=models.CASCADE,
+                                 on_delete=models.RESTRICT,
                                  verbose_name="Reporter",
                                  help_text="Documents who reported the flaw.")
     notes = models.ManyToManyField(Notes,
@@ -1770,7 +1770,7 @@ class Finding(models.Model):
                                          null=True,
                                          editable=False,
                                          related_name='last_reviewed_by',
-                                         on_delete=models.CASCADE,
+                                         on_delete=models.RESTRICT,
                                          verbose_name="Last Reviewed By",
                                          help_text="Provides the person who last reviewed the flaw.")
     files = models.ManyToManyField(FileUpload,
@@ -2459,7 +2459,7 @@ class Stub_Finding(models.Model):
     severity = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
-    reporter = models.ForeignKey(User, editable=False, default=1, on_delete=models.CASCADE)
+    reporter = models.ForeignKey(User, editable=False, default=1, on_delete=models.RESTRICT)
 
     class Meta:
         ordering = ('-date', 'title')
@@ -2481,7 +2481,7 @@ class Finding_Group(TimeStampedModel):
     name = models.CharField(max_length=255, blank=False, null=False)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
     findings = models.ManyToManyField(Finding)
-    creator = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
+    creator = models.ForeignKey(Dojo_User, on_delete=models.RESTRICT)
 
     def __str__(self):
         return self.name
@@ -2698,7 +2698,7 @@ class Risk_Acceptance(models.Model):
     path = models.FileField(upload_to='risk/%Y/%m/%d',
                             editable=True, null=True,
                             blank=True, verbose_name="Proof")
-    owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.CASCADE, help_text="User in DefectDojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.")
+    owner = models.ForeignKey(Dojo_User, editable=True, on_delete=models.RESTRICT, help_text="User in DefectDojo owning this acceptance. Only the owner and staff users can edit the risk acceptance.")
 
     expiration_date = models.DateTimeField(default=None, null=True, blank=True, help_text="When the risk acceptance expires, the findings will be reactivated (unless disabled below).")
     expiration_date_warned = models.DateTimeField(default=None, null=True, blank=True, help_text="(readonly) Date at which notice about the risk acceptance expiration was sent.")
@@ -3163,7 +3163,7 @@ class Language_Type(models.Model):
 class Languages(models.Model):
     language = models.ForeignKey(Language_Type, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, editable=True, blank=True, null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, editable=True, blank=True, null=True, on_delete=models.RESTRICT)
     files = models.IntegerField(blank=True, null=True, verbose_name='Number of files')
     blank = models.IntegerField(blank=True, null=True, verbose_name='Number of blank lines')
     comment = models.IntegerField(blank=True, null=True, verbose_name='Number of comment lines')
@@ -3180,7 +3180,7 @@ class Languages(models.Model):
 class App_Analysis(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=200, null=False)
-    user = models.ForeignKey(User, editable=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, editable=True, on_delete=models.RESTRICT)
     confidence = models.IntegerField(blank=True, null=True, verbose_name='Confidence level')
     version = models.CharField(max_length=200, null=True, blank=True, verbose_name='Version Number')
     icon = models.CharField(max_length=200, null=True, blank=True)
@@ -3547,11 +3547,11 @@ class Answered_Survey(models.Model):
     survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
     assignee = models.ForeignKey(User, related_name='assignee',
                                   null=True, blank=True, editable=True,
-                                  default=None, on_delete=models.CASCADE)
+                                  default=None, on_delete=models.RESTRICT)
     # who answered it
     responder = models.ForeignKey(User, related_name='responder',
                                   null=True, blank=True, editable=True,
-                                  default=None, on_delete=models.CASCADE)
+                                  default=None, on_delete=models.RESTRICT)
     completed = models.BooleanField(default=False)
     answered_on = models.DateField(null=True)
 
