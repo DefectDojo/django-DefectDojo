@@ -78,44 +78,6 @@ class ScannerTest(BaseTestCase):
             print()
         assert len(missing_docs) == 0
 
-    def test_check_for_fixtures(self):
-        fixture_path = dir_path[:-5] + 'dojo/fixtures/test_type.json'
-        file = open(fixture_path, 'r+')
-        fixtures = file.readlines()
-        file.close()
-
-        fixtures = [fix.replace('\t', '').replace('\n', '').replace('.', '').replace('-', ' ').strip().lower() for fix in fixtures]
-        remove_items = ['{', '},', '}', '[', ']', '"fields": {', '"model": "dojotest_type",']
-        fixtures = [fix for fix in fixtures if fix not in remove_items]
-        remove_patterns = ['"', 'name: ', 'pk: ', ' scan', ' scanner']
-        for pattern in remove_patterns:
-            fixtures = [re.sub(pattern, '', fix) for fix in fixtures]
-        fixtures = fixtures[fixtures.index('100') - 1:]
-        fixtures = list(filter((re.compile(r'\D')).match, fixtures))
-
-        acronyms = []
-        for words in fixtures:
-            acronyms += ["".join(word[0] for word in words.split())]
-
-        missing_fixtures = []
-        for tool in self.tools:
-            reg = re.compile(tool.replace('_', ' '))
-            matches = list(filter(reg.search, fixtures)) + list(filter(reg.search, acronyms))
-            matches = [m.strip() for m in matches]
-            if len(matches) != 1:
-                if tool not in matches:
-                    missing_fixtures += [tool]
-
-        if len(missing_fixtures) > 0:
-            print('The following scanners are missing fixtures')
-            print('Names must match those listed in /dojo/tools')
-            print('Fixtures can be added here:')
-            print('https://github.com/DefectDojo/django-DefectDojo/blob/master/dojo/fixtures/test_type.json\n')
-            for tool in missing_fixtures:
-                print(tool)
-            print()
-        assert len(missing_fixtures) == 0
-
     def test_check_for_forms(self):
         forms_path = dir_path[:-5] + 'dojo/forms.py'
         file = open(forms_path, 'r+')
@@ -292,7 +254,6 @@ def suite():
     suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ScannerTest('test_check_test_file'))
     suite.addTest(ScannerTest('test_check_for_doc'))
-    suite.addTest(ScannerTest('test_check_for_fixtures'))
     suite.addTest(ScannerTest('test_check_for_forms'))
     suite.addTest(ScannerTest('test_check_for_options'))
     suite.addTest(ProductTest('test_create_product'))
