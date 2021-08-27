@@ -189,6 +189,10 @@ That will generate three files, two of which are needed for defectdojo. Build th
 
 From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
 
+### Cloudsploit (AquaSecurity)
+
+From: https://github.com/aquasecurity/cloudsploit . Import the JSON output.
+
 ### CycloneDX
 
 CycloneDX is a lightweight software bill of materials (SBOM) standard designed for use in application security contexts and supply chain component analysis.

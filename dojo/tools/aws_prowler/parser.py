@@ -48,7 +48,7 @@ class AWSProwlerParser(object):
             title_text = row.get('TITLE_TEXT')
             result_extended = row.get('CHECK_RESULT_EXTENDED')
             asff_compliance_type = row.get('CHECK_ASFF_COMPLIANCE_TYPE')
-            severity = row.get('SEVERITY')
+            severity = row.get('CHECK_SEVERITY')
             aws_service_name = row.get('CHECK_SERVICENAME')
             asff_resource_type = row.get('CHECK_ASFF_RESOURCE_TYPE')
             asff_type = row.get('CHECK_ASFF_TYPE')

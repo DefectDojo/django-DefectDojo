@@ -1,9 +1,9 @@
 import base64
 import hashlib
 import logging
-from operator import itemgetter
 import os
 import re
+from typing import Dict, Set, Optional
 from uuid import uuid4
 from django.conf import settings
 
@@ -29,7 +29,6 @@ from dateutil.relativedelta import relativedelta
 from tagulous.models import TagField
 import tagulous.admin
 from django.db.models import JSONField
-from itertools import groupby
 import hyperlink
 from cvss import CVSS3
 
@@ -1396,9 +1395,9 @@ class Endpoint(models.Model):
             userinfo=':'.join(url.userinfo) if url.userinfo not in [(), ('',)] else None,
             host=url.host if url.host != '' else None,
             port=url.port,
-            path='/'.join(url.path) if url.path not in [(), ('',)] else None,
-            query=query_string if query_string != '' else None,
-            fragment=url.fragment if url.fragment != '' else None
+            path='/'.join(url.path)[:500] if url.path not in [None, (), ('',)] else None,
+            query=query_string[:1000] if query_string is not None and query_string != '' else None,
+            fragment=url.fragment[:500] if url.fragment is not None and url.fragment != '' else None
         )
 
     def get_absolute_url(self):
@@ -2519,12 +2518,11 @@ class Finding_Group(TimeStampedModel):
 
     @cached_property
     def components(self):
-        # Using defaultdict() + groupby()
-        # Convert list of tuples to dictionary value lists
-        component_tuples = set([(find.component_name, find.component_version) for find in self.findings.all()])
-        components = dict((k, [v[1] for v in itr]) for k, itr in groupby(
-                                component_tuples, itemgetter(0)))
-        return ','.join([key + ':' + ', '.join(value) for key, value in components.items() if key and value])
+        components: Dict[str, Set[Optional[str]]] = {}
+        for finding in self.findings.all():
+            if finding.component_name is not None:
+                components.setdefault(finding.component_name, set()).add(finding.component_version)
+        return "; ".join(f"""{name}: {", ".join(map(str, versions))}""" for name, versions in components.items())
 
     @property
     def age(self):

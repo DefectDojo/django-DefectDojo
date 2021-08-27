@@ -14,7 +14,8 @@ from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Fin
     Regulation, System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
-    Language_Type, Languages, Notifications, NOTIFICATION_CHOICES
+    Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
+    Network_Locations
 
 from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file
@@ -1048,6 +1049,8 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Finding
         fields = '__all__'
         extra_kwargs = {
+            'active': {'required': True},
+            'verified': {'required': True},
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
 
@@ -1553,3 +1556,15 @@ class NotificationsSerializer(serializers.ModelSerializer):
                 raise ValidationError("Notification for user and product already exists")
 
         return data
+
+
+class EngagementPresetsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Engagement_Presets
+        fields = '__all__'
+
+
+class NetworkLocationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Network_Locations
+        fields = '__all__'
