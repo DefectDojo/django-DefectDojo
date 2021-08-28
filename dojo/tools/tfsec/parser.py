@@ -10,8 +10,12 @@ class TFSecParser(object):
 
     # table to match tfsec severity to DefectDojo severity
     SEVERITY = {
+        "CRITICAL": "Critical",
+        "HIGH": "High",
         "ERROR": "High",
+        "MEDIUM": "Medium",
         "WARNING": "Medium",
+        "LOW": "Low",
         "INFO": "Info",
     }
 
@@ -32,21 +36,23 @@ class TFSecParser(object):
         if data.get('results') is None:
             return list()
         for item in data.get('results'):
+            if item.get('passed', None):
+                continue
             rule_id = item.get('rule_id')
             rule_description = item.get('rule_description')
             rule_provider = item.get('rule_provider')
             file = item.get('location').get('filename')
             start_line = item.get('location').get('start_line')
             end_line = item.get('location').get('end_line')
-            description = '\n'.join([item.get('description'), item.get('link')])
+            description = '\n'.join(["Rule ID: " + rule_id, item.get('description')])
             impact = item.get('impact')
             resolution = item.get('resolution')
-            if item.get('passed') is False:
-                active = True
+            if item.get('links', None) is not None:
+                references = '\n'.join(item.get('links'))
             else:
-                active = False
-            if item.get('severity') in self.SEVERITY:
-                severity = self.SEVERITY[item.get('severity')]
+                references = item.get('link', None)
+            if item.get('severity').upper() in self.SEVERITY:
+                severity = self.SEVERITY[item.get('severity').upper()]
             else:
                 severity = "Low"
 
@@ -63,8 +69,8 @@ class TFSecParser(object):
                     test=test,
                     severity=severity,
                     description=description,
-                    active=active,
                     mitigation=resolution,
+                    references=references,
                     impact=impact,
                     file_path=file,
                     line=start_line,

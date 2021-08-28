@@ -1,0 +1,398 @@
+{
+    "results": [
+        {
+            "rule_id": "aws-vpc-no-excessive-port-access",
+            "legacy_rule_id": "AWS050",
+            "rule_description": "An ingress Network ACL rule allows ALL ports.",
+            "rule_provider": "aws",
+            "impact": "All ports exposed for egressing data",
+            "resolution": "Set specific allowed ports",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-excessive-port-access#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule#to_port",
+                "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+            ],
+            "description": "Resource 'module.SUBNETS:aws_network_acl_rule.public_inbound[0]' defines a fully open ingress Network ACL rule with ALL ports open.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/vpc-subnets/resources.tf",
+                "start_line": 155,
+                "end_line": 155
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-public-egress-sgr",
+            "legacy_rule_id": "AWS007",
+            "rule_description": "An egress security group rule allows traffic to /0.",
+            "rule_provider": "aws",
+            "impact": "Your port is egressing data to the internet",
+            "resolution": "Set a more restrictive cidr range",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-public-egress-sgr#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule"
+            ],
+            "description": "Resource 'module.SG_VPC_ACCESS:aws_security_group_rule.egress_with_cidr_blocks[0]' defines a fully open egress security group rule.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/security-group/main.tf",
+                "start_line": 72,
+                "end_line": 72
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-public-egress-sgr",
+            "legacy_rule_id": "AWS007",
+            "rule_description": "An egress security group rule allows traffic to /0.",
+            "rule_provider": "aws",
+            "impact": "Your port is egressing data to the internet",
+            "resolution": "Set a more restrictive cidr range",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-public-egress-sgr#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule"
+            ],
+            "description": "Resource 'module.EKS:module.security_group_worker:aws_security_group_rule.egress_with_cidr_blocks[0]' defines a fully open egress security group rule.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/security-group/main.tf",
+                "start_line": 72,
+                "end_line": 72
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-public-egress-sgr",
+            "legacy_rule_id": "AWS007",
+            "rule_description": "An egress security group rule allows traffic to /0.",
+            "rule_provider": "aws",
+            "impact": "Your port is egressing data to the internet",
+            "resolution": "Set a more restrictive cidr range",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-public-egress-sgr#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule"
+            ],
+            "description": "Resource 'module.EKS:module.security_group_eks_cluster:aws_security_group_rule.egress_with_cidr_blocks[0]' defines a fully open egress security group rule.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/security-group/main.tf",
+                "start_line": 72,
+                "end_line": 72
+            }
+        },
+        {
+            "rule_id": "aws-autoscaling-enable-at-rest-encryption",
+            "legacy_rule_id": "AWS014",
+            "rule_description": "Launch configuration with unencrypted block device.",
+            "rule_provider": "aws",
+            "impact": "The block device could be compromised and read from",
+            "resolution": "Turn on encryption for all block devices",
+            "links": [
+                "https://tfsec.dev/docs/aws/autoscaling/enable-at-rest-encryption#aws/autoscaling",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#ebs-ephemeral-and-root-block-devices",
+                "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/RootDeviceStorage.html"
+            ],
+            "description": "Resource 'module.EKS:module.lc[\"workers\"]:aws_launch_configuration.this' uses an unencrypted EBS block device. Consider adding \u003cblue\u003eencrypted = true\u003c/blue\u003e",
+            "severity": "HIGH",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/launch-configuration/main.tf",
+                "start_line": 4,
+                "end_line": 48
+            }
+        },
+        {
+            "rule_id": "aws-eks-encrypt-secrets",
+            "legacy_rule_id": "AWS066",
+            "rule_description": "EKS should have the encryption of secrets enabled",
+            "rule_provider": "aws",
+            "impact": "EKS secrets could be read if compromised",
+            "resolution": "Enable encryption of EKS secrets",
+            "links": [
+                "https://tfsec.dev/docs/aws/eks/encrypt-secrets#aws/eks",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#encryption_config",
+                "https://aws.amazon.com/about-aws/whats-new/2020/03/amazon-eks-adds-envelope-encryption-for-secrets-with-aws-kms/"
+            ],
+            "description": "Resource 'module.EKS:module.eks:aws_eks_cluster.this' has no encryptionConfigBlock block",
+            "severity": "HIGH",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/eks_cluster/main.tf",
+                "start_line": 1,
+                "end_line": 36
+            }
+        },
+        {
+            "rule_id": "aws-eks-no-public-cluster-access",
+            "legacy_rule_id": "AWS069",
+            "rule_description": "EKS Clusters should have the public access disabled",
+            "rule_provider": "aws",
+            "impact": "EKS can be access from the internet",
+            "resolution": "Don't enable public access to EKS Clusters",
+            "links": [
+                "https://tfsec.dev/docs/aws/eks/no-public-cluster-access#aws/eks",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#endpoint_public_access",
+                "https://docs.aws.amazon.com/eks/latest/userguide/cluster-endpoint.html"
+            ],
+            "description": "Resource 'module.EKS:module.eks:aws_eks_cluster.this' has public access is explicitly set to enabled",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/eks_cluster/main.tf",
+                "start_line": 13,
+                "end_line": 13
+            }
+        },
+        {
+            "rule_id": "aws-eks-no-public-cluster-access-to-cidr",
+            "legacy_rule_id": "AWS068",
+            "rule_description": "EKS cluster should not have open CIDR range for public access",
+            "rule_provider": "aws",
+            "impact": "EKS can be access from the internet",
+            "resolution": "Don't enable public access to EKS Clusters",
+            "links": [
+                "https://tfsec.dev/docs/aws/eks/no-public-cluster-access-to-cidr#aws/eks",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#vpc_config",
+                "https://docs.aws.amazon.com/eks/latest/userguide/create-public-private-vpc.html"
+            ],
+            "description": "Resource 'module.EKS:module.eks:aws_eks_cluster.this' has public access cidr explicitly set to wide open",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/eks_cluster/main.tf",
+                "start_line": 14,
+                "end_line": 14
+            }
+        },
+        {
+            "rule_id": "aws-autoscaling-no-public-ip",
+            "legacy_rule_id": "AWS012",
+            "rule_description": "A resource has a public IP address.",
+            "rule_provider": "aws",
+            "impact": "The instance or configuration is publicly accessible",
+            "resolution": "Set the instance to not be publicly accessible",
+            "links": [
+                "https://tfsec.dev/docs/aws/autoscaling/no-public-ip#aws/autoscaling",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_configuration#associate_public_ip_address",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#associate_public_ip_address",
+                "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html"
+            ],
+            "description": "Resource 'module.EKS:module.lc[\"workers\"]:aws_launch_configuration.this' has a public IP address associated.",
+            "severity": "HIGH",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/launch-configuration/main.tf",
+                "start_line": 13,
+                "end_line": 13
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-public-egress-sgr",
+            "legacy_rule_id": "AWS007",
+            "rule_description": "An egress security group rule allows traffic to /0.",
+            "rule_provider": "aws",
+            "impact": "Your port is egressing data to the internet",
+            "resolution": "Set a more restrictive cidr range",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-public-egress-sgr#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule"
+            ],
+            "description": "Resource 'module.SG_WHITELIST_IPS:aws_security_group_rule.egress_with_cidr_blocks[0]' defines a fully open egress security group rule.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/security-group/main.tf",
+                "start_line": 72,
+                "end_line": 72
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-public-egress-sgr",
+            "legacy_rule_id": "AWS007",
+            "rule_description": "An egress security group rule allows traffic to /0.",
+            "rule_provider": "aws",
+            "impact": "Your port is egressing data to the internet",
+            "resolution": "Set a more restrictive cidr range",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-public-egress-sgr#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule"
+            ],
+            "description": "Resource 'module.SG_NAT:aws_security_group_rule.egress_with_cidr_blocks[0]' defines a fully open egress security group rule.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/security-group/main.tf",
+                "start_line": 72,
+                "end_line": 72
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-excessive-port-access",
+            "legacy_rule_id": "AWS050",
+            "rule_description": "An ingress Network ACL rule allows ALL ports.",
+            "rule_provider": "aws",
+            "impact": "All ports exposed for egressing data",
+            "resolution": "Set specific allowed ports",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-excessive-port-access#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule#to_port",
+                "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+            ],
+            "description": "Resource 'module.SUBNETS:aws_network_acl_rule.public_inbound[0]' defines a fully open ingress Network ACL rule with ALL ports open.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/vpc-subnets/resources.tf",
+                "start_line": 156,
+                "end_line": 156
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-public-ingress-sgr",
+            "legacy_rule_id": "AWS006",
+            "rule_description": "An ingress security group rule allows traffic from /0.",
+            "rule_provider": "aws",
+            "impact": "Your port exposed to the internet",
+            "resolution": "Set a more restrictive cidr range",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-public-ingress-sgr#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule#cidr_blocks",
+                "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-rules-reference.html"
+            ],
+            "description": "Resource 'module.SG_EXPOSE_APPS:aws_security_group_rule.ingress_with_cidr_blocks[1]' defines a fully open ingress security group rule.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/security-group/main.tf",
+                "start_line": 40,
+                "end_line": 40
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-public-egress-sgr",
+            "legacy_rule_id": "AWS007",
+            "rule_description": "An egress security group rule allows traffic to /0.",
+            "rule_provider": "aws",
+            "impact": "Your port is egressing data to the internet",
+            "resolution": "Set a more restrictive cidr range",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-public-egress-sgr#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule"
+            ],
+            "description": "Resource 'module.SG_EXPOSE_APPS:aws_security_group_rule.egress_with_cidr_blocks[0]' defines a fully open egress security group rule.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/security-group/main.tf",
+                "start_line": 72,
+                "end_line": 72
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-public-ingress-sgr",
+            "legacy_rule_id": "AWS006",
+            "rule_description": "An ingress security group rule allows traffic from /0.",
+            "rule_provider": "aws",
+            "impact": "Your port exposed to the internet",
+            "resolution": "Set a more restrictive cidr range",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-public-ingress-sgr#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule#cidr_blocks",
+                "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-rules-reference.html"
+            ],
+            "description": "Resource 'module.SG_EXPOSE_APPS:aws_security_group_rule.ingress_with_cidr_blocks[0]' defines a fully open ingress security group rule.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/security-group/main.tf",
+                "start_line": 40,
+                "end_line": 40
+            }
+        },
+        {
+            "rule_id": "aws-cloudwatch-log-group-customer-key",
+            "legacy_rule_id": "AWS089",
+            "rule_description": "CloudWatch log groups should be encrypted using CMK",
+            "rule_provider": "aws",
+            "impact": "Log data may be leaked if the logs are compromised. No auditing of who have viewed the logs.",
+            "resolution": "Enable CMK encryption of CloudWatch Log Groups",
+            "links": [
+                "https://tfsec.dev/docs/aws/cloudwatch/log-group-customer-key#aws/cloudwatch",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group#kms_key_id",
+                "https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html"
+            ],
+            "description": "Resource 'module.EKS:module.eks:aws_cloudwatch_log_group.this' is only using default encryption",
+            "severity": "LOW",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/eks_cluster/main.tf",
+                "start_line": 38,
+                "end_line": 41
+            }
+        },
+        {
+            "rule_id": "aws-eks-enable-control-plane-logging",
+            "legacy_rule_id": "AWS067",
+            "rule_description": "EKS Clusters should have cluster control plane logging turned on",
+            "rule_provider": "aws",
+            "impact": "Logging provides valuable information about access and usage",
+            "resolution": "Enable logging for the EKS control plane",
+            "links": [
+                "https://tfsec.dev/docs/aws/eks/enable-control-plane-logging#aws/eks",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_cluster#enabled_cluster_log_types",
+                "https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html"
+            ],
+            "description": "Resource 'module.EKS:module.eks:aws_eks_cluster.this' is missing the control plane log type 'scheduler'",
+            "severity": "MEDIUM",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/eks_cluster/main.tf",
+                "start_line": 4,
+                "end_line": 4
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-excessive-port-access",
+            "legacy_rule_id": "AWS050",
+            "rule_description": "An ingress Network ACL rule allows ALL ports.",
+            "rule_provider": "aws",
+            "impact": "All ports exposed for egressing data",
+            "resolution": "Set specific allowed ports",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-excessive-port-access#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule#to_port",
+                "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+            ],
+            "description": "Resource 'module.SUBNETS:aws_network_acl_rule.private_inbound[0]' defines a fully open ingress Network ACL rule with ALL ports open.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/vpc-subnets/resources.tf",
+                "start_line": 208,
+                "end_line": 208
+            }
+        },
+        {
+            "rule_id": "aws-vpc-no-excessive-port-access",
+            "legacy_rule_id": "AWS050",
+            "rule_description": "An ingress Network ACL rule allows ALL ports.",
+            "rule_provider": "aws",
+            "impact": "All ports exposed for egressing data",
+            "resolution": "Set specific allowed ports",
+            "links": [
+                "https://tfsec.dev/docs/aws/vpc/no-excessive-port-access#aws/vpc",
+                "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/network_acl_rule#to_port",
+                "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+            ],
+            "description": "Resource 'module.SUBNETS:aws_network_acl_rule.private_inbound[0]' defines a fully open ingress Network ACL rule with ALL ports open.",
+            "severity": "CRITICAL",
+            "status": "failed",
+            "location": {
+                "filename": "/tmp/aws-eks/modules/vpc-subnets/resources.tf",
+                "start_line": 207,
+                "end_line": 207
+            }
+        }
+    ]
+}
