@@ -12,7 +12,7 @@ remove this local setting and start using the new authorization as described
 in [Permissions]({{< ref "/usage/permissions" >}}).
 
 Users have been migrated to the new authorization with release 2.0.0 but you can
-the migration again with
+run the migration again with
 
 `./manage.py migrate_authorization_v2`
 
