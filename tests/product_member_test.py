@@ -26,7 +26,7 @@ class ProductMemberTest(BaseTestCase):
             driver.find_element_by_id("addProductMember").click()
             # Select the product 'QA Test'
             try:
-                WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_products_chosen')))
+                WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_products')))
             except TimeoutException:
                 self.fail('Timed out waiting for products dropdown to initialize ')
             driver.execute_script("document.getElementsByName('products')[0].style.display = 'inline'")
@@ -112,7 +112,7 @@ class ProductMemberTest(BaseTestCase):
             driver.find_element_by_id("addProductMember").click()
             # Select the user 'propersahm'
             try:
-                WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_users_chosen')))
+                WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_users')))
             except TimeoutException:
                 self.fail('Timed out waiting for users dropdown to initialize ')
             driver.execute_script("document.getElementsByName('users')[0].style.display = 'inline'")
