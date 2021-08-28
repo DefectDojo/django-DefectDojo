@@ -205,7 +205,13 @@ def test_report(request, tid):
 @user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
 def endpoint_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
-    return generate_report(request, endpoint)
+    return generate_report(request, endpoint, False)
+
+
+@user_is_authorized(Endpoint, Permissions.Endpoint_View, 'eid', 'view')
+def endpoint_host_report(request, eid):
+    endpoint = get_object_or_404(Endpoint, id=eid)
+    return generate_report(request, endpoint, True)
 
 
 @user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
@@ -335,7 +341,7 @@ def product_endpoint_report(request, pid):
                    })
 
 
-def generate_report(request, obj):
+def generate_report(request, obj, host_view=False):
     user = Dojo_User.objects.get(id=request.user.id)
     product_type = None
     product = None
@@ -399,7 +405,6 @@ def generate_report(request, obj):
     if include_disclaimer and len(disclaimer) == 0:
         disclaimer = 'Please configure in System Settings.'
     generate = "_generate" in request.GET
-    host_view = "host_view" in request.GET
     report_name = str(obj)
     report_type = type(obj).__name__
     add_breadcrumb(title="Generate Report", top_level=False, request=request)
