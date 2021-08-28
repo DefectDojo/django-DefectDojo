@@ -1856,7 +1856,7 @@ class UsersViewSet(mixins.CreateModelMixin,
                    mixins.DestroyModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = serializers.UserSerializer
-    queryset = User.objects.all()
+    queryset = Dojo_User.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filter_class = ApiUserFilter
     permission_classes = (IsAdminUser, DjangoModelPermissions)
