@@ -57,7 +57,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     if request.user.is_superuser and not settings.FEATURE_AUTHORIZATION_V2:
         message = '''Legacy authorization will be removed with version 2.5.0 / end of November 2021.
                      If you have set `FEATURE_AUTHORIZATION_V2` to `False` in your local
-                     configuration, remove this local setting before and start using
+                     configuration, remove this local setting and start using
                      the new authorization.'''
         messages.add_message(request, messages.WARNING, message, extra_tags='alert-warning')
 
