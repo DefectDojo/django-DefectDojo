@@ -492,10 +492,13 @@ def get_labels(obj):
 
 def jira_summary(obj):
     if type(obj) == Finding:
-        return obj.title
+        summary = obj.title
 
     if type(obj) == Finding_Group:
-        return obj.name
+        summary = obj.name
+
+    if summary:
+        return summary.replace('\r', '').replace('\n', '')
 
     return None
 
@@ -617,7 +620,7 @@ def add_jira_issue(obj, *args, **kwargs):
                 'project': {
                     'key': jira_project.project_key
                 },
-                'summary': jira_summary(obj).replace('\r', '').replace('\n', ''),
+                'summary': jira_summary(obj),
                 'description': jira_description(obj),
                 'issuetype': {
                     'name': jira_instance.default_issue_type
