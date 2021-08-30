@@ -2,8 +2,8 @@
 | -----------------------------| -------|   ---- | ------------------------|
 | Specific python wrapper      | Yes    | Yes    | working (2021-01-21)    |
 | Openapi python wrapper       | No     | Yes    | proof of concept only   |
-| Bash wrapper                 | No     | Yes    | might be outdated       |
-| Java library                 | No     | Yes    | working (2021-04-13)    |
+| Bash wrapper                 | No     | Yes    | working (2021-08-30)    |
+| Java library                 | No     | Yes    | working (2021-08-30)    |
 | Image using the Java library | No     | Yes    | out of date             |
 | .Net/C# library              | No     | Yes    | working (2021-06-08)    |
 
@@ -25,7 +25,7 @@ https://github.com/wurstbrot/defectdojo-client
 https://github.com/secureCodeBox/defectdojo-client-java
 
 ### Image using the Java library
-https://github.com/DefectDojo/defectdojo-java-client (out of date, update expected)
+https://github.com/SDA-SE/defectdojo-client
 
 ### .Net/C# library
 https://www.nuget.org/packages/DefectDojo.Api/
