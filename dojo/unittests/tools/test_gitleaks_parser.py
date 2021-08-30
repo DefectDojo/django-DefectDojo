@@ -20,7 +20,7 @@ class TestGitleaksParser(TestCase):
             finding = findings[0]
             self.assertEqual("Hard Coded Asymmetric Private Key", finding.title)
             self.assertEqual("cert-key.pem", finding.file_path)
-            self.assertIsNone(finding.line) # some old version don't have this data
+            self.assertIsNone(finding.line)  # some old version don't have this data
             self.assertIn("AsymmetricPrivateKey", finding.unsaved_tags)
 
     def test_parse_file_with_multiple_finding(self):
@@ -32,7 +32,7 @@ class TestGitleaksParser(TestCase):
             finding = findings[0]
             self.assertEqual("Hard Coded Github", finding.title)
             self.assertEqual(".bashrc", finding.file_path)
-            self.assertIsNone(finding.line) # some old version don't have this data
+            self.assertIsNone(finding.line)  # some old version don't have this data
             self.assertIn("Github", finding.unsaved_tags)
 
     def test_parse_file_with_multiple_redacted_finding(self):
