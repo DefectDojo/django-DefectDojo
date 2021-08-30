@@ -64,7 +64,7 @@ class BurpGraphQLParser(object):
 
         for issue in scan_data:
             if not issue.get('issue_type') or not issue['issue_type'].get('name'):
-                continue
+                raise ValueError('Issue does not have a name')
 
             issue_name = issue['issue_type']['name']
 
