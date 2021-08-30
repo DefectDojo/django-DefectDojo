@@ -49,7 +49,7 @@ class TestCobaltApiParser(TestCase):
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.is_mitigated)
         self.assertFalse(finding.static_finding)
-        self.assertFalse(finding.dynamic_finding)
+        self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_check_fix_finding(self):
         testfile = open("dojo/unittests/scans/cobalt_api/cobalt_api_one_vul_check_fix.json")
@@ -78,7 +78,7 @@ class TestCobaltApiParser(TestCase):
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.is_mitigated)
         self.assertFalse(finding.static_finding)
-        self.assertFalse(finding.dynamic_finding)
+        self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_invalid_finding(self):
         testfile = open("dojo/unittests/scans/cobalt_api/cobalt_api_one_vul_invalid.json")
@@ -107,7 +107,7 @@ class TestCobaltApiParser(TestCase):
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.is_mitigated)
         self.assertFalse(finding.static_finding)
-        self.assertFalse(finding.dynamic_finding)
+        self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_need_fix_finding(self):
         testfile = open("dojo/unittests/scans/cobalt_api/cobalt_api_one_vul_need_fix.json")
@@ -136,7 +136,7 @@ class TestCobaltApiParser(TestCase):
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.is_mitigated)
         self.assertFalse(finding.static_finding)
-        self.assertFalse(finding.dynamic_finding)
+        self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_new_finding(self):
         testfile = open("dojo/unittests/scans/cobalt_api/cobalt_api_one_vul_new.json")
@@ -165,7 +165,7 @@ class TestCobaltApiParser(TestCase):
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.is_mitigated)
         self.assertFalse(finding.static_finding)
-        self.assertFalse(finding.dynamic_finding)
+        self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_out_of_scope_finding(self):
         testfile = open("dojo/unittests/scans/cobalt_api/cobalt_api_one_vul_out_of_scope.json")
@@ -194,7 +194,7 @@ class TestCobaltApiParser(TestCase):
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.is_mitigated)
         self.assertFalse(finding.static_finding)
-        self.assertFalse(finding.dynamic_finding)
+        self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_triaging_finding(self):
         testfile = open("dojo/unittests/scans/cobalt_api/cobalt_api_one_vul_triaging.json")
@@ -223,7 +223,7 @@ class TestCobaltApiParser(TestCase):
         self.assertFalse(finding.risk_accepted)
         self.assertFalse(finding.is_mitigated)
         self.assertFalse(finding.static_finding)
-        self.assertFalse(finding.dynamic_finding)
+        self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_valid_fix_finding(self):
         testfile = open("dojo/unittests/scans/cobalt_api/cobalt_api_one_vul_valid_fix.json")
@@ -252,7 +252,7 @@ class TestCobaltApiParser(TestCase):
         self.assertFalse(finding.risk_accepted)
         self.assertTrue(finding.is_mitigated)
         self.assertFalse(finding.static_finding)
-        self.assertFalse(finding.dynamic_finding)
+        self.assertTrue(finding.dynamic_finding)
 
     def test_cobalt_api_parser_with_wont_fix_finding(self):
         testfile = open("dojo/unittests/scans/cobalt_api/cobalt_api_one_vul_wont_fix.json")
@@ -281,4 +281,4 @@ class TestCobaltApiParser(TestCase):
         self.assertTrue(finding.risk_accepted)
         self.assertFalse(finding.is_mitigated)
         self.assertFalse(finding.static_finding)
-        self.assertFalse(finding.dynamic_finding)
+        self.assertTrue(finding.dynamic_finding)
