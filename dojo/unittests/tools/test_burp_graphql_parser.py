@@ -57,7 +57,7 @@ class TestBurpGraphQLParser(TestCase):
 
     def test_burp_null_title(self):
         with open(path.join(path.dirname(__file__), "../scans/burp_graphql/null_title.json")) as test_file:
-            
+
             with self.assertRaises(ValueError):
                 parser = BurpGraphQLParser()
                 findings = parser.get_findings(test_file, Test())
