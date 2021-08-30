@@ -491,13 +491,15 @@ def get_labels(obj):
 
 
 def jira_summary(obj):
+    summary = ''
+
     if type(obj) == Finding:
-        return obj.title
+        summary = obj.title
 
     if type(obj) == Finding_Group:
-        return obj.name
+        summary = obj.name
 
-    return None
+    return summary.replace('\r', '').replace('\n', '')
 
 
 def jira_description(obj):
