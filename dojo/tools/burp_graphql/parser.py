@@ -1,6 +1,7 @@
 import logging
 import json
 import re
+import html2text
 
 
 from dojo.models import Endpoint, Finding
@@ -78,7 +79,7 @@ class BurpGraphQLParser(object):
 
     def combine_findings(self, finding, issue):
 
-        description = issue.get('description_html')
+        description = html2text.html2text(issue.get('description_html'))
 
         if description:
             if not finding['Description'].count(description) > 0:
@@ -99,14 +100,14 @@ class BurpGraphQLParser(object):
 
         if issue.get('description_html'):
             finding['Description'] += "**Issue Detail**\n"
-            finding['Description'] += issue.get('description_html') + "\n\n"
+            finding['Description'] += html2text.html2text(issue.get('description_html')) + "\n\n"
 
             if issue['issue_type'].get('description_html'):
                 finding['Impact'] += "**Issue Background**\n"
-                finding['Impact'] += issue['issue_type'].get('description_html') + "\n\n"
+                finding['Impact'] += html2text.html2text(issue['issue_type'].get('description_html')) + "\n\n"
         elif issue['issue_type'].get('description_html'):
             finding['Description'] += "**Issue Background**\n"
-            finding['Description'] += issue['issue_type'].get('description_html') + "\n\n"
+            finding['Description'] += html2text.html2text(issue['issue_type'].get('description_html')) + "\n\n"
 
         if issue.get('remediation_html'):
             finding['Mitigation'] += "**Remediation Detail**\n"
@@ -114,10 +115,10 @@ class BurpGraphQLParser(object):
 
             if issue['issue_type'].get('remediation_html'):
                 finding['Mitigation'] += "**Remediation Background**\n"
-                finding['Mitigation'] += issue['issue_type'].get('remediation_html') + "\n\n"
+                finding['Mitigation'] += html2text.html2text(issue['issue_type'].get('remediation_html')) + "\n\n"
         elif issue['issue_type'].get('remediation_html'):
             finding['Impact'] += "**Remediation Background**\n"
-            finding['Impact'] += issue['issue_type'].get('remediation_html') + "\n\n"
+            finding['Impact'] += html2text.html2text(issue['issue_type'].get('remediation_html')) + "\n\n"
 
         if issue.get('severity'):
             finding['Severity'] = issue['severity'].capitalize()
@@ -133,11 +134,11 @@ class BurpGraphQLParser(object):
 
         if issue['issue_type'].get('references_html'):
             finding['References'] += "**References**\n"
-            finding['References'] += issue['issue_type'].get('references_html') + "\n\n"
+            finding['References'] += html2text.html2text(issue['issue_type'].get('references_html')) + "\n\n"
 
         if issue['issue_type'].get('vulnerability_classifications_html'):
             finding['References'] += "**CWE Information**\n"
-            finding['References'] += issue['issue_type'].get('vulnerability_classifications_html') + "\n\n"
+            finding['References'] += html2text.html2text(issue['issue_type'].get('vulnerability_classifications_html')) + "\n\n"
             finding['CWE'] = self.get_cwe(issue['issue_type'].get('vulnerability_classifications_html'))
         else:
             finding['CWE'] = 0
@@ -158,9 +159,9 @@ class BurpGraphQLParser(object):
             for data in request_dict.get('request_segments'):
 
                 if data.get('data_html'):
-                    request += data.get('data_html')
+                    request += html2text.html2text(data.get('data_html'))
                 elif data.get('highlight_html'):
-                    request += data.get('highlight_html')
+                    request += html2text.html2text(data.get('highlight_html'))
 
             if (i + 1) < evidence_len and evidence[i + 1].get('response_segments') and \
                     evidence[i + 1].get('response_index') == request_dict.get('request_index'):
@@ -170,9 +171,9 @@ class BurpGraphQLParser(object):
 
                 for data in response_dict.get('response_segments'):
                     if data.get('data_html'):
-                        response += data.get('data_html')
+                        response += html2text.html2text(data.get('data_html'))
                     elif data.get('highlight_html'):
-                        response += data.get('highlight_html')
+                        response += html2text.html2text(data.get('highlight_html'))
 
                 i += 2
                 req_resp_list.append({"req": request, "resp": response})
