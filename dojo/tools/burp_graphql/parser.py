@@ -23,9 +23,7 @@ class BurpGraphQLParser(object):
 
         data = json.load(filename)
 
-        scan_data = data.get("Issues")
-
-        if not scan_data:
+        if "Issues" not in data:
             raise ValueError('No Issues found')
 
         return self.create_findings(data.get('Issues'), test)
