@@ -3,8 +3,6 @@ from datetime import datetime
 from dojo.models import Endpoint, Finding
 from dojo.tools.cobalt_api.importer import CobaltApiImporter
 
-__author__ = 'ericcornelissen'
-
 
 class CobaltApiParser(object):
     """
@@ -75,7 +73,7 @@ class CobaltApiParser(object):
                 last_status_update=last_status_update,
                 numerical_severity=self.convert_severity_numerical(cobalt_severity),
                 static_finding=False,
-                dynamic_finding=False,
+                dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool)
             finding.unsaved_endpoints = self.convert_endpoints(endpoints)
 
