@@ -1,6 +1,7 @@
 import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
+from django.db.models.deletion import RestrictedError
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -108,11 +109,17 @@ def delete_group(request, gid):
         if 'id' in request.POST and str(group.id) == request.POST['id']:
             form = DeleteGroupForm(request.POST, instance=group)
             if form.is_valid():
-                group.delete()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'Group and relationships successfully removed.',
-                                     extra_tags='alert-success')
+                try:
+                    group.delete()
+                    messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'Group and relationships successfully removed.',
+                                        extra_tags='alert-success')
+                except RestrictedError as err:
+                    messages.add_message(request,
+                                         messages.WARNING,
+                                         'Group cannot be deleted: {}'.format(err),
+                                         extra_tags='alert-warning')
                 return HttpResponseRedirect(reverse('groups'))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)

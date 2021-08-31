@@ -1,0 +1,502 @@
+{
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "mobsfscan",
+          "rules": [
+            {
+              "id": "android_logging",
+              "name": "AndroidLogging",
+              "helpUri": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#logs"
+            },
+            {
+              "id": "android_hidden_ui",
+              "name": "AndroidHiddenUi",
+              "helpUri": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-for-sensitive-data-disclosure-through-the-user-interface-mstg-storage-7"
+            },
+            {
+              "id": "sqlite_injection",
+              "name": "SqliteInjection",
+              "helpUri": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2"
+            },
+            {
+              "id": "android_detect_tapjacking",
+              "name": "AndroidDetectTapjacking",
+              "helpUri": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-for-overlay-attacks-mstg-platform-9"
+            },
+            {
+              "id": "android_prevent_screenshot",
+              "name": "AndroidPreventScreenshot",
+              "helpUri": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#finding-sensitive-information-in-auto-generated-screenshots-mstg-storage-9"
+            },
+            {
+              "id": "android_safetynet_api",
+              "name": "AndroidSafetynetApi",
+              "helpUri": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1"
+            },
+            {
+              "id": "android_root_detection",
+              "name": "AndroidRootDetection",
+              "helpUri": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1"
+            },
+            {
+              "id": "android_certificate_transparency",
+              "name": "AndroidCertificateTransparency",
+              "helpUri": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4"
+            },
+            {
+              "id": "android_certificate_pinning",
+              "name": "AndroidCertificatePinning",
+              "helpUri": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4"
+            }
+          ],
+          "version": "0.0.8",
+          "informationUri": "https://github.com/MobSF/mobsfscan",
+          "semanticVersion": "0.0.8"
+        }
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "endTimeUtc": "2021-08-13T14:27:11Z"
+        }
+      ],
+      "results": [
+        {
+          "message": {
+            "text": "The App logs information. Please ensure that sensitive information is never logged."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            Log.d(\"Diva\", \"Error occurred while creating database: \" + e.getMessage());"
+                  },
+                  "endColumn": 88,
+                  "endLine": 57,
+                  "startColumn": 13,
+                  "startLine": 57
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            Log.d(\"Diva\", \"Error occurred while inserting into database: \" + e.getMessage());"
+                  },
+                  "endColumn": 94,
+                  "endLine": 71,
+                  "startColumn": 13,
+                  "startLine": 71
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            Log.d(\"Diva\", \"File error: \" + e.getMessage());"
+                  },
+                  "endColumn": 60,
+                  "endLine": 72,
+                  "startColumn": 13,
+                  "startLine": 72
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/InsecureDataStorage3Activity.java"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            Log.d(\"Diva\", \"File error: \" + e.getMessage());"
+                  },
+                  "endColumn": 60,
+                  "endLine": 71,
+                  "startColumn": 13,
+                  "startLine": 71
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/InsecureDataStorage4Activity.java"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "        EditText cctxt = (EditText) findViewById(R.id.ccText);\n        try {\n            // Assuming we do some HTTP requests credit card validation and processing\n            //Everything seems fine and then we hit some unforseen error\n            processCC(cctxt.getText().toString());\n        } catch (RuntimeException re) {\n            Log.e(\"diva-log\", \"Error while processing transaction with credit card: \" + cctxt.getText().toString());\n            Toast.makeText(this, \"An error occured. Please try again later\", Toast.LENGTH_SHORT).show();\n        }"
+                  },
+                  "endColumn": 10,
+                  "endLine": 58,
+                  "startColumn": 9,
+                  "startLine": 50
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/LogActivity.java"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            Log.e(\"diva-log\", \"Error while processing transaction with credit card: \" + cctxt.getText().toString());"
+                  },
+                  "endColumn": 117,
+                  "endLine": 56,
+                  "startColumn": 13,
+                  "startLine": 56
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/LogActivity.java"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            Log.d(\"Diva-sqli\", \"Error occurred while creating database for SQLI: \" + e.getMessage());"
+                  },
+                  "endColumn": 102,
+                  "endLine": 61,
+                  "startColumn": 13,
+                  "startLine": 61
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/SQLInjectionActivity.java"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            Log.d(\"Diva-sqli\", \"Error occurred while searching in database: \" + e.getMessage());"
+                  },
+                  "endColumn": 97,
+                  "endLine": 85,
+                  "startColumn": 13,
+                  "startLine": 85
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/SQLInjectionActivity.java"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp-mobile": "M1: Improper Platform Usage",
+            "masvs": "MSTG-STORAGE-3",
+            "cwe": "CWE-532 Insertion of Sensitive Information into Log File",
+            "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#logs"
+          },
+          "ruleId": "android_logging",
+          "ruleIndex": 0
+        },
+        {
+          "message": {
+            "text": "Hidden elements in view can be used to hide data from user. But this data can be leaked."
+          },
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            pinTxt.setVisibility(View.INVISIBLE);"
+                  },
+                  "endColumn": 50,
+                  "endLine": 72,
+                  "startColumn": 13,
+                  "startLine": 72
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/AccessControl3NotesActivity.java"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            abutton.setVisibility(View.INVISIBLE);"
+                  },
+                  "endColumn": 51,
+                  "endLine": 73,
+                  "startColumn": 13,
+                  "startLine": 73
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/AccessControl3NotesActivity.java"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp-mobile": "M1: Improper Platform Usage",
+            "masvs": "MSTG-STORAGE-7",
+            "cwe": "CWE-919 - Weaknesses in Mobile Applications",
+            "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#checking-for-sensitive-data-disclosure-through-the-user-interface-mstg-storage-7"
+          },
+          "ruleId": "android_hidden_ui",
+          "ruleIndex": 1
+        },
+        {
+          "message": {
+            "text": "App uses SQLite Database and execute raw SQL query. Untrusted user input in raw SQL queries can cause SQL Injection. Also sensitive information should be encrypted and written to the database."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            mDB.execSQL(\"INSERT INTO myuser VALUES ('\"+ usr.getText().toString() +\"', '\"+ pwd.getText().toString() +\"');\");"
+                  },
+                  "endColumn": 124,
+                  "endLine": 67,
+                  "startColumn": 13,
+                  "startLine": 67
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/InsecureDataStorage2Activity.java"
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "            cr = mDB.rawQuery(\"SELECT * FROM sqliuser WHERE user = '\" + srchtxt.getText().toString() + \"'\", null);"
+                  },
+                  "endColumn": 115,
+                  "endLine": 70,
+                  "startColumn": 13,
+                  "startLine": 70
+                },
+                "artifactLocation": {
+                  "uri": "app/src/main/java/jakhar/aseem/diva/SQLInjectionActivity.java"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp-mobile": "M7: Client Code Quality",
+            "masvs": "MSTG-PLATFORM-2",
+            "cwe": "CWE-78 Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+            "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x04h-Testing-Code-Quality.md#injection-flaws-mstg-arch-2-and-mstg-platform-2"
+          },
+          "ruleId": "sqlite_injection",
+          "ruleIndex": 2
+        },
+        {
+          "message": {
+            "text": "This app does not have capabilities to prevent tapjacking attacks. An attacker can hijack the user's taps and tricks him into performing some critical operations that he did not intend to."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "Missing Best Practice"
+                  },
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                },
+                "artifactLocation": {
+                  "uri": "./"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp-mobile": "M1: Improper Platform Usage",
+            "masvs": "MSTG-PLATFORM-9",
+            "cwe": "CWE-200 Information Exposure",
+            "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05h-Testing-Platform-Interaction.md#testing-for-overlay-attacks-mstg-platform-9"
+          },
+          "ruleId": "android_detect_tapjacking",
+          "ruleIndex": 3
+        },
+        {
+          "message": {
+            "text": "This app does not have capabilities to prevent against Screenshots from Recent Task History/ Now On Tap etc."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "Missing Best Practice"
+                  },
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                },
+                "artifactLocation": {
+                  "uri": "./"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp-mobile": "M2: Insecure Data Storage",
+            "masvs": "MSTG-STORAGE-9",
+            "cwe": "CWE-200 Information Exposure",
+            "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05d-Testing-Data-Storage.md#finding-sensitive-information-in-auto-generated-screenshots-mstg-storage-9"
+          },
+          "ruleId": "android_prevent_screenshot",
+          "ruleIndex": 4
+        },
+        {
+          "message": {
+            "text": "This app does not uses SafetyNet Attestation API that provides cryptographically-signed attestation, assessing the device's integrity. This check helps to ensure that the servers are interacting with the genuine app running on a genuine Android device. "
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "Missing Best Practice"
+                  },
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                },
+                "artifactLocation": {
+                  "uri": "./"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp-mobile": "M8: Code Tampering",
+            "masvs": "MSTG-RESILIENCE-1",
+            "cwe": "CWE-353 Missing Support for Integrity Check",
+            "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1"
+          },
+          "ruleId": "android_safetynet_api",
+          "ruleIndex": 5
+        },
+        {
+          "message": {
+            "text": "This app does not have root detection capabilities. Running a sensitive application on a rooted device questions the device integrity and affects users data."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "Missing Best Practice"
+                  },
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                },
+                "artifactLocation": {
+                  "uri": "./"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp-mobile": "M8: Code Tampering",
+            "masvs": "MSTG-RESILIENCE-1",
+            "cwe": "CWE-919 - Weaknesses in Mobile Applications",
+            "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05j-Testing-Resiliency-Against-Reverse-Engineering.md#testing-root-detection-mstg-resilience-1"
+          },
+          "ruleId": "android_root_detection",
+          "ruleIndex": 6
+        },
+        {
+          "message": {
+            "text": "This app does not enforce TLS Certificate Transparency that helps to detect SSL certificates that have been mistakenly issued by a certificate authority or maliciously acquired from an otherwise unimpeachable certificate authority."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "Missing Best Practice"
+                  },
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                },
+                "artifactLocation": {
+                  "uri": "./"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp-mobile": "M3: Insecure Communication",
+            "masvs": "MSTG-NETWORK-4",
+            "cwe": "CWE-295 Improper Certificate Validation",
+            "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4"
+          },
+          "ruleId": "android_certificate_transparency",
+          "ruleIndex": 7
+        },
+        {
+          "message": {
+            "text": "This app does not use a TLS/SSL certificate or public key pinning in code to detect or prevent MITM attacks in secure communication channel. Please verify if pinning is enabled in `network_security_config.xml`."
+          },
+          "level": "note",
+          "locations": [
+            {
+              "physicalLocation": {
+                "region": {
+                  "snippet": {
+                    "text": "Missing Best Practice"
+                  },
+                  "endColumn": 1,
+                  "endLine": 1,
+                  "startColumn": 1,
+                  "startLine": 1
+                },
+                "artifactLocation": {
+                  "uri": "./"
+                }
+              }
+            }
+          ],
+          "properties": {
+            "owasp-mobile": "M3: Insecure Communication",
+            "masvs": "MSTG-NETWORK-4",
+            "cwe": "CWE-295 Improper Certificate Validation",
+            "reference": "https://github.com/MobSF/owasp-mstg/blob/master/Document/0x05g-Testing-Network-Communication.md#testing-custom-certificate-stores-and-certificate-pinning-mstg-network-4"
+          },
+          "ruleId": "android_certificate_pinning",
+          "ruleIndex": 8
+        }
+      ]
+    }
+  ],
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json"
+}

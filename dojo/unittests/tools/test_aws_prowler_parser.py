@@ -1,88 +1,112 @@
+import datetime
 from django.test import TestCase
 from dojo.tools.aws_prowler.parser import AWSProwlerParser
-from django.utils import timezone
-from dojo.models import Test, Engagement, Product, Product_Type, Test_Type
+from dojo.models import Test
 
 
 class TestAwsProwlerParser(TestCase):
     def setup(self, testfile):
-        product_type = Product_Type(critical_product=True, key_product=False)
-        product_type.save()
-
-        test_type = Test_Type(static_tool=True, dynamic_tool=False)
-        test_type.save()
-
-        product = Product(prod_type=product_type)
-        product.save()
-
-        engagement = Engagement(
-            product=product, target_start=timezone.now(), target_end=timezone.now()
-        )
-        engagement.save()
-
         parser = AWSProwlerParser()
-        findings = parser.get_findings(
-            testfile,
-            Test(
-                engagement=engagement,
-                test_type=test_type,
-                target_start=timezone.now(),
-                target_end=timezone.now(),
-            ),
-        )
-
+        findings = parser.get_findings(testfile, Test())
         testfile.close()
-
         return findings
 
     def test_aws_prowler_parser_with_no_vuln_has_no_findings(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_prowler/no_vuln.csv"))
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/no_vuln.csv"))
         self.assertEqual(0, len(findings))
 
     def test_aws_prowler_parser_with_critical_vuln_has_one_findings(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_prowler/one_vuln.csv"))
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/one_vuln.csv"))
         self.assertEqual(1, len(findings))
         self.assertEqual(
-            "Avoid the use of the root account (Scored)", findings[0].title
+            "Root user in the account wasn't accessed in the last 1 days", findings[0].title
         )
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_prowler/many_vuln.csv"))
-        self.assertEqual(5, len(findings))
-        self.assertEqual("Vuln A", findings[0].title)
-        self.assertEqual("Critical", findings[0].severity)
-        self.assertEqual("Vuln B", findings[1].title)
-        self.assertEqual("Critical", findings[1].severity)
-        self.assertEqual("Info A", findings[2].title)
-        self.assertEqual("Info", findings[2].severity)
-        self.assertEqual("Vuln C", findings[3].title)
-        self.assertEqual("High", findings[3].severity)
-        self.assertEqual("Info B", findings[4].title)
-        self.assertEqual("Info", findings[4].severity)
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/many_vuln.csv"))
+        self.assertEqual(4, len(findings))
+        self.assertEqual(
+            "Root user in the account wasn't accessed in the last 1 days", findings[0].title)
+        self.assertEqual("High", findings[0].severity)
+        self.assertEqual(
+            "User example_user has never used access key 1 since creation and not rotated it in the past 90 days", findings[1].title)
+        self.assertEqual("Medium", findings[1].severity)
+        self.assertEqual("Password Policy has weak reuse requirement (lower than 24)", findings[2].title)
+        self.assertEqual("Medium", findings[2].severity)
+        self.assertEqual("eu-west-2: sg-01234567890qwerty is not being used!", findings[3].title)
+        self.assertEqual("Low", findings[3].severity)
 
     def test_aws_prowler_parser_with_many_vuln_has_many_findings2(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_prowler/many_vuln2.csv"))
-        self.assertEqual(183, len(findings))
-        self.assertEqual("Show report generation info", findings[0].title)
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/many_vuln2.csv"))
+        self.assertEqual(174, len(findings))
+        self.assertEqual("Root user in the account wasn't accessed in the last 1 days", findings[0].title)
         self.assertEqual("Info", findings[0].severity)
-        self.assertEqual(1032, findings[0].cwe)
-        self.assertEqual("Ensure IAM password policy requires at least one uppercase letter (Scored)", findings[6].title)
+        self.assertEqual(
+            "User example has never used access key 1 since creation and not rotated it in the past 90 days", findings[4].title)
         self.assertEqual("Medium", findings[6].severity)
-        self.assertEqual(1032, findings[6].cwe)
 
     def test_aws_prowler_parser_issue4450(self):
-        findings = self.setup(open("dojo/unittests/scans/aws_prowler/issue4450.csv"))
-        self.assertEqual(2, len(findings))
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/issue4450.csv"))
+        self.assertEqual(4, len(findings))
         with self.subTest(i=0):
             finding = findings[0]
             self.assertFalse(finding.active)
-            self.assertEqual("Avoid the use of the root account (Scored)", finding.title)
+            self.assertEqual(
+                "Root user in the account wasn't accessed in the last 1 days", finding.title)
             self.assertEqual("Info", finding.severity)
             self.assertEqual(1032, finding.cwe)
         with self.subTest(i=1):
             finding = findings[1]
             self.assertTrue(finding.active)
-            self.assertEqual("Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password (Scored)", finding.title)
+            self.assertEqual(
+                "User ansible-test-user has Password enabled but MFA disabled", finding.title)
             self.assertEqual("High", finding.severity)
             self.assertEqual(1032, finding.cwe)
-            self.assertEqual(3, finding.nb_occurences)
+            self.assertEqual(1, finding.nb_occurences)
+
+    def test_aws_prowler_parser_with_no_vuln_has_no_findings_json(self):
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/no_vuln.json"))
+        self.assertEqual(0, len(findings))
+
+    def test_aws_prowler_parser_with_critical_vuln_has_one_findings_json(self):
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/one_vuln.json"))
+        self.assertEqual(1, len(findings))
+        self.assertEqual("eu-central-1: Only Virtual MFA is enabled for root", findings[0].title)
+        self.assertIn('012345678912', findings[0].description)
+        self.assertIn('Ensure hardware MFA is enabled for the root account', findings[0].description)
+        self.assertIn('check114', findings[0].description)
+        self.assertIn('1.14', findings[0].description)
+        self.assertIn('eu-central-1', findings[0].description)
+        self.assertIn('Software and Configuration Checks', findings[0].description)
+        self.assertIn('iam', findings[0].description)
+        self.assertIn('IAM', findings[0].description)
+        self.assertIn('MFA', findings[0].description)
+        self.assertEqual('Critical', findings[0].severity)
+        self.assertIn('The root account is the most privileged user in an AWS account. MFA adds an extra layer', findings[0].impact)
+        self.assertEqual('Using IAM console navigate to Dashboard and expand Activate MFA on your root account.', findings[0].mitigation)
+        self.assertEqual('https://docs.aws.amazon.com/IAM/latest/UserGuide/id_root-user.html#id_root-user_manage_mfa', findings[0].references)
+        self.assertEqual(datetime.date(2021, 8, 23), findings[0].date)
+
+    def test_aws_prowler_parser_with_many_vuln_has_many_findings_json(self):
+        findings = self.setup(
+            open("dojo/unittests/scans/aws_prowler/many_vuln.json"))
+        self.assertEqual(4, len(findings))
+        with self.subTest(i=0):
+            self.assertEqual("eu-central-1: Only Virtual MFA is enabled for root", findings[0].title)
+            self.assertEqual('Critical', findings[0].severity)
+        with self.subTest(i=1):
+            self.assertEqual("eu-central-1: Cluster control plane access is not restricted for EKS cluster prod", findings[1].title)
+            self.assertEqual('High', findings[1].severity)
+        with self.subTest(i=2):
+            self.assertEqual("eu-central-1: Control plane logging is not enabled for EKS cluster prod", findings[2].title)
+            self.assertEqual('Medium', findings[2].severity)
+        with self.subTest(i=3):
+            self.assertEqual("eu-central-1: prod.config_read.iam has inline policy directly attached", findings[3].title)
+            self.assertEqual('Low', findings[3].severity)

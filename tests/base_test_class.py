@@ -1,4 +1,5 @@
 from selenium import webdriver
+import chromedriver_autoinstaller
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -48,6 +49,9 @@ def set_suite_settings(suite, jira=False, github=False, block_execution=False):
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+
+        chromedriver_autoinstaller.install()
+
         global dd_driver
         if not dd_driver:
             # setupModule and tearDownModule are not working in our scenario, so for now we use setupClass and a global variable
