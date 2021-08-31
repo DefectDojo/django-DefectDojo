@@ -19,11 +19,6 @@ jobs:
   create_pr:
     runs-on: ubuntu-latest
     steps:
-#       - name: Login to DockerHub
-#         uses: docker/login-action@v1
-#         with:
-#           username: ${{ secrets.DOCKERHUB_USERNAME }}
-#           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Checkout from_branch branch
         uses: actions/checkout@v2
         with:
@@ -52,6 +47,10 @@ jobs:
           sed -ri "s/__version__ = '.*'/__version__ = '${{ github.event.inputs.release_number }}'/" dojo/__init__.py
           sed -ri "s/appVersion: \".*\"/appVersion: \"${{ github.event.inputs.release_number }}\"/" helm/defectdojo/Chart.yaml
           sed -ri "s/\"version\": \".*\"/\"version\": \"${{ github.event.inputs.release_number }}\"/" components/package.json
+          # remove the -dev suffix to make it the new final version in master
+          CURRENT_CHART_VERSION=$(grep -oP 'version: (\K\S*)?' helm/defectdojo/Chart.yaml)
+          sed -ri "s/version: \S+/version: ${CURRENT_CHART_VERSION%-*}/" helm/defectdojo/Chart.yaml
+
       - name: Check numbers
         run: |
           grep version dojo/__init__.py
