@@ -31,6 +31,8 @@
     <script src="{% static "components-jqueryui/jquery-ui.min.js" %}"></script>
     <!-- Bootstrap Core JavaScript -->
     <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
+    <!-- Bootstrap Select -->
+    <script src="{% static "bootstrap-select/dist/js/bootstrap-select.min.js" %}"></script>
 
     <!-- Metis Menu Plugin JavaScript -->
     <script src="{% static "metismenu/dist/metisMenu.min.js" %}"></script>
@@ -62,6 +64,9 @@
 
     <!-- Bootstrap Core CSS -->
     <link href="{% static "bootstrap/dist/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Bootstrap Select -->
+    <link href="{% static "bootstrap-select/dist/css/bootstrap-select.min.css" %}" rel="stylesheet">
 
     <!-- MetisMenu CSS -->
     <link href="{% static "metismenu/dist/metisMenu.min.css" %}" rel="stylesheet">
@@ -524,6 +529,18 @@
                         </li>
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
+                            <a class="" href="{% url 'add_sonarqube' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> Add SonarQube Configuration
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a title="Edit SonarQube Configurations"
+                               href="{% url 'view_sonarqube' product_tab.product.id %}">
+                                <i class="fa fa-history"></i> View SonarQube Configurations
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
                             <a class="" href="{% url 'new_object' product_tab.product.id %}">
                                 <i class="fa fa-plus"></i> Add Product Tracking Files
                             </a>
@@ -756,6 +773,11 @@
             <!-- 'placeholder': 'Select or add some tags...', -->
             <!-- 'no_results_text': "Tag not found, press TAB key to add.", -->
         <!-- }); -->
+
+        $('select').not('#notification-scope').addClass('selectpicker');
+        $('.selectpicker').attr('data-live-search', 'true');
+        $('.selectpicker').css('width', '70%');
+        $('.selectpicker').selectpicker();
 
     });
 </script>

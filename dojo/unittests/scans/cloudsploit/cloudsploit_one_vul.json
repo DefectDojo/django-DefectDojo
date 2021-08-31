@@ -1,0 +1,12 @@
+[
+    {
+        "plugin": "stackTerminationProtection",
+        "category": "CloudFormation",
+        "title": "CloudFormation Stack Termination Protection Enabled",
+        "description": "Ensures that AWS CloudFormation stacks have termination protection enabled.",
+        "resource": "arn:aws:cloudformation:us-east-1:0123456789012:stack/myStack-3ab9f838-96cf-4943-ab90-86cce3a83473/d52a5180-f519-11eb",
+        "region": "us-east-1",
+        "status": "FAIL",
+        "message": "CloudFormation stack \"myStack-3ab9f838-96cf-4943-ab90-86cce3a83473/d52a5180-f519-11eb\" does not have termination protection enabled"
+    }
+]

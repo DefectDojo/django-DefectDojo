@@ -77,6 +77,14 @@
                 "text": "A SLA for a finding has been breached.",
                 "facts": [
                     {
+                        "name": "Product:",
+                        "value": "{{ finding.test.engagement.product.name }}"
+                    },
+                    {
+                        "name": "Engagement:",
+                        "value": "{{ finding.test.engagement.name }}"
+                    },
+                    {
                         "name": "Finding:",
                         "value": "{{ finding.title }}"
                     },
