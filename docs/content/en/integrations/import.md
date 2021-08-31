@@ -66,7 +66,7 @@ JS file in scout2-report/inc-awsconfig/aws\_config.js.
 
 ### AWS Prowler Scanner
 
-Prowler file can be imported as a CSV file (-M csv).
+Prowler file can be imported as a CSV (`-M csv`) or JSON (`-M json`) file.
 
 ### Bandit
 
@@ -170,6 +170,10 @@ That will generate three files, two of which are needed for defectdojo. Build th
 ### Choctaw Hog parser
 
 From: <https://github.com/newrelic/rusty-hog> Import the JSON output.
+
+### Cloudsploit (AquaSecurity)
+
+From: https://github.com/aquasecurity/cloudsploit . Import the JSON output.
 
 ### CycloneDX
 
@@ -399,7 +403,7 @@ Github v4 graphql query to fetch data:
   }
 {{< /highlight >}}
 
-Another example of Python script that query one repository: 
+Another example of Python script that query one repository:
 
 ```python
 
@@ -483,16 +487,15 @@ XML file from IBM App Scanner.
 
 XML Scan Result File from Immuniweb Scan.
 
-IntSights Report
---------------
+### IntSights Report
 
 IntSights Threat Command is a commercial Threat Intelligence platform that monitors both the open and dark web to identify threats for the Assets you care about (Domain Names, IP addresses, Brand Names, etc.).
 
-### Manual Import
+#### Manual Import
 Use the Export CSV feature in the IntSights Threat Command GUI to create an *IntSights Alerts.csv* file. This CSV
 file can then be imported into Defect Dojo.
 
-### Automated Import
+#### Automated Import
 
 The IntSights `get-complete-alert` API only returns details for a single alert. To automate the process,
 individually fetch details for each alert and append to a list. The list is then saved as the value for the key
@@ -576,6 +579,10 @@ Import XML report
 ### MobSF Scanner
 
 Export a JSON file using the API, api/v1/report\_json.
+
+### Mobsfscan
+
+Import JSON report from <https://github.com/MobSF/mobsfscan>
 
 ### Mozilla Observatory Scanner
 
@@ -792,20 +799,29 @@ Version: \>= 1.1.0
 SonarQube API will be accessed to gather the report. No report file
 required.
 
-Follow below steps to setup API Import:
+Follow the below steps to setup API Import:
 
 1.  Configure the Sonarqube Authentication details by navigating to
     Configuration-\>Tool Configuration. Note the url should be in the
-    formation of <http(s)://>\<sonarqube\_hostname\>/api. Select the tool
-    type to SonarQube. By default tool will import vulnerabilities only,
-    but additional filters can be setup using Extras field separated by commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
+    formation of `<http(s)://>\<sonarqube\_hostname\>/api`. Select the tool
+    type to SonarQube. By default the tool will import vulnerabilities only,
+    but additional filters can be setup using the Extras field separated by
+    commas (e.g. BUG,VULNERABILITY,CODE_SMELL)
 2.  In the Product settings fill the details for the SonarQube Project
     Key (Key name can be found by navigating to a specific project and
     selecting the value from the url
-    <http(s)://>\<sonarqube\_host\>/dashboard?id=\<key\_name\>
-3.  Once all of the above setting are made, the API Import should be
-    able to auto import all vulnerability information from the SonarQube
-    instance.
+    `<http(s)://>\<sonarqube\_host\>/dashboard?id=\<key\_name\>`.
+    In case you will not provide SonarQube Project Key, DefectDojo will
+    try to use Product as Project name in SonarQube. If you would like to
+    collect findings from multiple projects you can specify multiple Keys as
+    separated SonarQube Configuration in the Product settings.
+3.  Once all of the above settings are made, the API Import should be
+    able to auto-import all vulnerability information from the SonarQube
+    instance. During setting import, you can select which SonarQube
+    Configuration (which Project key) should be used. If you will not choose
+    any, DefectDojo will try to do the best guess :) (if you defined only one
+    Product SonarQube Configuration or only one SonarQube Tool Configuration).
+
 
 **NOTE**: If `https` is in use for the SonarQube than certificate should be
 trusted by DD instance.

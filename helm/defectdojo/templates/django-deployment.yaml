@@ -51,6 +51,18 @@ spec:
         configMap:
           name: {{ .Values.django.uwsgi.certificates.configName }}
       {{- end }}
+      {{- range .Values.django.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -93,6 +105,14 @@ spec:
         {{- if  .Values.django.uwsgi.certificates.enabled }}
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
+        {{- end }}
+        {{- range .Values.django.extraVolumes }}
+        {{- if (eq .container "uwsgi") }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
         {{- end }}
         ports:
         - name: http
@@ -169,6 +189,14 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        {{- range .Values.django.extraVolumes }}
+        {{- if (eq .container "nginx") }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
+        {{- end }}
         ports:
         - name: http
           protocol: TCP

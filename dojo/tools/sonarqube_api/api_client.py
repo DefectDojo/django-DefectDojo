@@ -12,15 +12,15 @@ class SonarQubeAPI:
 
         tool_type, _ = Tool_Type.objects.get_or_create(name='SonarQube')
 
-        if not tool_config:
+        if not tool_config:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
             try:
-                tool_config = Tool_Configuration.objects.get(tool_type=tool_type)
-            except Tool_Configuration.DoesNotExist:
+                tool_config = Tool_Configuration.objects.get(tool_type=tool_type)  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 2
+            except Tool_Configuration.DoesNotExist:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 1
                 raise Exception(
                     'No SonarQube tool is configured. \n'
                     'Create a new Tool at Settings -> Tool Configuration'
                 )
-            except Tool_Configuration.MultipleObjectsReturned:
+            except Tool_Configuration.MultipleObjectsReturned:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 3
                 raise Exception(
                     'It has configured more than one SonarQube tool. \n'
                     'Please specify at Product configuration which one should be used.'
@@ -67,7 +67,7 @@ class SonarQubeAPI:
 
         else:
             raise Exception("Unable to find the project {} due to {} - {}".format(
-                project_name, response.status_code, response.content
+                project_name, response.status_code, response.content.decode("utf-8")
             ))
 
     def get_project(self, project_key):
@@ -91,7 +91,7 @@ class SonarQubeAPI:
             return response.json().get('component')
         else:
             raise Exception("Unable to find the project {} due to {} - {}".format(
-                project_key, response.status_code, response.content
+                project_key, response.status_code, response.content.decode("utf-8")
             ))
 
     def find_issues(self, component_key, types='VULNERABILITY'):
@@ -136,7 +136,7 @@ class SonarQubeAPI:
             else:
                 raise Exception(
                     "Unable to find the issues for component {} due to {} - {}".format(
-                        component_key, response.status_code, response.content
+                        component_key, response.status_code, response.content.decode("utf-8")
                     )
                 )
 
@@ -178,7 +178,7 @@ class SonarQubeAPI:
         else:
             raise Exception(
                 "Unable to get issue {} due to {} - {}".format(
-                    issue_key, response.status_code, response.content
+                    issue_key, response.status_code, response.content.decode("utf-8")
                 )
             )
 
@@ -202,7 +202,7 @@ class SonarQubeAPI:
                 self.rules_cache.update({rule_id: rule})
             else:
                 raise Exception("Unable to get the rule {} due to {} - {}".format(
-                    rule_id, response.status_code, response.content
+                    rule_id, response.status_code, response.content.decode("utf-8")
                 ))
         return rule
 
@@ -246,7 +246,7 @@ class SonarQubeAPI:
         if not response.ok:
             raise Exception(
                 "Unable to transition {} the issue {} due to {} - {}".format(
-                    transition, issue_key, response.status_code, response.content
+                    transition, issue_key, response.status_code, response.content.decode("utf-8")
                 )
             )
 
@@ -271,6 +271,28 @@ class SonarQubeAPI:
         if not response.ok:
             raise Exception(
                 "Unable to add a comment into issue {} due to {} - {}".format(
-                    issue_key, response.status_code, response.content
+                    issue_key, response.status_code, response.content.decode("utf-8")
                 )
             )
+
+    def test_connection(self):
+        """
+        Returns number of components (projects) or raise error.
+        """
+        response = self.session.get(
+            url='{}/components/search'.format(self.sonar_api_url),
+            params={
+                'qualifiers': 'TRK'
+            },
+            headers={
+                'User-Agent': 'DefectDojo'
+            },
+        )
+
+        if response.ok:
+            return response.json()['paging']['total']
+
+        else:
+            raise Exception("Unable to connect and search in SonarQube due to {} - {}".format(
+                response.status_code, response.content.decode("utf-8")
+            ))

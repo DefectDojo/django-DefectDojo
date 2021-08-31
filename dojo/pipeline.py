@@ -1,9 +1,11 @@
 import gitlab
+import re
 
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
-from dojo.models import Engagement, Product, Product_Member, Product_Type, Test, Role
+from dojo.models import Dojo_Group_Member, Engagement, Product, Product_Member, \
+    Product_Type, System_Settings, Test, Role
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 from dojo.authorization.roles_permissions import Permissions, Roles
@@ -59,7 +61,21 @@ def social_uid(backend, details, response, *args, **kwargs):
 
 def modify_permissions(backend, uid, user=None, social=None, *args, **kwargs):
     if kwargs.get('is_new'):
-        user.is_staff = False
+        system_settings = System_Settings.objects.get()
+
+        if system_settings.default_group is not None and system_settings.default_group_role is not None:
+            dojo_group_member = Dojo_Group_Member(
+                group=system_settings.default_group,
+                user=user,
+                role=system_settings.default_group_role)
+            dojo_group_member.save()
+
+        if system_settings.staff_user_email_pattern is not None and \
+           re.fullmatch(system_settings.staff_user_email_pattern, user.email) is not None:
+            user.is_staff = True
+        else:
+            user.is_staff = False
+
         if settings.GITLAB_PROJECT_AUTO_IMPORT is True and not settings.FEATURE_AUTHORIZATION_V2:
             # Add engagement creation permission if auto_import  is set
             user.user_permissions.set([Permission.objects.get(codename='add_engagement', content_type=ContentType.objects.get_for_model(Engagement)), Permission.objects.get(codename='add_test', content_type=ContentType.objects.get_for_model(Test)), Permission.objects.get(codename='change_test', content_type=ContentType.objects.get_for_model(Test))])
