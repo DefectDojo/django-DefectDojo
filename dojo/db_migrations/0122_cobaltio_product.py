@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0120_sonarqube_test_and_clean'),
+        ('dojo', '0121_user_restrict'),
     ]
 
     operations = [

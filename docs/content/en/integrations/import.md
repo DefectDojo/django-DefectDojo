@@ -66,7 +66,7 @@ JS file in scout2-report/inc-awsconfig/aws\_config.js.
 
 ### AWS Prowler Scanner
 
-Prowler file can be imported as a CSV file (-M csv).
+Prowler file can be imported as a CSV (`-M csv`) or JSON (`-M json`) file.
 
 ### Bandit
 

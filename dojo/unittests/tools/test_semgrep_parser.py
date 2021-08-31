@@ -40,7 +40,7 @@ class TestSemgrepParser(TestCase):
         self.assertEqual("javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");", finding.mitigation)
         self.assertEqual("java.lang.security.audit.cbc-padding-oracle.cbc-padding-oracle", finding.vuln_id_from_tool)
         finding = findings[2]
-        self.assertEqual("Low", finding.severity)
+        self.assertEqual("Info", finding.severity)
         self.assertEqual("src/main/java/org/owasp/benchmark/testcode/BenchmarkTest01150.java", finding.file_path)
         self.assertEqual(66, finding.line)
         self.assertEqual(696, finding.cwe)

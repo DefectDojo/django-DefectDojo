@@ -321,8 +321,7 @@ def finding_querys(request, prod):
     # filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
 
     from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY
-    filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY).distinct()
-
+    filters['accepted'] = findings_qs.filter(ACCEPTED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
     filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              active=True,
@@ -342,7 +341,6 @@ def finding_querys(request, prod):
                                          active=True,
                                          is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
-                                             false_p=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
