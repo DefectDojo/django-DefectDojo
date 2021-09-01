@@ -80,7 +80,7 @@ def search_cwe(value, cwes):
 def get_rule_cwes(rule):
     cwes = []
     # data of the specification
-    if 'relationships' in rule and type(rule['relationships']) == list and len(rule['relationships'])>0:
+    if 'relationships' in rule and type(rule['relationships']) == list:
         for relationship in rule['relationships']:
             value = relationship['target']['id']
             search_cwe(value, cwes)
