@@ -79,13 +79,24 @@ def search_cwe(value, cwes):
 
 def get_rule_cwes(rule):
     cwes = []
-    # condition for njsscan
-    if 'properties' in rule and 'cwe' in rule['properties']:
-        value = rule['properties']['cwe']
+    # data of the specification
+    if 'relationships' in rule: # and type(rule['relationships']) == list and len(rule['relationships'])>0:
+        for relationship in rule['relationships']:
+            value = relationship['target']['id']
+            search_cwe(value, cwes)
+        return cwes
+
+    for tag in get_rule_tags(rule):
+        search_cwe(tag, cwes)
+    return cwes
+
+
+def get_result_cwes_properties(result):
+    """Some tools like njsscan store the CWE in the properties of the result"""
+    cwes = []
+    if 'properties' in result and 'cwe' in result['properties']:
+        value = result['properties']['cwe']
         search_cwe(value, cwes)
-    else:
-        for tag in get_rule_tags(rule):
-            search_cwe(tag, cwes)
     return cwes
 
 
@@ -185,9 +196,12 @@ def get_item(result, rules, artifacts, run_date):
     # we add a special 'None' case if there is no CWE
     cwes = [0]
     if rule is not None:
-        cwes_extracted = get_rule_cwes(result)
+        cwes_extracted = get_rule_cwes(rule)
+        cwes_properties_extracted = get_result_cwes_properties(result)
         if len(cwes_extracted) > 0:
             cwes = cwes_extracted
+        elif len(cwes_properties_extracted) > 0:
+            cwes = cwes_properties_extracted 
 
     finding = Finding(
         title=textwrap.shorten(title, 150),
