@@ -156,14 +156,14 @@ def get_item(result, rules, artifacts, run_date):
                 line = location['physicalLocation']['region']['startLine']
 
     # test rule link
-    rule = rules.get(result['ruleId'])
-    title = result['ruleId']
+    rule = rules.get(result.get('ruleId'))
+    title = result.get('ruleId')
+    description = ''
     if 'message' in result:
         description = get_message_from_multiformatMessageString(
             result['message'], rule)
         if len(description) < 150:
             title = description
-    description = ''
     severity = get_severity(result.get('level', 'warning'))
     if rule is not None:
         # get the severity from the rule
@@ -195,8 +195,6 @@ def get_item(result, rules, artifacts, run_date):
         description=description,
         mitigation=mitigation,
         references=references,
-        # for now we only support when the id of the rule is a CVE
-        cve=cve_try(result['ruleId']),
         cwe=cwes[-1],
         static_finding=True,  # by definition
         dynamic_finding=False,  # by definition
@@ -206,6 +204,8 @@ def get_item(result, rules, artifacts, run_date):
 
     if 'ruleId' in result:
         finding.vuln_id_from_tool = result['ruleId']
+        # for now we only support when the id of the rule is a CVE
+        finding.cve = cve_try(result['ruleId'])
 
     if run_date:
         finding.date = run_date

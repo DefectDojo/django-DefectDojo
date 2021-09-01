@@ -243,3 +243,32 @@ class TestSarifParser(TestCase):
         self.assertEqual(9, len(findings))
         for finding in findings:
             self.common_checks(finding)
+
+    def test_gitleaks(self):
+        testfile = open("dojo/unittests/scans/sarif/gitleaks_7.5.0.sarif")
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(8, len(findings))
+        for finding in findings:
+            self.common_checks(finding)
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("AWS Access Key secret detected", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("AWS Access Key secret detected", finding.description)
+            self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json", finding.file_path)
+            self.assertEqual(13, finding.line)
+        with self.subTest(i=3):
+            finding = findings[3]
+            self.assertEqual("AWS Access Key secret detected", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("AWS Access Key secret detected", finding.description)
+            self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
+            self.assertEqual(44, finding.line)
+        with self.subTest(i=7):
+            finding = findings[7]
+            self.assertEqual("AWS Access Key secret detected", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("AWS Access Key secret detected", finding.description)
+            self.assertEqual("dojo/unittests/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
+            self.assertEqual(37, finding.line)
