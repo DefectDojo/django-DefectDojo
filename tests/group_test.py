@@ -70,7 +70,7 @@ class GroupTest(BaseTestCase):
         driver.find_element_by_id("addGroupMember").click()
         # Select the user 'propersahm'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_users_chosen')))
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_users')))
         except TimeoutException:
             self.fail('Timed out waiting for products dropdown to initialize ')
         driver.execute_script("document.getElementsByName('users')[0].style.display = 'inline'")

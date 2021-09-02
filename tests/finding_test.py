@@ -120,7 +120,7 @@ class FindingTest(BaseTestCase):
         # set select element style from 'none' to 'inline'
 
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_reviewers_chosen')))
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_reviewers')))
         except TimeoutException:
             self.fail('Timed out waiting for reviewer dropdown to initialize ')
 
