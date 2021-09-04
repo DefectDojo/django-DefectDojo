@@ -17,7 +17,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         testfile = open("dojo/unittests/scans/veracode/many_findings_different_hash_code_different_unique_id.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
+        self.assertEqual(4, len(findings))
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual(123, finding.cwe)
@@ -27,6 +27,9 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual(2, finding.line)
         self.assertEqual("app-12345_issue-1", finding.unique_id_from_tool)
         finding = findings[1]
+        self.assertEqual("Medium", finding.severity)
+        self.assertTrue(finding.dynamic_finding)
+        finding = findings[2]
         self.assertEqual("High", finding.severity)
         self.assertIsNone(finding.cwe)
         self.assertEqual("CVE-1234-1234", finding.cve)
