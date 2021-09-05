@@ -1,0 +1,80 @@
+{
+  "_links": {
+    "root": {
+      "href": "/"
+    },
+    "self": {
+      "href": "/scans/ceb5a5be-9681-4113-aa6e-21e66eed8223/findings"
+    },
+    "help": {
+      "href": "https://help.veracode.com/reader/LMv_dtSHyb7iIxAQznC~9w/56JX_MvP4edL8JB_h8ywGA"
+    }
+  },
+  "scan_id": "99f326aa-d648-4c11-ac0c-a583460c370d",
+  "scan_status": "SUCCESS",
+  "message": "Scan successful. Results size: 500 bytes",
+  "findings": [
+    {
+      "title": "finding title",
+      "issue_id": 1,
+      "gob": "B",
+      "severity": 5,
+      "issue_type_id": "taint",
+      "issue_type": "Issue Type",
+      "cwe_id": "123",
+      "display_text": "display text",
+      "files": {
+        "source_file": {
+          "file": "filename",
+          "line": 24,
+          "function_name": "fname",
+          "qualified_function_name": "object.fname",
+          "function_prototype": "fname()",
+          "scope": "^::object::fname"
+        }
+      },
+      "flaw_match": {
+        "procedure_hash": "12345678",
+        "prototype_hash": "90876544",
+        "flaw_hash": "54859332",
+        "flaw_hash_count": 1,
+        "flaw_hash_ordinal": 1,
+        "cause_hash": "36884664",
+        "cause_hash_count": 1,
+        "cause_hash_ordinal": 1
+      }
+    },
+    {
+      "title": "another finding title",
+      "issue_id": 2,
+      "gob": "B",
+      "severity": 3,
+      "issue_type_id": "taint",
+      "issue_type": "Another Issue Type",
+      "cwe_id": "456",
+      "display_text": "another display text",
+      "files": {
+        "source_file": {
+          "file": "different_filename",
+          "line": 89,
+          "function_name": "view",
+          "qualified_function_name": "object.view",
+          "function_prototype": "view()",
+          "scope": "^::object::view"
+        }
+      },
+      "flaw_match": {
+        "procedure_hash": "58758315",
+        "prototype_hash": "86700633",
+        "flaw_hash": "87151532",
+        "flaw_hash_count": 1,
+        "flaw_hash_ordinal": 1,
+        "cause_hash": "37275258",
+        "cause_hash_count": 1,
+        "cause_hash_ordinal": 1
+      }
+    }
+  ],
+  "pipeline_scan": "20.9.2-0",
+  "dev_stage": "DEVELOPMENT"
+}

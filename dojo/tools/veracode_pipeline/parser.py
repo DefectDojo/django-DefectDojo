@@ -83,9 +83,13 @@ class VeracodePipelineParser(object):
         finding.file_path = _source_file_path
         finding.sourcefile = _source_file_path
         finding.sast_source_file_path = _source_file_path
+        finding.line_number = _source_line_number
         finding.source_line = _source_line_number
         finding.sast_source_line = _source_line_number
         _sast_source_obj = _source_file_function
         finding.sast_source_object = _sast_source_obj if _sast_source_obj else None
+
+        if 'flaw_match' in flaw and 'flaw_hash' in flaw['flaw_match']:
+            finding.hash_code = flaw['flaw_match']['flaw_hash']
 
         return finding
