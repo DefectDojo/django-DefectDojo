@@ -30,7 +30,7 @@ Markdown==3.3.4
 mysqlclient==2.0.3
 openpyxl==3.0.7
 xlrd==1.2.0
-Pillow==8.3.1  # required by django-imagekit
+Pillow==8.3.2  # required by django-imagekit
 psycopg2-binary==2.9.1
 cryptography==3.4.8
 python-dateutil==2.8.2
@@ -50,9 +50,9 @@ Python-jose==3.3.0
 gitpython==3.1.18
 debugpy==1.4.1
 python-gitlab==2.10.1
-google-auth==2.0.1
+google-auth==2.0.2
 google-api-python-client==2.19.0
-google-auth-oauthlib==0.4.5
+google-auth-oauthlib==0.4.6
 drf_yasg==1.20.0
 cpe==1.2.1
 packageurl-python==0.9.4
@@ -63,7 +63,7 @@ django-debug-toolbar==3.2.2
 django-debug-toolbar-request-history==0.1.3
 vcrpy==4.1.1
 vcrpy-unittest==0.1.7
-django-tagulous==1.2.0
+django-tagulous==1.2.1
 PyJWT==2.1.0
 cvss==2.3
 django-fieldsignals==0.7.0
