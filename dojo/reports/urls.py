@@ -16,6 +16,8 @@ urlpatterns = [
         name='test_report'),
     url(r'^endpoint/(?P<eid>\d+)/report$', views.endpoint_report,
         name='endpoint_report'),
+    url(r'^endpoint/host/(?P<eid>\d+)/report$', views.endpoint_host_report,
+        name='endpoint_host_report'),
     url(r'^product/report$',
         views.product_findings_report, name='product_findings_report'),
     url(r'^reports/cover$',

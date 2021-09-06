@@ -17,7 +17,7 @@ class ProductTypeGroupTest(BaseTestCase):
         driver.find_element_by_id("addProductTypeGroup").click()
         # Select the product type 'Research and Development'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_product_types_chosen')))
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_product_types')))
         except TimeoutException:
             self.fail('Timed out waiting for product types dropdown to initialize ')
         driver.execute_script("document.getElementsByName('product_types')[0].style.display = 'inline'")
@@ -74,7 +74,7 @@ class ProductTypeGroupTest(BaseTestCase):
         driver.find_element_by_id("addProductTypeGroup").click()
         # Select the group 'Group Name'
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_groups_chosen')))
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_groups')))
         except TimeoutException:
             self.fail('Timed out waiting for groups dropdown to initialize ')
         driver.execute_script("document.getElementsByName('groups')[0].style.display = 'inline'")

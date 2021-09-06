@@ -53,6 +53,14 @@ def requires_file(scan_type):
     return scan_type != SCAN_SONARQUBE_API
 
 
+def initialize_test_types():
+    # called by the initializer to fill the table with test_types
+    for scan_type in PARSERS:
+        test_type, created = Test_Type.objects.get_or_create(name=scan_type)
+        if created:
+            test_type.save()
+
+
 import os
 from inspect import isclass
 from pathlib import Path

@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.db.models import Sum, Count, Q, Max
@@ -23,7 +23,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
                        EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
                        Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm, \
-                       DeleteAppAnalysisForm
+                       DeleteAppAnalysisForm, DeleteSonarqubeConfigurationForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
@@ -44,6 +44,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
+from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 
 logger = logging.getLogger(__name__)
 
@@ -319,8 +320,7 @@ def finding_querys(request, prod):
     # filters['accepted'] = [finding for ra in risk_acceptances for finding in ra.accepted_findings.all()]
 
     from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY
-    filters['accepted'] = Finding.objects.filter(test__engagement__product=prod).filter(ACCEPTED_FINDINGS_QUERY).distinct()
-
+    filters['accepted'] = findings_qs.filter(ACCEPTED_FINDINGS_QUERY).filter(date__range=[start_date, end_date])
     filters['verified'] = findings_qs.filter(date__range=[start_date, end_date],
                                              false_p=False,
                                              active=True,
@@ -340,7 +340,6 @@ def finding_querys(request, prod):
                                          active=True,
                                          is_mitigated=False)
     filters['inactive'] = findings_qs.filter(date__range=[start_date, end_date],
-                                             false_p=False,
                                              duplicate=False,
                                              out_of_scope=False,
                                              active=False,
@@ -775,13 +774,6 @@ def new_product(request, ptid=None):
                         except:
                             logger.info('Labels cannot be created - they may already exists')
 
-            # SonarQube API Configuration
-            sonarqube_form = Sonarqube_ProductForm(request.POST)
-            if sonarqube_form.is_valid():
-                sonarqube_product = sonarqube_form.save(commit=False)
-                sonarqube_product.product = product
-                sonarqube_product.save()
-
             create_notification(event='product_added', title=product.name,
                                 product=product,
                                 url=reverse('view_product', args=(product.id,)))
@@ -804,8 +796,7 @@ def new_product(request, ptid=None):
     return render(request, 'dojo/new_product.html',
                   {'form': form,
                    'jform': jira_project_form,
-                   'gform': gform,
-                   'sonarqube_form': Sonarqube_ProductForm()})
+                   'gform': gform})
 
 
 @user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
@@ -818,7 +809,6 @@ def edit_product(request, pid):
     github_enabled = system_settings.enable_github
     github_inst = None
     gform = None
-    sonarqube_form = None
     error = False
 
     try:
@@ -826,8 +816,6 @@ def edit_product(request, pid):
     except:
         github_inst = None
         pass
-
-    sonarqube_conf = Sonarqube_Product.objects.filter(product=product).first()
 
     if request.method == 'POST':
         form = ProductForm(request.POST, instance=product)
@@ -861,13 +849,6 @@ def edit_product(request, pid):
                                          'GITHUB information updated successfully.',
                                          extra_tags='alert-success')
 
-            # SonarQube API Configuration
-            sonarqube_form = Sonarqube_ProductForm(request.POST, instance=sonarqube_conf)
-            if sonarqube_form.is_valid():
-                new_conf = sonarqube_form.save(commit=False)
-                new_conf.product_id = pid
-                new_conf.save()
-
             if not error:
                 return HttpResponseRedirect(reverse('view_product', args=(pid,)))
     else:
@@ -888,8 +869,6 @@ def edit_product(request, pid):
         else:
             gform = None
 
-        sonarqube_form = Sonarqube_ProductForm(instance=sonarqube_conf)
-
     product_tab = Product_Tab(pid, title="Edit Product", tab="settings")
     return render(request,
                   'dojo/edit_product.html',
@@ -897,7 +876,6 @@ def edit_product(request, pid):
                    'product_tab': product_tab,
                    'jform': jform,
                    'gform': gform,
-                   'sonarqube_form': sonarqube_form,
                    'product': product
                    })
 
@@ -1606,6 +1584,138 @@ def delete_product_member(request, memberid):
         'form': memberform,
         'product_tab': product_tab,
     })
+
+
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+def add_sonarqube(request, pid):
+
+    prod = Product.objects.get(id=pid)
+    if request.method == 'POST':
+        form = Sonarqube_ProductForm(request.POST)
+        if form.is_valid():
+            sonarqube_product = form.save(commit=False)
+            sonarqube_product.product = prod
+            try:
+                sq = SonarQubeAPI(sonarqube_product.sonarqube_tool_config)
+                project = sq.get_project(sonarqube_product.sonarqube_project_key)  # if connection is not successful, this call raise exception
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'SonarQube connection successful. You have access to project "{}"'.format(
+                                         project['name']),
+                                     extra_tags='alert-success')
+                sonarqube_product.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'SonarQube Configuration added successfully.',
+                                     extra_tags='alert-success')
+                if 'add_another' in request.POST:
+                    return HttpResponseRedirect(reverse('add_sonarqube', args=(pid,)))
+                else:
+                    return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     str(e),
+                                     extra_tags='alert-danger')
+    else:
+        form = Sonarqube_ProductForm()
+
+    product_tab = Product_Tab(pid, title="Add SonarQube Configuration", tab="settings")
+
+    return render(request,
+                  'dojo/add_product_sonarqube_configuration.html',
+                  {'form': form,
+                   'product_tab': product_tab,
+                   'product': prod,
+                   })
+
+
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+def view_sonarqube(request, pid):
+
+    sonarqube_queryset = Sonarqube_Product.objects.filter(product=pid)
+
+    product_tab = Product_Tab(pid, title="Sonarqube Configurations", tab="settings")
+    return render(request,
+                  'dojo/view_product_sonarqube_configuration.html',
+                  {
+                      'sonarqube_queryset': sonarqube_queryset,
+                      'product_tab': product_tab,
+                      'pid': pid
+                  })
+
+
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+def edit_sonarqube(request, pid, sqcid):
+
+    sqc = Sonarqube_Product.objects.get(pk=sqcid)
+
+    if sqc.product.pk != int(pid):  # user is trying to edit SQ Config from another product (trying to by-pass auth)
+        raise Http404()
+
+    if request.method == 'POST':
+        sqcform = Sonarqube_ProductForm(request.POST, instance=sqc)
+        if sqcform.is_valid():
+            try:
+                sqcform_copy = sqcform.save(commit=False)
+                sq = SonarQubeAPI(sqcform_copy.sonarqube_tool_config)
+                project = sq.get_project(
+                    sqcform_copy.sonarqube_project_key)  # if connection is not successful, this call raise exception
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'SonarQube connection successful. You have access to project "{}"'.format(
+                                         project['name']),
+                                     extra_tags='alert-success')
+                sqcform.save()
+
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'SonarQube Configuration Successfully Updated.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     str(e),
+                                     extra_tags='alert-danger')
+    else:
+        sqcform = Sonarqube_ProductForm(instance=sqc)
+
+    product_tab = Product_Tab(pid, title="Edit SonarQube Configuration", tab="settings")
+    return render(request,
+                  'dojo/edit_product_sonarqube_configuration.html',
+                  {
+                      'sqcform': sqcform,
+                      'product_tab': product_tab
+                  })
+
+
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+def delete_sonarqube(request, pid, sqcid):
+
+    sqc = Sonarqube_Product.objects.get(pk=sqcid)
+
+    if sqc.product.pk != int(pid):  # user is trying to delete SQ Config from another product (trying to by-pass auth)
+        raise Http404()
+
+    if request.method == 'POST':
+        sqcform = Sonarqube_ProductForm(request.POST)
+        sqc.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'SonarQube Configuration Deleted.',
+                             extra_tags='alert-success')
+        return HttpResponseRedirect(reverse('view_sonarqube', args=(pid,)))
+    else:
+        sqcform = DeleteSonarqubeConfigurationForm(instance=sqc)
+
+    product_tab = Product_Tab(pid, title="Delete SonarQube Configuration", tab="settings")
+    return render(request,
+                  'dojo/delete_product_sonarqube_configuration.html',
+                  {
+                      'form': sqcform,
+                      'product_tab': product_tab
+                  })
 
 
 @user_is_authorized(Product_Group, Permissions.Product_Group_Edit, 'groupid')

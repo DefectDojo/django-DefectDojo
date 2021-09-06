@@ -5,6 +5,20 @@ draft: false
 weight: 5
 ---
 
+{{% alert title="Deprecation notice" color="warning" %}}
+Legacy authorization will be removed with version 2.5.0 / end of November 2021.
+If you have set `FEATURE_AUTHORIZATION_V2` to `False` in your local configuration,
+remove this local setting and start using the new authorization as described
+in [Permissions]({{< ref "/usage/permissions" >}}).
+
+Users have been migrated to the new authorization with release 2.0.0 but you can
+run the migration again with
+
+`./manage.py migrate_authorization_v2`
+
+See [Authorization](https://defectdojo.github.io/django-DefectDojo/getting_started/upgrading/#authorization)
+for more details about the migration.
+{{% /alert %}}
 
 Docker-compose
 --------------
@@ -56,6 +70,14 @@ first. (Of course, if you're doing this, then you know you have to
 update the source code first)
 
 Replace the first step above with this one: `docker-compose build`
+
+
+## Upgrading to DefectDojo Version 2.2.x.
+
+Upgrade to 2.0.0 contained migration of endpoints. Some parts of migration haven't been done properly. This deficiency
+may manifest as a doubled slash in endpoint URLs (like `http://foo.bar:8080//test`) or as a problem with deduplication
+of the same endpoints. The mentioned bug was fixed in 2.2.0 and if you have seen these kinds of problems, just rerun
+"Endpoint migration" as it is written in [Upgrading to DefectDojo Version 2.0.x.](#upgrading-to-defectdojo-version-20x).
 
 
 ## Upgrading to DefectDojo Version 2.0.x.

@@ -28,6 +28,15 @@ class TestEndpointModel(TestCase):
         self.assertEqual(endpoint.query, 'key1=value&no_value_key')
         self.assertEqual(endpoint.fragment, 'fragment1')
 
+    def test_truncates_large_attributes(self):
+        path = "foo" * 1000
+        query = "bar" * 1000
+        fragment = "baz" * 1000
+        endpoint = Endpoint.from_uri('http://alice@foo.bar:8080/{}?{}#{}'.format(path, query, fragment))
+        self.assertEqual(len(endpoint.path), 500)
+        self.assertEqual(len(endpoint.query), 1000)
+        self.assertEqual(len(endpoint.fragment), 500)
+
     def test_noscheme(self):
         endpoint = Endpoint.from_uri('//' + 'localhost:22')
         self.assertIsNone(endpoint.protocol)
