@@ -1,0 +1,18 @@
+[
+    {
+        "line": "\u003e [First you 😂😂then you 😢](https://twitter.com/kramse/status/1073168529405472768)",
+        "lineNumber": 23,
+        "offender": "twitter.com/kramse/status/1073168529405472768",
+        "commit": "",
+        "repo": "",
+        "repoURL": "",
+        "leakURL": "",
+        "rule": "Twitter Client ID",
+        "commitMessage": "",
+        "author": "",
+        "email": "",
+        "file": "README.md",
+        "date": "0001-01-01T00:00:00Z",
+        "tags": "client, Twitter"
+    }
+]

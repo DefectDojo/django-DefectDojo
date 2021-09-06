@@ -130,7 +130,7 @@
             "https://capec.mitre.org/data/definitions/463.html"
           ]
         },
-        "severity": "WARNING",
+        "severity": "INFO",
         "fix": "javax crypto Cipher.getInstance(\"AES/GCM/NoPadding\");",
         "lines": "\t\t\tjavax.crypto.Cipher c = javax.crypto.Cipher.getInstance(\"DES/CBC/PKCS5Padding\");"
       }
