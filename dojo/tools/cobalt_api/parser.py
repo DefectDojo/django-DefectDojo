@@ -1,4 +1,5 @@
 import json
+import textwrap
 from datetime import datetime
 from dojo.models import Endpoint, Finding
 from dojo.tools.cobalt_api.importer import CobaltApiImporter
@@ -57,7 +58,7 @@ class CobaltApiParser(object):
 
             finding = Finding(
                 test=test,
-                title=self.safe_title(title),
+                title=textwrap.shorten(title, width=511, placeholder="..."),
                 date=date,
                 severity=self.convert_severity(cobalt_severity),
                 description=description,
@@ -172,9 +173,3 @@ class CobaltApiParser(object):
 
     def is_verified(self, cobalt_state):
         return cobalt_state != "new" and cobalt_state != "triaging"
-
-    def safe_title(self, title):
-        if len(title) > 255:
-            return title[0:252] + "..."
-        else:
-            return title
