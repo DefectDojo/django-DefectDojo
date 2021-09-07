@@ -72,7 +72,6 @@ class CobaltApiParser(object):
                 risk_accepted=self.is_risk_accepted(cobalt_state),
                 is_mitigated=self.is_mitigated(cobalt_state),
                 last_status_update=last_status_update,
-                numerical_severity=self.convert_severity_numerical(cobalt_severity),
                 static_finding=False,
                 dynamic_finding=True,
                 unique_id_from_tool=unique_id_from_tool)
@@ -139,17 +138,6 @@ class CobaltApiParser(object):
             return "High"
         else:
             return "Info"
-
-    def convert_severity_numerical(self, cobalt_severity):
-        """Convert severity value"""
-        if cobalt_severity == "low":
-            return "S3"
-        elif cobalt_severity == "medium":
-            return "S2"
-        elif cobalt_severity == "high":
-            return "S1"
-        else:
-            return "S4"
 
     def is_active(self, cobalt_state):
         return not self.is_mitigated(cobalt_state) \
