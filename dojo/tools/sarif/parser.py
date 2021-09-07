@@ -150,11 +150,6 @@ def cve_try(val):
 
 
 def get_item(result, rules, artifacts, run_date):
-    mitigation = result.get('Remediation', {}).get(
-        'Recommendation', {}).get('Text', "")
-    references = result.get('Remediation', {}).get(
-        'Recommendation', {}).get('Url')
-
     # if there is a location get it
     file_path = None
     line = -1
@@ -193,23 +188,10 @@ def get_item(result, rules, artifacts, run_date):
         else:
             description = rule['id']
 
-    # we add a special 'None' case if there is no CWE
-    cwes = [0]
-    if rule is not None:
-        cwes_extracted = get_rule_cwes(rule)
-        cwes_properties_extracted = get_result_cwes_properties(result)
-        if len(cwes_extracted) > 0:
-            cwes = cwes_extracted
-        elif len(cwes_properties_extracted) > 0:
-            cwes = cwes_properties_extracted
-
     finding = Finding(
         title=textwrap.shorten(title, 150),
         severity=severity,
         description=description,
-        mitigation=mitigation,
-        references=references,
-        cwe=cwes[-1],
         static_finding=True,  # by definition
         dynamic_finding=False,  # by definition
         file_path=file_path,
@@ -220,6 +202,20 @@ def get_item(result, rules, artifacts, run_date):
         finding.vuln_id_from_tool = result['ruleId']
         # for now we only support when the id of the rule is a CVE
         finding.cve = cve_try(result['ruleId'])
+    # some time the rule id is here but the tool doesn't define it
+    if rule is not None:
+        cwes_extracted = get_rule_cwes(rule)
+        if len(cwes_extracted) > 0:
+            finding.cwe = cwes_extracted[-1]
+
+    # manage the case that some tools produce CWE as properties of the result
+    cwes_properties_extracted = get_result_cwes_properties(result)
+    if len(cwes_properties_extracted) > 0:
+        finding.cwe = cwes_properties_extracted[-1]
+
+    # manage fixes provided in the report
+    if "fixes" in result:
+        finding.mitigation = "\n".join([fix.get('description', {}).get("text") for fix in result["fixes"]])
 
     if run_date:
         finding.date = run_date
