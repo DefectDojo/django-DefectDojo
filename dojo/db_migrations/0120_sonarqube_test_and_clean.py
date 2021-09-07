@@ -20,7 +20,8 @@ def sq_clean(apps, schema_editor):
             sq.sonarqube_tool_config = sqtc
             sq.save()
     else:
-        logger.warning('No SonarQube tool configuration found, not updating any product SonarQube configurations')
+        logger.warning('No SonarQube tool configuration found, all invalid SonarQube configurations will be removed.')
+        Sonarqube_Product_model.objects.filter(sonarqube_tool_config__isnull=True).delete()
 
 
 class Migration(migrations.Migration):
