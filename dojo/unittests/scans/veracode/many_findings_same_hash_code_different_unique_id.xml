@@ -6,6 +6,11 @@
          <module name="myapp-1234.jar" compiler="JAVAC_8" os="Java J2SE 8" architecture="JVM" loc="5" score="70" numflawssev0="0" numflawssev1="0" numflawssev2="0" numflawssev3="2" numflawssev4="0" numflawssev5="0"/>
       </modules>
    </static-analysis>
+    <dynamic-analysis rating="B" score="100" submitted_date="2020-06-01 10&#x3a;02&#x3a;01 UTC" published_date="2020-06-01 10&#x3a;02&#x3a;01 UTC" version="28 Sep 2018 Dynamic" mitigated_rating="A" mitigated_score="100" dynamic_scan_type="ds" scan_exit_status_id="13" scan_exit_status_desc="min_priority">
+        <modules>
+            <module name="dynamic_analysis" compiler="Unknown" os="" architecture="" loc="0" score="99" numflawssev0="1" numflawssev1="0" numflawssev2="2" numflawssev3="1" numflawssev4="0" numflawssev5="0" target_url="https&#x3a;&#x2f;&#x2f;www.example.com&#x2f;index.html" domain="InternetDomainName&#x7b;name&#x3d;example.com&#x7d;"/>
+        </modules>
+    </dynamic-analysis>
    <severity level="5"/>
    <severity level="4"/>
    <severity level="3">
@@ -30,6 +35,18 @@
                </flaw>
            </staticflaws>
          </cwe>
+          <cwe cweid="456" cwename="cwename" pcirelated="true" owasp="456" sans="456">
+              <description>
+                  <text text="Description"/>
+              </description>
+              <dynamicflaws>
+                  <flaw severity="3" categoryname="catname" count="1" issueid="2" module="dynamic_analysis" type="Dynamic Type" description="Description" note="" cweid="456" remediationeffort="2" categoryid="456" pcirelated="true" date_first_occurrence="2020-06-01 10&#x3a;02&#x3a;01 UTC" remediation_status="Open" cia_impact="" grace_period_expires="" url="https&#x3a;&#x2f;&#x2f;www.example.com&#x2f;index.html">
+                      <mitigations>
+                          <mitigation action="No Action Taken" description="Description" user="AnyUser" date="2020-06-01 10&#x3a;02&#x3a;01 UTC"/>
+                      </mitigations>
+                  </flaw>
+              </dynamicflaws>
+          </cwe>
       </category>
    </severity>
    <severity level="2"/>
