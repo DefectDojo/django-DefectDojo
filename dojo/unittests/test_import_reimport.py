@@ -177,7 +177,7 @@ class ImportReimportMixin(object):
         logger.debug('importing original veracode report')
         notes_count_before = self.db_notes_count()
 
-        with assertTestImportModelsCreated(self, imports=1, affected_findings=3, created=3):
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=4, created=4):
             import0 = self.import_scan_with_params(self.veracode_many_findings, scan_type=self.scan_type_veracode)
 
         test_id = import0['test']
@@ -185,7 +185,7 @@ class ImportReimportMixin(object):
         self.log_finding_summary_json_api(findings)
 
         # imported count must match count in the report
-        self.assert_finding_count_json(3, findings)
+        self.assert_finding_count_json(4, findings)
 
         # no notes expected
         self.assertEqual(notes_count_before, self.db_notes_count())
@@ -335,7 +335,7 @@ class ImportReimportMixin(object):
         # reimported count must match count in sonar report
         # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(3, findings)
+        self.assert_finding_count_json(4, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
@@ -409,7 +409,7 @@ class ImportReimportMixin(object):
 
         # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(3, findings)
+        self.assert_finding_count_json(4, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
@@ -443,7 +443,7 @@ class ImportReimportMixin(object):
 
         # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(3, findings)
+        self.assert_finding_count_json(4, findings)
 
         # inversely, we should see no findings with verified=False
         findings = self.get_test_findings_api(test_id, verified=False)
@@ -478,7 +478,7 @@ class ImportReimportMixin(object):
 
         # we set verified=False in this reimport but DD keeps true as per the previous import (reimport doesn't "unverify" findings)
         findings = self.get_test_findings_api(test_id, verified=True)
-        self.assert_finding_count_json(3, findings)
+        self.assert_finding_count_json(4, findings)
 
         # The new finding has verified=false
         findings = self.get_test_findings_api(test_id, verified=False)
