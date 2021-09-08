@@ -1,6 +1,6 @@
 {
   "name": "DefectDojo",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "dependencies": {
     "JUMFlot": "jumjum123/JUMFlot#*",
     "bootstrap": "^3.4.0",
