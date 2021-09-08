@@ -1,6 +1,7 @@
 import json
 import logging
 import urllib
+from django.conf import settings
 
 from dojo.models import Finding
 
@@ -20,13 +21,17 @@ class SafetyParser(object):
 
     def get_safetydb(self):
         """Grab Safety DB for CVE lookup"""
-        url = "https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json"
-        try:
-            response = urllib.request.urlopen(url)
-            return json.load(response)
-        except urllib.error.URLError as e:
-            logger.warn("Error Message: %s", e)
-            logger.warn("Could not resolve %s. Fallback is using the offline version from dojo/tools/safety/insecure_full.json.", url)
+        if settings.SAFETY_PARSER_ONLINE_DB:
+            url = "https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json"
+            try:
+                response = urllib.request.urlopen(url)
+                return json.load(response)
+            except urllib.error.URLError as e:
+                logger.warn("Error Message: %s", e)
+                logger.warn("Could not resolve %s. Fallback is using the offline version from dojo/tools/safety/insecure_full.json.", url)
+                with open("dojo/tools/safety/insecure_full.json", "r") as insecure_full:
+                    return json.load(insecure_full)
+        else:
             with open("dojo/tools/safety/insecure_full.json", "r") as insecure_full:
                 return json.load(insecure_full)
 
