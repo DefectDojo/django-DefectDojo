@@ -160,6 +160,9 @@ env = environ.Env(
     DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
+    # when enabeld safety parser will download latest vuln db during runtime
+    # otherwise data is loaded from dojo/tools/safety/insecure_full.json
+    DD_SAFETY_PARSER_ONLINE_DB=(bool, True),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -1251,6 +1254,9 @@ QUALYS_WAS_WEAKNESS_IS_VULN = env("DD_QUALYS_WAS_WEAKNESS_IS_VULN")
 # Create a unique finding for all findings in qualys WAS parser
 # If using this, lines for Qualys WAS deduplication functions must be un-commented
 QUALYS_WAS_UNIQUE_ID = False
+
+# Deside if parser should download latest db or use offline version
+SAFETY_PARSER_ONLINE_DB = env("DD_SAFETY_PARSER_ONLINE_DB")
 
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',
