@@ -65,6 +65,8 @@ class TestEndpointModel(TestCase):
         endpoint.clean()
         endpoint = Endpoint(host='456_desktop')
         endpoint.clean()
+        endpoint = Endpoint(host='_invalid._host.com')
+        endpoint.clean()
 
     def test_invalid(self):
         self.assertRaises(ValidationError, Endpoint.from_uri, 'http://127.0.0.1:portNo/')

@@ -1196,7 +1196,7 @@ class Endpoint(models.Model):
                 self.userinfo = None
 
         if self.host:
-            if not re.match(r'^[A-Za-z0-9][A-Za-z0-9_\.\-\+]+$', self.host):
+            if not re.match(r'^[A-Za-z0-9_\-\+][A-Za-z0-9_\.\-\+]+$', self.host):
                 try:
                     validate_ipv46_address(self.host)
                 except ValidationError:
