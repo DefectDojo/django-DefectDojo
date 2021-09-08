@@ -27,10 +27,9 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Deployment method** *(select with an `X`)*
-- [ ] Docker
+- [ ] Docker Compose
 - [ ] Kubernetes
 - [ ] GoDojo
-- [ ] setup.bash / legacy-setup.bash
 
 **Environment information**
  - Operating System: [e.g. Ubuntu 18.04]
