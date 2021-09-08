@@ -23,7 +23,6 @@ class TestSarifParser(TestCase):
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(510, len(findings))
-        item = findings[0]
         for finding in findings:
             self.common_checks(finding)
 
@@ -78,6 +77,20 @@ class TestSarifParser(TestCase):
         )
         for finding in findings:
             self.common_checks(finding)
+
+    def test_example_k4_report_mitigation(self):
+        testfile = open("dojo/unittests/scans/sarif/appendix_k4.sarif")
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        for finding in findings:
+            self.common_checks(finding)
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual('Variable "ptr" was used without being initialized. It was declared [here](0).', finding.title)
+            self.assertEqual('C2001', finding.vuln_id_from_tool)
+            self.assertEqual('collections/list.h', finding.file_path)
+            self.assertEqual('Initialize the variable to null', finding.mitigation)
 
     def test_example_report_ms(self):
         """Report file come from Microsoft SARIF sdk on GitHub"""
@@ -243,3 +256,66 @@ class TestSarifParser(TestCase):
         self.assertEqual(9, len(findings))
         for finding in findings:
             self.common_checks(finding)
+
+    def test_gitleaks(self):
+        testfile = open("dojo/unittests/scans/sarif/gitleaks_7.5.0.sarif")
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(8, len(findings))
+        for finding in findings:
+            self.common_checks(finding)
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("AWS Access Key secret detected", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("AWS Access Key secret detected", finding.description)
+            self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json", finding.file_path)
+            self.assertEqual(13, finding.line)
+        with self.subTest(i=3):
+            finding = findings[3]
+            self.assertEqual("AWS Access Key secret detected", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("AWS Access Key secret detected", finding.description)
+            self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
+            self.assertEqual(44, finding.line)
+        with self.subTest(i=7):
+            finding = findings[7]
+            self.assertEqual("AWS Access Key secret detected", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("AWS Access Key secret detected", finding.description)
+            self.assertEqual("dojo/unittests/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
+            self.assertEqual(37, finding.line)
+
+    def test_flawfinder(self):
+        testfile = open("dojo/unittests/scans/sarif/flawfinder.sarif")
+        parser = SarifParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(54, len(findings))
+        for finding in findings:
+            self.common_checks(finding)
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).", finding.description)
+            self.assertEqual("src/tree/param.cc", finding.file_path)
+            self.assertEqual(29, finding.line)
+            self.assertEqual(327, finding.cwe)
+            self.assertEqual("FF1048", finding.vuln_id_from_tool)
+        with self.subTest(i=20):
+            finding = findings[20]
+            self.assertEqual("buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120).", finding.title)
+            self.assertEqual("Info", finding.severity)
+            self.assertEqual("Does not check for buffer overflows when copying to destination (CWE-120).", finding.description)
+            self.assertEqual("src/common/io.cc", finding.file_path)
+            self.assertEqual(31, finding.line)
+            self.assertEqual(120, finding.cwe)
+            self.assertEqual("FF1004", finding.vuln_id_from_tool)
+        with self.subTest(i=53):
+            finding = findings[53]
+            self.assertEqual("buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).", finding.title)
+            self.assertEqual("Critical", finding.severity)
+            self.assertEqual("The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).", finding.description)
+            self.assertEqual("src/cli_main.cc", finding.file_path)
+            self.assertEqual(482, finding.line)
+            self.assertEqual("FF1021", finding.vuln_id_from_tool)
