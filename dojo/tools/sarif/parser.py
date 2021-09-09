@@ -164,7 +164,7 @@ def get_snippet(result):
             if 'region' in location['physicalLocation']:
                 if 'snippet' in location['physicalLocation']['region']:
                     if 'text' in location['physicalLocation']['region']['snippet']:
-                        snippet = location['physicalLocation']['region']['snippet']['text']    
+                        snippet = location['physicalLocation']['region']['snippet']['text']
     return snippet
 
 
