@@ -149,10 +149,76 @@ def cve_try(val):
         return None
 
 
+def get_title(result, rule):
+    title = get_message_from_multiformatMessageString(result['message'], rule)
+    if rule is not None:
+        if title is None and 'shortDescription' in rule:
+            title = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
+        elif 'fullDescription' in rule:
+            title = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
+        elif title is None and 'name' in rule:
+            title = rule['name']
+        elif title is None:
+            title = rule['id']
+
+    if title is None:
+        title = ''
+
+    return textwrap.shorten(title, 150)
+
+
+def get_snippet(result):
+    snippet = None
+    if 'locations' in result:
+        location = result['locations'][0]
+        if 'physicalLocation' in location:
+            if 'region' in location['physicalLocation']:
+                if 'snippet' in location['physicalLocation']['region']:
+                    if 'text' in location['physicalLocation']['region']['snippet']:
+                        snippet = location['physicalLocation']['region']['snippet']['text']    
+    return snippet
+
+
+def get_description(result, rule):
+    description = ''
+    message = ''
+    if 'message' in result:
+        message = get_message_from_multiformatMessageString(result['message'], rule)
+        description += '**Result message:** {}\n'.format(message)
+    if get_snippet(result) is not None:
+        description += '**Snippet:** {}\n'.format(get_snippet(result))
+    if rule is not None:
+        if 'name' in rule:
+            description += '**Rule name:** {}\n'.format(rule.get('name'))
+        if 'shortDescription' in rule:
+            shortDescription = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
+            if shortDescription != message:
+                description += '**Rule short description:** {}\n'.format(shortDescription)
+        if 'fullDescription' in rule:
+            fullDescription = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
+            if fullDescription != message and fullDescription != shortDescription:
+                description += '**Rule full description:** {}\n'.format(fullDescription)
+
+    return description
+
+
+def get_references(rule):
+    reference = None
+    if rule is not None:
+        if 'helpUri' in rule:
+            reference = rule['helpUri']
+        elif 'help' in rule:
+            helpText = get_message_from_multiformatMessageString(rule['help'], rule)
+            if helpText.startswith('http'):
+                reference = helpText
+
+    return reference
+
+
 def get_item(result, rules, artifacts, run_date):
     # if there is a location get it
     file_path = None
-    line = -1
+    line = None
     if "locations" in result:
         location = result['locations'][0]
         if 'physicalLocation' in location:
@@ -161,15 +227,9 @@ def get_item(result, rules, artifacts, run_date):
             if 'region' in location['physicalLocation']:
                 line = location['physicalLocation']['region']['startLine']
 
+
     # test rule link
     rule = rules.get(result.get('ruleId'))
-    title = result.get('ruleId')
-    description = ''
-    if 'message' in result:
-        description = get_message_from_multiformatMessageString(
-            result['message'], rule)
-        if len(description) < 150:
-            title = description
     severity = get_severity(result.get('level', 'warning'))
     if rule is not None:
         # get the severity from the rule
@@ -177,25 +237,15 @@ def get_item(result, rules, artifacts, run_date):
             severity = get_severity(
                 rule['defaultConfiguration'].get('level', 'warning'))
 
-        if 'shortDescription' in rule:
-            description = get_message_from_multiformatMessageString(
-                rule['shortDescription'], rule)
-        elif 'fullDescription' in rule:
-            description = get_message_from_multiformatMessageString(
-                rule['fullDescription'], rule)
-        elif 'name' in rule:
-            description = rule['name']
-        else:
-            description = rule['id']
-
     finding = Finding(
-        title=textwrap.shorten(title, 150),
+        title=get_title(result, rule),
         severity=severity,
-        description=description,
+        description=get_description(result, rule),
         static_finding=True,  # by definition
         dynamic_finding=False,  # by definition
         file_path=file_path,
         line=line,
+        references=get_references(rule),
     )
 
     if 'ruleId' in result:
