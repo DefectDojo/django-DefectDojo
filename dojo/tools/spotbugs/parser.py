@@ -122,7 +122,7 @@ class SpotbugsParser(object):
                     'no_instance_hash',
                     title,
                     description,
-                ]) 
+                ])
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
