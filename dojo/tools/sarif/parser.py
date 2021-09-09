@@ -109,17 +109,6 @@ def get_artifacts(run):
     return artifacts
 
 
-def get_severity(data):
-    """Convert level value to severity
-    """
-    if 'warning' == data:
-        return 'Medium'
-    elif 'error' == data:
-        return 'Critical'
-    else:
-        return 'Info'
-
-
 def get_message_from_multiformatMessageString(data, rule):
     """Get a message from multimessage struct
 
@@ -154,7 +143,7 @@ def get_title(result, rule):
     if rule is not None:
         if title is None and 'shortDescription' in rule:
             title = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
-        elif 'fullDescription' in rule:
+        elif title is None and 'fullDescription' in rule:
             title = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
         elif title is None and 'name' in rule:
             title = rule['name']
@@ -190,6 +179,7 @@ def get_description(result, rule):
     if rule is not None:
         if 'name' in rule:
             description += '**Rule name:** {}\n'.format(rule.get('name'))
+        shortDescription = ''
         if 'shortDescription' in rule:
             shortDescription = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
             if shortDescription != message:
@@ -215,6 +205,21 @@ def get_references(rule):
     return reference
 
 
+def get_severity(result, rule):
+    severity = result.get('level', 'warning')
+    if severity is None and rule is not None:
+        # get the severity from the rule
+        if 'defaultConfiguration' in rule:
+            severity = rule['defaultConfiguration'].get('level', 'warning')
+
+    if 'warning' == severity:
+        return 'Medium'
+    elif 'error' == severity:
+        return 'Critical'
+    else:
+        return 'Info'
+
+
 def get_item(result, rules, artifacts, run_date):
     # if there is a location get it
     file_path = None
@@ -227,19 +232,12 @@ def get_item(result, rules, artifacts, run_date):
             if 'region' in location['physicalLocation']:
                 line = location['physicalLocation']['region']['startLine']
 
-
     # test rule link
     rule = rules.get(result.get('ruleId'))
-    severity = get_severity(result.get('level', 'warning'))
-    if rule is not None:
-        # get the severity from the rule
-        if 'defaultConfiguration' in rule:
-            severity = get_severity(
-                rule['defaultConfiguration'].get('level', 'warning'))
 
     finding = Finding(
         title=get_title(result, rule),
-        severity=severity,
+        severity=get_severity(result, rule),
         description=get_description(result, rule),
         static_finding=True,  # by definition
         dynamic_finding=False,  # by definition
