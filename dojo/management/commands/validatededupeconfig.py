@@ -1,10 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
+import logging
 
 
-"""
-Author: Josh Hewing and Michael Chen- This script will solve issue #3666 by checking for deduplication configuration at startup
-"""
+logger = logging.getLogger(__name__)
+deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class Command(BaseCommand):
