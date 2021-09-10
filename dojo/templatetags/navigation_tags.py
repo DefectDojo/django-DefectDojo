@@ -1,6 +1,7 @@
 from django import template
 from django.utils.safestring import mark_safe as safe
 from django.utils.html import escape
+from urllib.parse import urlencode
 
 
 register = template.Library()
@@ -60,7 +61,7 @@ def dojo_sort(request, display='Name', value='title', default=None):
     icon += ' dd-sort"></i>'
     dict_ = request.GET.copy()
     dict_[field] = value
-    link = '<a title="' + title + '" href="?' + dict_.urlencode() + '">' + display + '&nbsp;' + icon + '</a>'
+    link = '<a title="' + title + '" href="?' + escape(urlencode(dict_)) + '">' + display + '&nbsp;' + icon + '</a>'
     return safe(link)
 
 
