@@ -1912,7 +1912,7 @@ class Finding(models.Model):
                                         help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
 
     # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?"
-    publish_date = models.DateTimeField(null=True,
+    publish_date = models.DateField(null=True,
                                          blank=True,
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
