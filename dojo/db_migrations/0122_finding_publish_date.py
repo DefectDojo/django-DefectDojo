@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0121_user_restrict"),
+        ("dojo", "0122_cobaltio_product"),
     ]
 
     operations = [
