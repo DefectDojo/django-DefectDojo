@@ -1450,6 +1450,23 @@ class Sonarqube_Product(models.Model):
         return '{} | {}'.format(self.sonarqube_tool_config.name, self.sonarqube_project_key)
 
 
+class Cobaltio_Product(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cobaltio_asset_id = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="Cobalt.io Asset Id"
+    )
+    cobaltio_asset_name = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="Cobalt.io Asset Name"
+    )
+    cobaltio_tool_config = models.ForeignKey(
+        Tool_Configuration, verbose_name="Cobalt.io Configuration",
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return "{} ({})".format(self.cobaltio_asset_name, self.cobaltio_asset_id)
+
+
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
     lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
@@ -1482,6 +1499,7 @@ class Test(models.Model):
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
     sonarqube_config = models.ForeignKey(Sonarqube_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="SonarQube Config")
+    cobaltio_config = models.ForeignKey(Cobaltio_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="Cobalt.io Config")
 
     class Meta:
         indexes = [

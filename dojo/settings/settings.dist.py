@@ -1081,6 +1081,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx OSA': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     'Coverity API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Cobalt.io API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Track Finding Packaging Format (FPF) Export': DEDUPE_ALGO_HASH_CODE,
     'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
