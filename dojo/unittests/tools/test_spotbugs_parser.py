@@ -39,6 +39,37 @@ class TestSpotbugsParser(TestCase):
         test_finding = findings[0]
         self.assertEqual("securitytest/command/IdentityFunctionCommandInjection.kt", test_finding.file_path)
 
+    def test_file(self):
+        parser = SpotbugsParser()
+        testfile = open("dojo/unittests/scans/spotbugs/many_findings.xml")
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(81, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("Potential Command Injection", finding.title)
+            self.assertEqual("securitytest/command/IdentityFunctionCommandInjection.kt", finding.file_path)
+            self.assertEqual(95, finding.line)
+            self.assertEqual("securitytest.command.IdentityFunctionCommandInjection", finding.sast_source_object)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual(78, finding.cwe)
+        with self.subTest(i=40):
+            finding = findings[40]
+            self.assertEqual("Potential CRLF Injection for logs", finding.title)
+            self.assertEqual("securitytest/injection/KotlinLogging.kt", finding.file_path)
+            self.assertEqual(23, finding.line)
+            self.assertEqual("securitytest.injection.KotlinLogging", finding.sast_source_object)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual(117, finding.cwe)
+        with self.subTest(i=80):
+            finding = findings[80]
+            self.assertEqual("Potential Path Traversal (file read)", finding.title)
+            self.assertEqual("securitytest/pathtraversal/PathTraversalKotlin.kt", finding.file_path)
+            self.assertEqual(36, finding.line)
+            self.assertEqual("securitytest.pathtraversal.PathTraversalKotlin", finding.sast_source_object)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual(22, finding.cwe)
+
     def test_description(self):
         parser = SpotbugsParser()
         findings = parser.get_findings("dojo/unittests/scans/spotbugs/many_findings.xml", Test())

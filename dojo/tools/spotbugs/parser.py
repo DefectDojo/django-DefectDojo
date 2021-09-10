@@ -83,17 +83,16 @@ class SpotbugsParser(object):
                 desc += message + '\n'
 
             shortmessage_extract = bug.find('ShortMessage')
-            if shortmessage_extract:
-                title = shortmessage_extract.getText()
+            if shortmessage_extract is not None:
+                title = shortmessage_extract.text
             else:
                 title = bug.get('type')
-            cwe = bug.get('cweid', default=0)
             severity = SEVERITY[bug.get('priority')]
             description = desc
 
             finding = Finding(
                 title=title,
-                cwe=cwe,
+                cwe=int(bug.get('cweid', default=0)),
                 severity=severity,
                 description=description,
                 test=test,
@@ -106,10 +105,11 @@ class SpotbugsParser(object):
             source_extract = bug.find('SourceLine')
             if source_extract is not None:
                 finding.file_path = source_extract.get("sourcepath")
-                finding.line = int(source_extract.get("start"))
                 finding.sast_source_object = source_extract.get("classname")
                 finding.sast_source_file_path = source_extract.get("sourcepath")
-                finding.sast_source_line = int(source_extract.get("start"))
+                if 'start' in source_extract.attrib and source_extract.get("start").isdigit():
+                    finding.line = int(source_extract.get("start"))
+                    finding.sast_source_line = int(source_extract.get("start"))
 
             if bug.get('type') in mitigation_patterns:
                 finding.mitigation = mitigation_patterns[bug.get('type')]
