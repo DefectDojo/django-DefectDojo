@@ -36,8 +36,8 @@ class TestSarifParser(TestCase):
         self.assertEqual(15, item.line)
         self.assertEqual("Critical", item.severity)
         description = '''**Result message:** Variable "ptr" was used without being initialized. It was declared [here](0).
-**Snippet:** add_core(ptr, offset, val);
-    return;
+**Snippet:** ```add_core(ptr, offset, val);
+    return;```
 **Rule short description:** A variable was used without being initialized.
 **Rule full description:** A variable was used without being initialized. This can result in runtime errors such as null reference exceptions.
 '''
@@ -289,7 +289,7 @@ class TestSarifParser(TestCase):
             self.assertEqual("AWS Access Key secret detected", finding.title)
             self.assertEqual("Medium", finding.severity)
             description = '''**Result message:** AWS Access Key secret detected
-**Snippet:**       \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",
+**Snippet:** ```      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",```
 '''
             self.assertEqual(description, finding.description)
             self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json", finding.file_path)
@@ -299,7 +299,7 @@ class TestSarifParser(TestCase):
             self.assertEqual("AWS Access Key secret detected", finding.title)
             self.assertEqual("Medium", finding.severity)
             description = '''**Result message:** AWS Access Key secret detected
-**Snippet:**       \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",
+**Snippet:** ```      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",```
 '''
             self.assertEqual(description, finding.description)
             self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
@@ -309,7 +309,7 @@ class TestSarifParser(TestCase):
             self.assertEqual("AWS Access Key secret detected", finding.title)
             self.assertEqual("Medium", finding.severity)
             description = '''**Result message:** AWS Access Key secret detected
-**Snippet:**         self.assertEqual(\"AWS\\nAKIAIOSFODNN7EXAMPLE\", first_finding.description)
+**Snippet:** ```        self.assertEqual(\"AWS\\nAKIAIOSFODNN7EXAMPLE\", first_finding.description)```
 '''
             self.assertEqual(description, finding.description)
             self.assertEqual("dojo/unittests/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
@@ -327,7 +327,7 @@ class TestSarifParser(TestCase):
             self.assertEqual("random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).", finding.title)
             self.assertEqual("Medium", finding.severity)
             description = '''**Result message:** random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).
-**Snippet:**       is.setstate(std::ios::failbit);
+**Snippet:** ```      is.setstate(std::ios::failbit);```
 **Rule name:** random/setstate
 **Rule short description:** This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).
 '''
@@ -342,7 +342,7 @@ class TestSarifParser(TestCase):
             self.assertEqual("buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120).", finding.title)
             self.assertEqual("Info", finding.severity)
             description = '''**Result message:** buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120).
-**Snippet:**     std::memcpy(dptr, dmlc::BeginPtr(buffer_) + buffer_ptr_, size);
+**Snippet:** ```    std::memcpy(dptr, dmlc::BeginPtr(buffer_) + buffer_ptr_, size);```
 **Rule name:** buffer/memcpy
 **Rule short description:** Does not check for buffer overflows when copying to destination (CWE-120).
 '''
@@ -357,7 +357,7 @@ class TestSarifParser(TestCase):
             self.assertEqual("buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).", finding.title)
             self.assertEqual("Critical", finding.severity)
             description = '''**Result message:** buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).
-**Snippet:**       if (sscanf(argv[i], "%[^=]=%s", name, val) == 2) {
+**Snippet:** ```      if (sscanf(argv[i], "%[^=]=%s", name, val) == 2) {```
 **Rule name:** buffer/sscanf
 **Rule short description:** The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).
 '''
