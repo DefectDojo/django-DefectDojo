@@ -10,8 +10,8 @@ from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Fin
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Product_Type, JIRA_Instance, Endpoint, JIRA_Project, \
     Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
-    System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Cobaltio_Product, \
+    Regulation, System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
@@ -1181,6 +1181,8 @@ class ImportScanSerializer(serializers.Serializer):
     commit_hash = serializers.CharField(required=False)
     sonarqube_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Sonarqube_Product.objects.all())
+    cobaltio_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
+                                                         queryset=Cobaltio_Product.objects.all())
 
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
@@ -1201,6 +1203,7 @@ class ImportScanSerializer(serializers.Serializer):
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
         sonarqube_config = data.get('sonarqube_config', None)
+        cobaltio_config = data.get('cobaltio_config', None)
 
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
@@ -1229,7 +1232,8 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              push_to_jira=push_to_jira,
                                                                              close_old_findings=close_old_findings,
                                                                              group_by=group_by,
-                                                                             sonarqube_config=sonarqube_config)
+                                                                             sonarqube_config=sonarqube_config,
+                                                                             cobaltio_config=cobaltio_config)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -1285,6 +1289,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     commit_hash = serializers.CharField(required=False)
     sonarqube_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Sonarqube_Product.objects.all())
+    cobaltio_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
+                                                         queryset=Cobaltio_Product.objects.all())
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
@@ -1304,6 +1310,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
         sonarqube_config = data.get('sonarqube_config', None)
+        cobaltio_config = data.get('cobaltio_config', None)
 
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
@@ -1319,7 +1326,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             version=version, branch_tag=branch_tag, build_id=build_id,
                                             commit_hash=commit_hash, push_to_jira=push_to_jira,
                                             close_old_findings=close_old_findings,
-                                            group_by=group_by, sonarqube_config=sonarqube_config)
+                                            group_by=group_by, sonarqube_config=sonarqube_config,
+                                            cobaltio_config=cobaltio_config)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
