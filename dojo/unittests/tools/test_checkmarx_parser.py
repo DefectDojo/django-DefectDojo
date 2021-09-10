@@ -195,6 +195,10 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual("Stored XSS (Users.java)", item.title)
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(79, item.cwe)
+        self.assertEqual(bool, type(item.active))
+        self.assertEqual(True, item.active)
+        self.assertEqual(bool, type(item.verified))
+        self.assertEqual(True, item.verified)
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
@@ -249,9 +253,9 @@ class TestCheckmarxParser(TestCase):
         # check content
         item = findings[0]
         self.assertEqual(bool, type(item.active))
-        self.assertEqual(False, item.active)
+        self.assertEqual(True, item.active)
         self.assertEqual(bool, type(item.verified))
-        self.assertEqual(False, item.verified)
+        self.assertEqual(True, item.verified)
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(True, item.false_p)
 
@@ -272,6 +276,10 @@ class TestCheckmarxParser(TestCase):
         # check content for aggregated finding
         item = findings[0]
         # finding is never active/verified yet at this time
+        self.assertEqual(bool, type(item.active))
+        self.assertEqual(True, item.active)
+        self.assertEqual(bool, type(item.verified))
+        self.assertEqual(True, item.verified)
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
         mock.assert_called_with(product, 'Java')
@@ -495,6 +503,10 @@ class TestCheckmarxParser(TestCase):
         self.assertEqual("Stored XSS (Users.java�)", item.title)
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(79, item.cwe)
+        self.assertEqual(bool, type(item.active))
+        self.assertEqual(True, item.active)
+        self.assertEqual(bool, type(item.verified))
+        self.assertEqual(True, item.verified)
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
@@ -651,6 +663,10 @@ class TestCheckmarxParser(TestCase):
         )
         self.assertEqual(int, type(item.cwe))
         self.assertEqual(79, item.cwe)
+        self.assertEqual(bool, type(item.active))
+        self.assertEqual(True, item.active)
+        self.assertEqual(bool, type(item.verified))
+        self.assertEqual(True, item.verified)
         self.assertEqual(bool, type(item.false_p))
         self.assertEqual(False, item.false_p)
         self.assertEqual(str, type(item.severity))
