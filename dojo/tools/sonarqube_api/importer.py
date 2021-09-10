@@ -93,7 +93,7 @@ class SonarQubeApiImporter(object):
                 line = issue.get('line')
                 rule_id = issue['rule']
                 rule = client.get_rule(rule_id)
-                severity = self.convert_sonar_severity(rule['severity'])
+                severity = self.convert_sonar_severity(issue['severity'])
                 description = self.clean_rule_description_html(rule['htmlDesc'])
                 cwe = self.clean_cwe(rule['htmlDesc'])
                 references = self.get_references(rule['htmlDesc'])
