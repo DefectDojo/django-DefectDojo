@@ -172,6 +172,7 @@ class DependencyCheckParser(object):
         else:
             cwe_field = self.get_field_value(vulnerability, 'cwe', namespace)
         description = self.get_field_value(vulnerability, 'description', namespace)
+        description += '\nFilepath: ' + str(dependency_filepath)
 
         cve = name[:28]
         if cve and not cve.startswith('CVE'):
@@ -242,7 +243,7 @@ class DependencyCheckParser(object):
 
         return Finding(
             title=title,
-            file_path=dependency_filepath,
+            file_path=dependency_filename,
             test=test,
             cwe=cwe,
             cve=cve,
