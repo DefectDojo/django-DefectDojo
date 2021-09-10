@@ -4,6 +4,7 @@ from dojo.models import Test_Type
 PARSERS = {}
 # TODO remove that
 SCAN_SONARQUBE_API = 'SonarQube API Import'
+SCAN_COBALTIO_API = 'Cobalt.io API Import'
 
 
 def register(parser_type):
@@ -50,7 +51,7 @@ def requires_file(scan_type):
         return False
     # FIXME switch to method of the parser
     # parser = PARSERS[scan_type]
-    return scan_type != SCAN_SONARQUBE_API
+    return scan_type != SCAN_SONARQUBE_API and scan_type != SCAN_COBALTIO_API
 
 
 def initialize_test_types():

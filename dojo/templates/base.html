@@ -541,6 +541,17 @@
                         </li>
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
+                            <a class="" href="{% url 'add_cobaltio' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> Add Cobalt.io Configuration
+                            </a>
+                        </li>
+                        <li role="presentation">
+                            <a href="{% url 'view_cobaltio' product_tab.product.id %}">
+                                <i class="fa fa-history"></i> View Cobalt.io Configurations
+                            </a>
+                        </li>
+                        <li role="separator" class="divider"></li>
+                        <li role="presentation">
                             <a class="" href="{% url 'new_object' product_tab.product.id %}">
                                 <i class="fa fa-plus"></i> Add Product Tracking Files
                             </a>
