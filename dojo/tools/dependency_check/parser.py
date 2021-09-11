@@ -205,7 +205,7 @@ class DependencyCheckParser(object):
         if component_name is None:
             logger.error("component_name was None!")
             return None
-        
+
         title = '%s:%s | %s(in %s)' % (component_name.split(':')[-1], component_version,
             (stripped_name + ' ' if stripped_name else '') + (description if len(stripped_name) < 25 else ''),
             dependency_filename)
@@ -254,12 +254,12 @@ class DependencyCheckParser(object):
 
         # Check if this is a vulnerability or a suppressed vulnerability.
         if vulnerability.tag == "{}suppressedVulnerability".format(namespace):
-            #logger.info("This is a suppressed vulnerability!")
+            # logger.info("This is a suppressed vulnerability!")
             # If there are no notes in the suppressed vulnerability, we need to know and correct it
             # Tag the suppressed vulneability as missingdoc
             if notes == "":
                 # We suppressed this vulnerability, but never documented it. Not cool!
-                # Tag it so that we will have a way to find and document it for the future. 
+                # Tag it so that we will have a way to find and document it for the future.
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("missingdoc")
             mitigation = '**This vulnerability is mitigated and/or suppressed:** {}'.format(notes)
@@ -286,9 +286,9 @@ class DependencyCheckParser(object):
             severity=severity,
             mitigation=mitigation,
             tags=tags,
-            is_mitigated = is_mitigated,
-            risk_accepted = risk_accepted,
-            active = active,
+            is_mitigated=is_mitigated,
+            risk_accepted=risk_accepted,
+            active=active,
             static_finding=True,
             references=reference_detail,
             component_name=component_name,
@@ -325,7 +325,7 @@ class DependencyCheckParser(object):
         if dependencies:
             for dependency in dependencies.findall(namespace + 'dependency'):
                 vulnerabilities = dependency.find(namespace + 'vulnerabilities')
-                if vulnerabilities is not None:     
+                if vulnerabilities is not None:
                     for vulnerability in vulnerabilities.findall(namespace + 'vulnerability'):
                         if vulnerability:
                             finding = self.get_finding_from_vulnerability(dependency, None, vulnerability, test, namespace)
@@ -342,10 +342,9 @@ class DependencyCheckParser(object):
                         finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
                         self.add_finding(finding, dupes)
 
-
         return list(dupes.values())
 
-# From Emre - I left the original comments here below and moved them to the bottom. 
+# From Emre - I left the original comments here below and moved them to the bottom.
 # future idea include vulnerablesoftware in description?
 # <vulnerableSoftware>
 #     <software>cpe:2.3:a:netapp:snapmanager:-:*:*:*:*:sap:*:*</software>
