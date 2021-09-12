@@ -834,14 +834,10 @@ class TestDependencyCheckParser(TestCase):
         # Tests for two suppressed vulnerabilities,
         # One for Suppressed with notes, the other is without.
         self.assertEqual(items[9].active, False)
-        self.assertEqual(items[9].is_mitigated, True)
-        self.assertEqual(items[9].risk_accepted, True)
         self.assertEqual(items[9].mitigation,
                     '**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!')
 
         self.assertEqual(items[10].active, False)
-        self.assertEqual(items[10].is_mitigated, True)
-        self.assertEqual(items[10].risk_accepted, True)
         self.assertEqual(items[10].mitigation,
                      '**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.')
 

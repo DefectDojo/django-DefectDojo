@@ -162,8 +162,6 @@ class DependencyCheckParser(object):
         dependency_filename, dependency_filepath = self.get_filename_and_path_from_dependency(dependency, related_dependency, namespace)
         # logger.debug('dependency_filename: %s', dependency_filename)
 
-        # In the begining there were no tags!
-        # Tags will be used to (well duh...) tag the missingdoc and related fields.
         tags = []
 
         if dependency_filename is None:
@@ -249,31 +247,19 @@ class DependencyCheckParser(object):
                                      'url: {2}\n\n'.format(name, source, url)
 
         if related_dependency is not None:
-            # If we have a related vulnerability. I want to tag it as related
             tags.append("related")
 
-        # Check if this is a vulnerability or a suppressed vulnerability.
         if vulnerability.tag == "{}suppressedVulnerability".format(namespace):
-            # logger.info("This is a suppressed vulnerability!")
-            # If there are no notes in the suppressed vulnerability, we need to know and correct it
-            # Tag the suppressed vulneability as missingdoc
             if notes == "":
-                # We suppressed this vulnerability, but never documented it. Not cool!
-                # Tag it so that we will have a way to find and document it for the future.
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("missingdoc")
             mitigation = '**This vulnerability is mitigated and/or suppressed:** {}'.format(notes)
-            # Since we are now confident that this is a suppressed vulnerability, mark it as mitigated
-            # risk accepted and inactive. Poor man's risk acceptance for now.
-            # TODO: Figure out a way to document the Risk acceptance field(s) à la "Add Risk Acceptance" in the UI.
-            is_mitigated = True
-            risk_accepted = True
+
             active = False
+            tags.append("suppressed")
 
         else:
             mitigation = 'Update {}:{} to at least the version recommended in the description'.format(component_name, component_version)
-            is_mitigated = False
-            risk_accepted = False
             active = True
 
         return Finding(
@@ -286,8 +272,6 @@ class DependencyCheckParser(object):
             severity=severity,
             mitigation=mitigation,
             tags=tags,
-            is_mitigated=is_mitigated,
-            risk_accepted=risk_accepted,
             active=active,
             static_finding=True,
             references=reference_detail,
