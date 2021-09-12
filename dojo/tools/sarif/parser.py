@@ -139,19 +139,21 @@ def cve_try(val):
 
 
 def get_title(result, rule):
-    title = get_message_from_multiformatMessageString(result['message'], rule)
-    if rule is not None:
-        if title is None and 'shortDescription' in rule:
+    title = None
+    if 'message' in result:
+        title = get_message_from_multiformatMessageString(result['message'], rule)
+    if title is None and rule is not None:
+        if 'shortDescription' in rule:
             title = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
-        elif title is None and 'fullDescription' in rule:
+        elif 'fullDescription' in rule:
             title = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
-        elif title is None and 'name' in rule:
+        elif 'name' in rule:
             title = rule['name']
-        elif title is None:
+        elif 'id' in rule:
             title = rule['id']
 
     if title is None:
-        title = ''
+        raise ValueError('No information found to create a title')
 
     return textwrap.shorten(title, 150)
 
