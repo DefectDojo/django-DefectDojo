@@ -177,7 +177,7 @@ def get_description(result, rule):
         message = get_message_from_multiformatMessageString(result['message'], rule)
         description += '**Result message:** {}\n'.format(message)
     if get_snippet(result) is not None:
-        description += '**Snippet:** ```{}```\n'.format(get_snippet(result))
+        description += '**Snippet:**\n```{}```\n'.format(get_snippet(result))
     if rule is not None:
         if 'name' in rule:
             description += '**Rule name:** {}\n'.format(rule.get('name'))
@@ -190,6 +190,9 @@ def get_description(result, rule):
             fullDescription = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
             if fullDescription != message and fullDescription != shortDescription:
                 description += '**Rule full description:** {}\n'.format(fullDescription)
+
+    if description.endswith('\n'):
+        description = description[:-1]
 
     return description
 
