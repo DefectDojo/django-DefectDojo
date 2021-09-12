@@ -46,6 +46,13 @@ def get_choices():
     return tuple(res)
 
 
+def get_choices_sorted():
+    res = list()
+    for key in PARSERS:
+        res.append((key, key))
+    return sorted(tuple(res), key=lambda x: x[1].lower())
+
+
 def requires_file(scan_type):
     if scan_type is None or scan_type not in PARSERS:
         return False

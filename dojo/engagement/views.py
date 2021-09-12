@@ -563,11 +563,6 @@ def import_scan_results(request, eid=None, pid=None):
             group_by = form.cleaned_data.get('group_by', None)
 
             # TODO move to form validation?
-            if not any(scan_type in code
-                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
-                raise Http404()
-
-            # TODO move to form validation?
             if scan and is_scan_file_too_large(scan):
                 messages.add_message(request,
                                      messages.ERROR,
