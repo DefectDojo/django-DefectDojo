@@ -52,14 +52,14 @@ a {
 .panel-default .btn-primary {
     background-color: transparent!important;
     border-style: none!important;
-    color: #546474!important;
-    border: 1px solid #546474!important;
+    color: #fff!important;
+    border: 1px solid #fff!important;
 }
 
 .panel-default .btn-primary:hover {
     background-color: transparent!important;
-    color: #36404a!important;
-    border: 1px solid #546474!important;
+    color: #fff!important;
+    border: 1px solid #fff!important;
 }
 
 .btn-primary {
