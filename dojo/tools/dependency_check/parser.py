@@ -239,6 +239,7 @@ class DependencyCheckParser(object):
                                      'url: {2}\n\n'.format(name, source, url)
 
         mitigation = 'Update ' + component_name + ':' + component_version + ' to at least the version recommended in the description'
+        description += '\nFilepath: ' + str(dependency_filepath)
 
         return Finding(
             title=title,
