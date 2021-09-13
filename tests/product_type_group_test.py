@@ -146,7 +146,7 @@ class ProductTypeGroupTest(BaseTestCase):
         driver.find_element_by_id("id_name").clear()
         driver.find_element_by_id("id_name").send_keys("Group Name")
         # click on 'apply filter' button
-        driver.find_element_by_css_selector("button.btn.btn-sm.btn-primary").click()
+        driver.find_element_by_css_selector("button.btn.btn-sm.btn-secondary").click()
         # only the needed group is now available, proceed with opening the context menu and clicking 'Edit' button
         driver.find_element_by_id("dropdownMenuGroup").click()
         driver.find_element_by_id("viewGroup").click()
