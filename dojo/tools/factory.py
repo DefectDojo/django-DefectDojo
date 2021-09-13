@@ -1,5 +1,4 @@
 import logging
-from dojo.models import Test_Type
 
 PARSERS = {}
 
@@ -20,20 +19,12 @@ def register_parser(scan_type, parser):
     PARSERS[scan_type] = parser
 
 
-def import_parser_factory(file, test, active, verified, scan_type=None):
-    """Return a parser by the scan type
-    This function exists only for backward compatibility
-    """
-    if scan_type in PARSERS:
-        # create dynamicaly in DB
-        test_type, created = Test_Type.objects.get_or_create(name=scan_type)
-        if created:
-            test_type.save()
-        if not test_type.active:
-            raise ValueError(f"Parser {scan_type} is not active")
+def get_parser(scan_type):
+    """Return a parser by the scan type"""
+    if True:
         return PARSERS[scan_type]
     else:
-        raise ValueError(f'Unknown Test Type {scan_type}')
+        raise ValueError(f"Parser {scan_type} is not active")
 
 
 def get_choices():
