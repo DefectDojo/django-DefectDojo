@@ -31,6 +31,8 @@ import tagulous.admin
 from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
+from dojo.settings.settings import SLA_BUSINESS_DAYS
+from numpy import busday_count
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1129,6 +1131,7 @@ class Endpoint_Status(models.Model):
 
     @property
     def age(self):
+
         if self.mitigated:
             diff = self.mitigated_time.date() - self.date.date()
         else:
@@ -2177,11 +2180,17 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
-        if self.mitigated:
-            diff = self.mitigated.date() - start_date
+        if SLA_BUSINESS_DAYS:
+            if self.mitigated:
+                days = busday_count(self.date, self.mitigated.date())
+            else:
+                days = busday_count(self.date, get_current_date())
         else:
-            diff = get_current_date() - start_date
-        days = diff.days
+            if self.mitigated:
+                diff = self.mitigated.date() - start_date
+            else:
+                diff = get_current_date() - start_date
+            days = diff.days
         return days if days > 0 else 0
 
     @property
