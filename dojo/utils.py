@@ -362,15 +362,15 @@ def is_duplicate_reopen(new_finding, existing_finding):
 
 
 def set_duplicate_reopen(new_finding, existing_finding):
-    logger.debug('duplicate reopen existing finding')
+    logger.debug('if a new active finding is imported, we make sure the original is reactivated')
     existing_finding.mitigated = new_finding.mitigated
     existing_finding.is_mitigated = new_finding.is_mitigated
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
                                     entry="This finding has been automatically re-openend as it was found in recent scans.")
-    existing_finding.save(push_to_jira=True)
-
+    existing_finding.save()
+    # call jira_helper.push_status_to_jira(...) if existing_finding.has_jira_issue
 
 def do_apply_rules(new_finding, *args, **kwargs):
     rules = Rule.objects.filter(applies_to='Finding', parent_rule=None)
