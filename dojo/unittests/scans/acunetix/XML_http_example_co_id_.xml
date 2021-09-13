@@ -1,0 +1,1443 @@
+<?xml version="1.0"?>
+<ScanGroup ExportedOn="28/04/2020, 14:29:33">
+<Scan>
+        <Name><![CDATA[scan_name]]></Name>
+        <ShortName><![CDATA[scan_short_name]]></ShortName>
+        <StartURL><![CDATA[example.co.id]]></StartURL>
+        <StartTime><![CDATA[28/04/2020, 05:36:46]]></StartTime>
+        <FinishTime><![CDATA[28/04/2020, 06:07:03]]></FinishTime>
+        <ScanTime><![CDATA[30 minutes, 10 seconds]]></ScanTime>
+        <Aborted><![CDATA[False]]></Aborted>
+        <Responsive><![CDATA[True]]></Responsive>
+        <Banner><![CDATA[]]></Banner>
+        <Os><![CDATA[Unknown]]></Os>
+        <WebServer><![CDATA[None]]></WebServer>
+        <Technologies>
+            <![CDATA[
+            ]]>
+        </Technologies>
+        <Crawler StartUrl="http://example.co.id/">
+            <Cookies>
+            </Cookies>
+            <SiteFiles>
+<SiteFile id="1">
+                    <Name><![CDATA[http://example.co.id/]]></Name>
+                    <URL><![CDATA[/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/]]></FullURL>
+                </SiteFile>
+<SiteFile id="2">
+                    <Name><![CDATA[css]]></Name>
+                    <URL><![CDATA[/css/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/css/]]></FullURL>
+                </SiteFile>
+<SiteFile id="3">
+                    <Name><![CDATA[common,login,images,skin.css]]></Name>
+                    <URL><![CDATA[/css/common,login,images,skin.css]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/css/common,login,images,skin.css]]></FullURL>
+                </SiteFile>
+<SiteFile id="4">
+                    <Name><![CDATA[common,login,zhtml,skin.css]]></Name>
+                    <URL><![CDATA[/css/common,login,zhtml,skin.css]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/css/common,login,zhtml,skin.css]]></FullURL>
+                </SiteFile>
+<SiteFile id="5">
+                    <Name><![CDATA[iphone,iphone-cal,images.css]]></Name>
+                    <URL><![CDATA[/css/iphone,iphone-cal,images.css]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/css/iphone,iphone-cal,images.css]]></FullURL>
+                </SiteFile>
+<SiteFile id="6">
+                    <Name><![CDATA[xlite,xlite-cal,images.css]]></Name>
+                    <URL><![CDATA[/css/xlite,xlite-cal,images.css]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/css/xlite,xlite-cal,images.css]]></FullURL>
+                </SiteFile>
+<SiteFile id="7">
+                    <Name><![CDATA[h]]></Name>
+                    <URL><![CDATA[/h/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/h/]]></FullURL>
+                </SiteFile>
+<SiteFile id="8">
+                    <Name><![CDATA[search]]></Name>
+                    <URL><![CDATA[/h/search]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/h/search]]></FullURL>
+                </SiteFile>
+<SiteFile id="9">
+                    <Name><![CDATA[img]]></Name>
+                    <URL><![CDATA[/img/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/]]></FullURL>
+                </SiteFile>
+<SiteFile id="10">
+                    <Name><![CDATA[animated]]></Name>
+                    <URL><![CDATA[/img/animated/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/animated/]]></FullURL>
+                </SiteFile>
+<SiteFile id="11">
+                    <Name><![CDATA[calendar]]></Name>
+                    <URL><![CDATA[/img/calendar/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/calendar/]]></FullURL>
+                </SiteFile>
+<SiteFile id="12">
+                    <Name><![CDATA[docelements]]></Name>
+                    <URL><![CDATA[/img/docelements/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/docelements/]]></FullURL>
+                </SiteFile>
+<SiteFile id="13">
+                    <Name><![CDATA[docs]]></Name>
+                    <URL><![CDATA[/img/docs/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/docs/]]></FullURL>
+                </SiteFile>
+<SiteFile id="14">
+                    <Name><![CDATA[doctypes]]></Name>
+                    <URL><![CDATA[/img/doctypes/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/doctypes/]]></FullURL>
+                </SiteFile>
+<SiteFile id="15">
+                    <Name><![CDATA[dwt]]></Name>
+                    <URL><![CDATA[/img/dwt/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/dwt/]]></FullURL>
+                </SiteFile>
+<SiteFile id="16">
+                    <Name><![CDATA[ie-custom-icons]]></Name>
+                    <URL><![CDATA[/img/ie-custom-icons/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/ie-custom-icons/]]></FullURL>
+                </SiteFile>
+<SiteFile id="17">
+                    <Name><![CDATA[large]]></Name>
+                    <URL><![CDATA[/img/large/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/large/]]></FullURL>
+                </SiteFile>
+<SiteFile id="18">
+                    <Name><![CDATA[logo]]></Name>
+                    <URL><![CDATA[/img/logo/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/logo/]]></FullURL>
+                </SiteFile>
+<SiteFile id="19">
+                    <Name><![CDATA[Icon~ipadjsVersion@]]></Name>
+                    <URL><![CDATA[/img/logo/Icon~ipadjsVersion@]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/logo/Icon~ipadjsVersion@]]></FullURL>
+                </SiteFile>
+<SiteFile id="20">
+                    <Name><![CDATA[IconjsVersion@]]></Name>
+                    <URL><![CDATA[/img/logo/IconjsVersion@]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/logo/IconjsVersion@]]></FullURL>
+                </SiteFile>
+<SiteFile id="21">
+                    <Name><![CDATA[mail]]></Name>
+                    <URL><![CDATA[/img/mail/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/mail/]]></FullURL>
+                </SiteFile>
+<SiteFile id="22">
+                    <Name><![CDATA[mobile]]></Name>
+                    <URL><![CDATA[/img/mobile/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/mobile/]]></FullURL>
+                </SiteFile>
+<SiteFile id="23">
+                    <Name><![CDATA[iphone-ext]]></Name>
+                    <URL><![CDATA[/img/mobile/iphone-ext/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/mobile/iphone-ext/]]></FullURL>
+                </SiteFile>
+<SiteFile id="24">
+                    <Name><![CDATA[iphone]]></Name>
+                    <URL><![CDATA[/img/mobile/iphone/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/mobile/iphone/]]></FullURL>
+                </SiteFile>
+<SiteFile id="25">
+                    <Name><![CDATA[offline]]></Name>
+                    <URL><![CDATA[/img/offline/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/offline/]]></FullURL>
+                </SiteFile>
+<SiteFile id="26">
+                    <Name><![CDATA[prefs]]></Name>
+                    <URL><![CDATA[/img/prefs/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/prefs/]]></FullURL>
+                </SiteFile>
+<SiteFile id="27">
+                    <Name><![CDATA[tasks]]></Name>
+                    <URL><![CDATA[/img/tasks/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/tasks/]]></FullURL>
+                </SiteFile>
+<SiteFile id="28">
+                    <Name><![CDATA[translate]]></Name>
+                    <URL><![CDATA[/img/translate/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/translate/]]></FullURL>
+                </SiteFile>
+<SiteFile id="29">
+                    <Name><![CDATA[zimbra]]></Name>
+                    <URL><![CDATA[/img/zimbra/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/img/zimbra/]]></FullURL>
+                </SiteFile>
+<SiteFile id="30">
+                    <Name><![CDATA[js]]></Name>
+                    <URL><![CDATA[/js/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/js/]]></FullURL>
+                </SiteFile>
+<SiteFile id="31">
+                    <Name><![CDATA[m]]></Name>
+                    <URL><![CDATA[/m/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/m/]]></FullURL>
+                </SiteFile>
+<SiteFile id="32">
+                    <Name><![CDATA[zmain]]></Name>
+                    <URL><![CDATA[/m/zmain]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/m/zmain]]></FullURL>
+                </SiteFile>
+<SiteFile id="33">
+                    <Name><![CDATA[robots.txt]]></Name>
+                    <URL><![CDATA[/robots.txt]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/robots.txt]]></FullURL>
+                </SiteFile>
+<SiteFile id="34">
+                    <Name><![CDATA[service]]></Name>
+                    <URL><![CDATA[/service/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/service/]]></FullURL>
+                </SiteFile>
+<SiteFile id="35">
+                    <Name><![CDATA[error]]></Name>
+                    <URL><![CDATA[/service/error/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/service/error/]]></FullURL>
+                </SiteFile>
+<SiteFile id="36">
+                    <Name><![CDATA[skins]]></Name>
+                    <URL><![CDATA[/skins/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/skins/]]></FullURL>
+                </SiteFile>
+<SiteFile id="37">
+                    <Name><![CDATA[_base]]></Name>
+                    <URL><![CDATA[/skins/_base/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/skins/_base/]]></FullURL>
+                </SiteFile>
+<SiteFile id="38">
+                    <Name><![CDATA[logos]]></Name>
+                    <URL><![CDATA[/skins/_base/logos/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/skins/_base/logos/]]></FullURL>
+                </SiteFile>
+<SiteFile id="39">
+                    <Name><![CDATA[harmony]]></Name>
+                    <URL><![CDATA[/skins/harmony/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/skins/harmony/]]></FullURL>
+                </SiteFile>
+<SiteFile id="40">
+                    <Name><![CDATA[img]]></Name>
+                    <URL><![CDATA[/skins/harmony/img/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/skins/harmony/img/]]></FullURL>
+                </SiteFile>
+<SiteFile id="41">
+                    <Name><![CDATA[harmony]]></Name>
+                    <URL><![CDATA[/skins/harmony/img/harmony/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/skins/harmony/img/harmony/]]></FullURL>
+                </SiteFile>
+<SiteFile id="42">
+                    <Name><![CDATA[templates]]></Name>
+                    <URL><![CDATA[/templates/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/templates/]]></FullURL>
+                </SiteFile>
+<SiteFile id="43">
+                    <Name><![CDATA[data]]></Name>
+                    <URL><![CDATA[/templates/data/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/templates/data/]]></FullURL>
+                </SiteFile>
+<SiteFile id="44">
+                    <Name><![CDATA[share]]></Name>
+                    <URL><![CDATA[/templates/share/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/templates/share/]]></FullURL>
+                </SiteFile>
+<SiteFile id="45">
+                    <Name><![CDATA[yui]]></Name>
+                    <URL><![CDATA[/yui/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/]]></FullURL>
+                </SiteFile>
+<SiteFile id="46">
+                    <Name><![CDATA[2.7.0]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/]]></FullURL>
+                </SiteFile>
+<SiteFile id="47">
+                    <Name><![CDATA[assets]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/assets/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/assets/]]></FullURL>
+                </SiteFile>
+<SiteFile id="48">
+                    <Name><![CDATA[base]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/base/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/base/]]></FullURL>
+                </SiteFile>
+<SiteFile id="49">
+                    <Name><![CDATA[editor]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/editor]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/editor]]></FullURL>
+                </SiteFile>
+<SiteFile id="50">
+                    <Name><![CDATA[editor]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/editor/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/editor/]]></FullURL>
+                </SiteFile>
+<SiteFile id="51">
+                    <Name><![CDATA[assets]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/editor/assets/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/editor/assets/]]></FullURL>
+                </SiteFile>
+<SiteFile id="52">
+                    <Name><![CDATA[fonts]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/fonts/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/fonts/]]></FullURL>
+                </SiteFile>
+<SiteFile id="53">
+                    <Name><![CDATA[json]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/json/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/json/]]></FullURL>
+                </SiteFile>
+<SiteFile id="54">
+                    <Name><![CDATA[menu]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/menu/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/menu/]]></FullURL>
+                </SiteFile>
+<SiteFile id="55">
+                    <Name><![CDATA[assets]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/menu/assets/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/menu/assets/]]></FullURL>
+                </SiteFile>
+<SiteFile id="56">
+                    <Name><![CDATA[reset]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/reset/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/reset/]]></FullURL>
+                </SiteFile>
+<SiteFile id="57">
+                    <Name><![CDATA[uploader]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/uploader/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/uploader/]]></FullURL>
+                </SiteFile>
+<SiteFile id="58">
+                    <Name><![CDATA[assets]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/uploader/assets/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/uploader/assets/]]></FullURL>
+                </SiteFile>
+<SiteFile id="59">
+                    <Name><![CDATA[yahoo-dom-event]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/yahoo-dom-event/]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/yahoo-dom-event/]]></FullURL>
+                </SiteFile>
+<SiteFile id="60">
+                    <Name><![CDATA[yahoo-dom-event.js]]></Name>
+                    <URL><![CDATA[/yui/2.7.0/yahoo-dom-event/yahoo-dom-event.js]]></URL>
+                    <FullURL><![CDATA[http://example.co.id/yui/2.7.0/yahoo-dom-event/yahoo-dom-event.js]]></FullURL>
+                </SiteFile>
+            </SiteFiles>
+        </Crawler>
+        <ReportItems>
+<ReportItem id="1" color="orange">
+                <Name><![CDATA[HTML form without CSRF protection]]></Name>
+                <ModuleName><![CDATA[/Crawler/12-Crawler_Form_NO_CSRF.js]]></ModuleName>
+                <Details><![CDATA[Form name: &lt;empty&gt; <br/>Form action: /h/search <br/>Form method: GET <br/><br/>Form inputs: <br/><ul><li> sq [unknown]</li><li> incShared [checkbox]</li><li> search [submit]</li></ul>]]></Details>
+                <Affects><![CDATA[/h/search]]></Affects>
+                <Parameter><![CDATA[<empty>]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[medium]]></Severity>
+                <Type><![CDATA[csrf]]></Type>
+                <Impact><![CDATA[An attacker could use CSRF to trick a victim into accessing a website hosted by the attacker, or clicking a URL containing malicious or unauthorized requests.<br/><br/>
+CSRF is a type of 'confused deputy' attack which leverages the authentication and authorization of the victim when the forged request is being sent to the web server. Therefore, if a CSRF vulnerability could affect highly privileged users such as administrators full application compromise may be possible.]]></Impact>
+                <Description><![CDATA[<div class="bb-coolbox"><span class="bb-dark">This alert requires manual confirmation</span></div><br/>
+Cross-Site Request Forgery (CSRF, or XSRF) is a vulnerability wherein an attacker tricks a victim into making a request the victim did not intend to make. Therefore, with CSRF, an attacker abuses the trust a web application has with a victim's browser.<br/><br/>
+Acunetix found an HTML form with no apparent anti-CSRF protection implemented. Consult the 'Attack details' section for more information about the affected HTML form.]]></Description>
+                <DetailedInformation><![CDATA[During a CSRF attack, the browser is tricked into sending HTTP requests to the web application as intended by the attacker. This could include submitting forms to alter various forms of data.<br/><br/>  Upon sending an HTTP request (legitimate or otherwise), the victim's browser will include the Cookie header. Cookies are typically used to store a user's session identifier in order to prevent the user from authenticating for each request, which would obviously be impractical.<br/><br/>  To such an extent, if the victim's authentication session is stored in a Cookie, and is still valid (a browser window/tab does not necessarily need to be open), if the application is vulnerable to CSRF, an attacker can leverage CSRF to launch any desired requests against the website, without the website being able to distinguish whether the requests are legitimate or not.<br/><br/>   <h5>CSRF in GET requests</h5> The following is a simple example of how CSRF can be abused in GET requests through the use of the <code>&lt;img&gt;</code> tag.<br/>  <pre> &lt;img src=&quot;http://example.com/changePassword/?newPassword=attackerPassword&quot;&gt; </pre><br/>   The above is a CSRF attack using an HTTP GET request. If a victim visits a web page controlled by an attacker with the following payload, the browser will send a request containing the Cookie to the attacker crafted URL.<br/><br/>   <h5>CSRF in GET requests</h5> GET requests, however are not the only HTTP method an attacker can abuse. POST requests are equally susceptible to CSRF, however, an attacker will need to make use of a little bit of JavaScript to submit the POST request.<br/><br/>  The following is a simple example of how CSRF can be abused POST requests through the use of an <code>&lt;iframe&gt;</code> tag. This code would be loaded in an iFrame which is made invisible to the victim.<br/><br/>  <strong>iFrame</strong> <pre> &lt;iframe src=&quot;http://attacker.com/csrfAttack&quot; style=&quot;width:0;height:0;border:0;border:none;&quot;&gt;&lt;/iframe&gt; </pre>  <strong>iFrame Contents</strong> <pre> &lt;body onload=&quot;document.getElementById('csrf').submit()&quot;&gt;   &lt;form id=&quot;csrf&quot; action=&quot;http://example.com/changePassword&quot; method=&quot;POST&quot;&gt;     &lt;input name=&quot;newPassword&quot; value=&quot;attackerPassword&quot; /&gt;   &lt;/form&gt; &lt;/body&gt; </pre>]]></DetailedInformation>
+                <Recommendation><![CDATA[Verify if this form requires anti-CSRF protection and implement CSRF countermeasures if necessary.<br/><br/>
+The recommended and the most widely used technique for preventing CSRF attacks is know as an anti-CSRF token, also sometimes referred to as a synchronizer token. The characteristics of a well designed anti-CSRF system involve the following attributes.<br/><br/>
+<ul>
+  <li>The anti-CSRF token should be unique for each user session</li>
+  <li>The session should automatically expire after a suitable amount of time</li>
+  <li>The anti-CSRF token should be a cryptographically random value of significant length</li>
+  <li>The anti-CSRF token should be cryptographically secure, that is, generated by a strong Pseudo-Random Number Generator (PRNG) algorithm</li>
+  <li>The anti-CSRF token is added as a hidden field for forms, or within URLs (only necessary if GET requests cause state changes, that is, GET requests are not idempotent)</li>
+  <li>The server should reject the requested action if the anti-CSRF token fails validation</li>
+</ul><br/>
+When a user submits a form or makes some other authenticated request that requires a Cookie, the anti-CSRF token should be included in the request. Then, the web application will then verify the existence and correctness of this token before processing the request. If the token is missing or incorrect, the request can be rejected.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /h/search HTTP/1.1
+Referer: http://example.co.id/
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Cookie: JSESSIONID=1enc8dvuxj0j1dektaq2i06g4;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="352"><![CDATA[CWE-352]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:H/Au:N/C:N/I:P/A:N]]></Descriptor>
+                  <Score><![CDATA[2.6]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[High]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[Partial]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <CVSS3>
+                  <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N]]></Descriptor>
+                  <Score><![CDATA[4.3]]></Score>
+                  <TempScore><![CDATA[]]></TempScore>
+                  <EnvScore><![CDATA[]]></EnvScore>
+                  <AV><![CDATA[Network]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <PR><![CDATA[None]]></PR>
+                  <UI><![CDATA[Required]]></UI>
+                  <S><![CDATA[Unchanged]]></S>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[Low]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS3>
+                <References>
+                    <Reference>
+                      <Database><![CDATA[What is Cross Site Reference Forgery (CSRF)?]]></Database>
+                      <URL><![CDATA[https://www.acunetix.com/websitesecurity/csrf-attacks/]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[Cross-Site Request Forgery (CSRF) Prevention Cheatsheet]]></Database>
+                      <URL><![CDATA[https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[The Cross-Site Request Forgery (CSRF/XSRF) FAQ]]></Database>
+                      <URL><![CDATA[https://www.cgisecurity.com/csrf-faq.html]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[Cross-site Request Forgery]]></Database>
+                      <URL><![CDATA[https://en.wikipedia.org/wiki/Cross-site_request_forgery]]></URL>
+                    </Reference>
+                </References>
+            </ReportItem>
+<ReportItem id="2" color="orange">
+                <Name><![CDATA[HTML form without CSRF protection]]></Name>
+                <ModuleName><![CDATA[/Crawler/12-Crawler_Form_NO_CSRF.js]]></ModuleName>
+                <Details><![CDATA[Form name: &lt;empty&gt; <br/>Form action: zmain <br/>Form method: POST <br/><br/>Form inputs: <br/><ul><li> search [hidden]</li><li> crumb [hidden]</li><li> sq [text]</li><li> actionSearch [submit]</li><li> st [select]</li></ul>]]></Details>
+                <Affects><![CDATA[/m/zmain]]></Affects>
+                <Parameter><![CDATA[<empty>]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[medium]]></Severity>
+                <Type><![CDATA[csrf]]></Type>
+                <Impact><![CDATA[An attacker could use CSRF to trick a victim into accessing a website hosted by the attacker, or clicking a URL containing malicious or unauthorized requests.<br/><br/>
+CSRF is a type of 'confused deputy' attack which leverages the authentication and authorization of the victim when the forged request is being sent to the web server. Therefore, if a CSRF vulnerability could affect highly privileged users such as administrators full application compromise may be possible.]]></Impact>
+                <Description><![CDATA[<div class="bb-coolbox"><span class="bb-dark">This alert requires manual confirmation</span></div><br/>
+Cross-Site Request Forgery (CSRF, or XSRF) is a vulnerability wherein an attacker tricks a victim into making a request the victim did not intend to make. Therefore, with CSRF, an attacker abuses the trust a web application has with a victim's browser.<br/><br/>
+Acunetix found an HTML form with no apparent anti-CSRF protection implemented. Consult the 'Attack details' section for more information about the affected HTML form.]]></Description>
+                <DetailedInformation><![CDATA[During a CSRF attack, the browser is tricked into sending HTTP requests to the web application as intended by the attacker. This could include submitting forms to alter various forms of data.<br/><br/>  Upon sending an HTTP request (legitimate or otherwise), the victim's browser will include the Cookie header. Cookies are typically used to store a user's session identifier in order to prevent the user from authenticating for each request, which would obviously be impractical.<br/><br/>  To such an extent, if the victim's authentication session is stored in a Cookie, and is still valid (a browser window/tab does not necessarily need to be open), if the application is vulnerable to CSRF, an attacker can leverage CSRF to launch any desired requests against the website, without the website being able to distinguish whether the requests are legitimate or not.<br/><br/>   <h5>CSRF in GET requests</h5> The following is a simple example of how CSRF can be abused in GET requests through the use of the <code>&lt;img&gt;</code> tag.<br/>  <pre> &lt;img src=&quot;http://example.com/changePassword/?newPassword=attackerPassword&quot;&gt; </pre><br/>   The above is a CSRF attack using an HTTP GET request. If a victim visits a web page controlled by an attacker with the following payload, the browser will send a request containing the Cookie to the attacker crafted URL.<br/><br/>   <h5>CSRF in GET requests</h5> GET requests, however are not the only HTTP method an attacker can abuse. POST requests are equally susceptible to CSRF, however, an attacker will need to make use of a little bit of JavaScript to submit the POST request.<br/><br/>  The following is a simple example of how CSRF can be abused POST requests through the use of an <code>&lt;iframe&gt;</code> tag. This code would be loaded in an iFrame which is made invisible to the victim.<br/><br/>  <strong>iFrame</strong> <pre> &lt;iframe src=&quot;http://attacker.com/csrfAttack&quot; style=&quot;width:0;height:0;border:0;border:none;&quot;&gt;&lt;/iframe&gt; </pre>  <strong>iFrame Contents</strong> <pre> &lt;body onload=&quot;document.getElementById('csrf').submit()&quot;&gt;   &lt;form id=&quot;csrf&quot; action=&quot;http://example.com/changePassword&quot; method=&quot;POST&quot;&gt;     &lt;input name=&quot;newPassword&quot; value=&quot;attackerPassword&quot; /&gt;   &lt;/form&gt; &lt;/body&gt; </pre>]]></DetailedInformation>
+                <Recommendation><![CDATA[Verify if this form requires anti-CSRF protection and implement CSRF countermeasures if necessary.<br/><br/>
+The recommended and the most widely used technique for preventing CSRF attacks is know as an anti-CSRF token, also sometimes referred to as a synchronizer token. The characteristics of a well designed anti-CSRF system involve the following attributes.<br/><br/>
+<ul>
+  <li>The anti-CSRF token should be unique for each user session</li>
+  <li>The session should automatically expire after a suitable amount of time</li>
+  <li>The anti-CSRF token should be a cryptographically random value of significant length</li>
+  <li>The anti-CSRF token should be cryptographically secure, that is, generated by a strong Pseudo-Random Number Generator (PRNG) algorithm</li>
+  <li>The anti-CSRF token is added as a hidden field for forms, or within URLs (only necessary if GET requests cause state changes, that is, GET requests are not idempotent)</li>
+  <li>The server should reject the requested action if the anti-CSRF token fails validation</li>
+</ul><br/>
+When a user submits a form or makes some other authenticated request that requires a Cookie, the anti-CSRF token should be included in the request. Then, the web application will then verify the existence and correctness of this token before processing the request. If the token is missing or incorrect, the request can be rejected.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /m/zmain HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=1enc8dvuxj0j1dektaq2i06g4;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="352"><![CDATA[CWE-352]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:H/Au:N/C:N/I:P/A:N]]></Descriptor>
+                  <Score><![CDATA[2.6]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[High]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[Partial]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <CVSS3>
+                  <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N]]></Descriptor>
+                  <Score><![CDATA[4.3]]></Score>
+                  <TempScore><![CDATA[]]></TempScore>
+                  <EnvScore><![CDATA[]]></EnvScore>
+                  <AV><![CDATA[Network]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <PR><![CDATA[None]]></PR>
+                  <UI><![CDATA[Required]]></UI>
+                  <S><![CDATA[Unchanged]]></S>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[Low]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS3>
+                <References>
+                    <Reference>
+                      <Database><![CDATA[What is Cross Site Reference Forgery (CSRF)?]]></Database>
+                      <URL><![CDATA[https://www.acunetix.com/websitesecurity/csrf-attacks/]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[Cross-Site Request Forgery (CSRF) Prevention Cheatsheet]]></Database>
+                      <URL><![CDATA[https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[The Cross-Site Request Forgery (CSRF/XSRF) FAQ]]></Database>
+                      <URL><![CDATA[https://www.cgisecurity.com/csrf-faq.html]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[Cross-site Request Forgery]]></Database>
+                      <URL><![CDATA[https://en.wikipedia.org/wiki/Cross-site_request_forgery]]></URL>
+                    </Reference>
+                </References>
+            </ReportItem>
+<ReportItem id="3" color="orange">
+                <Name><![CDATA[HTML form without CSRF protection]]></Name>
+                <ModuleName><![CDATA[/Crawler/12-Crawler_Form_NO_CSRF.js]]></ModuleName>
+                <Details><![CDATA[Form name: &lt;empty&gt; <br/>Form action: zmain <br/>Form method: POST <br/><br/>Form inputs: <br/><ul><li> query [hidden]</li><li> st [hidden]</li><li> doFolderAction [hidden]</li><li> parentid [hidden]</li><li> crumb [hidden]</li><li> sname [text]</li><li> actionSaveSearch [submit]</li></ul>]]></Details>
+                <Affects><![CDATA[/m/zmain]]></Affects>
+                <Parameter><![CDATA[<empty>]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[medium]]></Severity>
+                <Type><![CDATA[csrf]]></Type>
+                <Impact><![CDATA[An attacker could use CSRF to trick a victim into accessing a website hosted by the attacker, or clicking a URL containing malicious or unauthorized requests.<br/><br/>
+CSRF is a type of 'confused deputy' attack which leverages the authentication and authorization of the victim when the forged request is being sent to the web server. Therefore, if a CSRF vulnerability could affect highly privileged users such as administrators full application compromise may be possible.]]></Impact>
+                <Description><![CDATA[<div class="bb-coolbox"><span class="bb-dark">This alert requires manual confirmation</span></div><br/>
+Cross-Site Request Forgery (CSRF, or XSRF) is a vulnerability wherein an attacker tricks a victim into making a request the victim did not intend to make. Therefore, with CSRF, an attacker abuses the trust a web application has with a victim's browser.<br/><br/>
+Acunetix found an HTML form with no apparent anti-CSRF protection implemented. Consult the 'Attack details' section for more information about the affected HTML form.]]></Description>
+                <DetailedInformation><![CDATA[During a CSRF attack, the browser is tricked into sending HTTP requests to the web application as intended by the attacker. This could include submitting forms to alter various forms of data.<br/><br/>  Upon sending an HTTP request (legitimate or otherwise), the victim's browser will include the Cookie header. Cookies are typically used to store a user's session identifier in order to prevent the user from authenticating for each request, which would obviously be impractical.<br/><br/>  To such an extent, if the victim's authentication session is stored in a Cookie, and is still valid (a browser window/tab does not necessarily need to be open), if the application is vulnerable to CSRF, an attacker can leverage CSRF to launch any desired requests against the website, without the website being able to distinguish whether the requests are legitimate or not.<br/><br/>   <h5>CSRF in GET requests</h5> The following is a simple example of how CSRF can be abused in GET requests through the use of the <code>&lt;img&gt;</code> tag.<br/>  <pre> &lt;img src=&quot;http://example.com/changePassword/?newPassword=attackerPassword&quot;&gt; </pre><br/>   The above is a CSRF attack using an HTTP GET request. If a victim visits a web page controlled by an attacker with the following payload, the browser will send a request containing the Cookie to the attacker crafted URL.<br/><br/>   <h5>CSRF in GET requests</h5> GET requests, however are not the only HTTP method an attacker can abuse. POST requests are equally susceptible to CSRF, however, an attacker will need to make use of a little bit of JavaScript to submit the POST request.<br/><br/>  The following is a simple example of how CSRF can be abused POST requests through the use of an <code>&lt;iframe&gt;</code> tag. This code would be loaded in an iFrame which is made invisible to the victim.<br/><br/>  <strong>iFrame</strong> <pre> &lt;iframe src=&quot;http://attacker.com/csrfAttack&quot; style=&quot;width:0;height:0;border:0;border:none;&quot;&gt;&lt;/iframe&gt; </pre>  <strong>iFrame Contents</strong> <pre> &lt;body onload=&quot;document.getElementById('csrf').submit()&quot;&gt;   &lt;form id=&quot;csrf&quot; action=&quot;http://example.com/changePassword&quot; method=&quot;POST&quot;&gt;     &lt;input name=&quot;newPassword&quot; value=&quot;attackerPassword&quot; /&gt;   &lt;/form&gt; &lt;/body&gt; </pre>]]></DetailedInformation>
+                <Recommendation><![CDATA[Verify if this form requires anti-CSRF protection and implement CSRF countermeasures if necessary.<br/><br/>
+The recommended and the most widely used technique for preventing CSRF attacks is know as an anti-CSRF token, also sometimes referred to as a synchronizer token. The characteristics of a well designed anti-CSRF system involve the following attributes.<br/><br/>
+<ul>
+  <li>The anti-CSRF token should be unique for each user session</li>
+  <li>The session should automatically expire after a suitable amount of time</li>
+  <li>The anti-CSRF token should be a cryptographically random value of significant length</li>
+  <li>The anti-CSRF token should be cryptographically secure, that is, generated by a strong Pseudo-Random Number Generator (PRNG) algorithm</li>
+  <li>The anti-CSRF token is added as a hidden field for forms, or within URLs (only necessary if GET requests cause state changes, that is, GET requests are not idempotent)</li>
+  <li>The server should reject the requested action if the anti-CSRF token fails validation</li>
+</ul><br/>
+When a user submits a form or makes some other authenticated request that requires a Cookie, the anti-CSRF token should be included in the request. Then, the web application will then verify the existence and correctness of this token before processing the request. If the token is missing or incorrect, the request can be rejected.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /m/zmain HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=1enc8dvuxj0j1dektaq2i06g4;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="352"><![CDATA[CWE-352]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:H/Au:N/C:N/I:P/A:N]]></Descriptor>
+                  <Score><![CDATA[2.6]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[High]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[Partial]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <CVSS3>
+                  <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:L/A:N]]></Descriptor>
+                  <Score><![CDATA[4.3]]></Score>
+                  <TempScore><![CDATA[]]></TempScore>
+                  <EnvScore><![CDATA[]]></EnvScore>
+                  <AV><![CDATA[Network]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <PR><![CDATA[None]]></PR>
+                  <UI><![CDATA[Required]]></UI>
+                  <S><![CDATA[Unchanged]]></S>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[Low]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS3>
+                <References>
+                    <Reference>
+                      <Database><![CDATA[What is Cross Site Reference Forgery (CSRF)?]]></Database>
+                      <URL><![CDATA[https://www.acunetix.com/websitesecurity/csrf-attacks/]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[Cross-Site Request Forgery (CSRF) Prevention Cheatsheet]]></Database>
+                      <URL><![CDATA[https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[The Cross-Site Request Forgery (CSRF/XSRF) FAQ]]></Database>
+                      <URL><![CDATA[https://www.cgisecurity.com/csrf-faq.html]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[Cross-site Request Forgery]]></Database>
+                      <URL><![CDATA[https://en.wikipedia.org/wiki/Cross-site_request_forgery]]></URL>
+                    </Reference>
+                </References>
+            </ReportItem>
+<ReportItem id="4" color="orange">
+                <Name><![CDATA[Slow HTTP Denial of Service Attack]]></Name>
+                <ModuleName><![CDATA[/SlowHTTPDOS]]></ModuleName>
+                <Details><![CDATA[Time difference between connections: <code>10001 </code>ms]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[medium]]></Severity>
+                <Type><![CDATA[denialofservice]]></Type>
+                <Impact><![CDATA[A single machine can take down another machine's web server with minimal bandwidth and side effects on unrelated services and ports.]]></Impact>
+                <Description><![CDATA[Your web server is vulnerable to Slow HTTP DoS (Denial of Service) attacks. <br/><br/>
+Slowloris and Slow HTTP POST DoS attacks rely on the fact that the HTTP protocol, by design, requires requests to be completely received by the server before they are processed. If an HTTP request is not complete, or if the transfer rate is very low, the server keeps its resources busy waiting for the rest of the data. If the server keeps too many resources busy, this creates a denial of service.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[Consult Web references for information about protecting your web server against this type of attack.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:P]]></Descriptor>
+                  <Score><![CDATA[5.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[Partial]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <CVSS3>
+                  <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L]]></Descriptor>
+                  <Score><![CDATA[5.3]]></Score>
+                  <TempScore><![CDATA[]]></TempScore>
+                  <EnvScore><![CDATA[]]></EnvScore>
+                  <AV><![CDATA[Network]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <PR><![CDATA[None]]></PR>
+                  <UI><![CDATA[None]]></UI>
+                  <S><![CDATA[Unchanged]]></S>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[Low]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS3>
+                <References>
+                    <Reference>
+                      <Database><![CDATA[Slowloris DOS Mitigation Guide]]></Database>
+                      <URL><![CDATA[https://www.funtoo.org/Slowloris_DOS_Mitigation_Guide]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[Protect Apache Against Slowloris Attack]]></Database>
+                      <URL><![CDATA[https://web.archive.org/web/20180329210925/http://blog.secaserver.com/2011/08/protect-apache-slowloris-attack/]]></URL>
+                    </Reference>
+                </References>
+            </ReportItem>
+<ReportItem id="5" color="orange">
+                <Name><![CDATA[Vulnerable Javascript library]]></Name>
+                <ModuleName><![CDATA[/Scripts/PerFile/Javascript_Libraries_Audit.script]]></ModuleName>
+                <Details><![CDATA[Detected Javascript library <strong>YUI</strong> version <span class="bb-dark"><strong>2.7.0</strong></span>. <br/>The version was detected from <strong>file content</strong>.<br/><br/>  References: <ul>               <li>http://www.cvedetails.com/cve/CVE-2010-4207/</li>      </ul>]]></Details>
+                <Affects><![CDATA[/yui/2.7.0/yahoo-dom-event/yahoo-dom-event.js]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[medium]]></Severity>
+                <Type><![CDATA[]]></Type>
+                <Impact><![CDATA[Consult References for more information.]]></Impact>
+                <Description><![CDATA[You are using a vulnerable Javascript library. One or more vulnerabilities were reported for this version of the Javascript library. Consult Attack details and Web References for more information about the affected library and the vulnerabilities that were reported.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[Upgrade to the latest version.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /yui/2.7.0/yahoo-dom-event/yahoo-dom-event.js HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=1enc8dvuxj0j1dektaq2i06g4;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:P/I:P/A:N]]></Descriptor>
+                  <Score><![CDATA[6.4]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[Partial]]></C>
+                  <I><![CDATA[Partial]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <CVSS3>
+                  <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N]]></Descriptor>
+                  <Score><![CDATA[6.5]]></Score>
+                  <TempScore><![CDATA[]]></TempScore>
+                  <EnvScore><![CDATA[]]></EnvScore>
+                  <AV><![CDATA[Network]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <PR><![CDATA[None]]></PR>
+                  <UI><![CDATA[None]]></UI>
+                  <S><![CDATA[Unchanged]]></S>
+                  <C><![CDATA[Low]]></C>
+                  <I><![CDATA[Low]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS3>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="6" color="blue">
+                <Name><![CDATA[Cookie(s) without HttpOnly flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_HttpOnly.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: ZM_AUTH_TOKEN=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies can be accessed by client-side scripts.]]></Impact>
+                <Description><![CDATA[This cookie does not have the HttpOnly flag set. When a cookie is set with the HttpOnly flag, it instructs the browser that the cookie can only be accessed by the server and not by client-side scripts. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the HttpOnly flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="7" color="blue">
+                <Name><![CDATA[Cookie(s) without HttpOnly flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_HttpOnly.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: JSESSIONID=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies can be accessed by client-side scripts.]]></Impact>
+                <Description><![CDATA[This cookie does not have the HttpOnly flag set. When a cookie is set with the HttpOnly flag, it instructs the browser that the cookie can only be accessed by the server and not by client-side scripts. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the HttpOnly flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="8" color="blue">
+                <Name><![CDATA[Cookie(s) without HttpOnly flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_HttpOnly.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: AUTH_TOKEN_TYPE=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies can be accessed by client-side scripts.]]></Impact>
+                <Description><![CDATA[This cookie does not have the HttpOnly flag set. When a cookie is set with the HttpOnly flag, it instructs the browser that the cookie can only be accessed by the server and not by client-side scripts. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the HttpOnly flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="9" color="blue">
+                <Name><![CDATA[Cookie(s) without HttpOnly flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_HttpOnly.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: T=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies can be accessed by client-side scripts.]]></Impact>
+                <Description><![CDATA[This cookie does not have the HttpOnly flag set. When a cookie is set with the HttpOnly flag, it instructs the browser that the cookie can only be accessed by the server and not by client-side scripts. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the HttpOnly flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="10" color="blue">
+                <Name><![CDATA[Cookie(s) without HttpOnly flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_HttpOnly.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: Y=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies can be accessed by client-side scripts.]]></Impact>
+                <Description><![CDATA[This cookie does not have the HttpOnly flag set. When a cookie is set with the HttpOnly flag, it instructs the browser that the cookie can only be accessed by the server and not by client-side scripts. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the HttpOnly flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="11" color="blue">
+                <Name><![CDATA[Cookie(s) without HttpOnly flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_HttpOnly.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: ADMIN_AUTH_KEY=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies can be accessed by client-side scripts.]]></Impact>
+                <Description><![CDATA[This cookie does not have the HttpOnly flag set. When a cookie is set with the HttpOnly flag, it instructs the browser that the cookie can only be accessed by the server and not by client-side scripts. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the HttpOnly flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="12" color="blue">
+                <Name><![CDATA[Cookie(s) without Secure flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_Secure.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: ZM_AUTH_TOKEN=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies could be sent over unencrypted channels.]]></Impact>
+                <Description><![CDATA[This cookie does not have the Secure flag set. When a cookie is set with the Secure flag, it instructs the browser that the cookie can only be accessed over secure SSL/TLS channels. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the Secure flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="13" color="blue">
+                <Name><![CDATA[Cookie(s) without Secure flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_Secure.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: JSESSIONID=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies could be sent over unencrypted channels.]]></Impact>
+                <Description><![CDATA[This cookie does not have the Secure flag set. When a cookie is set with the Secure flag, it instructs the browser that the cookie can only be accessed over secure SSL/TLS channels. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the Secure flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="14" color="blue">
+                <Name><![CDATA[Cookie(s) without Secure flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_Secure.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: AUTH_TOKEN_TYPE=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies could be sent over unencrypted channels.]]></Impact>
+                <Description><![CDATA[This cookie does not have the Secure flag set. When a cookie is set with the Secure flag, it instructs the browser that the cookie can only be accessed over secure SSL/TLS channels. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the Secure flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="15" color="blue">
+                <Name><![CDATA[Cookie(s) without Secure flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_Secure.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: T=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies could be sent over unencrypted channels.]]></Impact>
+                <Description><![CDATA[This cookie does not have the Secure flag set. When a cookie is set with the Secure flag, it instructs the browser that the cookie can only be accessed over secure SSL/TLS channels. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the Secure flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="16" color="blue">
+                <Name><![CDATA[Cookie(s) without Secure flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_Secure.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: Y=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies could be sent over unencrypted channels.]]></Impact>
+                <Description><![CDATA[This cookie does not have the Secure flag set. When a cookie is set with the Secure flag, it instructs the browser that the cookie can only be accessed over secure SSL/TLS channels. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the Secure flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="17" color="blue">
+                <Name><![CDATA[Cookie(s) without Secure flag set (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/Cookie_Without_Secure.js]]></ModuleName>
+                <Details><![CDATA[Set-Cookie: ADMIN_AUTH_KEY=&quot;&quot;;Version=1;Path=/;Expires=Thu, 01-Jan-1970 00:00:00 GMT;Max-Age=0]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[Cookies could be sent over unencrypted channels.]]></Impact>
+                <Description><![CDATA[This cookie does not have the Secure flag set. When a cookie is set with the Secure flag, it instructs the browser that the cookie can only be accessed over secure SSL/TLS channels. This is an important security protection for session cookies.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[If possible, you should set the Secure flag for this cookie.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET /?client=mobile&amp;loginOp=logout HTTP/1.1
+Referer: http://example.co.id/
+Cookie: JSESSIONID=g6t19rwhz1ua6juq8iir7c3m;ZM_AUTH_TOKEN=&#34;&#34;;AUTH_TOKEN_TYPE=&#34;&#34;;T=&#34;&#34;;Y=&#34;&#34;;ADMIN_AUTH_KEY=&#34;&#34;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="18" color="blue">
+                <Name><![CDATA[Unencrypted connection (verified)]]></Name>
+                <ModuleName><![CDATA[/RPA/no_https.js]]></ModuleName>
+                <Details><![CDATA[]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[low]]></Severity>
+                <Type><![CDATA[weakcrypto]]></Type>
+                <Impact><![CDATA[Possible information disclosure.]]></Impact>
+                <Description><![CDATA[This scan target was connected to over an unencrypted connection. A potential attacker can intercept and modify data sent and received from this site. ]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[The site should send and receive data over a secure (HTTPS) connection.]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET / HTTP/1.1
+Referer: http://example.co.id/
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="310"><![CDATA[CWE-310]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:M/Au:N/C:P/I:P/A:N]]></Descriptor>
+                  <Score><![CDATA[5.8]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Medium]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[Partial]]></C>
+                  <I><![CDATA[Partial]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <CVSS3>
+                  <Descriptor><![CDATA[CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N]]></Descriptor>
+                  <Score><![CDATA[9.1]]></Score>
+                  <TempScore><![CDATA[]]></TempScore>
+                  <EnvScore><![CDATA[]]></EnvScore>
+                  <AV><![CDATA[Network]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <PR><![CDATA[None]]></PR>
+                  <UI><![CDATA[None]]></UI>
+                  <S><![CDATA[Unchanged]]></S>
+                  <C><![CDATA[High]]></C>
+                  <I><![CDATA[High]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS3>
+                <References>
+                </References>
+            </ReportItem>
+<ReportItem id="19" color="green">
+                <Name><![CDATA[Content Security Policy (CSP) not implemented]]></Name>
+                <ModuleName><![CDATA[/httpdata/CSP_not_implemented.js]]></ModuleName>
+                <Details><![CDATA[]]></Details>
+                <Affects><![CDATA[/]]></Affects>
+                <Parameter><![CDATA[]]></Parameter>
+                <AOP_SourceFile><![CDATA[]]></AOP_SourceFile>
+                <AOP_SourceLine></AOP_SourceLine>
+                <AOP_Additional><![CDATA[]]></AOP_Additional>
+                <IsFalsePositive><![CDATA[]]></IsFalsePositive>
+                <Severity><![CDATA[informational]]></Severity>
+                <Type><![CDATA[configuration]]></Type>
+                <Impact><![CDATA[CSP can be used to prevent and/or mitigate attacks that involve content/code injection, such as cross-site scripting/XSS attacks, attacks that require embedding a malicious resource, attacks that involve malicious use of iframes, such as clickjacking attacks, and others. ]]></Impact>
+                <Description><![CDATA[Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. <br/><br/>
+Content Security Policy (CSP) can be implemented by adding a <strong>Content-Security-Policy</strong> header. The value of this header is a string containing the policy directives describing your Content Security Policy. To implement CSP, you should define lists of allowed origins for the all of the types of resources that your site utilizes. For example, if you have a simple site that needs to load scripts, stylesheets, and images hosted locally, as well as from the jQuery library from their CDN, the CSP header could look like the following:
+<pre><code>
+Content-Security-Policy:
+    default-src 'self';
+    script-src 'self' https://code.jquery.com;
+</code></pre>
+<br/><br/>
+It was detected that your web application doesn't implement Content Security Policy (CSP) as the CSP header is missing from the response. It's recommended to implement Content Security Policy (CSP) into your web application.]]></Description>
+                <DetailedInformation><![CDATA[]]></DetailedInformation>
+                <Recommendation><![CDATA[It's recommended to implement Content Security Policy (CSP) into your web application. Configuring Content Security Policy involves adding the <strong>Content-Security-Policy</strong> HTTP header to a web page and giving it values to control resources the user agent is allowed to load for that page. ]]></Recommendation>
+                <TechnicalDetails>
+                    <Request><![CDATA[GET / HTTP/1.1
+Referer: http://example.co.id/
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Encoding: gzip,deflate
+Host: example.co.id
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.21 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.21
+Connection: Keep-alive
+]]></Request>
+                </TechnicalDetails>
+                <CWEList>
+                    <CWE id="16"><![CDATA[CWE-16]]></CWE>
+                </CWEList>
+                <CVEList>
+                </CVEList>
+                <CVSS>
+                  <Descriptor><![CDATA[AV:N/AC:L/Au:N/C:N/I:N/A:N]]></Descriptor>
+                  <Score><![CDATA[0.0]]></Score>
+                  <AV><![CDATA[Network_Accessible]]></AV>
+                  <AC><![CDATA[Low]]></AC>
+                  <Au><![CDATA[None]]></Au>
+                  <C><![CDATA[None]]></C>
+                  <I><![CDATA[None]]></I>
+                  <A><![CDATA[None]]></A>
+                  <E><![CDATA[]]></E>
+                  <RL><![CDATA[]]></RL>
+                  <RC><![CDATA[]]></RC>
+                </CVSS>
+                <References>
+                    <Reference>
+                      <Database><![CDATA[Content Security Policy (CSP)]]></Database>
+                      <URL><![CDATA[https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP]]></URL>
+                    </Reference>
+                    <Reference>
+                      <Database><![CDATA[Implementing Content Security Policy]]></Database>
+                      <URL><![CDATA[https://hacks.mozilla.org/2016/02/implementing-content-security-policy/]]></URL>
+                    </Reference>
+                </References>
+            </ReportItem>
+        </ReportItems>
+    </Scan>
+</ScanGroup>

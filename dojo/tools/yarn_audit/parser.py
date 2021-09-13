@@ -72,8 +72,6 @@ def get_item(item_node, test):
                       references=item_node['url'],
                       component_name=item_node['module_name'],
                       component_version=item_node['findings'][0]['version'],
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,

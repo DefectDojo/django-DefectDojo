@@ -9,7 +9,7 @@
 [DefectDojo](https://www.defectdojo.org/) is a security program and
 vulnerability management tool.
 DefectDojo allows you to manage your application security program, maintain
-product and application information, schedule scans, triage vulnerabilities and
+product and application information, triage vulnerabilities and
 push findings into defect trackers.
 Consolidate your findings into one source of truth with DefectDojo.
 
@@ -41,23 +41,23 @@ For detailed documentation you can visit
 ## Supported Installation Options
 
 * [Docker / Docker Compose](DOCKER.md)
-* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)(End of Life 31/12/2020)
+* [godojo](https://github.com/DefectDojo/godojo)
+
+** Now EOL'ed **
+* [Setup.bash](https://github.com/DefectDojo/django-DefectDojo/blob/master/setup/README.md)
 
 ## Getting Started
 
 We recommend checking out the
-[about](https://defectdojo.github.io/django-DefectDojo/basics/about/) document to
+[Core Data Classes](https://defectdojo.github.io/django-DefectDojo/usage/models/) document to
 learn the terminology of DefectDojo and the
-[getting started guide](https://defectdojo.github.io/django-DefectDojo/running/getting-started/)
+[getting started guide](https://defectdojo.github.io/django-DefectDojo/getting_started/)
 for setting up a new installation.
 We've also created some example
-[workflows](https://defectdojo.github.io/django-DefectDojo/basics/workflows/) that
+[workflows](https://defectdojo.github.io/django-DefectDojo/usage/workflows/) that
 should give you an idea of how to use DefectDojo for your own team.
 
 ## REST APIs
-
-> ** Deprecation notice ** apiv1 is deprecated and EOS is on 12-31-2020. EOL is planned for 06-30-2021.
-> Please move on to apiv2 and raise issues for any unsupported operations.
 
 Defectdojo can be accessed through a Swagger REST API. Please see [the API documentation](https://defectdojo.github.io/django-DefectDojo/integrations/api-v2-docs/) or the in-app Swagger documentation.
 
@@ -68,13 +68,16 @@ See [Wrappers](WRAPPERS.md)
 
 
 ## Release and branch model
+
+We release every month on the last Tuesday. These release are minor releases, i.e. 2.0.0 to 2.1.0. In between there might be bugfix/hotfix/patch releases when needed, i.e. 2.0.1.
+
 See [Release and branch model](BRANCHING-MODEL.md)
 
 
 ## Roadmap
 A magical, illusionary, non-existent, YMMV, wannabe, no guarantees list of thing we may or may not be working on:
-- New permission model
-- Push groups of findings to a single JIRA ticket
+- New permission model (underway)
+- Push groups of findings to a single JIRA ticket (experimental now in!)
 - Reimport matching improvements
 
 
@@ -84,6 +87,7 @@ To manage expectations, we call this the wishlist. These are items we want to do
 - New dashboarding / statistics
 - New search engine
 - Adopt a plugin framework to allow plugins for issue trackers, parsers, reports, etc
+- More flexible model
 
 
 ## Support, Bug Reports and Getting Involved
@@ -133,6 +137,8 @@ Project Moderators can help you with pull requests or feedback on dev ideas.
 * [Cody Maffucci](https://www.linkedin.com/in/cody-maffucci)
 * Pascal Trovatelli / [Sopra Steria](https://www.soprasteria.com/)
 * [Damien Carol](https://www.linkedin.com/in/damien-carol/)
+* [Stefan Fleckenstein](https://www.linkedin.com/in/stefan-fleckenstein-6a456a30/)
+
 
 ## Hall of Fame
 
@@ -152,19 +158,6 @@ More info: [Contributing guideline](CONTRIBUTING.md)
 We would also like to highlight the contributions from Michael Dong and Fatimah
 Zohra who contributed to DefectDojo before it was open source.
 
-### Swag Rewards
-
-If you fix an issue with the `swag reward` tag,  we'll send you a shirt and some
-stickers!
-
-![Dojo tshirt front](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/dojo_tshirt_front.png)
-
-## Support
-
-Proceeds are used for testing, infrastructure, etc.
-
-[![PayPal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=paypal%40owasp%2eorg&lc=US&item_name=OWASP%20DefectDojo&no_note=0&currency_code=USD&bn=PP%2dDonationsBF)
-
 ## Sponsors
 
 [![Xing](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/XING_logo.png)](https://corporate.xing.com/en/about-xing/security/)
@@ -178,6 +171,7 @@ Proceeds are used for testing, infrastructure, etc.
 [![CloudBees](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/cloudbees-logo.png)](https://cloudbees.com/)
 [![WeHackPurple](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/WHP.png)](https://wehackpurple.com/)
 [![MaibornWolff](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/maibornwolff-logo.png)](https://www.maibornwolff.de/en)
+[![ARRIVAL](https://raw.githubusercontent.com/DefectDojo/django-DefectDojo/dev/docs/static/images/arrival.png)](https://arrival.com)
 
 
 Interested in becoming a sponsor and having your logo displayed? Please review

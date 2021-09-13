@@ -37,11 +37,8 @@ class VCGFinding(object):
         return Finding(
                 title=self.title,
                 test=test,
-                active=False,
-                verified=False,
                 description=self.get_finding_detail(),
                 severity=self.get_finding_severity(),
-                numerical_severity=Finding.get_numerical_severity(self.get_finding_severity())
         )
 
     def __init__(self):

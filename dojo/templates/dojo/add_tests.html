@@ -2,12 +2,14 @@
 {% load static %}
 
 {% block add_styles %}
+    {{ block.super }}
 .chosen-container {
     width: 70% !important;
 }
 {% endblock %}
 
 {% block content %}
+    {{ block.super }}
 
     <h3> Add Tests</h3>
     <form class="form-horizontal" action="{% url 'add_tests' eid%}" method="post">{% csrf_token %}
@@ -23,4 +25,5 @@
     </form>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 {% endblock %}

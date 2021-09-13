@@ -78,9 +78,9 @@ jobs:
           git checkout helm-charts
           git pull
           if [ ! -f ./index.yaml ]; then
-            helm repo index ./build --url "${{ GITHUB_SERVER_URL }}/${{ GITHUB_REPOSITORY }}/releases/download/${{ github.event.inputs.release_number }}/"
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ github.event.inputs.release_number }}/"
           else
-            helm repo index ./build --url "${{ GITHUB_SERVER_URL }}/${{ GITHUB_REPOSITORY }}/releases/download/${{ github.event.inputs.release_number }}/" --merge ./index.yaml
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ github.event.inputs.release_number }}/" --merge ./index.yaml
           fi
           cp -f ./build/index.yaml ./index.yaml
           git add ./index.yaml

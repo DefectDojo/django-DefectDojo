@@ -2,11 +2,13 @@
 {% load static %}
 {% load display_tags %}
 {% block add_styles %}
+    {{ block.super }}
 .chosen-container {
     width: 70% !important;
 }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     <h3> Add Tests</h3>
     <form class="form-horizontal" action="" enctype="multipart/form-data" method="post">
 	{% csrf_token %}
@@ -57,6 +59,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
 	<script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
 	<script type="application/javascript" src="{% static "easymde/dist/easymde.min.js" %}"></script>
 	<script type="text/javascript" src="{% static "admin/js/jquery.init.js" %}"></script>

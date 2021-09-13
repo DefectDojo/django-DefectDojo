@@ -70,11 +70,8 @@ class GosecParser(object):
 
                 find = Finding(title=title,
                                test=test,
-                               active=False,
-                               verified=False,
                                description=findingdetail,
                                severity=sev.title(),
-                               numerical_severity=Finding.get_numerical_severity(sev),
                                impact=impact,
                                references=references,
                                file_path=filename,

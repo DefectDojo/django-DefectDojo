@@ -1,8 +1,7 @@
 import logging
 import re
-from urllib.parse import urlparse
 
-from defusedxml import ElementTree as etree
+from lxml import etree
 
 from dojo.models import Endpoint, Finding
 
@@ -177,13 +176,10 @@ class BurpEnterpriseParser(object):
                            references=details.get('References'),
                            impact=details.get('Impact'),
                            cwe=int(details.get('CWE')),
-                           active=False,
-                           verified=False,
                            false_p=False,
                            duplicate=False,
                            out_of_scope=False,
                            mitigated=None,
-                           numerical_severity=Finding.get_numerical_severity(details.get('Severity')),
                            static_finding=False,
                            dynamic_finding=True,
                            nb_occurences=1)
@@ -200,22 +196,6 @@ class BurpEnterpriseParser(object):
             dupes[aggregateKeys] = find
 
             for url in details.get('Endpoint'):
-                parsedUrl = urlparse(url)
-                protocol = parsedUrl.scheme
-                query = parsedUrl.query
-                fragment = parsedUrl.fragment
-                path = parsedUrl.path
-                port = ""  # Set port to empty string by default
-                # Split the returned network address into host and
-                try:  # If there is port number attached to host address
-                    host, port = parsedUrl.netloc.split(':')
-                except:  # there's no port attached to address
-                    host = parsedUrl.netloc
-
-                find.unsaved_endpoints.append(Endpoint(
-                        host=host, port=port,
-                        path=path,
-                        protocol=protocol,
-                        query=query, fragment=fragment))
+                find.unsaved_endpoints.append(Endpoint.from_uri(url))
 
         return list(dupes.values())

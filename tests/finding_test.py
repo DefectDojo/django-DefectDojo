@@ -6,7 +6,7 @@ from selenium.common.exceptions import TimeoutException
 import unittest
 import sys
 import os
-from base_test_class import BaseTestCase, on_exception_html_source_logger
+from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest, WaitForPageLoad
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -40,7 +40,7 @@ class FindingTest(BaseTestCase):
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), False)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), False)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), False)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), False)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_mitigated").is_enabled(), False)
 
         driver.find_element_by_id("id_bulk_status").click()
 
@@ -49,7 +49,7 @@ class FindingTest(BaseTestCase):
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_verified").is_enabled(), True)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_false_p").is_enabled(), True)
         self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_out_of_scope").is_enabled(), True)
-        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_Mitigated").is_enabled(), True)
+        self.assertEqual(bulk_edit_menu.find_element_by_id("id_bulk_is_mitigated").is_enabled(), True)
 
     @on_exception_html_source_logger
     def test_edit_finding(self):
@@ -90,18 +90,19 @@ class FindingTest(BaseTestCase):
         # Click on the 'dropdownMenu1 button'
         driver.find_element_by_id("dropdownMenu1").click()
         # Click on `Edit Finding`
-        driver.find_element_by_link_text("Manage Images").click()
+        driver.find_element_by_link_text("Manage Files").click()
         # select first file input field: form-0-image
         # Set full image path for image file 'strange.png
         image_path = os.path.join(dir_path, 'finding_image.png')
-        driver.find_element_by_id("id_form-0-image").send_keys(image_path)
+        driver.find_element_by_id("id_form-0-file").send_keys(image_path)
+        driver.find_element_by_id("id_form-0-title").send_keys('Image Title')
         # Save uploaded image
         with WaitForPageLoad(driver, timeout=50):
             driver.find_element_by_css_selector("button.btn.btn-success").click()
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Images updated successfully'))
+        self.assertTrue(self.is_success_message_present(text='Files updated successfully.'))
 
     def test_mark_finding_for_review(self):
         # login to site, password set to fetch from environ
@@ -119,7 +120,7 @@ class FindingTest(BaseTestCase):
         # set select element style from 'none' to 'inline'
 
         try:
-            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_reviewers_chosen')))
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.ID, 'id_reviewers')))
         except TimeoutException:
             self.fail('Timed out waiting for reviewer dropdown to initialize ')
 
@@ -138,6 +139,7 @@ class FindingTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Finding marked for review and reviewers notified.'))
 
+    @on_exception_html_source_logger
     def test_clear_review_from_finding(self):
         # login to site, password set to fetch from environ
         driver = self.driver
@@ -170,7 +172,7 @@ class FindingTest(BaseTestCase):
         # Click on the 'dropdownMenu1 button'
         driver.find_element_by_id("dropdownMenu1").click()
         # Click on `Edit Finding`
-        driver.find_element_by_link_text("Manage Images").click()
+        driver.find_element_by_link_text("Manage Files").click()
         # mark delete checkbox for first file input field: form-0-DELETE
         driver.find_element_by_id("id_form-0-DELETE").click()
         # Save selection(s) for image deletion
@@ -178,7 +180,7 @@ class FindingTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='Images updated successfully'))
+        self.assertTrue(self.is_success_message_present(text='Files updated successfully.'))
 
     def test_close_finding(self):
         driver = self.driver
@@ -317,9 +319,9 @@ class FindingTest(BaseTestCase):
             driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
         # Query the site to determine if the finding has been added
         # print("\n\nDebug Print Log: findingTxt fetched: {}\n".format(productTxt))
-        # print("Checking for '.*ZAP Scan processed, a total of 4 findings were processed.*'")
+        # print("Checking for '.*ZAP Scan processed a total of 4 findings.*'")
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed, a total of 4 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='ZAP Scan processed a total of 4 findings'))
 
     def test_delete_finding(self):
         # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
@@ -352,12 +354,7 @@ class FindingTest(BaseTestCase):
 
 def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase('test_login'))
-    if jira:
-        suite.addTest(FindingTest('enable_jira'))
-    if github:
-        suite.addTest(FindingTest('enable_github'))
-    if block_execution:
-        suite.addTest(FindingTest('enable_block_execution'))
+    set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
 
     # Add each test the the suite to be run
     # success and failure is output by the test

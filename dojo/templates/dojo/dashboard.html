@@ -2,12 +2,14 @@
 {% load static %}
 
 {% block add_styles %}
+    {{ block.super }}
     .chart {height: 300px}
     .status .panel {min-height: 140px;background-color: #f5f5f5;}
     #punchcard {height: 350px}
 {% endblock %}
 
 {% block content %}
+    {{ block.super }}
     <div class="row status">
         <div class="col-lg-3 col-md-6">
             <div class="panel secondary-color">
@@ -127,6 +129,7 @@
         </div>
         <!-- /.col-lg-6 -->
     </div>
+    {% if system_settings.enable_questionnaires and request.user.is_staff %}
     <div class="row">
         <div class="col-lg-12">
             <div class="panel panel-default">
@@ -203,6 +206,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     <div class="row">
         {% if punchcard %}
             <div class="col-lg-12">
@@ -224,6 +228,7 @@
     </div>
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <!-- Flot Charts JavaScript -->
     <script src="{% static "flot/excanvas.min.js" %}"></script>
     <script src="{% static "flot/jquery.flot.js" %}"></script>

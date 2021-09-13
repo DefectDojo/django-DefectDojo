@@ -36,7 +36,7 @@ class PhpSecurityAuditV2Parser(object):
                     findingdetail += "Rule Source: " + issue["source"] + "\n"
                     findingdetail += "Details: " + issue["message"] + "\n"
 
-                    sev = PhpSecurityAuditV2.get_severity_word(issue["severity"])
+                    sev = PhpSecurityAuditV2Parser.get_severity_word(issue["severity"])
 
                     dupe_key = title + filepath + str(issue["line"]) + str(issue["column"])
 
@@ -45,24 +45,21 @@ class PhpSecurityAuditV2Parser(object):
                     else:
                         dupes[dupe_key] = True
 
-                        find = Finding(title=title,
-                                       test=test,
-                                       active=False,
-                                       verified=False,
-                                       description=findingdetail,
-                                       severity=sev.title(),
-                                       numerical_severity=Finding.get_numerical_severity(sev),
-                                       mitigation='',
-                                       impact='',
-                                       references='',
-                                       file_path=filepath,
-                                       url='N/A',
-                                       static_finding=True)
+                        find = Finding(
+                            title=title,
+                            test=test,
+                            description=findingdetail,
+                            severity=sev.title(),
+                            file_path=filepath,
+                            line=issue["line"],
+                            static_finding=True,
+                            dynamic_finding=False,
+                        )
 
                         dupes[dupe_key] = find
                         findingdetail = ''
 
-        self.items = list(dupes.values())
+        return list(dupes.values())
 
     @staticmethod
     def get_severity_word(severity):

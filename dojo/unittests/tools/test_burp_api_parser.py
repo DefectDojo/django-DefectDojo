@@ -11,6 +11,9 @@ class TestParser(TestCase):
         with open(testfile) as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
         self.assertEqual(5, len(findings))
         with self.subTest(i=0):
             item = findings[0]
@@ -26,6 +29,9 @@ class TestParser(TestCase):
         with open(testfile) as f:
             parser = BurpApiParser()
             findings = parser.get_findings(f, Test())
+            for finding in findings:
+                for endpoint in finding.unsaved_endpoints:
+                    endpoint.clean()
             for item in findings:
                 self.assertIsNotNone(item.impact)
 

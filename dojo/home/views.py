@@ -4,12 +4,14 @@ from typing import Dict
 
 from dateutil.relativedelta import relativedelta
 
+from django.conf import settings
+from django.contrib import messages
 from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse, HttpRequest
 from django.shortcuts import render
 from django.utils import timezone
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from dojo.utils import add_breadcrumb, get_punchcard_data
 from dojo.models import Answered_Survey
 from dojo.authorization.roles_permissions import Permissions
@@ -46,7 +48,18 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     severity_count_by_month = get_severities_by_month(findings, today)
     punchcard, ticks = get_punchcard_data(findings, today - relativedelta(weeks=26), 26)
 
-    unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0)
+    if request.user.is_staff:
+        unassigned_surveys = Answered_Survey.objects.filter(assignee_id__isnull=True, completed__gt=0, ) \
+            .filter(Q(engagement__isnull=True) | Q(engagement__in=engagements))
+    else:
+        unassigned_surveys = None
+
+    if request.user.is_superuser and not settings.FEATURE_AUTHORIZATION_V2:
+        message = '''Legacy authorization will be removed with version 2.5.0 / end of November 2021.
+                     If you have set `FEATURE_AUTHORIZATION_V2` to `False` in your local
+                     configuration, remove this local setting and start using
+                     the new authorization.'''
+        messages.add_message(request, messages.WARNING, message, extra_tags='alert-warning')
 
     add_breadcrumb(request=request, clear=True)
     return render(request, 'dojo/dashboard.html', {

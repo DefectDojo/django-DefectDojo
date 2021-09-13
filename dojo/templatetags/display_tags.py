@@ -7,15 +7,14 @@ from django.utils.safestring import mark_safe, SafeData
 from django.utils.text import normalize_newlines
 from django.urls import reverse
 from django.contrib.auth.models import User
-from dojo.utils import prepare_for_view, get_system_setting, get_full_url
+from dojo.utils import prepare_for_view, get_system_setting, get_full_url, get_file_images
 from dojo.user.helper import user_is_authorized
-from dojo.models import Check_List, FindingImageAccessToken, Finding, System_Settings, Product, Dojo_User
+from dojo.models import Check_List, FileAccessToken, Finding, System_Settings, Product, Dojo_User
 import markdown
 from django.db.models import Sum, Case, When, IntegerField, Value
 from django.utils import timezone
 import dateutil.relativedelta
 import datetime
-from urllib.parse import urlparse
 import bleach
 import git
 from django.conf import settings
@@ -84,10 +83,6 @@ def markdown_render(value):
 @register.filter(name='url_shortner')
 def url_shortner(value):
     return_value = str(value)
-    url = urlparse(return_value)
-
-    if url.path and len(url.path) != 1:
-        return_value = url.path
     if len(return_value) > 50:
         return_value = "..." + return_value[-47:]
 
@@ -232,6 +227,18 @@ def version_num(value):
         version = "v." + value
 
     return version
+
+
+@register.filter(name='group_sla')
+def group_sla(group):
+    if not get_system_setting('enable_finding_sla'):
+        return ""
+
+    if not group.findings.all():
+        return ""
+
+    # if there is at least 1 finding, there will be date, severity etc to calculate sla
+    return finding_sla(group)
 
 
 @register.filter(name='finding_sla')
@@ -401,20 +408,14 @@ def colgroup(parser, token):
 def pic_token(context, image, size):
     user_id = context['user_id']
     user = User.objects.get(id=user_id)
-    token = FindingImageAccessToken(user=user, image=image, size=size)
+    token = FileAccessToken(user=user, file=image, size=size)
     token.save()
     return reverse('download_finding_pic', args=[token.token])
 
 
-@register.simple_tag
-def severity_value(value):
-    try:
-        if get_system_setting('s_finding_severity_naming'):
-            value = Finding.get_numerical_severity(value)
-    except:
-        pass
-
-    return value
+@register.filter
+def file_images(obj):
+    return get_file_images(obj, return_objects=True)
 
 
 @register.simple_tag
@@ -937,7 +938,7 @@ def import_settings_tag(test_import, autoescape=True):
             <b>Close Old Findings:</b> %s<br/>
             <b>Push to jira:</b> %s<br/>
             <b>Tags:</b> %s<br/>
-            <b>Endpoint:</b> %s<br/>
+            <b>Endpoints:</b> %s<br/>
         "
     </i>
     """
@@ -953,7 +954,7 @@ def import_settings_tag(test_import, autoescape=True):
                                 esc(test_import.import_settings.get('close_old_findings', None)),
                                 esc(test_import.import_settings.get('push_to_jira', None)),
                                 esc(test_import.import_settings.get('tags', None)),
-                                esc(test_import.import_settings.get('endpoint', None))))
+                                esc(test_import.import_settings.get('endpoints', test_import.import_settings.get('endpoint', None)))))
 
 
 @register.filter(needs_autoescape=True)

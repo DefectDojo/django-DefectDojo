@@ -32,6 +32,11 @@ spec:
         prometheus.io/scheme: http
         prometheus.io/scrape: "true"
       {{- end }}
+      {{- if eq (.Values.trackConfig | default "disabled") "enabled" }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/esecret: {{ include (print $.Template.BasePath "/extra-secret.yaml") . | sha256sum }}
+      {{- end }}
     spec:
       serviceAccountName: {{ $fullName }}
       {{- if .Values.imagePullSecrets }}
@@ -45,6 +50,18 @@ spec:
       - name: cert-mount
         configMap:
           name: {{ .Values.django.uwsgi.certificates.configName }}
+      {{- end }}
+      {{- range .Values.django.extraVolumes }}
+      - name: userconfig-{{ .name }}
+        {{ .type }}:
+          {{- if (eq .type "configMap") }}
+          name: {{ .name }}
+          {{- else if (eq .type "secret") }}
+          secretName: {{ .name }}
+          {{- else if (eq .type "hostPath") }}
+          type: {{ .pathType | default "Directory" }}
+          path: {{ .hostPath }}
+          {{- end }}
       {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
@@ -89,12 +106,20 @@ spec:
         - name: cert-mount
           mountPath: {{ .Values.django.uwsgi.certificates.certMountPath }}
         {{- end }}
+        {{- range .Values.django.extraVolumes }}
+        {{- if (eq .container "uwsgi") }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
+        {{- end }}
         ports:
         - name: http
           protocol: TCP
           containerPort: 8081
-        {{- if .Values.django.uwsgi.enable_ptvsd }}
-        - name: ptvsd
+        {{- if .Values.django.uwsgi.enable_debug }}
+        - name: debug
           protocol: TCP
           containerPort: 3000
         {{- end }}
@@ -110,6 +135,10 @@ spec:
             secretKeyRef:
               name: defectdojo-{{ .Values.celery.broker }}-specific
               key: {{ .Values.celery.broker }}-password
+        {{- if .Values.django.uwsgi.enable_debug }}
+        - name: DD_DEBUG
+          value: 'True'
+        {{- end }}
         - name: DD_DATABASE_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -160,6 +189,14 @@ spec:
         volumeMounts:
         - name: run
           mountPath: /run/defectdojo
+        {{- range .Values.django.extraVolumes }}
+        {{- if (eq .container "nginx") }}
+        - name: userconfig-{{ .name }}
+          readOnly: true
+          mountPath: {{ .path }}
+          subPath: {{ .subPath }}
+        {{- end }}
+        {{- end }}
         ports:
         - name: http
           protocol: TCP

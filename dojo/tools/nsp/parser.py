@@ -71,8 +71,6 @@ def get_item(item_node, test):
                        str(item_node['cvss_vector']),
                       mitigation=item_node['recommendation'],
                       references=item_node['advisory'],
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,

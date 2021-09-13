@@ -1,0 +1,72 @@
+name: "[OOB] Release helm chart"
+
+env:
+  GIT_USERNAME: "DefectDojo release bot"
+  GIT_EMAIL: "dojo-release-bot@users.noreply.github.com"
+on:
+  workflow_dispatch:
+    inputs:
+      upload_url:
+        description: 'Where to upload the artifact (i.e. https://uploads.github.com/repos/octocat/Hello-World/releases/1/assets{?name,label})'
+        required: true
+      release_number:
+        description: 'Release number'
+        required: true  
+
+jobs:
+  release-chart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Configure git
+        run: |
+          git config --global user.name "${{ env.GIT_USERNAME }}"
+          git config --global user.email "${{ env.GIT_EMAIL }}"
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
+      - name: Configure HELM repos
+        run: |-
+             helm repo add stable https://charts.helm.sh/stable
+             helm repo add bitnami https://charts.bitnami.com/bitnami
+             helm dependency list ./helm/defectdojo
+             helm dependency update ./helm/defectdojo
+      - name: Package Helm chart
+        id: package-helm-chart
+        run: |
+          mkdir build
+          helm package helm/defectdojo/ --destination ./build
+          echo "::set-output name=chart_version::$(ls build | cut -d '-' -f 2 | sed 's|\.tgz||')"
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.inputs.upload_url }}
+          asset_path: ./build/defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
+          asset_name: defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
+          asset_content_type: application/tar+gzip
+      - name: Update Helm repository index
+        id: update-helm-repository-index
+        run: |
+          git config --global user.name "${{ env.GIT_USERNAME }}"
+          git config --global user.email "${{ env.GIT_EMAIL }}"
+          git remote update
+          git fetch --all
+          git checkout helm-charts
+          git pull
+          if [ ! -f ./index.yaml ]; then
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ github.event.inputs.release_number }}/"
+          else
+            helm repo index ./build --url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/download/${{ github.event.inputs.release_number }}/" --merge ./index.yaml
+          fi
+          cp -f ./build/index.yaml ./index.yaml
+          git add ./index.yaml
+          git commit -m "Update index.yaml"
+          git push -u origin helm-charts

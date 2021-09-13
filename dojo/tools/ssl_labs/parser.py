@@ -46,7 +46,6 @@ class SSLlabsParser(object):
                 group = ''
                 status = ''
                 port = ''
-                ipAddress = ''
                 protocol = ''
 
                 grade = ""
@@ -55,9 +54,6 @@ class SSLlabsParser(object):
                 port = ""
                 if "port" in host:
                     port = host["port"]
-                ipAddress = ""
-                if "ipAddress" in endpoints:
-                    ipAddress = endpoints["ipAddress"]
                 protocol = ""
                 if "protocol" in host:
                     protocol = host["protocol"]
@@ -185,11 +181,8 @@ class SSLlabsParser(object):
                     find = Finding(title=title,
                                    cwe=310,  # Cryptographic Issues
                                    test=test,
-                                   active=False,
-                                   verified=False,
                                    description=description,
                                    severity=sev,
-                                   numerical_severity=Finding.get_numerical_severity(sev),
                                    mitigation=mitigation,
                                    impact=impact,
                                    references=references,
@@ -199,7 +192,7 @@ class SSLlabsParser(object):
                     dupes[dupe_key] = find
                     find.unsaved_endpoints = list()
 
-                find.unsaved_endpoints.append(Endpoint(host=ipAddress, fqdn=hostName, port=port, protocol=protocol))
+                find.unsaved_endpoints.append(Endpoint(host=hostName, port=port, protocol=protocol))
 
             self.items = list(dupes.values())
 

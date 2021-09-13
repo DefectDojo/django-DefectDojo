@@ -1,5 +1,7 @@
 import html2text
+import re
 from defusedxml import ElementTree
+from hyperlink._url import SCHEME_PORT_MAP
 
 from dojo.models import Finding, Endpoint
 
@@ -104,7 +106,7 @@ class NexposeParser(object):
                 if test.get('id') in vulnsDefinitions and (
                         test.get('status') in ['vulnerable-exploited', 'vulnerable-version', 'vulnerable-potential']):
                     vuln = vulnsDefinitions[test.get('id').lower()]
-                    for desc in test.getchildren():
+                    for desc in list(test):
                         if 'pluginOutput' in vuln:
                             vuln['pluginOutput'] += "\n\n" + \
                                 self.parse_html_type(desc)
@@ -143,18 +145,18 @@ class NexposeParser(object):
                     'severity': sev,
                     'tags': list()
                 }
-                for item in vulnDef.getchildren():
+                for item in list(vulnDef):
                     if item.tag == 'description':
-                        for htmlType in item.getchildren():
+                        for htmlType in list(item):
                             vuln['desc'] += self.parse_html_type(htmlType)
 
                     elif item.tag == 'exploits':
-                        for exploit in item.getchildren():
+                        for exploit in list(item):
                             vuln['refs'][exploit.get('title')] = str(exploit.get('title')).strip() + ' ' + \
                                                                  str(exploit.get('link')).strip()
 
                     elif item.tag == 'references':
-                        for ref in item.getchildren():
+                        for ref in list(item):
                             if 'URL' in ref.get('source'):
                                 vuln['refs'][ref.get('source') + str(url_index)] = str(ref.text).strip()
                                 url_index += 1
@@ -162,12 +164,12 @@ class NexposeParser(object):
                                 vuln['refs'][ref.get('source')] = str(ref.text).strip()
 
                     elif item.tag == 'solution':
-                        for htmlType in item.getchildren():
+                        for htmlType in list(item):
                             vuln['resolution'] += self.parse_html_type(htmlType)
 
                     # there is currently no method to register tags in vulns
                     elif item.tag == 'tags':
-                        for tag in item.getchildren():
+                        for tag in list(item):
                             vuln['tags'].append(tag.text.lower())
 
                 vulns[vid] = vuln
@@ -184,6 +186,12 @@ class NexposeParser(object):
                 host['services'] = list()
                 host['vulns'] = self.parse_tests_type(node, vulns)
 
+                host['vulns'].append({
+                    'name': 'Host Up',
+                    'desc': 'Host is up because it replied on ICMP request or some TCP/UDP port is up',
+                    'severity': 'Info',
+                })
+
                 for names in node.findall('names'):
                     for name in names.findall('name'):
                         host['hostnames'].add(name.text)
@@ -197,13 +205,24 @@ class NexposeParser(object):
                         }
                         for services in endpoint.findall('services'):
                             for service in services.findall('service'):
-                                svc['name'] = service.get('name')
+                                svc['name'] = service.get('name', '').lower()
                                 svc['vulns'] = self.parse_tests_type(service, vulns)
 
                                 for configs in service.findall('configurations'):
                                     for config in configs.findall('config'):
                                         if "banner" in config.get('name'):
                                             svc['version'] = config.get('name')
+
+                                svc['vulns'].append({
+                                    'name': 'Open port {}/{}'.format(svc['protocol'].upper(), svc['port']),
+                                    'desc': '{}/{} port is open with "{}" service'.format(svc['protocol'],
+                                                                                          svc['port'],
+                                                                                          service.get('name')),
+                                    'severity': 'Info',
+                                    'tags': [
+                                        re.sub("[^A-Za-z0-9]+", "-", service.get('name').lower()).rstrip('-')
+                                    ] if service.get('name') != "<unknown>" else []
+                                })
 
                         host['services'].append(svc)
 
@@ -220,7 +239,7 @@ class NexposeParser(object):
 
                 endpoint = Endpoint(host=host['name'])
                 find.unsaved_endpoints.append(endpoint)
-                find.unsaved_tags = vuln['tags']
+                find.unsaved_tags = vuln.get('tags', [])
 
             # manage findings by service
             for service in host['services']:
@@ -229,9 +248,15 @@ class NexposeParser(object):
 
                     find = self.findings(dupe_key, dupes, test, vuln)
 
-                    endpoint = Endpoint(host=host['name'], port=service['port'], protocol=service['name'].lower())
+                    endpoint = Endpoint(
+                        host=host['name'],
+                        port=service['port'],
+                        protocol=service['name'] if service['name'] in SCHEME_PORT_MAP else service['protocol'],
+                        fragment=service['protocol'].lower() if service['name'] == "dns" else None
+                        # A little dirty hack but in case of DNS it is important to know if vulnerability is on TCP or UDP
+                    )
                     find.unsaved_endpoints.append(endpoint)
-                    find.unsaved_tags = vuln['tags']
+                    find.unsaved_tags = vuln.get('tags', [])
 
         return list(dupes.values())
 
@@ -243,20 +268,17 @@ class NexposeParser(object):
         """
         if dupe_key in dupes:
             find = dupes[dupe_key]
-            dupe_text = html2text.html2text(vuln['pluginOutput'])
+            dupe_text = html2text.html2text(vuln.get('pluginOutput', ''))
             if dupe_text not in find.description:
                 find.description += "\n\n" + dupe_text
         else:
             find = Finding(title=vuln['name'],
                            description=html2text.html2text(
-                               vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln['pluginOutput'].strip()),
+                               vuln['desc'].strip()) + "\n\n" + html2text.html2text(vuln.get('pluginOutput', '').strip()),
                            severity=vuln['severity'],
-                           numerical_severity=Finding.get_numerical_severity(vuln['severity']),
-                           mitigation=html2text.html2text(vuln['resolution']),
-                           impact=vuln['vector'],
+                           mitigation=html2text.html2text(vuln.get('resolution')) if vuln.get('resolution') else None,
+                           impact=vuln.get('vector') if vuln.get('vector') else None,
                            test=test,
-                           active=False,
-                           verified=False,
                            false_p=False,
                            duplicate=False,
                            out_of_scope=False,
@@ -264,7 +286,7 @@ class NexposeParser(object):
                            dynamic_finding=True)
             # build references
             refs = ''
-            for ref in vuln['refs']:
+            for ref in vuln.get('refs', {}):
                 if ref.startswith('BID'):
                     refs += f" * [{vuln['refs'][ref]}](https://www.securityfocus.com/bid/{vuln['refs'][ref]})"
                 elif ref.startswith('CA'):
@@ -284,7 +306,7 @@ class NexposeParser(object):
                 refs += "\n"
             find.references = refs
             # update CVE
-            if "CVE" in vuln['refs']:
+            if "CVE" in vuln.get('refs', {}):
                 find.cve = vuln['refs']['CVE']
             find.unsaved_endpoints = list()
             dupes[dupe_key] = find

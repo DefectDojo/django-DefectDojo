@@ -146,7 +146,7 @@ class ReportBuilderTest(BaseTestCase):
         dropdown.click()
 
         # print('waiting for filter section to expand...')
-        my_select = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "id_include_finding_notes")))
+        my_select = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, "//label[@for='id_include_finding_notes']")))
 
         my_select = Select(driver.find_element_by_id("id_include_finding_notes"))
         my_select.select_by_index(1)
@@ -181,6 +181,7 @@ def add_report_tests_to_suite(suite):
     # Add each test the the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(ProductTest('test_add_product_endpoints'))

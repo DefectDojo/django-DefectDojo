@@ -3,11 +3,13 @@
 {% load get_config_setting %}
 {% load static %}
 {% block add_styles %}
+    {{ block.super }}
     ul#select_by_severity a:hover, ul#bulk_edit a:hover {
     cursor: pointer;
     }
 {% endblock %}
 {% block content %}
+    {{ block.super }}
 {% if object_queryset %}
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -59,6 +61,7 @@ No files for this build were found.
 
 {% endblock %}
 {% block postscript %}
+    {{ block.super }}
     <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         $(function () {

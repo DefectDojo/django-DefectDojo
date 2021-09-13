@@ -4,6 +4,7 @@ from datetime import datetime
 from defusedxml import ElementTree
 
 from dojo.models import Finding
+from dojo.models import Endpoint
 
 XML_NAMESPACE = {'x': 'https://www.veracode.com/schema/reports/export/1.0'}
 
@@ -58,7 +59,13 @@ class VeracodeParser(object):
                 # Only process if we didn't do that before.
                 if dupe_key not in dupes:
                     # Add to list.
-                    dupes[dupe_key] = self.__xml_flaw_to_finding(app_id, flaw_node, mitigation_text, test)
+                    dupes[dupe_key] = self.__xml_static_flaw_to_finding(app_id, flaw_node, mitigation_text, test)
+
+            for flaw_node in category_node.findall('x:cwe/x:dynamicflaws/x:flaw', namespaces=XML_NAMESPACE):
+                dupe_key = flaw_node.attrib['issueid']
+
+                if dupe_key not in dupes:
+                    dupes[dupe_key] = self.__xml_dynamic_flaw_to_finding(app_id, flaw_node, mitigation_text, test)
 
         # Get SCA findings
         for component in root.findall('x:software_composition_analysis/x:vulnerable_components'
@@ -90,15 +97,12 @@ class VeracodeParser(object):
         finding = Finding()
         finding.test = test
         finding.mitigation = mitigation_text
-        finding.verified = False
-        finding.active = False
         finding.static_finding = True
         finding.dynamic_finding = False
         finding.unique_id_from_tool = cls.__xml_flaw_to_unique_id(app_id, xml_node)
 
         # Report values
         finding.severity = cls.__xml_flaw_to_severity(xml_node)
-        finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
         finding.cwe = int(xml_node.attrib['cweid'])
         finding.title = xml_node.attrib['categoryname']
         finding.impact = 'CIA Impact: ' + xml_node.attrib['cia_impact'].upper()
@@ -133,7 +137,7 @@ class VeracodeParser(object):
             for mitigation in xml_node.findall("x:mitigations/x:mitigation", namespaces=XML_NAMESPACE):
                 _is_mitigated = True
                 _mitigated_date = datetime.strptime(mitigation.attrib['date'], '%Y-%m-%d %H:%M:%S %Z')
-        finding.is_Mitigated = _is_mitigated
+        finding.is_mitigated = _is_mitigated
         finding.mitigated = _mitigated_date
         finding.active = not _is_mitigated
 
@@ -148,10 +152,18 @@ class VeracodeParser(object):
                 _false_positive = True
         finding.false_p = _false_positive
 
+        return finding
+
+    @classmethod
+    def __xml_static_flaw_to_finding(cls, app_id, xml_node, mitigation_text, test):
+        finding = cls.__xml_flaw_to_finding(app_id, xml_node, mitigation_text, test)
+        finding.static_finding = True
+        finding.dynamic_finding = False
+
         _line_number = xml_node.attrib['line']
         _functionrelativelocation = xml_node.attrib['functionrelativelocation']
         if (_line_number is not None and _line_number.isdigit() and
-             _functionrelativelocation is not None and _functionrelativelocation.isdigit()):
+                _functionrelativelocation is not None and _functionrelativelocation.isdigit()):
             finding.line = int(_line_number) + int(_functionrelativelocation)
             finding.line_number = finding.line
             finding.sast_source_line = finding.line
@@ -164,6 +176,17 @@ class VeracodeParser(object):
 
         _sast_source_obj = xml_node.attrib.get('functionprototype')
         finding.sast_source_object = _sast_source_obj if _sast_source_obj else None
+
+        return finding
+
+    @classmethod
+    def __xml_dynamic_flaw_to_finding(cls, app_id, xml_node, mitigation_text, test):
+        finding = cls.__xml_flaw_to_finding(app_id, xml_node, mitigation_text, test)
+        finding.static_finding = False
+        finding.dynamic_finding = True
+
+        url_host = xml_node.attrib.get('url')
+        finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
 
         return finding
 
@@ -200,7 +223,6 @@ class VeracodeParser(object):
 
         # Report values
         finding.severity = cls.__cvss_to_severity(float(xml_node.attrib['cvss_score']))
-        finding.numerical_severity = Finding.get_numerical_severity(finding.severity)
         finding.cve = xml_node.attrib['cve_id']
         finding.cwe = cls._get_cwe(xml_node.attrib['cwe_id'])
         finding.title = "Vulnerable component: {0}:{1}".format(library, version)

@@ -78,8 +78,6 @@ def get_item(dependency_name, dependency_version, dependency_source, vulnerabili
                       cvssv3=vulnerability['cvssVector'].replace('CVSS:3.0', ''),
                       mitigation='Upgrade the component to the latest non-vulnerable version, or remove the package if it is not in use.',
                       references=vulnerability.get('reference', ''),
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,

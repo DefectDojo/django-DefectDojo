@@ -81,6 +81,7 @@ class ProductTypeTest(BaseTestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(BaseTestCase('disable_block_execution'))
     suite.addTest(ProductTypeTest('test_create_product_type'))
     suite.addTest(ProductTypeTest('test_view_product_type'))
     suite.addTest(ProductTypeTest('test_create_product_for_product_type'))

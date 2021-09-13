@@ -157,12 +157,9 @@ how to fix : {model.rule_violation['how_to_fix']}"""
 
     finding = Finding(title=model.rule_violation['rule'],
                       test=test,
-                      active=True,
-                      verified=True,
                       references=model.rule_violation['message'],
                       description=desc,
                       severity=severity,
-                      numerical_severity=Finding.get_number_severity(severity),
                       static_finding=True)
 
     return finding

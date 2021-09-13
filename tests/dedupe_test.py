@@ -5,7 +5,7 @@ from selenium.common.exceptions import TimeoutException
 import unittest
 import sys
 import os
-from base_test_class import BaseTestCase, on_exception_html_source_logger
+from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest
 import time
 import logging
@@ -153,7 +153,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_1.json")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test
         self.goto_active_engagements_overview(driver)
@@ -166,7 +166,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_2.json")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     @on_exception_html_source_logger
     def test_check_path_status(self):
@@ -226,7 +226,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test : Immuniweb Scan (dynamic)
         self.goto_active_engagements_overview(driver)
@@ -240,7 +240,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_2.xml")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     @on_exception_html_source_logger
     def test_check_endpoint_status(self):
@@ -295,7 +295,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test : Generic Findings Import with Url (dynamic)
         self.goto_active_engagements_overview(driver)
@@ -308,7 +308,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     @on_exception_html_source_logger
     def test_check_same_eng_status(self):
@@ -368,7 +368,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings.xml"))
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 2 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 2 findings'))
 
         # Second test
         self.goto_active_engagements_overview(driver)
@@ -381,7 +381,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(os.path.realpath(self.relative_path + "/dedupe_scans/multiple_findings_line_changed.xml"))
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 2 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 2 findings'))
 
     def test_check_path_status_checkmarx_scan(self):
         # After aggregation, it's only two findings. Both are duplicates even though the line number has changed
@@ -446,7 +446,7 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_endpoint_1.xml")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
         # Second test : generic scan with url (dynamic)
         self.goto_active_engagements_overview(driver)
@@ -459,14 +459,29 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_cross_1.csv")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings were processed'))
+        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
 
     def test_check_cross_status(self):
         self.check_nb_duplicates(1)
 
 
-def add_dedupe_tests_to_suite(suite):
+def add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase('test_login'))
+    set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
+
+    if jira:
+        suite.addTest(BaseTestCase('enable_jira'))
+    else:
+        suite.addTest(BaseTestCase('disable_jira'))
+    if github:
+        suite.addTest(BaseTestCase('enable_github'))
+    else:
+        suite.addTest(BaseTestCase('disable_github'))
+    if block_execution:
+        suite.addTest(BaseTestCase('enable_block_execution'))
+    else:
+        suite.addTest(BaseTestCase('disable_block_execution'))
+
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(DedupeTest('test_enable_deduplication'))
     # Test same scanners - same engagement - static - dedupe
@@ -501,12 +516,8 @@ def add_dedupe_tests_to_suite(suite):
 
 def suite():
     suite = unittest.TestSuite()
-    add_dedupe_tests_to_suite(suite)
-    suite.addTest(DedupeTest('enable_jira'))
-    suite.addTest(DedupeTest('enable_github'))
-    # block mode no longer needed, so good to actually test in non block mode so celery does the dedupe
-    # suite.addTest(DedupeTest('enable_block_execution'))
-    add_dedupe_tests_to_suite(suite)
+    add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False)
+    add_dedupe_tests_to_suite(suite, jira=True, github=True, block_execution=True)
     return suite
 
 

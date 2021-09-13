@@ -7,7 +7,7 @@ from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
 
-CWE_REGEX = r'cwe-\d+$'
+CWE_REGEX = r'cwe-\d+'
 
 
 class SarifParser(object):
@@ -71,12 +71,32 @@ def get_rule_tags(rule):
         return rule['properties']['tags']
 
 
+def search_cwe(value, cwes):
+    matches = re.search(CWE_REGEX, value, re.IGNORECASE)
+    if matches:
+        cwes.append(int(matches[0].split("-")[1]))
+
+
 def get_rule_cwes(rule):
     cwes = []
+    # data of the specification
+    if 'relationships' in rule and type(rule['relationships']) == list:
+        for relationship in rule['relationships']:
+            value = relationship['target']['id']
+            search_cwe(value, cwes)
+        return cwes
+
     for tag in get_rule_tags(rule):
-        matches = re.search(CWE_REGEX, tag, re.IGNORECASE)
-        if matches:
-            cwes.append(int(matches[0].split("-")[1]))
+        search_cwe(tag, cwes)
+    return cwes
+
+
+def get_result_cwes_properties(result):
+    """Some tools like njsscan store the CWE in the properties of the result"""
+    cwes = []
+    if 'properties' in result and 'cwe' in result['properties']:
+        value = result['properties']['cwe']
+        search_cwe(value, cwes)
     return cwes
 
 
@@ -87,17 +107,6 @@ def get_artifacts(run):
         artifacts[tree_artifact.get('index', custom_index)] = tree_artifact
         custom_index += 1
     return artifacts
-
-
-def get_severity(data):
-    """Convert level value to severity
-    """
-    if 'warning' == data:
-        return 'Medium'
-    elif 'error' == data:
-        return 'Critical'
-    else:
-        return 'Info'
 
 
 def get_message_from_multiformatMessageString(data, rule):
@@ -129,13 +138,97 @@ def cve_try(val):
         return None
 
 
-def get_item(result, rules, artifacts, run_date):
-    mitigation = result.get('Remediation', {}).get('Recommendation', {}).get('Text', "")
-    references = result.get('Remediation', {}).get('Recommendation', {}).get('Url')
+def get_title(result, rule):
+    title = None
+    if 'message' in result:
+        title = get_message_from_multiformatMessageString(result['message'], rule)
+    if title is None and rule is not None:
+        if 'shortDescription' in rule:
+            title = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
+        elif 'fullDescription' in rule:
+            title = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
+        elif 'name' in rule:
+            title = rule['name']
+        elif 'id' in rule:
+            title = rule['id']
 
+    if title is None:
+        raise ValueError('No information found to create a title')
+
+    return textwrap.shorten(title, 150)
+
+
+def get_snippet(result):
+    snippet = None
+    if 'locations' in result:
+        location = result['locations'][0]
+        if 'physicalLocation' in location:
+            if 'region' in location['physicalLocation']:
+                if 'snippet' in location['physicalLocation']['region']:
+                    if 'text' in location['physicalLocation']['region']['snippet']:
+                        snippet = location['physicalLocation']['region']['snippet']['text']
+    return snippet
+
+
+def get_description(result, rule):
+    description = ''
+    message = ''
+    if 'message' in result:
+        message = get_message_from_multiformatMessageString(result['message'], rule)
+        description += '**Result message:** {}\n'.format(message)
+    if get_snippet(result) is not None:
+        description += '**Snippet:**\n```{}```\n'.format(get_snippet(result))
+    if rule is not None:
+        if 'name' in rule:
+            description += '**Rule name:** {}\n'.format(rule.get('name'))
+        shortDescription = ''
+        if 'shortDescription' in rule:
+            shortDescription = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
+            if shortDescription != message:
+                description += '**Rule short description:** {}\n'.format(shortDescription)
+        if 'fullDescription' in rule:
+            fullDescription = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
+            if fullDescription != message and fullDescription != shortDescription:
+                description += '**Rule full description:** {}\n'.format(fullDescription)
+
+    if description.endswith('\n'):
+        description = description[:-1]
+
+    return description
+
+
+def get_references(rule):
+    reference = None
+    if rule is not None:
+        if 'helpUri' in rule:
+            reference = rule['helpUri']
+        elif 'help' in rule:
+            helpText = get_message_from_multiformatMessageString(rule['help'], rule)
+            if helpText.startswith('http'):
+                reference = helpText
+
+    return reference
+
+
+def get_severity(result, rule):
+    severity = result.get('level', 'warning')
+    if severity is None and rule is not None:
+        # get the severity from the rule
+        if 'defaultConfiguration' in rule:
+            severity = rule['defaultConfiguration'].get('level', 'warning')
+
+    if 'warning' == severity:
+        return 'Medium'
+    elif 'error' == severity:
+        return 'Critical'
+    else:
+        return 'Info'
+
+
+def get_item(result, rules, artifacts, run_date):
     # if there is a location get it
     file_path = None
-    line = -1
+    line = None
     if "locations" in result:
         location = result['locations'][0]
         if 'physicalLocation' in location:
@@ -145,47 +238,37 @@ def get_item(result, rules, artifacts, run_date):
                 line = location['physicalLocation']['region']['startLine']
 
     # test rule link
-    rule = rules.get(result['ruleId'])
-    title = result['ruleId']
-    if 'message' in result:
-        description = get_message_from_multiformatMessageString(result['message'], rule)
-        if len(description) < 150:
-            title = description
-    description = ''
-    severity = get_severity('warning')
-    if rule is not None:
-        # get the severity from the rule
-        if 'defaultConfiguration' in rule:
-            severity = get_severity(rule['defaultConfiguration'].get('level', 'warning'))
+    rule = rules.get(result.get('ruleId'))
 
-        if 'shortDescription' in rule:
-            description = get_message_from_multiformatMessageString(rule['shortDescription'], rule)
-        elif 'fullDescription' in rule:
-            description = get_message_from_multiformatMessageString(rule['fullDescription'], rule)
-        elif 'name' in rule:
-            description = rule['name']
-        else:
-            description = rule['id']
+    finding = Finding(
+        title=get_title(result, rule),
+        severity=get_severity(result, rule),
+        description=get_description(result, rule),
+        static_finding=True,  # by definition
+        dynamic_finding=False,  # by definition
+        file_path=file_path,
+        line=line,
+        references=get_references(rule),
+    )
 
-    # we add a special 'None' case if there is no CWE
-    cwes = [0]
+    if 'ruleId' in result:
+        finding.vuln_id_from_tool = result['ruleId']
+        # for now we only support when the id of the rule is a CVE
+        finding.cve = cve_try(result['ruleId'])
+    # some time the rule id is here but the tool doesn't define it
     if rule is not None:
         cwes_extracted = get_rule_cwes(rule)
         if len(cwes_extracted) > 0:
-            cwes = cwes_extracted
+            finding.cwe = cwes_extracted[-1]
 
-    finding = Finding(title=textwrap.shorten(title, 150),
-                    severity=severity,
-                    numerical_severity=Finding.get_numerical_severity(severity),
-                    description=description,
-                    mitigation=mitigation,
-                    references=references,
-                    cve=cve_try(result['ruleId']),  # for now we only support when the id of the rule is a CVE
-                    cwe=cwes[0],
-                    static_finding=True,  # by definition
-                    dynamic_finding=False,  # by definition
-                    file_path=file_path,
-                    line=line)
+    # manage the case that some tools produce CWE as properties of the result
+    cwes_properties_extracted = get_result_cwes_properties(result)
+    if len(cwes_properties_extracted) > 0:
+        finding.cwe = cwes_properties_extracted[-1]
+
+    # manage fixes provided in the report
+    if "fixes" in result:
+        finding.mitigation = "\n".join([fix.get('description', {}).get("text") for fix in result["fixes"]])
 
     if run_date:
         finding.date = run_date

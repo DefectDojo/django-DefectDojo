@@ -98,11 +98,8 @@ class AWSScout2Parser(object):
                 find = Finding(title=textwrap.shorten(title, 150),
                                cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                                test=test,
-                               active=False,
-                               verified=False,
                                description="**AWS Account:** " + aws_account_id + "\n" + description,
                                severity=sev,
-                               numerical_severity=Finding.get_numerical_severity(sev),
                                references=None,
                                date=find_date,
                                dynamic_finding=True)

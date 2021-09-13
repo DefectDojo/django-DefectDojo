@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 import unittest
 import sys
 import time
-from base_test_class import BaseTestCase, on_exception_html_source_logger
+from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 
 
 class WaitForPageLoad(object):
@@ -142,6 +142,80 @@ class ProductTest(BaseTestCase):
 
         # Assert of the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Engagement added successfully'))
+
+    @on_exception_html_source_logger
+    def test_add_technology(self):
+        # Test To add technology to product
+        # login to site, password set to fetch from environ
+        driver = self.driver
+        # Navigate to the product page
+        self.goto_product_overview(driver)
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
+        # "Click" the dropdown option
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Click on the 'Engagement dropdown button'
+        driver.find_element_by_id("addTechnology").click()
+        # Keep a good practice of clearing field before entering value
+        driver.find_element_by_id("id_name").clear()
+        driver.find_element_by_id("id_name").send_keys("Technology Test")
+        driver.find_element_by_id("id_version").clear()
+        driver.find_element_by_id("id_version").send_keys("2.1.0-RELEASE")
+        # "Click" the Submit button to Add the technology
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        # Assert of the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Technology added successfully'))
+        # Query the site to determine if the member has been added
+        self.assertEqual(driver.find_elements_by_name("technology_name")[0].text, "Technology Test")
+        self.assertEqual(driver.find_elements_by_name("technology_version")[0].text, "v.2.1.0-RELEASE")
+
+    @on_exception_html_source_logger
+    def test_edit_technology(self):
+        # Test To edit technology to product
+        # login to site, password set to fetch from environ
+        driver = self.driver
+        # Navigate to the product page
+        self.goto_product_overview(driver)
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
+        # "Click" the dropdown option
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Open the menu to manage technologies and click the 'Edit' button
+        driver.find_elements_by_name("dropdownManageTechnologies")[0].click()
+        driver.find_elements_by_name("editTechnology")[0].click()
+        # Keep a good practice of clearing field before entering value
+        driver.find_element_by_id("id_name").clear()
+        driver.find_element_by_id("id_name").send_keys("Technology Changed")
+        driver.find_element_by_id("id_version").clear()
+        driver.find_element_by_id("id_version").send_keys("2.2.0-RELEASE")
+        # "Click" the Submit button to change the technology
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        # Assert of the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Technology changed successfully'))
+        # Query the site to determine if the member has been added
+        self.assertEqual(driver.find_elements_by_name("technology_name")[0].text, "Technology Changed")
+        self.assertEqual(driver.find_elements_by_name("technology_version")[0].text, "v.2.2.0-RELEASE")
+
+    @on_exception_html_source_logger
+    def test_delete_technology(self):
+        # Test To edit technology to product
+        # login to site, password set to fetch from environ
+        driver = self.driver
+        # Navigate to the product page
+        self.goto_product_overview(driver)
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
+        # "Click" the dropdown option
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Open the menu to manage technologies and click the 'Delete' button
+        driver.find_elements_by_name("dropdownManageTechnologies")[0].click()
+        driver.find_elements_by_name("deleteTechnology")[0].click()
+        # "Click" the Submit button to delete the technology
+        driver.find_element_by_css_selector("input.btn.btn-danger").click()
+        # Assert of the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Technology deleted successfully'))
+        # Query the site to determine if the technology has been deleted
+        self.assertFalse(driver.find_elements_by_name("technology_name"))
 
     @on_exception_html_source_logger
     def test_add_product_finding(self):
@@ -442,12 +516,17 @@ class ProductTest(BaseTestCase):
         driver.get(self.base_url + "metrics?date=5&view=dashboard")
 
 
-def add_product_tests_to_suite(suite):
+def add_product_tests_to_suite(suite, jira=False, github=False, block_execution=False):
     # Add each test and the suite to be run
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
+    set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
+
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_edit_product_description'))
+    suite.addTest(ProductTest('test_add_technology'))
+    suite.addTest(ProductTest('test_edit_technology'))
+    suite.addTest(ProductTest('test_delete_technology'))
     suite.addTest(ProductTest('test_add_product_engagement'))
     suite.addTest(ProductTest('test_add_product_finding'))
     suite.addTest(ProductTest('test_add_product_endpoints'))
@@ -475,11 +554,8 @@ def add_product_tests_to_suite(suite):
 
 def suite():
     suite = unittest.TestSuite()
-    add_product_tests_to_suite(suite)
-    suite.addTest(ProductTest('enable_jira'))
-    suite.addTest(ProductTest('enable_github'))
-    suite.addTest(ProductTest('enable_block_execution'))
-    add_product_tests_to_suite(suite)
+    add_product_tests_to_suite(suite, jira=False, github=False, block_execution=False)
+    add_product_tests_to_suite(suite, jira=True, github=True, block_execution=True)
 
     return suite
 

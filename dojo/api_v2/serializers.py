@@ -1,28 +1,29 @@
+from typing import List
+from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
-from dojo.models import Finding_Group, Product, Engagement, Test, Finding, \
+from rest_framework.fields import DictField, MultipleChoiceField
+
+from dojo.endpoint.utils import endpoint_filter
+from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
-    Product_Type, JIRA_Instance, Endpoint, BurpRawRequestResponse, JIRA_Project, \
-    Notes, DojoMeta, FindingImage, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
-    System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
-    Test_Import_Finding_Action, IMPORT_CREATED_FINDING, IMPORT_CLOSED_FINDING, \
-    IMPORT_REACTIVATED_FINDING, Product_Type_Member
+    Product_Type, JIRA_Instance, Endpoint, JIRA_Project, \
+    Notes, DojoMeta, Note_Type, App_Analysis, Endpoint_Status, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Cobaltio_Product, \
+    Regulation, System_Settings, FileUpload, SEVERITY_CHOICES, Test_Import, \
+    Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
+    Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
+    Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
+    Network_Locations
 
 from dojo.forms import ImportScanForm
-from dojo.tools.factory import import_parser_factory, requires_file
-from dojo.utils import max_safe, is_scan_file_too_large
-from dojo.notifications.helper import create_notification
-from django.urls import reverse
-
-from django.core.validators import URLValidator, validate_ipv46_address
-from django.core.exceptions import MultipleObjectsReturned
+from dojo.tools.factory import requires_file
+from dojo.utils import is_scan_file_too_large
 from django.conf import settings
 from rest_framework import serializers
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils import timezone
-import base64
 import datetime
 import six
 from django.utils.translation import ugettext_lazy as _
@@ -30,36 +31,17 @@ import json
 import dojo.jira_link.helper as jira_helper
 import logging
 import tagulous
+from dojo.importers.importer.importer import DojoDefaultImporter as Importer
+from dojo.importers.reimporter.reimporter import DojoDefaultReImporter as ReImporter
+from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.roles_permissions import Permissions
 
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
-class TagList(list):
-    def __init__(self, *args, **kwargs):
-        pretty_print = kwargs.pop("pretty_print", True)
-        list.__init__(self, *args, **kwargs)
-        self.pretty_print = pretty_print
-
-    def __add__(self, rhs):
-        return TagList(list.__add__(self, rhs))
-
-    def __getitem__(self, item):
-        result = list.__getitem__(self, item)
-        try:
-            return TagList(result)
-        except TypeError:
-            return result
-
-    def __str__(self):
-        if self.pretty_print:
-            return json.dumps(
-                self, sort_keys=True, indent=4, separators=(',', ': '))
-        else:
-            return json.dumps(self)
-
-
+@extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
 class TagListSerializerField(serializers.ListField):
     child = serializers.CharField()
     default_error_messages = {
@@ -116,35 +98,15 @@ class TagListSerializerField(serializers.ListField):
         # return data
 
     def to_representation(self, value):
-        if not isinstance(value, TagList):
-
+        if not isinstance(value, list):
             # we can't use isinstance because TagRelatedManager is non-existing class
             # it cannot be imported or referenced, so we fallback to string comparison
             if type(value).__name__ == 'TagRelatedManager':
-                # if self.order_by:
-                #     tags = value.all().order_by(*self.order_by)
-                # else:
-                #     tags = value.all()
-                # value = [tag.name for tag in tags]
-
                 value = value.get_tag_list()
-
             elif isinstance(value, str):
                 value = tagulous.utils.parse_tags(value)
-
-            # elif len(value) > 0 and isinstance(value[0], Tag):
-            #     raise ValueError('unreachable code?!')
-            #     print('to_representation4: ' + str(value))
-            #     # .. but sometimes the queryset already has been converted into a list, i.e. by prefetch_related
-            #     tags = value
-            #     value = [tag.name for tag in tags]
-            #     if self.order_by:
-            #         # the only possible ordering is by name, so we order after creating the list
-            #         value = sorted(value)
             else:
-                raise ValueError('unable to convert %s into TagList' % type(value).__name__)
-
-            value = TagList(value, pretty_print=self.pretty_print)
+                raise ValueError('unable to convert %s into list of tags' % type(value).__name__)
         return value
 
 
@@ -210,7 +172,7 @@ class RequestResponseDict(list):
 
 
 class RequestResponseSerializerField(serializers.ListSerializer):
-    child = serializers.CharField()
+    child = DictField(child=serializers.CharField())
     default_error_messages = {
         'not_a_list': _(
             'Expected a list of items but got type "{input_type}".'),
@@ -261,8 +223,7 @@ class RequestResponseSerializerField(serializers.ListSerializer):
             if not isinstance(response, str):
                 self.fail('not_a_str', input_type=type(request).__name__)
 
-            self.child.run_validation(request)
-            self.child.run_validation(response)
+            self.child.run_validation(s)
         return data
 
     def to_representation(self, value):
@@ -274,7 +235,12 @@ class RequestResponseSerializerField(serializers.ListSerializer):
                 else:
                     burps = value.all()
                 value = [{'request': burp.get_request(), 'response': burp.get_response()} for burp in burps]
+
         return value
+
+
+class BurpRawRequestResponseSerializer(serializers.Serializer):
+    req_resp = RequestResponseSerializerField(required=True)
 
 
 class MetaSerializer(serializers.ModelSerializer):
@@ -313,11 +279,95 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
 
+    def create(self, validated_data):
+        user = User.objects.create(**validated_data)
+        user.set_unusable_password()
+        user.save()
+        return user
+
 
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'first_name', 'last_name')
+
+
+class RoleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Role
+        fields = '__all__'
+
+
+class DojoGroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Dojo_Group
+        fields = '__all__'
+
+
+class DojoGroupMemberSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Dojo_Group_Member
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('group') != self.instance.group and \
+                not user_has_permission(self.context['request'].user, data.get('group'), Permissions.Group_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a user to this group')
+
+        if self.instance is None or \
+                data.get('group') != self.instance.group or \
+                data.get('user') != self.instance.user:
+            members = Dojo_Group_Member.objects.filter(group=data.get('group'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Dojo_Group_Member already exists')
+
+        if self.instance is not None and not data.get('role').is_owner:
+            owners = Dojo_Group_Member.objects.filter(group=data.get('group'), role__is_owner=True).exclude(id=self.instance.id).count()
+            if owners < 1:
+                raise ValidationError('There must be at least one owner')
+
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('group'), Permissions.Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a user as Owner to this group')
+
+        return data
+
+
+class GlobalRoleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Global_Role
+        fields = '__all__'
+
+    def validate(self, data):
+        user = None
+        group = None
+
+        if self.instance is not None:
+            user = self.instance.user
+            group = self.instance.group
+
+        if 'user' in data:
+            user = data.get('user')
+        if 'group' in data:
+            group = data.get('group')
+
+        if user is None and group is None:
+            raise ValidationError("Global_Role must have either user or group")
+        if user is not None and group is not None:
+            raise ValidationError("Global_Role cannot have both user and group")
+
+        return data
+
+
+class AddUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('id', 'username')
 
 
 class NoteHistorySerializer(serializers.ModelSerializer):
@@ -370,39 +420,112 @@ class FileSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
-    findings_count = serializers.SerializerMethodField()
-    findings_list = serializers.SerializerMethodField()
-
-    tags = TagListSerializerField(required=False)
-    product_meta = ProductMetaSerializer(read_only=True, many=True)
+class ProductMemberSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Product
-        exclude = ('tid', 'manager', 'prod_manager', 'tech_contact',
-                   'updated')
-        extra_kwargs = {
-            'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
-        }
+        model = Product_Member
+        fields = '__all__'
 
-    def get_findings_count(self, obj):
-        return obj.findings_count
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product') != self.instance.product and \
+                not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a member to this product')
 
-    def get_findings_list(self, obj):
-        return obj.open_findings_list
+        if self.instance is None or \
+                data.get('product') != self.instance.product or \
+                data.get('user') != self.instance.user:
+            members = Product_Member.objects.filter(product=data.get('product'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Product_Member already exists')
+
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Member_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a member as Owner to this product')
+
+        return data
+
+
+class ProductGroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product_Group
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product') != self.instance.product and \
+                not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Group_Add):
+            raise PermissionDenied('You are not permitted to add a group to this product')
+
+        if self.instance is None or \
+                data.get('product') != self.instance.product or \
+                data.get('group') != self.instance.group:
+            members = Product_Group.objects.filter(product=data.get('product'), group=data.get('group'))
+            if members.count() > 0:
+                raise ValidationError('Product_Group already exists')
+
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('product'), Permissions.Product_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a group as Owner to this product')
+
+        return data
 
 
 class ProductTypeMemberSerializer(serializers.ModelSerializer):
-    user = UserStubSerializer(many=False, read_only=True)
 
     class Meta:
         model = Product_Type_Member
-        exclude = ['product_type']
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product_type') != self.instance.product_type and \
+                not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Manage_Members):
+            raise PermissionDenied('You are not permitted to add a member to this product type')
+
+        if self.instance is None or \
+                data.get('product_type') != self.instance.product_type or \
+                data.get('user') != self.instance.user:
+            members = Product_Type_Member.objects.filter(product_type=data.get('product_type'), user=data.get('user'))
+            if members.count() > 0:
+                raise ValidationError('Product_Type_Member already exists')
+
+        if self.instance is not None and not data.get('role').is_owner:
+            owners = Product_Type_Member.objects.filter(product_type=data.get('product_type'), role__is_owner=True).exclude(id=self.instance.id).count()
+            if owners < 1:
+                raise ValidationError('There must be at least one owner')
+
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Member_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a member as Owner to this product type')
+
+        return data
+
+
+class ProductTypeGroupSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Product_Type_Group
+        fields = '__all__'
+
+    def validate(self, data):
+        if self.instance is not None and \
+                data.get('product_type') != self.instance.product_type and \
+                not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Group_Add):
+            raise PermissionDenied('You are not permitted to add a group to this product type')
+
+        if self.instance is None or \
+                data.get('product_type') != self.instance.product_type or \
+                data.get('group') != self.instance.group:
+            members = Product_Type_Group.objects.filter(product_type=data.get('product_type'), group=data.get('group'))
+            if members.count() > 0:
+                raise ValidationError('Product_Type_Group already exists')
+
+        if data.get('role').is_owner and not user_has_permission(self.context['request'].user, data.get('product_type'), Permissions.Product_Type_Group_Add_Owner):
+            raise PermissionDenied('You are not permitted to add a group as Owner to this product type')
+
+        return data
 
 
 class ProductTypeSerializer(serializers.ModelSerializer):
-    if settings.FEATURE_AUTHORIZATION_V2:
-        members = ProductTypeMemberSerializer(source='product_type_member_set', read_only=True, many=True)
 
     class Meta:
         model = Product_Type
@@ -448,7 +571,7 @@ class EngagementToFilesSerializer(serializers.Serializer):
     files = FileSerializer(many=True)
 
 
-class AppAnalysisSerializer(serializers.ModelSerializer):
+class AppAnalysisSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -521,80 +644,71 @@ class EndpointSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     def validate(self, data):
         # print('EndpointSerialize.validate')
-        port_re = "(:[0-9]{1,5}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}" \
-                  "|655[0-2][0-9]|6553[0-5])"
 
         if not self.context['request'].method == 'PATCH':
-            if ('host' not in data or
-                    'protocol' not in data or
-                    'path' not in data or
-                    'query' not in data or
-                    'fragment' not in data):
-                raise serializers.ValidationError(
-                    'Please provide valid host, protocol, path, query and '
-                    'fragment')
-            protocol = data['protocol']
-            path = data['path']
-            query = data['query']
-            fragment = data['fragment']
-            host = data['host']
+            if 'product' not in data:
+                raise serializers.ValidationError('Product is required')
+            protocol = data.get('protocol')
+            userinfo = data.get('userinfo')
+            host = data.get('host')
+            port = data.get('port')
+            path = data.get('path')
+            query = data.get('query')
+            fragment = data.get('fragment')
+            product = data.get('product')
         else:
             protocol = data.get('protocol', self.instance.protocol)
+            userinfo = data.get('userinfo', self.instance.userinfo)
+            host = data.get('host', self.instance.host)
+            port = data.get('port', self.instance.port)
             path = data.get('path', self.instance.path)
             query = data.get('query', self.instance.query)
             fragment = data.get('fragment', self.instance.fragment)
-            host = data.get('host', self.instance.host)
-        product = data.get('product', None)
+            if 'product' in data and data['product'] != self.instance.product:
+                raise serializers.ValidationError('Change of product is not possible')
+            product = self.instance.product
 
-        from urllib.parse import urlunsplit
-        if protocol:
-            endpoint = urlunsplit((protocol, host, path, query, fragment))
-        else:
-            endpoint = host
+        endpoint_ins = Endpoint(
+            protocol=protocol,
+            userinfo=userinfo,
+            host=host,
+            port=port,
+            path=path,
+            query=query,
+            fragment=fragment,
+            product=product
+        )
+        endpoint_ins.clean()  # Run standard validation and clean process; can raise errors
 
-        from django.core import exceptions
-        from django.core.validators import RegexValidator
-        import re
-        try:
-            url_validator = URLValidator()
-            url_validator(endpoint)
-        except exceptions.ValidationError:
-            try:
-                # do we have a port number?
-                regex = re.compile(port_re)
-                host = endpoint
-                if regex.findall(endpoint):
-                    for g in regex.findall(endpoint):
-                        host = re.sub(port_re, '', host)
-                validate_ipv46_address(host)
-            except exceptions.ValidationError:
-                try:
-                    validate_hostname = RegexValidator(
-                        regex=r'[a-zA-Z0-9-_]*\.[a-zA-Z]{2,6}')
-                    # do we have a port number?
-                    regex = re.compile(port_re)
-                    host = endpoint
-                    if regex.findall(endpoint):
-                        for g in regex.findall(endpoint):
-                            host = re.sub(port_re, '', host)
-                    validate_hostname(host)
-                except:  # noqa
-                    raise serializers.ValidationError(
-                        'It does not appear as though this endpoint is a '
-                        'valid URL or IP address.',
-                        code='invalid')
-
-        endpoint = Endpoint.objects.filter(protocol=protocol,
-                                           host=host,
-                                           path=path,
-                                           query=query,
-                                           fragment=fragment,
-                                           product=product)
-        if endpoint.count() > 0 and not self.instance:
+        endpoint = endpoint_filter(
+            protocol=endpoint_ins.protocol,
+            userinfo=endpoint_ins.userinfo,
+            host=endpoint_ins.host,
+            port=endpoint_ins.port,
+            path=endpoint_ins.path,
+            query=endpoint_ins.query,
+            fragment=endpoint_ins.fragment,
+            product=endpoint_ins.product
+        )
+        if ((self.context['request'].method in ["PUT", "PATCH"] and
+             ((endpoint.count() > 1) or
+              (endpoint.count() == 1 and
+               endpoint.first().pk != self.instance.pk))) or
+                (self.context['request'].method in ["POST"] and endpoint.count() > 0)):
             raise serializers.ValidationError(
                 'It appears as though an endpoint with this data already '
                 'exists for this product.',
                 code='invalid')
+
+        # use clean data
+        data['protocol'] = endpoint_ins.protocol
+        data['userinfo'] = endpoint_ins.userinfo
+        data['host'] = endpoint_ins.host
+        data['port'] = endpoint_ins.port
+        data['path'] = endpoint_ins.path
+        data['query'] = endpoint_ins.query
+        data['fragment'] = endpoint_ins.fragment
+        data['product'] = endpoint_ins.product
 
         return data
 
@@ -606,7 +720,7 @@ class JIRAIssueSerializer(serializers.ModelSerializer):
         model = JIRA_Issue
         fields = '__all__'
 
-    def get_url(self, obj):
+    def get_url(self, obj) -> str:
         return jira_helper.get_jira_issue_url(obj)
 
 
@@ -655,7 +769,7 @@ class FindingGroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Finding_Group
-        fields = ('name', 'test', 'jira_issue')
+        fields = ('id', 'name', 'test', 'jira_issue')
 
 
 class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
@@ -680,9 +794,9 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         queryset=Engagement.objects.all())
     notes = serializers.PrimaryKeyRelatedField(
         allow_null=True,
-        default=[],
         queryset=Notes.objects.all(),
-        many=True)
+        many=True,
+        required=False)
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -727,17 +841,6 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Risk_Acceptance
         fields = '__all__'
-
-
-class FindingImageSerializer(serializers.ModelSerializer):
-    base64 = serializers.SerializerMethodField()
-
-    class Meta:
-        model = FindingImage
-        fields = ["base64", "caption", "id"]
-
-    def get_base64(self, obj):
-        return base64.b64encode(obj.image.read())
 
 
 class FindingMetaSerializer(serializers.ModelSerializer):
@@ -794,10 +897,12 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
     test = serializers.SerializerMethodField()
     jira = serializers.SerializerMethodField()
 
+    @extend_schema_field(FindingTestSerializer)
     @swagger_serializer_method(FindingTestSerializer)
     def get_test(self, obj):
         return FindingTestSerializer(read_only=True).to_representation(obj.test)
 
+    @extend_schema_field(JIRAIssueSerializer)
     @swagger_serializer_method(JIRAIssueSerializer)
     def get_jira(self, obj):
         issue = jira_helper.get_jira_issue(obj)
@@ -807,7 +912,6 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
 
 
 class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
-    images = FindingImageSerializer(many=True, read_only=True)
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
     accepted_risks = RiskAcceptanceSerializer(many=True, read_only=True, source='risk_acceptance_set')
@@ -826,14 +930,17 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = Finding
         fields = '__all__'
 
+    @extend_schema_field(serializers.DateTimeField())
     @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_creation(self, obj):
         return jira_helper.get_jira_creation(obj)
 
+    @extend_schema_field(serializers.DateTimeField())
     @swagger_serializer_method(serializers.DateTimeField())
     def get_jira_change(self, obj):
         return jira_helper.get_jira_change(obj)
 
+    @extend_schema_field(FindingRelatedFieldsSerializer)
     @swagger_serializer_method(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
         request = self.context.get('request', None)
@@ -846,8 +953,7 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
         else:
             return None
 
-    @swagger_serializer_method(serializers.ListField(serializers.CharField()))
-    def get_display_status(self, obj):
+    def get_display_status(self, obj) -> str:
         return obj.status()
 
     # Overriding this to push add Push to JIRA functionality
@@ -907,6 +1013,8 @@ class FindingSerializer(TaggitSerializer, serializers.ModelSerializer):
             return NoteSerializer, {'many': True, 'read_only': True}
         return super().build_relational_field(field_name, relation_info)
 
+    @extend_schema_field(BurpRawRequestResponseSerializer)
+    @swagger_serializer_method(serializer_or_field=BurpRawRequestResponseSerializer)
     def get_request_response(self, obj):
         # burp_req_resp = BurpRawRequestResponse.objects.filter(finding=obj)
         burp_req_resp = obj.burprawrequestresponse_set.all()
@@ -923,7 +1031,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
     notes = serializers.PrimaryKeyRelatedField(
         read_only=True,
         allow_null=True,
-        default=[],
+        required=False,
         many=True)
     test = serializers.PrimaryKeyRelatedField(
         queryset=Test.objects.all())
@@ -939,8 +1047,10 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Finding
-        exclude = ['images']
+        fields = '__all__'
         extra_kwargs = {
+            'active': {'required': True},
+            'verified': {'required': True},
             'reporter': {'default': serializers.CurrentUserDefault()},
         }
 
@@ -988,7 +1098,7 @@ class FindingCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
         return data
 
 
-class FindingTemplateSerializer(serializers.ModelSerializer):
+class FindingTemplateSerializer(TaggitSerializer, serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
 
     class Meta:
@@ -1014,6 +1124,32 @@ class StubFindingCreateSerializer(serializers.ModelSerializer):
         }
 
 
+class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
+    findings_count = serializers.SerializerMethodField()
+    findings_list = serializers.SerializerMethodField()
+
+    tags = TagListSerializerField(required=False)
+    product_meta = ProductMetaSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Product
+        if not settings.FEATURE_AUTHORIZATION_V2:
+            exclude = ['tid', 'updated', 'members']
+            extra_kwargs = {
+                'authorized_users': {'queryset': User.objects.exclude(is_staff=True).exclude(is_active=False)}
+            }
+        else:
+            exclude = ['tid', 'updated', 'authorized_users']
+
+    def get_findings_count(self, obj) -> int:
+        return obj.findings_count
+
+    #  -> List[int] as return type doesn't seem enough for drf-yasg
+    @swagger_serializer_method(serializer_or_field=serializers.ListField(child=serializers.IntegerField()))
+    def get_findings_list(self, obj) -> List[int]:
+        return obj.open_findings_list
+
+
 class ImportScanSerializer(serializers.Serializer):
     scan_date = serializers.DateField(default=datetime.date.today)
 
@@ -1024,10 +1160,10 @@ class ImportScanSerializer(serializers.Serializer):
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
         choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
+    # TODO why do we allow only existing endpoints?
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
                                                          default=None)
-    test_type = serializers.CharField(required=False)
     file = serializers.FileField(required=False)
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all())
@@ -1043,245 +1179,71 @@ class ImportScanSerializer(serializers.Serializer):
     build_id = serializers.CharField(required=False)
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
+    sonarqube_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
+                                                          queryset=Sonarqube_Product.objects.all())
+    cobaltio_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
+                                                         queryset=Cobaltio_Product.objects.all())
 
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
-    # class Meta:
-    #     model = Test
-    #     # fields = '__all__'
-    #     exclude = ['target_start', 'target_end']
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def save(self, push_to_jira=False):
         data = self.validated_data
         close_old_findings = data['close_old_findings']
         active = data['active']
         verified = data['verified']
-        min_sev = data['minimum_severity']
-        test_type, created = Test_Type.objects.get_or_create(
-            name=data.get('test_type', data['scan_type']))
+        minimum_severity = data['minimum_severity']
+        scan_type = data['scan_type']
         endpoint_to_add = data['endpoint_to_add']
         scan_date = data['scan_date']
-        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
-        if settings.USE_TZ:
-            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
-
         # Will save in the provided environment or in the `Development` one if absent
-        environment_name = data.get('environment', 'Development')
         version = data.get('version', None)
         build_id = data.get('build_id', None)
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
+        sonarqube_config = data.get('sonarqube_config', None)
+        cobaltio_config = data.get('cobaltio_config', None)
 
+        environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
         tags = None
         if 'tags' in data:
             logger.debug('import scan tags: %s', data['tags'])
             tags = data['tags']
 
-        print(tags)
-        test = Test(
-            engagement=data['engagement'],
-            lead=data['lead'],
-            test_type=test_type,
-            target_start=data['scan_date'],
-            target_end=data['scan_date'],
-            environment=environment,
-            percent_complete=100,
-            version=version,
-            branch_tag=branch_tag,
-            build_id=build_id,
-            commit_hash=commit_hash,
-            tags=tags)
-        try:
-            test.full_clean()
-        except ValidationError:
-            pass
+        engagement = data['engagement']
+        lead = data['lead']
 
-        test.save()
+        scan = data.get('file', None)
+        endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
+
+        group_by = data.get('group_by', None)
+
+        importer = Importer()
+        try:
+            test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, lead, environment,
+                                                                             active=active, verified=verified, tags=tags,
+                                                                             minimum_severity=minimum_severity,
+                                                                             endpoints_to_add=endpoints_to_add,
+                                                                             scan_date=scan_date, version=version,
+                                                                             branch_tag=branch_tag, build_id=build_id,
+                                                                             commit_hash=commit_hash,
+                                                                             push_to_jira=push_to_jira,
+                                                                             close_old_findings=close_old_findings,
+                                                                             group_by=group_by,
+                                                                             sonarqube_config=sonarqube_config,
+                                                                             cobaltio_config=cobaltio_config)
+        # convert to exception otherwise django rest framework will swallow them as 400 error
+        # exceptions are already logged in the importer
+        except SyntaxError as se:
+            raise Exception(se)
+        except ValueError as ve:
+            raise Exception(ve)
+
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
         self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
 
-        test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
-
-        if test.engagement.engagement_type == 'CI/CD':
-            test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
-
-        test.engagement.save()
-
-        try:
-            parser = import_parser_factory(data.get('file', None),
-                                           test,
-                                           active,
-                                           verified,
-                                           data['scan_type'],)
-            parser_findings = parser.get_findings(data.get('file', None), test)
-        except ValueError:
-            raise Exception('FileParser ValueError')
-        except:
-            raise Exception('Error while parsing the report, did you specify the correct scan type ?')
-
-        new_findings = []
-        skipped_hashcodes = []
-        try:
-            items = parser_findings
-            logger.debug('starting import of %i items.', len(items))
-            i = 0
-            for item in items:
-                sev = item.severity
-                if sev == 'Information' or sev == 'Informational':
-                    sev = 'Info'
-
-                item.severity = sev
-
-                if (Finding.SEVERITIES[sev] >
-                        Finding.SEVERITIES[data['minimum_severity']]):
-                    continue
-
-                item.test = test
-                item.reporter = self.context['request'].user
-                item.last_reviewed = timezone.now()
-                item.last_reviewed_by = self.context['request'].user
-                item.active = data['active']
-                item.verified = data['verified']
-                logger.debug('going to save finding')
-                item.save(dedupe_option=False)
-
-                if (hasattr(item, 'unsaved_req_resp') and
-                        len(item.unsaved_req_resp) > 0):
-                    for req_resp in item.unsaved_req_resp:
-                        burp_rr = BurpRawRequestResponse(
-                            finding=item,
-                            burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                            burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
-                        burp_rr.clean()
-                        burp_rr.save()
-
-                if (item.unsaved_request is not None and
-                        item.unsaved_response is not None):
-                    burp_rr = BurpRawRequestResponse(
-                        finding=item,
-                        burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
-                        burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
-                    burp_rr.clean()
-                    burp_rr.save()
-
-                for endpoint in item.unsaved_endpoints:
-                    try:
-                        ep, created = Endpoint.objects.get_or_create(
-                            protocol=endpoint.protocol,
-                            host=endpoint.host,
-                            path=endpoint.path,
-                            query=endpoint.query,
-                            fragment=endpoint.fragment,
-                            product=test.engagement.product)
-                    except (MultipleObjectsReturned):
-                        pass
-
-                    try:
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=item,
-                            endpoint=ep)
-                    except (MultipleObjectsReturned):
-                        pass
-
-                    ep.endpoint_status.add(eps)
-                    item.endpoint_status.add(eps)
-                    item.endpoints.add(ep)
-                if endpoint_to_add:
-                    item.endpoints.add(endpoint_to_add)
-                    try:
-                        eps, created = Endpoint_Status.objects.get_or_create(
-                            finding=item,
-                            endpoint=endpoint_to_add)
-                    except (MultipleObjectsReturned):
-                        pass
-
-                    endpoint_to_add.endpoint_status.add(eps)
-                    item.endpoint_status.add(eps)
-
-                if item.unsaved_tags:
-                    item.tags = item.unsaved_tags
-
-                item.save(push_to_jira=push_to_jira)
-                new_findings.append(item)
-
-        except SyntaxError:
-            raise Exception('Parser SyntaxError')
-
-        old_findings = []
-        if close_old_findings:
-            # Close old active findings that are not reported by this scan.
-            new_hash_codes = test.finding_set.values('hash_code')
-
-            if test.engagement.deduplication_on_engagement:
-                old_findings = Finding.objects.exclude(test=test) \
-                                              .exclude(hash_code__in=new_hash_codes) \
-                                              .exclude(hash_code__in=skipped_hashcodes) \
-                                              .filter(test__engagement=test.engagement,
-                                                  test__test_type=test_type,
-                                                  active=True)
-            else:
-                old_findings = Finding.objects.exclude(test=test) \
-                                              .exclude(hash_code__in=new_hash_codes) \
-                                              .exclude(hash_code__in=skipped_hashcodes) \
-                                              .filter(test__engagement__product=test.engagement.product,
-                                                  test__test_type=test_type,
-                                                  active=True)
-
-            for old_finding in old_findings:
-                old_finding.active = False
-                old_finding.is_Mitigated = True
-                old_finding.notes.create(author=self.context['request'].user,
-                                         entry="This finding has been automatically closed"
-                                         " as it is not present anymore in recent scans.")
-                endpoint_status = old_finding.endpoint_status.all()
-                for status in endpoint_status:
-                    status.mitigated_by = self.context['request'].user
-                    status.mitigated_time = timezone.now()
-                    status.mitigated = True
-                    status.last_modified = timezone.now()
-                    status.save()
-
-                old_finding.tags.add('stale')
-                old_finding.save(dedupe_option=False)
-
-        if settings.TRACK_IMPORT_HISTORY:
-            import_settings = {}  # json field
-            import_settings['active'] = active
-            import_settings['verified'] = verified
-            import_settings['minimum_severity'] = min_sev
-            import_settings['close_old_findings'] = close_old_findings
-            import_settings['push_to_jira'] = push_to_jira
-            import_settings['tags'] = tags
-            if endpoint_to_add:
-                import_settings['endpoint'] = endpoint_to_add
-
-            test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.IMPORT_TYPE)
-            test_import.save()
-
-            test_import_finding_action_list = []
-            for finding in old_findings:
-                logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
-            for finding in new_findings:
-                logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
-
-            Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
-
-        logger.debug('done importing findings')
-
-        title = 'Test created for ' + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-        create_notification(event='test_added', title=title, test=test, engagement=test.engagement, product=test.engagement.product,
-                            url=reverse('view_test', args=(test.id,)))
-
-        updated_count = len(new_findings) + len(old_findings)
-        if updated_count > 0:
-            title = 'Created ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-            create_notification(event='scan_added', title=title, findings_new=new_findings, findings_mitigated=old_findings,
-                                finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product,
-                                url=reverse('view_test', args=(test.id,)))
-        logger.debug('returning test instance')
         return test
 
     def validate(self, data):
@@ -1325,292 +1287,53 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     build_id = serializers.CharField(required=False)
     branch_tag = serializers.CharField(required=False)
     commit_hash = serializers.CharField(required=False)
+    sonarqube_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
+                                                          queryset=Sonarqube_Product.objects.all())
+    cobaltio_config = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
+                                                         queryset=Cobaltio_Product.objects.all())
+
+    group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     def save(self, push_to_jira=False):
+        logger.debug('push_to_jira: %s', push_to_jira)
         data = self.validated_data
         test = data['test']
         scan_type = data['scan_type']
         endpoint_to_add = data['endpoint_to_add']
-        min_sev = data['minimum_severity']
+        minimum_severity = data['minimum_severity']
         scan_date = data['scan_date']
         close_old_findings = data['close_old_findings']
-        scan_date_time = datetime.datetime.combine(scan_date, timezone.now().time())
-        if settings.USE_TZ:
-            scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
         verified = data['verified']
         active = data['active']
         version = data.get('version', None)
         build_id = data.get('build_id', None)
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
+        sonarqube_config = data.get('sonarqube_config', None)
+        cobaltio_config = data.get('cobaltio_config', None)
 
+        scan = data.get('file', None)
+        endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
+
+        group_by = data.get('group_by', None)
+
+        reimporter = ReImporter()
         try:
-            parser = import_parser_factory(data.get('file', None),
-                                           test,
-                                           active,
-                                           verified,
-                                           data['scan_type'])
-            parser_findings = parser.get_findings(data.get('file', None), test)
-        except ValueError:
-            raise Exception("Parser ValueError")
-        except:
-            raise Exception('Error while parsing the report, did you specify the correct scan type ?')
-
-        try:
-            items = parser_findings
-            original_items = list(test.finding_set.all())
-            new_items = []
-            mitigated_count = 0
-            finding_count = 0
-            finding_added_count = 0
-            reactivated_count = 0
-            reactivated_items = []
-            unchanged_count = 0
-            unchanged_items = []
-
-            logger.debug('starting reimport of %i items.', len(items))
-            from dojo.importers.reimport.utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
-            deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
-
-            i = 0
-            logger.debug('STEP 1: looping over findings from the reimported report and trying to match them to existing findings')
-            deduplicationLogger.debug('Algorithm used for matching new findings to existing findings: %s', deduplication_algorithm)
-            for item in items:
-                sev = item.severity
-
-                if sev == 'Information' or sev == 'Informational':
-                    sev = 'Info'
-                    item.severity = sev
-
-                if (Finding.SEVERITIES[sev] >
-                        Finding.SEVERITIES[min_sev]):
-                    # finding's severity is below the configured threshold : ignoring the finding
-                    continue
-
-                # existing findings may be from before we had component_name/version fields
-                component_name = item.component_name if hasattr(item, 'component_name') else None
-                component_version = item.component_version if hasattr(item, 'component_version') else None
-
-                item.hash_code = item.compute_hash_code()
-                deduplicationLogger.debug("new finding's hash_code: %s", item.hash_code)
-
-                findings = match_new_finding_to_existing_finding(item, test, deduplication_algorithm, scan_type)
-
-                deduplicationLogger.debug('found %i findings matching with current new finding', len(findings))
-
-                if findings:
-                    # existing finding found
-                    finding = findings[0]
-                    if finding.false_p or finding.out_of_scope or finding.risk_accepted:
-                        logger.debug('%i: skipping existing finding (it is marked as false positive:%s and/or out of scope:%s or is a risk accepted:%s): %i:%s:%s:%s', i, finding.false_p, finding.out_of_scope, finding.risk_accepted, finding.id, finding, finding.component_name, finding.component_version)
-                    elif finding.mitigated or finding.is_Mitigated:
-                        logger.debug('%i: reactivating: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                        finding.mitigated = None
-                        finding.is_Mitigated = False
-                        finding.mitigated_by = None
-                        finding.active = True
-                        finding.verified = verified
-
-                        # existing findings may be from before we had component_name/version fields
-                        finding.component_name = finding.component_name if finding.component_name else component_name
-                        finding.component_version = finding.component_version if finding.component_version else component_version
-
-                        # don't dedupe before endpoints are added
-                        finding.save(dedupe_option=False)
-                        note = Notes(
-                            entry="Re-activated by %s re-upload." % scan_type,
-                            author=self.context['request'].user)
-                        note.save()
-                        endpoint_status = finding.endpoint_status.all()
-                        for status in endpoint_status:
-                            status.mitigated_by = None
-                            status.mitigated_time = None
-                            status.mitigated = False
-                            status.last_modified = timezone.now()
-                            status.save()
-                        finding.notes.add(note)
-                        reactivated_items.append(finding)
-                        reactivated_count += 1
-                    else:
-                        # existing findings may be from before we had component_name/version fields
-                        logger.debug('%i: updating existing finding: %i:%s:%s:%s', i, finding.id, finding, finding.component_name, finding.component_version)
-                        if not finding.component_name or not finding.component_version:
-                            finding.component_name = finding.component_name if finding.component_name else component_name
-                            finding.component_version = finding.component_version if finding.component_version else component_version
-                            finding.save(dedupe_option=False)
-
-                        unchanged_items.append(finding)
-                        unchanged_count += 1
-                    if finding.dynamic_finding:
-                        logger.debug("Re-import found an existing dynamic finding for this new finding. Checking the status of endpoints")
-                        update_endpoint_status(finding, item, self.context['request'].user)
-                else:
-                    # no existing finding found
-                    item.test = test
-                    item.reporter = self.context['request'].user
-                    item.last_reviewed = timezone.now()
-                    item.last_reviewed_by = self.context['request'].user
-                    item.verified = verified
-                    item.active = active
-                    # Save it. Don't dedupe before endpoints are added.
-                    item.save(dedupe_option=False)
-                    logger.debug('%i: reimport creating new finding as no existing finding match: %i:%s:%s:%s', i, item.id, item, item.component_name, item.component_version)
-                    finding_added_count += 1
-                    new_items.append(item)
-                    finding = item
-
-                    if hasattr(item, 'unsaved_req_resp'):
-                        for req_resp in item.unsaved_req_resp:
-                            burp_rr = BurpRawRequestResponse(
-                                finding=finding,
-                                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
-                            burp_rr.clean()
-                            burp_rr.save()
-
-                    if item.unsaved_request and item.unsaved_response:
-                        burp_rr = BurpRawRequestResponse(
-                            finding=finding,
-                            burpRequestBase64=base64.b64encode(item.unsaved_request.encode()),
-                            burpResponseBase64=base64.b64encode(item.unsaved_response.encode()))
-                        burp_rr.clean()
-                        burp_rr.save()
-
-                # for existing findings: make sure endpoints are present or created
-                if finding:
-                    finding_count += 1
-                    for endpoint in item.unsaved_endpoints:
-                        try:
-                            ep, created = Endpoint.objects.get_or_create(
-                                protocol=endpoint.protocol,
-                                host=endpoint.host,
-                                path=endpoint.path,
-                                query=endpoint.query,
-                                fragment=endpoint.fragment,
-                                product=test.engagement.product)
-                        except (MultipleObjectsReturned):
-                            pass
-
-                        try:
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=finding,
-                                endpoint=ep)
-                        except (MultipleObjectsReturned):
-                            pass
-
-                        ep.endpoint_status.add(eps)
-                        finding.endpoints.add(ep)
-                        finding.endpoint_status.add(eps)
-                    if endpoint_to_add:
-                        try:
-                            eps, created = Endpoint_Status.objects.get_or_create(
-                                finding=finding,
-                                endpoint=endpoint_to_add)
-                        except (MultipleObjectsReturned):
-                            pass
-                        finding.endpoints.add(endpoint_to_add)
-                        endpoint_to_add.endpoint_status.add(eps)
-                        finding.endpoint_status.add(eps)
-                    if item.unsaved_tags:
-                        finding.tags = item.unsaved_tags
-
-                    # existing findings may be from before we had component_name/version fields
-                    finding.component_name = finding.component_name if finding.component_name else component_name
-                    finding.component_version = finding.component_version if finding.component_version else component_version
-
-                    finding.save(push_to_jira=push_to_jira)
-
-            to_mitigate = set(original_items) - set(reactivated_items) - set(unchanged_items)
-            mitigated_findings = []
-            if close_old_findings:
-                logger.debug('STEP 2: Mitigating existing findings that are not present anymore in the report')
-                for finding in to_mitigate:
-                    if not finding.mitigated or not finding.is_Mitigated:
-                        logger.debug('mitigating finding: %i:%s', finding.id, finding)
-                        finding.mitigated = scan_date_time
-                        finding.is_Mitigated = True
-                        finding.mitigated_by = self.context['request'].user
-                        finding.active = False
-
-                        endpoint_status = finding.endpoint_status.all()
-                        for status in endpoint_status:
-                            status.mitigated_by = self.context['request'].user
-                            status.mitigated_time = timezone.now()
-                            status.mitigated = True
-                            status.last_modified = timezone.now()
-                            status.save()
-
-                        # don't try to dedupe findings that we are closing
-                        finding.save(push_to_jira=push_to_jira, dedupe_option=False)
-                        note = Notes(entry="Mitigated by %s re-upload." % scan_type,
-                                    author=self.context['request'].user)
-                        note.save()
-                        finding.notes.add(note)
-                        mitigated_findings.append(finding)
-                        mitigated_count += 1
-
-            untouched = set(unchanged_items) - set(to_mitigate)
-
-            test.updated = max_safe([scan_date_time, test.updated])
-            test.engagement.updated = max_safe([scan_date_time, test.engagement.updated])
-
-            if test.engagement.engagement_type == 'CI/CD':
-                test.target_end = max_safe([scan_date_time, test.target_end])
-                test.engagement.target_end = max_safe([scan_date, test.engagement.target_end])
-
-            if version:
-                test.version = version
-
-            if branch_tag:
-                test.branch_tag = branch_tag
-
-            if build_id:
-                test.build_id = build_id
-
-            if branch_tag:
-                test.commit_hash = commit_hash
-
-            test.save()
-            test.engagement.save()
-
-            if settings.TRACK_IMPORT_HISTORY:
-                import_settings = {}  # json field
-                import_settings['active'] = active
-                import_settings['verified'] = verified
-                import_settings['minimum_severity'] = min_sev
-                import_settings['close_old_findings'] = close_old_findings
-                import_settings['push_to_jira'] = push_to_jira
-
-                # tags=tags TODO no tags field in api for reimport it seems
-                if endpoint_to_add:
-                    import_settings['endpoint'] = endpoint_to_add
-
-                test_import = Test_Import(test=test, import_settings=import_settings, version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, type=Test_Import.REIMPORT_TYPE)
-                test_import.save()
-
-                test_import_finding_action_list = []
-                for finding in mitigated_findings:
-                    logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                    test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CLOSED_FINDING))
-                for finding in new_items:
-                    logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                    test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_CREATED_FINDING))
-                for finding in reactivated_items:
-                    logger.debug('preparing Test_Import_Finding_Action for finding: %i', finding.id)
-                    test_import_finding_action_list.append(Test_Import_Finding_Action(test_import=test_import, finding=finding, action=IMPORT_REACTIVATED_FINDING))
-
-                Test_Import_Finding_Action.objects.bulk_create(test_import_finding_action_list)
-
-            updated_count = mitigated_count + reactivated_count + len(new_items)
-            if updated_count > 0:
-                # new_items = original_items
-                title = 'Updated ' + str(updated_count) + " findings for " + str(test.engagement.product) + ': ' + str(test.engagement.name) + ': ' + str(test)
-                create_notification(event='scan_added', title=title, findings_new=new_items, findings_mitigated=mitigated_findings, findings_reactivated=reactivated_items,
-                                    finding_count=updated_count, test=test, engagement=test.engagement, product=test.engagement.product, findings_untouched=untouched,
-                                    url=reverse('view_test', args=(test.id,)))
-
-        except SyntaxError:
-            raise Exception("Parser SyntaxError")
+            test, finding_count, new_finding_count, closed_finding_count, reactivated_finding_count, untouched_finding_count = \
+                reimporter.reimport_scan(scan, scan_type, test, active=active, verified=verified,
+                                            tags=None, minimum_severity=minimum_severity,
+                                            endpoints_to_add=endpoints_to_add, scan_date=scan_date,
+                                            version=version, branch_tag=branch_tag, build_id=build_id,
+                                            commit_hash=commit_hash, push_to_jira=push_to_jira,
+                                            close_old_findings=close_old_findings,
+                                            group_by=group_by, sonarqube_config=sonarqube_config,
+                                            cobaltio_config=cobaltio_config)
+        # convert to exception otherwise django rest framework will swallow them as 400 error
+        # exceptions are already logged in the importer
+        except SyntaxError as se:
+            raise Exception(se)
+        except ValueError as ve:
+            raise Exception(ve)
 
         return test
 
@@ -1631,6 +1354,65 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         return value
 
 
+class LanguageTypeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Language_Type
+        fields = '__all__'
+
+
+class LanguageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Languages
+        fields = '__all__'
+
+
+class ImportLanguagesSerializer(serializers.Serializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(), required=True)
+    file = serializers.FileField(required=True)
+
+    def save(self):
+        data = self.validated_data
+        product = data['product']
+        languages = data['file']
+
+        try:
+            data = languages.read()
+            try:
+                deserialized = json.loads(str(data, 'utf-8'))
+            except:
+                deserialized = json.loads(data)
+        except:
+            raise Exception("Invalid format")
+
+        Languages.objects.filter(product=product).delete()
+
+        for name in deserialized:
+            if name not in ['header', 'SUM']:
+                element = deserialized[name]
+
+                try:
+                    language_type, created = Language_Type.objects.get_or_create(language=name)
+                except Language_Type.MultipleObjectsReturned:
+                    language_type = Language_Type.objects.filter(language=name).first()
+
+                language = Languages()
+                language.product = product
+                language.language = language_type
+                language.files = element.get('nFiles', 0)
+                language.blank = element.get('blank', 0)
+                language.comment = element.get('comment', 0)
+                language.code = element.get('code', 0)
+                language.save()
+
+    def validate(self, data):
+        if is_scan_file_too_large(data['file']):
+            raise serializers.ValidationError(
+                'File is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
+        return data
+
+
 class AddNewNoteOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -1643,11 +1425,6 @@ class AddNewFileOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileUpload
         fields = '__all__'
-
-
-class FindingToFindingImagesSerializer(serializers.Serializer):
-    finding_id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all(), many=False, allow_null=True)
-    images = FindingImageSerializer(many=True)
 
 
 class FindingToNotesSerializer(serializers.Serializer):
@@ -1695,7 +1472,6 @@ class ReportGenerateSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=200)
     user_id = serializers.IntegerField()
     host = serializers.CharField(max_length=200)
-    finding_images = FindingToFindingImagesSerializer(many=True, allow_null=True, required=False)
     finding_notes = FindingToNotesSerializer(many=True, allow_null=True, required=False)
 
 
@@ -1709,10 +1485,86 @@ class SystemSettingsSerializer(TaggitSerializer, serializers.ModelSerializer):
         model = System_Settings
         fields = '__all__'
 
+    def validate(self, data):
+
+        if self.instance is not None:
+            default_group = self.instance.default_group
+            default_group_role = self.instance.default_group_role
+
+        if 'default_group' in data:
+            default_group = data['default_group']
+        if 'default_group_role' in data:
+            default_group_role = data['default_group_role']
+
+        if (default_group is None and default_group_role is not None) or \
+           (default_group is not None and default_group_role is None):
+            raise ValidationError('default_group and default_group_role must either both be set or both be empty.')
+
+        return data
+
 
 class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
 
 
-class BurpRawRequestResponseSerializer(serializers.Serializer):
-    req_resp = RequestResponseSerializerField(required=True)
+class NotificationsSerializer(serializers.ModelSerializer):
+    product = serializers.PrimaryKeyRelatedField(queryset=Product.objects.all(),
+                                                 required=False,
+                                                 default=None,
+                                                 allow_null=True)
+    user = serializers.PrimaryKeyRelatedField(queryset=Dojo_User.objects.all(),
+                                                 required=False,
+                                                 default=None,
+                                                 allow_null=True)
+    product_type_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    product_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    engagement_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    test_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    scan_added = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    jira_update = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    upcoming_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    stale_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    auto_close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    close_engagement = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    user_mentioned = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    code_review = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    review_requested = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    other = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    sla_breach = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+    risk_acceptance_expiration = MultipleChoiceField(choices=NOTIFICATION_CHOICES)
+
+    class Meta:
+        model = Notifications
+        fields = '__all__'
+
+    def validate(self, data):
+        user = None
+        product = None
+
+        if self.instance is not None:
+            user = self.instance.user
+            product = self.instance.product
+
+        if 'user' in data:
+            user = data.get('user')
+        if 'product' in data:
+            product = data.get('product')
+
+        if self.instance is None or user != self.instance.user or product != self.instance.product:
+            notifications = Notifications.objects.filter(user=user, product=product).count()
+            if notifications > 0:
+                raise ValidationError("Notification for user and product already exists")
+
+        return data
+
+
+class EngagementPresetsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Engagement_Presets
+        fields = '__all__'
+
+
+class NetworkLocationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Network_Locations
+        fields = '__all__'

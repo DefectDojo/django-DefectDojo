@@ -5,6 +5,7 @@
 {% load static %}
 
 {% block add_styles %}
+    {{ block.super }}
     .chosen-container {
     width: 70% !important;
     }
@@ -13,9 +14,11 @@
     }
 {% endblock %}
 {% block add_css %}
+    {{ block.super }}
     <link rel="stylesheet" href="{% static 'easymde/dist/easymde.min.css' %}">
 {% endblock %}
 {% block content %}
+    {{ block.super }}
     {% if risk_acceptance.is_expired %}
         <div class="danger-zone panel panel-danger">
             <div class="panel-heading">
@@ -328,6 +331,7 @@
 {% endblock %}
 
 {% block postscript %}
+    {{ block.super }}
 {% if not edit_mode %}
     <script type="text/javascript">
         // keyboard shortcuts

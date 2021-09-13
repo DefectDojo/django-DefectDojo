@@ -70,8 +70,6 @@ class XanitizerParser(object):
                 file_path=self.generate_file_path(finding),
                 line=line,
                 date=date,
-                active=False,
-                verified=False,
                 static_finding=True)
 
             items.append(dojofinding)

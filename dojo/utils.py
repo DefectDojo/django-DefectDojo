@@ -1,8 +1,11 @@
+from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.queries import get_authorized_findings
 import re
 import binascii
 import os
 import hashlib
 import bleach
+import mimetypes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 from calendar import monthrange
@@ -15,7 +18,6 @@ from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.urls import get_resolver, reverse
 from django.db.models import Q, Sum, Case, When, IntegerField, Value, Count
-from django.template.defaultfilters import pluralize
 from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import post_save
@@ -188,8 +190,8 @@ def deduplicate_legacy(new_finding):
         # ---------------------------------------------------------
 
         if find.endpoints.count() != 0 and new_finding.endpoints.count() != 0:
-            list1 = [e.host_with_port for e in new_finding.endpoints.all()]
-            list2 = [e.host_with_port for e in find.endpoints.all()]
+            list1 = [str(e) for e in new_finding.endpoints.all()]
+            list2 = [str(e) for e in find.endpoints.all()]
 
             if all(x in list1 for x in list2):
                 deduplicationLogger.debug("%s: existing endpoints are present in new finding", find.id)
@@ -307,7 +309,8 @@ def deduplicate_uid_or_hash_code(new_finding):
         # same without "test__engagement=new_finding.test.engagement" condition
         existing_findings = Finding.objects.filter(
             (Q(hash_code__isnull=False) & Q(hash_code=new_finding.hash_code)) |
-            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type))).exclude(
+            (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=new_finding.unique_id_from_tool) & Q(test__test_type=new_finding.test.test_type)),
+            test__engagement__product=new_finding.test.engagement.product).exclude(
                 id=new_finding.id).exclude(
                         duplicate=True).order_by('id')
     deduplicationLogger.debug("Found " +
@@ -346,14 +349,14 @@ def set_duplicate(new_finding, existing_finding):
         new_finding.original_finding.remove(find)
         set_duplicate(find, existing_finding)
     existing_finding.found_by.add(new_finding.test.test_type)
-    logger.debug('saving new finding')
+    logger.debug('saving new finding: %d', new_finding.id)
     super(Finding, new_finding).save()
-    logger.debug('saving existing finding')
+    logger.debug('saving existing finding: %d', existing_finding.id)
     super(Finding, existing_finding).save()
 
 
 def is_duplicate_reopen(new_finding, existing_finding):
-    if (existing_finding.is_Mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_Mitigated:
+    if (existing_finding.is_mitigated or existing_finding.mitigated) and not existing_finding.out_of_scope and not existing_finding.false_p and new_finding.active and not new_finding.is_mitigated:
         return True
     else:
         return False
@@ -362,7 +365,7 @@ def is_duplicate_reopen(new_finding, existing_finding):
 def set_duplicate_reopen(new_finding, existing_finding):
     logger.debug('duplicate reopen existing finding')
     existing_finding.mitigated = new_finding.mitigated
-    existing_finding.is_Mitigated = new_finding.is_Mitigated
+    existing_finding.is_mitigated = new_finding.is_mitigated
     existing_finding.active = new_finding.active
     existing_finding.verified = new_finding.verified
     existing_finding.notes.create(author=existing_finding.reporter,
@@ -623,6 +626,22 @@ def add_breadcrumb(parent=None,
         crumbs += obj_crumbs
 
     request.session['dojo_breadcrumbs'] = crumbs
+
+
+def is_title_in_breadcrumbs(title):
+    request = crum.get_current_request()
+    if request is None:
+        return False
+
+    breadcrumbs = request.session.get('dojo_breadcrumbs')
+    if breadcrumbs is None:
+        return False
+
+    for breadcrumb in breadcrumbs:
+        if breadcrumb.get('title') == title:
+            return True
+
+    return False
 
 
 def get_punchcard_data(objs, start_date, weeks, view='Finding'):
@@ -1087,11 +1106,6 @@ def opened_in_period(start_date, end_date, pt):
     return oip
 
 
-def message(count, noun, verb):
-    return ('{} ' + noun + '{} {} ' + verb).format(
-        count, pluralize(count), pluralize(count, 'was,were'))
-
-
 class FileIterWrapper(object):
     def __init__(self, flo, chunk_size=1024**2):
         self.flo = flo
@@ -1202,6 +1216,10 @@ def get_page_items_and_count(request, items, page_size, prefix='', do_count=True
 
 def handle_uploaded_threat(f, eng):
     name, extension = os.path.splitext(f.name)
+    # Check if threat folder exist.
+    if not os.path.isdir(settings.MEDIA_ROOT + '/threat/'):
+        # Create the folder
+        os.mkdir(settings.MEDIA_ROOT + '/threat/')
     with open(settings.MEDIA_ROOT + '/threat/%s%s' % (eng.id, extension),
               'wb+') as destination:
         for chunk in f.chunks():
@@ -1433,7 +1451,7 @@ def get_system_setting(setting, default=None):
 @dojo_async_task
 @app.task
 @dojo_model_from_id(model=Product)
-def calculate_grade(product):
+def calculate_grade(product, *args, **kwargs):
     system_settings = System_Settings.objects.get()
     if not product:
         logger.warning('ignoring calculate product for product None!')
@@ -1497,6 +1515,8 @@ class Product_Tab():
                                                           mitigated__isnull=True).count()
         self.endpoints_count = Endpoint.objects.filter(
             product=self.product).count()
+        self.endpoint_hosts_count = Endpoint.objects.filter(
+            product=self.product).values('host').distinct().count()
         self.benchmark_type = Benchmark_Type.objects.filter(
             enabled=True).order_by('name')
         self.engagement = None
@@ -1530,6 +1550,9 @@ class Product_Tab():
 
     def endpoints(self):
         return self.endpoints_count
+
+    def endpoint_hosts(self):
+        return self.endpoint_hosts_count
 
     def benchmark_type(self):
         return self.benchmark_type
@@ -1723,6 +1746,7 @@ def sla_compute_and_notify(*args, **kwargs):
             event='sla_breach',
             title=title,
             finding=finding,
+            url=reverse('view_finding', args=(finding.id,)),
             sla_age=sla_age
         )
 
@@ -1751,9 +1775,9 @@ def sla_compute_and_notify(*args, **kwargs):
 
             query = None
             if settings.SLA_NOTIFY_ACTIVE:
-                query = Q(active=True, is_Mitigated=False, duplicate=False)
+                query = Q(active=True, is_mitigated=False, duplicate=False)
             if settings.SLA_NOTIFY_ACTIVE_VERIFIED_ONLY:
-                query = Q(active=True, verified=True, is_Mitigated=False, duplicate=False)
+                query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
             logger.debug("My query: {}".format(query))
 
             no_jira_findings = {}
@@ -1794,7 +1818,7 @@ def sla_compute_and_notify(*args, **kwargs):
                 jira_issue = None
                 if finding.has_jira_issue:
                     jira_issue = finding.jira_issue
-                elif finding.grouped:
+                elif finding.has_finding_group:
                     jira_issue = finding.finding_group.jira_issue
 
                 if jira_issue:
@@ -1849,11 +1873,21 @@ def sla_compute_and_notify(*args, **kwargs):
         logger.info("Findings SLA is not enabled.")
 
 
-def get_words_for_field(queryset, fieldname):
+def get_words_for_field(model, fieldname):
     max_results = getattr(settings, 'MAX_AUTOCOMPLETE_WORDS', 20000)
-    words = [
-        word for component_name in queryset.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (component_name.split() if component_name else []) if len(word) > 2
-    ]
+    models = None
+    if model == Finding:
+        models = get_authorized_findings(Permissions.Finding_View, user=get_current_user())
+    elif model == Finding_Template:
+        models = Finding_Template.objects.all()
+
+    if models is not None:
+        words = [
+            word for field_value in models.order_by().filter(**{'%s__isnull' % fieldname: False}).values_list(fieldname, flat=True).distinct()[:max_results] for word in (field_value.split() if field_value else []) if len(word) > 2
+        ]
+    else:
+        words = []
+
     return sorted(set(words))
 
 
@@ -1924,7 +1958,7 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def mass_model_updater(model_type, models, function, fields=None, page_size=1000, order='asc', log_prefix=''):
+def mass_model_updater(model_type, models, function, fields, page_size=1000, order='asc', log_prefix=''):
     """ Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
     this process very well if we can process the models ordered by id.
@@ -2015,3 +2049,24 @@ def prod_name(obj):
         return 'Unknown'
 
     return get_product(obj).name
+
+
+# Returns image locations by default (i.e. uploaded_files/09577eb1-6ccb-430b-bc82-0742d4c97a09.png)
+# if return_objects=True, return the FileUPload object instead of just the file location
+def get_file_images(obj, return_objects=False):
+    logger.debug('getting images for %s:%s', type(obj), obj)
+    files = None
+    if not obj:
+        return files
+    files = obj.files.all()
+
+    images = []
+    for file in files:
+        file_name = file.file.name
+        file_type = mimetypes.guess_type(file_name)[0]
+        if file_type and 'image' in file_type:
+            if return_objects:
+                images.append(file)
+            else:
+                images.append(file_name)
+    return images

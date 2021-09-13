@@ -62,8 +62,6 @@ def get_item(dependency_name, dependency_version, advisory, test):
                       cve=advisory['cve'],
                       mitigation='upgrade',
                       references=advisory['link'],
-                      active=False,
-                      verified=False,
                       false_p=False,
                       duplicate=False,
                       out_of_scope=False,
