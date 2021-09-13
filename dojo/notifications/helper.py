@@ -305,8 +305,8 @@ def get_slack_user_id(user_email):
 
     res = requests.request(
         method='POST',
-        url='https://slack.com/api/users.list',
-        data={'token': get_system_setting('slack_token')})
+        url='https://slack.com/api/users.lookupByEmail',
+        data={'token': get_system_setting('slack_token'), 'email': user_email})
 
     users = json.loads(res.text)
 
