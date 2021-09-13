@@ -23,7 +23,7 @@ from django.db import DEFAULT_DB_ALIAS
 from dojo.filters import TemplateFindingFilter, OpenFindingFilter, TestImportFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
-    ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
+    ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Sonarqube_Product, \

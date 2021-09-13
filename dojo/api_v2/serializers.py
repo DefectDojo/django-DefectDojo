@@ -17,7 +17,6 @@ from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Fin
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
     Network_Locations
 
-from dojo.forms import ImportScanForm
 from dojo.tools.factory import requires_file, get_choices_sorted
 from dojo.utils import is_scan_file_too_large
 from django.conf import settings
