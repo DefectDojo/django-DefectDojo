@@ -172,7 +172,6 @@ class DependencyCheckParser(object):
         else:
             cwe_field = self.get_field_value(vulnerability, 'cwe', namespace)
         description = self.get_field_value(vulnerability, 'description', namespace)
-        description += '\nFilepath: ' + str(dependency_filepath)
 
         cve = name[:28]
         if cve and not cve.startswith('CVE'):
@@ -240,6 +239,7 @@ class DependencyCheckParser(object):
                                      'url: {2}\n\n'.format(name, source, url)
 
         mitigation = 'Update ' + component_name + ':' + component_version + ' to at least the version recommended in the description'
+        description += '\nFilepath: ' + str(dependency_filepath)
 
         return Finding(
             title=title,
