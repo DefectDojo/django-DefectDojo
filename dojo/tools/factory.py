@@ -2,9 +2,6 @@ import logging
 from dojo.models import Test_Type
 
 PARSERS = {}
-# TODO remove that
-SCAN_SONARQUBE_API = 'SonarQube API Import'
-SCAN_COBALTIO_API = 'Cobalt.io API Import'
 
 
 def register(parser_type):
@@ -54,19 +51,12 @@ def get_choices_sorted():
 
 
 def requires_file(scan_type):
-    if scan_type is None or scan_type not in PARSERS:
+    if scan_type not in PARSERS:
         return False
-    # FIXME switch to method of the parser
-    # parser = PARSERS[scan_type]
-    return scan_type != SCAN_SONARQUBE_API and scan_type != SCAN_COBALTIO_API
-
-
-def initialize_test_types():
-    # called by the initializer to fill the table with test_types
-    for scan_type in PARSERS:
-        test_type, created = Test_Type.objects.get_or_create(name=scan_type)
-        if created:
-            test_type.save()
+    parser = PARSERS[scan_type]
+    if hasattr(parser, 'requires_file'):
+        return parser.requires_file(scan_type)
+    return False
 
 
 import os

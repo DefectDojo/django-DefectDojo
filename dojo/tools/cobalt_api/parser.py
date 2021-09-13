@@ -5,19 +5,25 @@ from dojo.models import Endpoint, Finding
 from dojo.tools.cobalt_api.importer import CobaltApiImporter
 
 
+SCAN_COBALTIO_API = 'Cobalt.io API Import'
+
+
 class CobaltApiParser(object):
     """
     Import from Cobalt.io API /findings
     """
 
     def get_scan_types(self):
-        return ["Cobalt.io API Import"]
+        return [SCAN_COBALTIO_API]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Cobalt.io API Import"
+        return SCAN_COBALTIO_API
 
     def get_description_for_scan_types(self, scan_type):
         return "Cobalt.io API findings can be imported in JSON format (option --json)."
+
+    def requires_file(self, scan_type):
+        return False
 
     def get_findings(self, file, test):
         if file is None:
