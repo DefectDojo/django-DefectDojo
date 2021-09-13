@@ -32,7 +32,7 @@ class DetectSecretsParser(object):
                 line = item.get('line_number')
                 description = "Detected potential secret with the following related data:\n"
                 description += "**Filename:** " + file + "\n"
-                description += "**Line:** " + line + "\n"
+                description += "**Line:** " + str(line) + "\n"
                 description += "**Type:** " + type + "\n"
 
                 dupe_key = hashlib.sha256(
