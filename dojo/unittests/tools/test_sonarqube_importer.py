@@ -239,7 +239,7 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
             engagement=other_engagement,
             sonarqube_config=Sonarqube_Product.objects.all().last()
         )
-    
+
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
