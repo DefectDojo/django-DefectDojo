@@ -1602,6 +1602,7 @@ class Test_Import_Finding_Action(TimeStampedModel):
     def __str__(self):
         return '%i: %s' % (self.finding.id, self.action)
 
+
 class Finding(models.Model):
 
     title = models.CharField(max_length=511,

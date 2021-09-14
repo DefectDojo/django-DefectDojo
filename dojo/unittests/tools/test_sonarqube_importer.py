@@ -23,28 +23,34 @@ def dummy_rule(self, *args, **kwargs):
         data = json.load(json_file)
         return data
 
+
 def dummy_no_hotspot(self, *args, **kwargs):
     with open('dojo/unittests/scans/sonarqube_api/hotspots/no_vuln.json') as json_file:
         data = json.load(json_file)
         return data
+
 
 def dummy_one_hotspot(self, *args, **kwargs):
     with open('dojo/unittests/scans/sonarqube_api/hotspots/one_vuln.json') as json_file:
         data = json.load(json_file)
         return data
 
+
 def dummy_many_hotspots(self, *args, **kwargs):
     with open('dojo/unittests/scans/sonarqube_api/hotspots/many_vulns.json') as json_file:
         data = json.load(json_file)
         return data
+
 
 def dummy_hotspot_rule(self, *args, **kwargs):
     with open('dojo/unittests/scans/sonarqube_api/hotspots/rule.json') as json_file:
         data = json.load(json_file)
         return data
 
+
 def empty_list(self, *args, **kwargs):
     return list()
+
 
 class TestSonarqubeImporterNoSQToolConfig(TestCase):
     # Testing case no 1. https://github.com/DefectDojo/django-DefectDojo/pull/4676
@@ -225,7 +231,8 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
             engagement=other_engagement,
             sonarqube_config=Sonarqube_Product.objects.all().last()
         )
-        
+
+
 class TestSonarqubeImporterTwoIssuesNoHotspots(TestCase):
     # Testing case no 9. https://github.com/DefectDojo/django-DefectDojo/pull/4107
     fixtures = [
@@ -248,7 +255,8 @@ class TestSonarqubeImporterTwoIssuesNoHotspots(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
-        
+
+
 class TestSonarqubeImporterNoIssuesOneHotspot(TestCase):
     # Testing case no 10. https://github.com/DefectDojo/django-DefectDojo/pull/4107
     fixtures = [
@@ -271,7 +279,8 @@ class TestSonarqubeImporterNoIssuesOneHotspot(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(1, len(findings))
-        
+
+
 class TestSonarqubeImporterNoIssuesTwoHotspots(TestCase):
     # Testing case no 11. https://github.com/DefectDojo/django-DefectDojo/pull/4107
     fixtures = [
@@ -294,7 +303,8 @@ class TestSonarqubeImporterNoIssuesTwoHotspots(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
-        
+
+
 class TestSonarqubeImporterTwoIssuesTwoHotspots(TestCase):
     # Testing case no 12. https://github.com/DefectDojo/django-DefectDojo/pull/4107
     fixtures = [
