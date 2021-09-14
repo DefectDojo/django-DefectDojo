@@ -22,7 +22,7 @@ class TestDetectSecretsParser(TestCase):
         with self.subTest(i=0):
             finding = findings[0]
             self.assertEqual("Secret Keyword", finding.title)
-            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("High", finding.severity)
             self.assertEqual(datetime.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
             self.assertFalse(finding.verified)
             self.assertEqual("modules_images", finding.file_path)
@@ -35,7 +35,7 @@ class TestDetectSecretsParser(TestCase):
         with self.subTest(i=1):
             finding = findings[1]
             self.assertEqual("Secret Keyword", finding.title)
-            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("High", finding.severity)
             self.assertEqual(datetime.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
             self.assertFalse(finding.verified)
             self.assertEqual("modules_images", finding.file_path)
@@ -48,7 +48,7 @@ class TestDetectSecretsParser(TestCase):
         with self.subTest(i=2):
             finding = findings[2]
             self.assertEqual("Secret Keyword", finding.title)
-            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("High", finding.severity)
             self.assertEqual(datetime.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
             self.assertFalse(finding.verified)
             self.assertEqual("example/pkg/docker_registry_watcher/docker_config.go", finding.file_path)
@@ -61,7 +61,7 @@ class TestDetectSecretsParser(TestCase):
         with self.subTest(i=3):
             finding = findings[3]
             self.assertEqual("Secret Keyword", finding.title)
-            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("High", finding.severity)
             self.assertEqual(datetime.datetime(2021, 5, 19, 10, 40, 18, tzinfo=tzlocal()), finding.date)
             self.assertFalse(finding.verified)
             self.assertEqual("example/pkg/docker_registry_watcher/docker_registry_watcher.go", finding.file_path)

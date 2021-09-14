@@ -49,7 +49,7 @@ class DetectSecretsParser(object):
                         description=description,
                         cwe=798,
                         date=find_date,
-                        severity="Medium",
+                        severity="High",
                         verified=is_verified,
                         file_path=file,
                         line=line,
