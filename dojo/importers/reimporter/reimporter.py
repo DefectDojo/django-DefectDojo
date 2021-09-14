@@ -9,7 +9,7 @@ from dojo.models import Notes, Finding, \
 
 from dojo.utils import get_current_user
 
-from django.core.exceptions import MultipleObjectsReturned
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
 from django.conf import settings
 from django.utils import timezone
 import dojo.notifications.helper as notifications_helper
@@ -283,7 +283,8 @@ class DojoDefaultReImporter(object):
 
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, sonarqube_config=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, sonarqube_config=None,
+                    cobaltio_config=None):
 
         logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
 
@@ -301,6 +302,14 @@ class DojoDefaultReImporter(object):
 
             if test.sonarqube_config != sonarqube_config:  # update of sonarqube_config
                 test.sonarqube_config = sonarqube_config
+                test.save()
+
+        if cobaltio_config:  # it there is no cobaltio_config, just use original
+            if cobaltio_config.product != test.engagement.product:
+                raise ValidationError('"cobaltio_config" has to be from same product as "test"')
+
+            if test.cobaltio_config != cobaltio_config:  # update the cobaltio_config
+                test.cobaltio_config = cobaltio_config
                 test.save()
 
         logger.debug('REIMPORT_SCAN: Parse findings')
