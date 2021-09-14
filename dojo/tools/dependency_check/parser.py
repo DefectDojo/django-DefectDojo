@@ -260,6 +260,7 @@ class DependencyCheckParser(object):
 
         else:
             mitigation = 'Update {}:{} to at least the version recommended in the description'.format(component_name, component_version)
+            description += '\nFilepath: ' + str(dependency_filepath)
             active = True
 
         return Finding(
