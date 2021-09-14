@@ -45,6 +45,9 @@
                 <div class="panel-heading">
                     <div class="clearfix">
                         <h4 class="pull-left">Groups</h4>
+                        &nbsp;
+                        <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                            <i class="fa fa-question-circle"></i></a>
                         {% if request.user.is_superuser %}
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" aria-label="Actions" type="button" id="dropdownMenuAddGroupMember"
@@ -59,9 +62,6 @@
                                     </a>
                                 </li>
                             </ul>
-                            &nbsp;
-                            <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                                <i class="fa fa-question-circle text-low"></i></a>
                         </div>
                         {% endif %}
                     </div>

@@ -463,7 +463,9 @@
                     {% if eng.engagement_type == "Interactive" and system_settings.enable_checklists %}
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h4> Checklist<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
+                                <h4> Checklist<span class="pull-right">
+                                    &nbsp;
+                                    <a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
                                     <i class="glyphicon glyphicon-chevron-down"></i></a></span>
                                     {% if eng|has_object_permission:"Engagement_Edit" or user|is_authorized_for_delete:eng %}
                                         {% if check %}
@@ -532,6 +534,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4>Questionnaires<span class="pull-right">
+                                    &nbsp;
                                     <a name="collapsible" data-toggle="collapse" href="#add_feat_survey">
                                     <i class="glyphicon glyphicon-chevron-down"></i></a></span>
                                     {% if eng|has_object_permission:"Engagement_Edit" or user|is_authorized_for_staff:eng %}
@@ -585,7 +588,7 @@
                                     {% include "dojo/form_fields.html" with form=form %}
                                     <div class="form-group">
                                         <div class="col-sm-offset-2 col-sm-10">
-                                            <input class="btn btn-primary" type="submit" id="add_note" label="Add Notes" value="Add Note"/>
+                                            <input class="btn btn-secondary" type="submit" id="add_note" label="Add Notes" value="Add Note"/>
                                         </div>
                                     </div>
                                 </form>
@@ -668,6 +671,7 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4>Files<span class="pull-right">
+                                &nbsp;
                                 <a data-toggle="collapse" href="#add_feat_files">
                                 <i class="glyphicon glyphicon-chevron-down"></i></a></span>
                                 {% if eng|has_object_permission:"Engagement_Edit" or user|is_authorized_for_staff:eng %}
