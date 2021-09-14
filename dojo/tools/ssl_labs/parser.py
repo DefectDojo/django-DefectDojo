@@ -27,6 +27,7 @@ class SSLlabsParser(object):
         find_date = datetime.now()
         dupes = {}
 
+        # FIXME - This is a pointless loop!
         for host in data:
             ssl_endpoints = []
             hostName = ""
@@ -194,7 +195,7 @@ class SSLlabsParser(object):
 
                 find.unsaved_endpoints.append(Endpoint(host=hostName, port=port, protocol=protocol))
 
-            self.items = list(dupes.values())
+            return list(dupes.values())
 
     # Criticality rating
     # Grades: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
