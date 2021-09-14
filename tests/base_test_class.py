@@ -1,4 +1,5 @@
 from selenium import webdriver
+import chromedriver_autoinstaller
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -48,6 +49,9 @@ def set_suite_settings(suite, jira=False, github=False, block_execution=False):
 class BaseTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+
+        chromedriver_autoinstaller.install()
+
         global dd_driver
         if not dd_driver:
             # setupModule and tearDownModule are not working in our scenario, so for now we use setupClass and a global variable
@@ -315,11 +319,9 @@ class BaseTestCase(unittest.TestCase):
             Images are now working after https://github.com/DefectDojo/django-DefectDojo/pull/3954,
             but http://localhost:8080/static/dojo/img/zoom-in.cur still produces a 404
 
-            The addition of the trigger exception is due to the Report Builder tests. All of the moving objects are from javascrip
-            Tooltips are attached to each object and operate fine at human speeds. Selenium moves too fast for tooltips to be
-            cleaned up, edited, and displayed, so the issue is only present in the test
+            The addition of the trigger exception is due to the Report Builder tests.
             """
-            accepted_javascript_messages = r'(zoom\-in\.cur.*)404\ \(Not\ Found\)|Cannot read property \'trigger\' of null'
+            accepted_javascript_messages = r'(zoom\-in\.cur.*)404\ \(Not\ Found\)|Uncaught TypeError: Cannot read properties of null \(reading \'trigger\'\)'
 
             if (entry['level'] == 'SEVERE'):
                 # print(self.driver.current_url)  # TODO actually this seems to be the previous url

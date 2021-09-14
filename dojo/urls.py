@@ -19,7 +19,8 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     AppAnalysisViewSet, EndpointStatusViewSet, SonarqubeIssueViewSet, SonarqubeIssueTransitionViewSet, \
     SonarqubeProductViewSet, RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
-    DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet
+    DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
+    NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -108,7 +109,9 @@ v2_api.register(r'regulations', RegulationsViewSet)
 v2_api.register(r'language_types', LanguageTypeViewSet)
 v2_api.register(r'languages', LanguageViewSet)
 v2_api.register(r'import-languages', ImportLanguagesView, basename='importlanguages')
-
+v2_api.register(r'notifications', NotificationsViewSet, basename='notifications')
+v2_api.register(r'engagement_presets', EngagementPresetsViewset)
+v2_api.register(r'network_locations', NetworkLocationsViewset)
 ur = []
 ur += dev_env_urls
 ur += endpoint_urls

@@ -27,10 +27,10 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
-    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
+    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, Cobaltio_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, Role
+    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member
 
 from dojo.tools.factory import requires_file, get_choices
 from dojo.user.helper import user_is_authorized
@@ -45,7 +45,7 @@ from dojo.product_type.queries import get_authorized_product_types
 from dojo.product.queries import get_authorized_products
 from dojo.finding.queries import get_authorized_findings
 from dojo.user.queries import get_authorized_users_for_product_and_product_type
-from dojo.group.queries import get_authorized_groups
+from dojo.group.queries import get_authorized_groups, get_group_member_roles
 
 logger = logging.getLogger(__name__)
 
@@ -437,6 +437,8 @@ class ImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
+    sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
+    cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
 
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
@@ -507,6 +509,8 @@ class ReImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
+    sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
+    cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
 
     if settings.FEATURE_FINDING_GROUPS:
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
@@ -589,7 +593,7 @@ class MergeFindings(forms.ModelForm):
             queryset=findings, required=True, label="Findings to Merge",
             widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
             help_text=('Select the findings to merge.'))
-        self.fields.keyOrder = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints', 'append_reference']
+        self.fields.field_order = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints', 'append_reference']
 
     class Meta:
         model = Finding
@@ -829,13 +833,16 @@ class TestForm(forms.ModelForm):
                 self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
             else:
                 self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
+            self.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product)
+            self.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
     class Meta:
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end', 'description',
-                  'environment', 'percent_complete', 'tags', 'lead', 'version', 'branch_tag', 'build_id', 'commit_hash']
+                  'environment', 'percent_complete', 'tags', 'lead', 'version', 'branch_tag', 'build_id', 'commit_hash',
+                  'sonarqube_config', 'cobaltio_config']
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -1510,6 +1517,16 @@ class ReviewFindingForm(forms.Form):
                                      'required, please use the text area '
                                      'below to provide documentation.')})
 
+    def __init__(self, *args, **kwargs):
+        finding = None
+        if 'finding' in kwargs:
+            finding = kwargs.pop('finding')
+
+        super(ReviewFindingForm, self).__init__(*args, **kwargs)
+
+        if finding is not None and settings.FEATURE_AUTHORIZATION_V2:
+            self.fields['reviewers'].queryset = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
+
     class Meta:
         fields = ['reviewers', 'entry']
 
@@ -1619,7 +1636,7 @@ class Add_Group_MemberForm(forms.ModelForm):
         self.fields['users'].queryset = Dojo_User.objects.exclude(
             Q(is_superuser=True) |
             Q(id__in=current_members)).exclude(is_active=False).order_by('first_name', 'last_name')
-        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+        self.fields['role'].queryset = get_group_member_roles()
 
     class Meta:
         model = Dojo_Group_Member
@@ -1634,7 +1651,7 @@ class Add_Group_Member_UserForm(forms.ModelForm):
         self.fields['user'].disabled = True
         current_groups = Dojo_Group_Member.objects.filter(user=self.initial['user']).values_list('group', flat=True)
         self.fields['groups'].queryset = Dojo_Group.objects.exclude(id__in=current_groups)
-        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+        self.fields['role'].queryset = get_group_member_roles()
 
     class Meta:
         model = Dojo_Group_Member
@@ -1646,7 +1663,7 @@ class Edit_Group_MemberForm(forms.ModelForm):
         super(Edit_Group_MemberForm, self).__init__(*args, **kwargs)
         self.fields['group'].disabled = True
         self.fields['user'].disabled = True
-        self.fields['role'].queryset = Role.objects.exclude(name='API_Importer').exclude(name='Writer')
+        self.fields['role'].queryset = get_group_member_roles()
 
     class Meta:
         model = Dojo_Group_Member
@@ -2107,12 +2124,29 @@ class Sonarqube_ProductForm(forms.ModelForm):
     sonarqube_tool_config = forms.ModelChoiceField(
         label='SonarQube Configuration',
         queryset=Tool_Configuration.objects.filter(tool_type__name="SonarQube").order_by('name'),
-        required=False
+        required=True
     )
 
     class Meta:
         model = Sonarqube_Product
         exclude = ['product']
+
+
+class Cobaltio_ProductForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Cobaltio_ProductForm, self).__init__(*args, **kwargs)
+        Tool_Type.objects.get_or_create(name='Cobalt.io')
+
+    cobaltio_tool_config = forms.ModelChoiceField(
+        label='Cobalt.io Configuration',
+        queryset=Tool_Configuration.objects.filter(tool_type__name="Cobalt.io").order_by('name'),
+        required=True
+    )
+
+    class Meta:
+        model = Cobaltio_Product
+        exclude = ['product', 'cobaltio_asset_name']
 
 
 class DeleteJIRAInstanceForm(forms.ModelForm):
@@ -2194,6 +2228,24 @@ class ToolConfigForm(forms.ModelForm):
                 code='invalid')
 
         return form_data
+
+
+class DeleteSonarqubeConfigurationForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Sonarqube_Product
+        fields = ['id']
+
+
+class DeleteCobaltioConfigurationForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Cobaltio_Product
+        fields = ['id']
 
 
 class DeleteObjectsSettingsForm(forms.ModelForm):
@@ -2300,6 +2352,10 @@ class DeleteEngagementPresetsForm(forms.ModelForm):
 
 
 class SystemSettingsForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(SystemSettingsForm, self).__init__(*args, **kwargs)
+        self.fields['default_group_role'].queryset = get_group_member_roles()
 
     class Meta:
         model = System_Settings

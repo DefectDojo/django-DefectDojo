@@ -1,0 +1,64 @@
+[
+    {
+        "plugin": "stackTerminationProtection",
+        "category": "CloudFormation",
+        "title": "CloudFormation Stack Termination Protection Enabled",
+        "description": "Ensures that AWS CloudFormation stacks have termination protection enabled.",
+        "resource": "arn:aws:cloudformation:us-east-1:0123456789012:stack/myStack-3ab9f838-96cf-4943-ab90-86cce3a83473/d52a5180-f519-11eb",
+        "region": "us-east-1",
+        "status": "FAIL",
+        "message": "CloudFormation stack \"myStack-3ab9f838-96cf-4943-ab90-86cce3a83473/d52a5180-f519-11eb\" does not have termination protection enabled"
+    },
+    {
+        "plugin": "cloudtrailBucketDelete",
+        "category": "CloudTrail",
+        "title": "CloudTrail Bucket Delete Policy",
+        "description": "Ensures CloudTrail logging bucket has a policy to prevent deletion of logs without an MFA token",
+        "resource": "arn:aws:s3:::myData-0123456789012",
+        "region": "ap-northeast-1",
+        "status": "WARN",
+        "message": "Bucket: myData-0123456789012 has MFA delete disabled"
+    },
+    {
+        "plugin": "flowLogsEnabled",
+        "category": "EC2",
+        "title": "VPC Flow Logs Enabled",
+        "description": "Ensures VPC flow logs are enabled for traffic logging",
+        "resource": "vpc-abcd1234",
+        "region": "us-east-2",
+        "status": "FAIL",
+        "message": "VPC flow logs are not enabled"
+    },
+    {
+        "plugin": "flowLogsEnabled",
+        "category": "EC2",
+        "title": "VPC Flow Logs Enabled",
+        "description": "Ensures VPC flow logs are enabled for traffic logging",
+        "resource": "vpc-efgh5678",
+        "region": "us-west-1",
+        "status": "FAIL",
+        "message": "VPC flow logs are not enabled"
+    },
+    {
+        "plugin": "acmValidation",
+        "category": "ACM",
+        "title": "ACM Certificate Validation",
+        "description": "ACM certificates should be configured to use DNS validation.",
+        "resource": "N/A",
+        "region": "us-east-1",
+        "status": "OK",
+        "message": "No ACM certificates found"
+    },
+    {
+        "plugin": "cloudfrontWafEnabled",
+        "category": "CloudFront",
+        "title": "CloudFront WAF Enabled",
+        "description": "Ensures CloudFront distributions have WAF enabled.",
+        "resource": "arn:aws:cloudfront::Ah6oophiekoongah",
+        "region": [
+            "global"
+        ],
+        "status": "FAIL",
+        "message": "The Cloudfront Distribution does not have WAF enabled"
+    }
+]
