@@ -85,6 +85,8 @@ class TestSonarqubeImporterOneSQToolConfig(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -128,6 +130,8 @@ class TestSonarqubeImporterOneSQConfigNoKey(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -152,6 +156,8 @@ class TestSonarqubeImporterOneSQConfigWithKey(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -201,6 +207,8 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -231,6 +239,20 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
             engagement=other_engagement,
             sonarqube_config=Sonarqube_Product.objects.all().last()
         )
+    
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    def test_parser(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(2, len(findings))
+
+    def test_product_mismatch(self):
+        with self.assertRaisesRegex(Exception, 'Product SonarQube Configuration and "Product" mismatch'):
+            SonarQubeApiImporter.prepare_client(self.other_test)
 
 
 class TestSonarqubeImporterTwoIssuesNoHotspots(TestCase):
@@ -326,4 +348,4 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(TestCase):
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
-        self.assertEqual(2, len(findings))
+        self.assertEqual(4, len(findings))
