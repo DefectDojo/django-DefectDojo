@@ -167,7 +167,6 @@ class SonarQubeApiImporter(object):
             hotspots = client.find_hotspots(component['key'])
             logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
 
-            #wrapper = textwrap.TextWrapper(width=5)
             for hotspot in hotspots:
                 status = hotspot['status']
 
@@ -175,7 +174,7 @@ class SonarQubeApiImporter(object):
                     continue
 
                 type = 'SECURITY_HOTSPOT'
-                if len(hotspot['message']) > 513: #511:
+                if len(hotspot['message']) > 513:
                     title = textwrap.shorten(text=hotspot['message'], width=507)
                 else:
                     title = hotspot['message']
