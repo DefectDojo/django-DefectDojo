@@ -201,8 +201,8 @@ class DependencyCheckParser(object):
         stripped_name = re.sub(r'^CWE-\d+', '', stripped_name).strip()
 
         if component_name is None:
-            logger.error("component_name was None!")
-            return None
+            logger.warning("component_name was None for File: {}, using dependency file name instead.".format(dependency_filename))
+            component_name = dependency_filename
 
         title = '%s:%s | %s(in %s)' % (component_name.split(':')[-1], component_version,
             (stripped_name + ' ' if stripped_name else '') + (description if len(stripped_name) < 25 else ''),
@@ -252,7 +252,7 @@ class DependencyCheckParser(object):
         if vulnerability.tag == "{}suppressedVulnerability".format(namespace):
             if notes == "":
                 notes = "Document on why we are suppressing this vulnerability is missing!"
-                tags.append("missingdoc")
+                tags.append("no_suppression_document")
             mitigation = '**This vulnerability is mitigated and/or suppressed:** {}'.format(notes)
 
             active = False

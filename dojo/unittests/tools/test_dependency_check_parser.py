@@ -836,10 +836,12 @@ class TestDependencyCheckParser(TestCase):
         self.assertEqual(items[9].active, False)
         self.assertEqual(items[9].mitigation,
                     '**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!')
+        self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
 
         self.assertEqual(items[10].active, False)
         self.assertEqual(items[10].mitigation,
                      '**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.')
+        self.assertEqual(items[10].tags, "suppressed")
 
         # evidencecollected -> multiple product + multiple version
         # TODO? Seems like since v6.0.0 there's always a packageurl
