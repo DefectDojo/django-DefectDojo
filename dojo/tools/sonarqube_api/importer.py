@@ -3,6 +3,7 @@ import re
 
 import html2text
 from lxml import etree
+import textwrap
 
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
@@ -156,21 +157,17 @@ class SonarQubeApiImporter(object):
         items = list()
 
         try:
-            product = test.engagement.product
-            config = product.sonarqube_product_set.all().first()
+            client, config = self.prepare_client(test)
 
-            client = SonarQubeAPI(
-                tool_config=config.sonarqube_tool_config if config else None
-            )
+            if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+                component = client.get_project(config.sonarqube_project_key)
+            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
+                component = client.find_project(test.engagement.product.name)
 
-            if config and config.sonarqube_project_key:
-                project = client.get_project(config.sonarqube_project_key)
-            else:
-                project = client.find_project(product.name)
+            hotspots = client.find_hotspots(component['key'])
+            logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
 
-            hotspots = client.find_hotspots(project['key'])
-            logging.info('Found {} hotspots for project {}'.format(len(hotspots), project["key"]))
-
+            #wrapper = textwrap.TextWrapper(width=5)
             for hotspot in hotspots:
                 status = hotspot['status']
 
@@ -178,8 +175,8 @@ class SonarQubeApiImporter(object):
                     continue
 
                 type = 'SECURITY_HOTSPOT'
-                if len(hotspot['message']) > 511:
-                    title = hotspot['message'][0:507] + "..."
+                if len(hotspot['message']) > 513: #511:
+                    title = textwrap.shorten(text=hotspot['message'], width=507)
                 else:
                     title = hotspot['message']
                 component_key = hotspot['component']
