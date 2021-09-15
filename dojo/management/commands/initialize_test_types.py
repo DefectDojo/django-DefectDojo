@@ -9,6 +9,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # called by the initializer to fill the table with test_types
         for scan_type in PARSERS:
-            test_type, created = Test_Type.objects.get_or_create(name=scan_type)
-            if created:
-                test_type.save()
+            Test_Type.objects.get_or_create(name=scan_type)
