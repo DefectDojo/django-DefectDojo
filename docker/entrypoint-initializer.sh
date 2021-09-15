@@ -117,7 +117,7 @@ EOD
   # surveys fixture needs to be modified as it contains an instance dependant polymorphic content id
   echo "Migration of textquestions for surveys"
   python3 manage.py migrate_textquestions
-  
+
   initialize_test_types
   
   # checks the deduplication config at startup
