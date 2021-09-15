@@ -802,7 +802,6 @@ class TestForm(forms.ModelForm):
     title = forms.CharField(max_length=255, required=False)
     description = forms.CharField(widget=forms.Textarea(attrs={'rows': '3'}), required=False)
     test_type = forms.ModelChoiceField(queryset=Test_Type.objects.all().order_by('name'))
-    #test_type = forms.ChoiceField(required=True, choices=get_choices_sorted)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
     # credential = forms.ModelChoiceField(Cred_User.objects.all(), required=False)

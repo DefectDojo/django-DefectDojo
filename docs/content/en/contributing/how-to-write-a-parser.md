@@ -90,7 +90,6 @@ class MyToolParser(object):
 
 ```
 
-requires_file
 ## Template Generator
 
 Use the [template](https://github.com/DefectDojo/cookiecutter-scanner-parser)  parser to quickly generate the files required. To get started you will need to install [cookiecutter](https://github.com/cookiecutter/cookiecutter).
