@@ -4,24 +4,28 @@ from dojo.models import Test
 
 
 class TestFactory(TestCase):
-
-    def test_acunetix_one_finding(self):
-        testfile = open('dojo/unittests/scans/acunetix/one_finding.xml')
-        parser = get_parser('Acunetix Scan')
-        findings = parser.get_findings(testfile, Test())
-        testfile.close()
-        self.assertEqual(1, len(findings))
-
-    def test_anchore_one_finding(self):
-        testfile = open("dojo/unittests/scans/anchore/one_vuln.json")
-        parser = get_parser('Anchore Engine Scan')
-        findings = parser.get_findings(testfile, Test())
-        testfile.close()
-        self.assertEqual(1, len(findings))
-
-    def test_nessus(self):
-        testfile = open("dojo/unittests/scans/nessus/nessus_v_unknown.xml")
-        parser = get_parser('Nessus Scan')
-        findings = parser.get_findings(testfile, Test())
-        testfile.close()
-        self.assertEqual(32, len(findings))
+    def test_get_parser(self):
+        with self.subTest(scan_type="Acunetix Scan"):
+            scan_type = "Acunetix Scan"
+            testfile = open("dojo/unittests/scans/acunetix/one_finding.xml")
+            parser = get_parser(scan_type)
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
+        with self.subTest(scan_type="Anchore Engine Scan"):
+            scan_type = "Anchore Engine Scan"
+            testfile = open("dojo/unittests/scans/anchore/one_vuln.json")
+            parser = get_parser(scan_type)
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
+        with self.subTest(scan_type="Nessus Scan"):
+            scan_type = "Nessus Scan"
+            testfile = open("dojo/unittests/scans/nessus/nessus_v_unknown.xml")
+            parser = get_parser(scan_type)
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
+        with self.subTest(scan_type="ZAP Scan"):
+            scan_type = "ZAP Scan"
+            testfile = open("dojo/unittests/scans/zap/some_2.9.0.xml")
+            parser = get_parser(scan_type)
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()

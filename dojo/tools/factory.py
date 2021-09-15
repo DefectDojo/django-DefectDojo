@@ -1,4 +1,6 @@
+import re
 import logging
+from django.conf import settings
 
 PARSERS = {}
 
@@ -21,7 +23,8 @@ def register_parser(scan_type, parser):
 
 def get_parser(scan_type):
     """Return a parser by the scan type"""
-    if True:
+    rg = re.compile(settings.PARSER_EXCLUDE)
+    if not rg.match(scan_type) or settings.PARSER_EXCLUDE.strip() == '':
         return PARSERS[scan_type]
     else:
         raise ValueError(f"Parser {scan_type} is not active")
