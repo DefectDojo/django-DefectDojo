@@ -40,6 +40,7 @@ class ZapParser(object):
                     references=html2text(item.findtext("reference")),
                     dynamic_finding=True,
                     static_finding=False,
+                    vuln_id_from_tool=item.findtext("pluginid"),
                 )
                 if item.findtext("cweid") is not None and item.findtext("cweid").isdigit():
                     finding.cwe = int(item.findtext("cweid"))

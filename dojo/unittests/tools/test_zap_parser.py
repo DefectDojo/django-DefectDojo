@@ -94,6 +94,7 @@ class TestZapParser(TestCase):
             finding = findings[0]
             self.assertEqual("X-Frame-Options Header Not Set", finding.title)
             self.assertEqual("Medium", finding.severity)
+            self.assertEqual("10020", finding.vuln_id_from_tool)
             self.assertEqual(11, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual("172.17.0.2", endpoint.host)
@@ -106,6 +107,7 @@ class TestZapParser(TestCase):
             finding = findings[18]
             self.assertEqual("Private IP Disclosure", finding.title)
             self.assertEqual("Low", finding.severity)
+            self.assertEqual("2", finding.vuln_id_from_tool)
             self.assertEqual(3, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
 
@@ -130,6 +132,7 @@ class TestZapParser(TestCase):
             finding = findings[0]
             self.assertEqual("User Controllable HTML Element Attribute (Potential XSS)", finding.title)
             self.assertEqual("Info", finding.severity)
+            self.assertEqual("10031", finding.vuln_id_from_tool)
             self.assertEqual(11, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual("http", endpoint.protocol)
@@ -143,6 +146,7 @@ class TestZapParser(TestCase):
             finding = findings[14]
             self.assertEqual("PII Disclosure", finding.title)
             self.assertEqual("High", finding.severity)
+            self.assertEqual("10062", finding.vuln_id_from_tool)
             self.assertEqual(359, finding.cwe)
             self.assertEqual(1, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
@@ -169,6 +173,7 @@ class TestZapParser(TestCase):
             finding = findings[0]
             self.assertEqual("Incomplete or No Cache-control Header Set", finding.title)
             self.assertEqual("Low", finding.severity)
+            self.assertEqual("10015", finding.vuln_id_from_tool)
             self.assertEqual(20, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
             self.assertEqual("https", endpoint.protocol)
@@ -182,6 +187,7 @@ class TestZapParser(TestCase):
             finding = findings[5]
             self.assertEqual("CSP: Wildcard Directive", finding.title)
             self.assertEqual("Medium", finding.severity)
+            self.assertEqual("10055", finding.vuln_id_from_tool)
             self.assertEqual(693, finding.cwe)
             self.assertEqual(2, len(finding.unsaved_endpoints))
             endpoint = finding.unsaved_endpoints[0]
