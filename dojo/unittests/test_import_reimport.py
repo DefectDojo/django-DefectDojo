@@ -141,8 +141,12 @@ class ImportReimportMixin(object):
 
         # the zap scan contains 2 endpoints (uris from findings)
         self.assertEqual(endpoint_count_before + 2, self.db_endpoint_count())
-        # 4 findings, total 11 endpoint statuses
-        self.assertEqual(endpoint_status_count_before_active + 11, self.db_endpoint_status_count(mitigated=False))
+        # 4 findings, total 7 endpoint statuses (1 + 2 + 2 + 2)
+        # finding 1 have 1 endpoints => 1 status
+        # finding 2 have 2 endpoints => 2 status
+        # finding 3 have 2 endpoints => 2 status
+        # finding 5 have 2 endpoints => 2 status
+        self.assertEqual(endpoint_status_count_before_active + 7, self.db_endpoint_status_count(mitigated=False))
         self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
 
         # no notes expected
