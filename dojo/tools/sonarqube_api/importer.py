@@ -4,6 +4,7 @@ import re
 import html2text
 from lxml import etree
 import textwrap
+from django.conf import settings
 
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
@@ -20,7 +21,8 @@ class SonarQubeApiImporter(object):
 
     def get_findings(self, filename, test):
         items = self.import_issues(test)
-        items.extend(self.import_hotspots(test))
+        if settings.SONARQUBE_API_PARSER_HOTSPOTS:
+            items.extend(self.import_hotspots(test))
         return items
 
     @staticmethod
