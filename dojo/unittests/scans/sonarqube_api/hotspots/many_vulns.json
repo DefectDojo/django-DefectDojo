@@ -13,11 +13,11 @@
         "updateDate": "2021-03-12T14:47:56+0000"
     },
     {
-        "key": "AXgm6Z-ophPPY0C1qhRq",
+        "key": "AXgm6Z-ophPPY0C1qhR1",
         "component": "internal.dummy.project:app/assets/javascripts/vuln.js",
         "project": "internal.dummy.project",
         "securityCategory": "auth",
-        "vulnerabilityProbability": "HIGH",
+        "vulnerabilityProbability": "MEDIUM",
         "status": "TO_REVIEW",
         "line": 5,
         "message": "\"password\" detected here, make sure this is not a hard-coded credential.",

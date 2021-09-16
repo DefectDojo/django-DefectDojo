@@ -52,6 +52,46 @@ def empty_list(self, *args, **kwargs):
     return list()
 
 
+def verify_issues_fields_match_findings_fields(self, parser, finding, issue, *args, **kwargs):
+    rule = dummy_rule(self)
+    self.assertIsNotNone(issue)
+    self.assertEqual(str(finding.title), str(issue['message']))
+    self.assertEqual(str(finding.cwe), str(parser.clean_cwe(rule['htmlDesc'])))
+    self.assertEqual(str(finding.description), str(parser.clean_rule_description_html(rule['htmlDesc'])))
+    self.assertEqual(str(finding.severity), str(parser.convert_sonar_severity(issue['severity'])))
+    self.assertEqual(str(finding.references), str(str(parser.get_references(rule['htmlDesc']))))
+    self.assertEqual(str(finding.file_path), str(issue['component']))
+    self.assertEqual(str(finding.line), str(issue['line']))
+    self.assertEqual(str(finding.verified), str(parser.is_confirmed(issue['status'])))
+    self.assertEqual(finding.false_p, False)
+    self.assertEqual(finding.duplicate, False)
+    self.assertEqual(finding.out_of_scope, False)
+    self.assertEqual(finding.mitigated, None)
+    self.assertEqual(str(finding.mitigation), "No mitigation provided")
+    self.assertEqual(str(finding.impact), "No impact provided")
+    self.assertEqual(finding.static_finding, True)
+    self.assertEqual(str(finding.sonarqube_issue), str(issue['key']))        
+
+
+def verify_hotspots_fields_match_findings_fields(self, parser, finding, hotspot, *args, **kwargs):
+    rule = dummy_hotspot_rule(self)
+    self.assertIsNotNone(hotspot)
+    self.assertEqual(str(finding.title), str(hotspot['message']))
+    self.assertEqual(str(finding.cwe), str(parser.clean_cwe(rule['riskDescription'])))
+    self.assertEqual(str(finding.description), str(parser.clean_rule_description_html(rule['vulnerabilityDescription'])))
+    self.assertEqual(str(finding.severity), str(parser.convert_sonar_review_priority(hotspot['vulnerabilityProbability'])))
+    self.assertEqual(str(finding.references), str(str(parser.get_references(rule['riskDescription']))))
+    self.assertEqual(str(finding.file_path), str(hotspot['component']))
+    self.assertEqual(str(finding.line), str(hotspot['line']))
+    self.assertEqual(finding.active, True)
+    self.assertEqual(str(finding.verified), str(parser.is_confirmed(hotspot['status'])))
+    self.assertEqual(finding.false_p, False)
+    self.assertEqual(finding.duplicate, False)
+    self.assertEqual(finding.out_of_scope, False)
+    self.assertEqual(finding.static_finding, True)
+    self.assertEqual(str(finding.sonarqube_issue), str(hotspot['key']))
+
+
 class TestSonarqubeImporterNoSQToolConfig(TestCase):
     # Testing case no 1. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
@@ -91,6 +131,19 @@ class TestSonarqubeImporterOneSQToolConfig(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    def test_verify_issues_fields_match_findings_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        issues = dummy_issues(self)
+        for finding in findings:
+            issue = next((dummy_issue for dummy_issue in issues if str(dummy_issue['key']) == str(finding.sonarqube_issue)), None)
+            verify_issues_fields_match_findings_fields(self, parser, finding, issue)
 
 
 class TestSonarqubeImporterMultipleSQToolConfig(TestCase):
@@ -137,6 +190,19 @@ class TestSonarqubeImporterOneSQConfigNoKey(TestCase):
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    def test_verify_issues_fields_match_findings_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        issues = dummy_issues(self)
+        for finding in findings:
+            issue = next((dummy_issue for dummy_issue in issues if str(dummy_issue['key']) == str(finding.sonarqube_issue)), None)
+            verify_issues_fields_match_findings_fields(self, parser, finding, issue)
+
 
 class TestSonarqubeImporterOneSQConfigWithKey(TestCase):
     # Testing case no 5. https://github.com/DefectDojo/django-DefectDojo/pull/4676 without Project key
@@ -162,6 +228,19 @@ class TestSonarqubeImporterOneSQConfigWithKey(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    def test_verify_issues_fields_match_findings_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        issues = dummy_issues(self)
+        for finding in findings:
+            issue = next((dummy_issue for dummy_issue in issues if str(dummy_issue['key']) == str(finding.sonarqube_issue)), None)
+            verify_issues_fields_match_findings_fields(self, parser, finding, issue)
 
 
 class TestSonarqubeImporterMultipleSQConfigs(TestCase):
@@ -214,6 +293,19 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(TestCase):
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    def test_verify_issues_fields_match_findings_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        issues = dummy_issues(self)
+        for finding in findings:
+            issue = next((dummy_issue for dummy_issue in issues if str(dummy_issue['key']) == str(finding.sonarqube_issue)), None)
+            verify_issues_fields_match_findings_fields(self, parser, finding, issue)
+
 
 class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
     # Testing case no 8. https://github.com/DefectDojo/django-DefectDojo/pull/4676 without Project key
@@ -250,6 +342,19 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    def test_verify_issues_fields_match_findings_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        issues = dummy_issues(self)
+        for finding in findings:
+            issue = next((dummy_issue for dummy_issue in issues if str(dummy_issue['key']) == str(finding.sonarqube_issue)), None)
+            verify_issues_fields_match_findings_fields(self, parser, finding, issue)
+
     def test_product_mismatch(self):
         with self.assertRaisesRegex(Exception, 'Product SonarQube Configuration and "Product" mismatch'):
             SonarQubeApiImporter.prepare_client(self.other_test)
@@ -278,6 +383,19 @@ class TestSonarqubeImporterTwoIssuesNoHotspots(TestCase):
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    def test_verify_issues_fields_match_findings_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        issues = dummy_issues(self)
+        for finding in findings:
+            issue = next((dummy_issue for dummy_issue in issues if str(dummy_issue['key']) == str(finding.sonarqube_issue)), None)
+            verify_issues_fields_match_findings_fields(self, parser, finding, issue)
+
 
 class TestSonarqubeImporterNoIssuesOneHotspot(TestCase):
     # Testing case no 10. https://github.com/DefectDojo/django-DefectDojo/pull/4107
@@ -301,6 +419,19 @@ class TestSonarqubeImporterNoIssuesOneHotspot(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(1, len(findings))
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', empty_list)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', dummy_one_hotspot)
+    def test_verify_hotspots_fields_match_findings_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        hotspots = dummy_one_hotspot(self)
+        for finding in findings:
+            hotspot = next((dummy_hotspot for dummy_hotspot in hotspots if str(dummy_hotspot['key']) == str(finding.sonarqube_issue)), None)
+            verify_hotspots_fields_match_findings_fields(self, parser, finding, hotspot)
 
 
 class TestSonarqubeImporterNoIssuesTwoHotspots(TestCase):
@@ -326,6 +457,19 @@ class TestSonarqubeImporterNoIssuesTwoHotspots(TestCase):
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
 
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', empty_list)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', dummy_many_hotspots)
+    def test_verify_hotspots_fields_match_findings_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        hotspots = dummy_many_hotspots(self)
+        for finding in findings:
+            hotspot = next((dummy_hotspot for dummy_hotspot in hotspots if str(dummy_hotspot['key']) == str(finding.sonarqube_issue)), None)
+            verify_hotspots_fields_match_findings_fields(self, parser, finding, hotspot)
+
 
 class TestSonarqubeImporterTwoIssuesTwoHotspots(TestCase):
     # Testing case no 12. https://github.com/DefectDojo/django-DefectDojo/pull/4107
@@ -349,3 +493,21 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(4, len(findings))
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', dummy_many_hotspots)
+    def test_verify_issues_and_hotspots_fields_match_findings_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        issues = dummy_issues(self)
+        hotspots = dummy_many_hotspots(self)
+        for finding in findings:
+            issue = next((dummy_issue for dummy_issue in issues if str(dummy_issue['key']) == str(finding.sonarqube_issue)), None)
+            hotspot = next((dummy_hotspot for dummy_hotspot in hotspots if str(dummy_hotspot['key']) == str(finding.sonarqube_issue)), None)
+            if issue is not None:
+                verify_issues_fields_match_findings_fields(self, parser, finding, issue)                
+            else:
+                verify_hotspots_fields_match_findings_fields(self, parser, finding, hotspot)
