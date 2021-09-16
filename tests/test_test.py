@@ -195,6 +195,40 @@ class TestUnitTest(BaseTestCase):
         # Assert to the query to dtermine status of failure
         self.assertTrue(self.is_text_present_on_page(text='App Vulnerable to XSS2'))
 
+    def test_add_and_promote_stub_finding(self):
+        # Login to the site.
+        driver = self.driver
+        # Navigate to the engagement page
+        self.goto_active_engagements_overview(driver)
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Beta Test").click()
+        driver.find_element_by_partial_link_text("Quick Security Testing").click()
+
+        # Enter the title of the stub finding
+        # Keep a good practice of clearing field before entering value
+        driver.find_element_by_id("quick_add_finding").clear()
+        driver.find_element_by_id("quick_add_finding").send_keys("App Vulnerable to XSS3")
+        # Click on Add Potential Finding
+        driver.find_element_by_id("the_button").click()
+
+        # There are timing problems with the AJAX call, so we navigate back to the engagement and test pages
+        self.goto_active_engagements_overview(driver)
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Beta Test").click()
+        driver.find_element_by_partial_link_text("Quick Security Testing").click()
+        # Query the site to determine if the stub finding has been added
+        self.assertTrue(driver.find_elements_by_name("stub_finding_name"))
+
+        driver.find_elements_by_name("stub_finding_name")[0].click()
+        self.assertEqual(driver.find_element_by_id("id_title").get_attribute('value'), 'App Vulnerable to XSS3')
+        # finding Description
+        driver.find_element_by_id("id_cvssv3_score").send_keys(Keys.TAB, Keys.TAB, "This is a promoted stub finding")
+        # "Click" the Done button to Edit the finding
+        driver.find_element_by_id("submit").click()
+
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Finding promoted successfully'))
+
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
@@ -229,6 +263,7 @@ def suite():
     suite.addTest(TestUnitTest('test_create_test'))
     suite.addTest(TestUnitTest('test_edit_test'))
     suite.addTest(TestUnitTest('test_add_test_finding'))
+    suite.addTest(TestUnitTest('test_add_and_promote_stub_finding'))
     # suite.addTest(TestUnitTest('test_add_note'))
     # suite.addTest(TestUnitTest('test_delete_test'))
     suite.addTest(ProductTest('test_delete_product'))
