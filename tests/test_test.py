@@ -236,7 +236,7 @@ class TestUnitTest(BaseTestCase):
 
     def test_add_and_delete_stub_finding(self):
 
-        self.test_add_stub_finding()    
+        self.test_add_stub_finding()
 
         driver = self.driver
 
