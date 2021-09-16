@@ -1,5 +1,5 @@
 from dojo.utils import max_safe
-from dojo.tools.factory import import_parser_factory
+from dojo.tools.factory import get_parser
 from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, Test_Import, Test_Import_Finding_Action
 import logging
 
@@ -8,11 +8,7 @@ logger = logging.getLogger(__name__)
 
 def parse_findings(scan, test, active, verified, scan_type):
     try:
-        parser = import_parser_factory(scan,
-                                        test,
-                                        active,
-                                        verified,
-                                        scan_type)
+        parser = get_parser(scan_type)
         parsed_findings = parser.get_findings(scan, test)
         return parsed_findings
     except SyntaxError as se:

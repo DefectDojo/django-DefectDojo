@@ -1160,6 +1160,7 @@ def edit_meta_data(request, pid):
 @user_is_authorized(Product, Permissions.Finding_Add, 'pid', 'staff')
 def ad_hoc_finding(request, pid):
     prod = Product.objects.get(id=pid)
+    test_type, _ = Test_Type.objects.get_or_create(name="Pen Test")
     test = None
     try:
         eng = Engagement.objects.get(product=prod, name="Ad Hoc Engagement")
@@ -1168,14 +1169,14 @@ def ad_hoc_finding(request, pid):
         if len(tests) != 0:
             test = tests[0]
         else:
-            test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+            test = Test(engagement=eng, test_type=test_type,
                         target_start=timezone.now(), target_end=timezone.now())
             test.save()
     except:
         eng = Engagement(name="Ad Hoc Engagement", target_start=timezone.now(),
                          target_end=timezone.now(), active=False, product=prod)
         eng.save()
-        test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+        test = Test(engagement=eng, test_type=test_type,
                     target_start=timezone.now(), target_end=timezone.now())
         test.save()
     form_error = False

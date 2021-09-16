@@ -165,6 +165,9 @@ env = environ.Env(
     # when enabeld safety parser will download latest vuln db during runtime
     # otherwise data is loaded from dojo/tools/safety/insecure_full.json
     DD_SAFETY_PARSER_ONLINE_DB=(bool, True),
+    # regular expression to exclude one or more parsers
+    # could be usefull to limit parser allowed
+    DD_PARSER_EXCLUDE=(str, ''),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -1265,6 +1268,9 @@ QUALYS_WAS_UNIQUE_ID = False
 
 # Deside if parser should download latest db or use offline version
 SAFETY_PARSER_ONLINE_DB = env("DD_SAFETY_PARSER_ONLINE_DB")
+
+# exclusion list for parsers
+PARSER_EXCLUDE = env("DD_PARSER_EXCLUDE")
 
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',
