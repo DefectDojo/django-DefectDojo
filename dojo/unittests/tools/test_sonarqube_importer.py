@@ -70,7 +70,7 @@ def verify_issues_fields_match_findings_fields(self, parser, finding, issue, *ar
     self.assertEqual(str(finding.mitigation), "No mitigation provided")
     self.assertEqual(str(finding.impact), "No impact provided")
     self.assertEqual(finding.static_finding, True)
-    self.assertEqual(str(finding.sonarqube_issue), str(issue['key']))        
+    self.assertEqual(str(finding.sonarqube_issue), str(issue['key']))
 
 
 def verify_hotspots_fields_match_findings_fields(self, parser, finding, hotspot, *args, **kwargs):
@@ -508,6 +508,6 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(TestCase):
             issue = next((dummy_issue for dummy_issue in issues if str(dummy_issue['key']) == str(finding.sonarqube_issue)), None)
             hotspot = next((dummy_hotspot for dummy_hotspot in hotspots if str(dummy_hotspot['key']) == str(finding.sonarqube_issue)), None)
             if issue is not None:
-                verify_issues_fields_match_findings_fields(self, parser, finding, issue)                
+                verify_issues_fields_match_findings_fields(self, parser, finding, issue)
             else:
                 verify_hotspots_fields_match_findings_fields(self, parser, finding, hotspot)
