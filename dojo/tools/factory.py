@@ -9,8 +9,8 @@ PARSERS = {}
 def register(parser_type):
     for scan_type in parser_type().get_scan_types():
         parser = parser_type()
-        if scan_type.endswith('detailed'):
-            parser.set_mode('detailed')
+        if scan_type.endswith("detailed"):
+            parser.set_mode("detailed")
         register_parser(scan_type, parser)
 
 
@@ -27,7 +27,7 @@ def get_parser(scan_type):
     if scan_type not in PARSERS:
         raise ValueError(f"Parser '{scan_type}' does not exists")
     rg = re.compile(settings.PARSER_EXCLUDE)
-    if not rg.match(scan_type) or settings.PARSER_EXCLUDE.strip() == '':
+    if not rg.match(scan_type) or settings.PARSER_EXCLUDE.strip() == "":
         # update DB dynamicaly
         test_type, _ = Test_Type.objects.get_or_create(name=scan_type)
         if test_type.active:
@@ -53,7 +53,7 @@ def requires_file(scan_type):
     if scan_type not in PARSERS:
         return False
     parser = PARSERS[scan_type]
-    if hasattr(parser, 'requires_file'):
+    if hasattr(parser, "requires_file"):
         return parser.requires_file(scan_type)
     return False
 
@@ -76,7 +76,7 @@ for module_name in os.listdir(package_dir):
                 module = import_module(f"dojo.tools.{module_name}.parser")
                 for attribute_name in dir(module):
                     attribute = getattr(module, attribute_name)
-                    if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + 'parser':
+                    if isclass(attribute) and attribute_name.lower() == module_name.replace("_", "") + "parser":
                         register(attribute)
         except:
             logging.exception(f"failed to load {module_name}")
