@@ -184,7 +184,7 @@ class SonarQubeApiImporter(object):
                 line = hotspot.get('line')
                 rule_id = hotspot['key']
                 rule = client.get_hotspot_rule(rule_id)
-                severity = self.convert_sonar_review_priority(rule['vulnerabilityProbability'])
+                severity = self.convert_sonar_review_priority(hotspot['vulnerabilityProbability'])
                 description = self.clean_rule_description_html(rule['vulnerabilityDescription'])
                 cwe = self.clean_cwe(rule['riskDescription'])
                 references = self.get_references(rule['riskDescription'])
