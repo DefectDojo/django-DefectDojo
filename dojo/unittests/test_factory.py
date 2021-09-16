@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dojo.tools.factory import get_parser
-from dojo.models import Test
+from dojo.models import Test, Test_Type
 
 
 class TestFactory(TestCase):
@@ -29,3 +29,26 @@ class TestFactory(TestCase):
             parser = get_parser(scan_type)
             findings = parser.get_findings(testfile, Test())
             testfile.close()
+
+    def test_get_parser_error(self):
+        with self.assertRaises(ValueError):
+            scan_type = "type_that_doesn't_exist"
+            get_parser(scan_type)
+
+    def test_get_parser_test_active_in_db(self):
+        """This test is designed to validate that the factory take into account the falg 'active' in DB"""
+        scan_type = "ZAP Scan"
+        # desactivate the parser
+        Test_Type.objects.update_or_create(
+            name=scan_type,
+            defaults={"active": False},
+        )
+        with self.assertRaises(ValueError):
+            get_parser(scan_type)
+        # activate the parser
+        test_type, created = Test_Type.objects.update_or_create(
+            name=scan_type,
+            defaults={"active": True},
+        )
+        parser = get_parser(scan_type)
+        self.assertIsNotNone(parser)

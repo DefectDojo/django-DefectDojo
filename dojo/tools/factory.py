@@ -1,6 +1,7 @@
 import re
 import logging
 from django.conf import settings
+from dojo.models import Test_Type
 
 PARSERS = {}
 
@@ -23,11 +24,15 @@ def register_parser(scan_type, parser):
 
 def get_parser(scan_type):
     """Return a parser by the scan type"""
+    if scan_type not in PARSERS:
+        raise ValueError(f"Parser '{scan_type}' does not exists")
     rg = re.compile(settings.PARSER_EXCLUDE)
     if not rg.match(scan_type) or settings.PARSER_EXCLUDE.strip() == '':
-        return PARSERS[scan_type]
-    else:
-        raise ValueError(f"Parser {scan_type} is not active")
+        # update DB dynamicaly
+        test_type, _ = Test_Type.objects.get_or_create(name=scan_type)
+        if test_type.active:
+            return PARSERS[scan_type]
+    raise ValueError(f"Parser {scan_type} is not active")
 
 
 def get_choices():
