@@ -29,7 +29,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Risk_Acceptance, Development_Environment, Endpoint, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, \
     Sonarqube_Product, Cobaltio_Product
-from dojo.tools.factory import get_choices
+from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
     get_system_setting, redirect_to_return_url_or_else, get_return_url
@@ -659,7 +659,7 @@ def import_scan_results(request, eid=None, pid=None):
          'title': title,
          'cred_form': cred_form,
          'jform': jform,
-         'scan_types': get_choices(),
+         'scan_types': get_choices_sorted(),
          })
 
 
