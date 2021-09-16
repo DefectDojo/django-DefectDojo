@@ -48,9 +48,8 @@ class CloudsploitParser(object):
             )
 
             # internal de-duplication
-            dupe_key = hashlib.sha256(
-                str(description + title).encode('utf-8')).hexdigest()
-            print(dupe_key)
+            dupe_key = hashlib.sha256(str(description + title).encode('utf-8')).hexdigest()
+
             if dupe_key in dupes:
                 find = dupes[dupe_key]
                 if finding.description:
