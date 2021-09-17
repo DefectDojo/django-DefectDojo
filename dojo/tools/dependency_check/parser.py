@@ -246,6 +246,7 @@ class DependencyCheckParser(object):
                                      'source: {1}\n' \
                                      'url: {2}\n\n'.format(name, source, url)
 
+
         if related_dependency is not None:
             tags.append("related")
 
@@ -262,6 +263,7 @@ class DependencyCheckParser(object):
             mitigation = 'Update {}:{} to at least the version recommended in the description'.format(component_name, component_version)
             description += '\nFilepath: ' + str(dependency_filepath)
             active = True
+            
 
         return Finding(
             title=title,

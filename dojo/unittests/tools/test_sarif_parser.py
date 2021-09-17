@@ -35,9 +35,13 @@ class TestSarifParser(TestCase):
         self.assertEqual("collections/list.h", item.file_path)
         self.assertEqual(15, item.line)
         self.assertEqual("Critical", item.severity)
-        self.assertEqual(
-            "A variable was used without being initialized.", item.description
-        )
+        description = '''**Result message:** Variable "ptr" was used without being initialized. It was declared [here](0).
+**Snippet:**
+```add_core(ptr, offset, val);
+    return;```
+**Rule short description:** A variable was used without being initialized.
+**Rule full description:** A variable was used without being initialized. This can result in runtime errors such as null reference exceptions.'''
+        self.assertEqual(description, item.description)
         self.assertEqual(datetime.datetime(2016, 7, 16, 14, 19, 1, tzinfo=datetime.timezone.utc), item.date)
         for finding in findings:
             self.common_checks(finding)
@@ -59,10 +63,9 @@ class TestSarifParser(TestCase):
         )
         self.assertEqual("src/collections/list.cpp", item.file_path)
         self.assertEqual(15, item.line)
-        self.assertEquals(
-            "A variable was used without being initialized. This can result in runtime errors such as null reference exceptions.",
-            item.description,
-        )
+        description = '''**Result message:** Variable "count" was used without being initialized.
+**Rule full description:** A variable was used without being initialized. This can result in runtime errors such as null reference exceptions.'''
+        self.assertEquals(description, item.description)
         for finding in findings:
             self.common_checks(finding)
 
@@ -132,7 +135,7 @@ class TestSarifParser(TestCase):
         )
         # finding 6
         item = findings[6]
-        self.assertEqual("CVE-2019-11358", item.title)
+        self.assertEqual("CVE-2019-11358 - jQuery before 3.4.0, as used in Drupal, Backdrop CMS, and other products, mishandles jQuery.extend(true, {}, ...) because of [...]", item.title)
         self.assertEqual("Critical", item.severity)
         self.assertEqual("CVE-2019-11358", item.cve)
         for finding in findings:
@@ -232,22 +235,34 @@ class TestSarifParser(TestCase):
             finding = findings[0]
             self.assertEqual("CIS-DI-0010", finding.vuln_id_from_tool)
             self.assertEqual("Critical", finding.severity)
-            self.assertIn("Do not store credential in ENVIRONMENT vars/files", finding.description)
+            description = '''**Result message:** Suspicious ENV key found : DD_ADMIN_PASSWORD, Suspicious ENV key found : DD_CELERY_BROKER_PASSWORD, Suspicious ENV key found : DD_DATABASE_PASSWORD
+**Rule short description:** Do not store credential in ENVIRONMENT vars/files'''
+            self.assertEqual(description, finding.description)
+            self.assertEqual('https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0010', finding.references)
         with self.subTest(i=1):
             finding = findings[1]
             self.assertEqual("CIS-DI-0005", finding.vuln_id_from_tool)
             self.assertEqual("Info", finding.severity)
-            self.assertEqual("Enable Content trust for Docker", finding.description)
+            description = '''**Result message:** export DOCKER_CONTENT_TRUST=1 before docker pull/build
+**Rule short description:** Enable Content trust for Docker'''
+            self.assertEqual(description, finding.description)
+            self.assertEqual('https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0005', finding.references)
         with self.subTest(i=2):
             finding = findings[2]
             self.assertEqual("CIS-DI-0006", finding.vuln_id_from_tool)
             self.assertEqual("Info", finding.severity)
-            self.assertEqual("Add HEALTHCHECK instruction to the container image", finding.description)
+            description = '''**Result message:** not found HEALTHCHECK statement
+**Rule short description:** Add HEALTHCHECK instruction to the container image'''
+            self.assertEqual(description, finding.description)
+            self.assertEqual('https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0006', finding.references)
         with self.subTest(i=3):
             finding = findings[3]
             self.assertEqual("CIS-DI-0008", finding.vuln_id_from_tool)
             self.assertEqual("Info", finding.severity)
-            self.assertEqual("Confirm safety of setuid/setgid files", finding.description)
+            description = '''**Result message:** setuid file: urwxr-xr-x usr/bin/chfn, setuid file: urwxr-xr-x usr/bin/chsh, setuid file: urwxr-xr-x usr/bin/passwd, setuid file: urwxr-xr-x bin/umount, setuid file: urwxr-xr-x bin/mount, setgid file: grwxr-xr-x usr/bin/wall, setgid file: grwxr-xr-x usr/bin/expiry, setuid file: urwxr-xr-x bin/su, setgid file: grwxr-xr-x sbin/unix_chkpwd, setuid file: urwxr-xr-x usr/bin/gpasswd, setgid file: grwxr-xr-x usr/bin/chage, setuid file: urwxr-xr-x usr/bin/newgrp
+**Rule short description:** Confirm safety of setuid/setgid files'''
+            self.assertEqual(description, finding.description)
+            self.assertEqual('https://github.com/goodwithtech/dockle/blob/master/CHECKPOINT.md#CIS-DI-0008', finding.references)
 
     def test_mobsfscan(self):
         testfile = open("dojo/unittests/scans/sarif/mobsfscan.json")
@@ -268,21 +283,30 @@ class TestSarifParser(TestCase):
             finding = findings[0]
             self.assertEqual("AWS Access Key secret detected", finding.title)
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual("AWS Access Key secret detected", finding.description)
+            description = '''**Result message:** AWS Access Key secret detected
+**Snippet:**
+```      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",```'''
+            self.assertEqual(description, finding.description)
             self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_1_vuln.json", finding.file_path)
             self.assertEqual(13, finding.line)
         with self.subTest(i=3):
             finding = findings[3]
             self.assertEqual("AWS Access Key secret detected", finding.title)
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual("AWS Access Key secret detected", finding.description)
+            description = '''**Result message:** AWS Access Key secret detected
+**Snippet:**
+```      \"raw_source_code_extract\": \"AKIAIOSFODNN7EXAMPLE\",```'''
+            self.assertEqual(description, finding.description)
             self.assertEqual("dojo/unittests/scans/gitlab_secret_detection_report/gitlab_secret_detection_report_3_vuln.json", finding.file_path)
             self.assertEqual(44, finding.line)
         with self.subTest(i=7):
             finding = findings[7]
             self.assertEqual("AWS Access Key secret detected", finding.title)
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual("AWS Access Key secret detected", finding.description)
+            description = '''**Result message:** AWS Access Key secret detected
+**Snippet:**
+```        self.assertEqual(\"AWS\\nAKIAIOSFODNN7EXAMPLE\", first_finding.description)```'''
+            self.assertEqual(description, finding.description)
             self.assertEqual("dojo/unittests/tools/test_gitlab_secret_detection_report_parser.py", finding.file_path)
             self.assertEqual(37, finding.line)
 
@@ -297,25 +321,43 @@ class TestSarifParser(TestCase):
             finding = findings[0]
             self.assertEqual("random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).", finding.title)
             self.assertEqual("Medium", finding.severity)
-            self.assertEqual("This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).", finding.description)
+            description = '''**Result message:** random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).
+**Snippet:**
+```      is.setstate(std::ios::failbit);```
+**Rule name:** random/setstate
+**Rule short description:** This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).'''
+            self.assertEqual(description, finding.description)
             self.assertEqual("src/tree/param.cc", finding.file_path)
             self.assertEqual(29, finding.line)
             self.assertEqual(327, finding.cwe)
             self.assertEqual("FF1048", finding.vuln_id_from_tool)
+            self.assertEqual('https://cwe.mitre.org/data/definitions/327.html', finding.references)
         with self.subTest(i=20):
             finding = findings[20]
             self.assertEqual("buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120).", finding.title)
             self.assertEqual("Info", finding.severity)
-            self.assertEqual("Does not check for buffer overflows when copying to destination (CWE-120).", finding.description)
+            description = '''**Result message:** buffer/memcpy:Does not check for buffer overflows when copying to destination (CWE-120).
+**Snippet:**
+```    std::memcpy(dptr, dmlc::BeginPtr(buffer_) + buffer_ptr_, size);```
+**Rule name:** buffer/memcpy
+**Rule short description:** Does not check for buffer overflows when copying to destination (CWE-120).'''
+            self.assertEqual(description, finding.description)
             self.assertEqual("src/common/io.cc", finding.file_path)
             self.assertEqual(31, finding.line)
             self.assertEqual(120, finding.cwe)
             self.assertEqual("FF1004", finding.vuln_id_from_tool)
+            self.assertEqual('https://cwe.mitre.org/data/definitions/120.html', finding.references)
         with self.subTest(i=53):
             finding = findings[53]
             self.assertEqual("buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).", finding.title)
             self.assertEqual("Critical", finding.severity)
-            self.assertEqual("The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).", finding.description)
+            description = '''**Result message:** buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).
+**Snippet:**
+```      if (sscanf(argv[i], "%[^=]=%s", name, val) == 2) {```
+**Rule name:** buffer/sscanf
+**Rule short description:** The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).'''
+            self.assertEqual(description, finding.description)
             self.assertEqual("src/cli_main.cc", finding.file_path)
             self.assertEqual(482, finding.line)
             self.assertEqual("FF1021", finding.vuln_id_from_tool)
+            self.assertEqual('https://cwe.mitre.org/data/definitions/120.html', finding.references)
