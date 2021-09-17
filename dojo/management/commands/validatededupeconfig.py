@@ -11,7 +11,7 @@ class Command(BaseCommand):
     help = 'Validate deduplication logic in settings'
 
     def handle(self, *args, **options):
-        for each_var in settings.HASHCODE_FIELDS_PER_SCANNER:
-            for each_ind in each_var:
-                if each_ind not in settings.HASHCODE_ALLOWED_FIELDS:
-                    deduplicationLogger.error("compute_hash_code - configuration error: some elements of HASHCODE_FIELDS_PER_SCANNER are not in the allowed list HASHCODE_ALLOWED_FIELDS. " "Using default fields")
+        for scanner in settings.HASHCODE_FIELDS_PER_SCANNER:
+            for field in settings.HASHCODE_FIELDS_PER_SCANNER.get(scanner):
+                if field not in settings.HASHCODE_ALLOWED_FIELDS:
+                    deduplicationLogger.error(f"Configuration error in HASHCODE_FIELDS_PER_SCANNER: Element {field} is not in the allowed list HASHCODE_ALLOWED_FIELDS for {scanner}. " "Using default fields")
