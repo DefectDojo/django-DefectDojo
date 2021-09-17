@@ -97,10 +97,14 @@ class ImportReimportMixin(object):
         # imported count must match count in xml report
         self.assert_finding_count_json(4, findings)
 
-        # the zap scan contains 3 endpoints (mainsite with pot + uris from findings)
-        self.assertEqual(endpoint_count_before + 3, self.db_endpoint_count())
-        # 4 findings, total 11 endpoint statuses
-        self.assertEqual(endpoint_status_count_before_active + 11, self.db_endpoint_status_count(mitigated=False))
+        # the zap scan contains 2 endpoints (uris from findings)
+        self.assertEqual(endpoint_count_before + 2, self.db_endpoint_count())
+        # 4 findings, total 7 endpoint statuses (1 + 2 + 2 + 2)
+        # finding 1 have 1 endpoints => 1 status
+        # finding 2 have 2 endpoints => 2 status
+        # finding 3 have 2 endpoints => 2 status
+        # finding 5 have 2 endpoints => 2 status
+        self.assertEqual(endpoint_status_count_before_active + 7, self.db_endpoint_status_count(mitigated=False))
         self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
 
         # no notes expected
@@ -135,10 +139,14 @@ class ImportReimportMixin(object):
         # imported count must match count in xml report
         self.assert_finding_count_json(4, findings)
 
-        # the zap scan contains 3 endpoints (mainsite with pot + uris from findings)
-        self.assertEqual(endpoint_count_before + 3, self.db_endpoint_count())
-        # 4 findings, total 11 endpoint statuses
-        self.assertEqual(endpoint_status_count_before_active + 11, self.db_endpoint_status_count(mitigated=False))
+        # the zap scan contains 2 endpoints (uris from findings)
+        self.assertEqual(endpoint_count_before + 2, self.db_endpoint_count())
+        # 4 findings, total 7 endpoint statuses (1 + 2 + 2 + 2)
+        # finding 1 have 1 endpoints => 1 status
+        # finding 2 have 2 endpoints => 2 status
+        # finding 3 have 2 endpoints => 2 status
+        # finding 5 have 2 endpoints => 2 status
+        self.assertEqual(endpoint_status_count_before_active + 7, self.db_endpoint_status_count(mitigated=False))
         self.assertEqual(endpoint_status_count_before_mitigated, self.db_endpoint_status_count(mitigated=True))
 
         # no notes expected
@@ -535,9 +543,9 @@ class ImportReimportMixin(object):
         self.assertEqual(finding_count_before + 1, self.db_finding_count())
         # zap4 only uses 2 endpoints that already exist
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
-        # but 2 statuses should be created for those endpoints, 3 statuses for zap1 closed
+        # but 2 statuses should be created for those endpoints, 2 statuses for zap1 closed
         self.assertEqual(endpoint_status_count_before_active + 2 - 3, self.db_endpoint_status_count(mitigated=False))
-        self.assertEqual(endpoint_status_count_before_mitigated + 3, self.db_endpoint_status_count(mitigated=True))
+        self.assertEqual(endpoint_status_count_before_mitigated + 2, self.db_endpoint_status_count(mitigated=True))
 
         # - 1 new note for zap1 being closed now
         self.assertEqual(notes_count_before + 1, self.db_notes_count())
@@ -563,9 +571,9 @@ class ImportReimportMixin(object):
 
         reimport1 = self.reimport_scan_with_params(test_id, self.zap_sample1_filename)
 
-        # zap1 should be closed 3 endpoint statuses less, but 2 extra for zap4
+        # zap1 should be closed 2 endpoint statuses less, but 2 extra for zap4
         self.assertEqual(endpoint_status_count_before_active - 3 + 2, self.db_endpoint_status_count(mitigated=False))
-        self.assertEqual(endpoint_status_count_before_mitigated + 3, self.db_endpoint_status_count(mitigated=True))
+        self.assertEqual(endpoint_status_count_before_mitigated + 2, self.db_endpoint_status_count(mitigated=True))
 
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
         endpoint_status_count_before_mitigated = self.db_endpoint_status_count(mitigated=True)
@@ -757,11 +765,11 @@ class ImportReimportMixin(object):
         self.assert_finding_count_json(0, findings)
 
         # the updated scan report has
-        # - 2 new findings, 2 new endpoints, 3 + 3 new endpoint statuses active, 3 + 3 endpoint statues mitigated due to zap1+2 closed
+        # - 2 new findings, 2 new endpoints, 2 + 2 new endpoint statuses active, 3 + 3 endpoint statues mitigated due to zap1+2 closed
         self.assertEqual(finding_count_before + 2, self.db_finding_count())
         self.assertEqual(endpoint_count_before, self.db_endpoint_count())
         self.assertEqual(endpoint_status_count_before_active + 3 + 3 - 3 - 3, self.db_endpoint_status_count(mitigated=False))
-        self.assertEqual(endpoint_status_count_before_mitigated + 3 + 3, self.db_endpoint_status_count(mitigated=True))
+        self.assertEqual(endpoint_status_count_before_mitigated + 2 + 2, self.db_endpoint_status_count(mitigated=True))
 
         # - zap2 and zap5 closed
         self.assertEqual(notes_count_before + 2, self.db_notes_count())
