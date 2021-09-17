@@ -289,7 +289,6 @@ class DependencyCheckParser(object):
         return "OWASP Dependency Check output can be imported in Xml format."
 
     def get_findings(self, filename, test):
-
         if filename is None:
             return list()
 
@@ -329,7 +328,6 @@ class DependencyCheckParser(object):
 
         return list(dupes.values())
 
-# From Emre - I left the original comments here below and moved them to the bottom.
 # future idea include vulnerablesoftware in description?
 # <vulnerableSoftware>
 #     <software>cpe:2.3:a:netapp:snapmanager:-:*:*:*:*:sap:*:*</software>
@@ -349,35 +347,3 @@ class DependencyCheckParser(object):
 #     <software>cpe:2.3:a:oracle:rapid_planning:12.1:*:*:*:*:*:*:*</software>
 #     <software>cpe:2.3:a:netapp:snap_creator_framework:-:*:*:*:*:*:*:*</software>
 # </vulnerableSoftware>
-
-
-# TODO relateddependencies are ignored in this parser, but should be imported because you might miss vulnerable dependencies otherwise
-# <relatedDependencies>
-#     <relatedDependency>
-#         <fileName>client-offer-service-ear-1.0-SNAPSHOT-deployment-prod.zip: h2-console.war</fileName>
-#         <filePath>/var/lib/jenkins/workspace/vice-middleware-security_develop/offer-service-ear/target/client-offer-service-ear-1.0-SNAPSHOT-deployment-prod.zip/jboss/standalone/deployments/h2-console.war</filePath>
-#         <sha256>a520752f350909c191db45a598a88fcca2fa5db17a340dee6b3d0e36f4122e11</sha256>
-#         <sha1>080c5a481cd7abf27bfd4b48edf73b1cb214085e</sha1>
-#         <md5>add18b9f953221ff565cf7a34aac0ed9</md5>
-#     </relatedDependency>
-#     <relatedDependency>
-#         <fileName>client-offer-service-ear-1.0-SNAPSHOT-deployment-uat.zip: h2-console.war</fileName>
-#         <filePath>/var/lib/jenkins/workspace/vice-middleware-security_develop/offer-service-ear/target/client-offer-service-ear-1.0-SNAPSHOT-deployment-uat.zip/jboss/standalone/deployments/h2-console.war</filePath>
-#         <sha256>a520752f350909c191db45a598a88fcca2fa5db17a340dee6b3d0e36f4122e11</sha256>
-#         <sha1>080c5a481cd7abf27bfd4b48edf73b1cb214085e</sha1>
-#         <md5>add18b9f953221ff565cf7a34aac0ed9</md5>
-#     </relatedDependency>
-# </relatedDependencies># related dependencies can have different identifiers
-# <relatedDependency>
-#     <fileName>client-platform.ear: platform-rest-internal.war: jackson-datatype-jsr310-2.9.8.jar</fileName>
-#     <filePath>/var/lib/jenkins/workspace/nl-platform_-_metrics_develop/platform-client/target/client-platform.ear/platform-rest-internal.war/WEB-INF/lib/jackson-datatype-jsr310-2.9.8.jar</filePath>
-#     <sha256>fdca896161766ca4a2c3e06f02f6a5ede22a5b3a55606541cd2838eace08ca23</sha256>
-#     <sha1>28ad1bced632ba338e51c825a652f6e11a8e6eac</sha1>
-#     <md5>01d34ef6e91de1aea29aadebced1aaa5</md5>
-#     <identifiers>
-#         <package>
-#             <id>pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.9.8</id>
-#             <url>https://ossindex.sonatype.org/component/pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.9.8</url>
-#         </package>
-#     </identifiers>
-# </relatedDependency>
