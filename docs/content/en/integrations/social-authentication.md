@@ -52,7 +52,7 @@ to be created. Closely follow the steps below to guarantee success.
     on the left side of the screen. Click **Create Credentials**, and
     choose **OAuth Client ID**:
 
-    ![image](../../images/google_1.png<>)
+    ![image](../../images/google_1.png)
 
 3.  Select **Web Applications**, and provide a descriptive name for the
     client.
