@@ -38,7 +38,8 @@ class TestDojoDefaultImporter(TestCase):
         importer = Importer()
 
         # create the test
-        test = importer.create_test(scan_type, engagement, lead, environment)
+        # by defaut test_type == scan_type
+        test = importer.create_test(scan_type, scan_type, engagement, lead, environment)
 
         # parse the findings
         active = False
