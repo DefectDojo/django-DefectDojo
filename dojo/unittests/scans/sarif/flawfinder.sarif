@@ -16,7 +16,7 @@
                 "text": "This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327)."
               },
               "defaultConfiguration": {
-                "level": "warning"
+                "level": "error"
               },
               "helpUri": "https://cwe.mitre.org/data/definitions/327.html",
               "relationships": [
@@ -283,7 +283,6 @@
       "results": [
         {
           "ruleId": "FF1048",
-          "level": "warning",
           "message": {
             "text": "random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327)."
           },

@@ -320,7 +320,7 @@ class TestSarifParser(TestCase):
         with self.subTest(i=0):
             finding = findings[0]
             self.assertEqual("random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).", finding.title)
-            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("Critical", finding.severity)
             description = '''**Result message:** random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327).
 **Snippet:**
 ```      is.setstate(std::ios::failbit);```

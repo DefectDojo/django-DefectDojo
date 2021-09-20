@@ -211,18 +211,20 @@ def get_references(rule):
 
 
 def get_severity(result, rule):
-    severity = result.get('level', 'warning')
+    severity = result.get('level')
     if severity is None and rule is not None:
         # get the severity from the rule
         if 'defaultConfiguration' in rule:
-            severity = rule['defaultConfiguration'].get('level', 'warning')
+            severity = rule['defaultConfiguration'].get('level')
 
-    if 'warning' == severity:
+    if 'note' == severity:
+        return 'Info'
+    elif 'warning' == severity:
         return 'Medium'
     elif 'error' == severity:
         return 'Critical'
     else:
-        return 'Info'
+        return 'Medium'
 
 
 def get_item(result, rules, artifacts, run_date):
