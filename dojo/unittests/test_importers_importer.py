@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.utils import timezone
-from dojo.importers import utils as importer_utils
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.models import Engagement, Product, Product_Type, User
+from dojo.tools.factory import get_parser
 
 
 class TestDojoDefaultImporter(TestCase):
@@ -42,11 +42,8 @@ class TestDojoDefaultImporter(TestCase):
         test = importer.create_test(scan_type, scan_type, engagement, lead, environment)
 
         # parse the findings
-        active = False
-        verified = False
-        parsed_findings = importer_utils.parse_findings(
-            scan, test, active, verified, scan_type
-        )
+        parser = get_parser(scan_type)
+        parsed_findings = parser.get_findings(scan, test)
 
         # process
         minimum_severity = "Info"
