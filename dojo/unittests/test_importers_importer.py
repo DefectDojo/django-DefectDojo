@@ -47,6 +47,8 @@ class TestDojoDefaultImporter(TestCase):
 
         # process
         minimum_severity = "Info"
+        active = True
+        verified = True
         new_findings = importer.process_parsed_findings(
             test,
             parsed_findings,
