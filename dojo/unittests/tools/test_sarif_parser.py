@@ -454,11 +454,11 @@ class TestSarifParser(TestCase):
         self.assertEqual(2, len(tests))
         with self.subTest(test=0):
             test = tests[0]
-            self.assertEqual("CodeScanner", test.test_type.name)
+            self.assertEqual("CodeScanner", test.type)
             findings = test.findings
             self.assertEqual(0, len(findings))
         with self.subTest(test=1):
             test = tests[1]
-            self.assertEqual("OtherScanner", test.test_type.name)
+            self.assertEqual("OtherScanner", test.type)
             findings = test.findings
             self.assertEqual(0, len(findings))
