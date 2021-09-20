@@ -1,0 +1,1894 @@
+{
+    "version": "2.1.0",
+    "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+    "runs": [
+        {
+            "tool": {
+                "extensions": [
+                    {
+                        "version": "4.4.0",
+                        "name": "edu.umd.cs.findbugs.plugins.core",
+                        "shortDescription": {
+                            "text": "Core SpotBugs plugin"
+                        },
+                        "informationUri": "https://github.com/spotbugs",
+                        "organization": "SpotBugs project"
+                    }
+                ],
+                "driver": {
+                    "name": "SpotBugs",
+                    "version": "4.4.0",
+                    "language": "en",
+                    "rules": [
+                        {
+                            "id": "DMI_HARDCODED_ABSOLUTE_FILENAME",
+                            "shortDescription": {
+                                "text": "Code contains a hard coded reference to an absolute pathname."
+                            },
+                            "messageStrings": {
+                                "default": {
+                                    "text": "Hard coded reference to an absolute pathname in {0}."
+                                }
+                            },
+                            "helpUri": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#DMI_HARDCODED_ABSOLUTE_FILENAME",
+                            "properties": {
+                                "tags": [
+                                    "STYLE"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "DM_DEFAULT_ENCODING",
+                            "shortDescription": {
+                                "text": "Reliance on default encoding."
+                            },
+                            "messageStrings": {
+                                "default": {
+                                    "text": "Found reliance on default encoding in {0}: {1}."
+                                }
+                            },
+                            "helpUri": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#DM_DEFAULT_ENCODING",
+                            "properties": {
+                                "tags": [
+                                    "I18N"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "WMI_WRONG_MAP_ITERATOR",
+                            "shortDescription": {
+                                "text": "Inefficient use of keySet iterator instead of entrySet iterator."
+                            },
+                            "messageStrings": {
+                                "default": {
+                                    "text": "{0} makes inefficient use of keySet iterator instead of entrySet iterator."
+                                }
+                            },
+                            "helpUri": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#WMI_WRONG_MAP_ITERATOR",
+                            "properties": {
+                                "tags": [
+                                    "PERFORMANCE"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "EI_EXPOSE_REP",
+                            "shortDescription": {
+                                "text": "May expose internal representation by returning reference to mutable object."
+                            },
+                            "messageStrings": {
+                                "default": {
+                                    "text": "{0} may expose internal representation by returning {1}."
+                                }
+                            },
+                            "helpUri": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#EI_EXPOSE_REP",
+                            "properties": {
+                                "tags": [
+                                    "MALICIOUS_CODE"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "EI_EXPOSE_REP2",
+                            "shortDescription": {
+                                "text": "May expose internal representation by incorporating reference to mutable object."
+                            },
+                            "messageStrings": {
+                                "default": {
+                                    "text": "{0} may expose internal representation by storing an externally mutable object into {1}."
+                                }
+                            },
+                            "helpUri": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#EI_EXPOSE_REP2",
+                            "properties": {
+                                "tags": [
+                                    "MALICIOUS_CODE"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "MS_FINAL_PKGPROTECT",
+                            "shortDescription": {
+                                "text": "Field should be both final and package protected."
+                            },
+                            "messageStrings": {
+                                "default": {
+                                    "text": "{0} should be both final and package protected."
+                                }
+                            },
+                            "helpUri": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#MS_FINAL_PKGPROTECT",
+                            "properties": {
+                                "tags": [
+                                    "MALICIOUS_CODE"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "MS_PKGPROTECT",
+                            "shortDescription": {
+                                "text": "Field should be package protected."
+                            },
+                            "messageStrings": {
+                                "default": {
+                                    "text": "{0} should be package protected."
+                                }
+                            },
+                            "helpUri": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#MS_PKGPROTECT",
+                            "properties": {
+                                "tags": [
+                                    "MALICIOUS_CODE"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "SF_SWITCH_NO_DEFAULT",
+                            "shortDescription": {
+                                "text": "Switch statement found where default case is missing."
+                            },
+                            "messageStrings": {
+                                "default": {
+                                    "text": "Switch statement found in {0} where default case is missing."
+                                }
+                            },
+                            "helpUri": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#SF_SWITCH_NO_DEFAULT",
+                            "properties": {
+                                "tags": [
+                                    "STYLE"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "NM_METHOD_NAMING_CONVENTION",
+                            "shortDescription": {
+                                "text": "Method names should start with a lower case letter."
+                            },
+                            "messageStrings": {
+                                "default": {
+                                    "text": "The method name {0} doesn\u0027t start with a lower case letter."
+                                }
+                            },
+                            "helpUri": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#NM_METHOD_NAMING_CONVENTION",
+                            "properties": {
+                                "tags": [
+                                    "BAD_PRACTICE"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "invocations": [
+                {
+                    "exitCode": 3,
+                    "exitSignalName": "ERROR,MISSING CLASS,BUGS FOUND",
+                    "executionSuccessful": false,
+                    "toolConfigurationNotifications": [
+                        {
+                            "descriptor": {
+                                "id": "spotbugs-missing-classes"
+                            },
+                            "message": {
+                                "text": "Classes needed for analysis were missing: [org.antlr.v4.runtime.ParserRuleContext, org.antlr.v4.runtime.Lexer, org.antlr.v4.runtime.tree.ParseTreeListener, org.antlr.v4.runtime.Parser, org.antlr.v4.runtime.atn.ATN, org.antlr.v4.runtime.atn.PredictionContextCache, org.antlr.v4.runtime.CharStream, org.antlr.v4.runtime.RuleContext, org.antlr.v4.runtime.atn.LexerATNSimulator, org.antlr.v4.runtime.atn.ATNSimulator, org.antlr.v4.runtime.TokenSource, org.antlr.v4.runtime.ANTLRInputStream, org.antlr.v4.runtime.CommonTokenStream, org.antlr.v4.runtime.Token, org.antlr.v4.runtime.TokenStream, org.antlr.v4.runtime.atn.ParserATNSimulator, org.antlr.v4.runtime.ANTLRErrorStrategy, org.antlr.v4.runtime.NoViableAltException, org.antlr.v4.runtime.tree.TerminalNode, org.antlr.v4.runtime.tree.ErrorNode, org.antlr.v4.runtime.dfa.DFA, org.antlr.v4.runtime.RecognitionException]"
+                            },
+                            "level": "error"
+                        }
+                    ]
+                }
+            ],
+            "results": [
+                {
+                    "ruleId": "DMI_HARDCODED_ABSOLUTE_FILENAME",
+                    "ruleIndex": 0,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Boot.main(String[])"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Boot.java"
+                                },
+                                "region": {
+                                    "startLine": 23
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "main(String[])",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "Boot.main(String[])"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "DM_DEFAULT_ENCODING",
+                    "ruleIndex": 1,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Boot.writeFrags(Log, String)",
+                            "new java.io.FileWriter(File)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Boot.java"
+                                },
+                                "region": {
+                                    "startLine": 104
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "new java.io.FileWriter(File)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "new java.io.FileWriter(File)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "DM_DEFAULT_ENCODING",
+                    "ruleIndex": 1,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Boot.writeSnipers(Log, String)",
+                            "new java.io.FileWriter(File)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Boot.java"
+                                },
+                                "region": {
+                                    "startLine": 125
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "new java.io.FileWriter(File)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "new java.io.FileWriter(File)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "DM_DEFAULT_ENCODING",
+                    "ruleIndex": 1,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Boot.writeSuicides(Log, String)",
+                            "new java.io.FileWriter(File)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Boot.java"
+                                },
+                                "region": {
+                                    "startLine": 84
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "new java.io.FileWriter(File)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "new java.io.FileWriter(File)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "DM_DEFAULT_ENCODING",
+                    "ruleIndex": 1,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Boot.writeTeamkills(Log, String)",
+                            "new java.io.FileWriter(File)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Boot.java"
+                                },
+                                "region": {
+                                    "startLine": 64
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "new java.io.FileWriter(File)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "new java.io.FileWriter(File)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "WMI_WRONG_MAP_ITERATOR",
+                    "ruleIndex": 2,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Boot.getTopFrag(Log, boolean)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Boot.java"
+                                },
+                                "region": {
+                                    "startLine": 210
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "getTopFrag(Log, boolean)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "Boot.getTopFrag(Log, boolean)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "WMI_WRONG_MAP_ITERATOR",
+                    "ruleIndex": 2,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Boot.getTopSuicide(Log)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Boot.java"
+                                },
+                                "region": {
+                                    "startLine": 166
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "getTopSuicide(Log)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "Boot.getTopSuicide(Log)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "WMI_WRONG_MAP_ITERATOR",
+                    "ruleIndex": 2,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Boot.getTopTeamkill(Log)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Boot.java"
+                                },
+                                "region": {
+                                    "startLine": 246
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "getTopTeamkill(Log)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "Boot.getTopTeamkill(Log)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "EI_EXPOSE_REP",
+                    "ruleIndex": 3,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Log.getMatchs()",
+                            "matchs"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Log.java"
+                                },
+                                "region": {
+                                    "startLine": 9
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "matchs",
+                                    "kind": "member",
+                                    "fullyQualifiedName": "Log.matchs"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "EI_EXPOSE_REP2",
+                    "ruleIndex": 4,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Log.setMatchs(List)",
+                            "matchs"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Log.java"
+                                },
+                                "region": {
+                                    "startLine": 13
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "matchs",
+                                    "kind": "variable",
+                                    "fullyQualifiedName": "Log.setMatchs(List)#matchs"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "EI_EXPOSE_REP",
+                    "ruleIndex": 3,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Match.getMatchLines()",
+                            "matchLines"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Match.java"
+                                },
+                                "region": {
+                                    "startLine": 9
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "matchLines",
+                                    "kind": "member",
+                                    "fullyQualifiedName": "Match.matchLines"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "EI_EXPOSE_REP2",
+                    "ruleIndex": 4,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "Match.setMatchLines(List)",
+                            "matchLines"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "Match.java"
+                                },
+                                "region": {
+                                    "startLine": 13
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "matchLines",
+                                    "kind": "variable",
+                                    "fullyQualifiedName": "Match.setMatchLines(List)#matchLines"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "MS_FINAL_PKGPROTECT",
+                    "ruleIndex": 5,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticLexer.modeNames"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticLexer.java"
+                                },
+                                "region": {
+                                    "startLine": 40
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "modeNames",
+                                    "kind": "member",
+                                    "fullyQualifiedName": "XonoticLexer.modeNames"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "MS_PKGPROTECT",
+                    "ruleIndex": 6,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticLexer._decisionToDFA"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticLexer.java"
+                                },
+                                "region": {
+                                    "startLine": 536
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "_decisionToDFA",
+                                    "kind": "member",
+                                    "fullyQualifiedName": "XonoticLexer._decisionToDFA"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "MS_PKGPROTECT",
+                    "ruleIndex": 6,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticLexer.ruleNames"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticLexer.java"
+                                },
+                                "region": {
+                                    "startLine": 68
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "ruleNames",
+                                    "kind": "member",
+                                    "fullyQualifiedName": "XonoticLexer.ruleNames"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "MS_PKGPROTECT",
+                    "ruleIndex": 6,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticLexer.tokenNames"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticLexer.java"
+                                },
+                                "region": {
+                                    "startLine": 44
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "tokenNames",
+                                    "kind": "member",
+                                    "fullyQualifiedName": "XonoticLexer.tokenNames"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "SF_SWITCH_NO_DEFAULT",
+                    "ruleIndex": 7,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticLexer.WS_action(RuleContext, int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticLexer.java"
+                                },
+                                "region": {
+                                    "startLine": 114,
+                                    "endLine": 115
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "WS_action(RuleContext, int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticLexer.WS_action(RuleContext, int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "SF_SWITCH_NO_DEFAULT",
+                    "ruleIndex": 7,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticLexer.action(RuleContext, int, int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticLexer.java"
+                                },
+                                "region": {
+                                    "startLine": 109,
+                                    "endLine": 110
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "action(RuleContext, int, int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticLexer.action(RuleContext, int, int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "MS_PKGPROTECT",
+                    "ruleIndex": 6,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser._decisionToDFA"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 2088
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "_decisionToDFA",
+                                    "kind": "member",
+                                    "fullyQualifiedName": "XonoticParser._decisionToDFA"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "MS_PKGPROTECT",
+                    "ruleIndex": 6,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser.ruleNames"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 74
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "ruleNames",
+                                    "kind": "member",
+                                    "fullyQualifiedName": "XonoticParser.ruleNames"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "MS_PKGPROTECT",
+                    "ruleIndex": 6,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser.tokenNames"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 40
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "tokenNames",
+                                    "kind": "member",
+                                    "fullyQualifiedName": "XonoticParser.tokenNames"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "SF_SWITCH_NO_DEFAULT",
+                    "ruleIndex": 7,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser.frag_someone()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 928,
+                                    "endLine": 1023
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "frag_someone()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser.frag_someone()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "SF_SWITCH_NO_DEFAULT",
+                    "ruleIndex": 7,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser.match_line()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 333,
+                                    "endLine": 468
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "match_line()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser.match_line()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_betrayedContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1331
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_betrayedContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_betrayedContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1333
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_betrayedContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_ending_spreeContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1386
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_ending_spreeContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_first_bloodContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1107
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_first_bloodContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_sniped_someoneContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 834
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_sniped_someoneContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_sniped_someoneContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 836
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_sniped_someoneContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_someoneContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 898
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_someoneContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_someoneContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 900
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_someoneContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_specialContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 722
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_specialContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_specialContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 724
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_specialContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_suicide2Context.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1286
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_suicide2Context.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Frag_suicideContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1191
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Frag_suicideContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Line_triple_fragContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1147
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Line_triple_fragContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$MatchContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 157
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$MatchContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$MatchContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 159
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$MatchContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Match_line_changed_teamContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1569
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Match_line_changed_teamContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Match_line_changed_teamContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1571
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Match_line_changed_teamContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Match_line_connectedContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1617
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Match_line_connectedContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Match_line_disconnectedContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1655
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Match_line_disconnectedContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Match_line_is_nowContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1694
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Match_line_is_nowContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Match_line_is_nowContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1696
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Match_line_is_nowContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Match_winsContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1737
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Match_winsContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Not_fragContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 781
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Not_fragContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Not_fragContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 783
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Not_fragContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Paused_gameContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 595
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Paused_gameContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Picked_upContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 640
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Picked_upContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Picked_upContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 642
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Picked_upContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Player_stats_rec_failedContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 541
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Player_stats_rec_failedContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Player_stats_rec_failedContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 543
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Player_stats_rec_failedContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Somebody_sayContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 488
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Somebody_sayContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Somebody_sayContext.Word(int)"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 490
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word(int)",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Somebody_sayContext.Word(int)"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$Unlocked_rageContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1068
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$Unlocked_rageContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "ruleId": "NM_METHOD_NAMING_CONVENTION",
+                    "ruleIndex": 8,
+                    "message": {
+                        "id": "default",
+                        "arguments": [
+                            "XonoticParser$You_cannotContext.Word()"
+                        ]
+                    },
+                    "level": "note",
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uri": "XonoticParser.java"
+                                },
+                                "region": {
+                                    "startLine": 1925
+                                }
+                            },
+                            "logicalLocations": [
+                                {
+                                    "name": "Word()",
+                                    "kind": "function",
+                                    "fullyQualifiedName": "XonoticParser$You_cannotContext.Word()"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "originalUriBaseIds": {}
+        }
+    ]
+}

@@ -57,7 +57,8 @@ class SarifParser(object):
         run_date = self.__get_last_invocation_date(run)
         for result in run.get('results', list()):
             item = get_item(result, rules, artifacts, run_date)
-            items.append(item)
+            if item is not None:
+                items.append(item)
         return items
 
     def __get_last_invocation_date(self, data):
