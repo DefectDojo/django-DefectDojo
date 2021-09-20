@@ -14,14 +14,14 @@ For further information, please visit the package documentation [Django Ratelimi
 
 #### Enable Rate Limiting
 
-To enable and configure rate limiting, edit the `dojo/settings/settings.dist.py` file and edit/replace the following information:
+To enable and configure rate limiting, edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) and edit/replace the following information:
 
-    {{< highlight python >}}
-    DD_RATE_LIMITER_ENABLED=(bool, True),
-    DD_RATE_LIMITER_RATE=(str, '5/m'),
-    DD_RATE_LIMITER_BLOCK=(bool, True),
-    DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, True),
-    {{< /highlight >}}
+{{< highlight python >}}
+DD_RATE_LIMITER_ENABLED=(bool, True),
+DD_RATE_LIMITER_RATE=(str, '5/m'),
+DD_RATE_LIMITER_BLOCK=(bool, True),
+DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, True),
+{{< /highlight >}}
 
 #### Rate Limit
 
