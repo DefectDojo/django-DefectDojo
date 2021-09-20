@@ -94,9 +94,15 @@ class SonarQubeApiImporter(object):
                 rule_id = issue['rule']
                 rule = client.get_rule(rule_id)
                 severity = self.convert_sonar_severity(issue['severity'])
-                description = self.clean_rule_description_html(rule['htmlDesc'])
-                cwe = self.clean_cwe(rule['htmlDesc'])
-                references = self.get_references(rule['htmlDesc'])
+                # custom (user defined) SQ rules may not have 'htmlDesc'
+                if 'htmlDesc' in rule:
+                    description = self.clean_rule_description_html(rule['htmlDesc'])
+                    cwe = self.clean_cwe(rule['htmlDesc'])
+                    references = self.get_references(rule['htmlDesc'])
+                else:
+                    description = ""
+                    cwe = None
+                    references = ""
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
                     key=issue['key'],
