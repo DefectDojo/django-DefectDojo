@@ -5,6 +5,8 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 
+# See https://defectdojo.github.io/django-DefectDojo/getting_started/configuration/ for options
+# how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
 
