@@ -323,7 +323,7 @@ class DojoDefaultReImporter(object):
                 parsed_findings.extend(test_raw.findings)
         else:
             logger.debug('REIMPORT_SCAN: Parse findings')
-            parsed_findings = importer_utils.parse_findings(scan, test, active, verified, scan_type)
+            parsed_findings = parser.get_findings(scan, test)
 
         logger.debug('REIMPORT_SCAN: Processing findings')
         new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \
