@@ -40,7 +40,8 @@ class SarifParser(object):
             run_date = self._get_last_invocation_date(run)
             for result in run.get('results', list()):
                 item = get_item(result, rules, artifacts, run_date)
-                items.append(item)
+                if item is not None:
+                    items.append(item)
         return items
 
     def _get_last_invocation_date(self, data):
@@ -228,6 +229,12 @@ def get_severity(result, rule):
 
 
 def get_item(result, rules, artifacts, run_date):
+
+    # see https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html / 3.27.9
+    kind = result.get('kind', 'fail')
+    if kind != 'fail':
+        return None
+
     # if there is a location get it
     file_path = None
     line = None

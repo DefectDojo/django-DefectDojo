@@ -314,7 +314,7 @@ class TestSarifParser(TestCase):
         testfile = open("dojo/unittests/scans/sarif/flawfinder.sarif")
         parser = SarifParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(54, len(findings))
+        self.assertEqual(53, len(findings))
         for finding in findings:
             self.common_checks(finding)
         with self.subTest(i=0):
@@ -347,8 +347,8 @@ class TestSarifParser(TestCase):
             self.assertEqual(120, finding.cwe)
             self.assertEqual("FF1004", finding.vuln_id_from_tool)
             self.assertEqual('https://cwe.mitre.org/data/definitions/120.html', finding.references)
-        with self.subTest(i=53):
-            finding = findings[53]
+        with self.subTest(i=52):
+            finding = findings[52]
             self.assertEqual("buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).", finding.title)
             self.assertEqual("Critical", finding.severity)
             description = '''**Result message:** buffer/sscanf:The scanf() family's %s operation, without a limit specification, permits buffer overflows (CWE-120, CWE-20).
