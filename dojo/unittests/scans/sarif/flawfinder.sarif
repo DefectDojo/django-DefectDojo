@@ -16,7 +16,7 @@
                 "text": "This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327)."
               },
               "defaultConfiguration": {
-                "level": "warning"
+                "level": "error"
               },
               "helpUri": "https://cwe.mitre.org/data/definitions/327.html",
               "relationships": [
@@ -283,7 +283,7 @@
       "results": [
         {
           "ruleId": "FF1048",
-          "level": "warning",
+          "kind": "fail",
           "message": {
             "text": "random/setstate:This function is not sufficiently random for security-related functions such as key and nonce creation (CWE-327)."
           },
@@ -1791,32 +1791,8 @@
         },
         {
           "ruleId": "FF1013",
-          "level": "note",
-          "message": {
-            "text": "buffer/char:Statically-sized arrays can be improperly restricted, leading to potential overflows or other issues (CWE-119!/CWE-120)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "src/cli_main.cc",
-                  "uriBaseId": "SRCROOT"
-                },
-                "region": {
-                  "startLine": 481,
-                  "startColumn": 7,
-                  "endColumn": 32,
-                  "snippet": {
-                    "text": "      char name[256], val[256];"
-                  }
-                }
-              }
-            }
-          ],
-          "fingerprints": {
-            "contextHash/v1": "f2de314a9ee6aee0f164f741d06c0ae628b87ccf9898285d866210d213bf3bd0"
-          },
-          "rank": 0.4
+          "kind": "pass",
+          "level": "note"
         },
         {
           "ruleId": "FF1021",
