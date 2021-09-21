@@ -23,6 +23,7 @@ def sq_clean(apps, schema_editor):
         logger.warning('No SonarQube tool configuration found, all invalid SonarQube configurations will be removed.')
         Sonarqube_Product_model.objects.filter(sonarqube_tool_config__isnull=True).delete()
 
+
 def sq_add_sq_to_test(apps, schema_editor):
     Test_model = apps.get_model('dojo', 'Test')
     test = Test_model.objects.all().first()
@@ -34,6 +35,7 @@ def sq_add_sq_to_test(apps, schema_editor):
         field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE,
                                 to='dojo.sonarqube_product', verbose_name='SonarQube Config'),
     )
+
 
 class Migration(migrations.Migration):
 
