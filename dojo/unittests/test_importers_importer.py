@@ -86,7 +86,8 @@ class TestDojoDefaultImporter(TestCase):
         )
 
         importer = Importer()
+        scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
         importer.import_scan(scan, scan_type, engagement, lead=None, environment=None, active=True, verified=True, tags=None, minimum_severity=None,
-                    user=user, endpoints_to_add=None, scan_date=datetime.date(2021, 9, 1), version=None, branch_tag=None, build_id=None,
+                    user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, sonarqube_config=None,
                     cobaltio_config=None)
