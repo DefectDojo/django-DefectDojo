@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, Count
-from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse, FileResponse
+from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -29,7 +29,7 @@ from dojo.models import Finding, Product, Engagement, Test, \
     Risk_Acceptance, Development_Environment, Endpoint, \
     Cred_Mapping, Dojo_User, System_Settings, Note_Type, \
     Sonarqube_Product, Cobaltio_Product
-from dojo.tools.factory import get_choices
+from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
     get_system_setting, redirect_to_return_url_or_else, get_return_url
@@ -563,11 +563,6 @@ def import_scan_results(request, eid=None, pid=None):
             group_by = form.cleaned_data.get('group_by', None)
 
             # TODO move to form validation?
-            if not any(scan_type in code
-                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
-                raise Http404()
-
-            # TODO move to form validation?
             if scan and is_scan_file_too_large(scan):
                 messages.add_message(request,
                                      messages.ERROR,
@@ -664,7 +659,7 @@ def import_scan_results(request, eid=None, pid=None):
          'title': title,
          'cred_form': cred_form,
          'jform': jform,
-         'scan_types': get_choices(),
+         'scan_types': get_choices_sorted(),
          })
 
 

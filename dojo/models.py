@@ -1450,7 +1450,7 @@ class Sonarqube_Product(models.Model):
     )
 
     def __str__(self):
-        return '{} | {}'.format(self.sonarqube_tool_config.name, self.sonarqube_project_key)
+        return '{} | {}'.format(self.sonarqube_tool_config.name if hasattr(self, 'sonarqube_tool_config') else '', self.sonarqube_project_key)
 
 
 class Cobaltio_Product(models.Model):
