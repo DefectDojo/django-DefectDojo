@@ -87,7 +87,11 @@ class TestDojoDefaultImporter(TestCase):
 
         importer = Importer()
         scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
-        importer.import_scan(scan, scan_type, engagement, lead=None, environment=None, active=True, verified=True, tags=None, minimum_severity=None,
+        test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None, active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, sonarqube_config=None,
                     cobaltio_config=None)
+
+        self.assertEqual("SpotBugs", test.test_type.name)
+        self.assertEqual(56, len_new_findings)
+        self.assertEqual(0, len_closed_findings)
