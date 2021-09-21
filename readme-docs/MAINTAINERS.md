@@ -9,7 +9,6 @@
 * Cody Maffucci (@Maffooch)
 
 ### Moderators
-* Anthony Pipia (@apipia)
 * Jannik Jürgens (@alles-klar)
 * Pascal Trovatelli (@ptrovatelli)
 * Damien Carol (@damiencarol)
