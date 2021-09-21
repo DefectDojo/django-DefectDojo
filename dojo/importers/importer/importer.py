@@ -309,6 +309,7 @@ class DojoDefaultImporter(object):
             test = self.create_test(scan_type, test_type_str, engagement, lead, environment, scan_date=scan_date, tags=tags,
                                 version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
                                 sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
+            test_raw = tests[0]
             if test_raw.name:
                 test.name = test_raw.name
                 test.save()
