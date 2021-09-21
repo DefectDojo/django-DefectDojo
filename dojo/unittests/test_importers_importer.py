@@ -1,8 +1,11 @@
+import datetime
+
 from django.test import TestCase
 from django.utils import timezone
 from dojo.importers.importer.importer import DojoDefaultImporter as Importer
 from dojo.models import Engagement, Product, Product_Type, User
 from dojo.tools.factory import get_parser
+from dojo.tools.sarif.parser import SarifParser
 
 
 class TestDojoDefaultImporter(TestCase):
@@ -61,3 +64,29 @@ class TestDojoDefaultImporter(TestCase):
 
         for finding in new_findings:
             self.assertIn(finding.numerical_severity, ["S0", "S1", "S2", "S3", "S4"])
+
+    def test_import_scan(self):
+        scan = open("dojo/unittests/scans/sarif/spotbugs.sarif")
+        scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
+
+        user, _ = User.objects.get_or_create(username="admin")
+        user_reporter, _ = User.objects.get_or_create(username="user_reporter")
+
+        product_type, _ = Product_Type.objects.get_or_create(name="test2")
+        product, _ = Product.objects.get_or_create(
+            name="TestDojoDefaultImporter2",
+            prod_type=product_type,
+        )
+
+        engagement, _ = Engagement.objects.get_or_create(
+            name="Test Create Engagement2",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+
+        importer = Importer()
+        importer.import_scan(scan, scan_type, engagement, lead=None, environment=None, active=True, verified=True, tags=None, minimum_severity=None,
+                    user=user, endpoints_to_add=None, scan_date=datetime.date(2021, 9, 1), version=None, branch_tag=None, build_id=None,
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, sonarqube_config=None,
+                    cobaltio_config=None)
