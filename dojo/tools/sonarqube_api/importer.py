@@ -212,7 +212,7 @@ class SonarQubeApiImporter(object):
                 duplicate=False,
                 out_of_scope=False,
                 static_finding=True,
-                scanner_confidence = scanner_confidence,
+                scanner_confidence=scanner_confidence,
                 sonarqube_issue=sonarqube_issue,
             )
             items.append(find)

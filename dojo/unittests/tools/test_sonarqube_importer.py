@@ -379,14 +379,14 @@ class TestSonarqubeImporterValidateHotspotData(TestCase):
             '\n\n  '
             '* Credentials allows access to a sensitive component like a database, a file storage, an API or a service. '
             '\n  '
-  	    '* Credentials are used in production environments. ' 
-  	    '\n  '
-  	    '* Application re-distribution is required before updating the credentials. ' 
-	    '\n\n'
-	    'There is a risk if you answered yes to any of those questions.' 
-	    '\n\n', 
-	    findings[0].description
-	)
+            '* Credentials are used in production environments. '
+            '\n  '
+            '* Application re-distribution is required before updating the credentials. '
+            '\n\n'
+            'There is a risk if you answered yes to any of those questions.'
+            '\n\n',
+            findings[0].description
+        )
         self.assertEqual(str(findings[0].severity), 'Info')
         self.assertMultiLineEqual(
             '[CVE-2019-13466](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-13466)'
@@ -395,17 +395,17 @@ class TestSonarqubeImporterValidateHotspotData(TestCase):
             '\n'
             '[OWASP Top 10 2017 Category A2](https://www.owasp.org/index.php/Top_10-2017_A2-Broken_Authentication)'
             '\n'
-	    '[MITRE, CWE-798](http://cwe.mitre.org/data/definitions/798)'
+            '[MITRE, CWE-798](http://cwe.mitre.org/data/definitions/798)'
             '\n'
-	    '[MITRE, CWE-259](http://cwe.mitre.org/data/definitions/259)'
+            '[MITRE, CWE-259](http://cwe.mitre.org/data/definitions/259)'
             '\n'
-	    '[CERT, MSC03-J.](https://wiki.sei.cmu.edu/confluence/x/OjdGBQ)'
+            '[CERT, MSC03-J.](https://wiki.sei.cmu.edu/confluence/x/OjdGBQ)'
             '\n'
-	    '[SANS Top 25](https://www.sans.org/top25-software-errors/#cat3)'
+            '[SANS Top 25](https://www.sans.org/top25-software-errors/#cat3)'
             '\n'
-	    '[Hard Coded Password](http://h3xstream.github.io/find-sec-bugs/bugs.htm#HARD_CODE_PASSWORD)'
-            '\n'
-            , findings[0].references
+            '[Hard Coded Password](http://h3xstream.github.io/find-sec-bugs/bugs.htm#HARD_CODE_PASSWORD)'
+            '\n',
+            findings[0].references
         )
         self.assertEqual(str(findings[0].file_path), 'internal.dummy.project:spec/support/user_fixture.rb')
         self.assertEqual(findings[0].line, 9)
