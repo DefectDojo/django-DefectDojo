@@ -43,7 +43,7 @@ class KICSParser(object):
                 issue_type = item.get('issue_type')
                 expected_value = item.get('expected_value')
                 actual_value = item.get('actual_value')
-                
+
                 description = f"{query.get('description','')}\n"
                 if platform:
                     description += f'**Platform:** {platform}\n'
