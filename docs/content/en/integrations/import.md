@@ -66,7 +66,7 @@ JS file in scout2-report/inc-awsconfig/aws\_config.js.
 
 ### AWS Prowler Scanner
 
-Prowler file can be imported as a CSV file (-M csv).
+Prowler file can be imported as a CSV (`-M csv`) or JSON (`-M json`) file.
 
 ### Bandit
 
@@ -235,6 +235,24 @@ client.
 ### Cobalt.io Scan
 
 CSV Report
+
+### Cobalt.io API Import
+
+Import findings from the Cobalt.io API - no file required.
+
+Follow these steps to setup API importing:
+
+1.  Configure the Cobalt.io Authentication details by navigating to
+    Configuration-\>Tool Configuration, selecting the Tool Type to "Cobalt.io",
+    and Authentication Type "API Key". Paste your Cobalt.io API key in the
+    "API Key" input and the desired org token in the "Extras" input.
+2.  In the Product settings select "Add Cobalt.io Configuration". Provide the ID
+    of the asset from which to import findings. The ID can be found at the end
+    of the URL when viewing the asset in your browser. Also select the
+    appropriate "Cobalt.io" configuration.
+3.  After this is you can import the findings as a scan by selecting "Cobalt.io
+    API Import" as the scan type. If you have more than one asset configured you
+    must also select which "Cobalt.io Config" to use.
 
 ### Coverity API
 

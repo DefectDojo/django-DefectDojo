@@ -20,7 +20,7 @@ leverage Auth0 to authenticate users on DefectDojo.
     -   Domain
     -   Client ID
     -   Client Secret
-4.  Now, edit the `dojo/settings/settings.dist.py` file and edit/replace the following
+4.  Now, edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
 
     {{< highlight python >}}
@@ -52,12 +52,12 @@ to be created. Closely follow the steps below to guarantee success.
     on the left side of the screen. Click **Create Credentials**, and
     choose **OAuth Client ID**:
 
-![image](../../images/google_1.png)
+    ![image](../../images/google_1.png)
 
 3.  Select **Web Applications**, and provide a descriptive name for the
     client.
 
-![image](../../images/google_2.png)
+    ![image](../../images/google_2.png)
 
 4.  Add the pictured URLs in the **Authorized Redirect URLs** section.
     This part is very important. If there are any mistakes here, the
@@ -65,34 +65,32 @@ to be created. Closely follow the steps below to guarantee success.
     access.
 5.  Once all URLs are added, finish by clicking **Create**
 
-Now with the authentication client created, the **Client ID** and
-**Client Secret Key** need to be copied over to `dojo/settings/settings.dist.py` in the
-project. Click the newly created client and copy the values:
+6. Now with the authentication client created, the **Client ID** and
+   **Client Secret Key** need to be copied over to the settings.
+   Click the newly created client and copy the values:
 
-![image](../../images/google_3.png)
+   ![image](../../images/google_3.png)
 
-In the **Environment** section at the top of `dojo/settings/settings.dist.py`, enter the
-values as shown below:
+7. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+   information:
 
-![image](../../images/google_4.png)
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED=True,
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, '**YOUR_CLIENT_ID_FROM_STEP_ABOVE**'),
+    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, '**YOUR_CLIENT_SECRET_FROM_STEP_ABOVE**'),
+    {{< /highlight >}}
 
-In the **Authentication** section of `dojo/settings/settings.dist.py`, set
-**DD_GOOGLE_OAUTH_ENABLED** to **True** to redirect away from this
-README and actually authorize.
+   To authorize users you will need to set the following:
 
-![image](../../images/google_5.png)
+    {{< highlight python >}}
+    SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com', 'example.org']
+    {{< /highlight >}}
 
-To authorize users you will need to set the following:
+    or
 
-{{< highlight python >}}
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = ['example.com', 'example.org']
-{{< /highlight >}}
-
-or
-
-{{< highlight python >}}
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
-{{< /highlight >}}
+    {{< highlight python >}}
+    SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = ['<email@example.com>']
+    {{< /highlight >}}
 
 OKTA
 ----
@@ -106,49 +104,48 @@ carries the same attributes and a similar procedure. Follow along below.
 2.  Once logged in, enter the **Applications** and click **Add
     Application**:
 
-![image](../../images/okta_1.png)
+    ![image](../../images/okta_1.png)
 
 3.  Select **Web Applications**.
 
-![image](../../images/okta_2.png)
+    ![image](../../images/okta_2.png)
 
 4.  Add the pictured URLs in the **Login Redirect URLs** section. This
     part is very important. If there are any mistakes here, the
     authentication client will not authorize the request, and deny
     access. Check the **Implicit** box as well.
 
-![image](../../images/okta_3.png)
+    ![image](../../images/okta_3.png)
 
 5.  Once all URLs are added, finish by clicking **Done**.
+
 6.  Return to the **Dashboard** to find the **Org-URL**. Note this value
     as it will be important in the settings file.
 
-![image](../../images/okta_4.png)
+    ![image](../../images/okta_4.png)
 
-Now, with the authentication client created, the **Client ID** and
-**Client Secret** Key need to be copied over to `dojo/settings/settings.dist.py` in the
-project. Click the newly created client and copy the values:
+7.  Now, with the authentication client created, the **Client ID** and
+    **Client Secret** Key need to be copied over to the settings.
+    Click the newly created client and copy the values:
 
-![image](../../images/okta_5.png)
+    ![image](../../images/okta_5.png)
 
-In the **Environment** section at the top of `dojo/settings/settings.dist.py`, enter the
-values as shown below:
+8. Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+   information:
 
-![image](../../images/okta_6.png)
-
-In the **Authentication** section of `dojo/settings/settings.dist.py`, set
-**DD_OKTA_OAUTH_ENABLED** to **True** to redirect away from this
-README and actually authorize.
-
-![image](../../images/okta_7.png)
+    {{< highlight python >}}
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=True,
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, '**YOUR_CLIENT_ID_FROM_STEP_ABOVE**'),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, '**YOUR_CLIENT_SECRET_FROM_STEP_ABOVE**'),
+    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, 'https://{your-org-url}/oauth2/default'),
+    {{< /highlight >}}
 
 If during the login process you get the following error: *The
 'redirect_uri' parameter must be an absolute URI that is whitelisted
 in the client app settings.* and the `redirect_uri` HTTP
 GET parameter starts with `http://` instead of
 `https://` you need to add
-**SOCIAL_AUTH_REDIRECT_IS_HTTPS = True** in the **Authentication**
-section of `dojo/settings/settings.dist.py`.
+`SOCIAL_AUTH_REDIRECT_IS_HTTPS = True` in the settings.
 
 ## Azure Active Directory
 
@@ -181,7 +178,7 @@ user, such as 'staff' or 'superuser'
     -   **OR**
     -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/azuread-tenant-oauth2/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/azuread-tenant-oauth2/)
 
-4.  Now, edit the dojo/`dojo/settings/settings.dist.py` file and edit/replace the following
+4.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
 
     {{< highlight python >}}
@@ -213,7 +210,7 @@ Follow along below.
 
     -   [https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/](https://the_hostname_you_have_dojo_deployed:your_server_port/complete/gitlab/)
 
-4.  Now, edit the dojo/`dojo/settings/settings.dist.py` file and edit/replace the following
+4.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
     information:
 
     {{< highlight python >}}
@@ -224,7 +221,7 @@ Follow along below.
     {{< /highlight >}}
 
     Additionally, if you want to import your Gitlab projects as DefectDojo
-    products, add the following line, still in dojo/`dojo/settings/settings.dist.py`:
+    products, add the following line to your settings:
 
     {{< highlight python >}}
     DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT = True
@@ -240,7 +237,8 @@ see the plugin [plugin
 homepage](https://github.com/IdentityPython/djangosaml2). 
 
 1.  Navigate to your SAML IdP and find your metadata
-2.  Edit the dojo/`dojo/settings/settings.dist.py` file or set the corresponding environment variables:
+2.  Edit the settings (see [Configuration]({{< ref "/getting_started/configuration" >}})) with the following
+    information:
 
     {{< highlight python >}}
     DD_SAML2_ENABLED=(bool, **True**),

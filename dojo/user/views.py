@@ -5,6 +5,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.core import serializers
 from django.core.exceptions import PermissionDenied
+from django.db.models.deletion import RestrictedError
 from django.urls import reverse
 from django.conf import settings
 from django.db.models import Q
@@ -430,11 +431,17 @@ def delete_user(request, uid):
         if 'id' in request.POST and str(user.id) == request.POST['id']:
             form = DeleteUserForm(request.POST, instance=user)
             if form.is_valid():
-                user.delete()
-                messages.add_message(request,
-                                     messages.SUCCESS,
-                                     'User and relationships removed.',
-                                     extra_tags='alert-success')
+                try:
+                    user.delete()
+                    messages.add_message(request,
+                                        messages.SUCCESS,
+                                        'User and relationships removed.',
+                                        extra_tags='alert-success')
+                except RestrictedError as err:
+                    messages.add_message(request,
+                                         messages.WARNING,
+                                         'User cannot be deleted: {}'.format(err),
+                                         extra_tags='alert-warning')
                 return HttpResponseRedirect(reverse('users'))
 
     collector = NestedObjects(using=DEFAULT_DB_ALIAS)

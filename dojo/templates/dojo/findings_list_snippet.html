@@ -11,6 +11,7 @@
                     <h3 class="has-filters">
                         {{ filter_name }} Findings
                         <div class="dropdown pull-right">
+                            &nbsp;
                             <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         </div>
                         <form method="get" action="{% url 'quick_report' %}" class="pull-right">
@@ -284,19 +285,21 @@
                                               </a>
                                               </li>
                                           {% else %}
-                                              {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
-                                                <li role="presentation">
-                                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                        <i class="fa fa-exclamation-circle"></i> Accept Risk
-                                                    </a>
-                                                </li>
-                                              {% endif %}
-                                              {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                <li role="presentation">
-                                                    <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
-                                                        <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
-                                                    </a>
-                                                </li>
+                                              {% if not finding.duplicate %}
+                                                {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
+                                                    <li role="presentation">
+                                                        <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                            <i class="fa fa-exclamation-circle"></i> Accept Risk
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                                    <li role="presentation">
+                                                        <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                            <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                               {% endif %}
                                           {% endif %}
                                         {% endif %}

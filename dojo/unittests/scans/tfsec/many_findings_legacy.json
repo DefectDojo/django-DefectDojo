@@ -14,7 +14,7 @@
 			"impact": "Username and password authentication methods are less secure",
 			"resolution": "Use service account or OAuth for authentication",
 			"severity": "ERROR",
-			"passed": false
+			"passed": true
 		},
 		{
 			"rule_id": "GCP009",

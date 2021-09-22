@@ -58,6 +58,17 @@
                   </li>
                   <li role="separator" class="divider"></li>
                   <li role="presentation">
+                      <a class="" href="{% url 'add_cobaltio' prod.id %}">
+                          <i class="fa fa-list-alt"></i> Add Cobalt.io Configuration
+                      </a>
+                  </li>
+                  <li role="presentation">
+                      <a href="{% url 'view_cobaltio' prod.id %}">
+                          <i class="fa fa-history"></i> View Cobalt.io Configurations
+                      </a>
+                  </li>
+                  <li role="separator" class="divider"></li>
+                  <li role="presentation">
                     <a class="" href="{% url 'new_object' prod.id %}">
                         <i class="fa fa-list-alt"></i> Add Product Tracking Files
                     </a>
@@ -83,7 +94,7 @@
                                         <span class="fa fa-list"></span> {{ bt.name }} {{ bt.version }}
                                     </a>
                     </li>
-                    {% endfor %} 
+                    {% endfor %}
                   {% endif %}
                 {% endif %}
                 {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_staff:prod %}
@@ -143,7 +154,7 @@
             {% if prod|has_object_permission:"Technology_Add" %}
             <a title="Add new Technology" class="pull-right btn btn-sm btn-primary" href="/product/{{ prod.id }}/new_technology" id="addTechnology"><span class="fa fa-plus"></span> </a>
             {% endif %}
-        </h3>      
+        </h3>
       </div>
       {% if app_analysis %}
       <table class="tablesorter-bootstrap table table-condensed table-striped">
@@ -241,6 +252,9 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h4 class="pull-left">Members</h4>
+                &nbsp;
+                <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                    <i class="fa fa-question-circle"></i></a>
                 {% if prod|has_object_permission:"Product_Manage_Members" %}
                 <div class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductMember"
@@ -255,9 +269,6 @@
                             </a>
                         </li>
                     </ul>
-                    &nbsp;
-                    <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                        <i class="fa fa-question-circle text-low"></i></a>
                 </div>
                 {% endif %}
             </div>
@@ -329,6 +340,9 @@
           <div class="panel-heading">
               <div class="clearfix">
                   <h4 class="pull-left">Groups</h4>
+                  &nbsp;
+                  <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
+                      <i class="fa fa-question-circle"></i></a>
                   {% if prod|has_object_permission:"Product_Group_Add" %}
                   <div class="dropdown pull-right">
                       <button class="btn btn-primary dropdown-toggle" label="Actions" type="button" id="dropdownMenuAddProductGroup"
@@ -343,9 +357,6 @@
                               </a>
                           </li>
                       </ul>
-                      &nbsp;
-                      <a href="https://defectdojo.github.io/django-DefectDojo/usage/permissions/" target="_blank">
-                          <i class="fa fa-question-circle text-low"></i></a>
                   </div>
                   {% endif %}
               </div>
@@ -669,7 +680,7 @@
               },
           });
         }
-        {% endif %}        
+        {% endif %}
     });
 
     $(function() {

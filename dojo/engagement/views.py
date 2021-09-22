@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.db.models import Q, Count
-from django.http import HttpResponseRedirect, StreamingHttpResponse, Http404, HttpResponse, FileResponse
+from django.http import HttpResponseRedirect, StreamingHttpResponse, HttpResponse, FileResponse
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
@@ -27,8 +27,9 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Sonarqube_Product
-from dojo.tools.factory import get_choices
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type, \
+    Sonarqube_Product, Cobaltio_Product
+from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
     get_system_setting, redirect_to_return_url_or_else, get_return_url
@@ -553,17 +554,13 @@ def import_scan_results(request, eid=None, pid=None):
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
             sonarqube_config = form.cleaned_data.get('sonarqube_config', None)
+            cobaltio_config = form.cleaned_data.get('cobaltio_config', None)
             close_old_findings = form.cleaned_data.get('close_old_findings', None)
             # Will save in the provided environment or in the `Development` one if absent
             environment_id = request.POST.get('environment', 'Development')
             environment = Development_Environment.objects.get(id=environment_id)
 
             group_by = form.cleaned_data.get('group_by', None)
-
-            # TODO move to form validation?
-            if not any(scan_type in code
-                       for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES):
-                raise Http404()
 
             # TODO move to form validation?
             if scan and is_scan_file_too_large(scan):
@@ -602,7 +599,7 @@ def import_scan_results(request, eid=None, pid=None):
                 test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings, group_by=group_by, sonarqube_config=sonarqube_config)
+                            close_old_findings=close_old_findings, group_by=group_by, sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 
@@ -652,6 +649,7 @@ def import_scan_results(request, eid=None, pid=None):
 
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
+    form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
     return render(request,
         'dojo/import_scan_results.html',
         {'form': form,
@@ -661,7 +659,7 @@ def import_scan_results(request, eid=None, pid=None):
          'title': title,
          'cred_form': cred_form,
          'jform': jform,
-         'scan_types': get_choices(),
+         'scan_types': get_choices_sorted(),
          })
 
 

@@ -133,6 +133,9 @@
                     {% if test.sonarqube_config %}
                         <th>SonarQube Config</th>
                     {% endif %}
+                    {% if test.cobaltio_config %}
+                        <th>Cobalt.io Config</th>
+                    {% endif %}
                 </tr>
                 <tr>
                     <td><a href="{% url 'view_engagement' test.engagement.id %}">{{ test.engagement.name }}</a></td>
@@ -174,6 +177,17 @@
                             {% endif %}
                         </td>
                     {% endif %}
+                    {% if test.cobaltio_config %}
+                        <td>
+                            {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
+                                <a href="{% url 'edit_cobaltio' prod.id test.cobaltio_config.id %}">
+                            {% endif %}
+                            {{ test.cobaltio_config }}
+                            {% if prod|has_object_permission:"Product_Edit" or user|is_authorized_for_change:prod %}
+                                </a>
+                            {% endif %}
+                        </td>
+                    {% endif %}
                 </tr>
             </table>
         </div>
@@ -206,6 +220,7 @@
                         </i>
                         <div class="dropdown pull-right">
                             <button id="show-filters" data-toggle="collapse" data-target="#import-history-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                            &nbsp;
                             <span class="pull-right">
                                 <a data-toggle="collapse" href="#import_history">
                                     <i class="glyphicon glyphicon-chevron-down"></i>
@@ -449,7 +464,7 @@
                 <h4 class="has-filters"> Findings ({{findings.total_count}}) <small>{{ test.id|get_severity_count:"test" }}</small>
                     <div class="dropdown pull-right"></div>
                     <div id="test-pulldown" class="dropdown pull-right">
-                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        &nbsp;<button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         {% if test|has_object_permission:"Finding_Add" or user|is_authorized_for_change:test %}
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                 data-toggle="dropdown" aria-expanded="true">
@@ -742,19 +757,21 @@
                                             </a>
                                             </li>
                                         {% else %}
-                                            {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
-                                                <li role="presentation">
-                                                    <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
-                                                        <i class="fa fa-exclamation-circle"></i> Accept Risk
-                                                    </a>
-                                                </li>
-                                            {% endif %}
-                                            {% if finding.test.engagement.product.enable_full_risk_acceptance %}
-                                                <li role="presentation">
-                                                    <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
-                                                        <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
-                                                    </a>
-                                                </li>
+                                            {% if not finding.duplicate %}
+                                                {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
+                                                    <li role="presentation">
+                                                        <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                            <i class="fa fa-exclamation-circle"></i> Accept Risk
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                {% if finding.test.engagement.product.enable_full_risk_acceptance %}
+                                                    <li role="presentation">
+                                                        <a href ="{% url 'add_risk_acceptance' finding.test.engagement.id finding.id %}">
+                                                            <i class="fa fa-exclamation-circle"></i> Add Risk Acceptance...
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                             {% endif %}
                                         {% endif %}
                                     {% endif %}
@@ -952,7 +969,7 @@
                 <tbody>
                 {% for finding in stub_findings %}
                     <tr>
-                        <td>
+                        <td name="stub_finding_name">
                             {% if test|has_object_permission:"Finding_Add" or user|is_authorized_for_change:test %}
                             <a href="{% url 'promote_to_finding' finding.id %}">{{ finding.title }}</a></td>
                             {% else %}
@@ -978,7 +995,7 @@
                                       style="display: inline" class="form-inline form">
                                     {% csrf_token %}
                                     <input type="hidden" name="id" value="{{ finding.id }}"/>
-                                    <button type="submit" class="btn btn-danger btn-sm delete-finding">
+                                    <button name="stub_finding_delete" type="submit" class="btn btn-danger btn-sm delete-finding">
                                         Delete
                                     </button>
                                 </form>
@@ -1097,8 +1114,8 @@
     <div class="col-md-12" id="cred">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Files<span class="pull-right">
-                <a data-toggle="collapse" href="#add_feat_files">
+                <h4>Files<span class="pull-right">&nbsp;
+                    <a data-toggle="collapse" href="#add_feat_files">
                     <i class="glyphicon glyphicon-chevron-down"></i></a></span>
                     {% if test|has_object_permission:"Test_Edit" or user|is_authorized_for_staff:test %}
                     <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"

@@ -22,61 +22,53 @@ class GitleaksParser(object):
         """
         Converts a Gitleaks report to DefectDojo findings
         """
-
-        # Exit if file is not provided
-        if filename is None:
-            return
-
-        data = filename.read()
+        issues = json.load(filename)
+        # empty report are just null object
+        if issues is None:
+            return list()
 
         dupes = dict()
-        issues = self.parse_json(data)
-        if issues is not None:
-            for issue in self.parse_json(data):
-                line = None
-                file_path = issue["file"]
-                reason = issue["rule"]
-                titleText = "Hard Coded " + reason + " in: " + file_path
-                description = "**Commit:** " + issue["commitMessage"].rstrip("\n") + "\n"
-                description += "**Commit Hash:** " + issue["commit"] + "\n"
-                description += "**Commit Date:** " + issue["date"] + "\n"
-                description += "**Author:** " + issue["author"] + " <" + issue["email"] + ">" + "\n"
-                description += "**Reason:** " + reason + "\n"
-                description += "**Path:** " + file_path + "\n"
-                if "lineNumber" in issue:
-                    description += "**Line:** %i\n" % issue["lineNumber"]
-                    line = issue["lineNumber"]
-                if "operation" in issue:
-                    description += "**Operation:** " + issue["operation"] + "\n"
-                description += "\n**String Found:**\n" + issue["line"].replace(issue["offender"], "REDACTED") + "\n"
+        for issue in issues:
+            line = None
+            file_path = issue["file"]
+            reason = issue["rule"]
+            titleText = "Hard Coded " + reason
+            description = "**Commit:** " + issue["commitMessage"].rstrip("\n") + "\n"
+            description += "**Commit Hash:** " + issue["commit"] + "\n"
+            description += "**Commit Date:** " + issue["date"] + "\n"
+            description += "**Author:** " + issue["author"] + " <" + issue["email"] + ">" + "\n"
+            description += "**Reason:** " + reason + "\n"
+            description += "**Path:** " + file_path + "\n"
+            if "lineNumber" in issue:
+                description += "**Line:** %i\n" % issue["lineNumber"]
+                line = issue["lineNumber"]
+            if "operation" in issue:
+                description += "**Operation:** " + issue["operation"] + "\n"
+            if "leakURL" in issue:
+                description += "**Leak URL:** [" + issue["leakURL"] + "](" + issue["leakURL"] + ")\n"
+            description += "\n**String Found:**\n\n```\n" + issue["line"].replace(issue["offender"], "REDACTED") + "\n```"
 
-                severity = "High"
-                if "Github" in reason or "AWS" in reason or "Heroku" in reason:
-                    severity = "Critical"
+            severity = "High"
+            if "Github" in reason or "AWS" in reason or "Heroku" in reason:
+                severity = "Critical"
 
-                dupe_key = hashlib.sha256((issue["offender"] + file_path + str(line)).encode("utf-8")).hexdigest()
+            finding = Finding(
+                title=titleText,
+                test=test,
+                cwe=798,
+                description=description,
+                severity=severity,
+                file_path=file_path,
+                line=line,
+                dynamic_finding=False,
+                static_finding=True,
+            )
+            # manage tags
+            finding.unsaved_tags = issue.get("tags", "").split(', ')
 
-                if dupe_key not in dupes:
-                    dupes[dupe_key] = Finding(title=titleText,
-                                      test=test,
-                                      cwe=798,
-                                      description=description,
-                                      severity=severity,
-                                      mitigation="Secrets and passwords should be stored in a secure vault and/or secure storage.",
-                                      impact="This weakness can lead to the exposure of resources or functionality to unintended actors, possibly providing attackers with sensitive information or even execute arbitrary code.",
-                                      file_path=file_path,
-                                      line=line,
-                                      dynamic_finding=False,
-                                      static_finding=True)
+            dupe_key = hashlib.sha256((issue["offender"] + file_path + str(line)).encode("utf-8")).hexdigest()
+
+            if dupe_key not in dupes:
+                dupes[dupe_key] = finding
+
         return list(dupes.values())
-
-    def parse_json(self, json_output):
-        # Load json data from the report file
-        try:
-            try:
-                json_data = json.loads(str(json_output, 'utf-8'))
-            except:
-                json_data = json.loads(json_output)
-        except ValueError:
-            raise Exception("Invalid format")
-        return json_data

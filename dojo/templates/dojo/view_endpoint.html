@@ -71,7 +71,7 @@
                                     </li>
                                     <li role="separator" class="divider"></li>
                                     <li role="presentation">
-                                        <a href="{% url 'endpoint_report' endpoint.id %}">
+                                        <a href="{% url 'endpoint_report' endpoint.id %}?active=1">
                                             <i class="fa fa-file-text-o"></i> Report
                                         </a>
                                     </li>
@@ -85,7 +85,7 @@
                                 {% endif %}
                               {% else %}
                                 <li role="presentation">
-                                    <a href="{% url 'endpoint_report' endpoint.id %}?host_view">
+                                    <a href="{% url 'endpoint_host_report' endpoint.id %}?&active=1">
                                         <i class="fa fa-file-text-o"></i> Report
                                     </a>
                                 </li>
@@ -127,8 +127,13 @@
 
                                 <div class="pull-right inline-block text-right">
                                     <span class=" fa-2x">{{ all_findings|length }}</span>
-                                    <span><a href="{% url 'endpoint_report' endpoint.id %}">endpoint
-                                        finding{{ all_findings|length|pluralize }} <i
+                                    <span>
+                                      {% if not host_view %}
+                                        <a href="{% url 'endpoint_report' endpoint.id %}">
+                                      {% else %}
+                                        <a href="{% url 'endpoint_host_report' endpoint.id %}">
+                                      {% endif %}
+                                            endpoint finding{{ all_findings|length|pluralize }} <i
                                                 class="fa fa-arrow-circle-right"></i></a>
                                     </span>
                                 </div>

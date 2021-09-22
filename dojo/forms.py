@@ -27,12 +27,12 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
-    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, \
+    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, Cobaltio_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
     Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member
 
-from dojo.tools.factory import requires_file, get_choices
+from dojo.tools.factory import requires_file, get_choices_sorted
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 from tagulous.forms import TagField
@@ -416,7 +416,6 @@ class DojoMetaDataForm(forms.ModelForm):
 
 
 class ImportScanForm(forms.Form):
-    SORTED_SCAN_TYPE_CHOICES = sorted(get_choices(), key=lambda x: x[1].lower())
     scan_date = forms.DateTimeField(
         required=True,
         label="Scan Completion Date",
@@ -428,7 +427,7 @@ class ImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES)
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
-    scan_type = forms.ChoiceField(required=True, choices=SORTED_SCAN_TYPE_CHOICES)
+    scan_type = forms.ChoiceField(required=True, choices=get_choices_sorted)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
@@ -438,6 +437,7 @@ class ImportScanForm(forms.Form):
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
     sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
+    cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
 
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
@@ -509,6 +509,7 @@ class ReImportScanForm(forms.Form):
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
     sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
+    cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
 
     if settings.FEATURE_FINDING_GROUPS:
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
@@ -591,7 +592,7 @@ class MergeFindings(forms.ModelForm):
             queryset=findings, required=True, label="Findings to Merge",
             widget=forms.widgets.SelectMultiple(attrs={'size': 10}),
             help_text=('Select the findings to merge.'))
-        self.fields.keyOrder = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints', 'append_reference']
+        self.fields.field_order = ['finding_to_merge_into', 'findings_to_merge', 'append_description', 'add_endpoints', 'append_reference']
 
     class Meta:
         model = Finding
@@ -832,6 +833,7 @@ class TestForm(forms.ModelForm):
             else:
                 self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
             self.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product)
+            self.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
@@ -839,7 +841,7 @@ class TestForm(forms.ModelForm):
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end', 'description',
                   'environment', 'percent_complete', 'tags', 'lead', 'version', 'branch_tag', 'build_id', 'commit_hash',
-                  'sonarqube_config']
+                  'sonarqube_config', 'cobaltio_config']
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -2129,6 +2131,23 @@ class Sonarqube_ProductForm(forms.ModelForm):
         exclude = ['product']
 
 
+class Cobaltio_ProductForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Cobaltio_ProductForm, self).__init__(*args, **kwargs)
+        Tool_Type.objects.get_or_create(name='Cobalt.io')
+
+    cobaltio_tool_config = forms.ModelChoiceField(
+        label='Cobalt.io Configuration',
+        queryset=Tool_Configuration.objects.filter(tool_type__name="Cobalt.io").order_by('name'),
+        required=True
+    )
+
+    class Meta:
+        model = Cobaltio_Product
+        exclude = ['product', 'cobaltio_asset_name']
+
+
 class DeleteJIRAInstanceForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
@@ -2216,6 +2235,15 @@ class DeleteSonarqubeConfigurationForm(forms.ModelForm):
 
     class Meta:
         model = Sonarqube_Product
+        fields = ['id']
+
+
+class DeleteCobaltioConfigurationForm(forms.ModelForm):
+    id = forms.IntegerField(required=True,
+                            widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Cobaltio_Product
         fields = ['id']
 
 
