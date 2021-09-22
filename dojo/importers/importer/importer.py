@@ -296,6 +296,9 @@ class DojoDefaultImporter(object):
             raise ValidationError('"cobaltio_config" has to be from same product as "engagement"')
 
         # check if the parser that handle the scan_type manage tests
+        # if yes, we parse the data first
+        # after that we customize the Test_Type to reflect the data
+        # This allow us to support some meta-formats like SARIF or the generic format
         parser = get_parser(scan_type)
         if hasattr(parser, 'get_tests'):
             logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
