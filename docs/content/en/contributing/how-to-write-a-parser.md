@@ -20,7 +20,7 @@ Set up your environment to use the debug environment, such as:
 
 `$ docker/setEnv.sh debug`
 
-Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md) for more details.
+Please have a look at [DOCKER.md](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) for more details.
 
 ### Docker images
 
