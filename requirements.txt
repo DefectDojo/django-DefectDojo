@@ -28,7 +28,7 @@ PyGithub==1.55
 lxml==4.6.3
 Markdown==3.3.4
 mysqlclient==2.0.3
-openpyxl==3.0.7
+openpyxl==3.0.9
 xlrd==1.2.0
 Pillow==8.3.2  # required by django-imagekit
 psycopg2-binary==2.9.1
