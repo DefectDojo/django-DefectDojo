@@ -1,4 +1,3 @@
-from dojo import finding_group
 import logging
 import re
 import urllib.parse
