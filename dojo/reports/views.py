@@ -1,3 +1,4 @@
+from dojo import finding_group
 import logging
 import re
 import urllib.parse
@@ -941,7 +942,15 @@ def quick_report(request):
 
 
 def get_excludes():
-    return ['SEVERITIES', 'github_issue', 'jira_issue', 'objects', 'test', 'unsaved_endpoints']
+    return ['SEVERITIES', 'age', 'github_issue', 'jira_issue', 'objects', 'risk_acceptance',
+    'test__engagement__product__authorized_group', 'test__engagement__product__member',
+    'test__engagement__product__prod_type__authorized_group', 'test__engagement__product__prod_type__member',
+    'unsaved_endpoints']
+
+
+def get_foreign_keys():
+    return ['defect_review_requested_by', 'duplicate_finding', 'finding_group', 'last_reviewed_by',
+        'mitigated_by', 'reporter', 'review_requested_by', 'sonarqube_issue', 'test']
 
 
 def csv_export(request):
@@ -974,8 +983,10 @@ def csv_export(request):
             for key in dir(finding):
                 if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
                     value = finding.__dict__.get(key)
+                    if key in get_foreign_keys() and getattr(finding, key):
+                        value = str(getattr(finding, key))
                     if value and isinstance(value, str):
-                        value = value.replace('\n', ' NEWLINE ')
+                        value = value.replace('\n', ' NEWLINE ').replace('\r', '')
                     fields.append(value)
             fields.append(finding.test.title)
             fields.append(finding.test.test_type.name)
@@ -1012,8 +1023,6 @@ def excel_export(request):
                 if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
                     worksheet.write(row_num, col_num, key, bold)
                     col_num += 1
-            worksheet.write(row_num, col_num, 'test', bold)
-            col_num += 1
             worksheet.write(row_num, col_num, 'found_by', bold)
             col_num += 1
             worksheet.write(row_num, col_num, 'engagement_id', bold)
@@ -1029,10 +1038,11 @@ def excel_export(request):
             col_num = 0
             for key in dir(finding):
                 if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
-                    worksheet.write(row_num, col_num, finding.__dict__.get(key))
+                    value = finding.__dict__.get(key)
+                    if key in get_foreign_keys() and getattr(finding, key):
+                        value = str(getattr(finding, key))
+                    worksheet.write(row_num, col_num, value)
                     col_num += 1
-            worksheet.write(row_num, col_num, finding.test.title)
-            col_num += 1
             worksheet.write(row_num, col_num, finding.test.test_type.name)
             col_num += 1
             worksheet.write(row_num, col_num, finding.test.engagement.id)
