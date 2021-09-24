@@ -32,4 +32,8 @@ urlpatterns = [
         views.custom_report, name='custom_report'),
     url(r'^reports/quick$',
         views.quick_report, name='quick_report'),
+    url(r'^reports/csv_export$',
+        views.csv_export, name='csv_export'),
+    url(r'^reports/excel_export$',
+        views.excel_export, name='excel_export'),
 ]

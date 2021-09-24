@@ -1,15 +1,20 @@
 import logging
 import re
 import urllib.parse
+import io
+import csv
+import xlsxwriter
+
 from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, HttpResponseForbidden
+from django.http import Http404, HttpResponseForbidden, HttpResponse
 from django_filters.filters import _truncate
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+
 from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
     EndpointFilter, now
 from dojo.forms import ReportOptionsForm
@@ -774,16 +779,25 @@ def validate_date(date, filter_lookup):
 def validate(field, value):
     validated_field = field
     validated_value = None
+    if 'tags' in field:
+        # Tags are not yet supported
+        pass
+    elif field == 'tag' or field == 'not_tag':
+        # Tags are not yet supported
+        pass
+    elif field == 'has_finding_group' or field == 'finding_group':
+        # Finding groups are not yet supported
+        pass
+    elif field == 'title':
+        validated_field = 'title__icontains'
+        validated_value = None if not len(value) else value
     # Boolean values
-    if value in ['true', 'false', 'unknown']:
+    elif value in ['true', 'false', 'unknown']:
         if value == 'true':
             validated_value = True
         elif value == 'false':
             validated_value = False
     # Tags (lists)
-    elif 'tags' in field:
-        validated_field = value.split(', ')
-        validated_field = field + '__in'
     else:
         # Integer (ID) values
         try:
@@ -872,17 +886,21 @@ def get_list_index(list, index):
     return element
 
 
-def quick_report(request):
-    url = request.GET.get('url', None)
+def get_findings(request):
+    url = request.META.get('QUERY_STRING')
     if not url:
         raise Http404('Please use the report button when viewing findings')
+    else:
+        if url.startswith('url='):
+            url = url[4:]
 
     views = ['all', 'open', 'inactive', 'verified',
              'closed', 'accepted', 'out_of_scope',
              'false_positive', 'inactive']
-    request.path = url
+    # request.path = url
     obj_name = obj_id = view = query = None
     path_items = list(filter(None, re.split('/|\?', url))) # noqa W605
+
     try:
         finding_index = path_items.index('finding')
     except ValueError:
@@ -913,5 +931,126 @@ def quick_report(request):
         query = get_list_index(path_items, 2)
 
     obj = get_view(filter_lookup, obj_name, obj_id, view)
-    findings = parse_query(filter_lookup, query)
+    findings = get_authorized_findings(Permissions.Finding_View, parse_query(filter_lookup, query))
+    return findings, obj
+
+
+def quick_report(request):
+    findings, obj = get_findings(request)
     return generate_quick_report(request, findings, obj)
+
+
+def get_excludes():
+    return ['SEVERITIES', 'github_issue', 'jira_issue', 'objects', 'test', 'unsaved_endpoints']
+
+
+def csv_export(request):
+    findings, obj = get_findings(request)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=findings.csv'
+
+    writer = csv.writer(response)
+
+    first_row = True
+    for finding in findings:
+        if first_row:
+            fields = []
+            for key in dir(finding):
+                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                    fields.append(key)
+            fields.append('test')
+            fields.append('found_by')
+            fields.append('engagement_id')
+            fields.append('engagement')
+            fields.append('product_id')
+            fields.append('product')
+
+            writer.writerow(fields)
+
+            first_row = False
+        if not first_row:
+            fields = []
+            for key in dir(finding):
+                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                    value = finding.__dict__.get(key)
+                    if value and isinstance(value, str):
+                        value = value.replace('\n', ' NEWLINE ')
+                    fields.append(value)
+            fields.append(finding.test.title)
+            fields.append(finding.test.test_type.name)
+            fields.append(finding.test.engagement.id)
+            fields.append(finding.test.engagement.name)
+            fields.append(finding.test.engagement.product.id)
+            fields.append(finding.test.engagement.product.name)
+
+            writer.writerow(fields)
+
+    return response
+
+
+def excel_export(request):
+    findings, obj = get_findings(request)
+
+    # Create an in-memory output file for the new workbook.
+    output = io.BytesIO()
+
+    # Even though the final file will be in memory the module uses temp
+    # files during assembly for efficiency. To avoid this on servers that
+    # don't allow temp files, for example the Google APP Engine, set the
+    # 'in_memory' Workbook() constructor option as shown in the docs.
+    workbook = xlsxwriter.Workbook(output,
+        {'remove_timezone': True, 'strings_to_urls': False, 'default_date_format': 'yyyy-mm-dd'})
+    worksheet = workbook.add_worksheet('Findings')
+    bold = workbook.add_format({'bold': True})
+
+    row_num = 0
+    for finding in findings:
+        if row_num == 0:
+            col_num = 0
+            for key in dir(finding):
+                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                    worksheet.write(row_num, col_num, key, bold)
+                    col_num += 1
+            worksheet.write(row_num, col_num, 'test', bold)
+            col_num += 1
+            worksheet.write(row_num, col_num, 'found_by', bold)
+            col_num += 1
+            worksheet.write(row_num, col_num, 'engagement_id', bold)
+            col_num += 1
+            worksheet.write(row_num, col_num, 'engagement', bold)
+            col_num += 1
+            worksheet.write(row_num, col_num, 'product_id', bold)
+            col_num += 1
+            worksheet.write(row_num, col_num, 'product', bold)
+
+            row_num = 1
+        if row_num > 0:
+            col_num = 0
+            for key in dir(finding):
+                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                    worksheet.write(row_num, col_num, finding.__dict__.get(key))
+                    col_num += 1
+            worksheet.write(row_num, col_num, finding.test.title)
+            col_num += 1
+            worksheet.write(row_num, col_num, finding.test.test_type.name)
+            col_num += 1
+            worksheet.write(row_num, col_num, finding.test.engagement.id)
+            col_num += 1
+            worksheet.write(row_num, col_num, finding.test.engagement.name)
+            col_num += 1
+            worksheet.write(row_num, col_num, finding.test.engagement.product.id)
+            col_num += 1
+            worksheet.write(row_num, col_num, finding.test.engagement.product.name)
+        row_num += 1
+
+    workbook.close()
+    output.seek(0)
+
+    response = HttpResponse(
+        output,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = 'attachment; filename=findings.xlsx'
+
+    return response
