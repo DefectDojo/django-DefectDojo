@@ -1,9 +1,11 @@
 import logging
 import re
 import urllib.parse
-import io
 import csv
-import xlsxwriter
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from tempfile import NamedTemporaryFile
+
 
 from datetime import datetime, timedelta
 
@@ -1002,64 +1004,68 @@ def csv_export(request):
 def excel_export(request):
     findings, obj = get_findings(request)
 
-    # Create an in-memory output file for the new workbook.
-    output = io.BytesIO()
+    workbook = Workbook()
+    workbook.iso_dates = True
+    worksheet = workbook.active
+    worksheet.title = 'Findings'
 
-    # Even though the final file will be in memory the module uses temp
-    # files during assembly for efficiency. To avoid this on servers that
-    # don't allow temp files, for example the Google APP Engine, set the
-    # 'in_memory' Workbook() constructor option as shown in the docs.
-    workbook = xlsxwriter.Workbook(output,
-        {'remove_timezone': True, 'strings_to_urls': False, 'default_date_format': 'yyyy-mm-dd'})
-    worksheet = workbook.add_worksheet('Findings')
-    bold = workbook.add_format({'bold': True})
+    font_bold = Font(bold=True)
 
-    row_num = 0
+    row_num = 1
     for finding in findings:
-        if row_num == 0:
-            col_num = 0
+        if row_num == 1:
+            col_num = 1
             for key in dir(finding):
                 if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
-                    worksheet.write(row_num, col_num, key, bold)
+                    cell = worksheet.cell(row=row_num, column=col_num, value=key)
+                    cell.font = font_bold
                     col_num += 1
-            worksheet.write(row_num, col_num, 'found_by', bold)
+            cell = worksheet.cell(row=row_num, column=col_num, value='found_by')
+            cell.font = font_bold
             col_num += 1
-            worksheet.write(row_num, col_num, 'engagement_id', bold)
+            worksheet.cell(row=row_num, column=col_num, value='engagement_id')
+            cell = cell.font = font_bold
             col_num += 1
-            worksheet.write(row_num, col_num, 'engagement', bold)
+            cell = worksheet.cell(row=row_num, column=col_num, value='engagement')
+            cell.font = font_bold
             col_num += 1
-            worksheet.write(row_num, col_num, 'product_id', bold)
+            cell = worksheet.cell(row=row_num, column=col_num, value='product_id')
+            cell.font = font_bold
             col_num += 1
-            worksheet.write(row_num, col_num, 'product', bold)
+            cell = worksheet.cell(row=row_num, column=col_num, value='product')
+            cell.font = font_bold
 
-            row_num = 1
-        if row_num > 0:
-            col_num = 0
+            row_num = 2
+        if row_num > 1:
+            col_num = 1
             for key in dir(finding):
                 if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
                     value = finding.__dict__.get(key)
                     if key in get_foreign_keys() and getattr(finding, key):
                         value = str(getattr(finding, key))
-                    worksheet.write(row_num, col_num, value)
+                    if value and isinstance(value, datetime):
+                        value = value.replace(tzinfo=None)
+                    worksheet.cell(row=row_num, column=col_num, value=value)
                     col_num += 1
-            worksheet.write(row_num, col_num, finding.test.test_type.name)
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
             col_num += 1
-            worksheet.write(row_num, col_num, finding.test.engagement.id)
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.id)
             col_num += 1
-            worksheet.write(row_num, col_num, finding.test.engagement.name)
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.name)
             col_num += 1
-            worksheet.write(row_num, col_num, finding.test.engagement.product.id)
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.id)
             col_num += 1
-            worksheet.write(row_num, col_num, finding.test.engagement.product.name)
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.name)
         row_num += 1
 
-    workbook.close()
-    output.seek(0)
+    with NamedTemporaryFile() as tmp:
+        workbook.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
 
     response = HttpResponse(
-        output,
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        content=stream,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
     response['Content-Disposition'] = 'attachment; filename=findings.xlsx'
-
     return response
