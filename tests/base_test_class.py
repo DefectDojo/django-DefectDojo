@@ -79,6 +79,10 @@ class BaseTestCase(unittest.TestCase):
             desired = webdriver.DesiredCapabilities.CHROME
             desired['goog:loggingPrefs'] = {'browser': 'ALL'}
 
+            # set automatic downloads to test csv and excel export
+            prefs = {"download.default_directory": '/tmp'}
+            dd_driver_options.add_experimental_option("prefs", prefs)
+
             # change path of chromedriver according to which directory you have chromedriver.
             print('starting chromedriver with options: ', vars(dd_driver_options), desired)
             dd_driver = webdriver.Chrome('chromedriver', chrome_options=dd_driver_options, desired_capabilities=desired)
@@ -321,7 +325,7 @@ class BaseTestCase(unittest.TestCase):
 
             The addition of the trigger exception is due to the Report Builder tests.
             """
-            accepted_javascript_messages = r'(zoom\-in\.cur.*)404\ \(Not\ Found\)|Uncaught TypeError: Cannot read properties of null \(reading \'trigger\'\)'
+            accepted_javascript_messages = r'(zoom\-in\.cur.*)404\ \(Not\ Found\)|Uncaught TypeError: Cannot read properties of null \(reading \'trigger\'\)|Uncaught TypeError: Cannot read properties of null \(reading \'innerHTML\'\)'
 
             if (entry['level'] == 'SEVERE'):
                 # print(self.driver.current_url)  # TODO actually this seems to be the previous url
@@ -351,7 +355,7 @@ class BaseTestCase(unittest.TestCase):
         print('tearDownDriver: ', cls.__name__)
         global dd_driver
         if dd_driver:
-            if not dd_driver_options.experimental_options or not dd_driver_options.experimental_options['detach']:
+            if not dd_driver_options.experimental_options or not dd_driver_options.experimental_options.get('detach'):
                 print('closing browser')
                 dd_driver.quit()
 
