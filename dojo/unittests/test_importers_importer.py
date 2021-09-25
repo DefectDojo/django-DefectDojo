@@ -92,6 +92,6 @@ class TestDojoDefaultImporter(TestCase):
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, sonarqube_config=None,
                     cobaltio_config=None)
 
-        self.assertEqual(f"{scan_type} > SpotBugs", test.test_type.name)
+        self.assertEqual(f"SpotBugs Scan ({scan_type})", test.test_type.name)
         self.assertEqual(56, len_new_findings)
         self.assertEqual(0, len_closed_findings)
