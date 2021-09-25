@@ -836,7 +836,7 @@ def parse_query(filter_lookup, query):
             findings = findings.order_by(order)
     else:
         findings = Finding.objects.filter(**filter_lookup)
-    return findings
+    return findings.select_related('test', 'test__engagement', 'test__engagement__product', 'test__test_type').prefetch_related('endpoints')
 
 
 def get_view(filter_lookup, obj_name, obj_id, view):
@@ -975,6 +975,7 @@ def csv_export(request):
             fields.append('engagement')
             fields.append('product_id')
             fields.append('product')
+            fields.append('endpoints')
 
             writer.writerow(fields)
 
@@ -995,6 +996,18 @@ def csv_export(request):
             fields.append(finding.test.engagement.name)
             fields.append(finding.test.engagement.product.id)
             fields.append(finding.test.engagement.product.name)
+
+            endpoint_value = ''
+            num_endpoints = 0
+            for endpoint in finding.endpoints.all():
+                num_endpoints += 1
+                if num_endpoints > 5:
+                    endpoint_value += '...'
+                    break
+                endpoint_value += f'{str(endpoint)}; '
+            if endpoint_value.endswith('; '):
+                endpoint_value = endpoint_value[:-2]
+            fields.append(endpoint_value)
 
             writer.writerow(fields)
 
@@ -1034,6 +1047,9 @@ def excel_export(request):
             col_num += 1
             cell = worksheet.cell(row=row_num, column=col_num, value='product')
             cell.font = font_bold
+            col_num += 1
+            cell = worksheet.cell(row=row_num, column=col_num, value='endpoints')
+            cell.font = font_bold
 
             row_num = 2
         if row_num > 1:
@@ -1056,6 +1072,20 @@ def excel_export(request):
             worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.id)
             col_num += 1
             worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.name)
+            col_num += 1
+
+            endpoint_value = ''
+            num_endpoints = 0
+            for endpoint in finding.endpoints.all():
+                num_endpoints += 1
+                if num_endpoints > 5:
+                    endpoint_value += '...'
+                    break
+                endpoint_value += f'{str(endpoint)}; \n'
+            if endpoint_value.endswith('; \n'):
+                endpoint_value = endpoint_value[:-3]
+            worksheet.cell(row=row_num, column=col_num, value=endpoint_value)
+
         row_num += 1
 
     with NamedTemporaryFile() as tmp:
