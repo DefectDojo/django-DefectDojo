@@ -306,9 +306,15 @@ class DojoDefaultImporter(object):
             # for now we only consider the first test in the list and artificially aggregate all findings of all tests
             # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
             # when there is more than 1 test
+            #
+            # we also aggregate the label of the Test_type to show the user the original scan_type
+            # only if they are different. This is to support meta format like SARIF
+            # so a report that have the label 'CodeScanner' will be changed to 'SARIF > CodeScanner'
             test_type_str = scan_type
             if len(tests) > 0:
                 test_type_str = tests[0].type
+                if tests[0].type and tests[0].type != scan_type:
+                    test_type_str = scan_type + " > " + test_type_str
             test = self.create_test(scan_type, test_type_str, engagement, lead, environment, scan_date=scan_date, tags=tags,
                                 version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
                                 sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
