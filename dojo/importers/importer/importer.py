@@ -27,12 +27,12 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 class DojoDefaultImporter(object):
 
-    def create_test(self, scan_type, test_type_str, engagement, lead, environment, tags=None,
+    def create_test(self, scan_type, test_type_name, engagement, lead, environment, tags=None,
                     scan_date=None, version=None, branch_tag=None, build_id=None, commit_hash=None, now=timezone.now(),
                     sonarqube_config=None, cobaltio_config=None):
 
         test_type, created = Test_Type.objects.get_or_create(
-            name=test_type_str)
+            name=test_type_name)
 
         if created:
             logger.info('Created new Test_Type with name %s because a report is being imported', test_type.name)
