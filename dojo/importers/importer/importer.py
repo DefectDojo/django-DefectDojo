@@ -310,12 +310,12 @@ class DojoDefaultImporter(object):
             # we also aggregate the label of the Test_type to show the user the original scan_type
             # only if they are different. This is to support meta format like SARIF
             # so a report that have the label 'CodeScanner' will be changed to 'SARIF > CodeScanner'
-            test_type_str = scan_type
+            test_type_name = scan_type
             if len(tests) > 0:
-                test_type_str = tests[0].type + " Scan"
+                test_type_name = tests[0].type + " Scan"
                 if tests[0].type and tests[0].type != scan_type:
-                    test_type_str = f"{test_type_str} ({scan_type})"
-            test = self.create_test(scan_type, test_type_str, engagement, lead, environment, scan_date=scan_date, tags=tags,
+                    test_type_name = f"{test_type_name} ({scan_type})"
+            test = self.create_test(scan_type, test_type_name, engagement, lead, environment, scan_date=scan_date, tags=tags,
                                 version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
                                 sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
             test_raw = tests[0]
