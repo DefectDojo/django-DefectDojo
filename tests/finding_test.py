@@ -70,7 +70,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("downloadMenu").click()
         driver.find_element_by_id("csv_export").click()
 
-        time.sleep(2)
+        time.sleep(4)
         self.assertTrue(Path("/tmp/findings.csv").is_file())
 
     def test_excel_export(self):
@@ -80,7 +80,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("downloadMenu").click()
         driver.find_element_by_id("excel_export").click()
 
-        time.sleep(2)
+        time.sleep(4)
         self.assertTrue(Path("/tmp/findings.xlsx").is_file())
 
     @on_exception_html_source_logger
