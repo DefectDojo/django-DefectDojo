@@ -324,6 +324,7 @@ class BaseTestCase(unittest.TestCase):
             but http://localhost:8080/static/dojo/img/zoom-in.cur still produces a 404
 
             The addition of the trigger exception is due to the Report Builder tests.
+            The addition of the innerHTML exception is due to the test for quick reports in finding_test.py
             """
             accepted_javascript_messages = r'(zoom\-in\.cur.*)404\ \(Not\ Found\)|Uncaught TypeError: Cannot read properties of null \(reading \'trigger\'\)|Uncaught TypeError: Cannot read properties of null \(reading \'innerHTML\'\)'
 
