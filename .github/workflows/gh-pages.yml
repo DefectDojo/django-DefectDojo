@@ -3,7 +3,7 @@ name: github-pages
 on:
   push:
     branches:
-      - master
+      - dev
 
 # Taken from https://github.com/marketplace/actions/hugo-setup#%EF%B8%8F-workflow-for-autoprefixer-and-postcss-cli
 jobs:
