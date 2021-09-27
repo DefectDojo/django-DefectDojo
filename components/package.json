@@ -16,7 +16,7 @@
     "datatables.net-buttons-bs": "^2.0.0",
     "datatables.net-buttons-dt": "^2.0.0",
     "datatables.net-colreorder": "^1.5.4",
-    "datatables.net-dt": "^1.11.2",
+    "datatables.net-dt": "^1.11.3",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
     "easymde": "^2.15.0",
