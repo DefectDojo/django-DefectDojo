@@ -300,10 +300,10 @@ datatables.net-bs@>=1.10.25:
     datatables.net ">=1.10.25"
     jquery ">=1.7"
 
-datatables.net-buttons-bs@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/datatables.net-buttons-bs/-/datatables.net-buttons-bs-2.0.0.tgz#b58d0f7a2622da60c2b4b0b9caea2b4b8b92312f"
-  integrity sha512-G5ZBENjsMyU3lFGMay3qcL/L1hLvPMLfH+lGD3zsqQ03YM6N++rbjwfYBFjoYCnzNOQD6EK7WCu0VrljdyJkFQ==
+datatables.net-buttons-bs@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/datatables.net-buttons-bs/-/datatables.net-buttons-bs-2.0.1.tgz#d1454d5f8584162109105135dd2c6f42f8656bc6"
+  integrity sha512-VyfZj+SZIHVE40wCaYDYIPgCxNzcctxG4JtGj/ssOAQzLg4DU88wnZ6RCmAeLqEaRmcJfSajBJaVAU0bjFww5g==
   dependencies:
     datatables.net-bs ">=1.10.25"
     datatables.net-buttons ">=1.7.1"
