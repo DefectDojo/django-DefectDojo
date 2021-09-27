@@ -223,7 +223,7 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
             SonarQubeApiImporter.prepare_client(self.other_test)
 
 
-class TestSonarqubeImporterRuleWithoutHtmlDesc(TestCase):
+class TestSonarqubeImporterExternalRule(TestCase):
     # Test that finding governed by a rule without htmlDesc can be imported.
     # Custom (user defined) rules may have no htmlDesc field.
     fixtures = [
@@ -250,3 +250,11 @@ class TestSonarqubeImporterRuleWithoutHtmlDesc(TestCase):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
+        finding = findings[0]
+        self.assertEqual('Dead stores should be removed', finding.title)
+        self.assertEqual(None, finding.cwe)
+        self.assertEqual('', finding.description)
+        self.assertEqual('', finding.references)
+        self.assertEqual('Medium', finding.severity)
+        self.assertEqual(237, finding.line)
+        self.assertEqual('internal.dummy.project:src/main/javascript/TranslateDirective.ts', finding.file_path)
