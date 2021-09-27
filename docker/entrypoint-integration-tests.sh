@@ -38,6 +38,14 @@ function success() {
     echo "Success: $1 test passed\n"
 }
 
+test="Finding integration tests"
+echo "Running: $test"
+if python3 tests/finding_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
 test="Report Builder tests"
 echo "Running: $test"
 if python3 tests/report_builder_test.py ; then
@@ -97,14 +105,6 @@ fi
 test="Environment integration tests"
 echo "Running: $test"
 if python3 tests/environment_test.py ; then
-    success $test
-else
-    fail $test
-fi
-
-test="Finding integration tests"
-echo "Running: $test"
-if python3 tests/finding_test.py ; then
     success $test
 else
     fail $test
