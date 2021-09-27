@@ -71,7 +71,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("csv_export").click()
 
         file_found = False
-        for i in range(1, 10):
+        for i in range(1, 20):
             time.sleep(1)
             if Path("/tmp/findings.csv").is_file():
                 file_found = True
@@ -86,7 +86,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("excel_export").click()
 
         file_found = False
-        for i in range(1, 10):
+        for i in range(1, 20):
             time.sleep(1)
             if Path("/tmp/findings.xlsx").is_file():
                 file_found = True
