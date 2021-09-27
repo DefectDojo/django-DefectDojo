@@ -256,5 +256,5 @@ class TestSonarqubeImporterExternalRule(TestCase):
         self.assertEqual('', finding.description)
         self.assertEqual('', finding.references)
         self.assertEqual('Medium', finding.severity)
-        self.assertEqual(237, finding.line)
+        self.assertEqual(242, finding.line)
         self.assertEqual('internal.dummy.project:src/main/javascript/TranslateDirective.ts', finding.file_path)
