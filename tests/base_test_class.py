@@ -14,6 +14,7 @@ import re
 dd_driver = None
 dd_driver_options = None
 
+
 def on_exception_html_source_logger(func):
     def wrapper(self, *args, **kwargs):
         try:
