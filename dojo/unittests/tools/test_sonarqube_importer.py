@@ -251,7 +251,7 @@ class TestSonarqubeImporterExternalRule(TestCase):
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
         finding = findings[0]
-        self.assertEqual('Dead stores should be removed', finding.title)
+        self.assertEqual('Remove this useless assignment to local variable "currentValue".', finding.title)
         self.assertEqual(None, finding.cwe)
         self.assertEqual('', finding.description)
         self.assertEqual('', finding.references)
