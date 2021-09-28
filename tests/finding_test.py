@@ -63,6 +63,16 @@ class FindingTest(BaseTestCase):
 
         self.assertIn("<title>Finding Report</title>", driver.page_source)
 
+    def check_file(self, file_name):
+        file_found = False
+        for i in range(1, 30):
+            time.sleep(1)
+            if Path(file_name).is_file():
+                file_found = True
+                break
+        self.assertTrue(file_found, f'Cannot find {file_name}')
+        os.remove(file_name)
+
     def test_csv_export(self):
         driver = self.driver
         driver.get(self.base_url + "finding")
@@ -70,13 +80,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("downloadMenu").click()
         driver.find_element_by_id("csv_export").click()
 
-        file_found = False
-        for i in range(1, 20):
-            time.sleep(1)
-            if Path("/tmp/findings.csv").is_file():
-                file_found = True
-                break
-        self.assertTrue(file_found, 'Couldn\'t find /tmp/findings.csv')
+        self.check_file(f'{self.export_path}/findings.csv')
 
     def test_excel_export(self):
         driver = self.driver
@@ -85,13 +89,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("downloadMenu").click()
         driver.find_element_by_id("excel_export").click()
 
-        file_found = False
-        for i in range(1, 20):
-            time.sleep(1)
-            if Path("/tmp/findings.xlsx").is_file():
-                file_found = True
-                break
-        self.assertTrue(file_found, 'Couldn\'t find /tmp/findings.xlsx')
+        self.check_file(f'{self.export_path}/findings.xlsx')
 
     @on_exception_html_source_logger
     def test_edit_finding(self):
