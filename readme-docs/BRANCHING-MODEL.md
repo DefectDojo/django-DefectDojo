@@ -1,5 +1,5 @@
 # Introduction
-The DefectDojo team aims to release at least once a month, on the last Tuesday.
+The DefectDojo team aims to release at least once a month, on the first Tuesday.
 Bugfix or security releases can come at any time.
 
 In doubt, GitHub Actions are the source of truth. The releases are semi-automated right now, with a DefectDojo maintainer proceeding with each major step in the release. The steps for a regular release are:

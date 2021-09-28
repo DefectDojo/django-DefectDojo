@@ -1,15 +1,22 @@
 import logging
 import re
 import urllib.parse
+import csv
+from openpyxl import Workbook
+from openpyxl.styles import Font
+from tempfile import NamedTemporaryFile
+
+
 from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, HttpResponseForbidden
+from django.http import Http404, HttpResponseForbidden, HttpResponse
 from django_filters.filters import _truncate
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+
 from dojo.filters import ReportFindingFilter, EndpointReportFilter, \
     EndpointFilter, now
 from dojo.forms import ReportOptionsForm
@@ -774,16 +781,25 @@ def validate_date(date, filter_lookup):
 def validate(field, value):
     validated_field = field
     validated_value = None
+    if 'tags' in field:
+        # Tags are not yet supported
+        pass
+    elif field == 'tag' or field == 'not_tag':
+        # Tags are not yet supported
+        pass
+    elif field == 'has_finding_group' or field == 'finding_group':
+        # Finding groups are not yet supported
+        pass
+    elif field == 'title':
+        validated_field = 'title__icontains'
+        validated_value = None if not len(value) else value
     # Boolean values
-    if value in ['true', 'false', 'unknown']:
+    elif value in ['true', 'false', 'unknown']:
         if value == 'true':
             validated_value = True
         elif value == 'false':
             validated_value = False
     # Tags (lists)
-    elif 'tags' in field:
-        validated_field = value.split(', ')
-        validated_field = field + '__in'
     else:
         # Integer (ID) values
         try:
@@ -820,7 +836,7 @@ def parse_query(filter_lookup, query):
             findings = findings.order_by(order)
     else:
         findings = Finding.objects.filter(**filter_lookup)
-    return findings
+    return findings.select_related('test', 'test__engagement', 'test__engagement__product', 'test__test_type').prefetch_related('endpoints')
 
 
 def get_view(filter_lookup, obj_name, obj_id, view):
@@ -872,17 +888,21 @@ def get_list_index(list, index):
     return element
 
 
-def quick_report(request):
-    url = request.GET.get('url', None)
+def get_findings(request):
+    url = request.META.get('QUERY_STRING')
     if not url:
         raise Http404('Please use the report button when viewing findings')
+    else:
+        if url.startswith('url='):
+            url = url[4:]
 
     views = ['all', 'open', 'inactive', 'verified',
              'closed', 'accepted', 'out_of_scope',
              'false_positive', 'inactive']
-    request.path = url
+    # request.path = url
     obj_name = obj_id = view = query = None
     path_items = list(filter(None, re.split('/|\?', url))) # noqa W605
+
     try:
         finding_index = path_items.index('finding')
     except ValueError:
@@ -913,5 +933,169 @@ def quick_report(request):
         query = get_list_index(path_items, 2)
 
     obj = get_view(filter_lookup, obj_name, obj_id, view)
-    findings = parse_query(filter_lookup, query)
+    findings = get_authorized_findings(Permissions.Finding_View, parse_query(filter_lookup, query))
+    return findings, obj
+
+
+def quick_report(request):
+    findings, obj = get_findings(request)
     return generate_quick_report(request, findings, obj)
+
+
+def get_excludes():
+    return ['SEVERITIES', 'age', 'github_issue', 'jira_issue', 'objects', 'risk_acceptance',
+    'test__engagement__product__authorized_group', 'test__engagement__product__member',
+    'test__engagement__product__prod_type__authorized_group', 'test__engagement__product__prod_type__member',
+    'unsaved_endpoints']
+
+
+def get_foreign_keys():
+    return ['defect_review_requested_by', 'duplicate_finding', 'finding_group', 'last_reviewed_by',
+        'mitigated_by', 'reporter', 'review_requested_by', 'sonarqube_issue', 'test']
+
+
+def csv_export(request):
+    findings, obj = get_findings(request)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=findings.csv'
+
+    writer = csv.writer(response)
+
+    first_row = True
+    for finding in findings:
+        if first_row:
+            fields = []
+            for key in dir(finding):
+                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                    fields.append(key)
+            fields.append('test')
+            fields.append('found_by')
+            fields.append('engagement_id')
+            fields.append('engagement')
+            fields.append('product_id')
+            fields.append('product')
+            fields.append('endpoints')
+
+            writer.writerow(fields)
+
+            first_row = False
+        if not first_row:
+            fields = []
+            for key in dir(finding):
+                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                    value = finding.__dict__.get(key)
+                    if key in get_foreign_keys() and getattr(finding, key):
+                        value = str(getattr(finding, key))
+                    if value and isinstance(value, str):
+                        value = value.replace('\n', ' NEWLINE ').replace('\r', '')
+                    fields.append(value)
+            fields.append(finding.test.title)
+            fields.append(finding.test.test_type.name)
+            fields.append(finding.test.engagement.id)
+            fields.append(finding.test.engagement.name)
+            fields.append(finding.test.engagement.product.id)
+            fields.append(finding.test.engagement.product.name)
+
+            endpoint_value = ''
+            num_endpoints = 0
+            for endpoint in finding.endpoints.all():
+                num_endpoints += 1
+                if num_endpoints > 5:
+                    endpoint_value += '...'
+                    break
+                endpoint_value += f'{str(endpoint)}; '
+            if endpoint_value.endswith('; '):
+                endpoint_value = endpoint_value[:-2]
+            fields.append(endpoint_value)
+
+            writer.writerow(fields)
+
+    return response
+
+
+def excel_export(request):
+    findings, obj = get_findings(request)
+
+    workbook = Workbook()
+    workbook.iso_dates = True
+    worksheet = workbook.active
+    worksheet.title = 'Findings'
+
+    font_bold = Font(bold=True)
+
+    row_num = 1
+    for finding in findings:
+        if row_num == 1:
+            col_num = 1
+            for key in dir(finding):
+                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                    cell = worksheet.cell(row=row_num, column=col_num, value=key)
+                    cell.font = font_bold
+                    col_num += 1
+            cell = worksheet.cell(row=row_num, column=col_num, value='found_by')
+            cell.font = font_bold
+            col_num += 1
+            worksheet.cell(row=row_num, column=col_num, value='engagement_id')
+            cell = cell.font = font_bold
+            col_num += 1
+            cell = worksheet.cell(row=row_num, column=col_num, value='engagement')
+            cell.font = font_bold
+            col_num += 1
+            cell = worksheet.cell(row=row_num, column=col_num, value='product_id')
+            cell.font = font_bold
+            col_num += 1
+            cell = worksheet.cell(row=row_num, column=col_num, value='product')
+            cell.font = font_bold
+            col_num += 1
+            cell = worksheet.cell(row=row_num, column=col_num, value='endpoints')
+            cell.font = font_bold
+
+            row_num = 2
+        if row_num > 1:
+            col_num = 1
+            for key in dir(finding):
+                if key not in get_excludes() and not callable(getattr(finding, key)) and not key.startswith('_'):
+                    value = finding.__dict__.get(key)
+                    if key in get_foreign_keys() and getattr(finding, key):
+                        value = str(getattr(finding, key))
+                    if value and isinstance(value, datetime):
+                        value = value.replace(tzinfo=None)
+                    worksheet.cell(row=row_num, column=col_num, value=value)
+                    col_num += 1
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.test_type.name)
+            col_num += 1
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.id)
+            col_num += 1
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.name)
+            col_num += 1
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.id)
+            col_num += 1
+            worksheet.cell(row=row_num, column=col_num, value=finding.test.engagement.product.name)
+            col_num += 1
+
+            endpoint_value = ''
+            num_endpoints = 0
+            for endpoint in finding.endpoints.all():
+                num_endpoints += 1
+                if num_endpoints > 5:
+                    endpoint_value += '...'
+                    break
+                endpoint_value += f'{str(endpoint)}; \n'
+            if endpoint_value.endswith('; \n'):
+                endpoint_value = endpoint_value[:-3]
+            worksheet.cell(row=row_num, column=col_num, value=endpoint_value)
+
+        row_num += 1
+
+    with NamedTemporaryFile() as tmp:
+        workbook.save(tmp.name)
+        tmp.seek(0)
+        stream = tmp.read()
+
+    response = HttpResponse(
+        content=stream,
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename=findings.xlsx'
+    return response

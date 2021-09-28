@@ -2,7 +2,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 import unittest
 import sys
-from base_test_class import BaseTestCase, on_exception_html_source_logger
+from base_test_class import BaseTestCase
 from product_test import ProductTest, WaitForPageLoad
 
 
@@ -115,19 +115,17 @@ class TestUnitTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Test saved.'))
 
-    @on_exception_html_source_logger
     def test_add_note(self):
         # Login to the site.
         driver = self.driver
         # Navigate to the engagement page
         self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Beta Test").click()
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
-        # "Click" the Add Notes option
-        driver.find_element_by_link_text("Add Notes").click()
-        # Select entry, clear field and input note
+        # Notes are on the view_test page
         driver.find_element_by_id("id_entry").clear()
         driver.find_element_by_id("id_entry").send_keys("This is a sample note for all to see.")
         # "Click" the submit button to complete the transaction
@@ -252,6 +250,27 @@ class TestUnitTest(BaseTestCase):
         # Check the stub finding is deleted
         self.assertFalse(driver.find_elements_by_name("stub_finding_name"))
 
+    def test_merge_findings(self):
+        # View existing test from ProductTest()
+        # Login to the site.
+        driver = self.driver
+
+        # Navigate to the engagement page
+        self.goto_active_engagements_overview(driver)
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Beta Test").click()
+        driver.find_element_by_partial_link_text("Quick Security Testing").click()
+
+        driver.find_element_by_id("select_all").click()
+
+        driver.find_element_by_id("merge_findings").click()
+
+        Select(driver.find_element_by_id("id_finding_action")).select_by_visible_text('Inactive')
+
+        Select(driver.find_element_by_id("id_findings_to_merge")).select_by_visible_text('App Vulnerable to XSS3')
+
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
@@ -259,18 +278,14 @@ class TestUnitTest(BaseTestCase):
         # Navigate to the engagement page
         self.goto_active_engagements_overview(driver)
         # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Beta Test").click()
         driver.find_element_by_partial_link_text("Quick Security Testing").click()
         # "Click" the dropdown button to see options
         driver.find_element_by_id("dropdownMenu1").click()
         # "Click" the Edit Test option
         driver.find_element_by_link_text("Delete Test").click()
-        # Type test name into Title field before clicking Delet button
-        driver.find_element_by_id("id_title").clear()  # always clear for inputting
-        driver.find_element_by_id("id_title").send_keys("Quick Security Testing")
         # "Click" the delete button to complete the transaction
         driver.find_element_by_css_selector("button.btn.btn-danger").click()
-        # Query the site to determine if the product has been added
-
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Test and relationships removed.'))
 
@@ -287,9 +302,10 @@ def suite():
     suite.addTest(TestUnitTest('test_edit_test'))
     suite.addTest(TestUnitTest('test_add_test_finding'))
     suite.addTest(TestUnitTest('test_add_and_promote_stub_finding'))
+    suite.addTest(TestUnitTest('test_merge_findings'))
     suite.addTest(TestUnitTest('test_add_and_delete_stub_finding'))
-    # suite.addTest(TestUnitTest('test_add_note'))
-    # suite.addTest(TestUnitTest('test_delete_test'))
+    suite.addTest(TestUnitTest('test_add_note'))
+    suite.addTest(TestUnitTest('test_delete_test'))
     suite.addTest(ProductTest('test_delete_product'))
     return suite
 
