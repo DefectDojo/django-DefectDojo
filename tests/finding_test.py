@@ -71,7 +71,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("csv_export").click()
 
         file_found = False
-        for i in range(1, 10):
+        for i in range(1, 20):
             time.sleep(1)
             if Path("/tmp/findings.csv").is_file():
                 file_found = True
@@ -86,7 +86,7 @@ class FindingTest(BaseTestCase):
         driver.find_element_by_id("excel_export").click()
 
         file_found = False
-        for i in range(1, 10):
+        for i in range(1, 20):
             time.sleep(1)
             if Path("/tmp/findings.xlsx").is_file():
                 file_found = True
@@ -145,6 +145,26 @@ class FindingTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text='Files updated successfully.'))
+
+    @on_exception_html_source_logger
+    def test_add_note_to_finding(self):
+        # The Name of the Finding created by test_add_product_finding => 'App Vulnerable to XSS'
+        # Test To Add Finding To product
+        # login to site, password set to fetch from environ
+        driver = self.driver
+        # Navigate to All Finding page
+        self.goto_all_findings_list(driver)
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+
+        # Notes are on the view_test page
+        driver.find_element_by_id("id_entry").clear()
+        driver.find_element_by_id("id_entry").send_keys("This is a sample note for all to see.")
+        # "Click" the submit button to complete the transaction
+        driver.find_element_by_xpath("//input[@value='Add Note']").click()
+
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Note saved.'))
 
     def test_mark_finding_for_review(self):
         # login to site, password set to fetch from environ
@@ -275,6 +295,55 @@ class FindingTest(BaseTestCase):
         # Assert ot the query to dtermine status of failure
         self.assertTrue(pre_status != post_status)
 
+    @on_exception_html_source_logger
+    def test_simple_accept_finding(self):
+        driver = self.driver
+        # Navigate to All Finding page
+        self.goto_all_findings_list(driver)
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        pre_status = driver.find_element_by_xpath('//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
+        # Click on the 'dropdownMenu1 button'
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Click on `Close Finding`
+        driver.find_element_by_link_text("Accept Risk").click()
+        # Query the site to determine if the finding has been added
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Finding risk accepted.'))
+        # Check to see if the endpoint was mitigated
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        # This will throw exception if the test fails due to invalid xpath
+        # TODO risk acceptance doesn't mitigate endpoints currently
+        # post_status = driver.find_element_by_xpath('//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
+        # self.assertTrue(pre_status != post_status)
+
+    def test_unaccept_finding(self):
+        driver = self.driver
+        # Navigate to All Finding page
+        self.goto_all_findings_list(driver)
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        pre_status = driver.find_element_by_xpath('//*[@id="vuln_endpoints"]/tbody/tr/td[3]').text
+        # Click on the 'dropdownMenu1 button'
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Click on `Close Finding`
+        driver.find_element_by_link_text("Unaccept Risk").click()
+        # Query the site to determine if the finding has been added
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Finding risk unaccepted.'))
+        # Check to see if the endpoint was mitigated
+        # Select and click on the particular finding to edit
+        driver.find_element_by_link_text("App Vulnerable to XSS").click()
+        # Get the status of the current endpoint
+        # This will throw exception if the test fails due to invalid xpath
+        # TODO risk acceptance doesn't mitigate endpoints currently
+        # post_status = driver.find_element_by_xpath('//*[@id="remd_endpoints"]/tbody/tr/td[3]').text
+        # self.assertTrue(pre_status != post_status)
+
     def test_make_finding_a_template(self):
         driver = self.driver
         # Navigate to All Finding page
@@ -322,6 +391,44 @@ class FindingTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         self.assertTrue(self.is_text_present_on_page(text='App Vulnerable to XSS'))
+
+    @on_exception_html_source_logger
+    def test_create_finding_from_template(self):
+        driver = self.driver
+        # Navigate to All Finding page
+        # goto engagemnent list (and wait for javascript to load)
+        self.goto_all_engagements_overview(driver)
+
+        # Select a previously created engagement title
+        driver.find_element_by_partial_link_text("Ad Hoc Engagement").click()
+        driver.find_element_by_partial_link_text("Pen Test").click()
+
+        # Click on the 'dropdownMenu1 button'
+        # print("\nClicking on dropdown menu \n")
+        driver.find_element_by_id("dropdownMenu_test_add").click()
+        self.assertNoConsoleErrors()
+
+        # Click on `Apply Template to Finding`
+        # print("\nClicking on apply template \n")
+        driver.find_element_by_link_text("Finding From Template").click()
+        self.assertNoConsoleErrors()
+        # click on the template of 'App Vulnerable to XSS'
+        print("\nClicking on the template \n")
+        driver.find_element_by_link_text("Use This Template").click()
+        self.assertNoConsoleErrors()
+
+        driver.find_element_by_id("id_title").clear()
+        driver.find_element_by_id("id_title").send_keys("App Vulnerable to XSS from Template")
+        self.assertNoConsoleErrors()
+        # Click the 'finished' button to submit
+        # print("\nClicking on finished \n")
+        driver.find_element_by_id("id_finished").click()
+        self.assertNoConsoleErrors()
+        # Query the site to determine if the finding has been added
+
+        # Assert to the query to determine status of failure
+        self.assertTrue(self.is_success_message_present(text='Finding from template added successfully.'))
+        self.assertTrue(self.is_text_present_on_page(text='App Vulnerable to XSS From Template'))
 
     @on_exception_html_source_logger
     def test_delete_finding_template(self):
@@ -400,27 +507,32 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
 
     # Add each test the the suite to be run
     # success and failure is output by the test
+    suite.addTest(BaseTestCase('delete_finding_template_if_exists'))
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(ProductTest('test_add_product_finding'))
-    # TODO add some more findings with different statuses
     suite.addTest(FindingTest('test_list_findings_all'))
-    # The next 3 tests don't work and need to be reworked
-    # suite.addTest(FindingTest('test_list_findings_closed'))
-    # suite.addTest(FindingTest('test_list_findings_accepted'))
-    # suite.addTest(FindingTest('test_list_findings_open'))
+    suite.addTest(FindingTest('test_list_findings_open'))
     suite.addTest(FindingTest('test_quick_report'))
     suite.addTest(FindingTest('test_csv_export'))
     suite.addTest(FindingTest('test_excel_export'))
     suite.addTest(FindingTest('test_list_components'))
     suite.addTest(FindingTest('test_edit_finding'))
+    suite.addTest(FindingTest('test_add_note_to_finding'))
     suite.addTest(FindingTest('test_add_image'))
     suite.addTest(FindingTest('test_delete_image'))
     suite.addTest(FindingTest('test_mark_finding_for_review'))
     suite.addTest(FindingTest('test_clear_review_from_finding'))
     suite.addTest(FindingTest('test_close_finding'))
+    suite.addTest(FindingTest('test_list_findings_closed'))
     suite.addTest(FindingTest('test_open_finding'))
+    suite.addTest(ProductTest('test_enable_simple_risk_acceptance'))
+    suite.addTest(FindingTest('test_simple_accept_finding'))
+    suite.addTest(FindingTest('test_list_findings_accepted'))
+    suite.addTest(FindingTest('test_list_findings_all'))
+    suite.addTest(FindingTest('test_unaccept_finding'))
     suite.addTest(FindingTest('test_make_finding_a_template'))
     suite.addTest(FindingTest('test_apply_template_to_a_finding'))
+    suite.addTest(FindingTest('test_create_finding_from_template'))
     suite.addTest(FindingTest('test_import_scan_result'))
     suite.addTest(FindingTest('test_delete_finding'))
     suite.addTest(FindingTest('test_delete_finding_template'))
