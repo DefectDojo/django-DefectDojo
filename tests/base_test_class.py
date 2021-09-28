@@ -14,7 +14,6 @@ import re
 dd_driver = None
 dd_driver_options = None
 
-
 def on_exception_html_source_logger(func):
     def wrapper(self, *args, **kwargs):
         try:
@@ -52,6 +51,9 @@ class BaseTestCase(unittest.TestCase):
 
         chromedriver_autoinstaller.install()
 
+        # Path for automatic downloads, mapped to the media path
+        cls.export_path = 'media'
+
         global dd_driver
         if not dd_driver:
             # setupModule and tearDownModule are not working in our scenario, so for now we use setupClass and a global variable
@@ -80,7 +82,7 @@ class BaseTestCase(unittest.TestCase):
             desired['goog:loggingPrefs'] = {'browser': 'ALL'}
 
             # set automatic downloads to test csv and excel export
-            prefs = {"download.default_directory": '/tmp'}
+            prefs = {"download.default_directory": cls.export_path}
             dd_driver_options.add_experimental_option("prefs", prefs)
 
             # change path of chromedriver according to which directory you have chromedriver.
