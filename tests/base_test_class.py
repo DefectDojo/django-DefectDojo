@@ -125,6 +125,18 @@ class BaseTestCase(unittest.TestCase):
         if len(qa_products) > 0:
             self.test_delete_product(name)
 
+    @on_exception_html_source_logger
+    def delete_finding_template_if_exists(self, name="App Vulnerable to XSS"):
+        driver = self.driver
+
+        driver.get(self.base_url + "template")
+        # Click on `Delete Template` button
+        templates = driver.find_elements(By.LINK_TEXT, name)
+        if len(templates) > 0:
+            driver.find_element_by_id("id_delete").click()
+            # Click 'Yes' on Alert popup
+            driver.switch_to.alert.accept()
+
     # used to load some page just to get started
     # we choose /user because it's lightweight and fast
     def goto_some_page(self):
@@ -273,7 +285,7 @@ class BaseTestCase(unittest.TestCase):
     def set_block_execution(self, block_execution=True):
         # we set the admin user (ourselves) to have block_execution checked
         # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
-        print('setting lbock execution to: ', str(block_execution))
+        print('setting block execution to: ', str(block_execution))
         driver = self.driver
         driver.get(self.base_url + 'profile')
         if driver.find_element_by_id('id_block_execution').is_selected() != block_execution:
@@ -340,7 +352,7 @@ class BaseTestCase(unittest.TestCase):
                 if self.accept_javascript_errors:
                     print('WARNING: skipping SEVERE javascript error because accept_javascript_errors is True!')
                 elif re.search(accepted_javascript_messages, entry['message']):
-                    print('WARNING: skipping javascript errors related to finding images, see https://github.com/DefectDojo/django-DefectDojo/issues/2045')
+                    print('WARNING: skipping javascript errors related to known issues images, see https://github.com/DefectDojo/django-DefectDojo/blob/master/tests/base_test_class.py#L324')
                 else:
                     self.assertNotEqual(entry['level'], 'SEVERE')
 
