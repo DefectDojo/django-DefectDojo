@@ -29,6 +29,7 @@ def dummy_hotspot_rule(self, *args, **kwargs):
         data = json.load(json_file)
         return data
 
+
 def empty_list(self, *args, **kwargs):
     return list()
 
