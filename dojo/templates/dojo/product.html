@@ -93,9 +93,9 @@
                                           <li><a href="{% url 'new_eng_for_prod' prod.id %}"><i class="fa fa-plus"></i> Add New Engagement</a></li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
-                                          <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
-                                          <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}&severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
-                                          <li><a href="{% url 'product_open_findings' prod.id %}?test__engagement__product={{ prod.id }}&date=1"><i class="fa fa-calendar"></i> View Last 7 Days Findings</a></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}"><i class="fa fa-list-alt"></i> View Open Findings</a></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}?severity=Critical"><i class="fa fa-exclamation-triangle"></i> View Critical Findings</a></li>
+                                          <li><a href="{% url 'product_open_findings' prod.id %}?date=2"><i class="fa fa-calendar"></i> View Last 7 Days Findings</a></li>
                                         {% if prod|has_object_permission:"Finding_Add" or user|is_authorized_for_staff:prod %}
                                           <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa fa-plus"></i> Add New Finding</a></li>
                                         {% endif %}
