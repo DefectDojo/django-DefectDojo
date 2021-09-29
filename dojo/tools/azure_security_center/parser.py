@@ -1,7 +1,7 @@
 import sys
 import io
 import csv
-from datetime import date, datetime
+from datetime import datetime
 from dojo.models import Finding
 
 
