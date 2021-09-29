@@ -17,8 +17,7 @@ from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Fin
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
     Network_Locations
 
-from dojo.forms import ImportScanForm
-from dojo.tools.factory import requires_file
+from dojo.tools.factory import requires_file, get_choices_sorted
 from dojo.utils import is_scan_file_too_large
 from django.conf import settings
 from rest_framework import serializers
@@ -1159,7 +1158,7 @@ class ImportScanSerializer(serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
+        choices=get_choices_sorted())
     # TODO why do we allow only existing endpoints?
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                          required=False,
@@ -1271,7 +1270,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     active = serializers.BooleanField(default=True)
     verified = serializers.BooleanField(default=True)
     scan_type = serializers.ChoiceField(
-        choices=ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
+        choices=get_choices_sorted())
     endpoint_to_add = serializers.PrimaryKeyRelatedField(queryset=Endpoint.objects.all(),
                                                           default=None,
                                                           required=False)

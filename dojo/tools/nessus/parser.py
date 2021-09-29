@@ -78,7 +78,7 @@ class NessusCSVParser(object):
                 # FIXME support more than one CVE in Nessus CSV parser
                 cve = detected_cve[0]
                 if len(detected_cve) > 1:
-                    LOGGER.warning("more than one CVE for a finding. NOT supported by Nessus CSV parser")
+                    LOGGER.debug("more than one CVE for a finding. NOT supported by Nessus CSV parser")
 
             if dupe_key in dupes:
                 find = dupes[dupe_key]
@@ -104,7 +104,7 @@ class NessusCSVParser(object):
                 if detected_cpe:
                     # FIXME support more than one CPE in Nessus CSV parser
                     if len(detected_cpe) > 1:
-                        LOGGER.warning("more than one CPE for a finding. NOT supported by Nessus CSV parser")
+                        LOGGER.debug("more than one CPE for a finding. NOT supported by Nessus CSV parser")
                     cpe_decoded = CPE(detected_cpe[0])
                     find.component_name = cpe_decoded.get_product()[0] if len(cpe_decoded.get_product()) > 0 else None
                     find.component_version = cpe_decoded.get_version()[0] if len(cpe_decoded.get_version()) > 0 else None
