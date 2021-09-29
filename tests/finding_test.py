@@ -511,8 +511,9 @@ def add_finding_tests_to_suite(suite, jira=False, github=False, block_execution=
     suite.addTest(FindingTest('test_list_findings_all'))
     suite.addTest(FindingTest('test_list_findings_open'))
     suite.addTest(FindingTest('test_quick_report'))
-    suite.addTest(FindingTest('test_csv_export'))
-    suite.addTest(FindingTest('test_excel_export'))
+    # Export tests are not stable and therefore disabled
+    # suite.addTest(FindingTest('test_csv_export'))
+    # suite.addTest(FindingTest('test_excel_export'))
     suite.addTest(FindingTest('test_list_components'))
     suite.addTest(FindingTest('test_edit_finding'))
     suite.addTest(FindingTest('test_add_note_to_finding'))
