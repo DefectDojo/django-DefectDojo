@@ -1,7 +1,7 @@
 import sys
 import io
 import csv
-from datetime import datetime
+from datetime import date, datetime
 from dojo.models import Finding
 
 
@@ -38,14 +38,16 @@ class AzureSecurityCenterParser(object):
                 resource_group = row.get('resourceGroup')
                 resource_type = row.get('resourceType')
                 resource_name = row.get('resourceName')
-                resource_id = row.get('resourceId')
+                # resourceId doesn't give additional information and can be ignored
+                # resource_id = row.get('resourceId')
                 recommendation_id = row.get('recommendationId')
                 recommendation_name = row.get('recommendationName')
                 recommendation_display_name = row.get('recommendationDisplayName')
                 azure_description = row.get('description')
                 remediation_steps = row.get('remediationSteps')
                 severity = row.get('severity')
-                firstEvaluationDate = row.get('firstEvaluationDate')
+                # firstEvaluationDate is where the Security Center was started the first time
+                # firstEvaluationDate = row.get('firstEvaluationDate')
                 status_change_date = row.get('statusChangeDate')
                 controls = row.get('controls')
                 azure_portal_recommendation_link = row.get('azurePortalRecommendationLink')
@@ -79,7 +81,7 @@ class AzureSecurityCenterParser(object):
                     severity=severity,
                     references=azure_portal_recommendation_link,
                     mitigation=remediation_steps,
-                    date=datetime.strptime(status_change_date[0:10], '%Y-%m-%d'),
+                    date=datetime.strptime(status_change_date[0:10], '%Y-%m-%d').date(),
                     vuln_id_from_tool=recommendation_name,
                     unique_id_from_tool=recommendation_id,
                     static_finding=True,
