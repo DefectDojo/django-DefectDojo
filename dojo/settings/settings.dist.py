@@ -1025,7 +1025,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
     'Github Vulnerability Scan': ['unique_id_from_tool'],
-    'Azure Security Center Scan': ['title', 'description', 'severity'],
+    'Azure Security Center Scan': ['unique_id_from_tool'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1131,7 +1131,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
-    'Azure Security Center Scan': DEDUPE_ALGO_HASH_CODE,
+    'Azure Security Center Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
