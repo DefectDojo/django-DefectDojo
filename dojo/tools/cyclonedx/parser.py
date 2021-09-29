@@ -167,7 +167,7 @@ class CycloneDXParser(object):
         cwes = self.get_cwes(vulnerability, ns)
         if len(cwes) > 1:
             # FIXME support more than one CWE
-            LOGGER.warning(
+            LOGGER.debug(
                 f"more than one CWE for a finding {cwes}. NOT supported by parser API"
             )
         if len(cwes) > 0:

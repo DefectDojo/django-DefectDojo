@@ -903,6 +903,11 @@ def simple_risk_accept(request, fid):
 
     ra_helper.simple_risk_accept(finding)
 
+    messages.add_message(request,
+                        messages.WARNING,
+                        'Finding risk accepted.',
+                        extra_tags='alert-success')
+
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -910,6 +915,12 @@ def simple_risk_accept(request, fid):
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(finding)
+
+    messages.add_message(request,
+                        messages.WARNING,
+                        'Finding risk unaccepted.',
+                        extra_tags='alert-success')
+
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -1168,7 +1179,7 @@ def apply_template_to_finding(request, fid, tid):
             reverse('view_finding', args=(finding.id, )))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Add, 'tid', 'staff')
+@user_is_authorized(Test, Permissions.Finding_Add, 'tid', 'staff')
 def add_stub_finding(request, tid):
     test = get_object_or_404(Test, id=tid)
     form = StubFindingForm()
@@ -1210,7 +1221,7 @@ def add_stub_finding(request, tid):
     return HttpResponseRedirect(reverse('view_test', args=(tid, )))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Delete, 'fid', 'staff')
+@user_is_authorized(Stub_Finding, Permissions.Finding_Delete, 'fid', 'staff')
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     form = DeleteStubFindingForm(instance=finding)
@@ -1236,7 +1247,7 @@ def delete_stub_finding(request, fid):
         return HttpResponseForbidden()
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid', 'staff')
+@user_is_authorized(Stub_Finding, Permissions.Finding_Edit, 'fid', 'staff')
 def promote_to_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     test = finding.test

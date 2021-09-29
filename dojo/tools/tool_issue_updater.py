@@ -2,7 +2,7 @@ from dojo.celery import app
 
 from dojo.decorators import (dojo_async_task, dojo_model_from_id,
                              dojo_model_to_id)
-from dojo.tools.factory import SCAN_SONARQUBE_API
+from dojo.tools.sonarqube_api.parser import SCAN_SONARQUBE_API
 
 
 def async_tool_issue_update(finding, *args, **kwargs):

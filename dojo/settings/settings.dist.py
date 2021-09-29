@@ -5,6 +5,8 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 
+# See https://defectdojo.github.io/django-DefectDojo/getting_started/configuration/ for options
+# how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
 
@@ -165,6 +167,9 @@ env = environ.Env(
     # when enabeld safety parser will download latest vuln db during runtime
     # otherwise data is loaded from dojo/tools/safety/insecure_full.json
     DD_SAFETY_PARSER_ONLINE_DB=(bool, True),
+    # regular expression to exclude one or more parsers
+    # could be usefull to limit parser allowed
+    DD_PARSER_EXCLUDE=(str, ''),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -1019,7 +1024,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Scout Suite Scan': ['title', 'severity', 'description'],
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Github Vulnerability Scan': ['unique_id_from_tool']
+    'Github Vulnerability Scan': ['unique_id_from_tool'],
+    'Azure Security Center Scan': ['unique_id_from_tool'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1124,6 +1130,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
     'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
+    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
+    'Azure Security Center Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1265,6 +1273,9 @@ QUALYS_WAS_UNIQUE_ID = False
 
 # Deside if parser should download latest db or use offline version
 SAFETY_PARSER_ONLINE_DB = env("DD_SAFETY_PARSER_ONLINE_DB")
+
+# exclusion list for parsers
+PARSER_EXCLUDE = env("DD_PARSER_EXCLUDE")
 
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',

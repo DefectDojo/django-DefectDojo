@@ -24,6 +24,12 @@ def dummy_rule(self, *args, **kwargs):
         return data
 
 
+def dummy_rule_wo_html_desc(self, *args, **kwargs):
+    with open('dojo/unittests/scans/sonarqube_api/rule_wo_html_desc.json') as json_file:
+        data = json.load(json_file)
+        return data
+
+
 class TestSonarqubeImporterNoSQToolConfig(TestCase):
     # Testing case no 1. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
@@ -215,3 +221,40 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
     def test_product_mismatch(self):
         with self.assertRaisesRegex(Exception, 'Product SonarQube Configuration and "Product" mismatch'):
             SonarQubeApiImporter.prepare_client(self.other_test)
+
+
+class TestSonarqubeImporterExternalRule(TestCase):
+    # Test that finding governed by a rule without htmlDesc can be imported.
+    # Custom (user defined) rules may have no htmlDesc field.
+    fixtures = [
+        'unit_sonarqube_toolType.json',
+        'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_toolConfig2.json',
+        'unit_sonarqube_product.json',
+        'unit_sonarqube_sqcNoKey.json',
+        'unit_sonarqube_sqcWithKey.json'
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name='product')
+        engagement = Engagement(product=product)
+        self.test = Test(
+            engagement=engagement,
+            sonarqube_config=Sonarqube_Product.objects.all().last()
+        )
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule_wo_html_desc)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    def test_parser(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(2, len(findings))
+        finding = findings[0]
+        self.assertEqual('Remove this useless assignment to local variable "currentValue".', finding.title)
+        self.assertEqual(None, finding.cwe)
+        self.assertEqual('', finding.description)
+        self.assertEqual('', finding.references)
+        self.assertEqual('Medium', finding.severity)
+        self.assertEqual(242, finding.line)
+        self.assertEqual('internal.dummy.project:src/main/javascript/TranslateDirective.ts', finding.file_path)
