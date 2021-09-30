@@ -774,12 +774,12 @@ supported by many tools. More details about the format here:
 <https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif>
 
 {{% alert title="Information" color="info" %}}
-SARIF parser customize the Test_Type with data from the report.
+SARIF parser customizes the Test_Type with data from the report.
 For example, a report with `Dockle` as a driver name will produce a Test with a Test_Type named `Dockle Scan (SARIF)`
 {{% /alert %}}
 
 {{% alert title="Warning" color="warning" %}}
-Current implementation is limited and will aggregate all the finding in the SARIF file in one single report.
+Current implementation is limited and will aggregate all the findings in the SARIF file in one single report.
 {{% /alert %}}
 
 ### ScoutSuite
