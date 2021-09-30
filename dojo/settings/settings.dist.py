@@ -1054,7 +1054,8 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'SpotBugs Scan': False,
     'Scout Suite Scan': True,
     'AWS Security Hub Scan': True,
-    'Meterian Scan': True
+    'Meterian Scan': True,
+    'SARIF': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1132,6 +1133,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'Azure Security Center Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'SARIF': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')

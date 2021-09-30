@@ -1,28 +1,8 @@
 from dojo.utils import max_safe
-from dojo.tools.factory import get_parser
 from dojo.models import IMPORT_CLOSED_FINDING, IMPORT_CREATED_FINDING, IMPORT_REACTIVATED_FINDING, Test_Import, Test_Import_Finding_Action
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-def parse_findings(scan, test, active, verified, scan_type):
-    try:
-        parser = get_parser(scan_type)
-        parsed_findings = parser.get_findings(scan, test)
-        return parsed_findings
-    except SyntaxError as se:
-        logger.exception(se)
-        logger.warn("Error in parser: {}".format(str(se)))
-        raise
-    except ValueError as ve:
-        logger.exception(ve)
-        logger.warn("Error in parser: {}".format(str(ve)))
-        raise
-    except Exception as e:
-        logger.exception(e)
-        logger.warn("Error in parser: {}".format(str(e)))
-        raise
 
 
 def update_timestamps(test, scan_date, version, branch_tag, build_id, commit_hash, now, scan_date_time):
