@@ -49,7 +49,7 @@ class SonarQubeAPI:
             },
             headers={
                 'User-Agent': 'DefectDojo'
-            },
+            },verify=False
         )
 
         if response.ok:
@@ -84,7 +84,7 @@ class SonarQubeAPI:
             },
             headers={
                 'User-Agent': 'DefectDojo'
-            },
+            },verify=False
         )
 
         if response.ok:
@@ -123,7 +123,7 @@ class SonarQubeAPI:
                 params=request_filter,
                 headers={
                     'User-Agent': 'DefectDojo'
-                },
+                },verify=False
             )
 
             if response.ok:
@@ -160,7 +160,7 @@ class SonarQubeAPI:
             params=request_filter,
             headers={
                 'User-Agent': 'DefectDojo'
-            },
+            },verify=False
         )
 
         if response.ok:
@@ -195,7 +195,7 @@ class SonarQubeAPI:
                 params={'key': rule_id},
                 headers={
                     'User-Agent': 'DefectDojo'
-                },
+                },verify=False
             )
             if response.ok:
                 rule = response.json()['rule']
@@ -241,7 +241,7 @@ class SonarQubeAPI:
             },
             headers={
                 'User-Agent': 'DefectDojo'
-            },
+            },verify=False
         )
         if not response.ok:
             raise Exception(
@@ -266,7 +266,7 @@ class SonarQubeAPI:
             },
             headers={
                 'User-Agent': 'DefectDojo'
-            },
+            },verify=False
         )
         if not response.ok:
             raise Exception(
@@ -286,7 +286,7 @@ class SonarQubeAPI:
             },
             headers={
                 'User-Agent': 'DefectDojo'
-            },
+            },verify=False
         )
 
         if response.ok:
