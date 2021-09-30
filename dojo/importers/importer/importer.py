@@ -309,7 +309,7 @@ class DojoDefaultImporter(object):
             #
             # we also aggregate the label of the Test_type to show the user the original scan_type
             # only if they are different. This is to support meta format like SARIF
-            # so a report that have the label 'CodeScanner' will be changed to 'SARIF > CodeScanner'
+            # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
             test_type_name = scan_type
             if len(tests) > 0:
                 test_type_name = tests[0].type + " Scan"
@@ -318,12 +318,17 @@ class DojoDefaultImporter(object):
             test = self.create_test(scan_type, test_type_name, engagement, lead, environment, scan_date=scan_date, tags=tags,
                                 version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
                                 sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
+            # This part change the name of the Test
+            # we get it from the data of the parser
             test_raw = tests[0]
             if test_raw.name:
                 test.name = test_raw.name
                 test.save()
 
             logger.debug('IMPORT_SCAN parser v2: Parse findings (aggregate)')
+            # currently we only support import one Test
+            # so for parser that support multiple tests (like SARIF)
+            # we aggregate all the findings into one uniq test
             parsed_findings = []
             for test_raw in tests:
                 parsed_findings.extend(test_raw.findings)
