@@ -24,6 +24,16 @@ def dummy_rule(self, *args, **kwargs):
         return data
 
 
+def dummy_hotspot_rule(self, *args, **kwargs):
+    with open('dojo/unittests/scans/sonarqube_api/hotspots/rule.json') as json_file:
+        data = json.load(json_file)
+        return data
+
+
+def empty_list(self, *args, **kwargs):
+    return list()
+
+
 class TestSonarqubeApiParser(TestCase):
     def setUp(self):
         product_type, _ = Product_Type.objects.get_or_create(name="Fake unit tests")
@@ -39,6 +49,8 @@ class TestSonarqubeApiParser(TestCase):
     @mock.patch("dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project", dummy_product)
     @mock.patch("dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule", dummy_rule)
     @mock.patch("dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues", dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_get_findings(self):
         parser = SonarQubeAPIParser()
         findings = parser.get_findings(None, self.test)

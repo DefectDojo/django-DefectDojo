@@ -203,6 +203,8 @@ env = environ.Env(
     DD_RATE_LIMITER_BLOCK=(bool, False),
     # Forces the user to change password on next login.
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
+    # when enabled SonarQube API parser will download the security hotspots
+    DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
 )
 
 
@@ -1314,3 +1316,6 @@ JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
 
 DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
+
+# Deside if SonarQube API parser should download the security hotspots
+SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")

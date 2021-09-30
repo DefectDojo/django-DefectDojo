@@ -3,6 +3,8 @@ import re
 
 import html2text
 from lxml import etree
+import textwrap
+from django.conf import settings
 
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
@@ -18,7 +20,10 @@ class SonarQubeApiImporter(object):
     """
 
     def get_findings(self, filename, test):
-        return self.import_issues(test)
+        items = self.import_issues(test)
+        if settings.SONARQUBE_API_PARSER_HOTSPOTS:
+            items.extend(self.import_hotspots(test))
+        return items
 
     @staticmethod
     def is_confirmed(state):
@@ -37,6 +42,12 @@ class SonarQubeApiImporter(object):
             'closed',
             'dismissed',
             'rejected'
+        ]
+
+    @staticmethod
+    def is_reviewed(state):
+        return state.lower() in [
+            'reviewed'
         ]
 
     @staticmethod
@@ -149,6 +160,71 @@ class SonarQubeApiImporter(object):
 
         return items
 
+    def import_hotspots(self, test):
+
+        items = list()
+        client, config = self.prepare_client(test)
+
+        if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+            component = client.get_project(config.sonarqube_project_key)
+        else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
+            component = client.find_project(test.engagement.product.name)
+
+        hotspots = client.find_hotspots(component['key'])
+        logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
+
+        for hotspot in hotspots:
+            status = hotspot['status']
+
+            if self.is_reviewed(status):
+                continue
+
+            type = 'SECURITY_HOTSPOT'
+            severity = 'Info'
+            title = textwrap.shorten(text=hotspot['message'], width=500)
+            component_key = hotspot['component']
+            line = hotspot.get('line')
+            rule_id = hotspot['key']
+            rule = client.get_hotspot_rule(rule_id)
+            scanner_confidence = self.convert_scanner_confidence(hotspot['vulnerabilityProbability'])
+            description = self.clean_rule_description_html(rule['vulnerabilityDescription'])
+            cwe = self.clean_cwe(rule['fixRecommendations'])
+            references = self.get_references(rule['riskDescription']) + self.get_references(rule['fixRecommendations'])
+
+            sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
+                key=hotspot['key'],
+                defaults={
+                    'status': status,
+                    'type': type
+                }
+            )
+
+            # Only assign the SonarQube_issue to the first finding related to the issue
+            if Finding.objects.filter(sonarqube_issue=sonarqube_issue).exists():
+                sonarqube_issue = None
+
+            find = Finding(
+                title=title,
+                cwe=cwe,
+                description=description,
+                test=test,
+                severity=severity,
+                references=references,
+                file_path=component_key,
+                line=line,
+                active=True,
+                verified=self.is_confirmed(status),
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                static_finding=True,
+                scanner_confidence=scanner_confidence,
+                sonarqube_issue=sonarqube_issue,
+            )
+            items.append(find)
+
+        return items
+
     @staticmethod
     def clean_rule_description_html(raw_html):
         search = re.search(r"^(.*?)(?:(<h2>See</h2>)|(<b>References</b>))", raw_html, re.DOTALL)
@@ -177,6 +253,18 @@ class SonarQubeApiImporter(object):
             return "Low"
         else:
             return "Info"
+
+    @staticmethod
+    def convert_scanner_confidence(sonar_scanner_confidence):
+        sev = sonar_scanner_confidence.lower()
+        if sev == "high":
+            return 1
+        elif sev == "medium":
+            return 4
+        elif sev == "low":
+            return 7
+        else:
+            return 7
 
     @staticmethod
     def get_references(vuln_details):
