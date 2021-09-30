@@ -5,16 +5,16 @@ from datetime import datetime
 from dojo.models import Finding
 
 
-class AzureSecurityCenterParser(object):
+class AzureSecurityCenterRecommendationsParser(object):
 
     def get_scan_types(self):
-        return ["Azure Security Center Scan"]
+        return ["Azure Security Center Recommendations Scan"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Azure Security Center Scan"
+        return "Azure Security Center Recommendations Scan"
 
     def get_description_for_scan_types(self, scan_type):
-        return "Export of Azure Security Center in CSV format."
+        return "Export of Azure Security Center Recommendations in CSV format."
 
     def get_findings(self, file, test):
         if file.name.lower().endswith('.csv'):
