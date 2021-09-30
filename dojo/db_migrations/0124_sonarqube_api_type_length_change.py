@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0122_cobaltio_product'),
+        ('dojo', '0123_scan_type'),
     ]
 
     operations = [
