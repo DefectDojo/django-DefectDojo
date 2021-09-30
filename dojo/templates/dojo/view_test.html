@@ -466,12 +466,12 @@
                     <div id="test-pulldown" class="dropdown pull-right">
                         &nbsp;<button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
                         {% if test|has_object_permission:"Finding_Add" or user|is_authorized_for_change:test %}
-                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                        <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu_test_add"
                                 data-toggle="dropdown" aria-expanded="true">
                             <span class="fa fa-plus"></span>
                             <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu_test_add">
                             <li role="presentation">
                                 <a title="Add Finding" href="{% url 'add_findings' test.id %}">
                                     <span class="fa fa-bug"></span> New Finding
@@ -485,13 +485,31 @@
                         </ul>
                         {% endif %}
                     </div>
-                    <form method="get" action="{% url 'quick_report' %}" class="pull-right">
-                        <input type="hidden" label="url" name="url" value="{{ request.get_full_path }}">
-                        <input type="hidden" label="_generate" name="_generate" value="_generate">
-                        <button class="btn btn-primary" type="submit" label="quick_report" id="quick_report" aria-expanded="true">
-                            <i class="fa fa-file-text-o"></i>
-                        </button>
-                    </form>
+                    &nbsp;
+                    <div id="test-pulldown" class="dropdown pull-right">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" aria-expanded="true">
+                        <span class="fa fa-download"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                    <li role="presentation">
+                        <a href="{% url 'quick_report' %}?url={{ request.get_full_path }}">
+                            <i class="fa fa-file-text-o"></i> Report
+                        </a>
+                    </li>
+                    <li role="presentation">
+                        <a href="{% url 'csv_export' %}?url={{ request.get_full_path }}">
+                            <i class="fa fa-table"></i> CSV Export
+                        </a>
+                    </li>
+                    <li role="presentation">
+                        <a href="{% url 'excel_export' %}?url={{ request.get_full_path }}">
+                            <i class="fa fa-file-excel-o"></i> Excel Export
+                        </a>
+                    </li>
+                    </ul>
+                    </div>
                 </h4>
             </div>
         </div>
@@ -515,7 +533,7 @@
             {% endif %}
             <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
                 {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
-                    <button type="button" class="btn btn-info btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
+                    <button type="button" id="merge_findings" class="btn btn-info btn-sm btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                         <a class="white-color merge" href="#" alt="Merge Findings">
                             <i class="fa fa-compress"></i>
                         </a>

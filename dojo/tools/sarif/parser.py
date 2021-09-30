@@ -3,6 +3,7 @@ import logging
 import re
 import textwrap
 import dateutil.parser
+from dojo.tools.parser_test import ParserTest
 from dojo.models import Finding
 
 logger = logging.getLogger(__name__)
@@ -26,24 +27,41 @@ class SarifParser(object):
         return "SARIF report file can be imported in SARIF format."
 
     def get_findings(self, filehandle, test):
+        """For simple interface of parser contract we just aggregate everything"""
         tree = json.load(filehandle)
-        return self.get_items(tree, test)
-
-    def get_items(self, tree, test):
         items = list()
-        # for each runs
+        # for each runs we just aggregate everything
         for run in tree.get('runs', list()):
-            # load rules
-            rules = get_rules(run)
-            artifacts = get_artifacts(run)
-            # get the timestamp of the run if possible
-            run_date = self._get_last_invocation_date(run)
-            for result in run.get('results', list()):
-                item = get_item(result, rules, artifacts, run_date)
+            items.extend(self.__get_items_from_run(run))
+        return items
+
+    def get_tests(self, scan_type, handle):
+        tree = json.load(handle)
+        tests = list()
+        for run in tree.get('runs', list()):
+            test = ParserTest(
+                name=run['tool']['driver']['name'],
+                type=run['tool']['driver']['name'],
+                version=run['tool']['driver'].get('version'),
+            )
+            test.findings = self.__get_items_from_run(run)
+            tests.append(test)
+        return tests
+
+    def __get_items_from_run(self, run):
+        items = list()
+        # load rules
+        rules = get_rules(run)
+        artifacts = get_artifacts(run)
+        # get the timestamp of the run if possible
+        run_date = self.__get_last_invocation_date(run)
+        for result in run.get('results', list()):
+            item = get_item(result, rules, artifacts, run_date)
+            if item is not None:
                 items.append(item)
         return items
 
-    def _get_last_invocation_date(self, data):
+    def __get_last_invocation_date(self, data):
         invocations = data.get('invocations', [])
         if len(invocations) == 0:
             return None
@@ -211,21 +229,29 @@ def get_references(rule):
 
 
 def get_severity(result, rule):
-    severity = result.get('level', 'warning')
+    severity = result.get('level')
     if severity is None and rule is not None:
         # get the severity from the rule
         if 'defaultConfiguration' in rule:
-            severity = rule['defaultConfiguration'].get('level', 'warning')
+            severity = rule['defaultConfiguration'].get('level')
 
-    if 'warning' == severity:
+    if 'note' == severity:
+        return 'Info'
+    elif 'warning' == severity:
         return 'Medium'
     elif 'error' == severity:
         return 'Critical'
     else:
-        return 'Info'
+        return 'Medium'
 
 
 def get_item(result, rules, artifacts, run_date):
+
+    # see https://docs.oasis-open.org/sarif/sarif/v2.1.0/csprd01/sarif-v2.1.0-csprd01.html / 3.27.9
+    kind = result.get('kind', 'fail')
+    if kind != 'fail':
+        return None
+
     # if there is a location get it
     file_path = None
     line = None

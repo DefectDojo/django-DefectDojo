@@ -5,6 +5,8 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 
+# See https://defectdojo.github.io/django-DefectDojo/getting_started/configuration/ for options
+# how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
 
@@ -201,6 +203,8 @@ env = environ.Env(
     DD_RATE_LIMITER_BLOCK=(bool, False),
     # Forces the user to change password on next login.
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
+    # when enabled SonarQube API parser will download the security hotspots
+    DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
 )
 
 
@@ -990,6 +994,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Checkmarx OSA': ['cve', 'component_name'],
     'Cloudsploit Scan': ['title', 'description'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
+    'SonarQube API Import': ['title', 'file_path', 'line'],
     'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
@@ -1022,7 +1027,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Scout Suite Scan': ['title', 'severity', 'description'],
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Github Vulnerability Scan': ['unique_id_from_tool']
+    'Github Vulnerability Scan': ['unique_id_from_tool'],
+    'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1051,7 +1057,8 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'SpotBugs Scan': False,
     'Scout Suite Scan': True,
     'AWS Security Hub Scan': True,
-    'Meterian Scan': True
+    'Meterian Scan': True,
+    'SARIF': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1093,6 +1100,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
+    'SonarQube API Import': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Dockle Scan': DEDUPE_ALGO_HASH_CODE,
     'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1127,6 +1135,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
     'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
+    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
+    'SARIF': DEDUPE_ALGO_HASH_CODE,
+    'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1305,3 +1316,6 @@ JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
 
 DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
+
+# Deside if SonarQube API parser should download the security hotspots
+SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")

@@ -30,19 +30,31 @@ class KICSParser(object):
         dupes = {}
         for query in data['queries']:
             name = query.get('query_name')
-            url = query.get('query_url')
+            query_url = query.get('query_url')
             if query.get('severity') in self.SEVERITY:
                 severity = self.SEVERITY[query.get('severity')]
             else:
                 severity = "Medium"
             platform = query.get('platform')
             category = query.get('category')
-            description = f"{query.get('description')}\nMore information: {url}"
             for item in query.get('files'):
                 file_name = item.get('file_name')
                 line_number = item.get('line')
                 issue_type = item.get('issue_type')
                 expected_value = item.get('expected_value')
+                actual_value = item.get('actual_value')
+
+                description = f"{query.get('description','')}\n"
+                if platform:
+                    description += f'**Platform:** {platform}\n'
+                if category:
+                    description += f'**Category:** {category}\n'
+                if issue_type:
+                    description += f'**Issue type:** {issue_type}\n'
+                if actual_value:
+                    description += f'**Actual value:** {actual_value}\n'
+                if description.endswith('\n'):
+                    description = description[:-1]
 
                 dupe_key = hashlib.sha256(
                     (platform + category + issue_type + file_name + str(line_number)).encode("utf-8")
@@ -64,6 +76,7 @@ class KICSParser(object):
                         line=line_number,
                         component_name=platform,
                         nb_occurences=1,
+                        references=query_url,
                     )
                     dupes[dupe_key] = finding
         return list(dupes.values())

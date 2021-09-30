@@ -1422,7 +1422,7 @@ class Development_Environment(models.Model):
 class Sonarqube_Issue(models.Model):
     key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
     status = models.CharField(max_length=20, help_text="SonarQube issue status")
-    type = models.CharField(max_length=15, help_text="SonarQube issue type")
+    type = models.CharField(max_length=20, help_text="SonarQube issue type")
 
     def __str__(self):
         return self.key
@@ -1474,6 +1474,7 @@ class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
     lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
+    scan_type = models.TextField(null=True)
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()

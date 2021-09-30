@@ -903,6 +903,11 @@ def simple_risk_accept(request, fid):
 
     ra_helper.simple_risk_accept(finding)
 
+    messages.add_message(request,
+                        messages.WARNING,
+                        'Finding risk accepted.',
+                        extra_tags='alert-success')
+
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
@@ -910,6 +915,12 @@ def simple_risk_accept(request, fid):
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(finding)
+
+    messages.add_message(request,
+                        messages.WARNING,
+                        'Finding risk unaccepted.',
+                        extra_tags='alert-success')
+
     return redirect_to_return_url_or_else(request, reverse('view_finding', args=(finding.id, )))
 
 
