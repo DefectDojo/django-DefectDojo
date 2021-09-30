@@ -3,7 +3,9 @@ name: PR Labeler
 # run on pull_request_target because we need write access to the GItHub API
 # don't run any code from PR here!
 on:
-  pull_request_target: types: [ opened, synchronize, reopened ]
+  pull_request_target:
+    types:
+      [opened, synchronize, reopened]
 
 jobs:
   labeler:
