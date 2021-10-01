@@ -73,3 +73,27 @@ class TestGitlabSastParser(TestCase):
         self.assertEqual(1, len(findings))
         finding = findings[0]
         self.assertEqual("[None severity] Potential XSS vulnerability", finding.title)
+
+    def test_without_scan(self):
+        testfile = open("dojo/unittests/scans/gitlab_sast/gl-sast-report-1-vuln.json")
+        parser = GitlabSastParser()
+        tests = parser.get_tests(None, testfile)
+        self.assertEqual(1, len(tests))
+        test = tests[0]
+        self.assertIsNone(test.name)
+        self.assertIsNone(test.type)
+        self.assertIsNone(test.version)
+        findings = test.findings
+        self.assertEqual(1, len(findings))
+
+    def test_with_scan(self):
+        testfile = open("dojo/unittests/scans/gitlab_sast/gl-sast-report-confidence.json")
+        parser = GitlabSastParser()
+        tests = parser.get_tests(None, testfile)
+        self.assertEqual(1, len(tests))
+        test = tests[0]
+        self.assertEqual("njsscan", test.name)
+        self.assertEqual("njsscan", test.type)
+        self.assertEqual("0.1.9", test.version)
+        findings = test.findings
+        self.assertEqual(8, len(findings))
