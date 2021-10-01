@@ -231,8 +231,15 @@ django:
   #   "File", "Socket", "CharDevice", "BlockDevice"
   # - `hostPath` - only for hostPath, file or directory from local host
   # @type: array<map>
+
   extraVolumes: []
 
+  # This feature needs more preparation before can be enabled, please visit Kubernetes.md#Persistent volumes
+  persistentVolume:
+    name: dd-volume
+    enabled: true
+    type: emptyDir # could be emptyDir (not for production) or pvc
+    persistentVolumeClaim: dd-pvc # in case if pvc specified
 
 initializer:
   run: true

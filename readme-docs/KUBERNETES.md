@@ -25,7 +25,7 @@ You should now be able to see the chart.
 
 ```
 $ helm search repo defectdojo
-NAME                      	CHART VERSION	APP VERSION	DESCRIPTION                                      
+NAME                      	CHART VERSION	APP VERSION	DESCRIPTION
 helm-charts/defectdojo	    1.5.1        	1.14.0-dev 	A Helm chart for Kubernetes to install DefectDojo
 ```
 
@@ -251,6 +251,11 @@ With the TLS certificate from your Kubernetes cluster all traffic to you cluster
 If you want to encrypt the traffic to the nginx server you can use the option `--set nginx.tls.enabled=true` and `--set nginx.tls.generateCertificate=true` to generate a self signed certificate and use the https config. The option to add you own pregenerated certificate is generelly possible but not implemented in the helm chart yet.
 
 Be aware that the traffic to the database and celery broker are unencrypted at the moment.
+
+
+### Persistent volumes
+
+By default DefectDojo helm installation doesn't support persistent storage for storing images (dynamicly uploaded by users)  
 
 ### Installation
 

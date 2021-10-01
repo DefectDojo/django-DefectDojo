@@ -63,6 +63,15 @@ spec:
           path: {{ .hostPath }}
           {{- end }}
       {{- end }}
+      {{- if .Values.persistentVolume.enabled }}
+      - name: {{ .Values.persistentVolume.name }}
+        {{- if eq .Values.persistentVolume.type "pvc"  }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistentVolume.persistentVolumeClaim }}
+        {{ else }}
+        emptyDir: {}
+        {{- end }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
