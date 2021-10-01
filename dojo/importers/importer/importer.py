@@ -314,7 +314,7 @@ class DojoDefaultImporter(object):
             if len(tests) > 0:
                 if tests[0].type:
                     test_type_name = tests[0].type + " Scan"
-                    if tests[0].type and tests[0].type != scan_type:
+                    if tests[0].type != scan_type:
                         test_type_name = f"{test_type_name} ({scan_type})"
 
                 test = self.create_test(scan_type, test_type_name, engagement, lead, environment, scan_date=scan_date, tags=tags,
