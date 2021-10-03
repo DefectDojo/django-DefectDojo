@@ -31,7 +31,9 @@ class BanditParser(object):
                     "**Line number:** `" + str(item["line_number"]) + "`",
                     "**Issue Confidence:** `" + item["issue_confidence"] + "`",
                     "**Code:**",
-                    "```\n" + str(item.get("code")).replace("```", "\\`\\`\\`") + "\n```",
+                    "```",
+                    str(item.get("code")).replace("```", "\\`\\`\\`"),
+                    "```",
                 ]
             )
 
