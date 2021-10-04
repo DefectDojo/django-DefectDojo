@@ -36,14 +36,13 @@ def sq_clean(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    atomic = False
 
     dependencies = [
         ('dojo', '0119_default_group_is_staff'),
     ]
 
     operations = [
-        migrations.RunPython(sq_clean),
+        migrations.RunPython(sq_clean, atomic=False),
         migrations.AddField(
             model_name='test',
             name='sonarqube_config',
