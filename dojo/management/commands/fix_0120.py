@@ -31,4 +31,4 @@ class Command(BaseCommand):
             else:
                 logger.info('There was nothing to fix')
         else:
-            logger.error('Only migrations stacked in front of 0119 can be fixed by this command')
+            logger.error('Only migrations stacked in front of 0120 can be fixed by this command')
