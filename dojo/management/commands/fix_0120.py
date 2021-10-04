@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
 
-    help = 'Usage: manage.py fix_0120.py'
+    help = 'Usage: manage.py fix_0120'
 
     def handle(self, *args, **options):
         connection = connections[DEFAULT_DB_ALIAS]
