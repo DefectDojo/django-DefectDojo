@@ -1,6 +1,5 @@
 from django.db import migrations, models
 import django.db.models.deletion
-from dojo.models import Test
 import logging
 
 logger = logging.getLogger(__name__)
@@ -23,16 +22,6 @@ def sq_clean(apps, schema_editor):
     else:
         logger.warning('No SonarQube tool configuration found, all invalid SonarQube configurations will be removed.')
         Sonarqube_Product_model.objects.filter(sonarqube_tool_config__isnull=True).delete()
-
-    try:
-        schema_editor.remove_field(
-            model=Test,
-            field=Test._meta.get_field('sonarqube_config'),
-        )
-    except django.db.utils.OperationalError:
-        # We expact exception like:
-        #   django.db.utils.OperationalError: (1091, "Can't DROP 'sonarqube_config_id'; check that column/key exists")
-        pass
 
 
 class Migration(migrations.Migration):
