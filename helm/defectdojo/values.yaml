@@ -232,7 +232,7 @@ django:
   # - `hostPath` - only for hostPath, file or directory from local host
   # @type: array<map>
   extraVolumes: []
-  
+
   # This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume
   mediaPersistentVolume:
     enabled: true
