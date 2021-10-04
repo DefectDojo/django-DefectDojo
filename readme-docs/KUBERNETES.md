@@ -253,9 +253,24 @@ If you want to encrypt the traffic to the nginx server you can use the option `-
 Be aware that the traffic to the database and celery broker are unencrypted at the moment.
 
 
-### Persistent volumes
+### Media persistent volume
 
-By default DefectDojo helm installation doesn't support persistent storage for storing images (dynamicly uploaded by users)  
+By default DefectDojo helm installation doesn't support persistent storage for storing images (dynamically uploaded by users). By default it uses emptyDir, which is ephemeral by its nature, and doesn't support multiple replicas of django pods, so should not be in use for production.
+
+To enable persistence of the media storage that supports R/W many, should be in use as backend storage like S3, NFS, glusterfs etc.
+
+```bash
+django:
+  mediaPersistentVolume:
+    enabled: true
+    name: media
+    type: pvc # could be emptyDir (not for production) or pvc
+    persistentVolumeClaim: media # in case if pvc specified
+```
+
+In example above, we want that media content is preserved  to `pvc` named `persistentVolumeClaim`.
+
+NOTE: PersistrentVolume needs to be created before helm installation is triggered.
 
 ### Installation
 
