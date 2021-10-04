@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(sq_clean, atomic=False),
+        migrations.RunPython(sq_clean),
         migrations.AddField(
             model_name='test',
             name='sonarqube_config',
