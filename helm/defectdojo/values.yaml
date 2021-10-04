@@ -235,11 +235,11 @@ django:
   extraVolumes: []
 
   # This feature needs more preparation before can be enabled, please visit Kubernetes.md#Persistent volumes
-  persistentVolume:
-    name: dd-volume
+  mediaPersistentVolume:
     enabled: true
+    name: media
     type: emptyDir # could be emptyDir (not for production) or pvc
-    persistentVolumeClaim: dd-pvc # in case if pvc specified
+    persistentVolumeClaim: media # in case if pvc specified
 
 initializer:
   run: true
@@ -387,3 +387,4 @@ redis:
 # NOTE  This is just an exmaple, do not store sensitive data in plain text form, better inject it during the deployment/upgrade by --set extraSecrets.secret=someSecret
 # extraSecrets:
 #   DD_SOCIAL_AUTH_AUTH0_SECRET: 'xxx'
+extraConfigs: {}

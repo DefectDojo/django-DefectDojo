@@ -63,11 +63,11 @@ spec:
           path: {{ .hostPath }}
           {{- end }}
       {{- end }}
-      {{- if .Values.persistentVolume.enabled }}
-      - name: {{ .Values.persistentVolume.name }}
-        {{- if eq .Values.persistentVolume.type "pvc"  }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      - name: {{ .Values.django.mediaPersistentVolume.name }}
+        {{- if eq .Values.django.mediaPersistentVolume.type "pvc"  }}
         persistentVolumeClaim:
-          claimName: {{ .Values.persistentVolume.persistentVolumeClaim }}
+          claimName: {{ .Values.django.mediaPersistentVolume.persistentVolumeClaim }}
         {{ else }}
         emptyDir: {}
         {{- end }}
@@ -122,6 +122,10 @@ spec:
           mountPath: {{ .path }}
           subPath: {{ .subPath }}
         {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: {{.Values.extraConfigs.DD_MEDIA_ROOT | default "/app/media" | quote }}
         {{- end }}
         ports:
         - name: http
@@ -205,6 +209,10 @@ spec:
           mountPath: {{ .path }}
           subPath: {{ .subPath }}
         {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: /usr/share/nginx/html/media
         {{- end }}
         ports:
         - name: http
