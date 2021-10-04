@@ -43,6 +43,10 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.django.mediaPersistentVolume.fsGroup | default 1001 }}
+      {{- end }}
       volumes:
       - name: run
         emptyDir: {}
