@@ -270,7 +270,7 @@ django:
 
 In example above, we want that media content is preserved  to `pvc` named `persistentVolumeClaim`.
 
-NOTE: PersistrentVolume needs to be created before helm installation is triggered.
+NOTE: PersistrentVolume needs to be prepared in front before helm installation/update is triggered.
 
 ### Installation
 

@@ -234,7 +234,7 @@ django:
 
   extraVolumes: []
 
-  # This feature needs more preparation before can be enabled, please visit Kubernetes.md#Persistent volumes
+  # This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume
   mediaPersistentVolume:
     enabled: true
     name: media
