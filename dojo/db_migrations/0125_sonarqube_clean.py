@@ -1,6 +1,4 @@
-from django.db import migrations, models
-import django.db.models.deletion
-from dojo.models import Test
+from django.db import migrations
 import logging
 
 logger = logging.getLogger(__name__)
