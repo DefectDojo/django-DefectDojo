@@ -236,8 +236,8 @@ django:
   mediaPersistentVolume:
     enabled: true
     name: media
-    type: emptyDir # could be emptyDir (not for production) or pvc
-    persistentVolumeClaim: media # in case if pvc specified
+    type: emptyDir #could be emptyDir (not for production) or pvc
+    persistentVolumeClaim: media #in case if pvc specified
 
 initializer:
   run: true
