@@ -17,7 +17,7 @@ class BanditParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
 
-        res = list()
+        results = list()
         if "generated_at" in data:
             find_date = dateutil.parser.parse(data["generated_at"])
 
@@ -57,9 +57,9 @@ class BanditParser(object):
             if "more_info" in item:
                 finding.references = item["more_info"]
 
-            res.append(finding)
+            results.append(finding)
 
-        return res
+        return results
 
     def convert_confidence(self, value):
         if "high" == value.lower():
