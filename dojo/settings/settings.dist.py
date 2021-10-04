@@ -397,6 +397,23 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+# Make Argon2 the default password hasher by listing it first
+# Unfortunately Django doesn't provide the default built-in
+# PASSWORD_HASHERS list here as a variable which we could modify,
+# so we have to list all the hashers present in Django :-(
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedSHA1PasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
+    'django.contrib.auth.hashers.CryptPasswordHasher',
+]
+
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',
     'dojo.pipeline.social_uid',
@@ -989,6 +1006,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Aqua Scan': ['severity', 'cve', 'component_name', 'component_version'],
+    'Bandit Scan': ['file_path', 'line,' 'vuln_id_from_tool'],
     'CargoAudit Scan': ['cve', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
@@ -1090,6 +1108,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'AuditJS Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'AWS Prowler Scan': DEDUPE_ALGO_HASH_CODE,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Bandit Scan': DEDUPE_ALGO_HASH_CODE,
     'CargoAudit Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
