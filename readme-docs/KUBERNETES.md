@@ -255,9 +255,9 @@ Be aware that the traffic to the database and celery broker are unencrypted at t
 
 ### Media persistent volume
 
-By default DefectDojo helm installation doesn't support persistent storage for storing images (dynamically uploaded by users). By default it uses emptyDir, which is ephemeral by its nature, and doesn't support multiple replicas of django pods, so should not be in use for production.
+By default, DefectDojo helm installation doesn't support persistent storage for storing images (dynamically uploaded by users). By default, it uses emptyDir, which is ephemeral by its nature and doesn't support multiple replicas of django pods, so should not be in use for production.
 
-To enable persistence of the media storage that supports R/W many, should be in use as backend storage like S3, NFS, glusterfs etc.
+To enable persistence of the media storage that supports R/W many, should be in use as backend storage like S3, NFS, glusterfs et
 
 ```bash
 django:
@@ -268,7 +268,7 @@ django:
     persistentVolumeClaim: media # in case if pvc specified
 ```
 
-In example above, we want that media content is preserved  to `pvc` named `persistentVolumeClaim`.
+In the example above, we want that media content to be preserved to `pvc` named `persistentVolumeClaim`.
 
 NOTE: PersistrentVolume needs to be prepared in front before helm installation/update is triggered.
 
