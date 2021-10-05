@@ -17,8 +17,8 @@ class Command(BaseCommand):
         connection = connections[DEFAULT_DB_ALIAS]
         connection.prepare_database()
         executor = MigrationExecutor(connection)
-        if not (executor.migration_plan([('dojo','0119_default_group_is_staff')])):
-        # this means that '0119_default_group_is_staff' was last successful migration
+        if not (executor.migration_plan([('dojo', '0119_default_group_is_staff')])):
+            # this means that '0119_default_group_is_staff' was last successful migration
             logger.warning('This command will remove field "sonarqube_config" in model "Test" to be able to finish migration 0120_sonarqube_test_and_clean')
             try:
                 with connection.schema_editor() as schema_editor:
