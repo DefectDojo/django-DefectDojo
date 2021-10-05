@@ -314,7 +314,7 @@ class DojoDefaultImporter(object):
             if len(tests) > 0:
                 if tests[0].type:
                     test_type_name = tests[0].type + " Scan"
-                    if tests[0].type != scan_type:
+                    if test_type_name != scan_type:
                         test_type_name = f"{test_type_name} ({scan_type})"
 
                 test = self.create_test(scan_type, test_type_name, engagement, lead, environment, scan_date=scan_date, tags=tags,
@@ -325,7 +325,9 @@ class DojoDefaultImporter(object):
                 test_raw = tests[0]
                 if test_raw.name:
                     test.name = test_raw.name
-                    test.save()
+                if test_raw.description:
+                    test.description = test_raw.description
+                test.save()
 
                 logger.debug('IMPORT_SCAN parser v2: Parse findings (aggregate)')
                 # currently we only support import one Test
