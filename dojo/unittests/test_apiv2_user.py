@@ -1,7 +1,6 @@
 from rest_framework.test import APITestCase, APIClient
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
-import json
 
 
 class UserTest(APITestCase):
@@ -18,7 +17,7 @@ class UserTest(APITestCase):
     def test_user_list(self):
         r = self.client.get(reverse('user-list'))
         self.assertEqual(r.status_code, 200, r.content[:1000])
-        user_list = json.loads(r.content)['results']
+        user_list = r.json()['results']
         self.assertTrue(len(user_list) >= 1, r.content[:1000])
         for user in user_list:
             for item in ['username', 'first_name', 'last_name', 'email']:
@@ -62,28 +61,28 @@ class UserTest(APITestCase):
             "username": "api-user-4"
         }, format='json')
         self.assertEqual(r.status_code, 201, r.content[:1000])
-        user_id = json.loads(r.content)['id']
+        user_id = r.json()['id']
 
-        r = self.client.put("{}{}".format(reverse('user-list'), user_id), {
+        r = self.client.put("{}{}/".format(reverse('user-list'), user_id), {
             "username": "api-user-4",
             "first_name": "first"
-        }, format='json', follow=True)
+        }, format='json',)
         self.assertEqual(r.status_code, 200, r.content[:1000])
 
-        r = self.client.patch("{}{}".format(reverse('user-list'), user_id), {
+        r = self.client.patch("{}{}/".format(reverse('user-list'), user_id), {
             "last_name": "last"
-        }, format='json', follow=True)
+        }, format='json')
         self.assertEqual(r.status_code, 200, r.content[:1000])
 
-        r = self.client.put("{}{}".format(reverse('user-list'), user_id), {
+        r = self.client.put("{}{}/".format(reverse('user-list'), user_id), {
             "username": "api-user-4",
             "password": "testTEST1234!@#$"
-        }, format='json', follow=True)
+        }, format='json')
         self.assertEqual(r.status_code, 400, r.content[:1000])
         self.assertIn("Update of password though API is not allowed", r.content.decode("utf-8"))
 
-        r = self.client.patch("{}{}".format(reverse('user-list'), user_id), {
+        r = self.client.patch("{}{}/".format(reverse('user-list'), user_id), {
             "password": "testTEST1234!@#$"
-        }, format='json', follow=True)
+        }, format='json')
         self.assertEqual(r.status_code, 400, r.content[:1000])
         self.assertIn("Update of password though API is not allowed", r.content.decode("utf-8"))

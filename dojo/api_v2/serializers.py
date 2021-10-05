@@ -295,7 +295,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def validate(self, data):
-        if self.context['request'].method in ['PATCH','PUT'] and 'password' in data:
+        if self.context['request'].method in ['PATCH', 'PUT'] and 'password' in data:
             raise ValidationError('Update of password though API is not allowed')
         else:
             return super().validate(data)
