@@ -1,22 +1,19 @@
+import base64
 import datetime
+import logging
 
-from dojo.endpoint.utils import endpoint_get_or_create
-from dojo.importers import utils as importer_utils
-from dojo.models import Notes, Finding, \
-    BurpRawRequestResponse, \
-    Endpoint_Status, \
-    Test_Import
-
-from dojo.utils import get_current_user
-
-from django.core.exceptions import MultipleObjectsReturned
-from django.conf import settings
-from django.utils import timezone
-import dojo.notifications.helper as notifications_helper
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
-import base64
-import logging
+import dojo.notifications.helper as notifications_helper
+from django.conf import settings
+from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.utils import timezone
+from dojo.endpoint.utils import endpoint_get_or_create
+from dojo.importers import utils as importer_utils
+from dojo.models import (BurpRawRequestResponse, Endpoint_Status, Finding,
+                         Notes, Test_Import)
+from dojo.tools.factory import get_parser
+from dojo.utils import get_current_user
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -39,21 +36,22 @@ class DojoDefaultReImporter(object):
         unchanged_items = []
 
         logger.debug('starting reimport of %i items.', len(items) if items else 0)
-        from dojo.importers.reimporter.utils import get_deduplication_algorithm_from_conf, match_new_finding_to_existing_finding, update_endpoint_status
+        from dojo.importers.reimporter.utils import (
+            get_deduplication_algorithm_from_conf,
+            match_new_finding_to_existing_finding, update_endpoint_status)
         deduplication_algorithm = get_deduplication_algorithm_from_conf(scan_type)
 
         i = 0
         logger.debug('STEP 1: looping over findings from the reimported report and trying to match them to existing findings')
         deduplicationLogger.debug('Algorithm used for matching new findings to existing findings: %s', deduplication_algorithm)
         for item in items:
-            sev = item.severity
-            if sev == 'Information' or sev == 'Informational':
-                sev = 'Info'
+            # FIXME hack to remove when all parsers have unit tests for this attribute
+            if item.severity.lower().startswith('info') and item.severity != 'Info':
+                item.severity = 'Info'
 
-            item.severity = sev
-            item.numerical_severity = Finding.get_numerical_severity(sev)
+            item.numerical_severity = Finding.get_numerical_severity(item.severity)
 
-            if (Finding.SEVERITIES[sev] >
+            if minimum_severity and (Finding.SEVERITIES[item.severity] >
                     Finding.SEVERITIES[minimum_severity]):
                 # finding's severity is below the configured threshold : ignoring the finding
                 continue
@@ -283,7 +281,8 @@ class DojoDefaultReImporter(object):
 
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, sonarqube_config=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, sonarqube_config=None,
+                    cobaltio_config=None):
 
         logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
 
@@ -303,8 +302,28 @@ class DojoDefaultReImporter(object):
                 test.sonarqube_config = sonarqube_config
                 test.save()
 
-        logger.debug('REIMPORT_SCAN: Parse findings')
-        parsed_findings = importer_utils.parse_findings(scan, test, active, verified, scan_type)
+        if cobaltio_config:  # it there is no cobaltio_config, just use original
+            if cobaltio_config.product != test.engagement.product:
+                raise ValidationError('"cobaltio_config" has to be from same product as "test"')
+
+            if test.cobaltio_config != cobaltio_config:  # update the cobaltio_config
+                test.cobaltio_config = cobaltio_config
+                test.save()
+
+        # check if the parser that handle the scan_type manage tests
+        parser = get_parser(scan_type)
+        if hasattr(parser, 'get_tests'):
+            logger.debug('REIMPORT_SCAN parser v2: Create parse findings')
+            tests = parser.get_tests(scan_type, scan)
+            # for now we only consider the first test in the list and artificially aggregate all findings of all tests
+            # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
+            # when there is more than 1 test
+            parsed_findings = []
+            for test_raw in tests:
+                parsed_findings.extend(test_raw.findings)
+        else:
+            logger.debug('REIMPORT_SCAN: Parse findings')
+            parsed_findings = parser.get_findings(scan, test)
 
         logger.debug('REIMPORT_SCAN: Processing findings')
         new_findings, reactivated_findings, findings_to_mitigate, untouched_findings = \

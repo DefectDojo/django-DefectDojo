@@ -7,12 +7,12 @@ defusedxml==0.7.1
 django_celery_results==2.2.0
 django-auditlog==1.0a1
 django-dbbackup==3.3.0
-django-environ==0.4.5
-django-filter==2.4.0
+django-environ==0.7.0
+django-filter==21.1
 django-imagekit==4.0.2
 django-multiselectfield==0.1.12
 django-polymorphic==3.0.0
-django-crispy-forms==1.12.0
+django-crispy-forms==1.13.0
 django_extensions==3.1.3
 django-slack==5.17.6
 django-tagging==0.5.0
@@ -28,18 +28,18 @@ PyGithub==1.55
 lxml==4.6.3
 Markdown==3.3.4
 mysqlclient==2.0.3
-openpyxl==3.0.7
+openpyxl==3.0.9
 xlrd==1.2.0
-Pillow==8.3.1  # required by django-imagekit
+Pillow==8.3.2  # required by django-imagekit
 psycopg2-binary==2.9.1
-cryptography==3.4.8
+cryptography==35.0.0
 python-dateutil==2.8.2
 pytz==2021.1
 redis==3.5.3
 requests==2.26.0
-sqlalchemy==1.4.23  # Required by Celery broker transport
+sqlalchemy==1.4.25  # Required by Celery broker transport
 supervisor==4.2.2
-urllib3==1.26.6
+urllib3==1.26.7
 uWSGI==2.0.19.1
 vobject==0.9.6.1
 whitenoise==5.2.0
@@ -47,12 +47,12 @@ titlecase==2.3
 social-auth-app-django==5.0.0
 social-auth-core==4.1.0
 Python-jose==3.3.0
-gitpython==3.1.18
-debugpy==1.4.1
+gitpython==3.1.24
+debugpy==1.4.3
 python-gitlab==2.10.1
-google-auth==2.0.1
-google-api-python-client==2.18.0
-google-auth-oauthlib==0.4.5
+google-api-python-client==2.23.0
+google-auth==2.2.1
+google-auth-oauthlib==0.4.6
 drf_yasg==1.20.0
 cpe==1.2.1
 packageurl-python==0.9.4
@@ -63,12 +63,14 @@ django-debug-toolbar==3.2.2
 django-debug-toolbar-request-history==0.1.3
 vcrpy==4.1.1
 vcrpy-unittest==0.1.7
-django-tagulous==1.2.0
+django-tagulous==1.3.0
 PyJWT==2.1.0
 cvss==2.3
 django-fieldsignals==0.7.0
 hyperlink==21.0.0
+numpy==1.21.2
 django-test-migrations==1.1.0
-djangosaml2==1.3.3
-drf-spectacular==0.17.3
+djangosaml2==1.3.4
+drf-spectacular==0.19.0
 django-ratelimit==3.0.1
+argon2-cffi==21.1.0

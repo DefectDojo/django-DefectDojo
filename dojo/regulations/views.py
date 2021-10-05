@@ -14,7 +14,7 @@ from dojo.models import Regulation
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def new_regulation(request):
     if request.method == 'POST':
         tform = RegulationForm(request.POST, instance=Regulation())
@@ -32,7 +32,7 @@ def new_regulation(request):
                   {'form': tform})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def edit_regulations(request, ttid):
     regulation = Regulation.objects.get(pk=ttid)
     if request.method == 'POST' and request.POST.get('delete'):
@@ -62,7 +62,6 @@ def edit_regulations(request, ttid):
                   })
 
 
-@user_passes_test(lambda u: u.is_staff)
 def regulations(request):
     confs = Regulation.objects.all().order_by('name')
     add_breadcrumb(title="Regulations", top_level=not len(request.GET), request=request)

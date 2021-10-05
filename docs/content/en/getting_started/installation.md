@@ -7,11 +7,11 @@ weight: 2
 
 ## Docker Compose install (recommended)
 
-See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo/blob/master/DOCKER.md>)
+See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/DOCKER.md>)
 
 ## Kubernetes install
 
-See instructions in [KUBERNETES.md](<https://github.com/DefectDojo/django-DefectDojo/blob/master/KUBERNETES.md>)
+See instructions in [KUBERNETES.md](<https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/KUBERNETES.md>)
 
 ## Local install with godojo
 

@@ -1,6 +1,7 @@
 import json
 
 from dojo.models import Finding
+from dojo.tools.parser_test import ParserTest
 
 
 class GitlabSastParser(object):
@@ -21,7 +22,28 @@ class GitlabSastParser(object):
 
         tree = self.parse_json(json_output)
         if tree:
-            return self.get_items(tree, test)
+            return self.get_items(tree)
+
+    def get_tests(self, scan_type, handle):
+        tree = self.parse_json(handle)
+        tests = list()
+
+        scan = tree.get('scan')
+        if scan:
+            scanner_name = scan['scanner']['name']
+            scanner_type = scan['scanner']['name']
+            scanner_version = scan['scanner']['version']
+        else:
+            scanner_name = scanner_type = scanner_version = None
+
+        test = ParserTest(
+            name=scanner_name,
+            type=scanner_type,
+            version=scanner_version
+        )
+        test.findings = self.get_items(tree)
+        tests.append(test)
+        return tests
 
     def parse_json(self, json_output):
         data = json_output.read()
@@ -32,18 +54,18 @@ class GitlabSastParser(object):
 
         return tree
 
-    def get_items(self, tree, test):
+    def get_items(self, tree):
         items = {}
 
         for node in tree['vulnerabilities']:
-            item = get_item(node, test)
+            item = get_item(node)
             if item:
                 items[item.unique_id_from_tool] = item
 
         return list(items.values())
 
 
-def get_item(vuln, test):
+def get_item(vuln):
     if vuln['category'] != 'sast':
         # For SAST reports, value must always be "sast"
         return None
@@ -123,7 +145,6 @@ def get_item(vuln, test):
                 references += '\n'
 
     finding = Finding(title=title,
-                      test=test,
                       description=description,
                       severity=severity,
                       scanner_confidence=scanner_confidence,

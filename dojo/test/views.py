@@ -20,15 +20,16 @@ from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 
-from dojo.filters import TemplateFindingFilter, OpenFindingFilter, TestImportFilter
+from dojo.filters import TemplateFindingFilter, FindingFilter, TestImportFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
-    ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
+    ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Sonarqube_Product
+    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Sonarqube_Product, \
+    Cobaltio_Product
 
-from dojo.tools.factory import get_choices
+from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
     Product_Tab, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
@@ -70,7 +71,7 @@ def view_test(request, tid):
     files = test.files.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
-    findings = OpenFindingFilter(request.GET, queryset=findings)
+    findings = FindingFilter(request.GET, queryset=findings)
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
@@ -120,7 +121,7 @@ def view_test(request, tid):
 
     paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix='findings')
     paged_stub_findings = get_page_items(request, stub_findings, 25)
-    show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
+    show_re_upload = any(test.test_type.name in code for code in get_choices_sorted())
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -665,7 +666,13 @@ def re_import_scan_results(request, tid):
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
                          "is highly recommended."
     test = get_object_or_404(Test, id=tid)
-    scan_type = test.test_type.name
+    # by default we keep a trace of the scan_type used to create the test
+    # if it's not here, we use the "name" of the test type
+    # this feature exists to provide custom label for tests for some parsers
+    if test.scan_type:
+        scan_type = test.scan_type
+    else:
+        scan_type = test.test_type.name
     engagement = test.engagement
     form = ReImportScanForm(test=test)
     jform = None
@@ -693,6 +700,7 @@ def re_import_scan_results(request, tid):
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
             sonarqube_config = form.cleaned_data.get('sonarqube_config', None)
+            cobaltio_config = form.cleaned_data.get('cobaltio_config', None)
 
             endpoints_to_add = None  # not available on reimport UI
 
@@ -722,7 +730,8 @@ def re_import_scan_results(request, tid):
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings, group_by=group_by,
-                                                sonarqube_config=sonarqube_config)
+                                                sonarqube_config=sonarqube_config,
+                                                cobaltio_config=cobaltio_config)
             except Exception as e:
                 logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
@@ -741,6 +750,7 @@ def re_import_scan_results(request, tid):
     product_tab.setEngagement(engagement)
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
     form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
+    form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,
@@ -748,5 +758,5 @@ def re_import_scan_results(request, tid):
                    'eid': engagement.id,
                    'additional_message': additional_message,
                    'jform': jform,
-                   'scan_types': get_choices(),
+                   'scan_types': get_choices_sorted(),
                    })
