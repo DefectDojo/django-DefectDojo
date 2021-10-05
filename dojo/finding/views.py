@@ -26,7 +26,7 @@ from imagekit.processors import ResizeToFill
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, close_external_issue, redirect, reopen_external_issue
 import copy
 
-from dojo.filters import OpenFindingFilter, AcceptedFindingFilter, ClosedFindingFilter, TemplateFindingFilter, SimilarFindingFilter
+from dojo.filters import TemplateFindingFilter, SimilarFindingFilter, FindingFilter, AcceptedFindingFilter
 from dojo.forms import NoteForm, TypedNoteForm, CloseFindingForm, FindingForm, PromoteFindingForm, FindingTemplateForm, \
     DeleteFindingTemplateForm, JIRAFindingForm, GITHUBFindingForm, ReviewFindingForm, ClearFindingReviewForm, \
     DefectFindingForm, StubFindingForm, DeleteFindingForm, DeleteStubFindingForm, ApplyFindingTemplateForm, \
@@ -53,50 +53,71 @@ from dojo.finding.queries import get_authorized_findings
 logger = logging.getLogger(__name__)
 
 
-def open_findings_filter(request, queryset, user, pid):
-    return OpenFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
+def get_filtered_findings(request, pid=None, eid=None, tid=None, filter_name=None, order_by='numerical_severity'):
 
+    findings = get_authorized_findings(Permissions.Finding_View)
 
-def accepted_findings_filter(request, queryset, user, pid):
-    return AcceptedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
+    findings = findings.order_by(order_by)
 
+    if pid:
+        findings = findings.filter(test__engagement__product__id=pid)
+    elif eid:
+        findings = findings.filter(test__engagement=eid)
+    elif tid:
+        findings = findings.filter(test=tid)
 
-def closed_findings_filter(request, queryset, user, pid):
-    return ClosedFindingFilter(request.GET, queryset=queryset, user=user, pid=pid)
+    if filter_name == 'Open':
+        findings = findings.filter(finding_helper.OPEN_FINDINGS_QUERY)
+    elif filter_name == 'Verified':
+        findings = findings.filter(finding_helper.VERIFIED_FINDINGS_QUERY)
+    elif filter_name == 'Out of Scope':
+        findings = findings.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY)
+    elif filter_name == 'False Positive':
+        findings = findings.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY)
+    elif filter_name == 'Inactive':
+        findings = findings.filter(finding_helper.INACTIVE_FINDINGS_QUERY)
+    elif filter_name == 'Accepted':
+        findings = findings.filter(finding_helper.ACCEPTED_FINDINGS_QUERY)
+    elif filter_name == 'Closed':
+        findings = findings.filter(finding_helper.CLOSED_FINDINGS_QUERY)
+
+    if filter_name == 'Accepted':
+        findings = AcceptedFindingFilter(request.GET, findings, user=request.user, pid=pid)
+    else:
+        findings = FindingFilter(request.GET, findings, user=request.user, pid=pid)
+
+    return findings
 
 
 def open_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", query_filter=finding_helper.OPEN_FINDINGS_QUERY, prefetch_type='open')
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Open", prefetch_type='open')
 
 
 def verified_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Verified", query_filter=finding_helper.VERIFIED_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Verified")
 
 
 def out_of_scope_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Out of Scope", query_filter=finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Out of Scope")
 
 
 def false_positive_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="False Positive", query_filter=finding_helper.FALSE_POSITIVE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="False Positive")
 
 
 def inactive_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive", query_filter=finding_helper.INACTIVE_FINDINGS_QUERY)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Inactive")
 
 
 def accepted_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted", query_filter=finding_helper.ACCEPTED_FINDINGS_QUERY,
-                    django_filter=accepted_findings_filter)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Accepted")
 
 
 def closed_findings(request, pid=None, eid=None, view=None):
-    return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", query_filter=finding_helper.CLOSED_FINDINGS_QUERY, order_by=('-mitigated'),
-                    django_filter=closed_findings_filter)
+    return findings(request, pid=pid, eid=eid, view=view, filter_name="Closed", order_by=('-mitigated'))
 
 
-def findings(request, pid=None, eid=None, view=None, filter_name=None, query_filter=None, order_by='numerical_severity',
-django_filter=open_findings_filter, prefetch_type='all'):
+def findings(request, pid=None, eid=None, view=None, filter_name=None, order_by='numerical_severity', prefetch_type='all'):
 
     show_product_column = True
     custom_breadcrumb = None
@@ -104,21 +125,14 @@ django_filter=open_findings_filter, prefetch_type='all'):
     jira_project = None
     github_config = None
 
-    findings = get_authorized_findings(Permissions.Finding_View)
-    # print('View: ', view)
     if view == "All":
         filter_name = "All"
     else:
         print('Filtering!', view)
-        findings = findings.filter(query_filter)
-
-    findings = findings.order_by(order_by)
-    # print('findings.query1', findings.query)
 
     if pid:
         product = get_object_or_404(Product, id=pid)
-        findings = findings.filter(test__engagement__product__id=pid)
-
+        user_has_permission_or_403(request.user, product, Permissions.Product_View)
         show_product_column = False
         product_tab = Product_Tab(pid, title="Findings", tab="findings")
         jira_project = jira_helper.get_jira_project(product)
@@ -126,8 +140,7 @@ django_filter=open_findings_filter, prefetch_type='all'):
 
     elif eid:
         engagement = get_object_or_404(Engagement, id=eid)
-        findings = findings.filter(test__engagement=eid)
-
+        user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
         show_product_column = False
         product_tab = Product_Tab(engagement.product_id, title=engagement.name, tab="engagements")
         jira_project = jira_helper.get_jira_project(engagement)
@@ -135,13 +148,7 @@ django_filter=open_findings_filter, prefetch_type='all'):
     else:
         add_breadcrumb(title="Findings", top_level=not len(request.GET), request=request)
 
-    print('findings.query2', findings.query)
-    # print(django_filter)
-    findings_filter = django_filter(request, findings, request.user, pid)
-
-    print('findings.query3', findings_filter.qs.query)
-
-    print('done')
+    findings_filter = get_filtered_findings(request, pid, eid, None, filter_name, order_by)
 
     title_words = get_words_for_field(Finding, 'title')
     component_words = get_words_for_field(Finding, 'component_name')
