@@ -272,6 +272,8 @@ In the example above, we want that media content to be preserved to `pvc` named 
 
 NOTE: PersistrentVolume needs to be prepared in front before helm installation/update is triggered.
 
+For more detail how how to create proper PVC see [example](https://github.com/DefectDojo/Community-Contribs/tree/master/persistent-media)
+
 ### Installation
 
 ```zsh
