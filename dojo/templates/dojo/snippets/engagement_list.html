@@ -106,27 +106,27 @@
                             {% endif %}
                             <li class="divider"></li>
                             <li role="presentation">
-                              <a href="{% url 'engagment_open_findings' eng.id %}?active=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
+                              <a href="{% url 'engagement_open_findings' eng.id %}">
                                 <i class="fa fa-file-text-o"></i> View Active Findings
                               </a>
                             </li>
                             <li role="presentation">
-                              <a href="{% url 'engagment_open_findings' eng.id %}?active=2&verified=2&false_p=3&duplicate=2&out_of_scope=1&test__engagement={{ eng.id }}">
+                              <a href="{% url 'engagement_verified_findings' eng.id %}">
                                 <i class="fa fa-file-text-o"></i> View Active and Verified Findings
                               </a>
                             </li>
                             <li role="presentation">
-                              <a href="{% url 'engagment_closed_findings' eng.id %}?is_mitigated=2&test__engagement={{ eng.id }}">
+                              <a href="{% url 'engagement_closed_findings' eng.id %}">
                                 <i class="fa fa-file-text-o"></i> View Mitigated Findings
                               </a>
                             </li>
                             <li role="presentation">
-                                <a href="{% url 'engagment_open_findings' eng.id %}?risk_acceptance=1&test__engagement={{ eng.id }}">
+                                <a href="{% url 'engagement_accepted_findings' eng.id %}">
                                     <i class="fa fa-file-text-o"></i> View Accepted Findings
                                 </a>
                               </li>
                             <li role="presentation">
-                              <a href="{% url 'engagment_all_findings' eng.id %}?test__engagement={{ eng.id }}">
+                              <a href="{% url 'engagement_all_findings' eng.id %}">
                                   <i class="fa fa-file-text-o"></i> View All Findings
                               </a>
                             </li>
