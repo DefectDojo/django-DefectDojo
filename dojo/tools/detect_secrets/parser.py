@@ -30,6 +30,10 @@ class DetectSecretsParser(object):
                 hashed_secret = item.get('hashed_secret')
                 is_verified = item.get('is_verified')
                 line = item.get('line_number')
+                description = "Detected potential secret with the following related data:\n"
+                description += "**Filename:** " + file + "\n"
+                description += "**Line:** " + str(line) + "\n"
+                description += "**Type:** " + type + "\n"
 
                 dupe_key = hashlib.sha256(
                     (type + file + str(line) + hashed_secret).encode('utf-8')
@@ -42,8 +46,10 @@ class DetectSecretsParser(object):
                     finding = Finding(
                         title=f"{type}",
                         test=test,
+                        description=description,
+                        cwe=798,
                         date=find_date,
-                        severity="Medium",
+                        severity="High",
                         verified=is_verified,
                         file_path=file,
                         line=line,

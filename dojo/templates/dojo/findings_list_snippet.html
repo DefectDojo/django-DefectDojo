@@ -11,15 +11,31 @@
                     <h3 class="has-filters">
                         {{ filter_name }} Findings
                         <div class="dropdown pull-right">
-                            <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
-                        </div>
-                        <form method="get" action="{% url 'quick_report' %}" class="pull-right">
-                            <input type="hidden" label="url" name="url" value="{{ request.get_full_path }}">
-                            <input type="hidden" label="_generate" name="_generate" value="_generate">
-                            <button class="btn btn-primary" type="submit" label="quick_report" id="quick_report" aria-expanded="true">
-                                <i class="fa fa-file-text-o"></i>
+                            &nbsp;
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="downloadMenu"
+                                    data-toggle="dropdown" aria-expanded="true">
+                                <span class="fa fa-download"></span>
+                                <span class="caret"></span>
                             </button>
-                        </form>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="downloadMenu">
+                            <li role="presentation">
+                                <a id="report" href="{% url 'quick_report' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-file-text-o"></i> Report
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a id="csv_export" href="{% url 'csv_export' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-table"></i> CSV Export
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a id="excel_export" href="{% url 'excel_export' %}?url={{ request.get_full_path }}">
+                                    <i class="fa fa-file-excel-o"></i> Excel Export
+                                </a>
+                            </li>
+                        </ul>
+                        <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa fa-filter"></i> <i class="caret"></i> </button>
+                        </div>
                     </h3>
                 </div>
                 <div id="the-filters" class="is-filters panel-body collapse" >
@@ -41,7 +57,7 @@
                 {% endif %}
                 <div class="btn-group mr-2" role="group" aria-label="Bulk Actions">
                     {% if product_tab and not 'DISABLE_FINDING_MERGE'|setting_enabled %}
-                    <button type="button" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
+                    <button type="button" id="merge_findings" class="btn btn-sm  btn-primary" data-toggle="tooltip" data-placement="bottom" title="Merge Findings">
                       <a class="white-color merge" href="#" alt="Merge Findings">
                         <i class="fa fa-compress"></i>
                       </a>
@@ -55,7 +71,7 @@
                     </button>
                     {% endif %}
                 </div>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+                <ul class="dropdown-menu" style="overflow: hidden;" aria-labelledby="dropdownMenu1" id="bulk_edit">
                     <li class="dropdown-header">Choose wisely...</li>
                     <li style="padding-left: 8px;">
                         {% if product_tab %}
@@ -66,7 +82,7 @@
                             {% csrf_token %}
                             <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                             <label style="display: block" for="severity">Severity</label>
-                            <select name="severity" id="severity" style="font-size: 80%">
+                            <select name="severity" data-container="body" id="severity" style="font-size: 80%">
                                 <option value="">Choose...</option>
                                 <option value="Info">Info</option>
                                 <option value="Low">Low</option>
@@ -557,14 +573,6 @@
                         extend: 'copy'
                     }),
                     $.extend( true, {}, buttonCommon, {
-                        extend: 'excel',
-                        autoFilter: true,
-                        sheetName: 'Exported data',
-                    }),
-                    $.extend( true, {}, buttonCommon, {
-                        extend: 'csv'
-                    }),
-                    $.extend( true, {}, buttonCommon, {
                         extend: 'pdf',
                         orientation: 'landscape',
                         pageSize: 'LETTER'
@@ -807,4 +815,5 @@
 
     </script>
     {% include "dojo/filter_js_snippet.html" %}
+    {% include "dojo/snippets/selectpicker_in_dropdown.html" %}
 {% endblock %}

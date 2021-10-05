@@ -11,10 +11,10 @@ class AnchoreGrypeParser(object):
     """
 
     def get_scan_types(self):
-        return ["anchore_grype"]
+        return ["Anchore Grype"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "anchore_grype"
+        return "Anchore Grype"
 
     def get_description_for_scan_types(self, scan_type):
         return "A vulnerability scanner for container images and filesystems. JSON report generated with '-o json' format"

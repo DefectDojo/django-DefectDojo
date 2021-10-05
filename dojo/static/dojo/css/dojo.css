@@ -52,14 +52,14 @@ a {
 .panel-default .btn-primary {
     background-color: transparent!important;
     border-style: none!important;
-    color: #546474!important;
-    border: 1px solid #546474!important;
+    color: #fff!important;
+    border: 1px solid #fff!important;
 }
 
 .panel-default .btn-primary:hover {
     background-color: transparent!important;
-    color: #36404a!important;
-    border: 1px solid #546474!important;
+    color: #fff!important;
+    border: 1px solid #fff!important;
 }
 
 .btn-primary {
@@ -71,6 +71,18 @@ a {
 .btn-primary:hover {
     background-color: #38434d!important;
 }
+
+.btn-secondary {
+    color: #fff;
+    background-color: #546474;
+	border-style: none!important;
+}
+
+.btn-secondary:hover {
+    color: #fff;
+    background-color: #38434d!important;
+}
+
 /*
 .btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open > .dropdown-toggle.btn-primary.focus, .open > .dropdown-toggle.btn-primary:focus, .open > .dropdown-toggle.btn-primary:hover {
     background-color: transparent!important;

@@ -20,14 +20,14 @@ from dojo.endpoint.utils import endpoint_get_or_create
 from dojo.templatetags.display_tags import get_level
 from dojo.filters import ProductEngagementFilter, ProductFilter, EngagementFilter, MetricsEndpointFilter, MetricsFindingFilter, ProductComponentFilter
 from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm, JIRAProjectForm, JIRAFindingForm, AdHocFindingForm, \
-                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, ProductNotificationsForm, \
+                       EngagementPresetsForm, DeleteEngagementPresetsForm, Sonarqube_ProductForm, Cobaltio_ProductForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
                        Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm, \
-                       DeleteAppAnalysisForm, DeleteSonarqubeConfigurationForm
+                       DeleteAppAnalysisForm, DeleteSonarqubeConfigurationForm, DeleteCobaltioConfigurationForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, Finding_Template, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Sonarqube_Product, Notifications, BurpRawRequestResponse, Product_Member, \
-                        Product_Group
+                        Product_Group, Cobaltio_Product
 from dojo.utils import add_external_issue, add_error_message_to_response, add_field_errors_to_response, get_page_items, add_breadcrumb, \
                        get_system_setting, Product_Tab, get_punchcard_data, queryset_check, is_title_in_breadcrumbs
 
@@ -45,6 +45,7 @@ from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
 from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
+from dojo.tools.cobalt_api.api_client import CobaltAPI
 
 logger = logging.getLogger(__name__)
 
@@ -1159,6 +1160,7 @@ def edit_meta_data(request, pid):
 @user_is_authorized(Product, Permissions.Finding_Add, 'pid', 'staff')
 def ad_hoc_finding(request, pid):
     prod = Product.objects.get(id=pid)
+    test_type, _ = Test_Type.objects.get_or_create(name="Pen Test")
     test = None
     try:
         eng = Engagement.objects.get(product=prod, name="Ad Hoc Engagement")
@@ -1167,14 +1169,14 @@ def ad_hoc_finding(request, pid):
         if len(tests) != 0:
             test = tests[0]
         else:
-            test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+            test = Test(engagement=eng, test_type=test_type,
                         target_start=timezone.now(), target_end=timezone.now())
             test.save()
     except:
         eng = Engagement(name="Ad Hoc Engagement", target_start=timezone.now(),
                          target_end=timezone.now(), active=False, product=prod)
         eng.save()
-        test = Test(engagement=eng, test_type=Test_Type.objects.get(name="Pen Test"),
+        test = Test(engagement=eng, test_type=test_type,
                     target_start=timezone.now(), target_end=timezone.now())
         test.save()
     form_error = False
@@ -1714,6 +1716,138 @@ def delete_sonarqube(request, pid, sqcid):
                   'dojo/delete_product_sonarqube_configuration.html',
                   {
                       'form': sqcform,
+                      'product_tab': product_tab
+                  })
+
+
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+def add_cobaltio(request, pid):
+
+    prod = Product.objects.get(id=pid)
+    if request.method == 'POST':
+        form = Cobaltio_ProductForm(request.POST)
+        if form.is_valid():
+            cobaltio_product = form.save(commit=False)
+            cobaltio_product.product = prod
+            try:
+                cobalt = CobaltAPI(cobaltio_product.cobaltio_tool_config)
+                asset = cobalt.get_asset(cobaltio_product.cobaltio_asset_id)
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Cobalt.io connection successful. You have access to asset "{}"'.format(
+                                         asset['resource']['title']),
+                                     extra_tags='alert-success')
+                cobaltio_product.cobaltio_asset_name = asset['resource']['title']
+                cobaltio_product.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Cobalt.io Configuration added successfully.',
+                                     extra_tags='alert-success')
+                if 'add_another' in request.POST:
+                    return HttpResponseRedirect(reverse('add_cobaltio', args=(pid,)))
+                else:
+                    return HttpResponseRedirect(reverse('view_cobaltio', args=(pid,)))
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     str(e),
+                                     extra_tags='alert-danger')
+    else:
+        form = Cobaltio_ProductForm()
+
+    product_tab = Product_Tab(pid, title="Add Cobalt.io Configuration", tab="settings")
+
+    return render(request,
+                  'dojo/add_product_cobaltio_configuration.html',
+                  {'form': form,
+                   'product_tab': product_tab,
+                   'product': prod,
+                   })
+
+
+@user_is_authorized(Product, Permissions.Product_View, 'pid', 'view')
+def view_cobaltio(request, pid):
+
+    cobaltio_queryset = Cobaltio_Product.objects.filter(product=pid)
+
+    product_tab = Product_Tab(pid, title="Cobalt.io Configurations", tab="settings")
+    return render(request,
+                  'dojo/view_product_cobaltio_configuration.html',
+                  {
+                      'cobaltio_queryset': cobaltio_queryset,
+                      'product_tab': product_tab,
+                      'pid': pid
+                  })
+
+
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+def edit_cobaltio(request, pid, cobaltio_cid):
+
+    cobaltio = Cobaltio_Product.objects.get(pk=cobaltio_cid)
+
+    if cobaltio.product.pk != int(pid):  # user is trying to edit Cobalt.io Config from another product (trying to by-pass auth)
+        raise Http404()
+
+    if request.method == 'POST':
+        form = Cobaltio_ProductForm(request.POST, instance=cobaltio)
+        if form.is_valid():
+            cobaltio_product = form.save(commit=False)
+            try:
+                cobalt = CobaltAPI(cobaltio_product.cobaltio_tool_config)
+                asset = cobalt.get_asset(cobaltio_product.cobaltio_asset_id)
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Cobalt.io connection successful. You have access to asset "{}"'.format(
+                                         asset['resource']['title']),
+                                     extra_tags='alert-success')
+                cobaltio_product.cobaltio_asset_name = asset['resource']['title']
+                cobaltio_product.save()
+                messages.add_message(request,
+                                     messages.SUCCESS,
+                                     'Cobalt.io Configuration updated successfully.',
+                                     extra_tags='alert-success')
+                return HttpResponseRedirect(reverse('view_cobaltio', args=(pid,)))
+            except Exception as e:
+                messages.add_message(request,
+                                     messages.ERROR,
+                                     str(e),
+                                     extra_tags='alert-danger')
+    else:
+        form = Cobaltio_ProductForm(instance=cobaltio)
+
+    product_tab = Product_Tab(pid, title="Edit Cobalt.io Configuration", tab="settings")
+    return render(request,
+                  'dojo/edit_product_cobaltio_configuration.html',
+                  {
+                      'form': form,
+                      'product_tab': product_tab
+                  })
+
+
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid', 'staff')
+def delete_cobaltio(request, pid, cobaltio_cid):
+
+    cobaltio = Cobaltio_Product.objects.get(pk=cobaltio_cid)
+
+    if cobaltio.product.pk != int(pid):  # user is trying to delete Cobalt.io Config from another product (trying to by-pass auth)
+        raise Http404()
+
+    if request.method == 'POST':
+        cobaltioform = Cobaltio_ProductForm(request.POST)
+        cobaltio.delete()
+        messages.add_message(request,
+                             messages.SUCCESS,
+                             'Cobalt.io Configuration Deleted.',
+                             extra_tags='alert-success')
+        return HttpResponseRedirect(reverse('view_cobaltio', args=(pid,)))
+    else:
+        cobaltioform = DeleteCobaltioConfigurationForm(instance=cobaltio)
+
+    product_tab = Product_Tab(pid, title="Delete Cobalt.io Configuration", tab="settings")
+    return render(request,
+                  'dojo/delete_product_cobaltio_configuration.html',
+                  {
+                      'form': cobaltioform,
                       'product_tab': product_tab
                   })
 

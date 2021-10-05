@@ -74,7 +74,6 @@ class TrivyParser:
                     package_name = vuln['PkgName']
                     severity = TRIVY_SEVERITIES[vuln['Severity']]
                 except KeyError as exc:
-                    print(vuln)
                     logger.warning('skip vulnerability due %r', exc)
                     continue
                 package_version = vuln.get('InstalledVersion', '')

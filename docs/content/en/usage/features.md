@@ -368,9 +368,11 @@ $ docker-compose exec uwsgi /bin/bash -c 'python manage.py sla_notifications'
 
 ## Reports
 
+### Instant reports
+
 ![Report Listing](../../images/report_1.png)
 
-Reports can be generated for:
+Instant reports can be generated for:
 
 1.  Product types
 2.  Products
@@ -378,11 +380,12 @@ Reports can be generated for:
 4.  Tests
 5.  List of Findings
 6.  Endpoints
-7.  Custom reports
-
-![Report Generation](../../images/report_2.png)
 
 Filtering is available on all report generation views to aid in focusing the report for the appropriate need.
+
+### Custom reports
+
+![Report Generation](../../images/report_2.png)
 
 Custom reports, generated with the Report Builder, allow you to select specific components to be added to the report. These include:
 
