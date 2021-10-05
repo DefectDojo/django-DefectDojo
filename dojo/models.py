@@ -3642,7 +3642,7 @@ def enable_disable_auditlog(enable=True):
     if enable:
         # Register for automatic logging to database
         logger.info('enabling audit logging')
-        auditlog.register(Dojo_User)
+        auditlog.register(Dojo_User, exclude_fields=['password'])
         auditlog.register(Endpoint)
         auditlog.register(Engagement)
         auditlog.register(Finding)
@@ -3650,7 +3650,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.register(Test)
         auditlog.register(Risk_Acceptance)
         auditlog.register(Finding_Template)
-        auditlog.register(Cred_User)
+        auditlog.register(Cred_User, exclude_fields=['password'])
     else:
         logger.info('disabling audit logging')
         auditlog.unregister(Dojo_User)
