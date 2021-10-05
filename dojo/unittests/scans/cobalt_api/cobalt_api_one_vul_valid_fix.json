@@ -1,0 +1,46 @@
+{
+  "data": [
+    {
+      "resource": {
+        "id": "vu_5wXY6bq",
+        "tag": "#PT3334_39",
+        "title": "SQL Injection",
+        "description": "A SQL injection attack...",
+        "type_category": null,
+        "labels": [],
+        "impact": 1,
+        "likelihood": 1,
+        "severity": "low",
+        "affected_targets": [
+          "https://example.com"
+        ],
+        "proof_of_concept": "Do this than that...",
+        "suggested_fix": "Ensure this...",
+        "pentest_id": "pt_NR5CDkK",
+        "asset_id": "as_cwrsqsL",
+        "log": [
+          {
+            "action": "created",
+            "timestamp": "2021-01-01T15:13:24.322Z"
+          },
+          {
+            "action": "state_changed",
+            "value": "need_fix",
+            "timestamp": "2021-01-02T15:14:57.845Z"
+          },
+          {
+            "action": "state_changed",
+            "value": "valid_fix",
+            "timestamp": "2021-01-03T15:14:57.845Z"
+          }
+        ],
+        "state": "valid_fix"
+      },
+      "links": {
+        "ui": {
+          "url": "https://api.cobalt.io/links/long-web-app-redirect-to-this-finding"
+        }
+      }
+    }
+  ]
+}

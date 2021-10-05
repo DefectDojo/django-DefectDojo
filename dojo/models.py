@@ -31,6 +31,8 @@ import tagulous.admin
 from django.db.models import JSONField
 import hyperlink
 from cvss import CVSS3
+from dojo.settings.settings import SLA_BUSINESS_DAYS
+from numpy import busday_count
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1129,6 +1131,7 @@ class Endpoint_Status(models.Model):
 
     @property
     def age(self):
+
         if self.mitigated:
             diff = self.mitigated_time.date() - self.date.date()
         else:
@@ -1196,7 +1199,7 @@ class Endpoint(models.Model):
                 self.userinfo = None
 
         if self.host:
-            if not re.match(r'^[A-Za-z0-9][A-Za-z0-9_\.\-\+]+$', self.host):
+            if not re.match(r'^[A-Za-z0-9_\-\+][A-Za-z0-9_\.\-\+]+$', self.host):
                 try:
                     validate_ipv46_address(self.host)
                 except ValidationError:
@@ -1419,7 +1422,7 @@ class Development_Environment(models.Model):
 class Sonarqube_Issue(models.Model):
     key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
     status = models.CharField(max_length=20, help_text="SonarQube issue status")
-    type = models.CharField(max_length=15, help_text="SonarQube issue type")
+    type = models.CharField(max_length=20, help_text="SonarQube issue type")
 
     def __str__(self):
         return self.key
@@ -1447,13 +1450,31 @@ class Sonarqube_Product(models.Model):
     )
 
     def __str__(self):
-        return '{} | {}'.format(self.sonarqube_tool_config.name, self.sonarqube_project_key)
+        return '{} | {}'.format(self.sonarqube_tool_config.name if hasattr(self, 'sonarqube_tool_config') else '', self.sonarqube_project_key)
+
+
+class Cobaltio_Product(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    cobaltio_asset_id = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="Cobalt.io Asset Id"
+    )
+    cobaltio_asset_name = models.CharField(
+        max_length=200, null=True, blank=True, verbose_name="Cobalt.io Asset Name"
+    )
+    cobaltio_tool_config = models.ForeignKey(
+        Tool_Configuration, verbose_name="Cobalt.io Configuration",
+        null=False, blank=False, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return "{} ({})".format(self.cobaltio_asset_name, self.cobaltio_asset_id)
 
 
 class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
     lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
+    scan_type = models.TextField(null=True)
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
@@ -1482,6 +1503,7 @@ class Test(models.Model):
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
     sonarqube_config = models.ForeignKey(Sonarqube_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="SonarQube Config")
+    cobaltio_config = models.ForeignKey(Cobaltio_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="Cobalt.io Config")
 
     class Meta:
         indexes = [
@@ -1890,7 +1912,7 @@ class Finding(models.Model):
                                         help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
 
     # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?"
-    publish_date = models.DateTimeField(null=True,
+    publish_date = models.DateField(null=True,
                                          blank=True,
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
@@ -2159,11 +2181,17 @@ class Finding(models.Model):
         return ", ".join([str(s) for s in status])
 
     def _age(self, start_date):
-        if self.mitigated:
-            diff = self.mitigated.date() - start_date
+        if SLA_BUSINESS_DAYS:
+            if self.mitigated:
+                days = busday_count(self.date, self.mitigated.date())
+            else:
+                days = busday_count(self.date, get_current_date())
         else:
-            diff = get_current_date() - start_date
-        days = diff.days
+            if self.mitigated:
+                diff = self.mitigated.date() - start_date
+            else:
+                diff = get_current_date() - start_date
+            days = diff.days
         return days if days > 0 else 0
 
     @property
@@ -3614,7 +3642,7 @@ def enable_disable_auditlog(enable=True):
     if enable:
         # Register for automatic logging to database
         logger.info('enabling audit logging')
-        auditlog.register(Dojo_User)
+        auditlog.register(Dojo_User, exclude_fields=['password'])
         auditlog.register(Endpoint)
         auditlog.register(Engagement)
         auditlog.register(Finding)
@@ -3622,7 +3650,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.register(Test)
         auditlog.register(Risk_Acceptance)
         auditlog.register(Finding_Template)
-        auditlog.register(Cred_User)
+        auditlog.register(Cred_User, exclude_fields=['password'])
     else:
         logger.info('disabling audit logging')
         auditlog.unregister(Dojo_User)

@@ -219,12 +219,12 @@
                                                 <li class="divider"></li>
                                             {% endif %}
                                             <li role="presentation">
-                                                <a href="{% url 'engagment_open_findings' eng.id %}?active=true">
+                                                <a href="{% url 'engagement_open_findings' eng.id %}">
                                                 <i class="fa fa-file-text-o"></i> View Open Findings
                                                 </a>
                                             </li>
                                             <li role="presentation">
-                                                <a href="{% url 'engagment_all_findings' eng.id %}">
+                                                <a href="{% url 'engagement_all_findings' eng.id %}">
                                                 <i class="fa fa-file-text-o"></i> View All Findings
                                                 </a>
                                             </li>
@@ -463,7 +463,9 @@
                     {% if eng.engagement_type == "Interactive" and system_settings.enable_checklists %}
                         <div class="panel panel-default">
                             <div class="panel-heading">
-                                <h4> Checklist<span class="pull-right"><a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
+                                <h4> Checklist<span class="pull-right">
+                                    &nbsp;
+                                    <a name="collapsible" data-toggle="collapse" href="#add_feat_check_list">
                                     <i class="glyphicon glyphicon-chevron-down"></i></a></span>
                                     {% if eng|has_object_permission:"Engagement_Edit" or user|is_authorized_for_delete:eng %}
                                         {% if check %}
@@ -532,6 +534,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4>Questionnaires<span class="pull-right">
+                                    &nbsp;
                                     <a name="collapsible" data-toggle="collapse" href="#add_feat_survey">
                                     <i class="glyphicon glyphicon-chevron-down"></i></a></span>
                                     {% if eng|has_object_permission:"Engagement_Edit" or user|is_authorized_for_staff:eng %}
@@ -585,7 +588,7 @@
                                     {% include "dojo/form_fields.html" with form=form %}
                                     <div class="form-group">
                                         <div class="col-sm-offset-2 col-sm-10">
-                                            <input class="btn btn-primary" type="submit" id="add_note" label="Add Notes" value="Add Note"/>
+                                            <input class="btn btn-secondary" type="submit" id="add_note" label="Add Notes" value="Add Note"/>
                                         </div>
                                     </div>
                                 </form>
@@ -668,6 +671,7 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4>Files<span class="pull-right">
+                                &nbsp;
                                 <a data-toggle="collapse" href="#add_feat_files">
                                 <i class="glyphicon glyphicon-chevron-down"></i></a></span>
                                 {% if eng|has_object_permission:"Engagement_Edit" or user|is_authorized_for_staff:eng %}
@@ -919,7 +923,7 @@
                         <div class="panel-heading">
                             <h4><span class="fa fa-key" aria-hidden="true"></span>
                                 Credentials
-                                {% if creds %}
+                                {% if creds and eng|has_object_permission:"Engagement_Edit" %}
                                     <a title="Add New Credential" class="pull-right btn btn-sm btn-primary"
                                         href="{% url 'new_cred_product_engagement' eng.id %}"><span class="fa fa-plus"></span></a>
                                 {% endif %}
@@ -958,14 +962,18 @@
                                                     <li class="dropdown" style="list-style:none;">
                                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                                         <ul class="dropdown-menu">
+                                                            {% if user.is_superuser %}
                                                             <li>
                                                                 <a class="" href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id %}">
                                                                 View</a>
                                                             </li>
+                                                            {% endif %}
+                                                            {% if eng|has_object_permission:"Engagement_Edit" %}
                                                             <li>
                                                                 <a class="" href="{% url 'delete_cred_engagement' cred.engagement.id cred.id %}">
                                                                 Delete</a>
                                                             </li>
+                                                            {% endif %}
                                                         </ul>
                                                     </li>
                                                 </ul>
@@ -994,10 +1002,12 @@
                                                     <li class="dropdown" style="list-style:none;">
                                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                                         <ul class="dropdown-menu">
+                                                            {% if user.is_superuser %}
                                                             <li>
                                                                 <a class="" href="{% url 'view_cred_product' cred.product.id cred.id %}">
                                                                 View</a>
                                                             </li>
+                                                            {% endif %}
                                                         </ul>
                                                     </li>
                                                 </ul>

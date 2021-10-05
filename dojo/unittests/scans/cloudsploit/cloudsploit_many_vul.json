@@ -48,5 +48,17 @@
         "region": "us-east-1",
         "status": "OK",
         "message": "No ACM certificates found"
+    },
+    {
+        "plugin": "cloudfrontWafEnabled",
+        "category": "CloudFront",
+        "title": "CloudFront WAF Enabled",
+        "description": "Ensures CloudFront distributions have WAF enabled.",
+        "resource": "arn:aws:cloudfront::Ah6oophiekoongah",
+        "region": [
+            "global"
+        ],
+        "status": "FAIL",
+        "message": "The Cloudfront Distribution does not have WAF enabled"
     }
 ]

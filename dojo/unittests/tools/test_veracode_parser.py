@@ -17,7 +17,7 @@ class TestVeracodeScannerParser(SimpleTestCase):
         testfile = open("dojo/unittests/scans/veracode/many_findings_different_hash_code_different_unique_id.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
+        self.assertEqual(4, len(findings))
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual(123, finding.cwe)
@@ -27,6 +27,9 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertEqual(2, finding.line)
         self.assertEqual("app-12345_issue-1", finding.unique_id_from_tool)
         finding = findings[1]
+        self.assertEqual("Medium", finding.severity)
+        self.assertTrue(finding.dynamic_finding)
+        finding = findings[2]
         self.assertEqual("High", finding.severity)
         self.assertIsNone(finding.cwe)
         self.assertEqual("CVE-1234-1234", finding.cve)
@@ -37,22 +40,27 @@ class TestVeracodeScannerParser(SimpleTestCase):
         testfile = open("dojo/unittests/scans/veracode/many_findings.xml")
         parser = VeracodeParser()
         findings = parser.get_findings(testfile, Test())
-        self.assertEqual(3, len(findings))
+        self.assertEqual(4, len(findings))
         finding = findings[0]
         self.assertEqual("Medium", finding.severity)
         self.assertEqual(123, finding.cwe)
         self.assertEqual("catname", finding.title)
+        self.assertTrue(finding.static_finding)
         self.assertFalse(finding.is_mitigated)
         self.assertEqual("sourcefilepathMyApp.java", finding.file_path)
         self.assertEqual(2, finding.line)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
         finding = findings[1]
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual(456, finding.cwe)
+        self.assertTrue(finding.dynamic_finding)
+        finding = findings[2]
         self.assertEqual("High", finding.severity)
         self.assertIsNone(finding.cwe)
         self.assertEqual("CVE-1234-1234", finding.cve)
         self.assertEqual("Vulnerable component: library:1234", finding.title)
         self.assertFalse(finding.is_mitigated)
-        finding = findings[2]
+        finding = findings[3]
         self.assertEqual("High", finding.severity)
         self.assertEqual("CVE-5678-5678", finding.cve)
         self.assertEqual("Vulnerable component: library1:1234", finding.title)
@@ -94,3 +102,22 @@ class TestVeracodeScannerParser(SimpleTestCase):
         self.assertTrue(finding.is_mitigated)
         self.assertEqual(datetime.datetime(2020, 6, 1, 10, 2, 1), finding.mitigated)
         self.assertEqual("app-1234_issue-1", finding.unique_id_from_tool)
+
+    def test_parse_file_with_dynamic_finding(self):
+        testfile = open("dojo/unittests/scans/veracode/dynamic_finding.xml")
+        parser = VeracodeParser()
+        findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("Medium", finding.severity)
+        self.assertEqual(456, finding.cwe)
+        self.assertTrue(finding.dynamic_finding)
+        self.assertEqual("catname", finding.title)
+        self.assertEqual("Description", finding.description)
+        self.assertFalse(finding.is_mitigated)
+        self.assertEqual(datetime.datetime(2021, 9, 3, 10, 0, 0), finding.date)
+        self.assertEqual(1, len(finding.unsaved_endpoints))
+        endpoint = finding.unsaved_endpoints[0]
+        self.assertEqual('https', endpoint.protocol)
+        self.assertEqual('www.example.com', endpoint.host)
+        self.assertEqual('index.html', endpoint.path)
