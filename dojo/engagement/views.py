@@ -206,7 +206,7 @@ def edit_engagement(request, eid):
                 create_notification(event='close_engagement',
                         title='Closure of %s' % engagement.name,
                         description='The engagement "%s" was closed' % (engagement.name),
-                        engagement=engagement, url=reverse('engagment_all_findings', args=(engagement.id, ))),
+                        engagement=engagement, url=reverse('engagement_all_findings', args=(engagement.id, ))),
             else:
                 engagement.active = True
             engagement.save()
@@ -675,7 +675,7 @@ def close_eng(request, eid):
     create_notification(event='close_engagement',
                         title='Closure of %s' % eng.name,
                         description='The engagement "%s" was closed' % (eng.name),
-                        engagement=eng, url=reverse('engagment_all_findings', args=(eng.id, ))),
+                        engagement=eng, url=reverse('engagement_all_findings', args=(eng.id, ))),
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
