@@ -294,11 +294,11 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
-    def update(self, instance, validated_data):
-        if 'password' in validated_data:
+    def validate(self, data):
+        if self.context['request'].method in ['PATCH','PUT'] and 'password' in data:
             raise ValidationError('Update of password though API is not allowed')
         else:
-            return super().update(instance, validated_data)
+            return super().validate(data)
 
 
 class UserStubSerializer(serializers.ModelSerializer):
