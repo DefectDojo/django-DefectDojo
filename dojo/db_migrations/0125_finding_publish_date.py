@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="finding",
             name="publish_date",
-            field=models.CharField(
+            field=models.DateField(
                 null=True,
                 blank=True,
                 verbose_name="Publish date",
