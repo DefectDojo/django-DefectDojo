@@ -831,13 +831,13 @@
         </div>
 
         <!--Cred Begin-->
-        {% if  finding.static_finding != True and cred_finding and system_settings.enable_credentials %}
+        {% if  finding.static_finding != True and system_settings.enable_credentials %}
             <div class="row">
                 <div class="col-md-12" id="cred">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4>Credential
-                                {% if not cred_finding %}
+                                {% if not cred_finding and finding|has_object_permission:"Finding_Edit" %}
                                     {% if cred_engagement or creds %}
                                         <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
                                            href="{% url 'new_cred_finding' finding.id %}"><span
@@ -884,10 +884,14 @@
                                             <td>{{ cred.cred_id.is_valid }}</td>
                                             <td>
                                                 <div class="btn-group">
-                                                    <a class="btn btn-sm btn-primary"
+                                                    {% if user.is_superuser %}
+                                                    <a class="btn btn-sm btn-secondary"
                                                        href="{% url 'view_cred_finding' cred.finding.id cred.id %}">View</a>
+                                                    {% endif %}
+                                                    {% if finding|has_object_permission:"Finding_Edit" %}
                                                     <a class="btn btn-sm btn-danger delete"
                                                        href="{% url 'delete_cred_finding' cred.finding.id cred.id %}">Delete</a>
+                                                    {% endif %}
                                                 </div>
                                             </td>
                                         </tr>
