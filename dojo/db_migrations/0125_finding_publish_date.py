@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0122_cobaltio_product"),
+        ("dojo", "0124_sonarqube_api_type_length_change"),
     ]
 
     operations = [
