@@ -11,12 +11,14 @@ from dojo.utils import add_breadcrumb, Product_Tab
 from dojo.forms import CredUserForm, NoteForm, CredMappingFormProd, CredMappingForm
 
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view, FileIterWrapper
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
 
 
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def new_cred(request):
     if request.method == 'POST':
         tform = CredUserForm(request.POST)
@@ -38,7 +40,7 @@ def new_cred(request):
     return render(request, 'dojo/new_cred.html', {'tform': tform})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_View, 'pid')
 def all_cred_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     creds = Cred_Mapping.objects.filter(product=prod).order_by('cred_id__name')
@@ -47,7 +49,7 @@ def all_cred_product(request, pid):
     return render(request, 'dojo/view_cred_prod.html', {'product_tab': product_tab, 'creds': creds, 'prod': prod})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def edit_cred(request, ttid):
     tool_config = Cred_User.objects.get(pk=ttid)
     if request.method == 'POST':
@@ -79,7 +81,7 @@ def edit_cred(request, ttid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def view_cred_details(request, ttid):
     cred = Cred_User.objects.get(pk=ttid)
     notes = cred.notes.all()
@@ -115,7 +117,7 @@ def view_cred_details(request, ttid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def cred(request):
     confs = Cred_User.objects.all().order_by('name', 'environment', 'username')
     add_breadcrumb(title="Credential Manager", top_level=True, request=request)
@@ -124,7 +126,8 @@ def cred(request):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# The dialogue shows the credentials and there can only be viewed by superusers
+@user_passes_test(lambda u: u.is_superuser)
 def view_cred_product(request, pid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -179,7 +182,8 @@ def view_cred_product(request, pid, ttid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# The dialogue shows the credentials and there can only be viewed by superusers
+@user_passes_test(lambda u: u.is_superuser)
 def view_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -232,7 +236,8 @@ def view_cred_product_engagement(request, eid, ttid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# The dialogue shows the credentials and there can only be viewed by superusers
+@user_passes_test(lambda u: u.is_superuser)
 def view_cred_engagement_test(request, tid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -287,7 +292,8 @@ def view_cred_engagement_test(request, tid, ttid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+# The dialogue shows the credentials and there can only be viewed by superusers
+@user_passes_test(lambda u: u.is_superuser)
 def view_cred_finding(request, fid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -342,7 +348,7 @@ def view_cred_finding(request, fid, ttid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def edit_cred_product(request, pid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -369,7 +375,7 @@ def edit_cred_product(request, pid, ttid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def edit_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related('cred_id'), id=ttid)
@@ -402,7 +408,7 @@ def edit_cred_product_engagement(request, eid, ttid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def new_cred_product(request, pid):
     prod = get_object_or_404(Product, pk=pid)
     if request.method == 'POST':
@@ -437,7 +443,7 @@ def new_cred_product(request, pid):
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def new_cred_product_engagement(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
 
@@ -488,7 +494,7 @@ def new_cred_product_engagement(request, eid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Test, Permissions.Test_Edit, 'tid')
 def new_cred_engagement_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
 
@@ -538,7 +544,7 @@ def new_cred_engagement_test(request, tid):
         })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def new_cred_finding(request, fid):
     finding = get_object_or_404(Finding, pk=fid)
 
@@ -659,39 +665,51 @@ def delete_cred_controller(request, destination_url, id, ttid):
     add_breadcrumb(title="Delete Credential", top_level=False, request=request)
     product_tab = None
     if id:
-        product_tab = Product_Tab(id, title="Delete Credential Mapping", tab="settings")
+        pid = None
+        if destination_url == "all_cred_product":
+            pid = id
+        elif destination_url == "view_engagement":
+            engagement = get_object_or_404(Engagement, id=id)
+            pid = engagement.product.id
+        elif destination_url == "view_test":
+            test = get_object_or_404(Test, id=id)
+            pid = test.engagement.product.id
+        elif destination_url == "view_finding":
+            finding = get_object_or_404(Finding, id=id)
+            pid = finding.test.engagement.product.id
+        product_tab = Product_Tab(pid, title="Delete Credential Mapping", tab="settings")
     return render(request, 'dojo/delete_cred_all.html', {
         'tform': tform,
         'product_tab': product_tab
     })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def delete_cred(request, ttid):
     return delete_cred_controller(request, "cred", 0, ttid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Product, Permissions.Product_Edit, 'pid')
 def delete_cred_product(request, pid, ttid):
     return delete_cred_controller(request, "all_cred_product", pid, ttid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Engagement, Permissions.Engagement_Edit, 'eid')
 def delete_cred_engagement(request, eid, ttid):
     return delete_cred_controller(request, "view_engagement", eid, ttid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Test, Permissions.Test_Edit, 'tid')
 def delete_cred_test(request, tid, ttid):
     return delete_cred_controller(request, "view_test", tid, ttid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Finding, Permissions.Finding_Edit, 'fid')
 def delete_cred_finding(request, fid, ttid):
     return delete_cred_controller(request, "view_finding", fid, ttid)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def view_selenium(request, ttid):
     import mimetypes
 

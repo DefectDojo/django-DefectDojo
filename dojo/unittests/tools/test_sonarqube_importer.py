@@ -30,6 +30,34 @@ def dummy_rule_wo_html_desc(self, *args, **kwargs):
         return data
 
 
+def dummy_no_hotspot(self, *args, **kwargs):
+    with open('dojo/unittests/scans/sonarqube_api/hotspots/no_vuln.json') as json_file:
+        data = json.load(json_file)
+        return data
+
+
+def dummy_one_hotspot(self, *args, **kwargs):
+    with open('dojo/unittests/scans/sonarqube_api/hotspots/one_vuln.json') as json_file:
+        data = json.load(json_file)
+        return data
+
+
+def dummy_many_hotspots(self, *args, **kwargs):
+    with open('dojo/unittests/scans/sonarqube_api/hotspots/many_vulns.json') as json_file:
+        data = json.load(json_file)
+        return data
+
+
+def dummy_hotspot_rule(self, *args, **kwargs):
+    with open('dojo/unittests/scans/sonarqube_api/hotspots/rule.json') as json_file:
+        data = json.load(json_file)
+        return data
+
+
+def empty_list(self, *args, **kwargs):
+    return list()
+
+
 class TestSonarqubeImporterNoSQToolConfig(TestCase):
     # Testing case no 1. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
@@ -63,6 +91,8 @@ class TestSonarqubeImporterOneSQToolConfig(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -106,6 +136,8 @@ class TestSonarqubeImporterOneSQConfigNoKey(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -130,6 +162,8 @@ class TestSonarqubeImporterOneSQConfigWithKey(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -179,6 +213,8 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -213,6 +249,8 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -246,6 +284,8 @@ class TestSonarqubeImporterExternalRule(TestCase):
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_project', dummy_product)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule_wo_html_desc)
     @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -258,3 +298,167 @@ class TestSonarqubeImporterExternalRule(TestCase):
         self.assertEqual('Medium', finding.severity)
         self.assertEqual(242, finding.line)
         self.assertEqual('internal.dummy.project:src/main/javascript/TranslateDirective.ts', finding.file_path)
+
+
+class TestSonarqubeImporterTwoIssuesNoHotspots(TestCase):
+    # Testing case no 9. https://github.com/DefectDojo/django-DefectDojo/pull/4107
+    fixtures = [
+        'unit_sonarqube_toolType.json',
+        'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_product.json'
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name='product')
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', empty_list)
+    def test_parser(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(2, len(findings))
+
+
+class TestSonarqubeImporterNoIssuesOneHotspot(TestCase):
+    # Testing case no 9. https://github.com/DefectDojo/django-DefectDojo/pull/4107
+    fixtures = [
+        'unit_sonarqube_toolType.json',
+        'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_product.json'
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name='product')
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', empty_list)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', dummy_one_hotspot)
+    def test_parser(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(1, len(findings))
+
+
+class TestSonarqubeImporterNoIssuesTwoHotspots(TestCase):
+    # Testing case no 11. https://github.com/DefectDojo/django-DefectDojo/pull/4107
+    fixtures = [
+        'unit_sonarqube_toolType.json',
+        'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_product.json'
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name='product')
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', empty_list)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', dummy_many_hotspots)
+    def test_parser(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(2, len(findings))
+
+
+class TestSonarqubeImporterTwoIssuesTwoHotspots(TestCase):
+    # Testing case no 12. https://github.com/DefectDojo/django-DefectDojo/pull/4107
+    fixtures = [
+        'unit_sonarqube_toolType.json',
+        'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_product.json'
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name='product')
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', dummy_issues)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', dummy_many_hotspots)
+    def test_parser(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(4, len(findings))
+
+
+class TestSonarqubeImporterValidateHotspotData(TestCase):
+    # Testing case no 13. https://github.com/DefectDojo/django-DefectDojo/pull/4107
+    fixtures = [
+        'unit_sonarqube_toolType.json',
+        'unit_sonarqube_toolConfig1.json',
+        'unit_sonarqube_product.json'
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name='product')
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_project', dummy_product)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_rule', dummy_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_issues', empty_list)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.get_hotspot_rule', dummy_hotspot_rule)
+    @mock.patch('dojo.tools.sonarqube_api.api_client.SonarQubeAPI.find_hotspots', dummy_one_hotspot)
+    def test_parser(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(findings[0].title, '"password" detected here, make sure this is not a hard-coded credential.')
+        self.assertEqual(findings[0].cwe, 798)
+        self.assertMultiLineEqual(
+            '**Ask Yourself Whether**'
+            '\n\n  '
+            '* Credentials allows access to a sensitive component like a database, a file storage, an API or a service. '
+            '\n  '
+            '* Credentials are used in production environments. '
+            '\n  '
+            '* Application re-distribution is required before updating the credentials. '
+            '\n\n'
+            'There is a risk if you answered yes to any of those questions.'
+            '\n\n',
+            findings[0].description
+        )
+        self.assertEqual(str(findings[0].severity), 'Info')
+        self.assertMultiLineEqual(
+            '[CVE-2019-13466](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-13466)'
+            '\n'
+            '[CVE-2018-15389](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15389)'
+            '\n'
+            '[OWASP Top 10 2017 Category A2](https://www.owasp.org/index.php/Top_10-2017_A2-Broken_Authentication)'
+            '\n'
+            '[MITRE, CWE-798](http://cwe.mitre.org/data/definitions/798)'
+            '\n'
+            '[MITRE, CWE-259](http://cwe.mitre.org/data/definitions/259)'
+            '\n'
+            '[CERT, MSC03-J.](https://wiki.sei.cmu.edu/confluence/x/OjdGBQ)'
+            '\n'
+            '[SANS Top 25](https://www.sans.org/top25-software-errors/#cat3)'
+            '\n'
+            '[Hard Coded Password](http://h3xstream.github.io/find-sec-bugs/bugs.htm#HARD_CODE_PASSWORD)'
+            '\n',
+            findings[0].references
+        )
+        self.assertEqual(str(findings[0].file_path), 'internal.dummy.project:spec/support/user_fixture.rb')
+        self.assertEqual(findings[0].line, 9)
+        self.assertEqual(findings[0].active, True)
+        self.assertEqual(findings[0].verified, False)
+        self.assertEqual(findings[0].false_p, False)
+        self.assertEqual(findings[0].duplicate, False)
+        self.assertEqual(findings[0].out_of_scope, False)
+        self.assertEqual(findings[0].static_finding, True)
+        self.assertEqual(findings[0].scanner_confidence, 1)
+        self.assertEqual(str(findings[0].sonarqube_issue), 'AXgm6Z-ophPPY0C1qhRq')

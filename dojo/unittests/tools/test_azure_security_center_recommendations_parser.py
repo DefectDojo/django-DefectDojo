@@ -1,20 +1,20 @@
 from datetime import date
 from django.test import TestCase
-from dojo.tools.azure_security_center.parser import AzureSecurityCenterParser
+from dojo.tools.azure_security_center_recommendations.parser import AzureSecurityCenterRecommendationsParser
 from dojo.models import Test
 
 
-class TestAzureSecurityCenterParser(TestCase):
+class TestAzureSecurityCenterRecommendationsParser(TestCase):
 
     def test_parse_file_with_no_findings(self):
-        testfile = open("dojo/unittests/scans/azure_security_center/zero_vulns.csv")
-        parser = AzureSecurityCenterParser()
+        testfile = open("dojo/unittests/scans/azure_security_center_recommendations/zero_vulns.csv")
+        parser = AzureSecurityCenterRecommendationsParser()
         findings = parser.get_findings(testfile, Test())
         self.assertEqual(0, len(findings))
 
     def test_parse_file_with_multiple_findings(self):
-        testfile = open("dojo/unittests/scans/azure_security_center/many_vulns.csv")
-        parser = AzureSecurityCenterParser()
+        testfile = open("dojo/unittests/scans/azure_security_center_recommendations/many_vulns.csv")
+        parser = AzureSecurityCenterRecommendationsParser()
         findings = parser.get_findings(testfile, Test())
 
         self.assertEqual(3, len(findings))

@@ -1422,7 +1422,7 @@ class Development_Environment(models.Model):
 class Sonarqube_Issue(models.Model):
     key = models.CharField(max_length=30, unique=True, help_text="SonarQube issue key")
     status = models.CharField(max_length=20, help_text="SonarQube issue status")
-    type = models.CharField(max_length=15, help_text="SonarQube issue type")
+    type = models.CharField(max_length=20, help_text="SonarQube issue type")
 
     def __str__(self):
         return self.key
@@ -1474,6 +1474,7 @@ class Test(models.Model):
     engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
     lead = models.ForeignKey(User, editable=True, null=True, on_delete=models.RESTRICT)
     test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
+    scan_type = models.TextField(null=True)
     title = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     target_start = models.DateTimeField()
@@ -1911,7 +1912,7 @@ class Finding(models.Model):
                                         help_text="Number of occurences in the source tool when several vulnerabilites were found and aggregated by the scanner.")
 
     # this is useful for vulnerabilities on dependencies : helps answer the question "Did I add this vulnerability or was it discovered recently?"
-    publish_date = models.DateTimeField(null=True,
+    publish_date = models.DateField(null=True,
                                          blank=True,
                                          verbose_name="Publish date",
                                          help_text="Date when this vulnerability was made publicly available.")
@@ -3641,7 +3642,7 @@ def enable_disable_auditlog(enable=True):
     if enable:
         # Register for automatic logging to database
         logger.info('enabling audit logging')
-        auditlog.register(Dojo_User)
+        auditlog.register(Dojo_User, exclude_fields=['password'])
         auditlog.register(Endpoint)
         auditlog.register(Engagement)
         auditlog.register(Finding)
@@ -3649,7 +3650,7 @@ def enable_disable_auditlog(enable=True):
         auditlog.register(Test)
         auditlog.register(Risk_Acceptance)
         auditlog.register(Finding_Template)
-        auditlog.register(Cred_User)
+        auditlog.register(Cred_User, exclude_fields=['password'])
     else:
         logger.info('disabling audit logging')
         auditlog.unregister(Dojo_User)

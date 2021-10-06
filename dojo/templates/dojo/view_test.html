@@ -254,7 +254,7 @@
                             <tr>
                                 <td>{{ test_import.type }}</td>
                                 <td>
-                                    <a href="{% url 'engagment_all_findings' test.engagement.id %}?test={{test.id}}&test_import_finding_action__test_import={{ test_import.id }}">
+                                    <a href="{% url 'engagement_all_findings' test.engagement.id %}?test={{test.id}}&test_import_finding_action__test_import={{ test_import.id }}">
                                         {{ test_import.created|date:"DATETIME_FORMAT" }}
                                     </a>
                                     {{ test_import|import_settings_tag }}
@@ -276,7 +276,7 @@
                                 </td>
                                 <td>
                                     {% regroup test_import.test_import_finding_action_set.all by get_action_display as finding_action_list %}
-                                    <a href="{% url 'engagment_all_findings' test.engagement.id %}?test={{test.id}}&test_import_finding_action__test_import={{ test_import.id }}">
+                                    <a href="{% url 'engagement_all_findings' test.engagement.id %}?test={{test.id}}&test_import_finding_action__test_import={{ test_import.id }}">
                                         {% for action in finding_action_list %}
                                         {{ action.grouper }} {{ action.list|length }} finding{{ action.list|pluralize }}{% if not forloop.last %},{% endif %}
                                         {% endfor %}
@@ -547,14 +547,14 @@
                     </button>
                 {% endif %}
             </div>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+            <ul class="dropdown-menu" style="overflow: hidden;" aria-labelledby="dropdownMenu1" id="bulk_edit">
                 <li class="dropdown-header">Choose wisely...</li>
                 <li style="padding-left: 8px;padding-right: 8px;">
                     <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
                         {% csrf_token %}
                         <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                         <label style="display: block" for="severity">Severity</label>
-                        <select name="severity" id="severity" style="font-size: 80%">
+                        <select name="severity" data-container="body" id="severity" style="font-size: 80%">
                             <option value="">Choose...</option>
                             <option value="Info">Info</option>
                             <option value="Low">Low</option>
@@ -1036,7 +1036,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Credentials
-                  {% if not cred_test and creds %}
+                  {% if not cred_test and creds and test|has_object_permission:"Test_Edit" %}
                     <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
                        href="{% url 'new_cred_engagement_test' test.id %}"><span class="fa fa-plus"></span></a>
                   {% endif %}
@@ -1077,10 +1077,14 @@
                             <td>{{ cred.cred_id.is_valid }}</td>
                             <td>
                                 <div class="btn-group">
-                                    <a class="btn btn-sm btn-primary"
+                                    {% if user.is_superuser %}
+                                    <a class="btn btn-sm btn-secondary"
                                        href="{% url 'view_cred_engagement_test' cred.test.id cred.id  %}">View</a>
+                                    {% endif %}
+                                    {% if test|has_object_permission:"Test_Edit" %}
                                     <a class="btn btn-sm btn-danger delete"
                                        href="{% url 'delete_cred_test' cred.test.id cred.id  %}">Delete</a>
+                                    {% endif %}
                                 </div>
                             </td>
                           </tr>
@@ -1658,4 +1662,5 @@
 
     </script>
     {% include "dojo/filter_js_snippet.html" %}
+    {% include "dojo/snippets/selectpicker_in_dropdown.html" %}
 {% endblock %}

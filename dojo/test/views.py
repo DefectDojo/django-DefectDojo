@@ -20,7 +20,7 @@ from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 
-from dojo.filters import TemplateFindingFilter, OpenFindingFilter, TestImportFilter
+from dojo.filters import TemplateFindingFilter, FindingFilter, TestImportFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
@@ -71,7 +71,7 @@ def view_test(request, tid):
     files = test.files.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
-    findings = OpenFindingFilter(request.GET, queryset=findings)
+    findings = FindingFilter(request.GET, queryset=findings)
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
@@ -666,7 +666,13 @@ def re_import_scan_results(request, tid):
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
                          "is highly recommended."
     test = get_object_or_404(Test, id=tid)
-    scan_type = test.test_type.name
+    # by default we keep a trace of the scan_type used to create the test
+    # if it's not here, we use the "name" of the test type
+    # this feature exists to provide custom label for tests for some parsers
+    if test.scan_type:
+        scan_type = test.scan_type
+    else:
+        scan_type = test.test_type.name
     engagement = test.engagement
     form = ReImportScanForm(test=test)
     jform = None

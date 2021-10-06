@@ -19,18 +19,20 @@ import dojo.jira_link.helper as jira_helper
 import base64
 import logging
 
+from dojo.tools.factory import get_parser
+
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 class DojoDefaultImporter(object):
 
-    def create_test(self, scan_type, engagement, lead, environment, tags=None,
+    def create_test(self, scan_type, test_type_name, engagement, lead, environment, tags=None,
                     scan_date=None, version=None, branch_tag=None, build_id=None, commit_hash=None, now=timezone.now(),
                     sonarqube_config=None, cobaltio_config=None):
 
         test_type, created = Test_Type.objects.get_or_create(
-            name=scan_type)
+            name=test_type_name)
 
         if created:
             logger.info('Created new Test_Type with name %s because a report is being imported', test_type.name)
@@ -39,6 +41,7 @@ class DojoDefaultImporter(object):
             engagement=engagement,
             lead=lead,
             test_type=test_type,
+            scan_type=scan_type,
             target_start=scan_date if scan_date else now.date(),
             target_end=scan_date if scan_date else now.date(),
             environment=environment,
@@ -67,15 +70,15 @@ class DojoDefaultImporter(object):
         logger.debug('starting import of %i items.', len(items) if items else 0)
         i = 0
         for item in items:
-            sev = item.severity
-            if sev == 'Information' or sev == 'Informational':
-                sev = 'Info'
+            # FIXME hack to remove when all parsers have unit tests for this attribute
+            if item.severity.lower().startswith('info') and item.severity != 'Info':
+                item.severity = 'Info'
 
-            item.severity = sev
-            item.numerical_severity = Finding.get_numerical_severity(sev)
+            item.numerical_severity = Finding.get_numerical_severity(item.severity)
 
-            if minimum_severity and (Finding.SEVERITIES[sev] >
+            if minimum_severity and (Finding.SEVERITIES[item.severity] >
                     Finding.SEVERITIES[minimum_severity]):
+                # finding's severity is below the configured threshold : ignoring the finding
                 continue
 
             item.test = test
@@ -292,13 +295,57 @@ class DojoDefaultImporter(object):
         if cobaltio_config and cobaltio_config.product != engagement.product:
             raise ValidationError('"cobaltio_config" has to be from same product as "engagement"')
 
-        logger.debug('IMPORT_SCAN: Create Test')
-        test = self.create_test(scan_type, engagement, lead, environment, scan_date=scan_date, tags=tags,
-                            version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
-                            sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
+        # check if the parser that handle the scan_type manage tests
+        # if yes, we parse the data first
+        # after that we customize the Test_Type to reflect the data
+        # This allow us to support some meta-formats like SARIF or the generic format
+        parser = get_parser(scan_type)
+        if hasattr(parser, 'get_tests'):
+            logger.debug('IMPORT_SCAN parser v2: Create Test and parse findings')
+            tests = parser.get_tests(scan_type, scan)
+            # for now we only consider the first test in the list and artificially aggregate all findings of all tests
+            # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
+            # when there is more than 1 test
+            #
+            # we also aggregate the label of the Test_type to show the user the original scan_type
+            # only if they are different. This is to support meta format like SARIF
+            # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
+            test_type_name = scan_type
+            if len(tests) > 0:
+                if tests[0].type:
+                    test_type_name = tests[0].type + " Scan"
+                    if tests[0].type != scan_type:
+                        test_type_name = f"{test_type_name} ({scan_type})"
 
-        logger.debug('IMPORT_SCAN: Parse findings')
-        parsed_findings = importer_utils.parse_findings(scan, test, active, verified, scan_type)
+                test = self.create_test(scan_type, test_type_name, engagement, lead, environment, scan_date=scan_date, tags=tags,
+                                    version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
+                                    sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
+                # This part change the name of the Test
+                # we get it from the data of the parser
+                test_raw = tests[0]
+                if test_raw.name:
+                    test.name = test_raw.name
+                    test.save()
+
+                logger.debug('IMPORT_SCAN parser v2: Parse findings (aggregate)')
+                # currently we only support import one Test
+                # so for parser that support multiple tests (like SARIF)
+                # we aggregate all the findings into one uniq test
+                parsed_findings = []
+                for test_raw in tests:
+                    parsed_findings.extend(test_raw.findings)
+            else:
+                logger.info(f'No tests found in import for {scan_type}')
+        else:
+            logger.debug('IMPORT_SCAN: Create Test')
+            # by default test_type == scan_type
+            test = self.create_test(scan_type, scan_type, engagement, lead, environment, scan_date=scan_date, tags=tags,
+                                version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
+                                sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
+
+            logger.debug('IMPORT_SCAN: Parse findings')
+            parser = get_parser(scan_type)
+            parsed_findings = parser.get_findings(scan, test)
 
         logger.debug('IMPORT_SCAN: Processing findings')
         new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
