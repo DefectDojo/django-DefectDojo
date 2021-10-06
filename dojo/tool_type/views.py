@@ -13,7 +13,7 @@ from dojo.models import Tool_Type
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def new_tool_type(request):
     if request.method == 'POST':
         tform = ToolTypeForm(request.POST, instance=Tool_Type())
@@ -31,7 +31,7 @@ def new_tool_type(request):
                   {'tform': tform})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def edit_tool_type(request, ttid):
     tool_type = Tool_Type.objects.get(pk=ttid)
     if request.method == 'POST':
@@ -54,7 +54,7 @@ def edit_tool_type(request, ttid):
                   })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def tool_type(request):
     confs = Tool_Type.objects.all().order_by('name')
     add_breadcrumb(title="Tool Type List", top_level=not len(request.GET), request=request)
