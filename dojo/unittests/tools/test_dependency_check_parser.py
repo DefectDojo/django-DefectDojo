@@ -835,12 +835,12 @@ class TestDependencyCheckParser(TestCase):
         # One for Suppressed with notes, the other is without.
         self.assertEqual(items[9].active, False)
         self.assertEqual(items[9].mitigation,
-                    '**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!')
+                    'This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!- Update jquery:3.1.1 to at least the version recommended in the description')
         self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
 
         self.assertEqual(items[10].active, False)
         self.assertEqual(items[10].mitigation,
-                     '**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.')
+                     '**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.- Update jquery:3.1.1 to at least the version recommended in the description')
         self.assertEqual(items[10].tags, "suppressed")
 
         # evidencecollected -> multiple product + multiple version
