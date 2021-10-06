@@ -253,7 +253,8 @@ class DependencyCheckParser(object):
             if notes == "":
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("no_suppression_document")
-            mitigation = '**This vulnerability is mitigated and/or suppressed:** {}'.format(notes)
+            mitigation = '**This vulnerability is mitigated and/or suppressed:** {}\n'.format(notes)
+            mitigation = mitigation + 'Update {}:{} to at least the version recommended in the description'.format(component_name, component_version)
 
             active = False
             tags.append("suppressed")
