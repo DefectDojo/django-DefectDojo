@@ -219,12 +219,12 @@
                                                 <li class="divider"></li>
                                             {% endif %}
                                             <li role="presentation">
-                                                <a href="{% url 'engagment_open_findings' eng.id %}?active=true">
+                                                <a href="{% url 'engagement_open_findings' eng.id %}">
                                                 <i class="fa fa-file-text-o"></i> View Open Findings
                                                 </a>
                                             </li>
                                             <li role="presentation">
-                                                <a href="{% url 'engagment_all_findings' eng.id %}">
+                                                <a href="{% url 'engagement_all_findings' eng.id %}">
                                                 <i class="fa fa-file-text-o"></i> View All Findings
                                                 </a>
                                             </li>
@@ -923,7 +923,7 @@
                         <div class="panel-heading">
                             <h4><span class="fa fa-key" aria-hidden="true"></span>
                                 Credentials
-                                {% if creds %}
+                                {% if creds and eng|has_object_permission:"Engagement_Edit" %}
                                     <a title="Add New Credential" class="pull-right btn btn-sm btn-primary"
                                         href="{% url 'new_cred_product_engagement' eng.id %}"><span class="fa fa-plus"></span></a>
                                 {% endif %}
@@ -962,14 +962,18 @@
                                                     <li class="dropdown" style="list-style:none;">
                                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                                         <ul class="dropdown-menu">
+                                                            {% if user.is_superuser %}
                                                             <li>
                                                                 <a class="" href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id %}">
                                                                 View</a>
                                                             </li>
+                                                            {% endif %}
+                                                            {% if eng|has_object_permission:"Engagement_Edit" %}
                                                             <li>
                                                                 <a class="" href="{% url 'delete_cred_engagement' cred.engagement.id cred.id %}">
                                                                 Delete</a>
                                                             </li>
+                                                            {% endif %}
                                                         </ul>
                                                     </li>
                                                 </ul>
@@ -998,10 +1002,12 @@
                                                     <li class="dropdown" style="list-style:none;">
                                                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">&nbsp;<b class="fa fa-ellipsis-v"></b>&nbsp;</a>
                                                         <ul class="dropdown-menu">
+                                                            {% if user.is_superuser %}
                                                             <li>
                                                                 <a class="" href="{% url 'view_cred_product' cred.product.id cred.id %}">
                                                                 View</a>
                                                             </li>
+                                                            {% endif %}
                                                         </ul>
                                                     </li>
                                                 </ul>
