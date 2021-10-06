@@ -65,7 +65,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.pulls.create({
+            github.rest.pulls.create({
               owner: '${{ env.REPO_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release: Merge back ${{ github.event.inputs.release_number_new }} into dev from: ${{ env.NEW_BRANCH }}',
