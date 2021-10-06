@@ -1307,16 +1307,6 @@ class FindingFilter(FindingFilterWithTags):
             self.form.fields['endpoints'].queryset = get_authorized_endpoints(Permissions.Endpoint_View).distinct()
 
 
-class OpenFindingFilter(FindingFilter):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-class ClosedFindingFilter(FindingFilter):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
 class AcceptedFindingFilter(FindingFilter):
     risk_acceptance__created__date = \
         DateRangeFilter(label="Acceptance Date")

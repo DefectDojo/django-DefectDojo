@@ -16,7 +16,7 @@ from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 logger = logging.getLogger(__name__)
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def new_tool_config(request):
     if request.method == 'POST':
         tform = ToolConfigForm(request.POST)
@@ -57,7 +57,7 @@ def new_tool_config(request):
                   {'tform': tform})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def edit_tool_config(request, ttid):
     tool_config = Tool_Configuration.objects.get(pk=ttid)
     if request.method == 'POST':
@@ -107,7 +107,7 @@ def edit_tool_config(request, ttid):
                   })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def tool_config(request):
     confs = Tool_Configuration.objects.all().order_by('name')
     add_breadcrumb(title="Tool Configuration List", top_level=not len(request.GET), request=request)
