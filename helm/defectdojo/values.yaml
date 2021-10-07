@@ -242,7 +242,7 @@ django:
     type: emptyDir
     # in case if pvc specified, should point to the already existing pvc
     persistentVolumeClaim: media
-    
+
 
 initializer:
   run: true
