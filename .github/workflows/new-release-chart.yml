@@ -6,9 +6,6 @@ env:
 on:
   workflow_dispatch:
     inputs:
-      upload_url:
-        description: 'Where to upload the artifact (i.e. https://uploads.github.com/repos/octocat/Hello-World/releases/1/assets{?name,label})'
-        required: true
       release_number:
         description: 'Release number'
         required: true  
@@ -22,6 +19,12 @@ jobs:
         with:
           ref: master
           fetch-depth: 0
+      - name: Get upload URL
+        id: get-upload-url
+        uses: pdamianik/release-tag-to-upload-url-action@v1.0.1
+        with:
+          tag: ${{ github.event.inputs.release_number }}
+          token: ${{ github.token }}
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
@@ -48,7 +51,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.inputs.upload_url }}
+          upload_url: ${{ steps.get-upload-url.outputs.uploadUrl }}
           asset_path: ./build/defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
           asset_name: defectdojo-${{ steps.package-helm-chart.outputs.chart_version }}.tgz
           asset_content_type: application/tar+gzip
