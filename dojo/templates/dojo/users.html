@@ -42,7 +42,7 @@
                     <table id="users"
                         class="tablesorter-bootstrap table table-condensed table-striped">
                         <tr>
-                            {% if request.user.is_staff %}
+                            {% if request.user.is_staff or request.user.is_superuser %}
                             <th></th>
                             {% endif %}
                             <th class="nowrap">{% dojo_sort request 'First Name' 'first_name' %}</th>
@@ -60,7 +60,7 @@
                         </tr>
                         {% for u in users %}
                             <tr>
-                                {% if request.user.is_staff %}
+                                {% if request.user.is_staff or request.user.is_superuser %}
                                 <td>
                                     <ul>
                                         <li class="dropdown" style="list-style:none;position:absolute">

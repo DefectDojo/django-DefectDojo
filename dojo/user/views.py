@@ -243,7 +243,7 @@ def change_password(request):
         'form': form})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
 def user(request):
     users = Dojo_User.objects.all() \
         .select_related('usercontactinfo', 'global_role') \
@@ -317,7 +317,7 @@ def add_user(request):
         'to_add': True})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_staff or u.is_superuser)
 def view_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     authorized_products = Product.objects.filter(authorized_users__in=[user])
