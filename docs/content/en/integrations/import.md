@@ -109,11 +109,6 @@ Import HTML reports from Burp Enterprise Edition
 
 Import JSON output of cargo-audit scan report <https://crates.io/crates/cargo-audit>
 
-### CCVS Report
-
-Import JSON reports from \[CCVS
-API\](<https://github.com/William-Hill-Online/CCVS-API>)
-
 ### Checkov Report
 
 Import JSON reports of Infrastructure as Code vulnerabilities.

@@ -3131,13 +3131,6 @@
             },
             {
                "location":{
-                  "uri":"dojo/tools/ccvs/parser.py",
-                  "uriBaseId":"%SRCROOT%",
-                  "index":71
-               }
-            },
-            {
-               "location":{
                   "uri":"dojo/tools/checkov/parser.py",
                   "uriBaseId":"%SRCROOT%",
                   "index":72
@@ -10371,33 +10364,6 @@
                ],
                "partialFingerprints":{
                   "primaryLocationLineHash":"cab0142de042e1fa:1",
-                  "primaryLocationStartColumnFingerprint":"0"
-               }
-            },
-            {
-               "ruleId":"com.lgtm/python-queries:py/catch-base-exception",
-               "ruleIndex":13,
-               "message":{
-                  "text":"Except block directly handles BaseException."
-               },
-               "locations":[
-                  {
-                     "physicalLocation":{
-                        "artifactLocation":{
-                           "uri":"dojo/tools/ccvs/parser.py",
-                           "uriBaseId":"%SRCROOT%",
-                           "index":71
-                        },
-                        "region":{
-                           "startLine":27,
-                           "startColumn":13,
-                           "endColumn":20
-                        }
-                     }
-                  }
-               ],
-               "partialFingerprints":{
-                  "primaryLocationLineHash":"c19ccff678f4320d:1",
                   "primaryLocationStartColumnFingerprint":"0"
                }
             },

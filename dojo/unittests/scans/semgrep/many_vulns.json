@@ -366,36 +366,6 @@
     },
     {
       "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
-      "path": "tools/ccvs/parser.py",
-      "start": {
-        "line": 53,
-        "col": 34
-      },
-      "end": {
-        "line": 54,
-        "col": 51
-      },
-      "extra": {
-        "message": "Detected MD5 hash algorithm which is considered insecure. MD5 is not\ncollision resistant and is therefore not suitable as a cryptographic\nsignature. Use SHA256 or SHA3 instead.\n",
-        "metavars": {},
-        "metadata": {
-          "source-rule-url": "https://github.com/PyCQA/bandit/blob/d5f8fa0d89d7b11442fc6ec80ca42953974354c8/bandit/blacklists/calls.py#L59",
-          "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
-          "owasp": "A3: Sensitive Data Exposure",
-          "bandit-code": "B303",
-          "references": [
-            "https://tools.ietf.org/html/rfc6151",
-            "https://crypto.stackexchange.com/questions/44151/how-does-the-flame-malware-take-advantage-of-md5-collision",
-            "https://pycryptodome.readthedocs.io/en/latest/src/hash/sha3_256.html"
-          ]
-        },
-        "severity": "WARNING",
-        "is_ignored": false,
-        "lines": "                    unique_key = hashlib.md5(\n                        str(vuln).encode('utf-8')).hexdigest()"
-      }
-    },
-    {
-      "check_id": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5",
       "path": "tools/twistlock/parser.py",
       "start": {
         "line": 71,

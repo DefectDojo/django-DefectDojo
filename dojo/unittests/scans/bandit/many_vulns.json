@@ -3218,30 +3218,6 @@
       "loc": 187,
       "nosec": 0
     },
-    "dojo/tools\\ccvs\\__init__.py": {
-      "CONFIDENCE.HIGH": 0.0,
-      "CONFIDENCE.LOW": 0.0,
-      "CONFIDENCE.MEDIUM": 0.0,
-      "CONFIDENCE.UNDEFINED": 0.0,
-      "SEVERITY.HIGH": 0.0,
-      "SEVERITY.LOW": 0.0,
-      "SEVERITY.MEDIUM": 0.0,
-      "SEVERITY.UNDEFINED": 0.0,
-      "loc": 0,
-      "nosec": 0
-    },
-    "dojo/tools\\ccvs\\parser.py": {
-      "CONFIDENCE.HIGH": 1.0,
-      "CONFIDENCE.LOW": 0.0,
-      "CONFIDENCE.MEDIUM": 0.0,
-      "CONFIDENCE.UNDEFINED": 0.0,
-      "SEVERITY.HIGH": 0.0,
-      "SEVERITY.LOW": 0.0,
-      "SEVERITY.MEDIUM": 1.0,
-      "SEVERITY.UNDEFINED": 0.0,
-      "loc": 66,
-      "nosec": 0
-    },
     "dojo/tools\\checkmarx\\__init__.py": {
       "CONFIDENCE.HIGH": 0.0,
       "CONFIDENCE.LOW": 0.0,
@@ -5403,18 +5379,6 @@
       "nosec": 0
     },
     "dojo/unittests\\test_burp_parser.py": {
-      "CONFIDENCE.HIGH": 0.0,
-      "CONFIDENCE.LOW": 0.0,
-      "CONFIDENCE.MEDIUM": 0.0,
-      "CONFIDENCE.UNDEFINED": 0.0,
-      "SEVERITY.HIGH": 0.0,
-      "SEVERITY.LOW": 0.0,
-      "SEVERITY.MEDIUM": 0.0,
-      "SEVERITY.UNDEFINED": 0.0,
-      "loc": 18,
-      "nosec": 0
-    },
-    "dojo/unittests\\test_ccvs_parser.py": {
       "CONFIDENCE.HIGH": 0.0,
       "CONFIDENCE.LOW": 0.0,
       "CONFIDENCE.MEDIUM": 0.0,
@@ -8432,21 +8396,6 @@
       ],
       "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b313-b320-xml-bad-etree",
       "test_id": "B320",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "42                     vuln['image_id'] = tree['vendors'][vendor]['image_id']\n43                     unique_key = hashlib.md5(\n44                         str(vuln).encode('utf-8')).hexdigest()\n45                     item = get_item(vuln, test)\n",
-      "filename": "dojo/tools\\ccvs\\parser.py",
-      "issue_confidence": "HIGH",
-      "issue_severity": "MEDIUM",
-      "issue_text": "Use of insecure MD2, MD4, MD5, or SHA1 hash function.",
-      "line_number": 43,
-      "line_range": [
-        43,
-        44
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/latest/blacklists/blacklist_calls.html#b303-md5",
-      "test_id": "B303",
       "test_name": "blacklist"
     },
     {
