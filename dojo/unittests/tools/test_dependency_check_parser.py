@@ -595,6 +595,103 @@ class TestDependencyCheckParser(TestCase):
                         <software>cpe:/a:component3:component3:1.0</software>
                     </vulnerableSoftware>
                 </vulnerability>
+                <suppressedVulnerability source="NVD">
+                    <name>CVE-2019-7238</name>
+                    <cvssV2>
+                        <score>7.5</score>
+                        <accessVector>NETWORK</accessVector>
+                        <accessComplexity>LOW</accessComplexity>
+                        <authenticationr>NONE</authenticationr>
+                        <confidentialImpact>PARTIAL</confidentialImpact>
+                        <integrityImpact>PARTIAL</integrityImpact>
+                        <availabilityImpact>PARTIAL</availabilityImpact>
+                        <severity>HIGH</severity>
+                        <version>2.0</version>
+                        <exploitabilityScore>10.0</exploitabilityScore>
+                        <impactScore>6.4</impactScore>
+                    </cvssV2>
+                    <cvssV3>
+                        <baseScore>9.8</baseScore>
+                        <attackVector>NETWORK</attackVector>
+                        <attackComplexity>LOW</attackComplexity>
+                        <privilegesRequired>NONE</privilegesRequired>
+                        <userInteraction>NONE</userInteraction>
+                        <scope>UNCHANGED</scope>
+                        <confidentialityImpact>HIGH</confidentialityImpact>
+                        <integrityImpact>HIGH</integrityImpact>
+                        <availabilityImpact>HIGH</availabilityImpact>
+                        <baseSeverity>CRITICAL</baseSeverity>
+                        <exploitabilityScore>3.9</exploitabilityScore>
+                        <impactScore>5.9</impactScore>
+                        <version>3.0</version>
+                    </cvssV3>
+                    <cwes>
+                        <cwe>NVD-CWE-noinfo</cwe>
+                    </cwes>
+                    <description>Sonatype Nexus Repository Manager before 3.15.0 has Incorrect Access Control.</description>
+                    <references>
+                        <reference>
+                        <source>MISC</source>
+                        <url>https://support.sonatype.com/hc/en-us/articles/360017310793-CVE-2019-7238-Nexus-Repository-Manager-3-Missing-Access-Controls-and-Remote-Code-Execution-February-5th-2019</url>
+                        <name>https://support.sonatype.com/hc/en-us/articles/360017310793-CVE-2019-7238-Nexus-Repository-Manager-3-Missing-Access-Controls-and-Remote-Code-Execution-February-5th-2019</name>
+                        </reference>
+                    </references>
+                    <vulnerableSoftware>
+                        <software matched="true" versionEndExcluding="3.15.0">cpe:2.3:a:sonatype:nexus:*:*:*:*:*:*:*:*</software>
+                    </vulnerableSoftware>
+                </suppressedVulnerability>
+                <suppressedVulnerability source="NVD">
+                    <name>CVE-2017-1000487</name>
+                    <cvssV2>
+                        <score>7.5</score>
+                        <accessVector>NETWORK</accessVector>
+                        <accessComplexity>LOW</accessComplexity>
+                        <authenticationr>NONE</authenticationr>
+                        <confidentialImpact>PARTIAL</confidentialImpact>
+                        <integrityImpact>PARTIAL</integrityImpact>
+                        <availabilityImpact>PARTIAL</availabilityImpact>
+                        <severity>HIGH</severity>
+                        <version>2.0</version>
+                        <exploitabilityScore>10.0</exploitabilityScore>
+                        <impactScore>6.4</impactScore>
+                        <acInsufInfo>true</acInsufInfo>
+                    </cvssV2>
+                    <cvssV3>
+                        <baseScore>9.8</baseScore>
+                        <attackVector>NETWORK</attackVector>
+                        <attackComplexity>LOW</attackComplexity>
+                        <privilegesRequired>NONE</privilegesRequired>
+                        <userInteraction>NONE</userInteraction>
+                        <scope>UNCHANGED</scope>
+                        <confidentialityImpact>HIGH</confidentialityImpact>
+                        <integrityImpact>HIGH</integrityImpact>
+                        <availabilityImpact>HIGH</availabilityImpact>
+                        <baseSeverity>CRITICAL</baseSeverity>
+                        <exploitabilityScore>3.9</exploitabilityScore>
+                        <impactScore>5.9</impactScore>
+                        <version>3.1</version>
+                    </cvssV3>
+                    <cwes>
+                        <cwe>CWE-78</cwe>
+                    </cwes>
+                    <description>Plexus-utils before 3.0.16 is vulnerable to command injection because it does not correctly process the contents of double quoted strings.</description>
+                    <notes>This is our reason for not to upgrade it.</notes>
+                    <references>
+                        <reference>
+                        <source>MLIST</source>
+                        <url>https://lists.debian.org/debian-lts-announce/2018/01/msg00011.html</url>
+                        <name>[debian-lts-announce] 20180109 [SECURITY] [DLA 1237-1] plexus-utils2 security update</name>
+                        </reference>
+                        <reference>
+                        <source>DEBIAN</source>
+                        <url>https://www.debian.org/security/2018/dsa-4146</url>
+                        <name>DSA-4146</name>
+                        </reference>
+                    </references>
+                    <vulnerableSoftware>
+                        <software matched="true" versionEndExcluding="3.0.16">cpe:2.3:a:plexus-utils_project:plexus-utils:*:*:*:*:*:*:*:*</software>
+                    </vulnerableSoftware>
+                </suppressedVulnerability>
             </vulnerabilities>
         </dependency>
     </dependencies>
@@ -604,7 +701,8 @@ class TestDependencyCheckParser(TestCase):
         parser = DependencyCheckParser()
         findings = parser.get_findings(testfile, Test())
         items = findings
-        self.assertEqual(9, len(items))
+
+        self.assertEqual(11, len(items))
         # test also different component_name formats
 
         # identifier -> package url java + 2 relateddependencies
@@ -633,6 +731,7 @@ class TestDependencyCheckParser(TestCase):
             items[1].mitigation,
             "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description"
         )
+        self.assertEqual(items[1].tags, "related")
 
         self.assertEqual(
             items[2].title,
@@ -731,6 +830,18 @@ class TestDependencyCheckParser(TestCase):
             items[8].mitigation,
             "Update jquery:3.1.1 to at least the version recommended in the description"
         )
+
+        # Tests for two suppressed vulnerabilities,
+        # One for Suppressed with notes, the other is without.
+        self.assertEqual(items[9].active, False)
+        self.assertEqual(items[9].mitigation,
+                    '**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!\nUpdate jquery:3.1.1 to at least the version recommended in the description')
+        self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
+
+        self.assertEqual(items[10].active, False)
+        self.assertEqual(items[10].mitigation,
+                     '**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.\nUpdate jquery:3.1.1 to at least the version recommended in the description')
+        self.assertEqual(items[10].tags, "suppressed")
 
         # evidencecollected -> multiple product + multiple version
         # TODO? Seems like since v6.0.0 there's always a packageurl
