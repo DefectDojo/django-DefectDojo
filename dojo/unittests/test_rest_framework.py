@@ -1610,7 +1610,7 @@ class ImportLanguagesTest(BaseClass.RESTEndpointTest):
         self.viewset = ImportLanguagesView
         self.payload = {
             'product': 1,
-            'file': open("/app/dojo/unittests/files/defectdojo_cloc.json")
+            'file': open("dojo/unittests/files/defectdojo_cloc.json")
         }
         self.object_permission = True
         self.permission_check_class = Languages
