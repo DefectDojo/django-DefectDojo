@@ -11,6 +11,6 @@ class Command(BaseCommand):
     help = "Validate deduplication logic in settings"
 
     def handle(self, *args, **options):
-        errors = check_configuration_deduplication()
+        errors = check_configuration_deduplication(None)
         for error in errors:
             deduplicationLogger.error(f"{error} - Using default fields")
