@@ -64,6 +64,11 @@ def get_open_api3_json_schema():
     return schema
 
 
+# use ugly global to avoid generating the schema for every test/method (as it's slow)
+global open_api3_json_schema
+open_api3_json_schema = get_open_api3_json_schema()
+
+
 def skipIfNotSubclass(baseclass):
     def decorate(f):
         def wrapper(self, *args, **kwargs):
@@ -259,12 +264,12 @@ class BaseClass():
             self.client = APIClient()
             self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
             self.url = reverse(self.viewname + '-list')
-            self.schema = get_open_api3_json_schema()
+            self.schema = open_api3_json_schema
 
         def check_schema(self, schema, obj):
             schema_checker = SchemaChecker(self.schema["components"])
             # print(vars(schema_checker))
-            schema_checker.check(schema, obj)
+            schema_checker.check(self.schema, obj)
 
         # def get_valid_object_id(self):
         #     response = self.client.get(format_url(f"/{self.viewname}/"))
