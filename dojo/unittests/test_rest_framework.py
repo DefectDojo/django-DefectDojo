@@ -258,11 +258,6 @@ class BaseClass():
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
 
-        @classmethod
-        def setUpClass(cls):
-            super().setUpClass()
-            # cls.schema = get_open_api3_json_schema()
-
         def setUp(self):
             testuser = User.objects.get(username='admin')
             token = Token.objects.get(user=testuser)
