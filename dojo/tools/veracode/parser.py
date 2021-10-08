@@ -165,7 +165,6 @@ class VeracodeParser(object):
         if (_line_number is not None and _line_number.isdigit() and
                 _functionrelativelocation is not None and _functionrelativelocation.isdigit()):
             finding.line = int(_line_number) + int(_functionrelativelocation)
-            finding.line_number = finding.line
             finding.sast_source_line = finding.line
 
         _source_file = xml_node.attrib.get('sourcefile')

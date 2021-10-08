@@ -1800,12 +1800,6 @@ class Finding(models.Model):
                                    editable=False,
                                    verbose_name="Files",
                                    help_text="Files(s) related to the flaw.")
-    line_number = models.CharField(null=True,
-                                   blank=True,
-                                   max_length=200,
-                                   verbose_name="Line Number",
-                                   help_text="Deprecated will be removed, use line",
-                                   editable=False)  # Deprecated will be removed, use line
     sourcefilepath = models.TextField(null=True,
                                       blank=True,
                                       editable=False,

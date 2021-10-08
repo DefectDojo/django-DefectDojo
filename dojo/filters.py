@@ -1268,7 +1268,7 @@ class FindingFilter(FindingFilterWithTags):
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'endpoint_status',
-                   'line_number', 'reviewers', 'sourcefile',
+                   'reviewers', 'sourcefile',
                    'created', 'files', 'sla_start_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
 

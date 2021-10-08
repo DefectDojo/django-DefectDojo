@@ -840,7 +840,6 @@
     "pk": 2,
     "model": "dojo.finding",
     "fields": {
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -891,7 +890,6 @@
     "pk": 3,
     "model": "dojo.finding",
     "fields": {
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -942,7 +940,6 @@
     "pk": 4,
     "model": "dojo.finding",
     "fields": {
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -993,7 +990,6 @@
     "pk": 5,
     "model": "dojo.finding",
     "fields": {
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -1044,7 +1040,6 @@
     "pk": 6,
     "model": "dojo.finding",
     "fields": {
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -1095,7 +1090,6 @@
     "pk": 7,
     "model": "dojo.finding",
     "fields": {
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -1149,7 +1143,6 @@
     "pk": 22,
     "model": "dojo.finding",
     "fields": {
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -1200,7 +1193,6 @@
     "pk": 23,
     "model": "dojo.finding",
     "fields": {
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -1251,7 +1243,6 @@
     "pk": 24,
     "model": "dojo.finding",
     "fields": {
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -1303,7 +1294,6 @@
     "model": "dojo.finding",
     "fields": {
       "unique_id_from_tool": 12345,
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -1355,7 +1345,6 @@
     "model": "dojo.finding",
     "fields": {
       "unique_id_from_tool": 12345,
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -1407,7 +1396,6 @@
     "model": "dojo.finding",
     "fields": {
       "unique_id_from_tool": 6789,
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
@@ -1459,7 +1447,6 @@
     "model": "dojo.finding",
     "fields": {
       "unique_id_from_tool": 6789,
-      "line_number": null,
       "last_reviewed_by": null,
       "reviewers": [],
       "static_finding": false,
