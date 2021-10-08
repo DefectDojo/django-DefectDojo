@@ -795,8 +795,9 @@
 
         $('select').not('#notification-scope').addClass('selectpicker');
         $('.selectpicker').attr('data-live-search', 'true');
+        $('.selectpicker').attr('data-container', 'body');
         $('.selectpicker').css('width', '70%');
-        $('.selectpicker').selectpicker();
+        $('.selectpicker').selectpicker('render');
 
     });
 </script>
