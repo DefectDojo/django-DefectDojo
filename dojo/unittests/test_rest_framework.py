@@ -64,6 +64,11 @@ def get_open_api3_json_schema():
     return schema
 
 
+# use ugly global to aboid generating the schema for every test/method (it's slow)
+global open_api3_json_schema
+open_api3_json_schema = get_open_api3_json_schema()
+
+
 def skipIfNotSubclass(baseclass):
     def decorate(f):
         def wrapper(self, *args, **kwargs):
@@ -253,18 +258,23 @@ class BaseClass():
         def __init__(self, *args, **kwargs):
             DojoAPITestCase.__init__(self, *args, **kwargs)
 
+        @classmethod
+        def setUpClass(cls):
+            super().setUpClass()
+            # cls.schema = get_open_api3_json_schema()
+
         def setUp(self):
             testuser = User.objects.get(username='admin')
             token = Token.objects.get(user=testuser)
             self.client = APIClient()
             self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
             self.url = reverse(self.viewname + '-list')
-            self.schema = get_open_api3_json_schema()
+            self.schema = open_api3_json_schema
 
         def check_schema(self, schema, obj):
             schema_checker = SchemaChecker(self.schema["components"])
             # print(vars(schema_checker))
-            schema_checker.check(schema, obj)
+            schema_checker.check(self.schema, obj)
 
         # def get_valid_object_id(self):
         #     response = self.client.get(format_url(f"/{self.viewname}/"))
@@ -1605,7 +1615,7 @@ class ImportLanguagesTest(BaseClass.RESTEndpointTest):
         self.viewset = ImportLanguagesView
         self.payload = {
             'product': 1,
-            'file': open("/app/dojo/unittests/files/defectdojo_cloc.json")
+            'file': open("dojo/unittests/files/defectdojo_cloc.json")
         }
         self.object_permission = True
         self.permission_check_class = Languages
