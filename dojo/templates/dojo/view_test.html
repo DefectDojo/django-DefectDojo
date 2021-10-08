@@ -547,14 +547,14 @@
                     </button>
                 {% endif %}
             </div>
-            <ul class="dropdown-menu" style="overflow: hidden;" aria-labelledby="dropdownMenu1" id="bulk_edit">
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
                 <li class="dropdown-header">Choose wisely...</li>
                 <li style="padding-left: 8px;padding-right: 8px;">
                     <form action="{% url 'finding_bulk_update_all_product' product_tab.product.id %}" method="post" id="bulk_change_form">
                         {% csrf_token %}
                         <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                         <label style="display: block" for="severity">Severity</label>
-                        <select name="severity" data-container="body" id="severity" style="font-size: 80%">
+                        <select name="severity" id="severity" style="font-size: 80%">
                             <option value="">Choose...</option>
                             <option value="Info">Info</option>
                             <option value="Low">Low</option>
