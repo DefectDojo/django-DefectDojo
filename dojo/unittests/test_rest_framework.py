@@ -64,7 +64,7 @@ def get_open_api3_json_schema():
     return schema
 
 
-# use ugly global to aboid generating the schema for every test/method (it's slow)
+# use ugly global to avoid generating the schema for every test/method (as it's slow)
 global open_api3_json_schema
 open_api3_json_schema = get_open_api3_json_schema()
 
