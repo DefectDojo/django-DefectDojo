@@ -30,7 +30,8 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, Cobaltio_Product, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
-    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member
+    Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
+    Product_API_Scan_Configuration
 
 from dojo.tools.factory import requires_file, get_choices_sorted
 from dojo.user.helper import user_is_authorized
@@ -2105,6 +2106,31 @@ class DeleteBenchmarkForm(forms.ModelForm):
 #     class Meta:
 #         model = JIRA_Project
 #         exclude = ['product']
+
+
+class Product_API_Scan_ConfigurationForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(Product_API_Scan_ConfigurationForm, self).__init__(*args, **kwargs)
+
+    tool_configuration = forms.ModelChoiceField(
+        label='Tool Configuration',
+        queryset=Tool_Configuration.objects.all().order_by('name'),
+        required=True,
+        widget=forms.Select(attrs={"onChange": 'refresh_tool_type(this.value);'})
+    )
+
+    class Meta:
+        model = Product_API_Scan_Configuration
+        exclude = ['product']
+
+
+class DeleteProduct_API_Scan_ConfigurationForm(forms.ModelForm):
+    id = forms.IntegerField(required=True, widget=forms.widgets.HiddenInput())
+
+    class Meta:
+        model = Product_API_Scan_Configuration
+        fields = ['id']
 
 
 class Sonarqube_ProductForm(forms.ModelForm):
