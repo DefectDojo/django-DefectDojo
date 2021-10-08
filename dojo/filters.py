@@ -239,7 +239,6 @@ def get_finding_filter_fields(metrics=False, similar=False):
         ])
 
     fields.extend([
-                'sourcefilepath',
                 'param',
                 'payload',
                 'risk_acceptance',
@@ -1020,8 +1019,6 @@ class ApiFindingFilter(DojoFilter):
     severity = CharFilter(method=custom_filter, field_name='severity')
     severity_justification = CharFilter(lookup_expr='icontains')
     step_to_reproduce = CharFilter(lookup_expr='icontains')
-    sourcefile = CharFilter(lookup_expr='icontains')
-    sourcefilepath = CharFilter(lookup_expr='icontains')
     unique_id_from_tool = CharFilter(lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
     # DateRangeFilter
@@ -1112,7 +1109,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ['url', 'is_template', 'thread_id', 'notes', 'files',
-                   'sourcefile', 'line', 'endpoint_status']
+                   'line', 'endpoint_status']
 
 
 class FindingFilter(FindingFilterWithTags):
@@ -1131,9 +1128,7 @@ class FindingFilter(FindingFilterWithTags):
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
 
-    # sourcefile = CharFilter(lookup_expr='icontains')
     file_path = CharFilter(lookup_expr='icontains')
-    sourcefilepath = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
     payload = CharFilter(lookup_expr='icontains')
 
@@ -1268,7 +1263,7 @@ class FindingFilter(FindingFilterWithTags):
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'endpoint_status',
-                   'reviewers', 'sourcefile',
+                   'reviewers',
                    'created', 'files', 'sla_start_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
 

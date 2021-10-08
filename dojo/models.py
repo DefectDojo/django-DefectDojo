@@ -1800,16 +1800,6 @@ class Finding(models.Model):
                                    editable=False,
                                    verbose_name="Files",
                                    help_text="Files(s) related to the flaw.")
-    sourcefilepath = models.TextField(null=True,
-                                      blank=True,
-                                      editable=False,
-                                      verbose_name="Source File Path",
-                                      help_text="Filepath of the source code file in which the flaw is located.")  # Not used? to remove
-    sourcefile = models.TextField(null=True,
-                                  blank=True,
-                                  editable=False,
-                                  verbose_name="Source File",
-                                  help_text="Name of the source code file in which the flaw is located.")
     param = models.TextField(null=True,
                              blank=True,
                              editable=False,

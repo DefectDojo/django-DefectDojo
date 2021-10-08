@@ -96,7 +96,6 @@ def get_item(vuln):
 
     location = vuln['location']
     file_path = location['file'] if 'file' in location else None
-    sourcefile = location['file'] if 'file' in location else None
 
     line = location['start_line'] if 'start_line' in location else None
     if 'end_line' in location:
@@ -152,7 +151,6 @@ def get_item(vuln):
                       unique_id_from_tool=unique_id_from_tool,
                       references=references,
                       file_path=file_path,
-                      sourcefile=sourcefile,
                       line=line,
                       sast_source_object=sast_object,
                       sast_sink_object=sast_object,
