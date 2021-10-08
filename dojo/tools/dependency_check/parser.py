@@ -309,6 +309,7 @@ class DependencyCheckParser(object):
 
         if dependencies:
             for dependency in dependencies.findall(namespace + 'dependency'):
+                logger.debug('parsing dependency: %s', self.get_field_value(dependency, 'fileName', namespace))
                 vulnerabilities = dependency.find(namespace + 'vulnerabilities')
                 if vulnerabilities is not None:
                     for vulnerability in vulnerabilities.findall(namespace + 'vulnerability'):
@@ -321,11 +322,11 @@ class DependencyCheckParser(object):
                             finding = self.get_finding_from_vulnerability(dependency, None, suppressedVulnerability, test, namespace)
                             self.add_finding(finding, dupes)
 
-                relatedDependencies = dependency.find(namespace + 'relatedDependencies')
-                if relatedDependencies:
-                    for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
-                        finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
-                        self.add_finding(finding, dupes)
+                    relatedDependencies = dependency.find(namespace + 'relatedDependencies')
+                    if relatedDependencies:
+                        for relatedDependency in relatedDependencies.findall(namespace + 'relatedDependency'):
+                            finding = self.get_finding_from_vulnerability(dependency, relatedDependency, vulnerability, test, namespace)
+                            self.add_finding(finding, dupes)
 
         return list(dupes.values())
 
