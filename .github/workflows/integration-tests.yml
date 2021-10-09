@@ -84,7 +84,29 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        docker-image: ["tests/group_test.py", "test/finding_test.py"]
+        docker-image: [
+          "tests/finding_test.py",
+          "tests/report_builder_test.py",
+          "tests/notes_test.py",
+          "tests/regulations_test.py",
+          "tests/product_type_test.py",
+          "tests/product_test.py",
+          "tests/endpoint_test.py",
+          "tests/engagement_test.py",
+          "tests/environment_test.py",
+          "tests/test_test.py",
+          "tests/user_test.py",
+          "tests/group_test.py",
+          "tests/product_group_test.py",
+          "tests/product_type_group_test.py",
+          "tests/product_member_test.py",
+          "tests/product_type_member_test.py",
+          "tests/ibm_appscan_test.py",
+          "tests/search_test.py",
+          "tests/file_test.py",
+          "tests/dedupe_test.py",
+          "tests/check_various_pages.py",
+        ]
 
     steps:
 
