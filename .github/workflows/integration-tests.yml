@@ -140,7 +140,7 @@ jobs:
       - name: Integration tests
         run: docker-compose up --exit-code-from integration-tests integration-tests
         env:
-          DD_INTEGRATION_TEST_FILENAME: ${{ matrix.docker-image }}
+          DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}
 
       - name: Logs
         if: always()
