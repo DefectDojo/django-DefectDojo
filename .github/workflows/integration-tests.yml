@@ -107,6 +107,7 @@ jobs:
           "tests/dedupe_test.py",
           "tests/check_various_pages.py",
         ]
+      fail-fast: false
 
     steps:
 
