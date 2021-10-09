@@ -82,6 +82,10 @@ jobs:
     name: integration tests
     needs: build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        docker-image: ["tests/group_test.py", "test/finding_test.py"]
+
     steps:
 
       - name: Checkout
@@ -112,6 +116,8 @@ jobs:
 
       - name: Integration tests
         run: docker-compose up --exit-code-from integration-tests integration-tests
+        env:
+          DD_INTEGRATION_TEST_FILENAME: ${{ matrix.docker-image }}
 
       - name: Logs
         if: always()
