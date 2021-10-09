@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        docker-image: [
+        test-case: [
           "tests/finding_test.py",
           "tests/report_builder_test.py",
           "tests/notes_test.py",
