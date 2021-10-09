@@ -1686,10 +1686,6 @@ class Finding(models.Model):
                              on_delete=models.CASCADE,
                              verbose_name="Test",
                              help_text="The test that is associated with this flaw.")
-    # TODO: Will be deprecated soon
-    is_template = models.BooleanField(default=False,
-                                      verbose_name="Is Template",
-                                      help_text="Denotes if this finding is a template and can be reused.")
     active = models.BooleanField(default=True,
                                  verbose_name="Active",
                                  help_text="Denotes if this flaw is active or not.")
