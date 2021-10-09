@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0127_remove_hashes'),
+        ('dojo', '0128_pytz_update'),
     ]
 
     operations = [
