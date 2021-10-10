@@ -119,7 +119,8 @@ EOD
   python3 manage.py migrate_textquestions
 
   initialize_test_types
-  
-  # do some checks
-  python3 manage.py check
+
 fi
+
+# do the check with Django stack
+python3 manage.py check
