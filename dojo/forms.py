@@ -1774,6 +1774,11 @@ class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
 
 
 class DojoUserForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(DojoUserForm, self).__init__(*args, **kwargs)
+        if not get_current_user().is_superuser and settings.USER_PROFILE_READ_ONLY:
+          for field in self.fields: self.fields[field].disabled=True
+
     class Meta:
         model = Dojo_User
         exclude = ['password', 'last_login', 'is_superuser', 'groups',
@@ -1878,6 +1883,8 @@ class UserContactInfoForm(forms.ModelForm):
         current_user = get_current_user()
         if not current_user.is_superuser:
             del self.fields['force_password_reset']
+            if settings.USER_PROFILE_READ_ONLY:
+              for field in self.fields: self.fields[field].disabled = True
 
 
 class GlobalRoleForm(forms.ModelForm):
