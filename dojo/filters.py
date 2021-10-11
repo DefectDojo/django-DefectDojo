@@ -1967,6 +1967,7 @@ class UserFilter(DojoFilter):
     first_name = CharFilter(lookup_expr='icontains')
     last_name = CharFilter(lookup_expr='icontains')
     username = CharFilter(lookup_expr='icontains')
+    email = CharFilter(lookup_expr='icontains')
     product_type = ModelMultipleChoiceFilter(
         queryset=Product_Type.objects.all(),
         label="Authorized Product Type")
@@ -1997,7 +1998,7 @@ class UserFilter(DojoFilter):
     class Meta:
         model = Dojo_User
         fields = ['is_staff', 'is_superuser', 'is_active', 'first_name',
-                  'last_name', 'username']
+                  'last_name', 'username', 'email']
         exclude = ['password', 'last_login', 'groups', 'user_permissions',
                    'date_joined']
 

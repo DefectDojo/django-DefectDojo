@@ -149,6 +149,13 @@ Follow these steps to setup API importing:
     API Import" as the scan type. If you have more than one asset configured you
     must also select which "Cobalt.io Config" to use.
 
+### CodeQL
+CodeQL can be used to generate a SARIF report, that can be imported into Defect Dojo:
+
+`codeql database analyze db python-security-and-quality.qls --sarif-add-snippets --format=sarif-latest --output=security-extended.sarif`
+
+The same can be achieved by running the CodeQL GitHub action with the `add-snippet` property set to true.
+
 ### Coverity API
 
 Export Coverity API view data in JSON format (`/api/viewContents/issues` endpoint).
@@ -226,7 +233,12 @@ Import report in JSON generated with -j option
 
 ### Dependency Check
 
-OWASP Dependency Check output can be imported in Xml format.
+OWASP Dependency Check output can be imported in Xml format. This parser ingests the vulnerable dependencies and inherits the suppressions. 
+
+* Suppressed vulnerabilities are tagged with the tag: `suppressed`. 
+* Suppressed vulnerabilities are marked as inactive, but not as mitigated.
+* If the suppression is missing any `<notes>` tag, it tags them as `no_suppression_document`. 
+* Related vulnerable dependencies are tagged with `related` tag.
 
 ### Dependency Track
 

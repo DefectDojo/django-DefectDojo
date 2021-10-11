@@ -72,6 +72,15 @@ update the source code first)
 Replace the first step above with this one: `docker-compose build`
 
 
+## Upgrading to DefectDojo Version 2.3.x.
+
+There are no special instruction for upgrading to 2.3.0. 
+In 2.3.0 we [changed the default password hashing algorithm to Argon2 (from PBKDF2)](https://github.com/DefectDojo/django-DefectDojo/pull/5205).
+When logging in, exising hashes get replaced by an Argon2 hash. If you want to rehash password without users having to login,
+please see the [Django password management docs](https://docs.djangoproject.com/en/3.2/topics/auth/passwords/).
+The previous password hashing algorithm (PBKDF2) was not unsafe, but we wanted to follow the [OWASP guidelines](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+
+
 ## Upgrading to DefectDojo Version 2.2.x.
 
 Upgrade to 2.0.0 contained migration of endpoints. Some parts of migration haven't been done properly. This deficiency
