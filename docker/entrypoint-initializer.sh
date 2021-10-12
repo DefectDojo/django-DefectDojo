@@ -121,6 +121,3 @@ EOD
   initialize_test_types
 
 fi
-
-# do the check with Django stack
-python3 manage.py check
