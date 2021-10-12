@@ -1006,7 +1006,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Aqua Scan': ['severity', 'cve', 'component_name', 'component_version'],
-    'Bandit Scan': ['file_path', 'line,' 'vuln_id_from_tool'],
+    'Bandit Scan': ['file_path', 'line', 'vuln_id_from_tool'],
     'CargoAudit Scan': ['cve', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
