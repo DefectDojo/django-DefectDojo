@@ -26,7 +26,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import
+    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Product_API_Scan_Configuration
 
 from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
@@ -626,6 +626,7 @@ def re_import_scan_results(request, tid):
     jira_project = jira_helper.get_jira_project(test)
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
     form.initial['api_scan_configuration'] = test.api_scan_configuration
+    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=test.engagement.product)
 
     # Decide if we need to present the Push to JIRA form
     if get_system_setting('enable_jira') and jira_project:
@@ -647,8 +648,7 @@ def re_import_scan_results(request, tid):
             branch_tag = form.cleaned_data.get('branch_tag', None)
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
-            sonarqube_config = None
-            cobaltio_config = None
+            api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
 
             endpoints_to_add = None  # not available on reimport UI
 
@@ -678,8 +678,7 @@ def re_import_scan_results(request, tid):
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings, group_by=group_by,
-                                                sonarqube_config=sonarqube_config,
-                                                cobaltio_config=cobaltio_config)
+                                                api_scan_configuration=api_scan_configuration)
             except Exception as e:
                 logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))

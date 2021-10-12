@@ -22,10 +22,10 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
     Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
-    UserContactInfo
+    UserContactInfo, Product_API_Scan_Configuration
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -1105,17 +1105,17 @@ class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
 
 
 # Authorization: staff
-class SonarqubeProductViewSet(mixins.ListModelMixin,
+class ProductAPIScanConfigurationViewSet(mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.DestroyModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
-    serializer_class = serializers.SonarqubeProductSerializer
-    queryset = Sonarqube_Product.objects.all()
+    serializer_class = serializers.ProductAPIScanConfigurationSerializer
+    queryset = Product_API_Scan_Configuration.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'product', 'sonarqube_project_key',
-                     'sonarqube_tool_config')
+    filter_fields = ('id', 'product', 'tool_configuration',
+                     'service_key_1', 'service_key_2', 'service_key_3')
     permission_classes = (IsAdminUser, DjangoModelPermissions)
 
 

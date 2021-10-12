@@ -18,5 +18,8 @@ class SonarQubeAPIParser(object):
     def requires_file(self, scan_type):
         return False
 
+    def requires_api_configuration(self):
+        return 'SonarQube'
+
     def get_findings(self, json_output, test):
         return SonarQubeApiImporter().get_findings(json_output, test)

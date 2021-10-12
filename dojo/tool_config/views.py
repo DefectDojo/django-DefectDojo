@@ -23,22 +23,22 @@ def new_tool_config(request):
         if tform.is_valid():
             form_copy = tform.save(commit=False)
             try:
-                tool_type_qs_sonarqube = Tool_Type.objects.filter(name='SonarQube')
-                if form_copy.tool_type in tool_type_qs_sonarqube:
-                    sq = SonarQubeAPI(form_copy)
-                    project_count = sq.test_connection()  # if connection is not successful, this call raise exception
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'SonarQube connection successful. You have access to {} projects'.format(project_count),
-                                         extra_tags='alert-success')
-                tool_type_qs_cobaltio = Tool_Type.objects.filter(name='Cobalt.io')
-                if form_copy.tool_type in tool_type_qs_cobaltio:
-                    cobalt = CobaltAPI(form_copy)
-                    org = cobalt.test_connection()  # if connection is not successful, this call raise exception
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'Cobalt.io connection successful. You have access to the "{}" org'.format(org["resource"]["name"]),
-                                         extra_tags='alert-success')
+                # tool_type_qs_sonarqube = Tool_Type.objects.filter(name='SonarQube')
+                # if form_copy.tool_type in tool_type_qs_sonarqube:
+                #     sq = SonarQubeAPI(form_copy)
+                #     project_count = sq.test_connection()  # if connection is not successful, this call raise exception
+                #     messages.add_message(request,
+                #                          messages.SUCCESS,
+                #                          'SonarQube connection successful. You have access to {} projects'.format(project_count),
+                #                          extra_tags='alert-success')
+                # tool_type_qs_cobaltio = Tool_Type.objects.filter(name='Cobalt.io')
+                # if form_copy.tool_type in tool_type_qs_cobaltio:
+                #     cobalt = CobaltAPI(form_copy)
+                #     org = cobalt.test_connection()  # if connection is not successful, this call raise exception
+                #     messages.add_message(request,
+                #                          messages.SUCCESS,
+                #                          'Cobalt.io connection successful. You have access to the "{}" org'.format(org["resource"]["name"]),
+                #                          extra_tags='alert-success')
                 form_copy.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -67,22 +67,22 @@ def edit_tool_config(request, ttid):
             form_copy.password = dojo_crypto_encrypt(tform.cleaned_data['password'])
             form_copy.ssh = dojo_crypto_encrypt(tform.cleaned_data['ssh'])
             try:
-                tool_type_qs_sonarqube = Tool_Type.objects.filter(name='SonarQube')
-                if form_copy.tool_type in tool_type_qs_sonarqube:
-                    sq = SonarQubeAPI(form_copy)
-                    project_count = sq.test_connection()  # if connection is not successful, this call raise exception
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'SonarQube connection successful. You have access to {} projects'.format(project_count),
-                                         extra_tags='alert-success')
-                tool_type_qs_cobaltio = Tool_Type.objects.filter(name='Cobalt.io')
-                if form_copy.tool_type in tool_type_qs_cobaltio:
-                    cobalt = CobaltAPI(form_copy)
-                    org = cobalt.test_connection()  # if connection is not successful, this call raise exception
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'Cobalt.io connection successful. You have access to the "{}" org'.format(org["resource"]["name"]),
-                                         extra_tags='alert-success')
+                # tool_type_qs_sonarqube = Tool_Type.objects.filter(name='SonarQube')
+                # if form_copy.tool_type in tool_type_qs_sonarqube:
+                #     sq = SonarQubeAPI(form_copy)
+                #     project_count = sq.test_connection()  # if connection is not successful, this call raise exception
+                #     messages.add_message(request,
+                #                          messages.SUCCESS,
+                #                          'SonarQube connection successful. You have access to {} projects'.format(project_count),
+                #                          extra_tags='alert-success')
+                # tool_type_qs_cobaltio = Tool_Type.objects.filter(name='Cobalt.io')
+                # if form_copy.tool_type in tool_type_qs_cobaltio:
+                #     cobalt = CobaltAPI(form_copy)
+                #     org = cobalt.test_connection()  # if connection is not successful, this call raise exception
+                #     messages.add_message(request,
+                #                          messages.SUCCESS,
+                #                          'Cobalt.io connection successful. You have access to the "{}" org'.format(org["resource"]["name"]),
+                #                          extra_tags='alert-success')
                 form_copy.save()
                 messages.add_message(request,
                                      messages.SUCCESS,

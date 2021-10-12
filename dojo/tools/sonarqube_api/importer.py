@@ -53,13 +53,13 @@ class SonarQubeApiImporter(object):
     @staticmethod
     def prepare_client(test):
         product = test.engagement.product
-        if test.sonarqube_config:
-            config = test.sonarqube_config  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
+        if test.api_scan_configuration:
+            config = test.api_scan_configuration  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
             # Double check of config
             if config.product != product:
                 raise Exception('Product SonarQube Configuration and "Product" mismatch')
         else:
-            sqqs = product.sonarqube_product_set.filter(product=product)
+            sqqs = product.product_api_scan_configuration_set.filter(product=product)
             if sqqs.count() == 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 4
                 config = sqqs.first()
             elif sqqs.count() > 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6

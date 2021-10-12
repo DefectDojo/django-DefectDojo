@@ -33,7 +33,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
     Product_API_Scan_Configuration
 
-from dojo.tools.factory import requires_file, get_choices_sorted
+from dojo.tools.factory import requires_file, get_choices_sorted, requires_api_configuration
 from dojo.user.helper import user_is_authorized
 from django.urls import reverse
 from tagulous.forms import TagField
@@ -437,7 +437,7 @@ class ImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
-    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects.none(), required=False, label='API Scan Configuration')
 
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
@@ -468,6 +468,12 @@ class ImportScanForm(forms.Form):
         file = cleaned_data.get("file")
         if requires_file(scan_type) and not file:
             raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
+        tool_type = requires_api_configuration(scan_type)
+        if tool_type:
+            api_scan_configuration = cleaned_data.get('api_scan_configuration')
+            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+                raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
+
         return cleaned_data
 
     # date can only be today or in the past, not the future
@@ -531,6 +537,12 @@ class ReImportScanForm(forms.Form):
         file = cleaned_data.get("file")
         if requires_file(self.scan_type) and not file:
             raise forms.ValidationError("Uploading a report file is required for re-uploading findings.")
+        tool_type = requires_api_configuration(self.scan_type)
+        if tool_type:
+            api_scan_configuration = cleaned_data.get('api_scan_configuration')
+            if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
+                raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
+
         return cleaned_data
 
     # date can only be today or in the past, not the future

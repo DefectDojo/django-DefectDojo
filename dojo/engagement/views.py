@@ -32,7 +32,7 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type, Product_API_Scan_Configuration
 from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
@@ -530,10 +530,13 @@ def import_scan_results(request, eid=None, pid=None):
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
         engagement_or_product = engagement
+        product = engagement.product
+        form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=engagement.product)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
     elif pid:
         product = get_object_or_404(Product, id=pid)
         engagement_or_product = product
+        form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
     elif not user.is_staff:
         raise PermissionDenied
 
@@ -568,8 +571,7 @@ def import_scan_results(request, eid=None, pid=None):
             branch_tag = form.cleaned_data.get('branch_tag', None)
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
-            sonarqube_config = None
-            cobaltio_config = None
+            api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
             close_old_findings = form.cleaned_data.get('close_old_findings', None)
             # Will save in the provided environment or in the `Development` one if absent
             environment_id = request.POST.get('environment', 'Development')
@@ -614,7 +616,7 @@ def import_scan_results(request, eid=None, pid=None):
                 test, finding_count, closed_finding_count = importer.import_scan(scan, scan_type, engagement, user, environment, active=active, verified=verified, tags=tags,
                             minimum_severity=minimum_severity, endpoints_to_add=form.cleaned_data['endpoints'], scan_date=scan_date,
                             version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, push_to_jira=push_to_jira,
-                            close_old_findings=close_old_findings, group_by=group_by, sonarqube_config=sonarqube_config, cobaltio_config=cobaltio_config)
+                            close_old_findings=close_old_findings, group_by=group_by, api_scan_configuration=api_scan_configuration)
 
                 message = f'{scan_type} processed a total of {finding_count} findings'
 
