@@ -387,9 +387,6 @@ def add_findings(request, tid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            create_template = new_finding.is_template
-            # always false now since this will be deprecated soon in favor of new Finding_Template model
-            new_finding.is_template = False
             new_finding.tags = form.cleaned_data['tags']
             new_finding.save(dedupe_option=False, push_to_jira=False)
             for ep in form.cleaned_data['endpoints']:
@@ -451,28 +448,6 @@ def add_findings(request, tid):
                 burp_rr.clean()
                 burp_rr.save()
 
-            if create_template:
-                templates = Finding_Template.objects.filter(title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(request,
-                                         messages.ERROR,
-                                         'A finding template was not created.  A template with this title already '
-                                         'exists.',
-                                         extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(title=new_finding.title,
-                                                cwe=new_finding.cwe,
-                                                severity=new_finding.severity,
-                                                description=new_finding.description,
-                                                mitigation=new_finding.mitigation,
-                                                impact=new_finding.impact,
-                                                references=new_finding.references,
-                                                numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A finding template was also created.',
-                                         extra_tags='alert-success')
             if '_Finished' in request.POST:
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
@@ -545,10 +520,6 @@ def add_temp_finding(request, tid, fid):
             new_finding.date = datetime.today()
             finding_helper.update_finding_status(new_finding, request.user)
 
-            create_template = new_finding.is_template
-            # is template always False now in favor of new model Finding_Template
-            # no further action needed here since this is already adding from template.
-            new_finding.is_template = False
             new_finding.save(dedupe_option=False, false_history=False)
             for ep in form.cleaned_data['endpoints']:
                 eps, created = Endpoint_Status.objects.get_or_create(
@@ -571,29 +542,6 @@ def add_temp_finding(request, tid, fid):
                                  messages.SUCCESS,
                                  'Finding from template added successfully.',
                                  extra_tags='alert-success')
-
-            if create_template:
-                templates = Finding_Template.objects.filter(title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(request,
-                                         messages.ERROR,
-                                         'A finding template was not created.  A template with this title already '
-                                         'exists.',
-                                         extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(title=new_finding.title,
-                                                cwe=new_finding.cwe,
-                                                severity=new_finding.severity,
-                                                description=new_finding.description,
-                                                mitigation=new_finding.mitigation,
-                                                impact=new_finding.impact,
-                                                references=new_finding.references,
-                                                numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A finding template was also created.',
-                                         extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
         else:

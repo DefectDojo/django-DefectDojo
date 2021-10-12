@@ -35,17 +35,8 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-
-      # build with docker so we can use layer caching
-      - name: Cache Docker layers
-        uses: actions/cache@v2
         with:
-          path: /tmp/.buildx-cache-${{ env.docker-image }}
-          key: ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}-${{ github.sha }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}-${{ github.workflow }}
-            ${{ runner.os }}-buildx-${{ env.docker-image }}
+          buildkitd-flags: --debug
 
       - name: Build
         id: docker_build
@@ -58,8 +49,8 @@ jobs:
             ${{ env.DD_DOCKER_REPO }}/defectdojo-${{ env.docker-image }}:latest
           file: Dockerfile.${{ env.docker-image }}
 
-          cache-from: type=local,src=/tmp/.buildx-cache-${{ env.docker-image }}
-          cache-to: type=local,dest=/tmp/.buildx-cache-${{ env.docker-image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # run tests with docker-compose
       - name: Set unit-test mode
