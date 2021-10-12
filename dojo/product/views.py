@@ -23,7 +23,7 @@ from dojo.forms import ProductForm, EngForm, DeleteProductForm, DojoMetaDataForm
                        EngagementPresetsForm, DeleteEngagementPresetsForm, ProductNotificationsForm, \
                        GITHUB_Product_Form, GITHUBFindingForm, AppAnalysisForm, JIRAEngagementForm, Add_Product_MemberForm, \
                        Edit_Product_MemberForm, Delete_Product_MemberForm, Add_Product_GroupForm, Edit_Product_Group_Form, Delete_Product_GroupForm, \
-                       DeleteAppAnalysisForm, DeleteSonarqubeConfigurationForm, DeleteCobaltioConfigurationForm, Product_API_Scan_ConfigurationForm
+                       DeleteAppAnalysisForm, Product_API_Scan_ConfigurationForm, DeleteProduct_API_Scan_ConfigurationForm
 from dojo.models import Product_Type, Note_Type, Finding, Product, Engagement, Test, GITHUB_PKey, \
                         Test_Type, System_Settings, Languages, App_Analysis, Benchmark_Type, Benchmark_Product_Summary, Endpoint_Status, \
                         Endpoint, Engagement_Presets, DojoMeta, Notifications, BurpRawRequestResponse, Product_Member, \
@@ -44,8 +44,6 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
-from dojo.tools.cobalt_api.api_client import CobaltAPI
 
 logger = logging.getLogger(__name__)
 

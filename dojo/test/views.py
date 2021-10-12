@@ -26,8 +26,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Sonarqube_Product, \
-    Cobaltio_Product
+    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import
 
 from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
@@ -626,6 +625,7 @@ def re_import_scan_results(request, tid):
     jform = None
     jira_project = jira_helper.get_jira_project(test)
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
+    form.initial['api_scan_configuration'] = test.api_scan_configuration
 
     # Decide if we need to present the Push to JIRA form
     if get_system_setting('enable_jira') and jira_project:
@@ -697,8 +697,6 @@ def re_import_scan_results(request, tid):
     product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    # form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
-    # form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,

@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0128_pytz_update'),
+        ('dojo', '0129_finding_deprecated_fields'),
     ]
 
     operations = [
@@ -21,5 +21,18 @@ class Migration(migrations.Migration):
                 ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dojo.product')),
                 ('tool_configuration', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dojo.tool_configuration')),
             ],
+        ),
+        migrations.RemoveField(
+            model_name='test',
+            name='cobaltio_config',
+        ),
+        migrations.RemoveField(
+            model_name='test',
+            name='sonarqube_config',
+        ),
+        migrations.AddField(
+            model_name='test',
+            name='api_scan_configuration',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='dojo.product_api_scan_configuration', verbose_name='API Scan Configuration'),
         ),
     ]

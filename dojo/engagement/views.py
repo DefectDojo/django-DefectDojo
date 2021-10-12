@@ -32,8 +32,7 @@ from dojo.forms import CheckForm, \
 from dojo.models import Finding, Product, Engagement, Test, \
     Check_List, Test_Import, Notes, \
     Risk_Acceptance, Development_Environment, Endpoint, \
-    Cred_Mapping, Dojo_User, System_Settings, Note_Type, \
-    Sonarqube_Product, Cobaltio_Product
+    Cred_Mapping, Dojo_User, System_Settings, Note_Type
 from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_success_message_to_response, get_page_items, add_breadcrumb, handle_uploaded_threat, \
     FileIterWrapper, get_cal_event, Product_Tab, is_scan_file_too_large, \
@@ -664,8 +663,6 @@ def import_scan_results(request, eid=None, pid=None):
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    # form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
-    # form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
     return render(request,
         'dojo/import_scan_results.html',
         {'form': form,

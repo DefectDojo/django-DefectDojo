@@ -22,7 +22,7 @@
                     <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
                         <li role="presentation">
                             <a href="{% url 'add_api_scan_configuration' pid %}">
-                                <i class="fa fa-pencil-square-o"></i> Add API Scan Configuration
+                                <i class="fa fa-plus"></i> Add API Scan Configuration
                             </a>
                         </li>
                     </ul>
@@ -40,7 +40,7 @@
                 <tr>
                     <td>
                         {% if request.user.is_superuser %}
-                            <a href="{% url 'edit_tool_type' product_api_scan_configuration.tool_configuration.id %}">
+                            <a href="{% url 'edit_tool_config' product_api_scan_configuration.tool_configuration.id %}">
                         {% endif %}
                         {{ product_api_scan_configuration.tool_configuration }}
                         {% if request.user.is_superuser %}

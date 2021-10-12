@@ -27,7 +27,7 @@ from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type
     JIRA_Issue, JIRA_Project, JIRA_Instance, GITHUB_Issue, GITHUB_PKey, GITHUB_Conf, UserContactInfo, Tool_Type, \
     Tool_Configuration, Tool_Product_Settings, Cred_User, Cred_Mapping, System_Settings, Notifications, \
     Languages, Language_Type, App_Analysis, Objects_Product, Benchmark_Product, Benchmark_Requirement, \
-    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, Sonarqube_Product, Cobaltio_Product, \
+    Benchmark_Product_Summary, Rule, Child_Rule, Engagement_Presets, DojoMeta, \
     Engagement_Survey, Answered_Survey, TextAnswer, ChoiceAnswer, Choice, Question, TextQuestion, \
     ChoiceQuestion, General_Survey, Regulation, FileUpload, SEVERITY_CHOICES, Product_Type_Member, \
     Product_Member, Global_Role, Dojo_Group, Product_Group, Product_Type_Group, Dojo_Group_Member, \
@@ -437,9 +437,7 @@ class ImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
-    # sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
-    # cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
-    product_api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
 
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
@@ -510,9 +508,7 @@ class ReImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
-    # sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
-    # cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
-    product_api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
+    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
 
     if settings.FEATURE_FINDING_GROUPS:
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')
@@ -835,8 +831,7 @@ class TestForm(forms.ModelForm):
                 self.fields['lead'].queryset = User.objects.filter(id__in=authorized_for_lead)
             else:
                 self.fields['lead'].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View)
-            self.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product)
-            self.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product)
+            self.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
         else:
             self.fields['lead'].queryset = User.objects.exclude(is_staff=False)
 
@@ -844,7 +839,7 @@ class TestForm(forms.ModelForm):
         model = Test
         fields = ['title', 'test_type', 'target_start', 'target_end', 'description',
                   'environment', 'percent_complete', 'tags', 'lead', 'version', 'branch_tag', 'build_id', 'commit_hash',
-                  'sonarqube_config', 'cobaltio_config']
+                  'api_scan_configuration']
 
 
 class DeleteTestForm(forms.ModelForm):
@@ -2119,7 +2114,6 @@ class Product_API_Scan_ConfigurationForm(forms.ModelForm):
         label='Tool Configuration',
         queryset=Tool_Configuration.objects.all().order_by('name'),
         required=True,
-        widget=forms.Select(attrs={"onChange": 'refresh_tool_type(this.value);'})
     )
 
     class Meta:
@@ -2133,40 +2127,6 @@ class DeleteProduct_API_Scan_ConfigurationForm(forms.ModelForm):
     class Meta:
         model = Product_API_Scan_Configuration
         fields = ['id']
-
-
-class Sonarqube_ProductForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(Sonarqube_ProductForm, self).__init__(*args, **kwargs)
-        Tool_Type.objects.get_or_create(name='SonarQube')
-
-    sonarqube_tool_config = forms.ModelChoiceField(
-        label='SonarQube Configuration',
-        queryset=Tool_Configuration.objects.filter(tool_type__name="SonarQube").order_by('name'),
-        required=True
-    )
-
-    class Meta:
-        model = Sonarqube_Product
-        exclude = ['product']
-
-
-class Cobaltio_ProductForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(Cobaltio_ProductForm, self).__init__(*args, **kwargs)
-        Tool_Type.objects.get_or_create(name='Cobalt.io')
-
-    cobaltio_tool_config = forms.ModelChoiceField(
-        label='Cobalt.io Configuration',
-        queryset=Tool_Configuration.objects.filter(tool_type__name="Cobalt.io").order_by('name'),
-        required=True
-    )
-
-    class Meta:
-        model = Cobaltio_Product
-        exclude = ['product', 'cobaltio_asset_name']
 
 
 class DeleteJIRAInstanceForm(forms.ModelForm):
@@ -2248,24 +2208,6 @@ class ToolConfigForm(forms.ModelForm):
                 code='invalid')
 
         return form_data
-
-
-class DeleteSonarqubeConfigurationForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Sonarqube_Product
-        fields = ['id']
-
-
-class DeleteCobaltioConfigurationForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Cobaltio_Product
-        fields = ['id']
 
 
 class DeleteObjectsSettingsForm(forms.ModelForm):
