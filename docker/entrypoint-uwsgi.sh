@@ -29,6 +29,9 @@ fi
 
 umask 0002
 
+# do the check with Django stack
+python3 manage.py check
+
 exec uwsgi \
   "--${DD_UWSGI_MODE}" "${DD_UWSGI_ENDPOINT}" \
   --protocol uwsgi \
