@@ -888,11 +888,6 @@ class Product_Type_Group(models.Model):
 class Tool_Type(models.Model):
     name = models.CharField(max_length=200)
     description = models.CharField(max_length=2000, null=True, blank=True)
-    additional_field_name_1 = models.CharField(max_length=200, null=True, blank=True)
-    additional_field_name_2 = models.CharField(max_length=200, null=True, blank=True)
-    additional_field_name_3 = models.CharField(max_length=200, null=True, blank=True)
-    additional_field_name_4 = models.CharField(max_length=200, null=True, blank=True)
-    additional_field_name_5 = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         ordering = ['name']
@@ -933,25 +928,26 @@ class Tool_Configuration(models.Model):
 class Product_API_Scan_Configuration(models.Model):
     product = models.ForeignKey(Product, null=False, blank=False, on_delete=models.CASCADE)
     tool_configuration = models.ForeignKey(Tool_Configuration, null=False, blank=False, on_delete=models.CASCADE)
-    additional_field_value_1 = models.CharField(max_length=200, null=True, blank=True)
-    additional_field_value_2 = models.CharField(max_length=200, null=True, blank=True)
-    additional_field_value_3 = models.CharField(max_length=200, null=True, blank=True)
-    additional_field_value_4 = models.CharField(max_length=200, null=True, blank=True)
-    additional_field_value_5 = models.CharField(max_length=200, null=True, blank=True)
+    service_key_1 = models.CharField(max_length=200, null=True, blank=True)
+    service_key_2 = models.CharField(max_length=200, null=True, blank=True)
+    service_key_3 = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         name = self.tool_configuration.name
-        if self.additional_field_value_1:
-            name += f' | {self.additional_field_value_1}'
-        if self.additional_field_value_2:
-            name += f' | {self.additional_field_value_2}'
-        if self.additional_field_value_3:
-            name += f' | {self.additional_field_value_3}'
-        if self.additional_field_value_4:
-            name += f' | {self.additional_field_value_4}'
-        if self.additional_field_value_5:
-            name += f' | {self.additional_field_value_5}'
+        if self.service_key_1 or self.service_key_2 or self.service_key_3:
+            name += f' ({self.details})'
         return name
+
+    @property
+    def details(self):
+        details = ''
+        if self.service_key_1:
+            details += f'{self.service_key_1}'
+        if self.service_key_2:
+            details += f' | {self.service_key_2}'
+        if self.service_key_3:
+            details += f' | {self.service_key_3}'
+        return details
 
 
 # declare form here as we can't import forms.py due to circular imports not even locally

@@ -569,8 +569,8 @@ def import_scan_results(request, eid=None, pid=None):
             branch_tag = form.cleaned_data.get('branch_tag', None)
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
-            sonarqube_config = form.cleaned_data.get('sonarqube_config', None)
-            cobaltio_config = form.cleaned_data.get('cobaltio_config', None)
+            sonarqube_config = None
+            cobaltio_config = None
             close_old_findings = form.cleaned_data.get('close_old_findings', None)
             # Will save in the provided environment or in the `Development` one if absent
             environment_id = request.POST.get('environment', 'Development')
@@ -664,8 +664,8 @@ def import_scan_results(request, eid=None, pid=None):
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
-    form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
+    # form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
+    # form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
     return render(request,
         'dojo/import_scan_results.html',
         {'form': form,

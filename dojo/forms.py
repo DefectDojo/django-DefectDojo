@@ -437,8 +437,9 @@ class ImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
-    sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
-    cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
+    # sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
+    # cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
+    product_api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
 
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
@@ -509,8 +510,9 @@ class ReImportScanForm(forms.Form):
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
-    sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
-    cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
+    # sonarqube_config = forms.ModelChoiceField(Sonarqube_Product.objects, required=False, label='SonarQube Config')
+    # cobaltio_config = forms.ModelChoiceField(Cobaltio_Product.objects, required=False, label='Cobalt.io Config')
+    product_api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
 
     if settings.FEATURE_FINDING_GROUPS:
         group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option')

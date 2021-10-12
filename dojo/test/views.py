@@ -647,8 +647,8 @@ def re_import_scan_results(request, tid):
             branch_tag = form.cleaned_data.get('branch_tag', None)
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
-            sonarqube_config = form.cleaned_data.get('sonarqube_config', None)
-            cobaltio_config = form.cleaned_data.get('cobaltio_config', None)
+            sonarqube_config = None
+            cobaltio_config = None
 
             endpoints_to_add = None  # not available on reimport UI
 
@@ -697,8 +697,8 @@ def re_import_scan_results(request, tid):
     product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
-    form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
+    # form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
+    # form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,
