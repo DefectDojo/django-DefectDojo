@@ -239,7 +239,6 @@ def get_finding_filter_fields(metrics=False, similar=False):
         ])
 
     fields.extend([
-                'sourcefilepath',
                 'param',
                 'payload',
                 'risk_acceptance',
@@ -1020,8 +1019,6 @@ class ApiFindingFilter(DojoFilter):
     severity = CharFilter(method=custom_filter, field_name='severity')
     severity_justification = CharFilter(lookup_expr='icontains')
     step_to_reproduce = CharFilter(lookup_expr='icontains')
-    sourcefile = CharFilter(lookup_expr='icontains')
-    sourcefilepath = CharFilter(lookup_expr='icontains')
     unique_id_from_tool = CharFilter(lookup_expr='icontains')
     title = CharFilter(lookup_expr='icontains')
     # DateRangeFilter
@@ -1111,8 +1108,8 @@ class ApiFindingFilter(DojoFilter):
 
     class Meta:
         model = Finding
-        exclude = ['url', 'is_template', 'thread_id', 'notes', 'files',
-                   'sourcefile', 'line', 'endpoint_status']
+        exclude = ['url', 'thread_id', 'notes', 'files',
+                   'line', 'endpoint_status']
 
 
 class FindingFilter(FindingFilterWithTags):
@@ -1131,9 +1128,7 @@ class FindingFilter(FindingFilterWithTags):
     is_mitigated = ReportBooleanFilter()
     mitigated = DateRangeFilter(label="Mitigated Date")
 
-    # sourcefile = CharFilter(lookup_expr='icontains')
     file_path = CharFilter(lookup_expr='icontains')
-    sourcefilepath = CharFilter(lookup_expr='icontains')
     param = CharFilter(lookup_expr='icontains')
     payload = CharFilter(lookup_expr='icontains')
 
@@ -1264,11 +1259,11 @@ class FindingFilter(FindingFilterWithTags):
         fields = get_finding_filter_fields()
 
         exclude = ['url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'is_template',
+                   'endpoint', 'references',
                    'thread_id', 'notes', 'scanner_confidence',
                    'numerical_severity', 'line', 'duplicate_finding',
                    'hash_code', 'endpoint_status',
-                   'line_number', 'reviewers', 'sourcefile',
+                   'reviewers',
                    'created', 'files', 'sla_start_date', 'cvssv3',
                    'severity_justification', 'steps_to_reproduce']
 
@@ -1905,7 +1900,7 @@ class ReportFindingFilter(FindingFilterWithTags):
         model = Finding
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ['date', 'cwe', 'url', 'description', 'mitigation', 'impact',
-                   'endpoint', 'references', 'test', 'is_template', 'sonarqube_issue'
+                   'endpoint', 'references', 'test', 'sonarqube_issue'
                    'thread_id', 'notes', 'endpoints', 'endpoint_status',
                    'numerical_severity', 'reporter', 'last_reviewed',
                    'jira_creation', 'jira_change', 'files']
