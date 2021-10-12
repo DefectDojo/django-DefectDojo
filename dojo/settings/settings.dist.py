@@ -169,7 +169,7 @@ env = environ.Env(
     DD_SAFETY_PARSER_ONLINE_DB=(bool, True),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
-    DD_PARSER_EXCLUDE=(str, ''),
+    DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
