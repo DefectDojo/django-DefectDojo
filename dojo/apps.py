@@ -1,9 +1,12 @@
-from django.apps import AppConfig
-from watson import search as watson
-from django.db import models
-
-
 import logging
+
+from django.apps import AppConfig
+from django.core.checks import register as register_check
+from django.db import models
+from watson import search as watson
+
+from dojo.checks import check_configuration_deduplication
+
 logger = logging.getLogger(__name__)
 
 
@@ -62,6 +65,8 @@ class DojoAppConfig(AppConfig):
 
         # YourModel = self.get_model("YourModel")
         # watson.register(YourModel)
+
+        register_check(check_configuration_deduplication, 'dojo')
 
 
 def get_model_fields_with_extra(model, extra_fields=()):
