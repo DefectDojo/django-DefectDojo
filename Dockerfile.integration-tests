@@ -43,7 +43,7 @@ RUN chmod -R ugo+w /usr/local/lib/python3.8/site-packages
 RUN mkdir /.local
 RUN chmod -R ugo+w /.local
 
-USER 1001
+# USER 1001
 ENV \
   DD_ADMIN_USER=admin \
   DD_ADMIN_PASSWORD='' \
