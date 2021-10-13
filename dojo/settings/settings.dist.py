@@ -1042,7 +1042,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
     'JFrog Xray Unified Scan': ['cve', 'file_path', 'component_name', 'component_version'],
-    'Scout Suite Scan': ['title', 'severity', 'description'],
+    'Scout Suite Scan': ['title', 'severity', 'vuln_id_from_tool'],
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
     'Github Vulnerability Scan': ['unique_id_from_tool'],

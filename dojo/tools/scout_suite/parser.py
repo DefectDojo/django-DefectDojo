@@ -41,7 +41,7 @@ class ScoutSuiteParser(object):
         test_description = "%s**Ruleset Description:** %s\n" % (test_description, last_run["ruleset_about"])
 
         # Summary of Services
-        test_description = "%s\n\nServices|Checked Items|Flagged Items|Max Level|Resource Count|Rules Count" % (test_description)
+        test_description = "%s\n\n Services | Checked Items | Flagged Items | Max Level | Resource Count | Rules Count" % (test_description)
         test_description = "%s\n:---|---:|---:|---:|---:|---:" % (test_description)
         for service, items in list(last_run["summary"].items()):
             test_description += "\n"
@@ -87,9 +87,7 @@ class ScoutSuiteParser(object):
             for finding_name in service_item.get("findings", []):
                 finding = service_item["findings"][finding_name]
                 for name in finding["items"]:
-                    description_text = finding.get("rationale", "")
-                    description_text += description_text + "\n**Location:** " + name + "\n\n---\n"
-                    description_text += description_text + "\n"
+                    description_text = finding.get("rationale", "") + "\n**Location:** " + name + "\n\n---\n"
                     key = name.split('.')
                     i = 1
                     lookup = service_item
@@ -105,17 +103,8 @@ class ScoutSuiteParser(object):
                     description_text = description_text + self.item_data
                     self.item_data = ""
 
-                    refs = finding["references"]
-                    mobsf_item = {
-                        "category": "Mobile Permissions",
-                        "title": finding["description"],
-                        "severity": finding["level"],
-                        "description": description_text,
-                        "references": ' '.join(filter(None, refs) if hasattr(refs, '__len__') else [])
-                    }
-
                     find = Finding(
-                        title=textwrap.shorten(finding["description"], 150),
+                        title=textwrap.shorten(f"{finding['description']}: {name}", 150),
                         date=last_run_date,
                         cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                         description=description_text,
