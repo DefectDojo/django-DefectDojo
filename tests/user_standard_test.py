@@ -4,11 +4,6 @@ import sys
 from base_test_class import BaseTestCase
 from user_test import UserTest
 
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver import ActionChains
-
 
 class UserStandardTest(BaseTestCase):
 
