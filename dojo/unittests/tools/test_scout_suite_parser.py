@@ -63,9 +63,8 @@ class TestScoutSuiteParser(TestCase):
         self.assertEqual(1, len(tests))
         test = tests[0]
         self.assertEqual("Scout Suite", test.name)
-        self.assertIn("AWS", test.description)
-        print(test.description)
-        self.assertIn("430150006394", test.description)
+        self.assertIn("Amazon Web Services", test.description)  # check that the Cloud provider is in the description
+        self.assertIn("430150006394", test.description)  # check that the account is in the description (very usefull)
         findings = test.findings
         self.assertEqual(356, len(findings))
         with self.subTest(i=0):

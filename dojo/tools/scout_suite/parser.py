@@ -48,11 +48,11 @@ class ScoutSuiteParser(object):
             test_description += "\n|"
             test_description += "|".join([
                 service,
-                items["checked_items"],
-                items["flagged_items"],
-                items["max_level"],
-                items["resources_count"],
-                items["rules_count"]
+                str(items["checked_items"]),
+                str(items["flagged_items"]),
+                str(items["max_level"]),
+                str(items["resources_count"]),
+                str(items["rules_count"])
             ])
             test_description += "|\n"
         test_description = "%s\n+-+-+-+-+-+" % (test_description)
