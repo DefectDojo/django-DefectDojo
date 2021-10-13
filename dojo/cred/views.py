@@ -631,11 +631,7 @@ def delete_cred_controller(request, destination_url, id, ttid):
                 cred_lookup = Cred_Mapping.objects.filter(
                     cred_id=cred.cred_id).exclude(finding__isnull=True)
                 message = "Credential is associated with finding(s). Remove the finding(s) before this credential can be deleted."
-                if cred_lookup.exists() is False:
-                    delete_cred = True
-            else:
-                if cred_lookup.exists() is False:
-                    delete_cred = True
+                delete_cred = True
         elif destination_url == "view_test" or destination_url == "view_finding":
             delete_cred = True
 
