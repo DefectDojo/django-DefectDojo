@@ -3,7 +3,6 @@ import unittest
 import sys
 from base_test_class import BaseTestCase
 from user_test import UserTest
-from django.test import override_settings
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -28,15 +27,14 @@ class UserStandardTest(BaseTestCase):
     def test_standard_user_login(self):
         self.login_standard_page()
 
-#    @override_settings(USER_PROFILE_READ_ONLY=True)
     def test_admin_profile_form(self):
         self.driver.get(self.base_url + "profile")
         self.assertTrue(self.driver.find_element_by_id('id_first_name').is_enabled())
 
-#    @override_settings(USER_PROFILE_READ_ONLY=True)
     def test_user_profile_form(self):
         self.driver.get(self.base_url + "profile")
         self.assertFalse(self.driver.find_element_by_id('id_first_name').is_enabled())
+
 
 def suite():
 

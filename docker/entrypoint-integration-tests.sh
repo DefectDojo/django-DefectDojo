@@ -206,6 +206,19 @@ else
     echo "Error: Check Various Pages test failed"; exit 1
 fi
 
+test="Read only user profile test"
+echo "Preparing configuration: USER_PROFILE_READ_ONLY=True"
+echo "USER_PROFILE_READ_ONLY=True" > /app/dojo/settings/local_settings.py
+
+echo "Running $test"
+if python3 tests/user_standard_test.py ; then
+    success $test
+else
+    fail $test
+fi
+echo "USER_PROFILE_READ_ONLY=False" > /app/dojo/settings/local_settings.py
+
+
 # The below tests are commented out because they are still an unstable work in progress
 ## Once Ready they can be uncommented.
 
