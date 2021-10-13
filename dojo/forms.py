@@ -1768,12 +1768,14 @@ class Edit_Product_Type_Group_Form(forms.ModelForm):
 
 
 class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
+
     def __init__(self, *args, **kwargs):
         super(Delete_Product_Type_GroupForm, self).__init__(*args, **kwargs)
         self.fields['role'].disabled = True
 
 
 class DojoUserForm(forms.ModelForm):
+
     def __init__(self, *args, **kwargs):
         super(DojoUserForm, self).__init__(*args, **kwargs)
         if not get_current_user().is_superuser and settings.USER_PROFILE_READ_ONLY:
