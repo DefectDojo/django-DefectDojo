@@ -41,11 +41,10 @@ class ScoutSuiteParser(object):
         test_description = "%s**Ruleset Description:** %s\n" % (test_description, last_run["ruleset_about"])
 
         # Summary of Services
-        test_description = "%s\n+-+-+-+-+-+" % (test_description)
-        test_description = "%s\n|Services|Checked Items|Max Level|Resource Count|Rules Count|\n\n" % (test_description)
-        test_description = "%s\n+-+-+-+-+-+" % (test_description)
+        test_description = "%s\n\nServices|Checked Items|Flagged Items|Max Level|Resource Count|Rules Count" % (test_description)
+        test_description = "%s\n:---|---:|---:|---:|---:|---:" % (test_description)
         for service, items in list(last_run["summary"].items()):
-            test_description += "\n|"
+            test_description += "\n"
             test_description += "|".join([
                 service,
                 str(items["checked_items"]),
@@ -54,8 +53,6 @@ class ScoutSuiteParser(object):
                 str(items["resources_count"]),
                 str(items["rules_count"])
             ])
-            test_description += "|\n"
-        test_description = "%s\n+-+-+-+-+-+" % (test_description)
 
         tests = list()
         test = ParserTest(
