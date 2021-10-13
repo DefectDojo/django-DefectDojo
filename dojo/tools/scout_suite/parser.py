@@ -104,12 +104,13 @@ class ScoutSuiteParser(object):
                     self.item_data = ""
 
                     find = Finding(
-                        title=textwrap.shorten(f"{finding['description']}: {name}", 150),
+                        title=textwrap.shorten(finding['description'], 150),
                         date=last_run_date,
                         cwe=1032,  # Security Configuration Weaknesses, would like to fine tune
                         description=description_text,
                         severity=self.getCriticalityRating(finding["level"]),
                         mitigation=finding.get("remediation"),
+                        file_path=name,  # we use file_path as a hack as there is no notion of "service" in finding today
                         dynamic_finding=True,
                         static_finding=False,
                         vuln_id_from_tool=":".join([data["provider_code"], finding_name]),
