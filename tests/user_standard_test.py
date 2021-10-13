@@ -1,4 +1,3 @@
-import os
 import unittest
 import sys
 from base_test_class import BaseTestCase
