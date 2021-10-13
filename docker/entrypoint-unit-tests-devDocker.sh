@@ -13,6 +13,9 @@ unset DD_DATABASE_URL
 python3 manage.py makemigrations dojo
 python3 manage.py migrate
 
+# do the check with Django stack
+python3 manage.py check
+
 python3 manage.py spectacular --fail-on-warn > /dev/null || {
     cat <<-EOF
 

@@ -732,9 +732,6 @@ def edit_finding(request, fid):
                 if new_finding.risk_accepted:
                     ra_helper.risk_unaccept(new_finding, perform_save=False)
 
-            create_template = new_finding.is_template
-            # always false now since this will be deprecated soon in favor of new Finding_Template model
-            new_finding.is_template = False
             new_finding.endpoints.set(form.cleaned_data['endpoints'])
             for endpoint in form.cleaned_data['endpoints']:
                 eps, created = Endpoint_Status.objects.get_or_create(
@@ -833,33 +830,6 @@ def edit_finding(request, fid):
                     messages.SUCCESS,
                     jira_message,
                     extra_tags='alert-success')
-
-            if create_template:
-                templates = Finding_Template.objects.filter(
-                    title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(
-                        request,
-                        messages.ERROR,
-                        'A finding template was not created.  A template with this title already '
-                        'exists.',
-                        extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(
-                        title=new_finding.title,
-                        cwe=new_finding.cwe,
-                        severity=new_finding.severity,
-                        description=new_finding.description,
-                        mitigation=new_finding.mitigation,
-                        impact=new_finding.impact,
-                        references=new_finding.references,
-                        numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(
-                        request,
-                        messages.SUCCESS,
-                        'A finding template was also created.',
-                        extra_tags='alert-success')
 
             return redirect_to_return_url_or_else(request, reverse('view_finding', args=(new_finding.id,)))
         else:

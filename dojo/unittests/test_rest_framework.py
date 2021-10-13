@@ -791,7 +791,6 @@ class FindingsTest(BaseClass.RESTEndpointTest):
             "impact": "HIGH",
             "references": "",
             "reporter": 3,
-            "is_template": False,
             "active": False,
             "verified": False,
             "false_p": False,

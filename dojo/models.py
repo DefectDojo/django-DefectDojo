@@ -1686,10 +1686,6 @@ class Finding(models.Model):
                              on_delete=models.CASCADE,
                              verbose_name="Test",
                              help_text="The test that is associated with this flaw.")
-    # TODO: Will be deprecated soon
-    is_template = models.BooleanField(default=False,
-                                      verbose_name="Is Template",
-                                      help_text="Denotes if this finding is a template and can be reused.")
     active = models.BooleanField(default=True,
                                  verbose_name="Active",
                                  help_text="Denotes if this flaw is active or not.")
@@ -1800,22 +1796,6 @@ class Finding(models.Model):
                                    editable=False,
                                    verbose_name="Files",
                                    help_text="Files(s) related to the flaw.")
-    line_number = models.CharField(null=True,
-                                   blank=True,
-                                   max_length=200,
-                                   verbose_name="Line Number",
-                                   help_text="Deprecated will be removed, use line",
-                                   editable=False)  # Deprecated will be removed, use line
-    sourcefilepath = models.TextField(null=True,
-                                      blank=True,
-                                      editable=False,
-                                      verbose_name="Source File Path",
-                                      help_text="Filepath of the source code file in which the flaw is located.")  # Not used? to remove
-    sourcefile = models.TextField(null=True,
-                                  blank=True,
-                                  editable=False,
-                                  verbose_name="Source File",
-                                  help_text="Name of the source code file in which the flaw is located.")
     param = models.TextField(null=True,
                              blank=True,
                              editable=False,
