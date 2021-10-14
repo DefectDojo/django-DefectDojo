@@ -111,8 +111,8 @@ class ScoutSuiteParser(object):
                         severity=self.getCriticalityRating(finding["level"]),
                         mitigation=finding.get("remediation"),
                         file_path=name,  # we use file_path as a hack as there is no notion of "service" in finding today
-                        dynamic_finding=True,
-                        static_finding=False,
+                        dynamic_finding=False,
+                        static_finding=True,
                         vuln_id_from_tool=":".join([data["provider_code"], finding_name]),
                     )
                     if finding.get("references"):
