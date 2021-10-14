@@ -169,7 +169,7 @@ env = environ.Env(
     DD_SAFETY_PARSER_ONLINE_DB=(bool, True),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
-    DD_PARSER_EXCLUDE=(str, ''),
+    DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -1042,7 +1042,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
     'JFrog Xray Unified Scan': ['cve', 'file_path', 'component_name', 'component_version'],
-    'Scout Suite Scan': ['title', 'severity', 'description'],
+    'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
     'Github Vulnerability Scan': ['unique_id_from_tool'],
