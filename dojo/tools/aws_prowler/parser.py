@@ -1,15 +1,12 @@
-# For Prowler CSV Export
-# Based on:
-# PROWLER_VERSION=2.4.0-07042021
 
-import re
-from datetime import date
-import sys
-import io
 import csv
-import textwrap
 import hashlib
+import io
 import json
+import re
+import sys
+import textwrap
+from datetime import date
 
 from dojo.models import Finding
 

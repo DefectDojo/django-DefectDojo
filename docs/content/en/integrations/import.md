@@ -60,9 +60,18 @@ auditjs ossi --json > auditjs_report.json
 The JSON output from AWS Security Hub exported with the `aws securityhub get-findings` (<https://docs.aws.amazon.com/cli/latest/reference/securityhub/get-findings.html>)
 command.
 
-### AWS Scout2 Scanner
+### AWS Scout2 Scanner (deprecated)
 
 JS file in scout2-report/inc-awsconfig/aws\_config.js.
+
+{{% alert title="Warning" color="warning" %}}
+AWS Scout2 Scanner is deprecated and has been replaced with ScoutSuite (https://github.com/nccgroup/ScoutSuite) upstream.
+Please switch to the new parser for ScoutSuite. 
+{{% /alert %}}
+
+{{% alert title="Warning" color="warning" %}}
+This parser is disactivated by default in releases >= 2.3.1 and will be removed in release >= 3.x.x.
+{{% /alert %}}
 
 ### AWS Prowler Scanner
 
