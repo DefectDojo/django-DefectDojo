@@ -16,6 +16,11 @@ class UserTest(BaseTestCase):
         f.write("USER_PROFILE_EDITABLE=False")
         f.close()
 
+    @staticmethod
+    def unset_user_read_only_parameter():
+        f = open('/app/dojo/settings/local_settings.py', 'w')
+        f.write("USER_PROFILE_EDITABLE=True")
+        f.close()
 
     @staticmethod
     def reload_service():
@@ -154,9 +159,15 @@ class UserTest(BaseTestCase):
         self.driver.get(self.base_url + "profile")
         self.assertTrue(self.driver.find_element_by_id('id_first_name').is_enabled())
 
-    def test_user_profile_form(self):
+    def test_user_profile_form_disabled(self):
         self.driver.get(self.base_url + "profile")
         self.assertFalse(self.driver.find_element_by_id('id_first_name').is_enabled())
+
+    def test_user_profile_form_enabled(self):
+        self.unset_user_read_only_parameter()
+        self.reload_service()
+        self.driver.get(self.base_url + "profile")
+        self.assertTrue(self.driver.find_element_by_id('id_first_name').is_enabled())
 
 def suite():
     suite = unittest.TestSuite()
@@ -168,7 +179,8 @@ def suite():
     suite.addTest(UserTest('test_admin_profile_form'))
     suite.addTest(BaseTestCase('test_logout'))
     suite.addTest(UserTest('test_standard_user_login'))
-    suite.addTest(UserTest('test_user_profile_form'))
+    suite.addTest(UserTest('test_user_profile_form_disabled'))
+    suite.addTest(UserTest('test_user_profile_form_enabled'))
     suite.addTest(BaseTestCase('test_logout'))
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_user_delete'))
