@@ -14,7 +14,7 @@ class UserStandardTest(BaseTestCase):
         f.close()
 
     @staticmethod
-    def reload_service(self):
+    def reload_service():
         Path("/app/dojo/settings/settings.py").touch()
 
     def login_standard_page(self):
