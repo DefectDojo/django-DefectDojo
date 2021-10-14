@@ -1,10 +1,21 @@
 import unittest
 import sys
+from pathlib import Path
 from base_test_class import BaseTestCase
 from user_test import UserTest
 
 
 class UserStandardTest(BaseTestCase):
+
+    @staticmethod
+    def add_user_read_only_parameter():
+        f = open('/app/dojo/settings/local_settings.py','w')
+        f.write("USER_PROFILE_READ_ONLY=True")
+        f.close()
+
+    @staticmethod
+    def reload_service(self):
+        Path("/app/dojo/settings/settings.py").touch()
 
     def login_standard_page(self):
         driver = self.driver
@@ -49,7 +60,8 @@ def suite():
 
 
 if __name__ == "__main__":
-
+    UserStandardTest.add_user_read_only_parameter()
+    UserStandardTest.reload_service()
     runner = unittest.TextTestRunner(descriptions=True, failfast=True, verbosity=2)
     ret = not runner.run(suite()).wasSuccessful()
     BaseTestCase.tearDownDriver()
