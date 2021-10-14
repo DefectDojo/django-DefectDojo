@@ -9,7 +9,7 @@ class UserStandardTest(BaseTestCase):
 
     @staticmethod
     def add_user_read_only_parameter():
-        f = open('/app/dojo/settings/local_settings.py','w')
+        f = open('/app/dojo/settings/local_settings.py', 'w')
         f.write("USER_PROFILE_READ_ONLY=True")
         f.close()
 
