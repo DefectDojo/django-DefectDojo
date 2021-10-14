@@ -1,3 +1,4 @@
+import time
 import unittest
 import sys
 from pathlib import Path
@@ -25,7 +26,6 @@ class UserTest(BaseTestCase):
     @staticmethod
     def reload_service():
         Path("/app/dojo/settings/settings.py").touch()
-
 
     def test_create_user(self):
         # Login to the site.
@@ -165,9 +165,11 @@ class UserTest(BaseTestCase):
 
     def test_user_profile_form_enabled(self):
         self.unset_user_read_only_parameter()
-        self.reload_service()
+        # Do not do function reload to avoid double reloading
+        time.sleep(5)
         self.driver.get(self.base_url + "profile")
         self.assertTrue(self.driver.find_element_by_id('id_first_name').is_enabled())
+
 
 def suite():
     suite = unittest.TestSuite()
@@ -175,7 +177,6 @@ def suite():
     # success and failure is output by the test
     suite.addTest(BaseTestCase('test_login'))
     suite.addTest(UserTest('test_create_user'))
-    suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_admin_profile_form'))
     suite.addTest(BaseTestCase('test_logout'))
     suite.addTest(UserTest('test_standard_user_login'))
@@ -183,6 +184,7 @@ def suite():
     suite.addTest(UserTest('test_user_profile_form_enabled'))
     suite.addTest(BaseTestCase('test_logout'))
     suite.addTest(BaseTestCase('test_login'))
+    suite.addTest(UserTest('test_user_edit_permissions'))
     suite.addTest(UserTest('test_user_delete'))
 
     # not really for the user we created, but still related to user settings

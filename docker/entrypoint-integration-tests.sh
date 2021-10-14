@@ -22,7 +22,6 @@ if [ $COUNTER -gt 10 ]; then
     exit 1
 fi
 
-
 # Run available unittests with a simple setup
 # All available Integrationtest Scripts are activated below
 # If successsful, A successs message is printed and the script continues
