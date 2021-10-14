@@ -215,8 +215,8 @@ else
     fi
 
     test="Read only user profile test"
-    echo "Preparing configuration: USER_PROFILE_READ_ONLY=True"
-    echo "USER_PROFILE_READ_ONLY=True" > /app/dojo/settings/local_settings.py
+    echo "Preparing configuration: USER_PROFILE_EDITABLE=True"
+    echo "USER_PROFILE_EDITABLE=Frue" > /app/dojo/settings/local_settings.py
     reload
 
     echo "Running $test"
@@ -225,7 +225,7 @@ else
     else
         fail $test
     fi
-    echo "USER_PROFILE_READ_ONLY=False" > /app/dojo/settings/local_settings.py
+    echo "USER_PROFILE_EDITABLE=True" > /app/dojo/settings/local_settings.py
     reload
 
 
