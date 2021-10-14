@@ -38,6 +38,10 @@ function success() {
     echo "Success: $1 test passed\n"
 }
 
+function reload() {
+  touch /app/dojo/settings/settings.py
+}
+
 test="Finding integration tests"
 echo "Running: $test"
 if python3 tests/finding_test.py ; then
@@ -46,172 +50,170 @@ else
     fail $test
 fi
 
-#test="Report Builder tests"
-#echo "Running: $test"
-#if python3 tests/report_builder_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Notes integration tests"
-#echo "Running: $test"
-#if python3 tests/notes_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Regulation integration tests"
-#echo "Running: $test"
-#if python3 tests/regulations_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Product type integration tests"
-#echo "Running: $test"
-#if python3 tests/product_type_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Product integration tests"
-#echo "Running: $test"
-#if python3 tests/product_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Endpoint integration tests"
-#echo "Running: $test"
-#if python3 tests/endpoint_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Engagement integration tests"
-#echo "Running: $test"
-#if python3 tests/engagement_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Environment integration tests"
-#echo "Running: $test"
-#if python3 tests/environment_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Test integration tests"
-#echo "Running: $test"
-#if python3 tests/test_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="User integration tests"
-#echo "Running: $test"
-#if python3 tests/user_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Group integration tests"
-#echo "Running: $test"
-#if python3 tests/group_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Product Group integration tests"
-#echo "Running: $test"
-#if python3 tests/product_group_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Product Type Group integration tests"
-#echo "Running: $test"
-#if python3 tests/product_type_group_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Product member integration tests"
-#echo "Running: $test"
-#if python3 tests/product_member_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Product type member integration tests"
-#echo "Running: $test"
-#if python3 tests/product_type_member_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Ibm Appscan integration test"
-#echo "Running: $test"
-#if python3 tests/ibm_appscan_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#
-#test="Search integration test"
-#echo "Running: $test"
-#if python3 tests/search_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="File Upload tests"
-#echo "Running: $test"
-#if python3 tests/file_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#test="Dedupe integration tests"
-#echo "Running: $test"
-#if python3 tests/dedupe_test.py ; then
-#    success $test
-#else
-#    fail $test
-#fi
-#
-#echo "Check Various Pages integration test"
-#if python3 tests/check_various_pages.py ; then
-#    echo "Success: Check Various Pages tests passed"
-#else
-#    echo "Error: Check Various Pages test failed"; exit 1
-#fi
+test="Report Builder tests"
+echo "Running: $test"
+if python3 tests/report_builder_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Notes integration tests"
+echo "Running: $test"
+if python3 tests/notes_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Regulation integration tests"
+echo "Running: $test"
+if python3 tests/regulations_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Product type integration tests"
+echo "Running: $test"
+if python3 tests/product_type_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Product integration tests"
+echo "Running: $test"
+if python3 tests/product_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Endpoint integration tests"
+echo "Running: $test"
+if python3 tests/endpoint_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Engagement integration tests"
+echo "Running: $test"
+if python3 tests/engagement_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Environment integration tests"
+echo "Running: $test"
+if python3 tests/environment_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Test integration tests"
+echo "Running: $test"
+if python3 tests/test_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="User integration tests"
+echo "Running: $test"
+if python3 tests/user_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Group integration tests"
+echo "Running: $test"
+if python3 tests/group_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Product Group integration tests"
+echo "Running: $test"
+if python3 tests/product_group_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Product Type Group integration tests"
+echo "Running: $test"
+if python3 tests/product_type_group_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Product member integration tests"
+echo "Running: $test"
+if python3 tests/product_member_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Product type member integration tests"
+echo "Running: $test"
+if python3 tests/product_type_member_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Ibm Appscan integration test"
+echo "Running: $test"
+if python3 tests/ibm_appscan_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+
+test="Search integration test"
+echo "Running: $test"
+if python3 tests/search_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="File Upload tests"
+echo "Running: $test"
+if python3 tests/file_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+test="Dedupe integration tests"
+echo "Running: $test"
+if python3 tests/dedupe_test.py ; then
+    success $test
+else
+    fail $test
+fi
+
+echo "Check Various Pages integration test"
+if python3 tests/check_various_pages.py ; then
+    echo "Success: Check Various Pages tests passed"
+else
+    echo "Error: Check Various Pages test failed"; exit 1
+fi
 
 test="Read only user profile test"
 echo "Preparing configuration: USER_PROFILE_READ_ONLY=True"
 echo "USER_PROFILE_READ_ONLY=True" > /app/dojo/settings/local_settings.py
-
-ls -la /app/dojo/settings/local_settings.py
-cat /app/dojo/settings/local_settings.py
+reload
 
 echo "Running $test"
 if python3 tests/user_standard_test.py ; then
@@ -220,6 +222,7 @@ else
     fail $test
 fi
 echo "USER_PROFILE_READ_ONLY=False" > /app/dojo/settings/local_settings.py
+reload
 
 
 # The below tests are commented out because they are still an unstable work in progress
