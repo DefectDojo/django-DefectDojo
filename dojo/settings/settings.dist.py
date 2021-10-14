@@ -206,7 +206,7 @@ env = environ.Env(
     # when enabled SonarQube API parser will download the security hotspots
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
     # when enabled standard users can't change their profile information, default False
-    DD_USER_PROFILE_READ_ONLY=(bool, False),
+    DD_USER_PROFILE_EDITABLE=(bool, True),
 )
 
 
@@ -1342,4 +1342,4 @@ DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
 SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
 
 # when enabled standard users can't change their profile information, default False
-USER_PROFILE_READ_ONLY = env("DD_USER_PROFILE_READ_ONLY")
+USER_PROFILE_EDITABLE = env("DD_USER_PROFILE_EDITABLE")
