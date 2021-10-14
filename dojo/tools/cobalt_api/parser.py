@@ -25,7 +25,7 @@ class CobaltApiParser(object):
     def requires_file(self, scan_type):
         return False
 
-    def requires_api_configuration(self):
+    def requires_tool_type(self):
         return 'Cobalt.io'
 
     def get_findings(self, file, test):

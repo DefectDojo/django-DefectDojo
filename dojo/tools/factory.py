@@ -58,12 +58,12 @@ def requires_file(scan_type):
     return False
 
 
-def requires_api_configuration(scan_type):
+def requires_tool_type(scan_type):
     if scan_type not in PARSERS:
         return None
     parser = PARSERS[scan_type]
-    if hasattr(parser, "requires_api_configuration"):
-        return parser.requires_api_configuration()
+    if hasattr(parser, "requires_tool_type"):
+        return parser.requires_tool_type()
     return None
 
 

@@ -17,7 +17,7 @@ from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Fin
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
     Network_Locations, UserContactInfo, Product_API_Scan_Configuration
 
-from dojo.tools.factory import requires_file, get_choices_sorted, requires_api_configuration
+from dojo.tools.factory import requires_file, get_choices_sorted, requires_tool_type
 from dojo.utils import is_scan_file_too_large
 from django.conf import settings
 from rest_framework import serializers
@@ -1256,7 +1256,7 @@ class ImportScanSerializer(serializers.Serializer):
         if file and is_scan_file_too_large(file):
             raise serializers.ValidationError(
                 'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
-        tool_type = requires_api_configuration(scan_type)
+        tool_type = requires_tool_type(scan_type)
         if tool_type:
             api_scan_configuration = data.get('api_scan_configuration')
             if tool_type != api_scan_configuration.tool_configuration.tool_type.name:
@@ -1348,7 +1348,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         if file and is_scan_file_too_large(file):
             raise serializers.ValidationError(
                 'Report file is too large. Maximum supported size is {} MB'.format(settings.SCAN_FILE_MAX_SIZE))
-        tool_type = requires_api_configuration(scan_type)
+        tool_type = requires_tool_type(scan_type)
         if tool_type:
             api_scan_configuration = data.get('api_scan_configuration')
             if tool_type != api_scan_configuration.tool_configuration.tool_type.name:

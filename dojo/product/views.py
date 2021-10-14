@@ -44,6 +44,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.product.queries import get_authorized_products, get_authorized_members_for_product, get_authorized_groups_for_product
 from dojo.product_type.queries import get_authorized_members_for_product_type, get_authorized_groups_for_product_type
+from dojo.tool_config.factory import create_API
 
 logger = logging.getLogger(__name__)
 
@@ -1571,13 +1572,13 @@ def add_api_scan_configuration(request, pid):
             product_api_scan_configuration = form.save(commit=False)
             product_api_scan_configuration.product = product
             try:
-                # sq = SonarQubeAPI(sonarqube_product.sonarqube_tool_config)
-                # project = sq.get_project(sonarqube_product.sonarqube_project_key)  # if connection is not successful, this call raise exception
-                # messages.add_message(request,
-                #                      messages.SUCCESS,
-                #                      'SonarQube connection successful. You have access to project "{}"'.format(
-                #                          project['name']),
-                #                      extra_tags='alert-success')
+                api = create_API(product_api_scan_configuration.tool_configuration)
+                if api and hasattr(api, 'test_product_connection'):
+                    result = api.test_product_connection(product_api_scan_configuration)
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         f'API connection successful with message: {result}.',
+                                         extra_tags='alert-success')
                 product_api_scan_configuration.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
@@ -1588,6 +1589,7 @@ def add_api_scan_configuration(request, pid):
                 else:
                     return HttpResponseRedirect(reverse('view_api_scan_configurations', args=(pid,)))
             except Exception as e:
+                logger.info(e)
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),
@@ -1633,14 +1635,13 @@ def edit_api_scan_configuration(request, pid, pascid):
         if form.is_valid():
             try:
                 form_copy = form.save(commit=False)
-                # sq = SonarQubeAPI(sqcform_copy.sonarqube_tool_config)
-                # project = sq.get_project(
-                #     sqcform_copy.sonarqube_project_key)  # if connection is not successful, this call raise exception
-                # messages.add_message(request,
-                #                      messages.SUCCESS,
-                #                      'SonarQube connection successful. You have access to project "{}"'.format(
-                #                          project['name']),
-                #                      extra_tags='alert-success')
+                api = create_API(form_copy.tool_configuration)
+                if api and hasattr(api, 'test_product_connection'):
+                    result = api.test_product_connection(form_copy)
+                    messages.add_message(request,
+                                         messages.SUCCESS,
+                                         f'API connection successful with message: {result}.',
+                                         extra_tags='alert-success')
                 form.save()
 
                 messages.add_message(request,
@@ -1649,6 +1650,7 @@ def edit_api_scan_configuration(request, pid, pascid):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('view_api_scan_configurations', args=(pid,)))
             except Exception as e:
+                logger.info(e)
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),

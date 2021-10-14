@@ -353,9 +353,15 @@ class SonarQubeAPI:
         )
 
         if response.ok:
-            return response.json()['paging']['total']
+            num_projects = response.json()['paging']['total']
+            return f'You have access to {num_projects} projects'
 
         else:
             raise Exception("Unable to connect and search in SonarQube due to {} - {}".format(
                 response.status_code, response.content.decode("utf-8")
             ))
+
+    def test_product_connection(self, api_scan_configuration):
+        project = self.get_project(api_scan_configuration.service_key_1)
+        project_name = project.get('name')
+        return f'You have access to project {project_name}'

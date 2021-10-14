@@ -70,7 +70,7 @@ class SonarQubeApiImporter(object):
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
                 config = None
 
-        return SonarQubeAPI(tool_config=config.sonarqube_tool_config if config else None), config
+        return SonarQubeAPI(tool_config=config.tool_configuration if config else None), config
 
     def import_issues(self, test):
 
@@ -80,8 +80,8 @@ class SonarQubeApiImporter(object):
 
             client, config = self.prepare_client(test)
 
-            if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.sonarqube_project_key)
+            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+                component = client.get_project(config.service_key_1)
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
                 component = client.find_project(test.engagement.product.name)
 
@@ -165,8 +165,8 @@ class SonarQubeApiImporter(object):
         items = list()
         client, config = self.prepare_client(test)
 
-        if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-            component = client.get_project(config.sonarqube_project_key)
+        if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+            component = client.get_project(config.service_key_1)
         else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
             component = client.find_project(test.engagement.product.name)
 

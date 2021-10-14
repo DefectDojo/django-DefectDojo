@@ -18,8 +18,11 @@ class SonarQubeAPIParser(object):
     def requires_file(self, scan_type):
         return False
 
-    def requires_api_configuration(self):
+    def requires_tool_type(self):
         return 'SonarQube'
+
+    def requires_API(self):
+        return 'dojo.tools.sonarqube_api.api_client.SonarQubeAPI'
 
     def get_findings(self, json_output, test):
         return SonarQubeApiImporter().get_findings(json_output, test)
