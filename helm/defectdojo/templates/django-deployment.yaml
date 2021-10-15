@@ -43,6 +43,10 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.django.mediaPersistentVolume.fsGroup | default 1001 }}
+      {{- end }}
       volumes:
       - name: run
         emptyDir: {}
@@ -62,6 +66,15 @@ spec:
           type: {{ .pathType | default "Directory" }}
           path: {{ .hostPath }}
           {{- end }}
+      {{- end }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      - name: {{ .Values.django.mediaPersistentVolume.name }}
+        {{- if eq .Values.django.mediaPersistentVolume.type "pvc"  }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.django.mediaPersistentVolume.persistentVolumeClaim }}
+        {{ else }}
+        emptyDir: {}
+        {{- end }}
       {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
@@ -113,6 +126,10 @@ spec:
           mountPath: {{ .path }}
           subPath: {{ .subPath }}
         {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: {{.Values.extraConfigs.DD_MEDIA_ROOT | default "/app/media" | quote }}
         {{- end }}
         ports:
         - name: http
@@ -196,6 +213,10 @@ spec:
           mountPath: {{ .path }}
           subPath: {{ .subPath }}
         {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: /usr/share/nginx/html/media
         {{- end }}
         ports:
         - name: http
