@@ -5,6 +5,8 @@ from celery.schedules import crontab
 from dojo import __version__
 import environ
 
+# See https://defectdojo.github.io/django-DefectDojo/getting_started/configuration/ for options
+# how to tune the configuration to your needs.
 
 root = environ.Path(__file__) - 3  # Three folders back
 
@@ -165,6 +167,9 @@ env = environ.Env(
     # when enabeld safety parser will download latest vuln db during runtime
     # otherwise data is loaded from dojo/tools/safety/insecure_full.json
     DD_SAFETY_PARSER_ONLINE_DB=(bool, True),
+    # regular expression to exclude one or more parsers
+    # could be usefull to limit parser allowed
+    DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
@@ -198,6 +203,8 @@ env = environ.Env(
     DD_RATE_LIMITER_BLOCK=(bool, False),
     # Forces the user to change password on next login.
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
+    # when enabled SonarQube API parser will download the security hotspots
+    DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
 )
 
 
@@ -389,6 +396,23 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.RemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
+
+# Make Argon2 the default password hasher by listing it first
+# Unfortunately Django doesn't provide the default built-in
+# PASSWORD_HASHERS list here as a variable which we could modify,
+# so we have to list all the hashers present in Django :-(
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedSHA1PasswordHasher',
+    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
+    'django.contrib.auth.hashers.CryptPasswordHasher',
+]
 
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',
@@ -982,11 +1006,13 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'Anchore Engine Scan': ['title', 'severity', 'component_name', 'component_version', 'file_path'],
     'Anchore Grype': ['title', 'severity', 'component_name', 'component_version'],
     'Aqua Scan': ['severity', 'cve', 'component_name', 'component_version'],
+    'Bandit Scan': ['file_path', 'line', 'vuln_id_from_tool'],
     'CargoAudit Scan': ['cve', 'severity', 'component_name', 'component_version', 'vuln_id_from_tool'],
     'Checkmarx Scan': ['cwe', 'severity', 'file_path'],
     'Checkmarx OSA': ['cve', 'component_name'],
     'Cloudsploit Scan': ['title', 'description'],
     'SonarQube Scan': ['cwe', 'severity', 'file_path'],
+    'SonarQube API Import': ['title', 'file_path', 'line'],
     'Dependency Check Scan': ['cve', 'cwe', 'file_path'],
     'Dockle Scan': ['title', 'description', 'vuln_id_from_tool'],
     'Dependency Track Finding Packaging Format (FPF) Export': ['component_name', 'component_version', 'cwe', 'cve'],
@@ -1016,10 +1042,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
     'JFrog Xray Unified Scan': ['cve', 'file_path', 'component_name', 'component_version'],
-    'Scout Suite Scan': ['title', 'severity', 'description'],
+    'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
-    'Github Vulnerability Scan': ['unique_id_from_tool']
+    'Github Vulnerability Scan': ['unique_id_from_tool'],
+    'Azure Security Center Recommendations Scan': ['unique_id_from_tool'],
 }
 
 # This tells if we should accept cwe=0 when computing hash_code with a configurable list of fields from HASHCODE_FIELDS_PER_SCANNER (this setting doesn't apply to legacy algorithm)
@@ -1048,7 +1075,8 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'SpotBugs Scan': False,
     'Scout Suite Scan': True,
     'AWS Security Hub Scan': True,
-    'Meterian Scan': True
+    'Meterian Scan': True,
+    'SARIF': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1080,6 +1108,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'AuditJS Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'AWS Prowler Scan': DEDUPE_ALGO_HASH_CODE,
     'Burp REST API': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Bandit Scan': DEDUPE_ALGO_HASH_CODE,
     'CargoAudit Scan': DEDUPE_ALGO_HASH_CODE,
     'Checkmarx Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Checkmarx Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1090,6 +1119,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
+    'SonarQube API Import': DEDUPE_ALGO_HASH_CODE,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Dockle Scan': DEDUPE_ALGO_HASH_CODE,
     'Nessus Scan': DEDUPE_ALGO_HASH_CODE,
@@ -1124,6 +1154,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Meterian Scan': DEDUPE_ALGO_HASH_CODE,
     'Github Vulnerability Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Cloudsploit Scan': DEDUPE_ALGO_HASH_CODE,
+    'KICS Scan': DEDUPE_ALGO_HASH_CODE,
+    'SARIF': DEDUPE_ALGO_HASH_CODE,
+    'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
@@ -1266,6 +1299,9 @@ QUALYS_WAS_UNIQUE_ID = False
 # Deside if parser should download latest db or use offline version
 SAFETY_PARSER_ONLINE_DB = env("DD_SAFETY_PARSER_ONLINE_DB")
 
+# exclusion list for parsers
+PARSER_EXCLUDE = env("DD_PARSER_EXCLUDE")
+
 SERIALIZATION_MODULES = {
     'xml': 'tagulous.serializers.xml_serializer',
     'json': 'tagulous.serializers.json',
@@ -1299,3 +1335,6 @@ JIRA_TEMPLATE_ROOT = env('DD_JIRA_TEMPLATE_ROOT')
 TEMPLATE_DIR_PREFIX = env('DD_TEMPLATE_DIR_PREFIX')
 
 DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
+
+# Deside if SonarQube API parser should download the security hotspots
+SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")

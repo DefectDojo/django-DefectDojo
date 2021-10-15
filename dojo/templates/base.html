@@ -110,7 +110,9 @@
                     <span class="icon-bar"></span>
                 </button>
                 <a class="navbar-brand" href="{% url 'home' %}">
-                    <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+		    {% block header_logo %}
+			<img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo Logo" width="240"/>
+        	    {% endblock %}
                 </a>
 
             </div>
@@ -375,7 +377,9 @@
                                         <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
                                         <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
                                         <li><a href="{% url 'rules' %}">Rules Framework </a></li>
+                                        {% endif %}
                                         <li><a href="{% url 'regulations' %}">Regulations </a></li>
+                                        {% if request.user.is_superuser %}
                                         <li><a href="{% url 'system_settings' %}">System Settings </a></li>
                                         <li><a href="{% url 'note_type' %}">Note Types </a></li>
                                         <li><a href="{% url 'configure_google_sheets' %}">Google Sheets Sync</a></li>
@@ -670,8 +674,12 @@
             <div class="row">
                 <div class="col-md-12 text-center text-">
                     <p>
-                        <a href="{% url 'home' %}"><img class="logo" src="{% static "dojo/img/chop.png" %}"
-                                                        alt="DefectDojo Chop" height="45"/></a><br/>
+                        <a href="{% url 'home' %}">
+			    {% block footer_logo %}
+				<img class="logo" src="{% static "dojo/img/chop.png" %}" alt="DefectDojo Chop" height="45"/>
+			    {% endblock %}
+			</a>
+			<br/>
                         {% dojo_version %} ( {% dojo_current_hash %} )
                     </p>
                     <p>
@@ -787,8 +795,9 @@
 
         $('select').not('#notification-scope').addClass('selectpicker');
         $('.selectpicker').attr('data-live-search', 'true');
+        $('.selectpicker').attr('data-container', 'body');
         $('.selectpicker').css('width', '70%');
-        $('.selectpicker').selectpicker();
+        $('.selectpicker').selectpicker('render');
 
     });
 </script>

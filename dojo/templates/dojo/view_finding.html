@@ -451,7 +451,7 @@
         </div>
         {% endif %}
     {% endif %}
-    {% if finding.static_finding or finding.line > 0 or finding.has_jira_configured or finding.has_jira_issue or finding.github_issue or finding.github_conf_new %}
+    {% if finding.file_path or finding.line > 0 or finding.has_jira_configured or finding.has_jira_issue or finding.github_issue or finding.github_conf_new or finding.finding_group or finding.component_name or finding.nb_occurences > 1 %}
     <div class="panel panel-default">
         <table id="error_notes" class="table-striped table table-condensed table-hover centered">
             <tr>
@@ -461,7 +461,7 @@
                 {% if finding.line %}
                 <th>Line Number</th>
                 {% endif %}
-                {% if finding.nb_occurences %}
+                {% if finding.nb_occurences > 1 %}
                 <th>Nb occurences</th>
                 {% endif %}
                 {% if finding.component_name %}
@@ -477,8 +477,8 @@
                 {% if finding.github_conf_new or finding.github_issue %}
                 <th>GitHub</th>
                 {% endif %}
-                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
-                    <th>Group</th>
+                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled and finding.finding_group %}
+                <th>Group</th>
                 {% endif %}
             </tr>
             <tr>
@@ -498,7 +498,7 @@
                     </span>
                 </td>
                 {% endif %}
-                {% if finding.nb_occurences %}
+                {% if finding.nb_occurences > 1 %}
                 <td>
                     <span>
                         {{ finding.nb_occurences }}
@@ -562,14 +562,10 @@
                     {% endif %}
                     </td>
                 {% endif %}
-                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled %}
+                {% if 'FEATURE_FINDING_GROUPS'|setting_enabled and finding.finding_group %}
                     <td>
-                        {% if finding.finding_group %}
-                            {{ finding.finding_group.name }}
-                            <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa fa-share-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
-                        {% else %}
-                            N
-                        {% endif %}
+                        {{ finding.finding_group.name }}
+                        <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa fa-share-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
                     </td>
                 {% endif %}
             </tr>
@@ -835,13 +831,13 @@
         </div>
 
         <!--Cred Begin-->
-        {% if  finding.static_finding != True and cred_finding and system_settings.enable_credentials %}
+        {% if  finding.static_finding != True and system_settings.enable_credentials %}
             <div class="row">
                 <div class="col-md-12" id="cred">
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h4>Credential
-                                {% if not cred_finding %}
+                                {% if not cred_finding and finding|has_object_permission:"Finding_Edit" %}
                                     {% if cred_engagement or creds %}
                                         <a title="Add New Credential" class="pull-right btn btn-primary btn-sm"
                                            href="{% url 'new_cred_finding' finding.id %}"><span
@@ -888,10 +884,14 @@
                                             <td>{{ cred.cred_id.is_valid }}</td>
                                             <td>
                                                 <div class="btn-group">
-                                                    <a class="btn btn-sm btn-primary"
+                                                    {% if user.is_superuser %}
+                                                    <a class="btn btn-sm btn-secondary"
                                                        href="{% url 'view_cred_finding' cred.finding.id cred.id %}">View</a>
+                                                    {% endif %}
+                                                    {% if finding|has_object_permission:"Finding_Edit" %}
                                                     <a class="btn btn-sm btn-danger delete"
                                                        href="{% url 'delete_cred_finding' cred.finding.id cred.id %}">Delete</a>
+                                                    {% endif %}
                                                 </div>
                                             </td>
                                         </tr>

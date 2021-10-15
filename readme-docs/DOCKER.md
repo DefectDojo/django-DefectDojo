@@ -313,13 +313,13 @@ python manage.py test dojo.unittests --keepdb
 Run all the tests from a python file. Example:
 
 ```
-python manage.py test dojo.unittests.test_dependency_check_parser --keepdb
+python manage.py test dojo.unittests.tools.test_dependency_check_parser --keepdb
 ```
 
 Run a single test. Example:
 
 ```
-python manage.py test dojo.unittests.test_dependency_check_parser.TestDependencyCheckParser.test_parse_without_file_has_no_findings --keepdb
+python manage.py test dojo.unittests.tools.test_dependency_check_parser.TestDependencyCheckParser.test_parse_file_with_no_vulnerabilities_has_no_findings --keepdb
 ```
 
 ## Running the integration-tests

@@ -1,27 +1,54 @@
 from django.test import TestCase
-from dojo.tools.factory import import_parser_factory
-from dojo.models import Test
+from dojo.tools.factory import get_parser
+from dojo.models import Test, Test_Type
 
 
 class TestFactory(TestCase):
+    def test_get_parser(self):
+        with self.subTest(scan_type="Acunetix Scan"):
+            scan_type = "Acunetix Scan"
+            testfile = open("dojo/unittests/scans/acunetix/one_finding.xml")
+            parser = get_parser(scan_type)
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
+        with self.subTest(scan_type="Anchore Engine Scan"):
+            scan_type = "Anchore Engine Scan"
+            testfile = open("dojo/unittests/scans/anchore/one_vuln.json")
+            parser = get_parser(scan_type)
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
+        with self.subTest(scan_type="Nessus Scan"):
+            scan_type = "Nessus Scan"
+            testfile = open("dojo/unittests/scans/nessus/nessus_v_unknown.xml")
+            parser = get_parser(scan_type)
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
+        with self.subTest(scan_type="ZAP Scan"):
+            scan_type = "ZAP Scan"
+            testfile = open("dojo/unittests/scans/zap/some_2.9.0.xml")
+            parser = get_parser(scan_type)
+            findings = parser.get_findings(testfile, Test())
+            testfile.close()
 
-    def test_acunetix_one_finding(self):
-        testfile = open('dojo/unittests/scans/acunetix/one_finding.xml')
-        parser = import_parser_factory(testfile, Test(), False, False, 'Acunetix Scan')
-        findings = parser.get_findings(testfile, Test())
-        testfile.close()
-        self.assertEqual(1, len(findings))
+    def test_get_parser_error(self):
+        with self.assertRaises(ValueError):
+            scan_type = "type_that_doesn't_exist"
+            get_parser(scan_type)
 
-    def test_anchore_one_finding(self):
-        testfile = open("dojo/unittests/scans/anchore/one_vuln.json")
-        parser = import_parser_factory(testfile, Test(), False, False, 'Anchore Engine Scan')
-        findings = parser.get_findings(testfile, Test())
-        testfile.close()
-        self.assertEqual(1, len(findings))
-
-    def test_nessus(self):
-        testfile = open("dojo/unittests/scans/nessus/nessus_v_unknown.xml")
-        parser = import_parser_factory(testfile, Test(), False, False, 'Nessus Scan')
-        findings = parser.get_findings(testfile, Test())
-        testfile.close()
-        self.assertEqual(32, len(findings))
+    def test_get_parser_test_active_in_db(self):
+        """This test is designed to validate that the factory take into account the falg 'active' in DB"""
+        scan_type = "ZAP Scan"
+        # desactivate the parser
+        Test_Type.objects.update_or_create(
+            name=scan_type,
+            defaults={"active": False},
+        )
+        with self.assertRaises(ValueError):
+            get_parser(scan_type)
+        # activate the parser
+        test_type, created = Test_Type.objects.update_or_create(
+            name=scan_type,
+            defaults={"active": True},
+        )
+        parser = get_parser(scan_type)
+        self.assertIsNotNone(parser)

@@ -106,8 +106,8 @@
                                     </td>
                                     <td class="text-center">
                                         {% if product.findings_count %}
-                                            <a href="{% url 'product_open_findings' product.id %}?test__engagement__product={{ product.id }}"><b>{{ product.findings_count }}</b></a>
-                                            &nbsp;(<a href="{% url 'product_verified_findings' product.id %}?test__engagement__product={{ product.id }}">{{ product.findings_active_verified_count }}</a>)
+                                            <a href="{% url 'product_open_findings' product.id %}"><b>{{ product.findings_count }}</b></a>
+                                            &nbsp;(<a href="{% url 'product_verified_findings' product.id %}">{{ product.findings_active_verified_count }}</a>)
                                         {% else %}
                                             0
                                         {% endif %}

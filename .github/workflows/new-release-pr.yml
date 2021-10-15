@@ -69,11 +69,11 @@ jobs:
       - name: Create Pull Request
         env:
           REPO_ORG: ${{ steps.set-repo-org.outputs.repoorg }}
-        uses: actions/github-script@v4
+        uses: actions/github-script@v5
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.pulls.create({
+            github.rest.pulls.create({
               owner: '${{ env.REPO_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release: Merge release into master from: ${{ env.NEW_BRANCH }}',

@@ -105,6 +105,34 @@ class ProductTest(BaseTestCase):
             self.is_success_message_present(text='Product with this Name already exists.'))
         self.assertFalse(self.is_error_message_present())
 
+    # For product consistency sake, We won't be editting the product title
+    # instead We can edit the product description
+    @on_exception_html_source_logger
+    def test_enable_simple_risk_acceptance(self):
+        # Login to the site. Password will have to be modified
+        # to match an admin password in your own container
+        driver = self.driver
+        # Navigate to the product page
+        self.goto_product_overview(driver)
+        # Select and click on the particular product to edit
+        driver.find_element_by_link_text("QA Test").click()
+        # "Click" the dropdown option
+        # driver.execute_script("window.scrollTo(0, 0)")
+        driver.find_element_by_id("dropdownMenu1").click()
+        # Click on the 'Edit' option
+        driver.find_element_by_link_text("Edit").click()
+        # Enable simple risk acceptance
+        driver.find_element_by_xpath('//*[@id="id_enable_simple_risk_acceptance"]').click()
+
+        # "Click" the submit button to complete the transaction
+        driver.find_element_by_css_selector("input.btn.btn-primary").click()
+        # Query the site to determine if the product has been added
+
+        # Assert ot the query to dtermine status of failure
+        self.assertTrue(self.is_success_message_present(text='Product updated successfully') or
+            self.is_success_message_present(text='Product with this Name already exists.'))
+        self.assertFalse(self.is_error_message_present())
+
     @on_exception_html_source_logger
     def test_add_product_engagement(self):
         # Test To Add Engagement To product

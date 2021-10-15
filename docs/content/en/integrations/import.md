@@ -60,9 +60,18 @@ auditjs ossi --json > auditjs_report.json
 The JSON output from AWS Security Hub exported with the `aws securityhub get-findings` (<https://docs.aws.amazon.com/cli/latest/reference/securityhub/get-findings.html>)
 command.
 
-### AWS Scout2 Scanner
+### AWS Scout2 Scanner (deprecated)
 
 JS file in scout2-report/inc-awsconfig/aws\_config.js.
+
+{{% alert title="Warning" color="warning" %}}
+AWS Scout2 Scanner is deprecated and has been replaced with ScoutSuite (https://github.com/nccgroup/ScoutSuite) upstream.
+Please switch to the new parser for ScoutSuite. 
+{{% /alert %}}
+
+{{% alert title="Warning" color="warning" %}}
+This parser is disactivated by default in releases >= 2.3.1 and will be removed in release >= 3.x.x.
+{{% /alert %}}
 
 ### AWS Prowler Scanner
 
@@ -104,6 +113,111 @@ processed and made available in the \'Finding View\' page.
 ### Burp Enterprise Scan
 
 Import HTML reports from Burp Enterprise Edition
+
+### Burp GraphQL
+
+Import the JSON data returned from the BurpSuite Enterprise GraphQL API. Append all the
+issues returned to a list and save it as the value for the key "Issues". There is no need
+to filter duplicates, the parser will automatically combine issues with the same name.
+
+Example:
+
+{{< highlight json >}}
+{
+    "Issues": [
+        {
+            "issue_type": {
+                "name": "Cross-site scripting (reflected)",
+                "description_html": "Issue Description",
+                "remediation_html": "Issue Remediation",
+                "vulnerability_classifications_html": "<li><a href=\"https://cwe.mitre.org/data/definitions/79.html\">CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')</a></li>",
+                "references_html": "<li><a href=\"https://portswigger.net/web-security/cross-site-scripting\">Cross-site scripting</a></li>"
+            },
+            "description_html": "Details",
+            "remediation_html": "Remediation Details",
+            "severity": "high",
+            "path": "/burp",
+            "origin": "https://portswigger.net",
+            "evidence": [
+                {
+                    "request_index": 0,
+                    "request_segments": [
+                        {
+                            "data_html": "GET"
+                        },
+                        {
+                            "highlight_html": "data"
+                        },
+                        {
+                            "data_html": " HTTP More data"
+                        }
+                    ]
+                },
+                {
+                    "response_index": 0,
+                    "response_segments": [
+                        {
+                            "data_html": "HTTP/2 200 OK "
+                        },
+                        {
+                            "highlight_html": "data"
+                        },
+                        {
+                            "data_html": "More data"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+{{< /highlight >}}
+
+Example GraphQL query to get issue details:
+
+{{< highlight graphql >}}
+    query Issue ($id: ID!, $serial_num: ID!) {
+        issue(scan_id: $id, serial_number: $serial_num) {
+            issue_type {
+                name
+                description_html
+                remediation_html
+                vulnerability_classifications_html
+                references_html
+            }
+            description_html
+            remediation_html
+            severity
+            path
+            origin
+            evidence {
+                ... on Request {
+                    request_index
+                    request_segments {
+                        ... on DataSegment {
+                            data_html
+                        }
+                        ... on HighlightSegment {
+                                highlight_html
+                        }
+                    }
+                }
+                ... on Response {
+                    response_index
+                    response_segments {
+                        ... on DataSegment {
+                            data_html
+                        }
+                        ... on HighlightSegment {
+                            highlight_html
+                        }
+                    }
+                }
+            }
+        }
+    }
+{{< /highlight >}}
+
 
 ### CargoAudit Scan
 
@@ -148,6 +262,13 @@ Follow these steps to setup API importing:
 3.  After this is you can import the findings as a scan by selecting "Cobalt.io
     API Import" as the scan type. If you have more than one asset configured you
     must also select which "Cobalt.io Config" to use.
+
+### CodeQL
+CodeQL can be used to generate a SARIF report, that can be imported into Defect Dojo:
+
+`codeql database analyze db python-security-and-quality.qls --sarif-add-snippets --format=sarif-latest --output=security-extended.sarif`
+
+The same can be achieved by running the CodeQL GitHub action with the `add-snippet` property set to true.
 
 ### Coverity API
 
@@ -226,7 +347,12 @@ Import report in JSON generated with -j option
 
 ### Dependency Check
 
-OWASP Dependency Check output can be imported in Xml format.
+OWASP Dependency Check output can be imported in Xml format. This parser ingests the vulnerable dependencies and inherits the suppressions. 
+
+* Suppressed vulnerabilities are tagged with the tag: `suppressed`. 
+* Suppressed vulnerabilities are marked as inactive, but not as mitigated.
+* If the suppression is missing any `<notes>` tag, it tags them as `no_suppression_document`. 
+* Related vulnerable dependencies are tagged with `related` tag.
 
 ### Dependency Track
 
@@ -772,6 +898,15 @@ Safety scan (\--json) output file can be imported in JSON format.
 OASIS Static Analysis Results Interchange Format (SARIF). SARIF is
 supported by many tools. More details about the format here:
 <https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=sarif>
+
+{{% alert title="Information" color="info" %}}
+SARIF parser customizes the Test_Type with data from the report.
+For example, a report with `Dockle` as a driver name will produce a Test with a Test_Type named `Dockle Scan (SARIF)`
+{{% /alert %}}
+
+{{% alert title="Warning" color="warning" %}}
+Current implementation is limited and will aggregate all the findings in the SARIF file in one single report.
+{{% /alert %}}
 
 ### ScoutSuite
 

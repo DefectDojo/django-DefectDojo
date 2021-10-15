@@ -1,13 +1,12 @@
-import hashlib
 import json
 import re
 
 from dateutil import parser
-
 from dojo.models import Finding
 
 
 class DawnScannerParser(object):
+    CVE_REGEX = re.compile(r"CVE-\d{4}-\d{4,7}")
 
     def get_scan_types(self):
         return ["DawnScanner Scan"]
@@ -21,51 +20,28 @@ class DawnScannerParser(object):
     def get_findings(self, filename, test):
         data = json.load(filename)
 
-        dupes = dict()
-        find_date = parser.parse(data['scan_started'])
+        find_date = parser.parse(data["scan_started"])
 
-        for item in data['vulnerabilities']:
-            categories = ''
-            language = ''
-            mitigation = ''
-            impact = ''
-            references = ''
-            findingdetail = ''
-            title = ''
-            group = ''
-            status = ''
+        items = []
+        for item in data["vulnerabilities"]:
 
-            title = item['name'].upper()
-            if "CVE" in title:
-                # FIXME switch to a function
-                cve = re.findall(r'CVE-\d{4}-\d{4,7}', title)[0]
-            else:
-                cve = None
-            # Finding details information
-            findingdetail = item['message'] if item['message'][0:2] != 'b,' else item['message'][0:-1]
-            sev = item['severity'].capitalize()
-            mitigation = item['remediation']
-            references = item['cve_link']
+            findingdetail = item["message"] if item["message"][0:2] != "b," else item["message"][0:-1]
 
-            dupe_key = hashlib.sha256(str(sev + '|' + title).encode("utf-8")).hexdigest()
+            finding = Finding(
+                title=item["name"],
+                test=test,
+                description=findingdetail,
+                severity=item["severity"].capitalize(),
+                mitigation=item.get("remediation"),
+                references=item.get("cve_link"),
+                date=find_date,
+                static_finding=True,
+                dynamic_finding=False,
+            )
 
-            if dupe_key in dupes:
-                find = dupes[dupe_key]
-            else:
-                dupes[dupe_key] = True
+            if self.CVE_REGEX.match(item["name"]):
+                finding.cve = self.CVE_REGEX.findall(item["name"])[0]
 
-                find = Finding(
-                    title=title,
-                    test=test,
-                    cve=cve,
-                    description=findingdetail,
-                    severity=sev,
-                    mitigation=mitigation,
-                    impact=impact,
-                    references=references,
-                    url='N/A',
-                    date=find_date,
-                    static_finding=True)
+            items.append(finding)
 
-                dupes[dupe_key] = find
-        return list(dupes.values())
+        return items

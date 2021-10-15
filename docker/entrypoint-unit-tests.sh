@@ -70,7 +70,7 @@ python3 manage.py migrate
 
 echo "Swagger Schema Tests - Broken"
 echo "------------------------------------------------------------"
-python3 manage.py test dojo.unittests -v 3 --no-input --tag broken && true
+python3 manage.py test dojo.unittests -v 3 --keepdb --no-input --tag broken && true
 
 echo "Unit Tests"
 echo "------------------------------------------------------------"

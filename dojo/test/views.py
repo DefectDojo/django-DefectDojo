@@ -20,16 +20,16 @@ from django.utils import timezone
 from django.contrib.admin.utils import NestedObjects
 from django.db import DEFAULT_DB_ALIAS
 
-from dojo.filters import TemplateFindingFilter, OpenFindingFilter, TestImportFilter
+from dojo.filters import TemplateFindingFilter, FindingFilter, TestImportFilter
 from dojo.forms import NoteForm, TestForm, FindingForm, \
     DeleteTestForm, AddFindingForm, TypedNoteForm, \
-    ImportScanForm, ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
+    ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
     Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Sonarqube_Product, \
     Cobaltio_Product
 
-from dojo.tools.factory import get_choices
+from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
     Product_Tab, is_scan_file_too_large, get_words_for_field
 from dojo.notifications.helper import create_notification
@@ -71,7 +71,7 @@ def view_test(request, tid):
     files = test.files.all()
     person = request.user.username
     findings = Finding.objects.filter(test=test).order_by('numerical_severity')
-    findings = OpenFindingFilter(request.GET, queryset=findings)
+    findings = FindingFilter(request.GET, queryset=findings)
     stub_findings = Stub_Finding.objects.filter(test=test)
     cred_test = Cred_Mapping.objects.filter(test=test).select_related('cred_id').order_by('cred_id')
     creds = Cred_Mapping.objects.filter(engagement=test.engagement).select_related('cred_id').order_by('cred_id')
@@ -121,7 +121,7 @@ def view_test(request, tid):
 
     paged_findings = get_page_items_and_count(request, prefetch_for_findings(findings.qs), 25, prefix='findings')
     paged_stub_findings = get_page_items(request, stub_findings, 25)
-    show_re_upload = any(test.test_type.name in code for code in ImportScanForm.SORTED_SCAN_TYPE_CHOICES)
+    show_re_upload = any(test.test_type.name in code for code in get_choices_sorted())
 
     product_tab = Product_Tab(prod.id, title="Test", tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -387,9 +387,6 @@ def add_findings(request, tid):
             new_finding.reporter = request.user
             new_finding.numerical_severity = Finding.get_numerical_severity(
                 new_finding.severity)
-            create_template = new_finding.is_template
-            # always false now since this will be deprecated soon in favor of new Finding_Template model
-            new_finding.is_template = False
             new_finding.tags = form.cleaned_data['tags']
             new_finding.save(dedupe_option=False, push_to_jira=False)
             for ep in form.cleaned_data['endpoints']:
@@ -451,28 +448,6 @@ def add_findings(request, tid):
                 burp_rr.clean()
                 burp_rr.save()
 
-            if create_template:
-                templates = Finding_Template.objects.filter(title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(request,
-                                         messages.ERROR,
-                                         'A finding template was not created.  A template with this title already '
-                                         'exists.',
-                                         extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(title=new_finding.title,
-                                                cwe=new_finding.cwe,
-                                                severity=new_finding.severity,
-                                                description=new_finding.description,
-                                                mitigation=new_finding.mitigation,
-                                                impact=new_finding.impact,
-                                                references=new_finding.references,
-                                                numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A finding template was also created.',
-                                         extra_tags='alert-success')
             if '_Finished' in request.POST:
                 return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
             else:
@@ -545,10 +520,6 @@ def add_temp_finding(request, tid, fid):
             new_finding.date = datetime.today()
             finding_helper.update_finding_status(new_finding, request.user)
 
-            create_template = new_finding.is_template
-            # is template always False now in favor of new model Finding_Template
-            # no further action needed here since this is already adding from template.
-            new_finding.is_template = False
             new_finding.save(dedupe_option=False, false_history=False)
             for ep in form.cleaned_data['endpoints']:
                 eps, created = Endpoint_Status.objects.get_or_create(
@@ -571,29 +542,6 @@ def add_temp_finding(request, tid, fid):
                                  messages.SUCCESS,
                                  'Finding from template added successfully.',
                                  extra_tags='alert-success')
-
-            if create_template:
-                templates = Finding_Template.objects.filter(title=new_finding.title)
-                if len(templates) > 0:
-                    messages.add_message(request,
-                                         messages.ERROR,
-                                         'A finding template was not created.  A template with this title already '
-                                         'exists.',
-                                         extra_tags='alert-danger')
-                else:
-                    template = Finding_Template(title=new_finding.title,
-                                                cwe=new_finding.cwe,
-                                                severity=new_finding.severity,
-                                                description=new_finding.description,
-                                                mitigation=new_finding.mitigation,
-                                                impact=new_finding.impact,
-                                                references=new_finding.references,
-                                                numerical_severity=new_finding.numerical_severity)
-                    template.save()
-                    messages.add_message(request,
-                                         messages.SUCCESS,
-                                         'A finding template was also created.',
-                                         extra_tags='alert-success')
 
             return HttpResponseRedirect(reverse('view_test', args=(test.id,)))
         else:
@@ -666,7 +614,13 @@ def re_import_scan_results(request, tid):
                          "mitigated.  The process attempts to identify the differences, however manual verification " \
                          "is highly recommended."
     test = get_object_or_404(Test, id=tid)
-    scan_type = test.test_type.name
+    # by default we keep a trace of the scan_type used to create the test
+    # if it's not here, we use the "name" of the test type
+    # this feature exists to provide custom label for tests for some parsers
+    if test.scan_type:
+        scan_type = test.scan_type
+    else:
+        scan_type = test.test_type.name
     engagement = test.engagement
     form = ReImportScanForm(test=test)
     jform = None
@@ -752,5 +706,5 @@ def re_import_scan_results(request, tid):
                    'eid': engagement.id,
                    'additional_message': additional_message,
                    'jform': jform,
-                   'scan_types': get_choices(),
+                   'scan_types': get_choices_sorted(),
                    })

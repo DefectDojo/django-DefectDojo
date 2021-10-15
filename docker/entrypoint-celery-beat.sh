@@ -37,6 +37,9 @@ if test -f "$FILE"; then
     cp "$FILE" /app/dojo/settings/local_settings.py
 fi
 
+# do the check with Django stack
+python3 manage.py check
+
 exec celery --app=dojo \
     beat \
   --pidfile=/var/run/defectdojo/celery-beat.pid \
