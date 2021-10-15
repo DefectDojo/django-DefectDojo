@@ -6,7 +6,7 @@ from datetime import datetime
 from dojo.models import Endpoint, Finding
 
 
-class SSLlabsParser(object):
+class SslLabsParser(object):
 
     def get_scan_types(self):
         return ["SSL Labs Scan"]
