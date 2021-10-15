@@ -1,7 +1,7 @@
 import csv
 import hashlib
 import io
-from dojo.models import Endpoint, Finding
+from dojo.models import Finding
 
 
 class SolarAppscreenerParser(object):
