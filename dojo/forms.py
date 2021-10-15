@@ -438,7 +438,6 @@ class ImportScanForm(forms.Form):
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
     build_id = forms.CharField(max_length=100, required=False, help_text="ID of the build that was scanned.")
     api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects, required=False, label='API Scan Configuration')
-#    api_scan_configuration = forms.ModelChoiceField(Product_API_Scan_Configuration.objects.none(), required=False, label='API Scan Configuration')
 
     tags = TagField(required=False, help_text="Add tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
@@ -471,9 +470,6 @@ class ImportScanForm(forms.Form):
             raise forms.ValidationError('Uploading a Report File is required for {}'.format(scan_type))
         tool_type = requires_tool_type(scan_type)
         if tool_type:
-            print('------------------------------')
-            print(cleaned_data)
-            print('------------------------------')
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
             if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
                 raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')

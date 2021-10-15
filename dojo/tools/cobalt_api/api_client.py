@@ -86,6 +86,13 @@ class CobaltAPI:
                 response_assets.status_code, response_assets.content.decode("utf-8")
             ))
 
+    def test_product_connection(self, api_scan_configuration):
+        asset = self.get_asset(api_scan_configuration.service_key_1)
+        asset_name = asset['resource']['title']
+        api_scan_configuration.service_key_2 = asset_name
+        api_scan_configuration.save()
+        return f'You have access to asset "{asset_name}"'
+
     def get_headers(self):
         headers = {
             'accept': 'application/vnd.cobalt.v1+json',

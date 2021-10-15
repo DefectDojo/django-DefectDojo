@@ -530,13 +530,10 @@ def import_scan_results(request, eid=None, pid=None):
     if eid:
         engagement = get_object_or_404(Engagement, id=eid)
         engagement_or_product = engagement
-        product = engagement.product
-        form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=engagement.product)
         cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(engagement=engagement).order_by('cred_id')
     elif pid:
         product = get_object_or_404(Product, id=pid)
         engagement_or_product = product
-        form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
     elif not user.is_staff:
         raise PermissionDenied
 
@@ -665,6 +662,7 @@ def import_scan_results(request, eid=None, pid=None):
         jform = JIRAImportScanForm(push_all=push_all_jira_issues, prefix='jiraform')
 
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
+    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
     return render(request,
         'dojo/import_scan_results.html',
         {'form': form,

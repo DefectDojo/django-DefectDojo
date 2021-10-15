@@ -625,8 +625,6 @@ def re_import_scan_results(request, tid):
     jform = None
     jira_project = jira_helper.get_jira_project(test)
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
-    form.initial['api_scan_configuration'] = test.api_scan_configuration
-    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product=test.engagement.product)
 
     # Decide if we need to present the Push to JIRA form
     if get_system_setting('enable_jira') and jira_project:
@@ -696,6 +694,8 @@ def re_import_scan_results(request, tid):
     product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
+    form.initial['api_scan_configuration'] = test.api_scan_configuration
+    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,
