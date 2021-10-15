@@ -22,6 +22,7 @@ if [ $COUNTER -gt 10 ]; then
     exit 1
 fi
 
+export CHROMEDRIVER=$(find /opt/chrome-driver -name chromedriver)
 
 # Run available unittests with a simple setup
 # All available Integrationtest Scripts are activated below
