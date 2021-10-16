@@ -31,7 +31,7 @@ def new_tool_config(request):
                 form_copy.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Tool Configuration Successfully Updated.',
+                                     'Tool Configuration successfully updated.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('tool_config', ))
             except Exception as e:
@@ -67,7 +67,7 @@ def edit_tool_config(request, ttid):
                 form_copy.save()
                 messages.add_message(request,
                                      messages.SUCCESS,
-                                     'Tool Configuration Successfully Updated.',
+                                     'Tool Configuration successfully updated.',
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('tool_config', ))
             except Exception as e:
