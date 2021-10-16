@@ -3,6 +3,41 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
+from dojo.models import Sonarqube_Product, Cobaltio_Product, Product_API_Scan_Configuration, Test
+
+
+def migrate_sonarqube(apps, schema_editor):
+    sq_products = Sonarqube_Product.objects.all()
+    for sq_product in sq_products:
+        api_scan_configuration = Product_API_Scan_Configuration()
+        api_scan_configuration.product = sq_product.product
+        api_scan_configuration.tool_configuration = sq_product.sonarqube_tool_config
+        api_scan_configuration.service_key_1 = sq_product.sonarqube_project_key
+        api_scan_configuration.save()
+        tests = Test.objects.filter(sonarqube_config=sq_product)
+        for test in tests:
+            test.api_scan_configuration = api_scan_configuration
+            test.sonarqube_config = None
+            test.save()
+        sq_product.delete()
+
+
+def migrate_cobalt_io(apps, schema_editor):
+    cobalt_products = Cobaltio_Product.objects.all()
+    for cobalt_product in cobalt_products:
+        api_scan_configuration = Product_API_Scan_Configuration()
+        api_scan_configuration.product = cobalt_product.product
+        api_scan_configuration.tool_configuration = cobalt_product.cobaltio_tool_config
+        api_scan_configuration.service_key_1 = cobalt_product.cobaltio_asset_id
+        api_scan_configuration.service_key_2 = cobalt_product.cobaltio_asset_name
+        api_scan_configuration.save()
+        tests = Test.objects.filter(cobaltio_config=cobalt_product)
+        for test in tests:
+            test.api_scan_configuration = api_scan_configuration
+            test.cobaltio_config = None
+            test.save()
+        cobalt_product.delete()
+
 
 class Migration(migrations.Migration):
 
@@ -22,17 +57,12 @@ class Migration(migrations.Migration):
                 ('tool_configuration', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='dojo.tool_configuration')),
             ],
         ),
-        migrations.RemoveField(
-            model_name='test',
-            name='cobaltio_config',
-        ),
-        migrations.RemoveField(
-            model_name='test',
-            name='sonarqube_config',
-        ),
         migrations.AddField(
             model_name='test',
             name='api_scan_configuration',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='dojo.product_api_scan_configuration', verbose_name='API Scan Configuration'),
         ),
+
+        migrations.RunPython(migrate_sonarqube),
+        migrations.RunPython(migrate_cobalt_io),
     ]
