@@ -108,6 +108,11 @@ class Permissions(IntEnum):
     Technology_Edit = 2406
     Technology_Delete = 2407
 
+    Product_API_Scan_Configuration_View = 2502
+    Product_API_Scan_Configuration_Add = 2503
+    Product_API_Scan_Configuration_Edit = 2506
+    Product_API_Scan_Configuration_Delete = 2507
+
     @classmethod
     def has_value(cls, value):
         try:
@@ -183,6 +188,10 @@ class Permissions(IntEnum):
     @classmethod
     def get_technology_permissions(cls):
         return {Permissions.Technology_View, Permissions.Technology_Edit, Permissions.Technology_Delete}
+
+    @classmethod
+    def get_product_api_scan_configuration_permissions(cls):
+        return {Permissions.Product_API_Scan_Configuration_View, Permissions.Product_API_Scan_Configuration_Edit, Permissions.Product_API_Scan_Configuration_Delete}
 
 
 def get_roles_with_permissions():
@@ -338,7 +347,12 @@ def get_roles_with_permissions():
             Permissions.Technology_View,
             Permissions.Technology_Add,
             Permissions.Technology_Edit,
-            Permissions.Technology_Delete
+            Permissions.Technology_Delete,
+
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_API_Scan_Configuration_Add,
+            Permissions.Product_API_Scan_Configuration_Edit,
+            Permissions.Product_API_Scan_Configuration_Delete
         },
         Roles.Owner: {
             Permissions.Product_Type_Add_Product,
@@ -421,6 +435,11 @@ def get_roles_with_permissions():
             Permissions.Technology_View,
             Permissions.Technology_Add,
             Permissions.Technology_Edit,
-            Permissions.Technology_Delete
+            Permissions.Technology_Delete,
+
+            Permissions.Product_API_Scan_Configuration_View,
+            Permissions.Product_API_Scan_Configuration_Add,
+            Permissions.Product_API_Scan_Configuration_Edit,
+            Permissions.Product_API_Scan_Configuration_Delete
         }
     }

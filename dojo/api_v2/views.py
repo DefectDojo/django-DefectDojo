@@ -47,7 +47,7 @@ from dojo.product_type.queries import get_authorized_product_types, get_authoriz
     get_authorized_product_type_groups
 from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, \
     get_authorized_product_members, get_authorized_product_groups, get_authorized_languages, \
-    get_authorized_engagement_presets
+    get_authorized_engagement_presets, get_authorized_product_api_scan_configurations
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
@@ -1112,11 +1112,14 @@ class ProductAPIScanConfigurationViewSet(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     serializer_class = serializers.ProductAPIScanConfigurationSerializer
-    queryset = Product_API_Scan_Configuration.objects.all()
+    queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('id', 'product', 'tool_configuration',
                      'service_key_1', 'service_key_2', 'service_key_3')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (IsAuthenticated, permissions.UserHasProductAPIScanConfigurationPermission)
+
+    def get_queryset(self):
+        return get_authorized_product_api_scan_configurations(Permissions.Product_API_Scan_Configuration_View)
 
 
 # Authorization: object-based

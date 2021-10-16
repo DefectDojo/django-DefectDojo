@@ -1776,11 +1776,11 @@
   },
   {
     "pk": 1,
-    "model": "dojo.sonarqube_product",
+    "model": "dojo.product_api_scan_configuration",
     "fields": {
       "product": 2,
-      "sonarqube_project_key": "dojo_sonar_key",
-      "sonarqube_tool_config": 3
+      "service_key_1": "dojo_sonar_key",
+      "tool_configuration": 3
     }
   },
   {

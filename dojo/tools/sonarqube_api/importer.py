@@ -57,14 +57,14 @@ class SonarQubeApiImporter(object):
             config = test.api_scan_configuration  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
             # Double check of config
             if config.product != product:
-                raise Exception('Product SonarQube Configuration and "Product" mismatch')
+                raise Exception('Product API Scan Configuration and Product do not match.')
         else:
             sqqs = product.product_api_scan_configuration_set.filter(product=product)
             if sqqs.count() == 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 4
                 config = sqqs.first()
             elif sqqs.count() > 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6
                 raise Exception(
-                    'It has configured more than one Product SonarQube Configuration but non of them has been choosen.\n'
+                    'More than one Product API Scan Configuration has been configured, but non of them has been choosen.\n'
                     'Please specify at Test which one should be used.'
                 )
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
