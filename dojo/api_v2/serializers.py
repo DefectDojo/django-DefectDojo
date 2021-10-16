@@ -785,7 +785,7 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = '__all__'
+        exclude = ['sonarqube_config', 'cobaltio_config']
 
     def build_relational_field(self, field_name, relation_info):
         if field_name == 'notes':
@@ -807,7 +807,7 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        fields = '__all__'
+        exclude = ['sonarqube_config', 'cobaltio_config']
 
 
 class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
