@@ -1527,8 +1527,6 @@ class Test(models.Model):
                                    null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
-    sonarqube_config = models.ForeignKey(Sonarqube_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="SonarQube Config")
-    cobaltio_config = models.ForeignKey(Cobaltio_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="Cobalt.io Config")
     api_scan_configuration = models.ForeignKey(Product_API_Scan_Configuration, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="API Scan Configuration")
 
     class Meta:
@@ -3735,4 +3733,3 @@ admin.site.register(Notifications)
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)
 admin.site.register(Sonarqube_Issue_Transition)
-admin.site.register(Sonarqube_Product)
