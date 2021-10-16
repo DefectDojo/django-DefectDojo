@@ -209,7 +209,8 @@ def get_roles_with_permissions():
             Permissions.Product_Type_Group_View,
             Permissions.Group_View,
             Permissions.Language_View,
-            Permissions.Technology_View
+            Permissions.Technology_View,
+            Permissions.Product_API_Scan_Configuration_View
         },
         Roles.API_Importer: {
             Permissions.Product_Type_View,
@@ -272,7 +273,9 @@ def get_roles_with_permissions():
 
             Permissions.Technology_View,
             Permissions.Technology_Add,
-            Permissions.Technology_Edit
+            Permissions.Technology_Edit,
+
+            Permissions.Product_API_Scan_Configuration_View
         },
         Roles.Maintainer: {
             Permissions.Product_Type_Add_Product,
