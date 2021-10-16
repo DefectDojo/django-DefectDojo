@@ -785,6 +785,7 @@ class TestSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test
+        fields = '__all__'
 
     def build_relational_field(self, field_name, relation_info):
         if field_name == 'notes':
@@ -806,6 +807,7 @@ class TestCreateSerializer(TaggitSerializer, serializers.ModelSerializer):
 
     class Meta:
         model = Test
+        fields = '__all__'
 
 
 class TestTypeSerializer(TaggitSerializer, serializers.ModelSerializer):
