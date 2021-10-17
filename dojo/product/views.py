@@ -1589,7 +1589,7 @@ def add_api_scan_configuration(request, pid):
                 else:
                     return HttpResponseRedirect(reverse('view_api_scan_configurations', args=(pid,)))
             except Exception as e:
-                logger.info(e)
+                logger.exception(e)
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),

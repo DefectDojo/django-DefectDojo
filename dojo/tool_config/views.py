@@ -35,7 +35,7 @@ def new_tool_config(request):
                                      extra_tags='alert-success')
                 return HttpResponseRedirect(reverse('tool_config', ))
             except Exception as e:
-                logger.info(e)
+                logger.exception(e)
                 messages.add_message(request,
                                      messages.ERROR,
                                      str(e),
