@@ -24,7 +24,6 @@ class NpmAuditParser(object):
 
     def parse_json(self, json_output):
         if json_output is None:
-            self.items = []
             return
         try:
             data = json_output.read()

@@ -20,8 +20,7 @@ class BlackduckComponentRiskParser(object):
 
     def get_findings(self, filename, test):
         """
-        Function initializes the parser with a file and sets the
-        self.items (eventually).
+        Function initializes the parser with a file and returns the items.
         :param filename: Input in Defect Dojo
         :param test:
         """

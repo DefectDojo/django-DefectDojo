@@ -6,7 +6,7 @@ from datetime import datetime
 from dojo.models import Endpoint, Finding
 
 
-class SSLlabsParser(object):
+class SslLabsParser(object):
 
     def get_scan_types(self):
         return ["SSL Labs Scan"]
@@ -194,13 +194,14 @@ class SSLlabsParser(object):
 
                 find.unsaved_endpoints.append(Endpoint(host=hostName, port=port, protocol=protocol))
 
-            self.items = list(dupes.values())
+        return list(dupes.values())
 
     # Criticality rating
     # Grades: https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
-    # A - Info, B - Medium, C - High, D/F/M/T - Critical
+    # A - Info, B - Medium, C - High, D/F/M/T - Critical, (unknown/other) - Critical
     def getCriticalityRating(self, rating):
-        criticality = "Info"
+        # Default to Critical if we can't make sense of the grade
+        criticality = "Critical"
         if "A" in rating:
             criticality = "Info"
         elif "B" in rating:
