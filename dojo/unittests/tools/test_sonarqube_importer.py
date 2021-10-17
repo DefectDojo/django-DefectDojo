@@ -187,7 +187,7 @@ class TestSonarqubeImporterMultipleSQConfigs(TestCase):
         self.test = Test(engagement=engagement)
 
     def test_parser(self):
-        with self.assertRaisesRegex(Exception, 'More than one Product API Scan Configuration has been configured, but none of them has been choosen.'):
+        with self.assertRaisesRegex(Exception, 'More than one Product API Scan Configuration has been configured, but none of them has been chosen.'):
             SonarQubeApiImporter.prepare_client(self.test)
 
 

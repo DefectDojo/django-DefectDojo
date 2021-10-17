@@ -28,7 +28,7 @@ class CobaltApiImporter(object):
                 config = configs.first()
             elif configs.count() > 1:
                 raise Exception(
-                    'More than one Product API Scan Configuration has been configured, but none of them has been choosen.\n'
+                    'More than one Product API Scan Configuration has been configured, but none of them has been chosen.\n'
                     'Please specify at Test which one should be used.'
                 )
             else:

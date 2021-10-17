@@ -64,7 +64,7 @@ class SonarQubeApiImporter(object):
                 config = sqqs.first()
             elif sqqs.count() > 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6
                 raise Exception(
-                    'More than one Product API Scan Configuration has been configured, but none of them has been choosen.\n'
+                    'More than one Product API Scan Configuration has been configured, but none of them has been chosen.\n'
                     'Please specify at Test which one should be used.'
                 )
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
