@@ -1,4 +1,5 @@
 import logging
+from dojo.models import Product_API_Scan_Configuration
 
 from dojo.tools.cobalt_api.api_client import CobaltAPI
 
@@ -23,7 +24,7 @@ class CobaltApiImporter(object):
             if config.product != product:
                 raise Exception('API Scan Configuration for Cobalt.io and Product do not match.')
         else:
-            configs = product.product_api_scan_configuration_set.filter(product=product)
+            configs = Product_API_Scan_Configuration.objects.filter(product=product)
             if configs.count() == 1:
                 config = configs.first()
             elif configs.count() > 1:
