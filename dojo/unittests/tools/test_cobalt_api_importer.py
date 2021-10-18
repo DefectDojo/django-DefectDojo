@@ -1,9 +1,9 @@
 import json
+from django.test import TestCase
 from unittest.mock import patch
 
-from dojo.tools.cobalt_api.importer import CobaltApiImporter
-from django.test import TestCase
 from dojo.models import Test, Engagement, Product, Product_API_Scan_Configuration, Tool_Type, Tool_Configuration
+from dojo.tools.cobalt_api.importer import CobaltApiImporter
 
 
 class TestCobaltApiImporter(TestCase):
