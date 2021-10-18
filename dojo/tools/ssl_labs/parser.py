@@ -45,8 +45,9 @@ class SslLabsParser(object):
                 title = ''
                 group = ''
                 status = ''
-                port = ''
-                protocol = ''
+                port = None
+                protocol = None
+                ipAddress = None
 
                 grade = ""
                 if "grade" in endpoints:
@@ -57,6 +58,10 @@ class SslLabsParser(object):
                 protocol = ""
                 if "protocol" in host:
                     protocol = host["protocol"]
+                if protocol.lower() == "http":
+                    protocol = "https"
+                if "ipAddress" in endpoints:
+                    ipAddress = endpoints["ipAddress"]
 
                 title = "TLS Grade '%s' for %s" % (grade, hostName)
 
@@ -186,13 +191,17 @@ class SslLabsParser(object):
                                    mitigation=mitigation,
                                    impact=impact,
                                    references=references,
-                                   url=host,
                                    date=find_date,
                                    dynamic_finding=True)
                     dupes[dupe_key] = find
                     find.unsaved_endpoints = list()
 
                 find.unsaved_endpoints.append(Endpoint(host=hostName, port=port, protocol=protocol))
+                if ipAddress:
+                    find.unsaved_endpoints.append(Endpoint(host=ipAddress, port=port, protocol=protocol))
+                if endpoints["details"]["httpTransactions"]:
+                    for url in endpoints["details"]["httpTransactions"]:
+                        find.unsaved_endpoints.append(Endpoint.from_uri(url['requestUrl']))
 
         return list(dupes.values())
 
