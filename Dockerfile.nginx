@@ -16,12 +16,14 @@ RUN \
     xmlsec1 \
     git \
     uuid-runtime \
+    curl \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt && \
+    curl -sS -o /tmp/insecure_full.json https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json
 
 FROM build AS collectstatic
 
