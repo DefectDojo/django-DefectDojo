@@ -1,6 +1,6 @@
 # DefectDojo on Kubernetes
 
-DefetDojo Kubernetes utilizes [Helm](https://helm.sh/), a
+DefectDojo Kubernetes utilizes [Helm](https://helm.sh/), a
 package manager for Kubernetes. Helm Charts help you define, install, and
 upgrade even the most complex Kubernetes application.
 
