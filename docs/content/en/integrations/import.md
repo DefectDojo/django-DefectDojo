@@ -256,9 +256,9 @@ Follow these steps to setup API importing:
     and Authentication Type "API Key". Paste your Cobalt.io API key in the
     "API Key" field and the desired org token in the "Extras" field.
 2.  In the Product settings select "Add API Scan Configuration" and select the
-    previously add Cobalt.io Tool Configuration. Provide the ID
-    of the asset from which to import findings. The ID can be found at the end
-    of the URL when viewing the asset in your browser.
+    previously added Cobalt.io Tool Configuration. Provide the ID
+    of the asset from which to import findings in the field *Service key 1*.
+    The ID can be found at the end of the URL when viewing the asset in your browser.
 3.  After this is done, you can import the findings by selecting "Cobalt.io
     API Import" as the scan type. If you have more than one asset configured, you
     must also select which Cobalt.io API Scan Configuratio to use.
