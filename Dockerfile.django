@@ -18,12 +18,14 @@ RUN \
     xmlsec1 \
     git \
     uuid-runtime \
+    curl \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
   true
 COPY requirements.txt ./
-RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt
+RUN pip3 wheel --wheel-dir=/tmp/wheels -r ./requirements.txt && \
+    curl -sS -o /tmp/insecure_full.json https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json
 
 FROM python:3.8.12-slim-buster@sha256:7e732593f25983fa7d4b2d54444be4a785f2397c1cf2f815d2e3638337eee012
 WORKDIR /app
@@ -47,7 +49,6 @@ RUN \
     uuid-runtime \
     # only required for the dbshell (used by the initializer job)
     postgresql-client \
-    curl \
     && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists && \
@@ -77,8 +78,8 @@ COPY dojo/ ./dojo/
 # Add extra fixtures to docker image which are loaded by the initializer
 COPY docker/extra_fixtures/* /app/dojo/fixtures/
 
-# Fallback for safety parser, if installation does't allow internet connectivity
-RUN curl -sS -o dojo/tools/safety/insecure_full.json https://raw.githubusercontent.com/pyupio/safety-db/master/data/insecure_full.json
+# Fallback for safety parser, if installation doesn't allow internet connectivity
+COPY --from=build /tmp/insecure_full.json dojo/tools/safety/insecure_full.json
 
 COPY tests/ ./tests/
 RUN \
