@@ -63,7 +63,7 @@ def requires_tool_type(scan_type):
         return None
     parser = PARSERS[scan_type]
     if hasattr(parser, "requires_tool_type"):
-        return parser.requires_tool_type()
+        return parser.requires_tool_type(scan_type)
     return None
 
 
