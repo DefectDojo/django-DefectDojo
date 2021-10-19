@@ -19,7 +19,7 @@ class UserTest(BaseTestCase):
 
     @staticmethod
     def unset_user_read_only_parameter():
-        f = open('/app/dojo/settings/local_settings.py', 'w')
+        f = open('dojo/settings/local_settings.py', 'w')
         f.write("USER_PROFILE_EDITABLE=True")
         f.close()
 
