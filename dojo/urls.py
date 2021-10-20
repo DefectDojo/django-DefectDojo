@@ -20,7 +20,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     SonarqubeProductViewSet, RegulationsViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     DojoGroupViewSet, ProductGroupViewSet, ProductTypeGroupViewSet, RoleViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, ImportLanguagesView, LanguageTypeViewSet, LanguageViewSet, \
-    NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset
+    NotificationsViewSet, EngagementPresetsViewset, NetworkLocationsViewset, UserContactInfoViewSet
 
 from dojo.utils import get_system_setting
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -99,6 +99,7 @@ v2_api.register(r'tool_configurations', ToolConfigurationsViewSet)
 v2_api.register(r'tool_product_settings', ToolProductSettingsViewSet)
 v2_api.register(r'tool_types', ToolTypesViewSet)
 v2_api.register(r'users', UsersViewSet)
+v2_api.register(r'user_contact_infos', UserContactInfoViewSet)
 v2_api.register(r'import-scan', ImportScanView, basename='importscan')
 v2_api.register(r'reimport-scan', ReImportScanView, basename='reimportscan')
 v2_api.register(r'metadata', DojoMetaViewSet, basename='metadata')

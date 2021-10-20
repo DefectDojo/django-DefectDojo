@@ -10,7 +10,7 @@ from dojo.models import Product, Engagement, Test, Finding, \
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
-    Notifications
+    Notifications, UserContactInfo
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -21,7 +21,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
-    NotificationsViewSet
+    NotificationsViewSet, UserContactInfoViewSet
 from json import dumps
 from django.urls import reverse
 from rest_framework import status
@@ -1256,6 +1256,26 @@ class UsersTest(BaseClass.RESTEndpointTest):
             "is_active": True,
         }
         self.update_fields = {"first_name": "test changed"}
+        self.object_permission = False
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class UserContactInfoTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = UserContactInfo
+        self.endpoint_path = 'user_contact_infos'
+        self.viewname = 'usercontactinfo'
+        self.viewset = UserContactInfoViewSet
+        self.payload = {
+            "user": 4,
+            "title": "Sir",
+            "phone_number": "+999999999",
+            "cell_number": "+999999999",
+            "twitter_username": "defectdojo",
+        }
+        self.update_fields = {"title": "Lady"}
         self.object_permission = False
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 

@@ -24,7 +24,8 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
     Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
-    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations
+    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
+    UserContactInfo
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -1867,6 +1868,36 @@ class UsersViewSet(mixins.CreateModelMixin,
             return Response('Users may not delete themselves', status=status.HTTP_400_BAD_REQUEST)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Authorization: superuser
+@extend_schema_view(
+    list=extend_schema(parameters=[
+        OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                         description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+        OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                         description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class UserContactInfoViewSet(prefetch.PrefetchListMixin,
+                             prefetch.PrefetchRetrieveMixin,
+                             mixins.CreateModelMixin,
+                             mixins.UpdateModelMixin,
+                             mixins.ListModelMixin,
+                             mixins.RetrieveModelMixin,
+                             mixins.DestroyModelMixin,
+                             viewsets.GenericViewSet):
+    serializer_class = serializers.UserContactInfoSerializer
+    queryset = UserContactInfo.objects.all()
+    swagger_schema = prefetch.get_prefetch_schema(["user_contact_infos_list", "user_contact_infos_read"],
+                                                  serializers.UserContactInfoSerializer).to_schema()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = '__all__'
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
 # Authorization: authenticated users, DjangoModelPermissions

@@ -15,7 +15,7 @@ from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Fin
     Test_Import_Finding_Action, Product_Type_Member, Product_Member, \
     Product_Group, Product_Type_Group, Dojo_Group, Role, Global_Role, Dojo_Group_Member, \
     Language_Type, Languages, Notifications, NOTIFICATION_CHOICES, Engagement_Presets, \
-    Network_Locations
+    Network_Locations, UserContactInfo
 
 from dojo.tools.factory import requires_file, get_choices_sorted
 from dojo.utils import is_scan_file_too_large
@@ -283,6 +283,13 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_unusable_password()
         user.save()
         return user
+
+
+class UserContactInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserContactInfo
+        fields = '__all__'
 
 
 class UserStubSerializer(serializers.ModelSerializer):
