@@ -24,7 +24,6 @@ services:
   initializer:
     image: busybox:1.34.0-musl
     entrypoint: ['echo', 'skipping', 'initializer']
-
   mysql:
     ports:
       - target: 3306
@@ -35,6 +34,9 @@ services:
       MYSQL_DATABASE: "${DD_TEST_DATABASE_NAME:-test_defectdojo}"
     volumes:
        - defectdojo_data_unittest:/var/lib/mysql
+  rabbitmq:
+    image: busybox:1.34.0-musl
+    entrypoint: ['echo', 'skipping', 'rabbitmq']
 volumes:
   defectdojo_data_unittest: {}
   defectdojo_media_unittest: {}
