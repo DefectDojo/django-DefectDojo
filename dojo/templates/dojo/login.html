@@ -27,11 +27,13 @@
                     <div class="col-sm-offset-1 col-sm-1">
                         <button class="btn btn-success">Login</button>
                     </div>
-                    <div class="col-sm-offset-1 col-sm-1">
-                        <button class="btn btn-success" type="button">
-                            <a id="reset-password" href="{% url 'password_reset' %}" style="color: rgb(255,255,255)">Forgot password</a>
-                        </button>
-                    </div>
+                    {% if FORGOT_PASSWORD_BUTTON %}
+                        <div class="col-sm-offset-1 col-sm-1">
+                            <button class="btn btn-success" type="button">
+                                <a id="reset-password" href="{% url 'password_reset' %}" style="color: rgb(255,255,255)">Forgot password</a>
+                            </button>
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="form-group">
