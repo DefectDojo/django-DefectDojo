@@ -1,5 +1,4 @@
 from django.conf.urls import url, include
-from django.urls import path
 from django.contrib.auth import views as auth_views
 
 from dojo.user import views
