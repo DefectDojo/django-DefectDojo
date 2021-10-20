@@ -30,13 +30,13 @@ class HorusecParser(object):
 
     def get_tests(self, scan_type, scan):
         data = json.load(scan)
-        test = ParserTest(name=self.ID, type=self.ID, version=data.get("version"))
+        test = ParserTest(name=self.ID, type=self.ID, version=data.get("version").lstrip("v"))  # remove the v in vX.Y.Z
         test.description = "\n".join(
             [
                 f"**Status:** {data.get('status')}",
                 "**Errors:**",
                 "```",
-                data.get("errors"),
+                data.get("errors").replace("```", "``````"),
                 "```",
             ]
         )
@@ -44,13 +44,15 @@ class HorusecParser(object):
         return [test]
 
     def _get_finding(self, data):
-        description = "\n".join([
-            data["vulnerabilities"]["details"].split("\n")[-1],
-            "**Code:**",
-            f"```{data['vulnerabilities']['language']}",
-            data["vulnerabilities"]["code"].replace("```", "``````"),
-            "```"
-        ])
+        description = "\n".join(
+            [
+                data["vulnerabilities"]["details"].split("\n")[-1],
+                "**Code:**",
+                f"```{data['vulnerabilities']['language']}",
+                data["vulnerabilities"]["code"].replace("```", "``````"),
+                "```",
+            ]
+        )
         finding = Finding(
             title=data["vulnerabilities"]["details"].split("\n")[0],
             severity=data["vulnerabilities"]["severity"].title(),
