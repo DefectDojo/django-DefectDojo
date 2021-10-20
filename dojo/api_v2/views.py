@@ -1870,7 +1870,7 @@ class UsersViewSet(mixins.CreateModelMixin,
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# Authorization: staff
+# Authorization: superuser
 @extend_schema_view(
     list=extend_schema(parameters=[
         OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
@@ -1893,11 +1893,11 @@ class UserContactInfoViewSet(prefetch.PrefetchListMixin,
                              viewsets.GenericViewSet):
     serializer_class = serializers.UserContactInfoSerializer
     queryset = UserContactInfo.objects.all()
-    swagger_schema = prefetch.get_prefetch_schema(["users_list", "users_read"],
-                                                  serializers.DojoGroupSerializer).to_schema()
+    swagger_schema = prefetch.get_prefetch_schema(["user_contact_infos_list", "user_contact_infos_read"],
+                                                  serializers.UserContactInfoSerializer).to_schema()
     filter_backends = (DjangoFilterBackend,)
     filter_fields = '__all__'
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
 # Authorization: authenticated users, DjangoModelPermissions
