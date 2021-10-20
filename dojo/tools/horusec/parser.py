@@ -26,10 +26,12 @@ class HorusecParser(object):
 
     def get_findings(self, filename, test):
         data = json.load(filename)
-        return [self._get_finding(node) for node in data.get("analysisVulnerabilities")]
+        report_date = datetime.strptime(data.get("createdAt")[0:9], "%Y-%m-%d")
+        return [self._get_finding(node, report_date) for node in data.get("analysisVulnerabilities")]
 
     def get_tests(self, scan_type, scan):
         data = json.load(scan)
+        report_date = datetime.strptime(data.get("createdAt")[0:9], "%Y-%m-%d")
         test = ParserTest(name=self.ID, type=self.ID, version=data.get("version").lstrip("v"))  # remove the v in vX.Y.Z
         test.description = "\n".join(
             [
@@ -40,10 +42,10 @@ class HorusecParser(object):
                 "```",
             ]
         )
-        test.findings = [self._get_finding(node) for node in data.get("analysisVulnerabilities")]
+        test.findings = [self._get_finding(node, report_date) for node in data.get("analysisVulnerabilities")]
         return [test]
 
-    def _get_finding(self, data):
+    def _get_finding(self, data, date):
         description = "\n".join(
             [
                 data["vulnerabilities"]["details"].split("\n")[-1],
@@ -55,6 +57,7 @@ class HorusecParser(object):
         )
         finding = Finding(
             title=data["vulnerabilities"]["details"].split("\n")[0],
+            date=date,
             severity=data["vulnerabilities"]["severity"].title(),
             description=description,
             file_path=data["vulnerabilities"]["file"],

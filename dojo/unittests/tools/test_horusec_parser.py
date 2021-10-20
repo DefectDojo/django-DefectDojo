@@ -1,7 +1,9 @@
+import datetime
 from os import path
+
 from django.test import TestCase
-from dojo.tools.horusec.parser import HorusecParser
 from dojo.models import Test
+from dojo.tools.horusec.parser import HorusecParser
 
 
 class TestHorusecParser(TestCase):
@@ -28,18 +30,21 @@ class TestHorusecParser(TestCase):
                 self.assertEqual("Critical", finding.severity)
                 self.assertEqual("docker/entrypoint.sh", finding.file_path)
                 self.assertEqual(20, finding.line)
+                self.assertEqual(datetime.datetime(2021, 10, 1), finding.date)
             with self.subTest(i=50):
                 finding = findings[50]
                 self.assertEqual("Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.", finding.title)
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("dojo/tools/huskyci/parser.py", finding.file_path)
                 self.assertEqual(55, finding.line)
+                self.assertEqual(datetime.datetime(2021, 10, 1), finding.date)
             with self.subTest(i=266):
                 finding = findings[266]
                 self.assertEqual("Try, Except, Pass detected.", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("tests/base_test_class.py", finding.file_path)
                 self.assertEqual(191, finding.line)
+                self.assertEqual(datetime.datetime(2021, 10, 1), finding.date)
 
     def test_get_tests_ok(self):
         """Version 2.6.3 with big project in Python"""
