@@ -19,6 +19,7 @@ class TestHorusecParser(TestCase):
             tests = parser.get_tests("Horusec Scan", testfile)
             self.assertEqual(1, len(tests))
             test = tests[0]
+            self.assertEqual('2.6.3', test.version)
             self.assertEqual(267, len(test.findings))
             findings = test.findings
             with self.subTest(i=0):
