@@ -618,6 +618,17 @@ Hadolint Dockerfile scan in json format.
 Import findings from Harbor registry container scan:
 <https://github.com/goharbor/harbor>
 
+### Horusec
+
+Import findings from Horusec scan.
+
+```shell
+./horusec_linux_x64 start -O=report.json -o json -i="tests/" 
+```
+
+References:
+ * [GitHub repository](https://github.com/ZupIT/horusec)
+
 ### HuskyCI Report
 
 Import JSON reports from
