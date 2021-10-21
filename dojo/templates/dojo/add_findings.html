@@ -99,9 +99,6 @@
         $.hotkeys.options.filterTextInputs = false;
 
         $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' test.engagement.product.id %}?_popup");
-        {% if not form_error %}
-            $('#id_endpoints').find('option').remove();
-        {% endif %}
 
         $(document).bind('keydown', 'ctrl+s', function (event) {
             if (event.preventDefault) {

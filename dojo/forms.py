@@ -74,14 +74,6 @@ class MultipleSelectWithPop(forms.SelectMultiple):
         return mark_safe(popup_plus)
 
 
-class MultipleSelectWithPopPlusMinus(forms.SelectMultiple):
-    def render(self, name, *args, **kwargs):
-        html = super(MultipleSelectWithPopPlusMinus, self).render(name, *args, **kwargs)
-        popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="icon-plusminus"></span></a></span></div>'
-
-        return mark_safe(popup_plus)
-
-
 class MonthYearWidget(Widget):
     """
     A Widget that splits date input into two <select> boxes for month and year,
@@ -431,8 +423,7 @@ class ImportScanForm(forms.Form):
     scan_type = forms.ChoiceField(required=True, choices=get_choices_sorted)
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints')
     version = forms.CharField(max_length=100, required=False, help_text="Version that was scanned.")
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
@@ -500,8 +491,7 @@ class ReImportScanForm(forms.Form):
                                          choices=SEVERITY_CHOICES[0:4])
     active = forms.BooleanField(help_text="Select if these findings are currently active.", required=False, initial=True)
     verified = forms.BooleanField(help_text="Select if these findings have been verified.", required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '5'}))
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints')
     tags = TagField(required=False, help_text="Modify existing tags that help describe this scan.  "
                     "Choose from the list or add new tags. Press Enter key to add.")
     file = forms.FileField(widget=forms.widgets.FileInput(
@@ -880,8 +870,7 @@ class AddFindingForm(forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects.none(), required=False, label='Systems / Endpoints')
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
@@ -892,7 +881,16 @@ class AddFindingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
+
+        product = None
+        if 'product' in kwargs:
+            product = kwargs.pop('product')
+
         super(AddFindingForm, self).__init__(*args, **kwargs)
+
+        if product:
+            self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
+
         if req_resp:
             self.fields['request'].initial = req_resp[0]
             self.fields['response'].initial = req_resp[1]
@@ -935,8 +933,7 @@ class AdHocFindingForm(forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    endpoints = forms.ModelMultipleChoiceField(queryset=Endpoint.objects.none(), required=False, label='Systems / Endpoints')
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
@@ -947,7 +944,16 @@ class AdHocFindingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         req_resp = kwargs.pop('req_resp')
+
+        product = None
+        if 'product' in kwargs:
+            product = kwargs.pop('product')
+
         super(AdHocFindingForm, self).__init__(*args, **kwargs)
+
+        if product:
+            self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
+
         if req_resp:
             self.fields['request'].initial = req_resp[0]
             self.fields['response'].initial = req_resp[1]
@@ -964,7 +970,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
 
@@ -983,14 +989,23 @@ class PromoteFindingForm(forms.ModelForm):
             'invalid_choice': 'Select valid choice: Critical,High,Medium,Low'})
     mitigation = forms.CharField(widget=forms.Textarea, required=False)
     impact = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects.none(), required=False, label='Systems / Endpoints')
     references = forms.CharField(widget=forms.Textarea, required=False)
+
+    def __init__(self, *args, **kwargs):
+        product = None
+        if 'product' in kwargs:
+            product = kwargs.pop('product')
+
+        super(PromoteFindingForm, self).__init__(*args, **kwargs)
+
+        if product:
+            self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
 
     class Meta:
         model = Finding
         order = ('title', 'severity', 'endpoints', 'description', 'impact')
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'active', 'false_p', 'verified', 'endpoint_status'
+        exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status',
                    'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
 
 
@@ -1057,8 +1072,7 @@ class FindingForm(forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints',
-                                               widget=MultipleSelectWithPopPlusMinus(attrs={'size': '11'}))
+    endpoints = forms.ModelMultipleChoiceField(queryset=Endpoint.objects.none(), required=False, label='Systems / Endpoints')
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
@@ -1083,6 +1097,8 @@ class FindingForm(forms.ModelForm):
             else False
 
         super(FindingForm, self).__init__(*args, **kwargs)
+
+        self.fields['endpoints'].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
@@ -1150,7 +1166,7 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
+        exclude = ('reporter', 'url', 'numerical_severity', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'sonarqube_issue', 'endpoint_status')
 
 
@@ -1292,7 +1308,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 class EditEndpointForm(forms.ModelForm):
     class Meta:
         model = Endpoint
-        exclude = ['product']
+        exclude = ['product', 'endpoint_status']
 
     def __init__(self, *args, **kwargs):
         self.product = None

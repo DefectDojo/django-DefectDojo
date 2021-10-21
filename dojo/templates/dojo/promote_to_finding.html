@@ -48,9 +48,6 @@
         $.hotkeys.options.filterTextInputs = false;
 
         $('#add_id_endpoints').attr('href', '/endpoints/{{ test.engagement.product.id }}/add?_popup');
-        {% if not form_error %}
-            $('#id_endpoints').find('option').remove();
-        {% endif %}
 
         $(function () {
             $("textarea").each(function (index, elem) {

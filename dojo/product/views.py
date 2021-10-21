@@ -1182,11 +1182,11 @@ def ad_hoc_finding(request, pid):
     push_all_jira_issues = jira_helper.is_push_all_issues(test)
     jform = None
     gform = None
-    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None)
+    form = AdHocFindingForm(initial={'date': timezone.now().date()}, req_resp=None, product=prod)
     use_jira = jira_helper.get_jira_project(test) is not None
 
     if request.method == 'POST':
-        form = AdHocFindingForm(request.POST, req_resp=None)
+        form = AdHocFindingForm(request.POST, req_resp=None, product=prod)
         if (form['active'].value() is False or form['false_p'].value()) and form['duplicate'].value() is False:
             closing_disabled = Note_Type.objects.filter(is_mandatory=True, is_active=True).count()
             if closing_disabled != 0:
@@ -1319,10 +1319,6 @@ def ad_hoc_finding(request, pid):
             else:
                 return HttpResponseRedirect(reverse('add_findings', args=(test.id,)))
         else:
-            if 'endpoints' in form.cleaned_data:
-                form.fields['endpoints'].queryset = form.cleaned_data['endpoints']
-            else:
-                form.fields['endpoints'].queryset = Endpoint.objects.none()
             form_error = True
             add_error_message_to_response('The form has errors, please correct them below.')
             add_field_errors_to_response(jform)

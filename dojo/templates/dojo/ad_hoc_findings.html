@@ -8,7 +8,10 @@
 {% endblock %}
 {% block add_styles %}
     {{ block.super }}
-    .select2 .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
     width: 70% !important;
     }
 {% endblock %}
@@ -80,9 +83,6 @@
             });
         });
         $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' pid %}?_popup");
-        {% if not form_error %}
-            $('#id_endpoints').find('option').remove();
-        {% endif %}
     </script>
 
 
