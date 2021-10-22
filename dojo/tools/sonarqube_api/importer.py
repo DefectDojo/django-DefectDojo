@@ -21,8 +21,8 @@ class SonarQubeApiImporter(object):
     def get_findings(self, filename, test):
         rules = dict()
         items = self.import_issues(test, rules)
-        # if settings.SONARQUBE_API_PARSER_HOTSPOTS:
-        #     items.extend(self.import_hotspots(test, rules))
+        if settings.SONARQUBE_API_PARSER_HOTSPOTS:
+            items.extend(self.import_hotspots(test, rules))
         return items
 
     @staticmethod
@@ -70,13 +70,7 @@ class SonarQubeApiImporter(object):
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
                 config = None
 
-        # return SonarQubeAPI(tool_config=config.sonarqube_tool_config if config else None), config
-        # token = "fd8d62b189f2a28d40bfb2f040902280f4a4d82e"
-        # sonar = SonarQubeClient(sonarqube_url="http://192.168.0.174:9005", token=token)
-        # return sonar, {"key": "test"}
-        token = "a592748e84a3153d1d9028226d04633a138965b5"
-        sonar = SonarCloudClient(sonarcloud_url="https://sonarcloud.io", token=token)
-        return sonar, {"key": "damiencarol_django-DefectDojo"}
+        return SonarQubeAPI(tool_config=config.sonarqube_tool_config if config else None), config
 
     def import_issues(self, test, rules):
 
@@ -88,7 +82,6 @@ class SonarQubeApiImporter(object):
             component = client.get_project(config.service_key_1)
         else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
             component = client.find_project(test.engagement.product.name)
-
 
         # issues = client.issues.search_issues(componentKeys=component["key"], branch="master", languages="py", types="BUG,VULNERABILITY")
         issues = client.issues.search_issues(componentKeys=component["key"], types="VULNERABILITY")
@@ -143,10 +136,11 @@ class SonarQubeApiImporter(object):
         items = list()
         client, config = self.prepare_client(test)
 
-        if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-            component = client.get_project(config.service_key_1)
-        else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
-            component = client.find_project(test.engagement.product.name)
+        # if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+        #     component = client.get_project(config.service_key_1)
+        # else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
+        #     component = client.find_project(test.engagement.product.name)
+        component = config
 
         # get the hotspots
         # hotspots = client.hotspots.search_hotspots(componentKeys=component["key"], branch="master")
