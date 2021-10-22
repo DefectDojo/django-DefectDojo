@@ -221,9 +221,10 @@
                                     <span class="glyphicon arrow"></span>
                                 </a>
                                 <ul class="nav nav-second-level">
-                                    <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
+                                    <li><a href="{% url 'active_engagements' %}">Active Engagements</a></li>
+                                    <li><a href="{% url 'all_engagements' %}">All Engagements</a></li>
                                     {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
-                                        <li><a href="{% url 'engagements_all' %}">All Engagements</a></li>
+                                        <li><a href="{% url 'engagements_all' %}">Engagements by Product</a></li>
                                     {% endif %}
                                     {% if request.user.is_staff %}
                                         <li><a href="{% url 'test_type' %}">Test Types</a></li>
