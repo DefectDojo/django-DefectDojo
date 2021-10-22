@@ -1115,7 +1115,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'Mobsfscan Scan': DEDUPE_ALGO_HASH_CODE,
     'SonarQube Scan detailed': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'SonarQube Scan': DEDUPE_ALGO_HASH_CODE,
-    'SonarQube API Import': DEDUPE_ALGO_HASH_CODE,
+    'SonarQube API Import': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Dependency Check Scan': DEDUPE_ALGO_HASH_CODE,
     'Dockle Scan': DEDUPE_ALGO_HASH_CODE,
     'Nessus Scan': DEDUPE_ALGO_HASH_CODE,

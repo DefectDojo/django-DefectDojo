@@ -1,14 +1,13 @@
 import logging
 import re
+import textwrap
 
 import html2text
-from lxml import etree
-import textwrap
+from dateutil import parser
 from django.conf import settings
-
-from dojo.models import Finding, Sonarqube_Issue
-from dojo.notifications.helper import create_notification
-from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
+from dojo.models import Finding
+from lxml import etree
+from sonarqube import SonarQubeClient, SonarCloudClient
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +19,10 @@ class SonarQubeApiImporter(object):
     """
 
     def get_findings(self, filename, test):
-        items = self.import_issues(test)
-        if settings.SONARQUBE_API_PARSER_HOTSPOTS:
-            items.extend(self.import_hotspots(test))
+        rules = dict()
+        items = self.import_issues(test, rules)
+        # if settings.SONARQUBE_API_PARSER_HOTSPOTS:
+        #     items.extend(self.import_hotspots(test, rules))
         return items
 
     @staticmethod
@@ -70,97 +70,75 @@ class SonarQubeApiImporter(object):
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
                 config = None
 
-        return SonarQubeAPI(tool_config=config.tool_configuration if config else None), config
+        # return SonarQubeAPI(tool_config=config.sonarqube_tool_config if config else None), config
+        # token = "fd8d62b189f2a28d40bfb2f040902280f4a4d82e"
+        # sonar = SonarQubeClient(sonarqube_url="http://192.168.0.174:9005", token=token)
+        # return sonar, {"key": "test"}
+        token = "a592748e84a3153d1d9028226d04633a138965b5"
+        sonar = SonarCloudClient(sonarcloud_url="https://sonarcloud.io", token=token)
+        return sonar, {"key": "damiencarol_django-DefectDojo"}
 
-    def import_issues(self, test):
+    def import_issues(self, test, rules):
 
         items = list()
 
-        try:
+        client, config = self.prepare_client(test)
 
-            client, config = self.prepare_client(test)
+        if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+            component = client.get_project(config.service_key_1)
+        else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
+            component = client.find_project(test.engagement.product.name)
 
-            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.service_key_1)
-            else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
-                component = client.find_project(test.engagement.product.name)
 
-            issues = client.find_issues(component['key'])
-            logging.info('Found {} issues for component {}'.format(len(issues), component["key"]))
+        # issues = client.issues.search_issues(componentKeys=component["key"], branch="master", languages="py", types="BUG,VULNERABILITY")
+        issues = client.issues.search_issues(componentKeys=component["key"], types="VULNERABILITY")
+        for issue in issues:
+            status = issue['status']
+            from_hotspot = issue.get('fromHotspot', False)
 
-            for issue in issues:
-                status = issue['status']
-                from_hotspot = issue.get('fromHotspot', False)
+            if self.is_closed(status) or from_hotspot:
+                continue
 
-                if self.is_closed(status) or from_hotspot:
-                    continue
+            rule_id = issue['rule']
+            if rule_id not in rules:
+                rules[rule_id] = client.rules.get_rule(key=rule_id, organization='damiencarol')['rule']
+            rule = rules[rule_id]
+            # custom (user defined) SQ rules may not have 'htmlDesc'
+            if 'htmlDesc' in rule:
+                description = self.clean_rule_description_html(rule['htmlDesc'])
+                cwe = self.clean_cwe(rule['htmlDesc'])
+                references = self.get_references(rule['htmlDesc'])
+                import json
+                references = json.dumps(rule, indent=2)
+            else:
+                description = ""
+                cwe = 0
+                references = ""
 
-                type = issue['type']
-                if len(issue['message']) > 511:
-                    title = issue['message'][0:507] + "..."
-                else:
-                    title = issue['message']
-                component_key = issue['component']
-                line = issue.get('line')
-                rule_id = issue['rule']
-                rule = client.get_rule(rule_id)
-                severity = self.convert_sonar_severity(issue['severity'])
-                # custom (user defined) SQ rules may not have 'htmlDesc'
-                if 'htmlDesc' in rule:
-                    description = self.clean_rule_description_html(rule['htmlDesc'])
-                    cwe = self.clean_cwe(rule['htmlDesc'])
-                    references = self.get_references(rule['htmlDesc'])
-                else:
-                    description = ""
-                    cwe = None
-                    references = ""
-
-                sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
-                    key=issue['key'],
-                    defaults={
-                        'status': status,
-                        'type': type,
-                    }
-                )
-
-                # Only assign the SonarQube_issue to the first finding related to the issue
-                if Finding.objects.filter(sonarqube_issue=sonarqube_issue).exists():
-                    sonarqube_issue = None
-
-                find = Finding(
-                    title=title,
-                    cwe=cwe,
-                    description=description,
-                    test=test,
-                    severity=severity,
-                    references=references,
-                    file_path=component_key,
-                    line=line,
-                    verified=self.is_confirmed(status),
-                    false_p=False,
-                    duplicate=False,
-                    out_of_scope=False,
-                    mitigated=None,
-                    mitigation='No mitigation provided',
-                    impact="No impact provided",
-                    static_finding=True,
-                    sonarqube_issue=sonarqube_issue,
-                )
-                items.append(find)
-
-        except Exception as e:
-            logger.exception(e)
-            create_notification(
-                event='other',
-                title='SonarQube API import issue',
-                description=e,
-                icon='exclamation-triangle',
-                source='SonarQube API'
+            find = Finding(
+                title=textwrap.shorten(issue['message'], 511),
+                date=parser.parse(issue["creationDate"]),
+                cwe=cwe,
+                description=description,
+                test=test,
+                severity=self.convert_sonar_severity(issue['severity']),
+                references=references,
+                file_path=issue['component'].split(":")[-1],
+                line=issue.get('line'),
+                verified=self.is_confirmed(status),
+                false_p=False,
+                duplicate=False,
+                out_of_scope=False,
+                mitigated=None,
+                static_finding=True,
+                dynamic_finding=False,
+                unique_id_from_tool=f"issue:{issue['key']}",
             )
+            items.append(find)
 
         return items
 
-    def import_hotspots(self, test):
+    def import_hotspots(self, test, rules):
 
         items = list()
         client, config = self.prepare_client(test)
@@ -170,8 +148,9 @@ class SonarQubeApiImporter(object):
         else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
             component = client.find_project(test.engagement.product.name)
 
-        hotspots = client.find_hotspots(component['key'])
-        logging.info('Found {} hotspots for project {}'.format(len(hotspots), component["key"]))
+        # get the hotspots
+        # hotspots = client.hotspots.search_hotspots(componentKeys=component["key"], branch="master")
+        hotspots = client.hotspots.search_hotspots(projectKey=component["key"], branch="master")
 
         for hotspot in hotspots:
             status = hotspot['status']
@@ -179,47 +158,39 @@ class SonarQubeApiImporter(object):
             if self.is_reviewed(status):
                 continue
 
-            type = 'SECURITY_HOTSPOT'
-            severity = 'Info'
-            title = textwrap.shorten(text=hotspot['message'], width=500)
-            component_key = hotspot['component']
-            line = hotspot.get('line')
-            rule_id = hotspot['key']
-            rule = client.get_hotspot_rule(rule_id)
-            scanner_confidence = self.convert_scanner_confidence(hotspot['vulnerabilityProbability'])
-            description = self.clean_rule_description_html(rule['vulnerabilityDescription'])
-            cwe = self.clean_cwe(rule['fixRecommendations'])
-            references = self.get_references(rule['riskDescription']) + self.get_references(rule['fixRecommendations'])
+            print(hotspot)
+            if 'rule' in hotspot:
+                rule_id = hotspot['rule']
+                if rule_id not in rules:
+                    rules[rule_id] = client.rules.get_rule(key=rule_id, organization='damiencarol')['rule']
+                rule = rules[rule_id]
 
-            sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
-                key=hotspot['key'],
-                defaults={
-                    'status': status,
-                    'type': type
-                }
-            )
-
-            # Only assign the SonarQube_issue to the first finding related to the issue
-            if Finding.objects.filter(sonarqube_issue=sonarqube_issue).exists():
-                sonarqube_issue = None
+                cwe = self.clean_cwe(rule['fixRecommendations'])
+                description = self.clean_rule_description_html(rule['vulnerabilityDescription'])
+                references = self.get_references(rule['riskDescription']) + self.get_references(rule['fixRecommendations'])
+            else:
+                cwe = 0
+                description = ""
+                references = ""
 
             find = Finding(
-                title=title,
+                title=textwrap.shorten(text=hotspot['message'], width=511),
+                date=parser.parse(hotspot["creationDate"]),
                 cwe=cwe,
                 description=description,
-                test=test,
-                severity=severity,
                 references=references,
-                file_path=component_key,
-                line=line,
+                severity='Info',
+                file_path=hotspot['component'].split(":")[-1],
+                line=hotspot.get('line'),
                 active=True,
                 verified=self.is_confirmed(status),
                 false_p=False,
                 duplicate=False,
                 out_of_scope=False,
                 static_finding=True,
-                scanner_confidence=scanner_confidence,
-                sonarqube_issue=sonarqube_issue,
+                dynamic_finding=False,
+                scanner_confidence=self.convert_scanner_confidence(hotspot['vulnerabilityProbability']),
+                unique_id_from_tool=f"hotspot:{hotspot['key']}",
             )
             items.append(find)
 
