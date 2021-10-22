@@ -606,12 +606,14 @@ class EngagementDirectFilter(DojoFilter):
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
+            ('target_start', 'target_start'),
             ('name', 'name'),
             ('product__name', 'product__name'),
             ('product__prod_type__name', 'product__prod_type__name'),
             ('lead__first_name', 'lead__first_name'),
         ),
         field_labels={
+            'target_start': 'Start date',
             'name': 'Engagement',
             'product__name': 'Product Name',
             'product__prod_type__name': 'Product Type',
