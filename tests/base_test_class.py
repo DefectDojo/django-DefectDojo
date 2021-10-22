@@ -164,14 +164,14 @@ class BaseTestCase(unittest.TestCase):
         return driver
 
     def goto_active_engagements_overview(self, driver):
-        # return self.goto_engagements_internal(driver, 'engagement')
-        # engagement overview doesn't seem to have the datatables yet modifying the DOM
-        # https://github.com/DefectDojo/django-DefectDojo/issues/2173
-        driver.get(self.base_url + 'engagement')
-        # self.goto_engagements_internal(driver, 'engagement')
+        driver.get(self.base_url + 'engagement/active')
         return driver
 
     def goto_all_engagements_overview(self, driver):
+        driver.get(self.base_url + 'engagement/all')
+        return driver
+
+    def goto_all_engagements_by_product_overview(self, driver):
         return self.goto_engagements_internal(driver, 'engagements_all')
 
     def goto_engagements_internal(self, driver, rel_url):
