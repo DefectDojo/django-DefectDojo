@@ -1,9 +1,10 @@
 import re
-
+from django.conf import settings
 from rest_framework.exceptions import ParseError
+from dojo.importers.reimporter.utils import get_import_meta_data_from_dict, get_target_engagement_if_exists, get_target_product_if_exists, get_target_product_type_if_exists, validate_import_metadata
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
-from rest_framework import permissions
+from rest_framework import permissions, serializers
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 
@@ -11,7 +12,7 @@ from dojo.authorization.roles_permissions import Permissions
 def check_post_permission(request, post_model, post_pk, post_permission):
     if request.method == 'POST':
         if request.data.get(post_pk) is None:
-            raise ParseError('Attribute \'{}\' is required'.format(post_pk))
+            raise ParseError('Unable to check for permissions: Attribute \'{}\' is required'.format(post_pk))
         object = get_object_or_404(post_model, pk=request.data.get(post_pk))
         return user_has_permission(request.user, object, post_permission)
     else:
@@ -166,7 +167,37 @@ class UserHasFindingPermission(permissions.BasePermission):
 
 class UserHasImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(request, Engagement, 'engagement', Permissions.Import_Scan_Result)
+        # permission check takes place before validation, so we don't have access to serializer.validated_data()
+        # and we have to validate ourselves
+        validation_error = validate_import_metadata(request.data)
+        if validation_error:
+            raise serializers.ValidationError(validation_error)
+
+        engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name = get_import_meta_data_from_dict(request.data)
+
+        engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
+        product = get_target_product_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
+        product_type = get_target_product_type_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
+
+        if engagement:
+            # existing engagement, nothing special to check
+            return user_has_permission(request.user, engagement, Permissions.Import_Scan_Result)
+        elif product:
+            # existing product, but user also needs permission to (auto)create a new engagement
+            return user_has_permission(request.user, product, Permissions.Import_Scan_Result) \
+                and (user_has_permission(request.user, product, Permissions.Engagement_Add) or settings.ALLOW_IMPORT_AUTO_CREATE)
+        elif product_type:
+            # existing product_type, but user also needs permission to (auto)create a new product and engagement
+            return user_has_permission(request.user, product_type, Permissions.Import_Scan_Result) and (
+                        (user_has_permission(request.user, product_type, Permissions.Product_Type_Add_Product) and
+                        user_has_permission(request.user, product_type, Permissions.Engagement_Add)) or
+                        settings.ALLOW_IMPORT_AUTO_CREATE)
+        else:
+            # Here the scan will be uploaded into a new engagement, new product and product_type "Auto Created via API"
+            # There is no permission suitable for this, so we use a settings.py entry
+            # This is temporary as there will be permission/authorization improvements coming along which
+            # can be used to make this better/nicer
+            return settings.ALLOW_IMPORT_EVERYONE
 
 
 class UserHasProductPermission(permissions.BasePermission):

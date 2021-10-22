@@ -4,6 +4,7 @@ from drf_yasg.utils import swagger_serializer_method
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
+from dojo.importers.reimporter.utils import get_import_meta_data_from_dict, get_or_create_engagement, validate_import_metadata
 from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -1171,8 +1172,16 @@ class ImportScanSerializer(serializers.Serializer):
                                                          required=False,
                                                          default=None)
     file = serializers.FileField(required=False)
+    # with the smart import it cannot be a primarykeyrelated field as that is always mandatory
     engagement = serializers.PrimaryKeyRelatedField(
-        queryset=Engagement.objects.all())
+        queryset=Engagement.objects.all(), required=False)
+    # engagement = serializers.IntegerField()
+    engagement_name = serializers.CharField(required=False)
+    product = serializers.IntegerField(required=False)
+    product_name = serializers.CharField(required=False)
+    product_type = serializers.IntegerField(required=False)
+    product_type_name = serializers.CharField(required=False)
+
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True,
         default=None,
@@ -1189,6 +1198,7 @@ class ImportScanSerializer(serializers.Serializer):
                                                           queryset=Product_API_Scan_Configuration.objects.all())
 
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
+    id = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
@@ -1215,13 +1225,17 @@ class ImportScanSerializer(serializers.Serializer):
             logger.debug('import scan tags: %s', data['tags'])
             tags = data['tags']
 
-        engagement = data['engagement']
         lead = data['lead']
 
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
 
         group_by = data.get('group_by', None)
+
+        engagement, engagement_name, product_id, product_name, product_type_id, product_type_name = get_import_meta_data_from_dict(data)
+
+        # TODO VS : Pass version, commit, etc?
+        engagement = get_or_create_engagement(engagement.id if engagement else None, engagement_name, product_id, product_name, product_type_id, product_type_name)
 
         importer = Importer()
         try:
@@ -1246,9 +1260,12 @@ class ImportScanSerializer(serializers.Serializer):
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
         self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
 
-        return test
-
     def validate(self, data):
+        logger.debug('importserializer.validate()')
+        validation_error = validate_import_metadata(data)
+        if validation_error:
+            raise serializers.ValidationError(validation_error)
+
         scan_type = data.get("scan_type")
         file = data.get("file")
         if not file and requires_file(scan_type):
@@ -1338,7 +1355,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         except ValueError as ve:
             raise Exception(ve)
 
-        return test
+    def validate_Create(self, data):
+        logger.debug('validate.create()')
 
     def validate(self, data):
         scan_type = data.get("scan_type")

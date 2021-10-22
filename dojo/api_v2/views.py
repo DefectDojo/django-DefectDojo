@@ -38,7 +38,7 @@ from dojo.risk_acceptance import api as ra_api
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from datetime import datetime
-from dojo.utils import get_period_counts_legacy, get_system_setting
+from dojo.utils import get_object_or_none, get_period_counts_legacy, get_system_setting
 from dojo.api_v2 import serializers, permissions, prefetch, schema
 import dojo.jira_link.helper as jira_helper
 import logging
@@ -1906,6 +1906,29 @@ class UserContactInfoViewSet(prefetch.PrefetchListMixin,
 # Authorization: authenticated users, DjangoModelPermissions
 class ImportScanView(mixins.CreateModelMixin,
                      viewsets.GenericViewSet):
+    """
+    Imports a scan report into an engagement or product.
+
+    Traditional way of importing:
+    - Create a Product (or use an existing product)
+    - Create an Engagement inside the product
+    - Use the id of the engagement to import the scan
+
+    In this scenario a new Test will be created inside the engagement.
+    The test will contain the findings from the provided scan report.
+    The id of the Test that was created is returned in the response.
+
+    "Lazy" way of importing:
+    - Create a Product (or use an existing product)
+    - Provide the id as product parameter or name of the product as product_name parameter
+    - Provide the desired name of the engagement as engagement_name parameter.
+
+    In this scenario a new Engagement with the provided name will be created if
+    it doesn't already exist. A new Test will be created inside that engagement.
+    The test will contain the findings from the provided scan report.
+    The id of the Test and the id of the engagment that contains the test is returned in the response.
+
+    """
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
@@ -1915,8 +1938,10 @@ class ImportScanView(mixins.CreateModelMixin,
         permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def perform_create(self, serializer):
-        engagement = serializer.validated_data['engagement']
-        jira_project = jira_helper.get_jira_project(engagement)
+        logger.debug('valdata:', serializer.validated_data)
+        engagement_name = serializer.validated_data.get('engagement_name')
+        engagement = serializer.validated_data.get('engagement', get_object_or_none(Engagement, name=engagement_name) if engagement_name else None)
+        jira_project = jira_helper.get_jira_project(engagement) if engagement else None
 
         push_to_jira = serializer.validated_data.get('push_to_jira')
         if get_system_setting('enable_jira') and jira_project:
@@ -1993,6 +2018,30 @@ class ImportLanguagesView(mixins.CreateModelMixin,
 # Authorization: authenticated users, DjangoModelPermissions
 class ReImportScanView(mixins.CreateModelMixin,
                        viewsets.GenericViewSet):
+    """
+    Imports a scan report into an engagement or product.
+
+    Traditional way of importing:
+    - Find an existing Test you want to reimport
+    - Use the id of this Test to reimport the scan into
+
+    In this scenario a the scan report will be matched against existing
+    findings in the Test. Any new findings will be created, any no longer
+    existing findings will be closed if `close_old_findings` is set to True.
+
+    "Lazy" way of importing:
+    - Create a Product (or use an existing product)
+    - Provide the id as product parameter or name of the product as product_name parameter
+    - Provide the desired name of the engagement as engagement_name parameter.
+
+    In this scenario a new Engagement with the provided name will be created if
+    it doesn't already exist. A new Test will be created inside that engagement
+    if it doesn't already exist. The scan report will be matched against existing
+    findings in the Test. Any new findings will be created, any no longer
+    existing findings will be closed if `close_old_findings` is set to True.
+
+    The id of the Test and the id of the engagement that contains the test is returned in the response.
+    """
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
     queryset = Test.objects.none()
