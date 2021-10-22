@@ -925,6 +925,31 @@ class Tool_Configuration(models.Model):
         return self.name
 
 
+class Product_API_Scan_Configuration(models.Model):
+    product = models.ForeignKey(Product, null=False, blank=False, on_delete=models.CASCADE)
+    tool_configuration = models.ForeignKey(Tool_Configuration, null=False, blank=False, on_delete=models.CASCADE)
+    service_key_1 = models.CharField(max_length=200, null=True, blank=True)
+    service_key_2 = models.CharField(max_length=200, null=True, blank=True)
+    service_key_3 = models.CharField(max_length=200, null=True, blank=True)
+
+    def __str__(self):
+        name = self.tool_configuration.name
+        if self.service_key_1 or self.service_key_2 or self.service_key_3:
+            name += f' ({self.details})'
+        return name
+
+    @property
+    def details(self):
+        details = ''
+        if self.service_key_1:
+            details += f'{self.service_key_1}'
+        if self.service_key_2:
+            details += f' | {self.service_key_2}'
+        if self.service_key_3:
+            details += f' | {self.service_key_3}'
+        return details
+
+
 # declare form here as we can't import forms.py due to circular imports not even locally
 class ToolConfigForm_Admin(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=False)
@@ -1439,6 +1464,7 @@ class Sonarqube_Issue_Transition(models.Model):
         ordering = ('-created', )
 
 
+# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
 class Sonarqube_Product(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     sonarqube_project_key = models.CharField(
@@ -1453,6 +1479,7 @@ class Sonarqube_Product(models.Model):
         return '{} | {}'.format(self.sonarqube_tool_config.name if hasattr(self, 'sonarqube_tool_config') else '', self.sonarqube_project_key)
 
 
+# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
 class Cobaltio_Product(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     cobaltio_asset_id = models.CharField(
@@ -1502,8 +1529,7 @@ class Test(models.Model):
                                    null=True, blank=True, help_text="Commit hash tested, a reimport may update this field.", verbose_name="Commit Hash")
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text="Tag or branch that was tested, a reimport may update this field.", verbose_name="Branch/Tag")
-    sonarqube_config = models.ForeignKey(Sonarqube_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="SonarQube Config")
-    cobaltio_config = models.ForeignKey(Cobaltio_Product, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="Cobalt.io Config")
+    api_scan_configuration = models.ForeignKey(Product_API_Scan_Configuration, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name="API Scan Configuration")
 
     class Meta:
         indexes = [
@@ -3709,4 +3735,3 @@ admin.site.register(Notifications)
 # SonarQube Integration
 admin.site.register(Sonarqube_Issue)
 admin.site.register(Sonarqube_Issue_Transition)
-admin.site.register(Sonarqube_Product)

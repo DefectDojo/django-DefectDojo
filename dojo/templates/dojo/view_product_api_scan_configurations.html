@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load get_config_setting %}
+{% load static %}
+{% block add_styles %}
+    ul#select_by_severity a:hover, ul#bulk_edit a:hover {
+    cursor: pointer;
+    }
+{% endblock %}
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix">
+                <h3 class="pull-left">API Scan Configurations</h3>
+
+                <div id="test-pulldown" class="dropdown pull-right">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                            data-toggle="dropdown" aria-expanded="true" aria-label="Add API Scan Configuration">
+                        <span class="fa fa-bars"></span>
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
+                        <li role="presentation">
+                            <a href="{% url 'add_api_scan_configuration' pid %}">
+                                <i class="fa fa-plus"></i> Add API Scan Configuration
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table-striped table table-condensed table-hover left">
+                <tr>
+                    <th>Tool Configuration</th>
+                    <th>Details</th>
+                    <th>Actions</th>
+                </tr>
+                {% for product_api_scan_configuration in product_api_scan_configurations %}
+                <tr>
+                    <td>
+                        {% if request.user.is_superuser %}
+                            <a href="{% url 'edit_tool_config' product_api_scan_configuration.tool_configuration.id %}">
+                        {% endif %}
+                        {{ product_api_scan_configuration.tool_configuration }}
+                        {% if request.user.is_superuser %}
+                            </a>
+                        {% endif %}
+                    </td>
+                    <td>{{ product_api_scan_configuration.details }}</td>
+                    <td>
+                       <div class="btn-group">
+                           <a class="btn btn-sm btn-warning"
+                              href="{% url 'edit_api_scan_configuration' product_api_scan_configuration.product.id product_api_scan_configuration.id %}">Edit</a>
+                           <a class="btn btn-sm btn-danger"
+                              href="{% url 'delete_api_scan_configuration' product_api_scan_configuration.product.id product_api_scan_configuration.id %}">Delete</a>
+                       </div>
+                   </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    </div>
+{% endblock %}
+{% block postscript %}
+{% endblock %}

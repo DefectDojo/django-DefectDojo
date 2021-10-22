@@ -281,8 +281,7 @@ class DojoDefaultReImporter(object):
 
     def reimport_scan(self, scan, scan_type, test, active=True, verified=True, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, sonarqube_config=None,
-                    cobaltio_config=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=True, group_by=None, api_scan_configuration=None):
 
         logger.debug(f'REIMPORT_SCAN: parameters: {locals()}')
 
@@ -294,20 +293,11 @@ class DojoDefaultReImporter(object):
         if settings.USE_TZ:
             scan_date_time = timezone.make_aware(scan_date_time, timezone.get_default_timezone())
 
-        if sonarqube_config:  # it there is not sonarqube_config, just use original
-            if sonarqube_config.product != test.engagement.product:
-                raise ValidationError('"sonarqube_config" has to be from same product as "test"')
-
-            if test.sonarqube_config != sonarqube_config:  # update of sonarqube_config
-                test.sonarqube_config = sonarqube_config
-                test.save()
-
-        if cobaltio_config:  # it there is no cobaltio_config, just use original
-            if cobaltio_config.product != test.engagement.product:
-                raise ValidationError('"cobaltio_config" has to be from same product as "test"')
-
-            if test.cobaltio_config != cobaltio_config:  # update the cobaltio_config
-                test.cobaltio_config = cobaltio_config
+        if api_scan_configuration:
+            if api_scan_configuration.product != test.engagement.product:
+                raise ValidationError('API Scan Configuration has to be from same product as the Test')
+            if test.api_scan_configuration != api_scan_configuration:
+                test.api_scan_configuration = api_scan_configuration
                 test.save()
 
         # check if the parser that handle the scan_type manage tests
