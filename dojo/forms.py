@@ -20,7 +20,8 @@ from django.utils.safestring import mark_safe
 from django.utils import timezone
 import tagulous
 
-from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter
+from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
+    validate_endpoints_to_add, save_endpoints_to_add
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
@@ -1073,6 +1074,10 @@ class FindingForm(forms.ModelForm):
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(queryset=Endpoint.objects.none(), required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     mitigated = SplitDateTimeField(required=False, help_text='Date and time when the flaw has been fixed')
@@ -1082,9 +1087,11 @@ class FindingForm(forms.ModelForm):
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
-                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'references',
+                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
+
+    endpoints_to_add_list = []
 
     def __init__(self, *args, **kwargs):
         template = kwargs.pop('template')
@@ -1150,6 +1157,12 @@ class FindingForm(forms.ModelForm):
         if cleaned_data['active'] and 'risk_accepted' in cleaned_data and cleaned_data['risk_accepted']:
             raise forms.ValidationError('Active findings cannot '
                                         'be risk accepted.')
+
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 

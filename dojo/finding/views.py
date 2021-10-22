@@ -49,6 +49,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
+from dojo.endpoint.utils import save_endpoints_to_add
 
 logger = logging.getLogger(__name__)
 
@@ -732,8 +733,13 @@ def edit_finding(request, fid):
                 if new_finding.risk_accepted:
                     ra_helper.risk_unaccept(new_finding, perform_save=False)
 
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
-            for endpoint in form.cleaned_data['endpoints']:
+            added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, new_finding.test.engagement.product)
+            endpoint_ids = []
+            for endpoint in added_endpoints:
+                endpoint_ids.append(endpoint.id)
+
+            new_finding.endpoints.set(form.cleaned_data['endpoints'] | Endpoint.objects.filter(id__in=endpoint_ids))
+            for endpoint in new_finding.endpoints.all():
                 eps, created = Endpoint_Status.objects.get_or_create(
                     finding=new_finding,
                     endpoint=endpoint)
@@ -741,7 +747,7 @@ def edit_finding(request, fid):
                 new_finding.endpoint_status.add(eps)
             endpoint_status_list = Endpoint_Status.objects.filter(finding=new_finding)
             for endpoint_status in endpoint_status_list:
-                if endpoint_status.endpoint not in form.cleaned_data['endpoints']:
+                if endpoint_status.endpoint not in new_finding.endpoints.all():
                     endpoint_status.delete()
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
