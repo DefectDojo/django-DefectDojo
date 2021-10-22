@@ -1464,6 +1464,7 @@ class Sonarqube_Issue_Transition(models.Model):
         ordering = ('-created', )
 
 
+# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
 class Sonarqube_Product(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     sonarqube_project_key = models.CharField(
@@ -1478,6 +1479,7 @@ class Sonarqube_Product(models.Model):
         return '{} | {}'.format(self.sonarqube_tool_config.name if hasattr(self, 'sonarqube_tool_config') else '', self.sonarqube_project_key)
 
 
+# This class is not used anymore, but can't be deleted because it's referenced in dojo/db_migrations/0131_migrate_sonarcube_cobalt.py
 class Cobaltio_Product(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     cobaltio_asset_id = models.CharField(

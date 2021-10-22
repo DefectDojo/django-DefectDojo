@@ -1104,7 +1104,7 @@ class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
-# Authorization: staff
+# Authorization: object-based
 class ProductAPIScanConfigurationViewSet(mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.DestroyModelMixin,
