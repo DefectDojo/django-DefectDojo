@@ -6,8 +6,9 @@ import html2text
 from dateutil import parser
 from django.conf import settings
 from dojo.models import Finding
+from dojo.tools.sonarqube_api import SonarQubeAPI
 from lxml import etree
-from sonarqube import SonarQubeClient, SonarCloudClient
+from sonarqube import SonarCloudClient, SonarQubeClient
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +95,10 @@ class SonarQubeApiImporter(object):
 
             rule_id = issue['rule']
             if rule_id not in rules:
-                rules[rule_id] = client.rules.get_rule(key=rule_id, organization='damiencarol')['rule']
+                if config.service_key_2:
+                    rules[rule_id] = client.rules.get_rule(key=rule_id, organization=config.service_key_2)['rule']
+                else:
+                    rules[rule_id] = client.rules.get_rule(key=rule_id)['rule']
             rule = rules[rule_id]
             # custom (user defined) SQ rules may not have 'htmlDesc'
             if 'htmlDesc' in rule:
