@@ -25,6 +25,9 @@ class CobaltApiParser(object):
     def requires_file(self, scan_type):
         return False
 
+    def requires_tool_type(self, scan_type):
+        return 'Cobalt.io'
+
     def get_findings(self, file, test):
         if file is None:
             data = CobaltApiImporter().get_findings(test)

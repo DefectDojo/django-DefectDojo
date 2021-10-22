@@ -534,25 +534,14 @@
                         </li>
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
-                            <a class="" href="{% url 'add_sonarqube' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> Add SonarQube Configuration
+                            <a class="" href="{% url 'add_api_scan_configuration' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> Add API Scan Configuration
                             </a>
                         </li>
                         <li role="presentation">
-                            <a title="Edit SonarQube Configurations"
-                               href="{% url 'view_sonarqube' product_tab.product.id %}">
-                                <i class="fa fa-history"></i> View SonarQube Configurations
-                            </a>
-                        </li>
-                        <li role="separator" class="divider"></li>
-                        <li role="presentation">
-                            <a class="" href="{% url 'add_cobaltio' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> Add Cobalt.io Configuration
-                            </a>
-                        </li>
-                        <li role="presentation">
-                            <a href="{% url 'view_cobaltio' product_tab.product.id %}">
-                                <i class="fa fa-history"></i> View Cobalt.io Configurations
+                            <a title="View API Scan Configurations"
+                               href="{% url 'view_api_scan_configurations' product_tab.product.id %}">
+                                <i class="fa fa-list-alt"></i> View API Scan Configurations
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -563,7 +552,7 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'view_objects' product_tab.product.id %}">
-                                <i class="fa fa-history"></i> View Product Tracking Files
+                                <i class="fa fa-list-alt"></i> View Product Tracking Files
                             </a>
                         </li>
                         {% if system_settings.enable_credentials %}

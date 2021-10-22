@@ -90,8 +90,7 @@ class TestDojoDefaultImporter(TestCase):
         scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
         test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None, active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, sonarqube_config=None,
-                    cobaltio_config=None)
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
 
         self.assertEqual(f"SpotBugs Scan ({scan_type})", test.test_type.name)
         self.assertEqual(56, len_new_findings)
@@ -122,8 +121,7 @@ class TestDojoDefaultImporter(TestCase):
         scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
         test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None, active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, sonarqube_config=None,
-                    cobaltio_config=None)
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
 
         self.assertEqual("GitLab SAST Report", test.test_type.name)
         self.assertEqual(1, len_new_findings)
