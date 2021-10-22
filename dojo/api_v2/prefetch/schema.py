@@ -58,7 +58,7 @@ def prefetch_postprocessing_hook(result, generator, request, public):
 
     paths = result.get('paths', {})
     for path in paths:
-        if 'get' in paths[path]:
+        if 'get' in paths[path] and 'parameters' in paths[path]['get']:
             for parameter in paths[path]['get']['parameters']:
                 if parameter['name'] == 'prefetch':
                     prefetcher = _Prefetcher()

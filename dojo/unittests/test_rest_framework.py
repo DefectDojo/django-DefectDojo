@@ -36,6 +36,7 @@ from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from drf_spectacular.settings import spectacular_settings
 import logging
 import pathlib
+import json
 from dojo.authorization.roles_permissions import Permissions
 
 
@@ -1679,3 +1680,24 @@ class NotificationsTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'product_added': ["alert", "msteams"]}
         self.object_permission = False
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class UserProfileTest(DojoAPITestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.url = reverse('user_profile')
+
+    def test_profile(self):
+        response = self.client.get(reverse('user_profile'))
+        data = json.loads(response.content)
+
+        self.assertEqual(1, data['user']['id'])
+        self.assertEqual('admin', data['user']['username'])
+        self.assertTrue(data['user']['is_superuser'])
+        self.assertEqual(1, data['user_contact_info']['id'])
+        self.assertEqual('#admin', data['user_contact_info']['twitter_username'])

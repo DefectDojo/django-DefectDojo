@@ -292,6 +292,11 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class UserProfileSerializer(serializers.Serializer):
+    user = UserSerializer(many=False)
+    user_contact_info = UserContactInfoSerializer(many=False)
+
+
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
