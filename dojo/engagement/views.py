@@ -610,7 +610,7 @@ def import_scan_results(request, eid=None, pid=None):
             error = False
 
             # Save newly added endpoints
-            added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, product)
+            added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, engagement.product)
 
             try:
                 importer = Importer()
