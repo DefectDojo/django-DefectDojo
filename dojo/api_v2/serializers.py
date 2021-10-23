@@ -292,11 +292,6 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class UserProfileSerializer(serializers.Serializer):
-    user = UserSerializer(many=False)
-    user_contact_info = UserContactInfoSerializer(many=False)
-
-
 class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -1581,3 +1576,12 @@ class NetworkLocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Network_Locations
         fields = '__all__'
+
+
+class UserProfileSerializer(serializers.Serializer):
+    user = UserSerializer(many=False)
+    user_contact_info = UserContactInfoSerializer(many=False)
+    global_role = GlobalRoleSerializer(many=False)
+    dojo_group_member = DojoGroupMemberSerializer(many=True)
+    product_type_member = ProductTypeMemberSerializer(many=True)
+    product_member = ProductMemberSerializer(many=True)

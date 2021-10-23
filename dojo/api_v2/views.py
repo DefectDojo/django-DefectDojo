@@ -1920,7 +1920,17 @@ class UserProfileView(GenericAPIView):
     def get(self, request, format=None):
         user = get_current_user()
         user_contact_info = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
-        serializer = serializers.UserProfileSerializer({"user": user, "user_contact_info": user_contact_info}, many=False)
+        global_role = user.global_role if hasattr(user, 'global_role') else None
+        dojo_group_member = Dojo_Group_Member.objects.filter(user=user)
+        product_type_member = Product_Type_Member.objects.filter(user=user)
+        product_member = Product_Member.objects.filter(user=user)
+        serializer = serializers.UserProfileSerializer(
+            {"user": user,
+             "user_contact_info": user_contact_info,
+             "global_role": global_role,
+             "dojo_group_member": dojo_group_member,
+             "product_type_member": product_type_member,
+             "product_member": product_member}, many=False)
         return Response(serializer.data)
 
 
