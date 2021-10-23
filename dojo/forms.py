@@ -59,14 +59,6 @@ FINDING_STATUS = (('verified', 'Verified'),
                   ('out_of_scope', 'Out of Scope'))
 
 
-class SelectWithPop(forms.Select):
-    def render(self, name, *args, **kwargs):
-        html = super(SelectWithPop, self).render(name, *args, **kwargs)
-        popup_plus = '<div class="input-group dojo-input-group">' + html + '<span class="input-group-btn"><a href="/' + name + '/add" class="btn btn-primary" class="add-another" id="add_id_' + name + '" onclick="return showAddAnotherPopup(this);"><span class="glyphicon glyphicon-plus"></span></a></span></div>'
-
-        return mark_safe(popup_plus)
-
-
 class MultipleSelectWithPop(forms.SelectMultiple):
     def render(self, name, *args, **kwargs):
         html = super(MultipleSelectWithPop, self).render(name, *args, **kwargs)
@@ -425,6 +417,10 @@ class ImportScanForm(forms.Form):
     environment = forms.ModelChoiceField(
         queryset=Development_Environment.objects.all().order_by('name'))
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects, required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     version = forms.CharField(max_length=100, required=False, help_text="Version that was scanned.")
     branch_tag = forms.CharField(max_length=100, required=False, help_text="Branch or Tag that was scanned.")
     commit_hash = forms.CharField(max_length=100, required=False, help_text="Commit that was scanned.")
@@ -454,6 +450,8 @@ class ImportScanForm(forms.Form):
             choices.insert(0, ('', '---------'))
             self.fields['group_by'].choices = choices
 
+        self.endpoints_to_add_list = []
+
     def clean(self):
         cleaned_data = super().clean()
         scan_type = cleaned_data.get("scan_type")
@@ -465,6 +463,12 @@ class ImportScanForm(forms.Form):
             api_scan_configuration = cleaned_data.get('api_scan_configuration')
             if api_scan_configuration and tool_type != api_scan_configuration.tool_configuration.tool_type.name:
                 raise forms.ValidationError(f'API scan configuration must be of tool type {tool_type}')
+
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
 
         return cleaned_data
 

@@ -260,19 +260,9 @@ def add_endpoint(request, pid):
                                  messages.SUCCESS,
                                  'Endpoint added successfully.',
                                  extra_tags='alert-success')
-            if '_popup' in request.GET:
-                resp = '<script type="text/javascript">opener.emptyEndpoints(window);</script>'
-                for endpoint in endpoints:
-                    resp += '<script type="text/javascript">opener.dismissAddAnotherPopupDojo(window, "%s", "%s");</script>' \
-                            % (escape(endpoint._get_pk_val()), escape(endpoint))
-                resp += '<script type="text/javascript">window.close();</script>'
-                return HttpResponse(resp)
-            else:
-                return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
+            return HttpResponseRedirect(reverse('endpoint') + "?product=" + pid)
 
-    product_tab = None
-    if '_popup' not in request.GET:
-        product_tab = Product_Tab(product.id, "Add Endpoint", tab="endpoints")
+    product_tab = Product_Tab(product.id, "Add Endpoint", tab="endpoints")
 
     return render(request, template, {
         'product_tab': product_tab,
