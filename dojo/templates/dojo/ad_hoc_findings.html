@@ -72,14 +72,16 @@
                     elem.id = "req"
                 }
 
-                var mde = new EasyMDE({
-                    spellChecker: false,
-                    element: elem,
-                    autofocus: false,
-                    forceSync: true,
-                    hideIcons: ["side-by-side", "fullscreen"]
-                });
-                mde.render();
+                if (elem.name != 'endpoints_to_add') {
+                    var mde = new EasyMDE({
+                        spellChecker: false,
+                        element: elem,
+                        autofocus: false,
+                        forceSync: true,
+                        hideIcons: ["side-by-side", "fullscreen"]
+                    });
+                    mde.render();
+                }
             });
         });
         $('#add_id_endpoints').attr('href', "{% url 'add_endpoint' pid %}?_popup");

@@ -49,7 +49,6 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
-from dojo.endpoint.utils import save_endpoints_to_add
 
 logger = logging.getLogger(__name__)
 
@@ -675,7 +674,7 @@ def edit_finding(request, fid):
         )
     else:
         req_resp = None
-    form = FindingForm(instance=finding, template=False, req_resp=req_resp,
+    form = FindingForm(instance=finding, req_resp=req_resp,
                        can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
     form_error = False
     jform = None
@@ -686,7 +685,7 @@ def edit_finding(request, fid):
     github_enabled = finding.has_github_issue()
 
     if request.method == 'POST':
-        form = FindingForm(request.POST, instance=finding, template=False, req_resp=None,
+        form = FindingForm(request.POST, instance=finding, req_resp=None,
                            can_edit_mitigated_data=finding_helper.can_edit_mitigated_data(request.user))
 
         if finding.active:
@@ -733,22 +732,15 @@ def edit_finding(request, fid):
                 if new_finding.risk_accepted:
                     ra_helper.risk_unaccept(new_finding, perform_save=False)
 
-            added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, new_finding.test.engagement.product)
-            endpoint_ids = []
-            for endpoint in added_endpoints:
-                endpoint_ids.append(endpoint.id)
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
 
-            new_finding.endpoints.set(form.cleaned_data['endpoints'] | Endpoint.objects.filter(id__in=endpoint_ids))
-            for endpoint in new_finding.endpoints.all():
-                eps, created = Endpoint_Status.objects.get_or_create(
-                    finding=new_finding,
-                    endpoint=endpoint)
-                endpoint.endpoint_status.add(eps)
-                new_finding.endpoint_status.add(eps)
+            # Remove unrelated endpoints
             endpoint_status_list = Endpoint_Status.objects.filter(finding=new_finding)
             for endpoint_status in endpoint_status_list:
                 if endpoint_status.endpoint not in new_finding.endpoints.all():
                     endpoint_status.delete()
+
             new_finding.last_reviewed = timezone.now()
             new_finding.last_reviewed_by = request.user
 
@@ -1264,7 +1256,9 @@ def promote_to_finding(request, fid):
             new_finding.out_of_scope = False
 
             new_finding.save()
-            new_finding.endpoints.set(form.cleaned_data['endpoints'])
+
+            # Save and add new endpoints
+            finding_helper.add_endpoints(new_finding, form)
 
             # Push to jira?
             push_to_jira = False

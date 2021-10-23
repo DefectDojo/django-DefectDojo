@@ -21,7 +21,7 @@ from django.utils import timezone
 import tagulous
 
 from dojo.endpoint.utils import endpoint_get_or_create, endpoint_filter, \
-    validate_endpoints_to_add, save_endpoints_to_add
+    validate_endpoints_to_add
 from dojo.models import Finding, Finding_Group, Product_Type, Product, Note_Type, \
     Check_List, User, Engagement, Test, Test_Type, Notes, Risk_Acceptance, \
     Development_Environment, Dojo_User, Endpoint, Stub_Finding, Finding_Template, \
@@ -872,12 +872,16 @@ class AddFindingForm(forms.ModelForm):
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects.none(), required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
@@ -896,6 +900,8 @@ class AddFindingForm(forms.ModelForm):
             self.fields['request'].initial = req_resp[0]
             self.fields['response'].initial = req_resp[1]
 
+        self.endpoints_to_add_list = []
+
     def clean(self):
         cleaned_data = super(AddFindingForm, self).clean()
         if ((cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']):
@@ -908,11 +914,16 @@ class AddFindingForm(forms.ModelForm):
             raise forms.ValidationError('Active findings cannot '
                                         'be risk accepted.')
 
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
+
         return cleaned_data
 
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'endpoint', 'under_review', 'reviewers',
                    'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change', 'endpoint_status', 'sla_start_date')
 
@@ -935,12 +946,16 @@ class AdHocFindingForm(forms.ModelForm):
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(queryset=Endpoint.objects.none(), required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
     publish_date = forms.DateField(widget=forms.TextInput(attrs={'class': 'datepicker', 'autocomplete': 'off'}), required=False)
 
-    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
     field_order = ('title', 'date', 'cwe', 'cve', 'severity', 'cvssv3', 'description', 'mitigation', 'impact', 'request', 'response', 'steps_to_reproduce',
-                   'severity_justification', 'endpoints', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
+                   'severity_justification', 'endpoints', 'endpoints_to_add', 'references', 'active', 'verified', 'false_p', 'duplicate', 'out_of_scope',
                    'risk_accepted', 'under_defect_review', 'sla_start_date')
 
     def __init__(self, *args, **kwargs):
@@ -959,6 +974,8 @@ class AdHocFindingForm(forms.ModelForm):
             self.fields['request'].initial = req_resp[0]
             self.fields['response'].initial = req_resp[1]
 
+        self.endpoints_to_add_list = []
+
     def clean(self):
         cleaned_data = super(AdHocFindingForm, self).clean()
         if ((cleaned_data['active'] or cleaned_data['verified']) and cleaned_data['duplicate']):
@@ -967,6 +984,13 @@ class AdHocFindingForm(forms.ModelForm):
         if cleaned_data['false_p'] and cleaned_data['verified']:
             raise forms.ValidationError('False positive findings cannot '
                                         'be verified.')
+
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
+
         return cleaned_data
 
     class Meta:
@@ -991,7 +1015,17 @@ class PromoteFindingForm(forms.ModelForm):
     mitigation = forms.CharField(widget=forms.Textarea, required=False)
     impact = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(Endpoint.objects.none(), required=False, label='Systems / Endpoints')
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                               help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
+                                         "Each must be valid.",
+                               widget=forms.widgets.Textarea(attrs={'rows': '3', 'cols': '400'}))
     references = forms.CharField(widget=forms.Textarea, required=False)
+
+    # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
+    field_order = ('title', 'group', 'date', 'sla_start_date', 'cwe', 'cve', 'severity', 'cvssv3', 'cvssv3_score', 'description', 'mitigation', 'impact',
+                   'request', 'response', 'steps_to_reproduce', 'severity_justification', 'endpoints', 'endpoints_to_add', 'references',
+                   'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
+                   'out_of_scope', 'risk_accept', 'under_defect_review')
 
     def __init__(self, *args, **kwargs):
         product = None
@@ -1003,9 +1037,21 @@ class PromoteFindingForm(forms.ModelForm):
         if product:
             self.fields['endpoints'].queryset = Endpoint.objects.filter(product=product)
 
+        self.endpoints_to_add_list = []
+
+    def clean(self):
+        cleaned_data = super(PromoteFindingForm, self).clean()
+
+        endpoints_to_add_list, errors = validate_endpoints_to_add(cleaned_data['endpoints_to_add'])
+        if errors:
+            raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_add_list = endpoints_to_add_list
+
+        return cleaned_data
+
     class Meta:
         model = Finding
-        order = ('title', 'severity', 'endpoints', 'description', 'impact')
         exclude = ('reporter', 'url', 'numerical_severity', 'active', 'false_p', 'verified', 'endpoint_status',
                    'duplicate', 'out_of_scope', 'under_review', 'reviewers', 'review_requested_by', 'is_mitigated', 'jira_creation', 'jira_change')
 
@@ -1091,11 +1137,7 @@ class FindingForm(forms.ModelForm):
                    'active', 'mitigated', 'mitigated_by', 'verified', 'false_p', 'duplicate',
                    'out_of_scope', 'risk_accept', 'under_defect_review')
 
-    endpoints_to_add_list = []
-
     def __init__(self, *args, **kwargs):
-        template = kwargs.pop('template')
-
         req_resp = None
         if 'req_resp' in kwargs:
             req_resp = kwargs.pop('req_resp')
@@ -1143,6 +1185,8 @@ class FindingForm(forms.ModelForm):
         else:
             self.fields['group'].queryset = self.instance.test.finding_group_set.all()
             self.fields['group'].initial = self.instance.finding_group
+
+        self.endpoints_to_add_list = []
 
     def clean(self):
         cleaned_data = super(FindingForm, self).clean()
@@ -1416,34 +1460,12 @@ class AddEndpointForm(forms.Form):
             raise forms.ValidationError('Please enter a valid URL or IP address.',
                                         code='invalid')
 
-        endpoints = endpoint.split()
-
-        errors = []
-        for endpoint in endpoints:
-            try:
-                if '://' in endpoint:  # is it full uri?
-                    endpoint_ins = Endpoint.from_uri(endpoint)  # from_uri validate URI format + split to components
-                else:
-                    # from_uri parse any '//localhost', '//127.0.0.1:80', '//foo.bar/path' correctly
-                    # format doesn't follow RFC 3986 but users use it
-                    endpoint_ins = Endpoint.from_uri('//' + endpoint)
-                endpoint_ins.clean()
-                self.endpoints_to_process.append([
-                    endpoint_ins.protocol,
-                    endpoint_ins.userinfo,
-                    endpoint_ins.host,
-                    endpoint_ins.port,
-                    endpoint_ins.path,
-                    endpoint_ins.query,
-                    endpoint_ins.fragment
-                ])
-            except ValidationError as ves:
-                for ve in ves:
-                    errors.append(
-                        ValidationError("Invalid endpoint {}: {}".format(endpoint, ve))
-                    )
+        endpoints_to_add_list, errors = validate_endpoints_to_add(endpoint)
         if errors:
             raise forms.ValidationError(errors)
+        else:
+            self.endpoints_to_process = endpoints_to_add_list
+
         return cleaned_data
 
 
