@@ -1342,18 +1342,29 @@ class Endpoint(models.Model):
     def findings_count(self):
         return self.findings().count()
 
+    def endpoint_status_list(self):
+        return Endpoint_Status.objects.filter(endpoint=self)
+
+    def active_endpoint_status_list(self):
+        return self.endpoint_status_list().filter(mitigated=False)
+
     def active_findings(self):
-        return self.findings().filter(active=True,
+        findings = self.findings().filter(active=True,
                                       verified=True,
                                       out_of_scope=False,
                                       mitigated__isnull=True,
                                       false_p=False,
                                       duplicate=False).order_by('numerical_severity')
+        findings = findings.filter(endpoint_status__in=self.active_endpoint_status_list())
+        return findings
 
     def active_findings_count(self):
         return self.active_findings().count()
 
     def closed_findings(self):
+        print('-------------------------------------')
+        print(self.findings().filter(mitigated__isnull=False))
+        print('-------------------------------------')
         return self.findings().filter(mitigated__isnull=False)
 
     def closed_findings_count(self):
@@ -1380,13 +1391,21 @@ class Endpoint(models.Model):
     def host_findings_count(self):
         return self.host_finding().count()
 
+    def host_endpoint_status_list(self):
+        return Endpoint_Status.objects.filter(endpoint__in=self.host_endpoints())
+
+    def host_active_endpoint_status_list(self):
+        return self.host_endpoint_status_list().filter(mitigated=False)
+
     def host_active_findings(self):
-        return self.host_findings().filter(active=True,
+        findings = self.host_findings().filter(active=True,
                                            verified=True,
                                            out_of_scope=False,
                                            mitigated__isnull=True,
                                            false_p=False,
                                            duplicate=False).order_by('numerical_severity')
+        findings = findings.filter(endpoint_status__in=self.host_active_endpoint_status_list())
+        return findings
 
     def host_active_findings_count(self):
         return self.host_active_findings().count()
