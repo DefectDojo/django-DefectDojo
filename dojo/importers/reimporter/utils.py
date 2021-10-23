@@ -1,4 +1,5 @@
 from datetime import timedelta
+from time import strftime
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from dojo.models import Engagement, Finding, Q, Product, Product_Type
@@ -147,9 +148,13 @@ def get_target_product_if_exists(engagement_id=None, engagement_name=None, produ
         return None
 
 
-def get_engagement_name(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
+def get_engagement_name(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None, use_time_stamp_for_new_engagement=False):
+    # for import we create a timestamped engagement if the target engagement doesn't yet exist
     if not engagement_name:
         engagement_name = ENGAGEMENT_NAME_AUTO
+        if use_time_stamp_for_new_engagement:
+            engagement_name += ' - ' + strftime("%a, %d %b %Y %X", timezone.now().timetuple())
+
     return engagement_name
 
 
@@ -169,7 +174,11 @@ def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, pr
     return engagement
 
 
-def get_or_create_engagement(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
+def get_or_create_engagement_for_import(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
+    return get_or_create_engagement(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name, True)
+
+
+def get_or_create_engagement(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None, use_time_stamp_for_new_engagement=False):
     engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
 
     if not engagement:
@@ -182,7 +191,7 @@ def get_or_create_engagement(engagement_id=None, engagement_name=None, product_i
                 raise ValueError('unable to create product, missing product_name')
 
         logger.info('Creating new engagement: %s', get_engagement_name(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name))
-        return auto_create_engagement(get_engagement_name(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name), product)
+        return auto_create_engagement(get_engagement_name(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name, use_time_stamp_for_new_engagement), product)
     else:
         logger.debug('Using existing engagement %i:%s', engagement.id, engagement.name)
 

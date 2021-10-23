@@ -4,7 +4,7 @@ from drf_yasg.utils import swagger_serializer_method
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
-from dojo.importers.reimporter.utils import get_import_meta_data_from_dict, get_or_create_engagement, validate_import_metadata
+from dojo.importers.reimporter.utils import get_import_meta_data_from_dict, get_or_create_engagement_for_import, validate_import_metadata
 from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -1235,7 +1235,7 @@ class ImportScanSerializer(serializers.Serializer):
         engagement, engagement_name, product_id, product_name, product_type_id, product_type_name = get_import_meta_data_from_dict(data)
 
         # TODO VS : Pass version, commit, etc?
-        engagement = get_or_create_engagement(engagement.id if engagement else None, engagement_name, product_id, product_name, product_type_id, product_type_name)
+        engagement = get_or_create_engagement_for_import(engagement.id if engagement else None, engagement_name, product_id, product_name, product_type_id, product_type_name)
 
         importer = Importer()
         try:

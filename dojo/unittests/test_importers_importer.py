@@ -208,7 +208,7 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id, engagement=None)
             engagement_new = self.get_latest_model(Engagement)
-            self.assertEqual(engagement_new.name, ENGAGEMENT_NAME_AUTO)
+            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, self.product)
@@ -241,7 +241,7 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT, engagement=None)
             engagement_new = self.get_latest_model(Engagement)
-            self.assertEqual(engagement_new.name, ENGAGEMENT_NAME_AUTO)
+            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, self.product)
@@ -265,7 +265,7 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
             self.assertEqual(product.prod_type.name, PRODUCT_TYPE_NAME_DEFAULT)
 
             engagement_new = self.get_latest_model(Engagement)
-            self.assertEqual(engagement_new.name, ENGAGEMENT_NAME_AUTO)
+            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, product)
@@ -280,7 +280,7 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
             self.assertEqual(product.prod_type.name, PRODUCT_TYPE_NAME_DEFAULT)
 
             engagement_new = self.get_latest_model(Engagement)
-            self.assertEqual(engagement_new.name, ENGAGEMENT_NAME_AUTO)
+            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, product)
@@ -294,7 +294,7 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
             product = Product.objects.last()
             self.assertEqual(product.name, PRODUCT_NAME_NEW)
             engagement_new = self.get_latest_model(Engagement)
-            self.assertEqual(engagement_new.name, ENGAGEMENT_NAME_AUTO)
+            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, product)
@@ -306,3 +306,5 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
 
 
 # TODO Add auto_create_product, auto_create_engagement + test cases
+# TODO Return engagement and product
+# TODO timestampe engagement for imports
