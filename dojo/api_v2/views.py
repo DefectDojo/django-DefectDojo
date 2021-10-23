@@ -1918,16 +1918,22 @@ class ImportScanView(mixins.CreateModelMixin,
     The test will contain the findings from the provided scan report.
     The id of the Test that was created is returned in the response.
 
-    "Lazy" way of importing:
-    - Create a Product (or use an existing product)
-    - Provide the id as product parameter or name of the product as product_name parameter
-    - Provide the desired name of the engagement as engagement_name parameter.
+    Flexible way of importing:
+    - Provide product (id) or product_name
+    - Optional: Provide desired engagement_name
+    - Provide auto_create_engagement=True and auto_create_product=True to
+    have the product/engagement automatically created if needed
 
     In this scenario a new Engagement with the provided name will be created if
     it doesn't already exist. A new Test will be created inside that engagement.
     The test will contain the findings from the provided scan report.
     The id of the Test and the id of the engagment that contains the test is returned in the response.
-
+    A new engagement will be named 'Auto Created via API - <datetime>` so it will be unique
+    for every import.
+    A new product will be added to the `_Auto Created via API` Product Type.
+    To create an engagement or product, the proper permissions are required.
+    Or ALLOW_IMPORT_AUTO_CREATE needs to be True.
+    To create a new product without a product type, ALLOW_IMPORT_EVERYONE needs to be True
     """
     serializer_class = serializers.ImportScanSerializer
     parser_classes = [MultiPartParser]
