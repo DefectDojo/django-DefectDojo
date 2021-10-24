@@ -34,7 +34,7 @@ def custom_exception_handler(exc, context):
                 # They need not to be logged and we provide the exception
                 # message, if it is different from the detail that is already
                 # in the response.
-                if str(exc) != response.data.get('detail', ''):
+                if isinstance(response.data, dict) and str(exc) != response.data.get('detail', ''):
                     response.data['message'] = str(exc)
             else:
                 # HTTP status code 500 or higher are technical errors.
