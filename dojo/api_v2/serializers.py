@@ -1235,7 +1235,7 @@ class ImportScanSerializer(serializers.Serializer):
         engagement, engagement_name, product_id, product_name, product_type_id, product_type_name = get_import_meta_data_from_dict(data)
 
         # TODO VS : Pass version, commit, etc?
-        engagement = get_or_create_engagement_for_import(engagement.id if engagement else None, engagement_name, product_id, product_name, product_type_id, product_type_name)
+        engagement = get_or_create_engagement_for_import(engagement, engagement_name, product_id, product_name, product_type_id, product_type_name)
 
         importer = Importer()
         try:

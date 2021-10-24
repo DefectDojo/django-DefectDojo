@@ -1,7 +1,6 @@
 from datetime import timedelta
 from time import strftime
 from django.conf import settings
-from django.shortcuts import get_object_or_404
 from dojo.models import Engagement, Finding, Q, Product, Product_Type
 from django.utils import timezone
 import logging
@@ -91,6 +90,8 @@ def mitigate_endpoint_status(endpoint_status, user):
 
 def get_import_meta_data_from_dict(data):
     engagement_id = data.get('engagement', None)
+    if isinstance(engagement_id, Engagement):
+        engagement_id = engagement_id.id
     engagement_name = data.get('engagement_name', None)
     product_id = data.get('product', None)
     product_name = data.get('product_name', None)
@@ -100,14 +101,29 @@ def get_import_meta_data_from_dict(data):
 
 
 def validate_import_metadata(data):
+    """
+    # return None if there are no validation errors
+    # valid cases:
+    # engagement_id -> classic import into engagement
+    # product_id + engagement_name -> import into (auto_created) engagement
+    # product_id -> import into auto_created engagement
+    # product_name + engagement_name -> import into (auto_created) engagement
+    # product_name -> import into auto_created engagement + (auto_created) product
+    # product_type id or name + product_name -> import into auto_created product + engagement
+    """
     engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name = get_import_meta_data_from_dict(data)
     if engagement_id:
-        return None
-    elif product_id or product_name:
-        return None
-    elif (product_type_id or product_type_name) and product_name:
-        return None
-    return 'engagement or product/product_name needed or product_type_id/name and product_name needed'
+        return None if get_object_or_none(Engagement, pk=engagement_id) else ('Engagement %s not found' % engagement_id)
+    elif product_id:
+        return None if get_object_or_none(Product, pk=product_id) else ('Product %s not found' % product_id)
+    elif product_name:
+        if product_type_id and not get_object_or_none(Product_Type, pk=product_type_id):
+            return ('Product Type %s not found' % product_type_id)
+        if product_type_name and not get_object_or_none(Product_Type, name=product_type_name):
+            return ('Product Type "%s" not found' % product_type_name)
+        # TODO add auto_create
+        return None if get_object_or_none(Product, name=product_name) else ('Product "%s" not found' % product_name)
+    return 'need engagement_id or engagement_name and product id/name or product/product_name and auto_create'
 
 
 def auto_create_engagement(engagement_name, product):
@@ -116,7 +132,6 @@ def auto_create_engagement(engagement_name, product):
     return engagement
 
 
-# TODO VS: change 404 into none
 def auto_create_product(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
     product_type = get_target_product_type_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
     if not product_type:
@@ -131,17 +146,17 @@ def auto_create_product(engagement_id=None, engagement_name=None, product_id=Non
 def get_target_product_type_if_exists(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
     if product_type_id:
         logger.debug('looking up product_type by id %s', product_type_id)
-        return get_object_or_404(Product_Type, pk=product_type_id)
+        return get_object_or_none(Product_Type, pk=product_type_id)
     elif product_type_name:
         logger.debug('looking up product_type by name %s', product_type_name)
-        return get_object_or_404(Product_Type, name=product_type_name)
+        return get_object_or_none(Product_Type, name=product_type_name)
     else:
         return None
 
 
 def get_target_product_if_exists(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
     if product_id:
-        return get_object_or_404(Product, pk=product_id)
+        return get_object_or_none(Product, pk=product_id)
     elif product_name:
         return get_object_or_none(Product, name=product_name)
     else:
@@ -160,7 +175,7 @@ def get_engagement_name(engagement_id=None, engagement_name=None, product_id=Non
 
 def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
     if engagement_id:
-        engagement = get_object_or_404(Engagement, pk=engagement_id)
+        engagement = get_object_or_none(Engagement, pk=engagement_id)
         logger.debug('Using existing engagement by id: %s', engagement_id)
         return engagement
 

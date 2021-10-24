@@ -300,9 +300,18 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
             self.assertEqual(engagement_new.product, product)
             self.assertEqual(engagement_new.product.prod_type.name, PRODUCT_TYPE_NAME_AUTO)
 
-    def test_import_with_missing_parameters(self):
-        import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None, expected_http_status_code=400)
-        import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None, engagement_name='what the bleep', expected_http_status_code=400)
+    def test_import_with_invalid_parameters(self):
+        with self.subTest('no parameters'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None, expected_http_status_code=400)
+
+        with self.subTest('no product data'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None, engagement_name='what the bleep', expected_http_status_code=400)
+
+        with self.subTest('invalid product'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None, product=67283, expected_http_status_code=400)
+
+        with self.subTest('invalid engagement'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=1254235, expected_http_status_code=400)
 
 
 # TODO Add auto_create_product, auto_create_engagement + test cases

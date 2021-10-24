@@ -1,5 +1,6 @@
 import re
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from rest_framework.exceptions import ParseError
 from dojo.importers.reimporter.utils import get_import_meta_data_from_dict, get_target_engagement_if_exists, get_target_product_if_exists, get_target_product_type_if_exists, validate_import_metadata
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
@@ -167,6 +168,9 @@ class UserHasFindingPermission(permissions.BasePermission):
 
 class UserHasImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
+
+        raise PermissionDenied('valentijn does not approve')
+
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves
         validation_error = validate_import_metadata(request.data)
