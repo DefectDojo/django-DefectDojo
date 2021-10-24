@@ -58,7 +58,7 @@ def process_endpoints_view(request, host_view=False, vulnerable=False):
         view_name = "All"
 
     if host_view:
-        view_name += " Endpoint Hosts"
+        view_name += " Hosts"
     else:
         view_name += " Endpoints"
 
