@@ -158,7 +158,6 @@ def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, pr
         # if there's no product, then for sure there's no engagement either
         return None
 
-    # TODO VS: Check if it doesn't by accident select engagement by name from another product
     engagement = get_object_or_none(Engagement, product=product, name=get_engagement_name(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name))
     return engagement
 

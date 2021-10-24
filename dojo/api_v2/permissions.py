@@ -169,9 +169,18 @@ class UserHasFindingPermission(permissions.BasePermission):
 class UserHasImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
-        # and we have to validate ourselves
+        # and we have to validate ourselves unfortunately
 
         engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name = get_import_meta_data_from_dict(request.data)
+
+        if engagement_id and not engagement_id.isdigit():
+            raise serializers.ValidationError('engagement must be an integer')
+
+        if product_id and not product_id.isdigit():
+            raise serializers.ValidationError('product must be an integer')
+
+        if product_type_id and not product_type_id.isdigit():
+            raise serializers.ValidationError('product_type_id must be an integer')
 
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
         product = get_target_product_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)

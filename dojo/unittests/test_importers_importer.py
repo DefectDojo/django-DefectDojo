@@ -314,7 +314,9 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
         with self.subTest('invalid engagement'):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=1254235, expected_http_status_code=400)
 
+        with self.subTest('invalid engagement, but exists in another product'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_name='blabla', expected_http_status_code=400)
+
 
 # TODO Add auto_create_product, auto_create_engagement + test cases
 # TODO Return engagement and product
-# TODO timestampe engagement for imports
