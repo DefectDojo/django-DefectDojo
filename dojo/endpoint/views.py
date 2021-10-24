@@ -325,7 +325,7 @@ def add_meta_data(request, eid):
                                  'Metadata added successfully.',
                                  extra_tags='alert-success')
             if 'add_another' in request.POST:
-                return HttpResponseRedirect(reverse('add_meta_data', args=(eid,)))
+                return HttpResponseRedirect(reverse('add_endpoint_meta_data', args=(eid,)))
             else:
                 return HttpResponseRedirect(reverse('view_endpoint', args=(eid,)))
     else:
