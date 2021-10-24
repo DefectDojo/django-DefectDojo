@@ -100,32 +100,6 @@ def get_import_meta_data_from_dict(data):
     return engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name
 
 
-def validate_import_metadata(data):
-    """
-    # return None if there are no validation errors
-    # valid cases:
-    # engagement_id -> classic import into engagement
-    # product_id + engagement_name -> import into (auto_created) engagement
-    # product_id -> import into auto_created engagement
-    # product_name + engagement_name -> import into (auto_created) engagement
-    # product_name -> import into auto_created engagement + (auto_created) product
-    # product_type id or name + product_name -> import into auto_created product + engagement
-    """
-    engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name = get_import_meta_data_from_dict(data)
-    if engagement_id:
-        return None if get_object_or_none(Engagement, pk=engagement_id) else ('Engagement %s not found' % engagement_id)
-    elif product_id:
-        return None if get_object_or_none(Product, pk=product_id) else ('Product %s not found' % product_id)
-    elif product_name:
-        if product_type_id and not get_object_or_none(Product_Type, pk=product_type_id):
-            return ('Product Type %s not found' % product_type_id)
-        if product_type_name and not get_object_or_none(Product_Type, name=product_type_name):
-            return ('Product Type "%s" not found' % product_type_name)
-        # TODO add auto_create
-        return None if get_object_or_none(Product, name=product_name) else ('Product "%s" not found' % product_name)
-    return 'need engagement_id or engagement_name and product id/name or product/product_name and auto_create'
-
-
 def auto_create_engagement(engagement_name, product):
     # TODO VS: Set lead as current user?
     engagement, _ = Engagement.objects.get_or_create(name=engagement_name, product=product, target_start=timezone.now(), target_end=timezone.now() + timedelta(days=365))

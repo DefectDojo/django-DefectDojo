@@ -4,7 +4,7 @@ from drf_yasg.utils import swagger_serializer_method
 from rest_framework.fields import DictField, MultipleChoiceField
 
 from dojo.endpoint.utils import endpoint_filter
-from dojo.importers.reimporter.utils import get_import_meta_data_from_dict, get_or_create_engagement_for_import, validate_import_metadata
+from dojo.importers.reimporter.utils import get_import_meta_data_from_dict, get_or_create_engagement_for_import
 from dojo.models import Dojo_User, Finding_Group, Product, Engagement, Test, Finding, \
     User, Stub_Finding, Risk_Acceptance, \
     Finding_Template, Test_Type, Development_Environment, NoteHistory, \
@@ -1261,10 +1261,8 @@ class ImportScanSerializer(serializers.Serializer):
         self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
 
     def validate(self, data):
+        # metadata has already been check in HasImportPermission
         logger.debug('importserializer.validate()')
-        validation_error = validate_import_metadata(data)
-        if validation_error:
-            raise serializers.ValidationError(validation_error)
 
         scan_type = data.get("scan_type")
         file = data.get("file")

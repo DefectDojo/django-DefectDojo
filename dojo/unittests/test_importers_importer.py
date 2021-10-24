@@ -286,7 +286,8 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
             self.assertEqual(engagement_new.product, product)
 
     def test_import_by_product_name_and_product_type_name_not_exists(self):
-        import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW, product_type_name='bla bla', engagement=None, expected_http_status_code=404)
+        # no permission to crete new product_type by name
+        import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW, product_type_name='bla bla', engagement=None, expected_http_status_code=403)
 
     def test_import_by_product_name_only_not_exists(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1):
