@@ -1262,6 +1262,10 @@ class ImportScanSerializer(serializers.Serializer):
 
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
         self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
+        self.fields['id'] = serializers.IntegerField(read_only=True, default=test.id)
+        if test:
+            data['engagement'] = test.engagement
+            data['product'] = test.engagement.product.id
 
     def validate(self, data):
         # metadata has already been check in HasImportPermission

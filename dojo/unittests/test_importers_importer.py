@@ -436,5 +436,5 @@ class FlexibleImportReimportTestAPI(DojoAPITestCase):
             product_type='bla bla', expected_http_status_code=400)
 
 
-# TODO Add auto_create_product, auto_create_engagement + test cases
-# TODO Return engagement and product
+# TODO Authz test cases
+# TODO Reimport
