@@ -109,7 +109,8 @@ class TestDojoDefaultImporter(TestCase):
 
         importer = Importer()
         scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
-        test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None, active=True, verified=True, tags=None, minimum_severity=None,
+        test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
+                    active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
 
@@ -140,7 +141,8 @@ class TestDojoDefaultImporter(TestCase):
 
         importer = Importer()
         scan_date = timezone.make_aware(datetime.datetime(2021, 9, 1), timezone.get_default_timezone())
-        test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None, active=True, verified=True, tags=None, minimum_severity=None,
+        test, len_new_findings, len_closed_findings = importer.import_scan(scan, scan_type, engagement, lead=None, environment=None,
+                    active=True, verified=True, tags=None, minimum_severity=None,
                     user=user, endpoints_to_add=None, scan_date=scan_date, version=None, branch_tag=None, build_id=None,
                     commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None)
 
@@ -150,7 +152,7 @@ class TestDojoDefaultImporter(TestCase):
 
 
 @override_settings(TRACK_IMPORT_HISTORY=True)
-class SmartImportReimportTestAPI(DojoAPITestCase):
+class FlexibleImportReimportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):
         # TODO remove __init__ if it does nothing...
         DojoAPITestCase.__init__(self, *args, **kwargs)
@@ -183,30 +185,117 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
     def test_import_by_product_id_engagement_name_exists(self):
         # import into product should result in 1 new Test object created, engagement already exists
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement)
 
     def test_import_by_product_id_engagement_name_not_exists(self):
         # import into product should result in 1 new Engagement object created as it doesn't exist yet
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
+
+    def test_import_by_product_id_only_engagement_exists(self):
+        self.engagement = self.create_engagement(ENGAGEMENT_NAME_AUTO, self.product)
+        with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
+                 engagement=None)
+            test_id = import0['test']
+            self.assertEqual(Test.objects.get(id=test_id).engagement.id, self.engagement.id)
+
+    def test_import_by_product_id_only_engagement_not_exists(self):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
+                engagement=None, expected_http_status_code=400)
+
+    def test_import_by_product_name_exists_engagement_name_exists(self):
+        with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
+            test_id = import0['test']
+            self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement)
+
+    def test_import_by_product_name_exists_engagement_name_not_exists(self):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
+
+    def test_import_by_product_name_only_exists_engagement_exists(self):
+        self.engagement = self.create_engagement(ENGAGEMENT_NAME_AUTO, self.product)
+        with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+                engagement=None)
+            test_id = import0['test']
+            self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement)
+
+    def test_import_by_product_name_only_exists_engagement_not_exists(self):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+                engagement=None, expected_http_status_code=400)
+
+    def test_import_by_product_name_not_exists_engagement_name(self):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
+
+    def test_import_by_product_name_and_product_type_id(self):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                product_type=self.product_type.id, engagement=None, expected_http_status_code=400)
+
+    def test_import_by_product_name_and_product_type_name_exists(self):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                product_type_name=PRODUCT_TYPE_NAME_DEFAULT, engagement=None, expected_http_status_code=400)
+
+    def test_import_by_product_name_and_product_type_name_not_exists(self):
+        # no permission to crete new product_type by name
+        import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+            product_type_name='bla bla', engagement=None, expected_http_status_code=403)
+
+    def test_import_by_product_name_only_not_exists(self):
+        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                engagement=None, expected_http_status_code=400)
+
+    def test_import_by_engagement_id_auto_create(self):
+        # import into engagement should result in 1 new Test object created
+        with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=self.engagement.id,
+                auto_create_engagement=True, auto_create_product=True)
+
+    def test_import_by_product_id_engagement_name_exists_auto_create(self):
+        # import into product should result in 1 new Test object created, engagement already exists
+        with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, auto_create_engagement=True, auto_create_product=True)
+            test_id = import0['test']
+            self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement)
+
+    def test_import_by_product_id_engagement_name_not_exists_auto_create(self):
+        # import into product should result in 1 new Engagement object created as it doesn't exist yet
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id, engagement=None, engagement_name=ENGAGEMENT_NAME_NEW)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_engagement=True, auto_create_product=True)
             engagement_new = self.get_latest_model(Engagement)
             self.assertEqual(engagement_new.name, ENGAGEMENT_NAME_NEW)
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, self.product)
 
-    def test_import_by_product_id_only_engagement_exists(self):
+    def test_import_by_product_id_only_engagement_exists_auto_create(self):
         self.engagement = self.create_engagement(ENGAGEMENT_NAME_AUTO, self.product)
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id, engagement=None)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
+                engagement=None, auto_create_engagement=True, auto_create_product=True)
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement.id, self.engagement.id)
 
-    def test_import_by_product_id_only_engagement_not_exists(self):
+    def test_import_by_product_id_only_engagement_not_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id, engagement=None)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
+                engagement=None, auto_create_engagement=True, auto_create_product=True)
             engagement_new = self.get_latest_model(Engagement)
             self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
@@ -215,40 +304,45 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
 
             # TODO: VS: Add case with invalid product id
 
-    def test_import_by_product_name_exists_engagement_name_exists(self):
+    def test_import_by_product_name_exists_engagement_name_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, auto_create_engagement=True, auto_create_product=True)
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement)
 
-    def test_import_by_product_name_exists_engagement_name_not_exists(self):
+    def test_import_by_product_name_exists_engagement_name_not_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT, engagement=None, engagement_name=ENGAGEMENT_NAME_NEW)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_engagement=True, auto_create_product=True)
             engagement_new = self.get_latest_model(Engagement)
             self.assertEqual(engagement_new.name, ENGAGEMENT_NAME_NEW)
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, self.product)
 
-    def test_import_by_product_name_only_exists_engagement_exists(self):
+    def test_import_by_product_name_only_exists_engagement_exists_auto_create(self):
         self.engagement = self.create_engagement(ENGAGEMENT_NAME_AUTO, self.product)
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT, engagement=None)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+                engagement=None, auto_create_engagement=True, auto_create_product=True)
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement)
 
-    def test_import_by_product_name_only_exists_engagement_not_exists(self):
+    def test_import_by_product_name_only_exists_engagement_not_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT, engagement=None)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
+                engagement=None, auto_create_engagement=True, auto_create_product=True)
             engagement_new = self.get_latest_model(Engagement)
             self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, self.product)
 
-    def test_import_by_product_name_not_exists_engagement_name(self):
+    def test_import_by_product_name_not_exists_engagement_name_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW, engagement=None, engagement_name=ENGAGEMENT_NAME_NEW)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, auto_create_engagement=True, auto_create_product=True)
             product = Product.objects.last()
             self.assertEqual(product.name, PRODUCT_NAME_NEW)
             engagement_new = self.get_latest_model(Engagement)
@@ -257,45 +351,52 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, product)
 
-    def test_import_by_product_name_and_product_type_id(self):
+    def test_import_by_product_name_and_product_type_id_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW, product_type=self.product_type.id, engagement=None)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                product_type=self.product_type.id, engagement=None, auto_create_engagement=True, auto_create_product=True)
             product = Product.objects.last()
             self.assertEqual(product.name, PRODUCT_NAME_NEW)
             self.assertEqual(product.prod_type.name, PRODUCT_TYPE_NAME_DEFAULT)
 
             engagement_new = self.get_latest_model(Engagement)
-            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
+            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '),
+                msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, product)
 
             # TODO: VS: Add case with invalid product_type id
 
-    def test_import_by_product_name_and_product_type_name_exists(self):
+    def test_import_by_product_name_and_product_type_name_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW, product_type_name=PRODUCT_TYPE_NAME_DEFAULT, engagement=None)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                product_type_name=PRODUCT_TYPE_NAME_DEFAULT, engagement=None, auto_create_engagement=True, auto_create_product=True)
             product = Product.objects.last()
             self.assertEqual(product.name, PRODUCT_NAME_NEW)
             self.assertEqual(product.prod_type.name, PRODUCT_TYPE_NAME_DEFAULT)
 
             engagement_new = self.get_latest_model(Engagement)
-            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
+            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '),
+                msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, product)
 
-    def test_import_by_product_name_and_product_type_name_not_exists(self):
+    def test_import_by_product_name_and_product_type_name_not_exists_auto_create(self):
         # no permission to crete new product_type by name
-        import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW, product_type_name='bla bla', engagement=None, expected_http_status_code=403)
+        import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+            product_type_name='bla bla', engagement=None, auto_create_engagement=True, auto_create_product=True, expected_http_status_code=403)
 
-    def test_import_by_product_name_only_not_exists(self):
+    def test_import_by_product_name_only_not_exists_auto_create(self):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW, engagement=None)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
+                engagement=None, auto_create_engagement=True, auto_create_product=True)
             product = Product.objects.last()
             self.assertEqual(product.name, PRODUCT_NAME_NEW)
             engagement_new = self.get_latest_model(Engagement)
-            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '), msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
+            self.assertTrue(engagement_new.name.startswith(ENGAGEMENT_NAME_AUTO + ' - '),
+                msg='{} doesn''t start with {}'.format(engagement_new.name, ENGAGEMENT_NAME_AUTO + ' - '))
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, engagement_new)
             self.assertEqual(engagement_new.product, product)
@@ -303,19 +404,36 @@ class SmartImportReimportTestAPI(DojoAPITestCase):
 
     def test_import_with_invalid_parameters(self):
         with self.subTest('no parameters'):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None, expected_http_status_code=400)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, expected_http_status_code=400)
 
         with self.subTest('no product data'):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None, engagement_name='what the bleep', expected_http_status_code=400)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, engagement_name='what the bleep', expected_http_status_code=400)
 
         with self.subTest('invalid product'):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=None, product=67283, expected_http_status_code=400)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=None, product=67283, expected_http_status_code=400)
 
         with self.subTest('invalid engagement'):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=1254235, expected_http_status_code=400)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement=1254235, expected_http_status_code=400)
 
         with self.subTest('invalid engagement, but exists in another product'):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement_name=ENGAGEMENT_NAME_DEFAULT, product_name='blabla', expected_http_status_code=400)
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement_name=ENGAGEMENT_NAME_DEFAULT, product_name='blabla', expected_http_status_code=400)
+
+        with self.subTest('invalid engagement not id'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                engagement='bla bla', expected_http_status_code=400)
+
+        with self.subTest('invalid product not id'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+                product='bla bla', expected_http_status_code=400)
+
+        with self.subTest('invalid product_type not id'):
+            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE,
+            product_type='bla bla', expected_http_status_code=400)
 
 
 # TODO Add auto_create_product, auto_create_engagement + test cases

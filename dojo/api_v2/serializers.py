@@ -1182,6 +1182,9 @@ class ImportScanSerializer(serializers.Serializer):
     product_type = serializers.IntegerField(required=False)
     product_type_name = serializers.CharField(required=False)
 
+    auto_create_engagement = serializers.BooleanField(default=False)
+    auto_create_product = serializers.BooleanField(default=False)
+
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True,
         default=None,
@@ -1232,10 +1235,10 @@ class ImportScanSerializer(serializers.Serializer):
 
         group_by = data.get('group_by', None)
 
-        engagement, engagement_name, product_id, product_name, product_type_id, product_type_name = get_import_meta_data_from_dict(data)
+        engagement, engagement_name, product_id, product_name, product_type_id, product_type_name, auto_create_engagement, auto_create_product = get_import_meta_data_from_dict(data)
 
         # TODO VS : Pass version, commit, etc?
-        engagement = get_or_create_engagement_for_import(engagement, engagement_name, product_id, product_name, product_type_id, product_type_name)
+        engagement = get_or_create_engagement_for_import(engagement, engagement_name, product_id, product_name, product_type_id, product_type_name, auto_create_engagement, auto_create_product)
 
         importer = Importer()
         try:

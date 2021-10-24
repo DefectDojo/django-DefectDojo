@@ -97,16 +97,19 @@ def get_import_meta_data_from_dict(data):
     product_name = data.get('product_name', None)
     product_type_id = data.get('product_type', None)
     product_type_name = data.get('product_type_name', None)
-    return engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name
+    auto_create_engagement = data.get('auto_create_engagement', None)
+    auto_create_product = data.get('auto_create_product', None)
+
+    return engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name, auto_create_engagement, auto_create_product
 
 
-def auto_create_engagement(engagement_name, product):
+def _auto_create_engagement(engagement_name, product):
     # TODO VS: Set lead as current user?
     engagement, _ = Engagement.objects.get_or_create(name=engagement_name, product=product, target_start=timezone.now(), target_end=timezone.now() + timedelta(days=365))
     return engagement
 
 
-def auto_create_product(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
+def _auto_create_product(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
     product_type = get_target_product_type_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
     if not product_type:
         product_type, created = Product_Type.objects.get_or_create(name=PRODUCT_TYPE_NAME_AUTO)
@@ -162,24 +165,30 @@ def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, pr
     return engagement
 
 
-def get_or_create_engagement_for_import(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None):
-    return get_or_create_engagement(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name, True)
+def get_or_create_engagement_for_import(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None, auto_create_engagement=None, auto_create_product=None):
+    return get_or_create_engagement(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name, auto_create_engagement, auto_create_product, True)
 
 
-def get_or_create_engagement(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None, use_time_stamp_for_new_engagement=False):
+def get_or_create_engagement(engagement_id=None, engagement_name=None, product_id=None, product_name=None, product_type_id=None, product_type_name=None, auto_create_engagement=None, auto_create_product=None, use_time_stamp_for_new_engagement=False):
     engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
 
     if not engagement:
         product = get_target_product_if_exists(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
 
         if not product:
-            if product_name:
-                product = auto_create_product(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
+            if auto_create_product:
+                if product_name:
+                    product = _auto_create_product(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name)
+                else:
+                    raise ValueError('unable to create product, missing product_name')
             else:
-                raise ValueError('unable to create product, missing product_name')
+                raise ValueError('product not found')
 
         logger.info('Creating new engagement: %s', get_engagement_name(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name))
-        return auto_create_engagement(get_engagement_name(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name, use_time_stamp_for_new_engagement), product)
+        if auto_create_engagement:
+            return _auto_create_engagement(get_engagement_name(engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name, use_time_stamp_for_new_engagement), product)
+        else:
+            raise ValueError('engagement not found')
     else:
         logger.debug('Using existing engagement %i:%s', engagement.id, engagement.name)
 

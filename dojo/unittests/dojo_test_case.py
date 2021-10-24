@@ -394,7 +394,8 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
     def import_scan_with_params(self, filename, scan_type='ZAP Scan', engagement=1, minimum_severity='Low', active=True, verified=True,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
-                                product_name=None, product=None, product_type=None, product_type_name=None, expected_http_status_code=201):
+                                product_name=None, product=None, product_type=None, product_type_name=None, auto_create_engagement=None,
+                                auto_create_product=None, expected_http_status_code=201):
         payload = {
                 "scan_date": '2020-06-04',
                 "minimum_severity": minimum_severity,
@@ -435,6 +436,12 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
 
         if group_by is not None:
             payload['group_by'] = group_by
+
+        if auto_create_engagement is not None:
+            payload['auto_create_engagement'] = auto_create_engagement
+
+        if auto_create_product is not None:
+            payload['auto_create_product'] = auto_create_product
 
         return self.import_scan(payload, expected_http_status_code)
 
