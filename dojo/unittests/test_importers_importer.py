@@ -38,14 +38,10 @@ class TestDojoDefaultImporter(TestCase):
         user, created = User.objects.get_or_create(username="admin")
 
         product_type, created = Product_Type.objects.get_or_create(name="test")
-        if created:
-            product_type.save()
         product, created = Product.objects.get_or_create(
             name="TestDojoDefaultImporter",
-            product_type=product_type,
+            prod_type=product_type,
         )
-        if created:
-            product.save()
 
         engagement_name = "Test Create Engagement"
         engagement, created = Engagement.objects.get_or_create(
@@ -54,8 +50,6 @@ class TestDojoDefaultImporter(TestCase):
             target_start=timezone.now(),
             target_end=timezone.now(),
         )
-        if created:
-            engagement.save()
         lead = None
         environment = None
 
@@ -97,7 +91,7 @@ class TestDojoDefaultImporter(TestCase):
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
         product, _ = Product.objects.get_or_create(
             name="TestDojoDefaultImporter2",
-            product_type=product_type,
+            prod_type=product_type,
         )
 
         engagement, _ = Engagement.objects.get_or_create(
@@ -129,7 +123,7 @@ class TestDojoDefaultImporter(TestCase):
         product_type, _ = Product_Type.objects.get_or_create(name="test2")
         product, _ = Product.objects.get_or_create(
             name="TestDojoDefaultImporter2",
-            product_type=product_type,
+            prod_type=product_type,
         )
 
         engagement, _ = Engagement.objects.get_or_create(
