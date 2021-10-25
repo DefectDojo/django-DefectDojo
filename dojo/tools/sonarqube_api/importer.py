@@ -6,7 +6,7 @@ import html2text
 from dateutil import parser
 from django.conf import settings
 from dojo.models import Finding
-from dojo.tools.sonarqube_api import SonarQubeAPI
+from dojo.tools.sonarqube_api.api_client import SonarQubeAPI
 from lxml import etree
 from sonarqube import SonarCloudClient, SonarQubeClient
 
@@ -52,7 +52,7 @@ class SonarQubeApiImporter(object):
         ]
 
     @staticmethod
-    def prepare_client(test):
+    def prepare_client(test) -> (SonarQubeAPI, dict):
         product = test.engagement.product
         if test.api_scan_configuration:
             config = test.api_scan_configuration  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
@@ -84,8 +84,7 @@ class SonarQubeApiImporter(object):
         else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
             component = client.find_project(test.engagement.product.name)
 
-        # issues = client.issues.search_issues(componentKeys=component["key"], branch="master", languages="py", types="BUG,VULNERABILITY")
-        issues = client.issues.search_issues(componentKeys=component["key"], types="VULNERABILITY")
+        issues = client.find_issues(componentKeys=component["key"], types="VULNERABILITY")
         for issue in issues:
             status = issue['status']
             from_hotspot = issue.get('fromHotspot', False)
@@ -96,7 +95,7 @@ class SonarQubeApiImporter(object):
             rule_id = issue['rule']
             if rule_id not in rules:
                 if config.service_key_2:
-                    rules[rule_id] = client.rules.get_rule(key=rule_id, organization=config.service_key_2)['rule']
+                    rules[rule_id] = client.find_rule(key=rule_id, organization=config.service_key_2)
                 else:
                     rules[rule_id] = client.rules.get_rule(key=rule_id)['rule']
             rule = rules[rule_id]
