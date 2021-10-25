@@ -1361,15 +1361,6 @@ class Endpoint(models.Model):
     def active_findings_count(self):
         return self.active_findings().count()
 
-    def closed_findings(self):
-        print('-------------------------------------')
-        print(self.findings().filter(mitigated__isnull=False))
-        print('-------------------------------------')
-        return self.findings().filter(mitigated__isnull=False)
-
-    def closed_findings_count(self):
-        return self.closed_findings().count()
-
     def host_endpoints(self):
         return Endpoint.objects.filter(host=self.host,
                                        product=self.product).distinct()
@@ -1409,12 +1400,6 @@ class Endpoint(models.Model):
 
     def host_active_findings_count(self):
         return self.host_active_findings().count()
-
-    def host_closed_findings(self):
-        return self.host_findings().filter(mitigated__isnull=False)
-
-    def host_closed_findings_count(self):
-        return self.host_closed_findings().count()
 
     def get_breadcrumbs(self):
         bc = self.product.get_breadcrumbs()

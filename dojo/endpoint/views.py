@@ -124,13 +124,11 @@ def process_endpoint_view(request, eid, host_view=False):
         endpoint_metadata = None
         all_findings = endpoint.host_findings()
         active_findings = endpoint.host_active_findings()
-        closed_findings = endpoint.host_closed_findings()
     else:
         endpoints = None
         endpoint_metadata = dict(endpoint.endpoint_meta.values_list('name', 'value'))
         all_findings = endpoint.findings()
         active_findings = endpoint.active_findings()
-        closed_findings = endpoint.closed_findings()
 
     if all_findings:
         start_date = timezone.make_aware(datetime.combine(all_findings.last().date, datetime.min.time()))
@@ -142,6 +140,9 @@ def process_endpoint_view(request, eid, host_view=False):
     months_between = (r.years * 12) + r.months
     # include current month
     months_between += 1
+
+    # A closed findings is needed for get_periods_counts, but they are not relevant in the endpoint view
+    closed_findings = Finding.objects.none()
 
     monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
                                        relative_delta='months')
