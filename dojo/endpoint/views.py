@@ -141,7 +141,7 @@ def process_endpoint_view(request, eid, host_view=False):
     # include current month
     months_between += 1
 
-    # A closed findings is needed for get_periods_counts, but they are not relevant in the endpoint view
+    # closed_findings is needed as a parameter for get_periods_counts, but they are not relevant in the endpoint view
     closed_findings = Finding.objects.none()
 
     monthly_counts = get_period_counts(active_findings, all_findings, closed_findings, None, months_between, start_date,
