@@ -1261,9 +1261,9 @@ class ImportScanSerializer(serializers.Serializer):
             raise Exception(ve)
 
         # return the id of the created test, can't find a better way because this is not a ModelSerializer....
-        self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
-        self.fields['id'] = serializers.IntegerField(read_only=True, default=test.id)
         if test:
+            self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
+            self.fields['id'] = serializers.IntegerField(read_only=True, default=test.id)
             data['engagement'] = test.engagement
             data['product'] = test.engagement.product.id
 
@@ -1359,9 +1359,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
             raise Exception(se)
         except ValueError as ve:
             raise Exception(ve)
-
-    def validate_Create(self, data):
-        logger.debug('validate.create()')
 
     def validate(self, data):
         scan_type = data.get("scan_type")

@@ -173,6 +173,9 @@ class UserHasImportPermission(permissions.BasePermission):
 
         engagement_id, engagement_name, product_id, product_name, product_type_id, product_type_name, auto_create_engagement, auto_create_product = get_import_meta_data_from_dict(request.data)
 
+        if (auto_create_engagement or auto_create_product) and not settings.ALLOW_IMPORT_AUTO_CREATE:
+            raise PermissionDenied('auto create is disabled, ALLOW_IMPORT_AUTO_CREATE==False')
+
         if engagement_id and not engagement_id.isdigit():
             raise serializers.ValidationError('engagement must be an integer')
 
