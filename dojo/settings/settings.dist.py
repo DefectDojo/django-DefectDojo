@@ -30,7 +30,6 @@ env = environ.Env(
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
     DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
-    DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
@@ -543,10 +542,6 @@ RATE_LIMITER_ACCOUNT_LOCKOUT = env('DD_RATE_LIMITER_ACCOUNT_LOCKOUT')  # Forces 
 # If True, the SecurityMiddleware redirects all non-HTTPS requests to HTTPS
 # (except for those URLs matching a regular expression listed in SECURE_REDIRECT_EXEMPT).
 SECURE_SSL_REDIRECT = env('DD_SECURE_SSL_REDIRECT')
-
-# If True, the SecurityMiddleware sets the X-XSS-Protection: 1;
-# mode=block header on all responses that do not already have it.
-SECURE_BROWSER_XSS_FILTER = env('DD_SECURE_BROWSER_XSS_FILTER')
 
 # If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
 SECURE_CONTENT_TYPE_NOSNIFF = env('DD_SECURE_CONTENT_TYPE_NOSNIFF')
