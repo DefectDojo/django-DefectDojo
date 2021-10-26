@@ -1,8 +1,13 @@
 from django.conf import settings
-from dojo.models import Finding, Q
+from dojo.models import Engagement, Finding, Q, Product, Test
 from django.utils import timezone
-
 import logging
+from dojo.utils import get_last_object_or_none, get_object_or_none
+
+
+ENGAGEMENT_NAME_AUTO = 'Auto Created via API'
+PRODUCT_TYPE_NAME_AUTO = '_Auto Created via API'
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -79,3 +84,58 @@ def mitigate_endpoint_status(endpoint_status, user):
     endpoint_status.mitigated = True
     endpoint_status.last_modified = timezone.now()
     endpoint_status.save()
+
+
+def get_import_meta_data_from_dict(data):
+    test_id = data.get('test', None)
+    if isinstance(test_id, Test):
+        test_id = test_id.id
+    scan_type = data.get('scan_type', None)
+
+    test_title = data.get('test_title', None)
+    engagement_id = data.get('engagement', None)
+    if isinstance(engagement_id, Engagement):
+        engagement_id = engagement_id.id
+    engagement_name = data.get('engagement_name', None)
+    product_id = data.get('product', None)
+    product_name = data.get('product_name', None)
+
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_id, product_name
+
+
+def get_target_product_if_exists(product_id=None, product_name=None):
+    if product_id:
+        return get_object_or_none(Product, pk=product_id)
+    elif product_name:
+        return get_object_or_none(Product, name=product_name)
+    else:
+        return None
+
+
+def get_target_engagement_if_exists(engagement_id=None, engagement_name=None, product=None):
+    if engagement_id:
+        engagement = get_object_or_none(Engagement, pk=engagement_id)
+        logger.debug('Using existing engagement by id: %s', engagement_id)
+        return engagement
+
+    if not product:
+        # if there's no product, then for sure there's no engagement either
+        return None
+
+    engagement = get_last_object_or_none(Engagement, product=product, name=engagement_name)
+    return engagement
+
+
+def get_target_test_if_exists(test_id=None, test_title=None, scan_type=None, engagement=None):
+    if test_id:
+        test = get_object_or_none(Test, pk=test_id)
+        logger.debug('Using existing Test by id: %s', test_id)
+        return test
+
+    if not engagement:
+        return None
+
+    if test_title:
+        return get_last_object_or_none(Test, engagement=engagement, title=test_title, scan_type=scan_type)
+
+    return get_last_object_or_none(Test, engagement=engagement, scan_type=scan_type)

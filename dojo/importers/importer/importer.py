@@ -29,7 +29,7 @@ class DojoDefaultImporter(object):
 
     def create_test(self, scan_type, test_type_name, engagement, lead, environment, tags=None,
                     scan_date=None, version=None, branch_tag=None, build_id=None, commit_hash=None, now=timezone.now(),
-                    api_scan_configuration=None):
+                    api_scan_configuration=None, title=None):
 
         test_type, created = Test_Type.objects.get_or_create(
             name=test_type_name)
@@ -38,6 +38,7 @@ class DojoDefaultImporter(object):
             logger.info('Created new Test_Type with name %s because a report is being imported', test_type.name)
 
         test = Test(
+            title=title,
             engagement=engagement,
             lead=lead,
             test_type=test_type,
@@ -275,7 +276,8 @@ class DojoDefaultImporter(object):
 
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None,
+                    title=None):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
@@ -314,7 +316,7 @@ class DojoDefaultImporter(object):
 
                 test = self.create_test(scan_type, test_type_name, engagement, lead, environment, scan_date=scan_date, tags=tags,
                                     version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
-                                    api_scan_configuration=api_scan_configuration)
+                                    api_scan_configuration=api_scan_configuration, title=title)
                 # This part change the name of the Test
                 # we get it from the data of the parser
                 test_raw = tests[0]
@@ -338,7 +340,7 @@ class DojoDefaultImporter(object):
             # by default test_type == scan_type
             test = self.create_test(scan_type, scan_type, engagement, lead, environment, scan_date=scan_date, tags=tags,
                                 version=version, branch_tag=branch_tag, build_id=build_id, commit_hash=commit_hash, now=now,
-                                api_scan_configuration=api_scan_configuration)
+                                api_scan_configuration=api_scan_configuration, title=title)
 
             logger.debug('IMPORT_SCAN: Parse findings')
             parser = get_parser(scan_type)
