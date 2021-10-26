@@ -5,10 +5,6 @@ import logging
 from dojo.utils import get_last_object_or_none, get_object_or_none
 
 
-ENGAGEMENT_NAME_AUTO = 'Auto Created via API'
-PRODUCT_TYPE_NAME_AUTO = '_Auto Created via API'
-
-
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
