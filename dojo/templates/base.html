@@ -221,9 +221,10 @@
                                     <span class="glyphicon arrow"></span>
                                 </a>
                                 <ul class="nav nav-second-level">
-                                    <li><a href="{% url 'engagement' %}">Active Engagements</a></li>
+                                    <li><a href="{% url 'active_engagements' %}">Active Engagements</a></li>
+                                    <li><a href="{% url 'all_engagements' %}">All Engagements</a></li>
                                     {% if request.user.is_staff or 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
-                                        <li><a href="{% url 'engagements_all' %}">All Engagements</a></li>
+                                        <li><a href="{% url 'engagements_all' %}">Engagements by Product</a></li>
                                     {% endif %}
                                     {% if request.user.is_staff %}
                                         <li><a href="{% url 'test_type' %}">Test Types</a></li>
@@ -377,7 +378,9 @@
                                         <li><a href="{% url 'tool_config' %}">Tool Configuration </a></li>
                                         <li><a href="{% url 'tool_type' %}">Tool Type </a></li>
                                         <li><a href="{% url 'rules' %}">Rules Framework </a></li>
+                                        {% endif %}
                                         <li><a href="{% url 'regulations' %}">Regulations </a></li>
+                                        {% if request.user.is_superuser %}
                                         <li><a href="{% url 'system_settings' %}">System Settings </a></li>
                                         <li><a href="{% url 'note_type' %}">Note Types </a></li>
                                         <li><a href="{% url 'configure_google_sheets' %}">Google Sheets Sync</a></li>
@@ -531,25 +534,14 @@
                         </li>
                         <li role="separator" class="divider"></li>
                         <li role="presentation">
-                            <a class="" href="{% url 'add_sonarqube' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> Add SonarQube Configuration
+                            <a class="" href="{% url 'add_api_scan_configuration' product_tab.product.id %}">
+                                <i class="fa fa-plus"></i> Add API Scan Configuration
                             </a>
                         </li>
                         <li role="presentation">
-                            <a title="Edit SonarQube Configurations"
-                               href="{% url 'view_sonarqube' product_tab.product.id %}">
-                                <i class="fa fa-history"></i> View SonarQube Configurations
-                            </a>
-                        </li>
-                        <li role="separator" class="divider"></li>
-                        <li role="presentation">
-                            <a class="" href="{% url 'add_cobaltio' product_tab.product.id %}">
-                                <i class="fa fa-plus"></i> Add Cobalt.io Configuration
-                            </a>
-                        </li>
-                        <li role="presentation">
-                            <a href="{% url 'view_cobaltio' product_tab.product.id %}">
-                                <i class="fa fa-history"></i> View Cobalt.io Configurations
+                            <a title="View API Scan Configurations"
+                               href="{% url 'view_api_scan_configurations' product_tab.product.id %}">
+                                <i class="fa fa-list-alt"></i> View API Scan Configurations
                             </a>
                         </li>
                         <li role="separator" class="divider"></li>
@@ -560,7 +552,7 @@
                         </li>
                         <li role="presentation">
                             <a href="{% url 'view_objects' product_tab.product.id %}">
-                                <i class="fa fa-history"></i> View Product Tracking Files
+                                <i class="fa fa-list-alt"></i> View Product Tracking Files
                             </a>
                         </li>
                         {% if system_settings.enable_credentials %}
@@ -678,6 +670,7 @@
 			    {% endblock %}
 			</a>
 			<br/>
+			<br/>
                         {% dojo_version %} ( {% dojo_current_hash %} )
                     </p>
                     <p>
@@ -686,11 +679,11 @@
                     </p>
                     <p>
                         DefectDojo is licensed under the <a
-                            href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md">Simplified BSD
-                        license</a>.
+                            href="https://github.com/DefectDojo/django-DefectDojo/blob/master/LICENSE.md">3-Clause BSD
+			    License</a>. | <a href="https://github.com/DefectDojo/django-DefectDojo/blob/master/NOTICE"> Dependencies Notice.</a>
                     </p>
                     <p>
-                        &copy; {% now "Y" %} DefectDojo
+                        &copy; {% now "Y" %} DefectDojo Maintainers. All rights reserved.
                     </p>
                 </div>
             </div>
@@ -793,8 +786,9 @@
 
         $('select').not('#notification-scope').addClass('selectpicker');
         $('.selectpicker').attr('data-live-search', 'true');
+        $('.selectpicker').attr('data-container', 'body');
         $('.selectpicker').css('width', '70%');
-        $('.selectpicker').selectpicker();
+        $('.selectpicker').selectpicker('render');
 
     });
 </script>

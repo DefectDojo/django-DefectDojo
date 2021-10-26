@@ -37,6 +37,7 @@ field_dictionary['Product'] = product_fields
 field_dictionary['Product Type'] = product_type_fields
 
 
+@user_passes_test(lambda u: u.is_superuser)
 def rules(request):
     initial_queryset = Rule.objects.all().order_by('name')
     add_breadcrumb(title="Rules", top_level=True, request=request)
@@ -47,6 +48,7 @@ def rules(request):
         'rules': initial_queryset})
 
 
+@user_passes_test(lambda u: u.is_superuser)
 def new_rule(request):
     if request.method == 'POST':
         form = RuleForm(request.POST)
@@ -71,7 +73,7 @@ def new_rule(request):
                    'field_dictionary': json.dumps(field_dictionary)})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def add_child(request, pid):
     rule = get_object_or_404(Rule, pk=pid)
     if request.method == 'POST':
@@ -99,7 +101,7 @@ def add_child(request, pid):
                    'field_dictionary': json.dumps(field_dictionary)})
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def edit_rule(request, pid):
     pt = get_object_or_404(Rule, pk=pid)
     children = Rule.objects.filter(parent_rule=pt)
@@ -126,7 +128,7 @@ def edit_rule(request, pid):
         'pt': pt, })
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_passes_test(lambda u: u.is_superuser)
 def delete_rule(request, tid):
     rule = get_object_or_404(Rule, pk=tid)
     form = DeleteRuleForm(instance=rule)

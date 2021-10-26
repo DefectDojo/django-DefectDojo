@@ -15,3 +15,6 @@ integration_tests:
 
 settings_changes:
 - any: ['dojo/settings/settings.dist.py']
+
+apiv2:
+- any: ['dojo/api_v2/**/*']

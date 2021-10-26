@@ -16,7 +16,7 @@ from dojo.api_v2.views import \
     EngagementViewSet, FindingTemplatesViewSet, FindingViewSet, \
     JiraInstanceViewSet, DojoMetaViewSet, NoteTypeViewSet, NotesViewSet, \
     ProductTypeViewSet, ProductViewSet, RegulationsViewSet, \
-    SonarqubeIssueViewSet, SonarqubeProductViewSet, \
+    SonarqubeIssueViewSet, ProductAPIScanConfigurationViewSet, \
     SonarqubeIssueTransitionViewSet, StubFindingsViewSet, SystemSettingsViewSet, \
     TestTypesViewSet, TestsViewSet, ToolConfigurationsViewSet, ToolProductSettingsViewSet, \
     ToolTypesViewSet, UsersViewSet, JiraIssuesViewSet, JiraProjectViewSet, AppAnalysisViewSet, \
@@ -25,7 +25,7 @@ from dojo.api_v2.views import \
 from dojo.models import \
     Development_Environment, Endpoint_Status, Endpoint, Engagement, Finding_Template, \
     Finding, JIRA_Instance, JIRA_Issue, DojoMeta, Note_Type, Notes, Product_Type, Product, Regulation, \
-    Sonarqube_Issue, Sonarqube_Product, Sonarqube_Issue_Transition, \
+    Sonarqube_Issue, Product_API_Scan_Configuration, Sonarqube_Issue_Transition, \
     Stub_Finding, System_Settings, Test_Type, Test, Tool_Configuration, Tool_Product_Settings, \
     Tool_Type, Dojo_User, JIRA_Project, App_Analysis, Language_Type, Languages
 
@@ -34,7 +34,7 @@ from dojo.api_v2.serializers import \
     EngagementSerializer, FindingTemplateSerializer, FindingSerializer, \
     JIRAInstanceSerializer, JIRAIssueSerializer, JIRAProjectSerializer, MetaSerializer, NoteTypeSerializer, \
     ProductSerializer, RegulationSerializer, \
-    SonarqubeIssueSerializer, SonarqubeProductSerializer, SonarqubeIssueTransitionSerializer, \
+    SonarqubeIssueSerializer, ProductAPIScanConfigurationSerializer, SonarqubeIssueTransitionSerializer, \
     StubFindingSerializer, SystemSettingsSerializer, TestTypeSerializer, TestSerializer, ToolConfigurationSerializer, \
     ToolProductSettingsSerializer, ToolTypeSerializer, UserSerializer, NoteSerializer, ProductTypeSerializer, \
     AppAnalysisSerializer, LanguageTypeSerializer, LanguageSerializer
@@ -679,13 +679,13 @@ class SonarqubeIssuesTest(BaseClass.SchemaTest):
         }
 
 
-class SonarqubeProductConfTest(BaseClass.SchemaTest):
+class ProductAPIScanConfigurationTest(BaseClass.SchemaTest):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.viewname = "sonarqube_product_configurations"
-        self.viewset = SonarqubeProductViewSet
-        self.model = Sonarqube_Product
-        self.serializer = SonarqubeProductSerializer
+        self.viewname = "product_api_scan_configurations"
+        self.viewset = ProductAPIScanConfigurationViewSet
+        self.model = Product_API_Scan_Configuration
+        self.serializer = ProductAPIScanConfigurationSerializer
 
 
 class SonarqubeTransitionTest(BaseClass.SchemaTest):

@@ -4,7 +4,7 @@ from dojo.request_cache import cache_for_request
 from dojo.authorization.roles_permissions import Permissions, Roles, get_roles_with_permissions
 from dojo.models import Product_Type, Product_Type_Member, Product, Product_Member, Engagement, \
     Test, Finding, Endpoint, Finding_Group, Product_Group, Product_Type_Group, Dojo_Group, Dojo_Group_Member, \
-    Languages, App_Analysis
+    Languages, App_Analysis, Stub_Finding, Product_API_Scan_Configuration
 
 
 def user_has_permission(user, obj, permission):
@@ -15,12 +15,13 @@ def user_has_permission(user, obj, permission):
     if user.is_staff and settings.AUTHORIZATION_STAFF_OVERRIDE:
         return True
 
-    if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
-        return True
-
-    for group in get_groups(user):
-        if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
+    if isinstance(obj, Product_Type) or isinstance(obj, Product):
+        # Global roles are only relevant for product types, products and their dependent objects
+        if hasattr(user, 'global_role') and user.global_role.role is not None and role_has_permission(user.global_role.role.id, permission):
             return True
+        for group in get_groups(user):
+            if hasattr(group, 'global_role') and group.global_role.role is not None and role_has_permission(group.global_role.role.id, permission):
+                return True
 
     if isinstance(obj, Product_Type):
         # Check if the user has a role for the product type with the requested permissions
@@ -51,7 +52,7 @@ def user_has_permission(user, obj, permission):
         return user_has_permission(user, obj.product, permission)
     elif isinstance(obj, Test) and permission in Permissions.get_test_permissions():
         return user_has_permission(user, obj.engagement.product, permission)
-    elif isinstance(obj, Finding) and permission in Permissions.get_finding_permissions():
+    elif (isinstance(obj, Finding) or isinstance(obj, Stub_Finding)) and permission in Permissions.get_finding_permissions():
         return user_has_permission(user, obj.test.engagement.product, permission)
     elif isinstance(obj, Finding_Group) and permission in Permissions.get_finding_group_permissions():
         return user_has_permission(user, obj.test.engagement.product, permission)
@@ -60,6 +61,8 @@ def user_has_permission(user, obj, permission):
     elif isinstance(obj, Languages) and permission in Permissions.get_language_permissions():
         return user_has_permission(user, obj.product, permission)
     elif isinstance(obj, App_Analysis) and permission in Permissions.get_technology_permissions():
+        return user_has_permission(user, obj.product, permission)
+    elif isinstance(obj, Product_API_Scan_Configuration) and permission in Permissions.get_product_api_scan_configuration_permissions():
         return user_has_permission(user, obj.product, permission)
     elif isinstance(obj, Product_Type_Member) and permission in Permissions.get_product_type_member_permissions():
         if permission == Permissions.Product_Type_Member_Delete:

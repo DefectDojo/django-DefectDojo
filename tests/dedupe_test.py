@@ -1,15 +1,16 @@
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-import unittest
-import sys
-import os
-from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
-from product_test import ProductTest
-import time
 import logging
+import os
+import sys
+import time
+import unittest
 
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
+from base_test_class import (BaseTestCase, on_exception_html_source_logger,
+                             set_suite_settings)
+from product_test import ProductTest
 
 logger = logging.getLogger(__name__)
 
@@ -135,12 +136,15 @@ class DedupeTest(BaseTestCase):
 
         self.assertTrue(self.is_success_message_present(text='Test added successfully'))
 
-    # Re-upload dedupe_path_1.json bandit report into "Path Test 1" empty test (nothing uploaded before)
-    # Then do the same with dedupe_path_2.json / "Path Test 2"
     @on_exception_html_source_logger
     def test_import_path_tests(self):
+        """
+        Re-upload dedupe_path_1.json bandit report into "Path Test 1" empty test (nothing uploaded before)
+        Then do the same with dedupe_path_2.json / "Path Test 2"
+        """
         logger.debug("importing reports...")
         # First test
+        # the first report have 3 duplicates of the same finding
         driver = self.driver
         self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Path Test").click()
@@ -153,9 +157,12 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_1.json")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
+        # 'Bandit Scan processed a total of 1 findings created 1 findings did not touch 1 findings.'
+        self.assertTrue(self.is_success_message_present(text='a total of 1 findings'))
 
         # Second test
+        # the second report have 2 findings (same vuln_id same file but different line number)
+        # one the findings is the same in the first and the second report
         self.goto_active_engagements_overview(driver)
         driver.find_element_by_partial_link_text("Dedupe Path Test").click()
         driver.find_element_by_partial_link_text("Path Test 2").click()
@@ -166,7 +173,8 @@ class DedupeTest(BaseTestCase):
         driver.find_element_by_id('id_file').send_keys(self.relative_path + "/dedupe_scans/dedupe_path_2.json")
         driver.find_elements_by_css_selector("button.btn.btn-primary")[1].click()
 
-        self.assertTrue(self.is_success_message_present(text='a total of 3 findings'))
+        # 'Bandit Scan processed a total of 2 findings created 2 findings did not touch 1 findings.'
+        self.assertTrue(self.is_success_message_present(text='a total of 2 findings'))
 
     @on_exception_html_source_logger
     def test_check_path_status(self):

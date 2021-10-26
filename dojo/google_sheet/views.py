@@ -20,6 +20,8 @@ from django.views.decorators.debug import sensitive_variables, sensitive_post_pa
 from dojo.models import Finding, System_Settings, Test, Dojo_User, Note_Type, NoteHistory, Notes, Sonarqube_Issue
 from dojo.forms import GoogleSheetFieldsForm
 from dojo.utils import add_breadcrumb, Product_Tab
+from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +200,7 @@ def validate_drive_authentication(request, cred_str, drive_folder_ID):
                     return True
 
 
-@user_passes_test(lambda u: u.is_staff)
+@user_is_authorized(Test, Permissions.Test_View, 'tid', 'staff')
 def export_to_sheet(request, tid):
     system_settings = get_object_or_404(System_Settings, id=1)
     google_sheets_enabled = system_settings.enable_google_sheets
