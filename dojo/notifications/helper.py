@@ -155,8 +155,8 @@ def process_notifications(event, notifications=None, **kwargs):
         send_alert_notification(event, notifications.user, **kwargs)
 
 
-# @dojo_async_task
-# @app.task
+@dojo_async_task
+@app.task
 def send_slack_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 
@@ -213,8 +213,8 @@ def send_slack_notification(event, user=None, *args, **kwargs):
         log_alert(e, 'Slack Notification', title=kwargs['title'], description=str(e), url=kwargs.get('url', None))
 
 
-# @dojo_async_task
-# @app.task
+@dojo_async_task
+@app.task
 def send_msteams_notification(event, user=None, *args, **kwargs):
     from dojo.utils import get_system_setting
 

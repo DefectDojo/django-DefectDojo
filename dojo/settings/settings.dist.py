@@ -201,14 +201,7 @@ env = environ.Env(
     # Forces the user to change password on next login.
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
     # when enabled SonarQube API parser will download the security hotspots
-    DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
-    # This allows users with Import_Scan_Result permissions for a product or product_type
-    # to request auto creationof  engagements and products using the `auto_create_product`
-    # and `auto_create_engagement` parameters
-    DD_ALLOW_IMPORT_AUTO_CREATE=(bool, True),
-    # It also allows ALL users to import results into not yet existing products which will
-    # will be auto created in the `Auto Created via API` product type when using the `auto_create_product` parameter
-    DD_ALLOW_IMPORT_EVERYONE=(bool, True)
+    DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True)
 )
 
 
@@ -1336,6 +1329,3 @@ DUPLICATE_CLUSTER_CASCADE_DELETE = env('DD_DUPLICATE_CLUSTER_CASCADE_DELETE')
 
 # Deside if SonarQube API parser should download the security hotspots
 SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
-
-ALLOW_IMPORT_AUTO_CREATE = env("DD_ALLOW_IMPORT_AUTO_CREATE")
-ALLOW_IMPORT_EVERYONE = env("DD_ALLOW_IMPORT_EVERYONE")
