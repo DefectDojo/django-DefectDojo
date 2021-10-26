@@ -46,6 +46,8 @@ def get_item(vulnerability, test):
         title=vulnerability['code'] + ": " + vulnerability['file'],
         test=test,
         severity=severity,
+        file_path=vulnerability['file'],
+        line=vulnerability['line'],
         description="File: {}:{}\nVulnerability ID: {}\nDetails: {}\n".format(vulnerability['file'], vulnerability['line'], vulnerability['code'], vulnerability['message']),
         mitigation="No mitigation provided",
         false_p=False,
