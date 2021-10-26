@@ -2055,8 +2055,10 @@ class ReImportScanView(mixins.CreateModelMixin,
     By Names:
     - Provide `product_name` (or `product_id`)
     - Provide `engagement_name`
+    - Optionally Provide `test_title`
 
-    In this scenario Defect Dojo will look up the engagment by the provided details.
+    In this scenario Defect Dojo will look up the test by the provided details.
+    If no `test_title` is provided, the latest test inside the engagement will be chosen based on scan_type.
     """
     serializer_class = serializers.ReImportScanSerializer
     parser_classes = [MultiPartParser]
