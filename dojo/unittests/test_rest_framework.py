@@ -36,6 +36,7 @@ from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from drf_spectacular.settings import spectacular_settings
 import logging
 import pathlib
+import json
 from dojo.authorization.roles_permissions import Permissions
 
 
@@ -1679,3 +1680,32 @@ class NotificationsTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'product_added': ["alert", "msteams"]}
         self.object_permission = False
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class UserProfileTest(DojoAPITestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.url = reverse('user_profile')
+
+    def test_profile(self):
+        response = self.client.get(reverse('user_profile'))
+        data = json.loads(response.content)
+
+        self.assertEqual(1, data['user']['id'])
+        self.assertEqual('admin', data['user']['username'])
+        self.assertTrue(data['user']['is_superuser'])
+        self.assertEqual(1, data['user_contact_info']['user'])
+        self.assertEqual('#admin', data['user_contact_info']['twitter_username'])
+        self.assertEqual(1, data['global_role']['user'])
+        self.assertEqual(4, data['global_role']['role'])
+        self.assertEqual(1, data['dojo_group_member'][0]['user'])
+        self.assertEqual(1, data['dojo_group_member'][0]['group'])
+        self.assertEqual(1, data['product_type_member'][0]['user'])
+        self.assertEqual(1, data['product_type_member'][0]['product_type'])
+        self.assertEqual(1, data['product_member'][1]['user'])
+        self.assertEqual(3, data['product_member'][1]['product'])

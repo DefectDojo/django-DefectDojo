@@ -1,4 +1,6 @@
+from rest_framework.generics import GenericAPIView
 from drf_spectacular.types import OpenApiTypes
+from crum import get_current_user
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -1901,6 +1903,35 @@ class UserContactInfoViewSet(prefetch.PrefetchListMixin,
     filter_backends = (DjangoFilterBackend,)
     filter_fields = '__all__'
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+
+# Authorization: authenticated users
+class UserProfileView(GenericAPIView):
+    permission_classes = (IsAuthenticated, )
+    pagination_class = None
+    serializer_class = serializers.UserProfileSerializer
+
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.UserProfileSerializer}
+    )
+    @action(detail=True, methods=["get"],
+            filter_backends=[], pagination_class=None)
+    def get(self, request, format=None):
+        user = get_current_user()
+        user_contact_info = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
+        global_role = user.global_role if hasattr(user, 'global_role') else None
+        dojo_group_member = Dojo_Group_Member.objects.filter(user=user)
+        product_type_member = Product_Type_Member.objects.filter(user=user)
+        product_member = Product_Member.objects.filter(user=user)
+        serializer = serializers.UserProfileSerializer(
+            {"user": user,
+             "user_contact_info": user_contact_info,
+             "global_role": global_role,
+             "dojo_group_member": dojo_group_member,
+             "product_type_member": product_type_member,
+             "product_member": product_member}, many=False)
+        return Response(serializer.data)
 
 
 # Authorization: authenticated users, DjangoModelPermissions
