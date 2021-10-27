@@ -1158,7 +1158,6 @@ class ProductSerializer(TaggitSerializer, serializers.ModelSerializer):
 
 
 class ImportScanSerializer(serializers.Serializer):
-    title = serializers.CharField(max_length=255, required=False)
     scan_date = serializers.DateField(default=datetime.date.today)
 
     minimum_severity = serializers.ChoiceField(

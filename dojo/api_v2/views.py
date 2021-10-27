@@ -1949,6 +1949,8 @@ class ImportScanView(mixins.CreateModelMixin,
     In this scenario a new Test will be created inside the engagement.
 
     By Names:
+    - Create a Product (or use an existing product)
+    - Create an Engagement inside the product
     - Provide `product_name` (or `product_id`)
     - Provide `engagement_name`
 
@@ -2053,6 +2055,9 @@ class ReImportScanView(mixins.CreateModelMixin,
     - Provide this in the `test` parameter
 
     By Names:
+    - Create a Product (or use an existing product)
+    - Create an Engagement inside the product
+    - Import a report which will create a Test
     - Provide `product_name` (or `product_id`)
     - Provide `engagement_name`
     - Optionally Provide `test_title`

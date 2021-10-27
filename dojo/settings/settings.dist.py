@@ -201,7 +201,7 @@ env = environ.Env(
     # Forces the user to change password on next login.
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
     # when enabled SonarQube API parser will download the security hotspots
-    DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True)
+    DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
 )
 
 
