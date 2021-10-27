@@ -62,7 +62,7 @@ class DojoDefaultImporter(object):
         return test
 
     def process_parsed_findings(self, test, parsed_findings, scan_type, user, active, verified, minimum_severity=None,
-                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now()):
+                                endpoints_to_add=None, push_to_jira=None, group_by=None, now=timezone.now(), service=None):
         logger.debug('endpoints_to_add: %s', endpoints_to_add)
         new_findings = []
         items = parsed_findings
@@ -93,6 +93,9 @@ class DojoDefaultImporter(object):
 
             item.created = now
             item.updated = now
+
+            item.service = service
+
             item.save(dedupe_option=False)
 
             if settings.FEATURE_FINDING_GROUPS and group_by:
@@ -275,7 +278,8 @@ class DojoDefaultImporter(object):
 
     def import_scan(self, scan, scan_type, engagement, lead, environment, active, verified, tags=None, minimum_severity=None,
                     user=None, endpoints_to_add=None, scan_date=None, version=None, branch_tag=None, build_id=None,
-                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None):
+                    commit_hash=None, push_to_jira=None, close_old_findings=False, group_by=None, api_scan_configuration=None,
+                    service=None):
 
         logger.debug(f'IMPORT_SCAN: parameters: {locals()}')
 
@@ -348,7 +352,7 @@ class DojoDefaultImporter(object):
         new_findings = self.process_parsed_findings(test, parsed_findings, scan_type, user, active,
                                                     verified, minimum_severity=minimum_severity,
                                                     endpoints_to_add=endpoints_to_add, push_to_jira=push_to_jira,
-                                                    group_by=group_by, now=now)
+                                                    group_by=group_by, now=now, service=service)
 
         closed_findings = []
         if close_old_findings:

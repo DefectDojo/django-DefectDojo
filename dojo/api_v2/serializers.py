@@ -1187,6 +1187,7 @@ class ImportScanSerializer(serializers.Serializer):
     commit_hash = serializers.CharField(required=False)
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
+    service = serializers.CharField(required=False)
 
     test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
 
@@ -1207,6 +1208,7 @@ class ImportScanSerializer(serializers.Serializer):
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
         api_scan_configuration = data.get('api_scan_configuration', None)
+        service = data.get('service', None)
 
         environment_name = data.get('environment', 'Development')
         environment = Development_Environment.objects.get(name=environment_name)
@@ -1235,7 +1237,8 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              push_to_jira=push_to_jira,
                                                                              close_old_findings=close_old_findings,
                                                                              group_by=group_by,
-                                                                             api_scan_configuration=api_scan_configuration)
+                                                                             api_scan_configuration=api_scan_configuration,
+                                                                             service=service)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -1296,6 +1299,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     commit_hash = serializers.CharField(required=False)
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
+    service = serializers.CharField(required=False)
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
@@ -1315,6 +1319,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         branch_tag = data.get('branch_tag', None)
         commit_hash = data.get('commit_hash', None)
         api_scan_configuration = data.get('api_scan_configuration', None)
+        service = data.get('service', None)
 
         scan = data.get('file', None)
         endpoints_to_add = [endpoint_to_add] if endpoint_to_add else None
@@ -1330,7 +1335,8 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             version=version, branch_tag=branch_tag, build_id=build_id,
                                             commit_hash=commit_hash, push_to_jira=push_to_jira,
                                             close_old_findings=close_old_findings,
-                                            group_by=group_by, api_scan_configuration=api_scan_configuration)
+                                            group_by=group_by, api_scan_configuration=api_scan_configuration,
+                                            service=service)
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
