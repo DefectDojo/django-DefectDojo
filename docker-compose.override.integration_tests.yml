@@ -17,7 +17,7 @@ services:
       DD_BASE_URL: 'http://nginx:8080/'
       DD_ADMIN_USER: "${DD_ADMIN_USER:-admin}"
       DD_ADMIN_PASSWORD: "${DD_ADMIN_PASSWORD:-AdminsLoveIntegrationtests!}"
-      DD_SECRET_KEY: "${DD_SECRET_KEY:-.}"
+      DD_INTEGRATION_TEST_FILENAME: "${DD_INTEGRATION_TEST_FILENAME}"
   nginx:
     volumes:
       - defectdojo_media_integration_test:/usr/share/nginx/html/media

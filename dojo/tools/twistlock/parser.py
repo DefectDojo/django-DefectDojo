@@ -56,7 +56,6 @@ class TwistlockCSVParser(object):
 
     def parse(self, filename, test):
         if filename is None:
-            self.items = ()
             return
         content = filename.read()
         dupes = dict()

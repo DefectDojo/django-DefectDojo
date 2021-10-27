@@ -1,6 +1,6 @@
 # DefectDojo on Kubernetes
 
-DefetDojo Kubernetes utilizes [Helm](https://helm.sh/), a
+DefectDojo Kubernetes utilizes [Helm](https://helm.sh/), a
 package manager for Kubernetes. Helm Charts help you define, install, and
 upgrade even the most complex Kubernetes application.
 
@@ -25,7 +25,7 @@ You should now be able to see the chart.
 
 ```
 $ helm search repo defectdojo
-NAME                      	CHART VERSION	APP VERSION	DESCRIPTION                                      
+NAME                      	CHART VERSION	APP VERSION	DESCRIPTION
 helm-charts/defectdojo	    1.5.1        	1.14.0-dev 	A Helm chart for Kubernetes to install DefectDojo
 ```
 
@@ -251,6 +251,30 @@ With the TLS certificate from your Kubernetes cluster all traffic to you cluster
 If you want to encrypt the traffic to the nginx server you can use the option `--set nginx.tls.enabled=true` and `--set nginx.tls.generateCertificate=true` to generate a self signed certificate and use the https config. The option to add you own pregenerated certificate is generelly possible but not implemented in the helm chart yet.
 
 Be aware that the traffic to the database and celery broker are unencrypted at the moment.
+
+
+### Media persistent volume
+
+By default, DefectDojo helm installation doesn't support persistent storage for storing images (dynamically uploaded by users). By default, it uses emptyDir, which is ephemeral by its nature and doesn't support multiple replicas of django pods, so should not be in use for production.
+
+To enable persistence of the media storage that supports R/W many, should be in use as backend storage like S3, NFS, glusterfs, etc
+
+```bash
+mediaPersistentVolume:
+  enabled: true
+  # any name
+  name: media
+  # could be emptyDir (not for production) or pvc
+  type: pvc
+  # in case if pvc specified, should point to already existing pvc
+  persistentVolumeClaim: media
+```
+
+In the example above, we want that media content to be preserved to `pvc` named `media` as `persistentVolumeClaim` k8s resource.
+
+NOTE: PersistrentVolume needs to be prepared in front before helm installation/update is triggered.
+
+For more detail how how to create proper PVC see [example](https://github.com/DefectDojo/Community-Contribs/tree/master/persistent-media)
 
 ### Installation
 

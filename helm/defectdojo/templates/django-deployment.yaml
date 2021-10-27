@@ -43,6 +43,10 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      securityContext:
+        fsGroup: {{ .Values.django.mediaPersistentVolume.fsGroup | default 1001 }}
+      {{- end }}
       volumes:
       - name: run
         emptyDir: {}
@@ -63,6 +67,15 @@ spec:
           path: {{ .hostPath }}
           {{- end }}
       {{- end }}
+      {{- if .Values.django.mediaPersistentVolume.enabled }}
+      - name: {{ .Values.django.mediaPersistentVolume.name }}
+        {{- if eq .Values.django.mediaPersistentVolume.type "pvc"  }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.django.mediaPersistentVolume.persistentVolumeClaim }}
+        {{ else }}
+        emptyDir: {}
+        {{- end }}
+      {{- end }}
       containers:
       {{- if .Values.cloudsql.enabled  }}
       - name: cloudsql-proxy
@@ -77,6 +90,12 @@ spec:
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.postgresql.service.port }}"
         {{- else if eq .Values.database "mysql" }}
         - "-instances={{ .Values.cloudsql.instance }}=tcp:{{ .Values.mysql.service.port }}"
+        {{- end }}
+        {{- if .Values.cloudsql.enable_iam_login }}
+        - "-enable_iam_login"
+        {{- end }}
+        {{- if .Values.cloudsql.use_private_ip }}
+        - "-ip_address_types=PRIVATE"
         {{- end }}
       {{- end }}
       {{- if and .Values.monitoring.enabled .Values.monitoring.prometheus.enabled }}
@@ -113,6 +132,10 @@ spec:
           mountPath: {{ .path }}
           subPath: {{ .subPath }}
         {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: {{.Values.extraConfigs.DD_MEDIA_ROOT | default "/app/media" | quote }}
         {{- end }}
         ports:
         - name: http
@@ -196,6 +219,10 @@ spec:
           mountPath: {{ .path }}
           subPath: {{ .subPath }}
         {{- end }}
+        {{- end }}
+        {{- if .Values.django.mediaPersistentVolume.enabled }}
+        - name: {{ .Values.django.mediaPersistentVolume.name }}
+          mountPath: /usr/share/nginx/html/media
         {{- end }}
         ports:
         - name: http

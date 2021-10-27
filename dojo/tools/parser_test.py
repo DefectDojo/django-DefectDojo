@@ -3,3 +3,4 @@ class ParserTest(object):
         self.name = name
         self.type = type
         self.version = version
+        self.description = None

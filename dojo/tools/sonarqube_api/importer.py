@@ -53,24 +53,24 @@ class SonarQubeApiImporter(object):
     @staticmethod
     def prepare_client(test):
         product = test.engagement.product
-        if test.sonarqube_config:
-            config = test.sonarqube_config  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
+        if test.api_scan_configuration:
+            config = test.api_scan_configuration  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 7 and 8
             # Double check of config
             if config.product != product:
-                raise Exception('Product SonarQube Configuration and "Product" mismatch')
+                raise Exception('Product API Scan Configuration and Product do not match.')
         else:
-            sqqs = product.sonarqube_product_set.filter(product=product)
+            sqqs = product.product_api_scan_configuration_set.filter(product=product)
             if sqqs.count() == 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 4
                 config = sqqs.first()
             elif sqqs.count() > 1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 case no. 6
                 raise Exception(
-                    'It has configured more than one Product SonarQube Configuration but non of them has been choosen.\n'
+                    'More than one Product API Scan Configuration has been configured, but none of them has been chosen.\n'
                     'Please specify at Test which one should be used.'
                 )
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 1-3
                 config = None
 
-        return SonarQubeAPI(tool_config=config.sonarqube_tool_config if config else None), config
+        return SonarQubeAPI(tool_config=config.tool_configuration if config else None), config
 
     def import_issues(self, test):
 
@@ -80,8 +80,8 @@ class SonarQubeApiImporter(object):
 
             client, config = self.prepare_client(test)
 
-            if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-                component = client.get_project(config.sonarqube_project_key)
+            if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+                component = client.get_project(config.service_key_1)
             else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
                 component = client.find_project(test.engagement.product.name)
 
@@ -165,8 +165,8 @@ class SonarQubeApiImporter(object):
         items = list()
         client, config = self.prepare_client(test)
 
-        if config and config.sonarqube_project_key:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
-            component = client.get_project(config.sonarqube_project_key)
+        if config and config.service_key_1:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 5 and 8
+            component = client.get_project(config.service_key_1)
         else:  # https://github.com/DefectDojo/django-DefectDojo/pull/4676 cases no. 2, 4 and 7
             component = client.find_project(test.engagement.product.name)
 

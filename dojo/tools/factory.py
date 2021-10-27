@@ -58,6 +58,15 @@ def requires_file(scan_type):
     return False
 
 
+def requires_tool_type(scan_type):
+    if scan_type not in PARSERS:
+        return None
+    parser = PARSERS[scan_type]
+    if hasattr(parser, "requires_tool_type"):
+        return parser.requires_tool_type(scan_type)
+    return None
+
+
 import os
 from inspect import isclass
 from pathlib import Path
