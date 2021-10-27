@@ -26,8 +26,7 @@ from dojo.forms import NoteForm, TestForm, FindingForm, \
     ReImportScanForm, JIRAFindingForm, JIRAImportScanForm, \
     FindingBulkUpdateForm
 from dojo.models import Finding, Finding_Group, Test, Note_Type, BurpRawRequestResponse, Endpoint, Stub_Finding, \
-    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Sonarqube_Product, \
-    Cobaltio_Product
+    Finding_Template, Cred_Mapping, Dojo_User, System_Settings, Endpoint_Status, Test_Import, Product_API_Scan_Configuration
 
 from dojo.tools.factory import get_choices_sorted
 from dojo.utils import add_error_message_to_response, add_field_errors_to_response, add_success_message_to_response, get_page_items, get_page_items_and_count, add_breadcrumb, get_cal_event, process_notifications, get_system_setting, \
@@ -647,8 +646,7 @@ def re_import_scan_results(request, tid):
             branch_tag = form.cleaned_data.get('branch_tag', None)
             build_id = form.cleaned_data.get('build_id', None)
             commit_hash = form.cleaned_data.get('commit_hash', None)
-            sonarqube_config = form.cleaned_data.get('sonarqube_config', None)
-            cobaltio_config = form.cleaned_data.get('cobaltio_config', None)
+            api_scan_configuration = form.cleaned_data.get('api_scan_configuration', None)
 
             endpoints_to_add = None  # not available on reimport UI
 
@@ -678,8 +676,7 @@ def re_import_scan_results(request, tid):
                                                 version=version, branch_tag=branch_tag, build_id=build_id,
                                                 commit_hash=commit_hash, push_to_jira=push_to_jira,
                                                 close_old_findings=close_old_findings, group_by=group_by,
-                                                sonarqube_config=sonarqube_config,
-                                                cobaltio_config=cobaltio_config)
+                                                api_scan_configuration=api_scan_configuration)
             except Exception as e:
                 logger.exception(e)
                 add_error_message_to_response('An exception error occurred during the report import:%s' % str(e))
@@ -697,8 +694,8 @@ def re_import_scan_results(request, tid):
     product_tab = Product_Tab(engagement.product.id, title="Re-upload a %s" % scan_type, tab="engagements")
     product_tab.setEngagement(engagement)
     form.fields['endpoints'].queryset = Endpoint.objects.filter(product__id=product_tab.product.id)
-    form.fields['sonarqube_config'].queryset = Sonarqube_Product.objects.filter(product=product_tab.product)
-    form.fields['cobaltio_config'].queryset = Cobaltio_Product.objects.filter(product=product_tab.product)
+    form.initial['api_scan_configuration'] = test.api_scan_configuration
+    form.fields['api_scan_configuration'].queryset = Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id)
     return render(request,
                   'dojo/import_scan_results.html',
                   {'form': form,

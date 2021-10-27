@@ -7,13 +7,20 @@ from product_test import ProductTest
 
 class EngagementTest(BaseTestCase):
 
-    def test_list_active_engagements(self):
+    def test_list_active_engagements_found(self):
         driver = self.driver
         self.goto_active_engagements_overview(driver)
+        self.assertIn("edited test engagement</a>", driver.page_source)
 
-    def test_list_all_engagements(self):
+    def test_list_active_engagements_empty(self):
         driver = self.driver
-        self.goto_all_engagements_overview(driver)
+        self.goto_active_engagements_overview(driver)
+        self.assertNotIn("edited test engagement</a>", driver.page_source)
+
+    def test_list_all_engagements_by_product(self):
+        driver = self.driver
+        self.goto_all_engagements_by_product_overview(driver)
+        self.assertIn("edited test engagement</a>", driver.page_source)
 
     def test_add_new_engagement(self):
         driver = self.driver
@@ -93,7 +100,10 @@ def suite():
     suite.addTest(ProductTest('test_create_product'))
     suite.addTest(EngagementTest('test_add_new_engagement'))
     suite.addTest(EngagementTest('test_edit_created_new_engagement'))
+    suite.addTest(EngagementTest('test_list_active_engagements_found'))
     suite.addTest(EngagementTest('test_close_new_engagement'))
+    suite.addTest(EngagementTest('test_list_active_engagements_empty'))
+    suite.addTest(EngagementTest('test_list_all_engagements_by_product'))
     suite.addTest(EngagementTest('test_delete_new_closed_engagement'))
     suite.addTest(EngagementTest('test_new_ci_cd_engagement'))
     suite.addTest(ProductTest('test_delete_product'))

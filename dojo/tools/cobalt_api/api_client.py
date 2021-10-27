@@ -78,11 +78,20 @@ class CobaltAPI:
         if response_orgs.ok and response_assets.ok:
             data = response_orgs.json().get('data')
             orgs = filter(lambda org: org["resource"]["token"] == self.org_token, data)
-            return list(orgs)[0]
+            org = list(orgs)[0]
+            org_name = org["resource"]["name"]
+            return f'You have access to the "{org_name}" organization'
         else:
             raise Exception("Connection failed (error: {} - {})".format(
                 response_assets.status_code, response_assets.content.decode("utf-8")
             ))
+
+    def test_product_connection(self, api_scan_configuration):
+        asset = self.get_asset(api_scan_configuration.service_key_1)
+        asset_name = asset['resource']['title']
+        api_scan_configuration.service_key_2 = asset_name
+        api_scan_configuration.save()
+        return f'You have access to asset "{asset_name}"'
 
     def get_headers(self):
         headers = {

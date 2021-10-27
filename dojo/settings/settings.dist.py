@@ -30,7 +30,6 @@ env = environ.Env(
     DD_SESSION_EXPIRE_AT_BROWSER_CLOSE=(bool, False),
     DD_SESSION_COOKIE_AGE=(int, 1209600),  # 14 days
     DD_CSRF_COOKIE_SECURE=(bool, False),
-    DD_SECURE_BROWSER_XSS_FILTER=(bool, True),
     DD_SECURE_CONTENT_TYPE_NOSNIFF=(bool, True),
     DD_TIME_ZONE=(str, 'UTC'),
     DD_LANG=(str, 'en-us'),
@@ -169,13 +168,11 @@ env = environ.Env(
     DD_SAFETY_PARSER_ONLINE_DB=(bool, True),
     # regular expression to exclude one or more parsers
     # could be usefull to limit parser allowed
-    DD_PARSER_EXCLUDE=(str, ''),
+    DD_PARSER_EXCLUDE=(str, 'AWS Scout2 Scan'),
     # when enabled in sytem settings,  every minute a job run to delete excess duplicates
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
-    # APIv1 is depreacted and will be removed at 2021-06-30
-    DD_LEGACY_API_V1_ENABLE=(bool, False),
     # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
@@ -510,8 +507,6 @@ LOGIN_EXEMPT_URLS = (
     r'empty_questionnaire/([\d]+)/answer'
 )
 
-LEGACY_API_V1_ENABLE = env('DD_LEGACY_API_V1_ENABLE')
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
@@ -549,10 +544,6 @@ RATE_LIMITER_ACCOUNT_LOCKOUT = env('DD_RATE_LIMITER_ACCOUNT_LOCKOUT')  # Forces 
 # If True, the SecurityMiddleware redirects all non-HTTPS requests to HTTPS
 # (except for those URLs matching a regular expression listed in SECURE_REDIRECT_EXEMPT).
 SECURE_SSL_REDIRECT = env('DD_SECURE_SSL_REDIRECT')
-
-# If True, the SecurityMiddleware sets the X-XSS-Protection: 1;
-# mode=block header on all responses that do not already have it.
-SECURE_BROWSER_XSS_FILTER = env('DD_SECURE_BROWSER_XSS_FILTER')
 
 # If True, the SecurityMiddleware sets the X-Content-Type-Options: nosniff;
 SECURE_CONTENT_TYPE_NOSNIFF = env('DD_SECURE_CONTENT_TYPE_NOSNIFF')
@@ -1044,7 +1035,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     'GitLab Dependency Scanning Report': ['title', 'cve', 'file_path', 'component_name', 'component_version'],
     'SpotBugs Scan': ['cwe', 'severity', 'file_path', 'line'],
     'JFrog Xray Unified Scan': ['cve', 'file_path', 'component_name', 'component_version'],
-    'Scout Suite Scan': ['title', 'severity', 'description'],
+    'Scout Suite Scan': ['file_path', 'vuln_id_from_tool'],  # for now we use file_path as there is no attribute for "service"
     'AWS Security Hub Scan': ['unique_id_from_tool'],
     'Meterian Scan': ['cwe', 'component_name', 'component_version', 'description', 'severity'],
     'Github Vulnerability Scan': ['unique_id_from_tool'],

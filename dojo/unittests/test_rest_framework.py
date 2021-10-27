@@ -6,11 +6,11 @@ from dojo.models import Product, Engagement, Test, Finding, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     User, Stub_Finding, Endpoint, JIRA_Project, JIRA_Instance, \
     Finding_Template, Note_Type, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Notes, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Product_API_Scan_Configuration, Notes, \
     BurpRawRequestResponse, DojoMeta, FileUpload, Product_Type, Dojo_Group, \
     Role, Product_Type_Member, Product_Member, Product_Type_Group, \
     Product_Group, Global_Role, Dojo_Group_Member, Language_Type, Languages, \
-    Notifications
+    Notifications, UserContactInfo
 from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     FindingTemplatesViewSet, FindingViewSet, JiraInstanceViewSet, \
     JiraIssuesViewSet, JiraProjectViewSet, ProductViewSet, \
@@ -21,7 +21,7 @@ from dojo.api_v2.views import EndPointViewSet, EngagementViewSet, \
     DojoGroupViewSet, RoleViewSet, ProductTypeMemberViewSet, ProductMemberViewSet, \
     ProductTypeGroupViewSet, ProductGroupViewSet, GlobalRoleViewSet, \
     DojoGroupMemberViewSet, LanguageTypeViewSet, LanguageViewSet, ImportLanguagesView, \
-    NotificationsViewSet
+    NotificationsViewSet, UserContactInfoViewSet, ProductAPIScanConfigurationViewSet
 from json import dumps
 from django.urls import reverse
 from rest_framework import status
@@ -36,6 +36,7 @@ from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from drf_spectacular.settings import spectacular_settings
 import logging
 import pathlib
+import json
 from dojo.authorization.roles_permissions import Permissions
 
 
@@ -180,17 +181,17 @@ class SchemaChecker():
 
         if obj is None:
             self._check_or_fail(is_nullable, f"{self._get_prefix()} is not nullable yet the value returned was null")
-        elif schema_type is TYPE_BOOLEAN:
+        elif schema_type == TYPE_BOOLEAN:
             _check_helper(isinstance(obj, bool))
-        elif schema_type is TYPE_INTEGER:
+        elif schema_type == TYPE_INTEGER:
             _check_helper(isinstance(obj, int))
-        elif schema_type is TYPE_NUMBER:
+        elif schema_type == TYPE_NUMBER:
             _check_helper(obj.isdecimal())
-        elif schema_type is TYPE_ARRAY:
+        elif schema_type == TYPE_ARRAY:
             _check_helper(isinstance(obj, list))
-        elif schema_type is TYPE_OBJECT:
+        elif schema_type == TYPE_OBJECT:
             _check_helper(isinstance(obj, OrderedDict) or isinstance(obj, dict))
-        elif schema_type is TYPE_STRING:
+        elif schema_type == TYPE_STRING:
             _check_helper(isinstance(obj, str))
         else:
             # Default case
@@ -1033,21 +1034,26 @@ class SonarqubeIssuesTransitionTest(BaseClass.RESTEndpointTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
-class SonarqubeProductTest(BaseClass.RESTEndpointTest):
+class Product_API_Scan_ConfigurationTest(BaseClass.RESTEndpointTest):
     fixtures = ['dojo_testdata.json']
 
     def __init__(self, *args, **kwargs):
-        self.endpoint_model = Sonarqube_Product
-        self.endpoint_path = 'sonarqube_product_configurations'
-        self.viewname = 'sonarqube_product'
-        self.viewset = JiraProjectViewSet
+        self.endpoint_model = Product_API_Scan_Configuration
+        self.endpoint_path = 'product_api_scan_configurations'
+        self.viewname = 'product_api_scan_configuration'
+        self.viewset = ProductAPIScanConfigurationViewSet
         self.payload = {
             "product": 2,
-            "sonarqube_project_key": "dojo_sonar_key",
-            "sonarqube_tool_config": 3
+            "service_key_1": "dojo_sonar_key",
+            "tool_configuration": 3
         }
-        self.update_fields = {'sonarqube_tool_config': 2}
-        self.object_permission = False
+        self.update_fields = {'tool_configuration': 2}
+        self.object_permission = True
+        self.permission_check_class = Product_API_Scan_Configuration
+        self.permission_check_id = 1
+        self.permission_create = Permissions.Product_API_Scan_Configuration_Add
+        self.permission_update = Permissions.Product_API_Scan_Configuration_Edit
+        self.permission_delete = Permissions.Product_API_Scan_Configuration_Delete
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
@@ -1256,6 +1262,26 @@ class UsersTest(BaseClass.RESTEndpointTest):
             "is_active": True,
         }
         self.update_fields = {"first_name": "test changed"}
+        self.object_permission = False
+        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class UserContactInfoTest(BaseClass.RESTEndpointTest):
+    fixtures = ['dojo_testdata.json']
+
+    def __init__(self, *args, **kwargs):
+        self.endpoint_model = UserContactInfo
+        self.endpoint_path = 'user_contact_infos'
+        self.viewname = 'usercontactinfo'
+        self.viewset = UserContactInfoViewSet
+        self.payload = {
+            "user": 4,
+            "title": "Sir",
+            "phone_number": "+999999999",
+            "cell_number": "+999999999",
+            "twitter_username": "defectdojo",
+        }
+        self.update_fields = {"title": "Lady"}
         self.object_permission = False
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
@@ -1654,3 +1680,32 @@ class NotificationsTest(BaseClass.RESTEndpointTest):
         self.update_fields = {'product_added': ["alert", "msteams"]}
         self.object_permission = False
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class UserProfileTest(DojoAPITestCase):
+    fixtures = ['dojo_testdata.json']
+
+    def setUp(self):
+        testuser = User.objects.get(username='admin')
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + token.key)
+        self.url = reverse('user_profile')
+
+    def test_profile(self):
+        response = self.client.get(reverse('user_profile'))
+        data = json.loads(response.content)
+
+        self.assertEqual(1, data['user']['id'])
+        self.assertEqual('admin', data['user']['username'])
+        self.assertTrue(data['user']['is_superuser'])
+        self.assertEqual(1, data['user_contact_info']['user'])
+        self.assertEqual('#admin', data['user_contact_info']['twitter_username'])
+        self.assertEqual(1, data['global_role']['user'])
+        self.assertEqual(4, data['global_role']['role'])
+        self.assertEqual(1, data['dojo_group_member'][0]['user'])
+        self.assertEqual(1, data['dojo_group_member'][0]['group'])
+        self.assertEqual(1, data['product_type_member'][0]['user'])
+        self.assertEqual(1, data['product_type_member'][0]['product_type'])
+        self.assertEqual(1, data['product_member'][1]['user'])
+        self.assertEqual(3, data['product_member'][1]['product'])

@@ -7,7 +7,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading tight">
                     <h3 class="has-filters">
-                        Tool Configuration
+                        Tool Configurations
                         <div class="dropdown pull-right">
                             <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                                     data-toggle="dropdown" aria-expanded="true">
@@ -34,11 +34,12 @@
                 </div>
                 <div class="panel panel-default table-responsive">
                     <table id="products"
-                           class="tablesorter-bootstrap table table-bordered table-condensed table-striped">
+                           class="tablesorter-bootstrap table table-condensed table-striped">
                         <thead>
                         <tr>
-                            <th>Tool Name</th>
+                            <th>Name</th>
                             <th>Description</th>
+                            <th>URL</th>
                             <th>Category</th>
                         </tr>
                         </thead>
@@ -49,7 +50,10 @@
                                     <a href="{% url 'edit_tool_config' conf.id %}"><b>{{ conf.name }}</b></a>
                                 </td>
                                 <td>
-                                        {{ conf.description }}
+                                    {% if conf.description %}{{ conf.description }}{% endif %}
+                                </td>
+                                <td>
+                                    {% if conf.url %}{{ conf.url }}{% endif %}
                                 </td>
                                 <td>
                                   {{ conf.tool_type.name }}

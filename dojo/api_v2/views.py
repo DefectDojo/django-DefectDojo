@@ -1,4 +1,6 @@
+from rest_framework.generics import GenericAPIView
 from drf_spectacular.types import OpenApiTypes
+from crum import get_current_user
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -22,9 +24,10 @@ from dojo.models import Language_Type, Languages, Notifications, Product, Produc
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
     Endpoint, JIRA_Project, JIRA_Instance, DojoMeta, Development_Environment, \
     Dojo_User, Note_Type, System_Settings, App_Analysis, Endpoint_Status, \
-    Sonarqube_Issue, Sonarqube_Issue_Transition, Sonarqube_Product, Regulation, \
+    Sonarqube_Issue, Sonarqube_Issue_Transition, Regulation, \
     BurpRawRequestResponse, FileUpload, Product_Type_Member, Product_Member, Dojo_Group, \
-    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations
+    Product_Group, Product_Type_Group, Role, Global_Role, Dojo_Group_Member, Engagement_Presets, Network_Locations, \
+    UserContactInfo, Product_API_Scan_Configuration
 
 from dojo.endpoint.views import get_endpoint_ids
 from dojo.reports.views import report_url_resolver, prefetch_related_findings_for_report
@@ -46,7 +49,7 @@ from dojo.product_type.queries import get_authorized_product_types, get_authoriz
     get_authorized_product_type_groups
 from dojo.product.queries import get_authorized_products, get_authorized_app_analysis, get_authorized_dojo_meta, \
     get_authorized_product_members, get_authorized_product_groups, get_authorized_languages, \
-    get_authorized_engagement_presets
+    get_authorized_engagement_presets, get_authorized_product_api_scan_configurations
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.test.queries import get_authorized_tests, get_authorized_test_imports
 from dojo.finding.queries import get_authorized_findings, get_authorized_stub_findings
@@ -1103,19 +1106,22 @@ class SonarqubeIssueTransitionViewSet(mixins.ListModelMixin,
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
 
-# Authorization: staff
-class SonarqubeProductViewSet(mixins.ListModelMixin,
+# Authorization: object-based
+class ProductAPIScanConfigurationViewSet(mixins.ListModelMixin,
                   mixins.RetrieveModelMixin,
                   mixins.DestroyModelMixin,
                   mixins.UpdateModelMixin,
                   mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
-    serializer_class = serializers.SonarqubeProductSerializer
-    queryset = Sonarqube_Product.objects.all()
+    serializer_class = serializers.ProductAPIScanConfigurationSerializer
+    queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('id', 'product', 'sonarqube_project_key',
-                     'sonarqube_tool_config')
-    permission_classes = (IsAdminUser, DjangoModelPermissions)
+    filter_fields = ('id', 'product', 'tool_configuration',
+                     'service_key_1', 'service_key_2', 'service_key_3')
+    permission_classes = (IsAuthenticated, permissions.UserHasProductAPIScanConfigurationPermission)
+
+    def get_queryset(self):
+        return get_authorized_product_api_scan_configurations(Permissions.Product_API_Scan_Configuration_View)
 
 
 # Authorization: object-based
@@ -1867,6 +1873,65 @@ class UsersViewSet(mixins.CreateModelMixin,
             return Response('Users may not delete themselves', status=status.HTTP_400_BAD_REQUEST)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Authorization: superuser
+@extend_schema_view(
+    list=extend_schema(parameters=[
+        OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                         description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    ),
+    retrieve=extend_schema(parameters=[
+        OpenApiParameter("prefetch", OpenApiTypes.STR, OpenApiParameter.QUERY, required=False,
+                         description="List of fields for which to prefetch model instances and add those to the response"),
+    ],
+    )
+)
+class UserContactInfoViewSet(prefetch.PrefetchListMixin,
+                             prefetch.PrefetchRetrieveMixin,
+                             mixins.CreateModelMixin,
+                             mixins.UpdateModelMixin,
+                             mixins.ListModelMixin,
+                             mixins.RetrieveModelMixin,
+                             mixins.DestroyModelMixin,
+                             viewsets.GenericViewSet):
+    serializer_class = serializers.UserContactInfoSerializer
+    queryset = UserContactInfo.objects.all()
+    swagger_schema = prefetch.get_prefetch_schema(["user_contact_infos_list", "user_contact_infos_read"],
+                                                  serializers.UserContactInfoSerializer).to_schema()
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = '__all__'
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+
+
+# Authorization: authenticated users
+class UserProfileView(GenericAPIView):
+    permission_classes = (IsAuthenticated, )
+    pagination_class = None
+    serializer_class = serializers.UserProfileSerializer
+
+    @swagger_auto_schema(
+        method='get',
+        responses={status.HTTP_200_OK: serializers.UserProfileSerializer}
+    )
+    @action(detail=True, methods=["get"],
+            filter_backends=[], pagination_class=None)
+    def get(self, request, format=None):
+        user = get_current_user()
+        user_contact_info = user.usercontactinfo if hasattr(user, 'usercontactinfo') else None
+        global_role = user.global_role if hasattr(user, 'global_role') else None
+        dojo_group_member = Dojo_Group_Member.objects.filter(user=user)
+        product_type_member = Product_Type_Member.objects.filter(user=user)
+        product_member = Product_Member.objects.filter(user=user)
+        serializer = serializers.UserProfileSerializer(
+            {"user": user,
+             "user_contact_info": user_contact_info,
+             "global_role": global_role,
+             "dojo_group_member": dojo_group_member,
+             "product_type_member": product_type_member,
+             "product_member": product_member}, many=False)
+        return Response(serializer.data)
 
 
 # Authorization: authenticated users, DjangoModelPermissions

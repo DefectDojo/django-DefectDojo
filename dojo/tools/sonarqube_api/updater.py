@@ -110,26 +110,27 @@ class SonarQubeApiUpdater(object):
         target_status = self.get_sonarqube_status_for(finding)
 
         issue = client.get_issue(sonarqube_issue.key)
-        if issue.get('resolution'):
-            current_status = '{} / {}'.format(issue.get('status'), issue.get('resolution'))
-        else:
-            current_status = issue.get('status')
+        if issue:  # Issue could have disappeared in SQ because a previous scan has resolved the issue as fixed
+            if issue.get('resolution'):
+                current_status = '{} / {}'.format(issue.get('status'), issue.get('resolution'))
+            else:
+                current_status = issue.get('status')
 
-        logger.debug("--> SQ Current status: {}. Current target status: {}".format(current_status, target_status))
+            logger.debug("--> SQ Current status: {}. Current target status: {}".format(current_status, target_status))
 
-        transitions = self.get_sonarqube_required_transitions_for(current_status, target_status)
-        if transitions:
-            logger.info("Updating finding '{}' in SonarQube".format(finding))
+            transitions = self.get_sonarqube_required_transitions_for(current_status, target_status)
+            if transitions:
+                logger.info("Updating finding '{}' in SonarQube".format(finding))
 
-            for transition in transitions:
-                client.transition_issue(sonarqube_issue.key, transition)
+                for transition in transitions:
+                    client.transition_issue(sonarqube_issue.key, transition)
 
-            # Track Defect Dojo has updated the SonarQube issue
-            Sonarqube_Issue_Transition.objects.create(
-                sonarqube_issue=finding.sonarqube_issue,
-                # not sure if this is needed, but looks like the original author decided to send display status to sonarcube
-                # we changed Accepted into Risk Accepted, but we change it back to be sure we don't break the integration
-                finding_status=finding.status().replace('Risk Accepted', 'Accepted') if finding.status() else finding.status(),
-                sonarqube_status=current_status,
-                transitions=','.join(transitions),
-            )
+                # Track Defect Dojo has updated the SonarQube issue
+                Sonarqube_Issue_Transition.objects.create(
+                    sonarqube_issue=finding.sonarqube_issue,
+                    # not sure if this is needed, but looks like the original author decided to send display status to sonarcube
+                    # we changed Accepted into Risk Accepted, but we change it back to be sure we don't break the integration
+                    finding_status=finding.status().replace('Risk Accepted', 'Accepted') if finding.status() else finding.status(),
+                    sonarqube_status=current_status,
+                    transitions=','.join(transitions),
+                )
