@@ -25,7 +25,7 @@ class UserTest(BaseTestCase):
 
     @staticmethod
     def reload_service():
-        Path("/app/dojo/settings/settings.py").touch()
+        Path("dojo/settings/settings.py").touch()
 
     def test_create_user(self):
         # Login to the site.
