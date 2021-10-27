@@ -31,7 +31,7 @@ class AnchoreGrypeParser(object):
             if type(item["matchDetails"]) is dict:
                 description += f'\n**Matcher:** {item["matchDetails"]["matcher"]}'
             else:
-                description += f'\n**Matchers:**'
+                description += '\n**Matchers:**'
                 for matchers in item["matchDetails"]:
                     description += f'\n * {matchers["matcher"]}'
             description += f"\n**PURL:** {purl}"
