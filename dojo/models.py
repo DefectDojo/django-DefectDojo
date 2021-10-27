@@ -1928,7 +1928,7 @@ class Finding(models.Model):
                                blank=True,
                                max_length=200,
                                verbose_name="Service",
-                               help_text="A service is a self-contained piece of functionality within a Product. It is used in deduplication of findings.")
+                               help_text="A service is a self-contained piece of functionality within a Product. This is an optional field which is used in deduplication of findings when set.")
 
     tags = TagField(blank=True, force_lowercase=True, help_text="Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add.")
 
