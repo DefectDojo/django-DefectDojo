@@ -1179,7 +1179,6 @@ class ImportScanSerializer(serializers.Serializer):
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), required=False)
     engagement_name = serializers.CharField(required=False)
-    product = serializers.IntegerField(required=False)
     product_name = serializers.CharField(required=False)
 
     lead = serializers.PrimaryKeyRelatedField(
@@ -1307,7 +1306,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     test_title = serializers.CharField(required=False)
     engagement_id = serializers.IntegerField(required=False)
     engagement_name = serializers.CharField(required=False)
-    product = serializers.IntegerField(required=False)
     product_name = serializers.CharField(required=False)
 
     push_to_jira = serializers.BooleanField(default=False)
