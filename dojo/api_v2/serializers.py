@@ -1250,18 +1250,19 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              group_by=group_by,
                                                                              api_scan_configuration=api_scan_configuration,
                                                                              title=test_title)
+
+            # return the id of the created test, can't find a better way because this is not a ModelSerializer....
+            if test:
+                self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
+                data['engagement'] = test.engagement
+                data['product'] = test.engagement.product.id
+
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:
             raise Exception(ve)
-
-        # return the id of the created test, can't find a better way because this is not a ModelSerializer....
-        if test:
-            self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
-            data['engagement'] = test.engagement
-            data['product'] = test.engagement.product.id
 
     def validate(self, data):
         # metadata has already been check in HasImportPermission
@@ -1360,18 +1361,19 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             commit_hash=commit_hash, push_to_jira=push_to_jira,
                                             close_old_findings=close_old_findings,
                                             group_by=group_by, api_scan_configuration=api_scan_configuration)
+
+            # return the id of the created test, can't find a better way because this is not a ModelSerializer....
+            if test:
+                data['test'] = test
+                data['engagement'] = test.engagement
+                data['product'] = test.engagement.product.id
+
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:
             raise Exception(ve)
-
-        # return the id of the created test, can't find a better way because this is not a ModelSerializer....
-        if test:
-            data['test'] = test
-            data['engagement'] = test.engagement
-            data['product'] = test.engagement.product.id
 
     def validate(self, data):
         scan_type = data.get("scan_type")
