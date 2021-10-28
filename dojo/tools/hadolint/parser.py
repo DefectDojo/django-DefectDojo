@@ -48,15 +48,9 @@ def get_item(vulnerability, test):
         severity=severity,
         file_path=vulnerability['file'],
         line=vulnerability['line'],
-        description="File: {}:{}\nVulnerability ID: {}\nDetails: {}\n".format(vulnerability['file'], vulnerability['line'], vulnerability['code'], vulnerability['message']),
-        mitigation="No mitigation provided",
-        false_p=False,
-        duplicate=False,
+        description="File: {}:{}\nVulnerability ID: {}\nDetails: {}\n".format(vulnerability['code'], vulnerability['message']),
         static_finding=True,
-        dynamic_finding=False,
-        out_of_scope=False,
-        mitigated=None,
-        impact="No impact provided")
+        dynamic_finding=False)
 
     finding.description = finding.description.strip()
 
