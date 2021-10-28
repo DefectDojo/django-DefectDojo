@@ -43,7 +43,7 @@ def get_item(vulnerability, test):
 
     # create the finding object, with 'static' type
     finding = Finding(
-        title=vulnerability['code'] + ": " + vulnerability['file'],
+        title=vulnerability['code'] + ": " + vulnerability['message'],
         test=test,
         severity=severity,
         file_path=vulnerability['file'],
