@@ -804,7 +804,7 @@ def update_jira_issue(obj, *args, **kwargs):
                 # folder. Has this feature ever worked?
                 try:
                     jira_attachment(
-                        find, jira, new_issue,
+                        find, jira, issue,
                         settings.MEDIA_ROOT + '/' + pic)
                 except FileNotFoundError as e:
                     logger.info(e)
