@@ -82,27 +82,8 @@ def mitigate_endpoint_status(endpoint_status, user):
     endpoint_status.save()
 
 
-def get_import_meta_data_from_dict(data):
-    test_id = data.get('test', None)
-    if isinstance(test_id, Test):
-        test_id = test_id.id
-    scan_type = data.get('scan_type', None)
-
-    test_title = data.get('test_title', None)
-    engagement_id = data.get('engagement', None)
-    if isinstance(engagement_id, Engagement):
-        engagement_id = engagement_id.id
-    engagement_name = data.get('engagement_name', None)
-    product_id = data.get('product', None)
-    product_name = data.get('product_name', None)
-
-    return test_id, test_title, scan_type, engagement_id, engagement_name, product_id, product_name
-
-
-def get_target_product_if_exists(product_id=None, product_name=None):
-    if product_id:
-        return get_object_or_none(Product, pk=product_id)
-    elif product_name:
+def get_target_product_if_exists(product_name=None):
+    if product_name:
         return get_object_or_none(Product, name=product_name)
     else:
         return None

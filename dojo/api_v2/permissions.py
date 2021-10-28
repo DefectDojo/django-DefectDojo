@@ -1,11 +1,36 @@
 import re
 from rest_framework.exceptions import ParseError
-from dojo.importers.reimporter.utils import get_import_meta_data_from_dict, get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
+
+
+def get_import_meta_data_from_dict(data):
+    test_id = data.get('test', None)
+    if test_id:
+        if isinstance(test_id, Test):
+            test_id = test_id.id
+        elif isinstance(test_id, str) and not test_id.isdigit():
+            raise serializers.ValidationError('test must be an integer')
+
+    scan_type = data.get('scan_type', None)
+
+    test_title = data.get('test_title', None)
+
+    engagement_id = data.get('engagement', None)
+    if engagement_id:
+        if isinstance(engagement_id, Engagement):
+            engagement_id = engagement_id.id
+        elif isinstance(engagement_id, str) and not engagement_id.isdigit():
+            raise serializers.ValidationError('engagement must be an integer')
+    engagement_name = data.get('engagement_name', None)
+
+    product_name = data.get('product_name', None)
+
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name
 
 
 def check_post_permission(request, post_model, post_pk, post_permission):
@@ -169,15 +194,8 @@ class UserHasImportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        _, _, _, engagement_id, engagement_name, product_id, product_name = get_import_meta_data_from_dict(request.data)
-
-        if engagement_id and not engagement_id.isdigit():
-            raise serializers.ValidationError('engagement must be an integer')
-
-        if product_id and not product_id.isdigit():
-            raise serializers.ValidationError('product must be an integer')
-
-        product = get_target_product_if_exists(product_id, product_name)
+        _, _, _, engagement_id, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
+        product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
 
         if engagement:
@@ -186,16 +204,12 @@ class UserHasImportPermission(permissions.BasePermission):
         elif engagement_id:
             # engagement_id doesn't exist
             raise serializers.ValidationError("Engagement '%s' doesn''t exist" % engagement_id)
-        elif product and product_id and engagement_name:
-            raise serializers.ValidationError("Engagement '%s' doesn't exist in Product %s" % (engagement_name, product_id))
         elif product and product_name and engagement_name:
             raise serializers.ValidationError("Engagement '%s' doesn't exist in Product %s" % (engagement_name, product_name))
-        elif not product and product_id:
-            raise serializers.ValidationError("Product '%s' doesn't exist" % product_id)
         elif not product and product_name:
             raise serializers.ValidationError("Product '%s' doesn't exist" % product_name)
         else:
-            raise serializers.ValidationError("Need engagement_id or product_id/name + engagement_name to perform import")
+            raise serializers.ValidationError("Need engagement_id or product_name + engagement_name to perform import")
 
 
 class UserHasProductPermission(permissions.BasePermission):
@@ -254,15 +268,9 @@ class UserHasReimportPermission(permissions.BasePermission):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()
         # and we have to validate ourselves unfortunately
 
-        test_id, test_title, scan_type, _, engagement_name, product_id, product_name = get_import_meta_data_from_dict(request.data)
+        test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(request.data)
 
-        if test_id and not test_id.isdigit():
-            raise serializers.ValidationError('test must be an integer')
-
-        if product_id and not product_id.isdigit():
-            raise serializers.ValidationError('product must be an integer')
-
-        product = get_target_product_if_exists(product_id, product_name)
+        product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
 
@@ -276,16 +284,12 @@ class UserHasReimportPermission(permissions.BasePermission):
             raise serializers.ValidationError("Test '%s' with scan_type '%s'  doesn't exist in Engagement %s" % (scan_type, test_title, engagement_name))
         elif engagement and engagement_name and scan_type:
             raise serializers.ValidationError("Test with scan_type '%s' doesn't exist in Engagement %s" % (scan_type, engagement_name))
-        elif product and product_id and engagement_name:
-            raise serializers.ValidationError("Engagement '%s' doesn''t exist in Product %s" % (engagement_name, product_id))
         elif product and product_name and engagement_name:
             raise serializers.ValidationError("Engagement '%s' doesn''t exist in Product %s" % (engagement_name, product_name))
-        elif not product and product_id:
-            raise serializers.ValidationError("Product '%s' doesn't exist" % product_id)
         elif not product and product_name:
             raise serializers.ValidationError("Product '%s' doesn't exist" % product_name)
         else:
-            raise serializers.ValidationError("Need test_id or product_id/name + engagement_id/name + test_title to perform reimport")
+            raise serializers.ValidationError("Need test_id or product_name + engagement_name + test_title to perform reimport")
 
 
 class UserHasTestPermission(permissions.BasePermission):

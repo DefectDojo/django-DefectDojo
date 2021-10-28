@@ -19,7 +19,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema, no_body
 import base64
 from dojo.engagement.services import close_engagement, reopen_engagement
-from dojo.importers.reimporter.utils import get_import_meta_data_from_dict, get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
+from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Language_Type, Languages, Notifications, Product, Product_Type, Engagement, Test, Test_Import, Test_Type, Finding, \
     User, Stub_Finding, Finding_Template, Notes, \
     JIRA_Issue, Tool_Product_Settings, Tool_Configuration, Tool_Type, \
@@ -1965,8 +1965,8 @@ class ImportScanView(mixins.CreateModelMixin,
         permission_classes = (IsAuthenticated, DjangoModelPermissions)
 
     def perform_create(self, serializer):
-        _, _, _, engagement_id, engagement_name, product_id, product_name = get_import_meta_data_from_dict(serializer.validated_data)
-        product = get_target_product_if_exists(product_id, product_name)
+        _, _, _, engagement_id, engagement_name, product_name = permissions.get_import_meta_data_from_dict(serializer.validated_data)
+        product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(engagement_id, engagement_name, product)
         jira_project = jira_helper.get_jira_project(engagement)
 
@@ -2077,8 +2077,8 @@ class ReImportScanView(mixins.CreateModelMixin,
         return get_authorized_tests(Permissions.Import_Scan_Result)
 
     def perform_create(self, serializer):
-        test_id, test_title, scan_type, _, engagement_name, product_id, product_name = get_import_meta_data_from_dict(serializer.validated_data)
-        product = get_target_product_if_exists(product_id, product_name)
+        test_id, test_title, scan_type, _, engagement_name, product_name = permissions.get_import_meta_data_from_dict(serializer.validated_data)
+        product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
         jira_project = jira_helper.get_jira_project(test)

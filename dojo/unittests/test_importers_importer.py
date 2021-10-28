@@ -183,18 +183,6 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             test_id = import0['test']
             self.assertEqual(get_object_or_none(Test, id=test_id).title, DEFAULT_TEST_TITLE)
 
-    def test_import_by_product_id_engagement_name_exists(self):
-        with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
-                engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
-            test_id = import0['test']
-            self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement_last)
-
-    def test_import_by_product_id_engagement_name_not_exists(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
-            import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
-                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
-
     def test_import_by_product_name_exists_engagement_name_exists(self):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_DEFAULT,
@@ -287,19 +275,6 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
             test_id = import0['test']
             self.assertEqual(test_id, self.test_last_by_scan_type.id)
-
-    def test_reimport_by_product_id_engagement_name_exists_test_title_exists(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
-            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
-                engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT, test_title=ALTERNATE_TEST_TITLE)
-
-            test_id = import0['test']
-            self.assertEqual(test_id, self.test_with_title.id)
-
-    def test_reimport_by_product_id_engagement_name_not_exists(self):
-        with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
-            import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product=self.product.id,
-                engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
