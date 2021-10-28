@@ -1067,7 +1067,8 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'Scout Suite Scan': True,
     'AWS Security Hub Scan': True,
     'Meterian Scan': True,
-    'SARIF': True
+    'SARIF': True,
+    'Hadolint Dockerfile check': True
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1148,6 +1149,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'KICS Scan': DEDUPE_ALGO_HASH_CODE,
     'SARIF': DEDUPE_ALGO_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
