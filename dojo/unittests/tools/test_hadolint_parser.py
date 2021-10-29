@@ -11,6 +11,9 @@ class TesthadolintParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
+        finding = list(findings)[0]
+        self.assertEqual(finding.line, 9)
+        self.assertEqual(finding.file_path, "django-DefectDojo\\Dockerfile.django")
 
     def test_parse_file_with_many_dockerfile(self):
         testfile = open("dojo/unittests/scans/hadolint/many_dockerfile.json")
