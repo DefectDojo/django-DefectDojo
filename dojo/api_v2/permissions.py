@@ -1,36 +1,12 @@
 import re
 from rest_framework.exceptions import ParseError
+from dojo.api_v2.serializers import get_import_meta_data_from_dict
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
 from dojo.models import Endpoint, Engagement, Finding, Product_Type, Product, Test, Dojo_Group
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, serializers
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
-
-
-def get_import_meta_data_from_dict(data):
-    test_id = data.get('test', None)
-    if test_id:
-        if isinstance(test_id, Test):
-            test_id = test_id.id
-        elif isinstance(test_id, str) and not test_id.isdigit():
-            raise serializers.ValidationError('test must be an integer')
-
-    scan_type = data.get('scan_type', None)
-
-    test_title = data.get('test_title', None)
-
-    engagement_id = data.get('engagement', None)
-    if engagement_id:
-        if isinstance(engagement_id, Engagement):
-            engagement_id = engagement_id.id
-        elif isinstance(engagement_id, str) and not engagement_id.isdigit():
-            raise serializers.ValidationError('engagement must be an integer')
-    engagement_name = data.get('engagement_name', None)
-
-    product_name = data.get('product_name', None)
-
-    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name
 
 
 def check_post_permission(request, post_model, post_pk, post_permission):

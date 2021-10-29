@@ -2,7 +2,6 @@ from typing import List
 from drf_spectacular.utils import extend_schema_field
 from drf_yasg.utils import swagger_serializer_method
 from rest_framework.fields import DictField, MultipleChoiceField
-from dojo.api_v2.permissions import get_import_meta_data_from_dict
 
 from dojo.endpoint.utils import endpoint_filter
 from dojo.importers.reimporter.utils import get_target_engagement_if_exists, get_target_product_if_exists, get_target_test_if_exists
@@ -40,6 +39,31 @@ from dojo.authorization.roles_permissions import Permissions
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+
+def get_import_meta_data_from_dict(data):
+    test_id = data.get('test', None)
+    if test_id:
+        if isinstance(test_id, Test):
+            test_id = test_id.id
+        elif isinstance(test_id, str) and not test_id.isdigit():
+            raise serializers.ValidationError('test must be an integer')
+
+    scan_type = data.get('scan_type', None)
+
+    test_title = data.get('test_title', None)
+
+    engagement_id = data.get('engagement', None)
+    if engagement_id:
+        if isinstance(engagement_id, Engagement):
+            engagement_id = engagement_id.id
+        elif isinstance(engagement_id, str) and not engagement_id.isdigit():
+            raise serializers.ValidationError('engagement must be an integer')
+    engagement_name = data.get('engagement_name', None)
+
+    product_name = data.get('product_name', None)
+
+    return test_id, test_title, scan_type, engagement_id, engagement_name, product_name
 
 
 @extend_schema_field(serializers.ListField(child=serializers.CharField()))  # also takes basic python types
@@ -1195,11 +1219,13 @@ class ImportScanSerializer(serializers.Serializer):
     commit_hash = serializers.CharField(required=False)
     api_scan_configuration = serializers.PrimaryKeyRelatedField(allow_null=True, default=None,
                                                           queryset=Product_API_Scan_Configuration.objects.all())
-
-    test = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
-    id = serializers.IntegerField(read_only=True)  # not a modelserializer, so can't use related fields
-
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
+
+    # extra fields populated in response
+    test = serializers.IntegerField(read_only=True)  # left for backwards compatibility
+    test_id = serializers.IntegerField(read_only=True)
+    engagement_id = serializers.IntegerField(read_only=True)  # need to use the _id suffix as without the serializer framework gets confused
+    product_id = serializers.IntegerField(read_only=True)
 
     def save(self, push_to_jira=False):
         data = self.validated_data
@@ -1252,9 +1278,10 @@ class ImportScanSerializer(serializers.Serializer):
 
             # return the id of the created test, can't find a better way because this is not a ModelSerializer....
             if test:
-                self.fields['test'] = serializers.IntegerField(read_only=True, default=test.id)
-                data['engagement'] = test.engagement
-                data['product'] = test.engagement.product.id
+                data['test'] = test.id
+                data['test_id'] = test.id
+                data['engagement_id'] = test.engagement.id
+                data['product_id'] = test.engagement.product.id
 
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
@@ -1322,6 +1349,9 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
+    test_id = serializers.IntegerField(read_only=True)
+    product_id = serializers.IntegerField(read_only=True)
+
     def save(self, push_to_jira=False):
         logger.debug('push_to_jira: %s', push_to_jira)
         data = self.validated_data
@@ -1361,10 +1391,12 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             group_by=group_by, api_scan_configuration=api_scan_configuration)
 
             # return the id of the created test, can't find a better way because this is not a ModelSerializer....
+            # return the id of the created test, can't find a better way because this is not a ModelSerializer....
             if test:
                 data['test'] = test
-                data['engagement'] = test.engagement
-                data['product'] = test.engagement.product.id
+                data['test_id'] = test.id
+                data['engagement_id'] = test.engagement.id
+                data['product_id'] = test.engagement.product.id
 
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer

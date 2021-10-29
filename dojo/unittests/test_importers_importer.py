@@ -182,6 +182,8 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, engagement=self.engagement.id, test_title=DEFAULT_TEST_TITLE)
             test_id = import0['test']
             self.assertEqual(get_object_or_none(Test, id=test_id).title, DEFAULT_TEST_TITLE)
+            self.assertEqual(import0['engagement_id'], self.engagement.id)
+            self.assertEqual(import0['product_id'], self.engagement.product.id)
 
     def test_import_by_product_name_exists_engagement_name_exists(self):
         with assertImportModelsCreated(self, tests=1, engagements=0, products=0):
@@ -189,6 +191,8 @@ class FlexibleImportTestAPI(DojoAPITestCase):
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
             test_id = import0['test']
             self.assertEqual(Test.objects.get(id=test_id).engagement, self.engagement_last)
+            self.assertEqual(import0['engagement_id'], self.engagement_last.id)
+            self.assertEqual(import0['product_id'], self.engagement_last.product.id)
 
     def test_import_by_product_name_exists_engagement_name_not_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
@@ -268,6 +272,8 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             test_id = import0['test']
             self.assertEqual(get_object_or_none(Test, id=test_id).title, DEFAULT_TEST_TITLE)
             self.assertEqual(test_id, self.test.id)
+            self.assertEqual(import0['engagement_id'], self.test.engagement.id)
+            self.assertEqual(import0['product_id'], self.test.engagement.product.id)
 
     def test_reimport_by_product_name_exists_engagement_name_exists_no_title(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
@@ -275,6 +281,8 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
                 engagement=None, engagement_name=ENGAGEMENT_NAME_DEFAULT)
             test_id = import0['test']
             self.assertEqual(test_id, self.test_last_by_scan_type.id)
+            self.assertEqual(import0['engagement_id'], self.test_last_by_scan_type.engagement.id)
+            self.assertEqual(import0['product_id'], self.test_last_by_scan_type.engagement.product.id)
 
     def test_reimport_by_product_name_exists_engagement_name_exists_scan_type_not_exsists_test_title_exists(self):
         with assertImportModelsCreated(self, tests=0, engagements=0, products=0):
