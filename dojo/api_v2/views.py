@@ -1951,7 +1951,7 @@ class ImportScanView(mixins.CreateModelMixin,
     By Names:
     - Create a Product (or use an existing product)
     - Create an Engagement inside the product
-    - Provide `product_name` (or `product_id`)
+    - Provide `product_name`
     - Provide `engagement_name`
 
     In this scenario Defect Dojo will look up the engagment by the provided details.
