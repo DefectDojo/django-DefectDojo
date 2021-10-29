@@ -2058,7 +2058,7 @@ class ReImportScanView(mixins.CreateModelMixin,
     - Create a Product (or use an existing product)
     - Create an Engagement inside the product
     - Import a report which will create a Test
-    - Provide `product_name` (or `product_id`)
+    - Provide `product_name`
     - Provide `engagement_name`
     - Optionally Provide `test_title`
 
