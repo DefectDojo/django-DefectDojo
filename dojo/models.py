@@ -2099,8 +2099,11 @@ class Finding(models.Model):
 
     # Compute the hash_code from the fields to hash
     def hash_fields(self, fields_to_hash):
-        if self.service:
-            fields_to_hash += self.service
+        if hasattr(settings, 'HASH_CODE_FIELDS_ALWAYS'):
+            for field in settings.HASH_CODE_FIELDS_ALWAYS:
+                if getattr(self, field):
+                    fields_to_hash += str(getattr(self, field))
+
         logger.debug('fields_to_hash      : %s', fields_to_hash)
         logger.debug('fields_to_hash lower: %s', fields_to_hash.lower())
         return hashlib.sha256(fields_to_hash.casefold().encode('utf-8').strip()).hexdigest()
