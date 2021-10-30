@@ -22,6 +22,7 @@ from dojo.utils import is_scan_file_too_large
 from django.conf import settings
 from rest_framework import serializers
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.contrib.auth.password_validation import validate_password
 from django.utils import timezone
 import datetime
 import six
@@ -273,16 +274,31 @@ class ProductMetaSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     last_login = serializers.DateTimeField(read_only=True)
+    password = serializers.CharField(write_only=True, style={'input_type': 'password'}, required=False,
+                                     validators=[validate_password])
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser')
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'last_login', 'is_active', 'is_staff', 'is_superuser', 'password')
 
     def create(self, validated_data):
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+        else:
+            password = None
         user = User.objects.create(**validated_data)
-        user.set_unusable_password()
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
         user.save()
         return user
+
+    def validate(self, data):
+        if self.context['request'].method in ['PATCH', 'PUT'] and 'password' in data:
+            raise ValidationError('Update of password though API is not allowed')
+        else:
+            return super().validate(data)
 
 
 class UserContactInfoSerializer(serializers.ModelSerializer):
