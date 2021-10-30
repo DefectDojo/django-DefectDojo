@@ -54,9 +54,7 @@
                             <th class="nowrap, text-center">{% dojo_sort request 'Active' 'is_active' %}</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'Staff' 'is_staff' %}</th>
                             <th class="nowrap, text-center">{% dojo_sort request 'SuperUser' 'is_superuser' %}</th>
-                            {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                             <th class="nowrap">Global Role</th>
-                            {% endif %}
                         </tr>
                         {% for u in users %}
                             <tr>
@@ -113,9 +111,7 @@
                                 <td class="text-center">{% if u.is_superuser %}
                                     <i class="text-success fa fa-check"></i>{% else %}
                                     <i class="text-danger fa fa-times"></i>{% endif %}</td>
-                                {% if 'FEATURE_AUTHORIZATION_V2'|setting_enabled %}
                                 <td>{% if u.global_role.role %} {{ u.global_role.role }} {% endif %}</td>
-                                {% endif %}
                                 </tr>
                         {% endfor %}
                     </table>
