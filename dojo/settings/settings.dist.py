@@ -1068,7 +1068,9 @@ HASHCODE_ALLOWS_NULL_CWE = {
     'AWS Security Hub Scan': True,
     'Meterian Scan': True,
     'SARIF': True,
-    'Hadolint Dockerfile check': True
+    'Hadolint Dockerfile check': True,
+    'Semgrep JSON Report': True,
+    'Generic Findings Import': True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1150,6 +1152,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     'SARIF': DEDUPE_ALGO_HASH_CODE,
     'Azure Security Center Recommendations Scan': DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     'Hadolint Dockerfile check': DEDUPE_ALGO_HASH_CODE,
+    'Semgrep JSON Report': DEDUPE_ALGO_HASH_CODE,
+    'Generic Findings Import': DEDUPE_ALGO_HASH_CODE,
 }
 
 DUPE_DELETE_MAX_PER_RUN = env('DD_DUPE_DELETE_MAX_PER_RUN')
