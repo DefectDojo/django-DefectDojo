@@ -179,9 +179,9 @@
                                 <td>{% if item %}
                                       <a data-toggle="tooltip" data-placement="top" data-original-title="{{ item }}" href="{% url 'view_endpoint' item.id %}">
                                       {% if item.vulnerable %}
-                                        <span style="color:OrangeRed" class="fa fa-unlock"></span>
+                                        <span style="color:OrangeRed" class="fa fa-thumbs-down"></span>
                                       {% else %}
-                                        <span class="fa fa-lock"></span>
+                                        <span class="fa fa-thumbs-up"></span>
                                       {% endif %}
                                       &nbsp;{{ item|url_shortner }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation for look for fix process" >&#128681;</span>{% endif %}</a>
                                     {% endif %}
