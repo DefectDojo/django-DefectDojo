@@ -19,8 +19,6 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.html import escape
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
-from django.core.exceptions import PermissionDenied
-from django.conf import settings
 
 from dojo.filters import MetricsFindingFilter, EngineerFilter, MetricsEndpointFilter
 from dojo.forms import SimpleMetricsForm, ProductTypeCountsForm
@@ -29,7 +27,6 @@ from dojo.models import Product_Type, Finding, Product, Engagement, Test, \
 from dojo.utils import get_page_items, add_breadcrumb, findings_this_period, opened_in_period, count_findings, \
     get_period_counts, get_system_setting, get_punchcard_data, queryset_check
 from functools import reduce
-from dojo.user.helper import user_is_authorized
 from django.views.decorators.vary import vary_on_cookie
 from dojo.authorization.roles_permissions import Permissions
 from dojo.product.queries import get_authorized_products
@@ -613,11 +610,7 @@ def product_type_counts(request):
         form = ProductTypeCountsForm(request.GET)
         if form.is_valid():
             pt = form.cleaned_data['product_type']
-            if not settings.FEATURE_AUTHORIZATION_V2:
-                if not user_is_authorized(request.user, 'view', pt):
-                    raise PermissionDenied
-            else:
-                user_has_permission_or_403(request.user, pt, Permissions.Product_Type_View)
+            user_has_permission_or_403(request.user, pt, Permissions.Product_Type_View)
             month = int(form.cleaned_data['month'])
             year = int(form.cleaned_data['year'])
             first_of_month = first_of_month.replace(month=month, year=year)

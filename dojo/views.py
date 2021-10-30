@@ -14,7 +14,6 @@ from dojo.forms import ManageFileFormSet
 from dojo.utils import get_page_items, Product_Tab, get_system_setting
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
-from dojo.user.helper import user_is_authorized
 
 
 logger = logging.getLogger(__name__)
@@ -26,9 +25,6 @@ def action_history(request, cid, oid):
         obj = ct.get_object_for_this_type(pk=oid)
     except (KeyError, ObjectDoesNotExist):
         raise Http404()
-
-    if not settings.FEATURE_AUTHORIZATION_V2 and not user_is_authorized(request.user, 'view', obj):
-        raise PermissionDenied
 
     product_id = None
     active_tab = None
