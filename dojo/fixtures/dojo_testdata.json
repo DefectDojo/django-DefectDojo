@@ -303,7 +303,7 @@
     "pk": 120,
     "model": "dojo.test_type",
     "fields": {
-        "name": "Generic Findings Import"
+        "name": "Xanitizer Scan"
     }
   },
   {
