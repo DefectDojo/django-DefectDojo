@@ -1222,9 +1222,10 @@ class ImportScanSerializer(serializers.Serializer):
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
     # extra fields populated in response
+    # need to use the _id suffix as without the serializer framework gets confused
     test = serializers.IntegerField(read_only=True)  # left for backwards compatibility
     test_id = serializers.IntegerField(read_only=True)
-    engagement_id = serializers.IntegerField(read_only=True)  # need to use the _id suffix as without the serializer framework gets confused
+    engagement_id = serializers.IntegerField(read_only=True)
     product_id = serializers.IntegerField(read_only=True)
 
     def save(self, push_to_jira=False):
@@ -1331,7 +1332,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
     test = serializers.PrimaryKeyRelatedField(required=False,
         queryset=Test.objects.all())
     test_title = serializers.CharField(required=False)
-    engagement_id = serializers.IntegerField(required=False)
     engagement_name = serializers.CharField(required=False)
     product_name = serializers.CharField(required=False)
 
@@ -1349,7 +1349,10 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
 
     group_by = serializers.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text='Choose an option to automatically group new findings by the chosen option.')
 
+    # extra fields populated in response
+    # need to use the _id suffix as without the serializer framework gets confused
     test_id = serializers.IntegerField(read_only=True)
+    engagement_id = serializers.IntegerField(read_only=True)  # need to use the _id suffix as without the serializer framework gets confused
     product_id = serializers.IntegerField(read_only=True)
 
     def save(self, push_to_jira=False):
