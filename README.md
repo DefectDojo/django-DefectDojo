@@ -43,7 +43,7 @@ Navigate to <http://localhost:8080>.
 
 ### [REST APIs](readme-docs/REST-APIs.md)
 
-### [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND-WRAPPERS.md)
+### [Client APIs and Wrappers](readme-docs/CLIENT-APIs-AND_WRAPPERS.md)
 
 ### [Release and Branch Model](readme-docs/RELEASE-AND-BRANCH-MODEL.md)
 
