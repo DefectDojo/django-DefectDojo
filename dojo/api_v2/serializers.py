@@ -1197,13 +1197,12 @@ class ImportScanSerializer(serializers.Serializer):
                                                          required=False,
                                                          default=None)
     file = serializers.FileField(required=False)
-    # with the smart import it cannot be a primarykeyrelated field as that is always mandatory
 
-    test_title = serializers.CharField(required=False)
+    product_name = serializers.CharField(required=False)
+    engagement_name = serializers.CharField(required=False)
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), required=False)
-    engagement_name = serializers.CharField(required=False)
-    product_name = serializers.CharField(required=False)
+    test_title = serializers.CharField(required=False)
 
     lead = serializers.PrimaryKeyRelatedField(
         allow_null=True,
@@ -1277,7 +1276,6 @@ class ImportScanSerializer(serializers.Serializer):
                                                                              api_scan_configuration=api_scan_configuration,
                                                                              title=test_title)
 
-            # return the id of the created test, can't find a better way because this is not a ModelSerializer....
             if test:
                 data['test'] = test.id
                 data['test_id'] = test.id
@@ -1292,9 +1290,6 @@ class ImportScanSerializer(serializers.Serializer):
             raise Exception(ve)
 
     def validate(self, data):
-        # metadata has already been check in HasImportPermission
-        logger.debug('importserializer.validate()')
-
         scan_type = data.get("scan_type")
         file = data.get("file")
         if not file and requires_file(scan_type):
@@ -1377,7 +1372,7 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
         group_by = data.get('group_by', None)
 
         test_id, test_title, scan_type, _, engagement_name, product_name = get_import_meta_data_from_dict(data)
-        # we passed validation, so the engagement is present
+        # we passed validation, so the test is present
         product = get_target_product_if_exists(product_name)
         engagement = get_target_engagement_if_exists(None, engagement_name, product)
         test = get_target_test_if_exists(test_id, test_title, scan_type, engagement)
@@ -1393,8 +1388,6 @@ class ReImportScanSerializer(TaggitSerializer, serializers.Serializer):
                                             close_old_findings=close_old_findings,
                                             group_by=group_by, api_scan_configuration=api_scan_configuration)
 
-            # return the id of the created test, can't find a better way because this is not a ModelSerializer....
-            # return the id of the created test, can't find a better way because this is not a ModelSerializer....
             if test:
                 data['test'] = test
                 data['test_id'] = test.id

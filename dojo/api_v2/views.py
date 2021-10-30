@@ -2060,7 +2060,7 @@ class ReImportScanView(mixins.CreateModelMixin,
     - Import a report which will create a Test
     - Provide `product_name`
     - Provide `engagement_name`
-    - Optionally Provide `test_title`
+    - Optional: Provide `test_title`
 
     In this scenario Defect Dojo will look up the test by the provided details.
     If no `test_title` is provided, the latest test inside the engagement will be chosen based on scan_type.
