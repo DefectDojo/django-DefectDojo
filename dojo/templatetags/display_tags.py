@@ -312,8 +312,7 @@ def action_log_entry(value, autoescape=None):
     text = ''
     for k in history.keys():
         text += k.capitalize() + ' changed from "' + \
-                history[k][0] + '" to "' + history[k][1] + '"'
-
+                history[k][0] + '" to "' + history[k][1] + '"\n'
     return text
 
 
